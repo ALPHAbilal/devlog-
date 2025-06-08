@@ -13,9 +13,15 @@ const blockComponents = {
   heading: HeadingBlock,
 };
 
-export default function Block({ block, onUpdate, onDelete, onAddBelow, showAddButton }) {
+export default function Block({ block, onUpdate, onDelete, onAddBelow, onConvert, showAddButton }) {
   const [isHovered, setIsHovered] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
+
+  const handleConvert = (newType, meta = {}) => {
+    if (onConvert) {
+      onConvert(block.id, newType, meta);
+    }
+  };
 
   return (
     <>
@@ -44,6 +50,7 @@ export default function Block({ block, onUpdate, onDelete, onAddBelow, showAddBu
           <BlockComponent 
             block={block} 
             onUpdate={(updates) => onUpdate(block.id, updates)}
+            onConvert={handleConvert}
           />
         </div>
       </div>

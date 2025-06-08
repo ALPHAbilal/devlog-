@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
 
 export default function CodeBlock({ block, onUpdate }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [code, setCode] = useState(block.content || '');
   const [language, setLanguage] = useState(block.language || 'javascript');
   const [copied, setCopied] = useState(false);

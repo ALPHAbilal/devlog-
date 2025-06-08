@@ -55,12 +55,52 @@ export default function ExpandedView({ entry, onClose, onUpdate }) {
     }
   };
 
+  const convertBlock = (blockId, newType, meta = {}) => {
+    const updatedBlocks = blocks.map(block => {
+      if (block.id === blockId) {
+        // Preserve content if possible
+        const newBlock = {
+          ...block,
+          type: newType,
+          ...meta
+        };
+        
+        // Handle special conversions
+        if (newType === 'heading' && meta.level) {
+          newBlock.level = meta.level;
+        }
+        
+        // Clear content for AI blocks as they use different structure
+        if (newType === 'ai') {
+          newBlock.content = '';
+          newBlock.messages = [];
+        }
+        
+        return newBlock;
+      }
+      return block;
+    });
+    
+    setBlocks(updatedBlocks);
+    if (onUpdate) {
+      onUpdate(entry.id, { blocks: updatedBlocks });
+    }
+  };
+
   const addBlock = (type, afterBlockId = null) => {
     const newBlock = {
       id: Date.now().toString(),
       type,
       content: '',
+      isNew: true // Flag to trigger auto-focus
     };
+
+    // Initialize block based on type
+    if (type === 'ai') {
+      newBlock.messages = [];
+    } else if (type === 'heading') {
+      newBlock.level = 2;
+    }
 
     let updatedBlocks;
     if (afterBlockId) {
@@ -145,6 +185,7 @@ export default function ExpandedView({ entry, onClose, onUpdate }) {
               onUpdate={updateBlock}
               onDelete={deleteBlock}
               onAddBelow={handleAddBelowBlock}
+              onConvert={convertBlock}
               showAddButton={true}
             />
             <AddBlockRow

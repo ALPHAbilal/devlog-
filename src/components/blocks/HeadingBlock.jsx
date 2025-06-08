@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 
 export default function HeadingBlock({ block, onUpdate }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [content, setContent] = useState(block.content || '');
   const [level, setLevel] = useState(block.level || 2);
   const inputRef = useRef(null);

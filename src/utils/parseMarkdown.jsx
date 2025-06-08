@@ -14,6 +14,8 @@ export function parseMarkdown(text) {
     inlineCode: /`([^`]+)`/g,
     // Strikethrough: ~~text~~
     strikethrough: /~~(.*?)~~/g,
+    // Document links: [[Document Name]]
+    docLink: /\[\[([^\]]+)\]\]/g,
     // Links: [text](url)
     link: /\[([^\]]+)\]\(([^)]+)\)/g,
     // Line breaks
@@ -129,8 +131,20 @@ export function parseMarkdown(text) {
       });
     }
 
+    // Process document links
+    const docLinkRegex = new RegExp(patterns.docLink);
+    const docLinkMatches = [];
+    while ((match = docLinkRegex.exec(processedText)) !== null) {
+      docLinkMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        content: match[1],
+        type: 'docLink'
+      });
+    }
+
     // Combine and sort all matches
-    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches].sort((a, b) => a.start - b.start);
+    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches].sort((a, b) => a.start - b.start);
 
     // Build elements
     allMatches.forEach((match, matchIndex) => {
@@ -157,6 +171,23 @@ export function parseMarkdown(text) {
           <del key={`strike-${segmentIndex}-${matchIndex}`} className="line-through opacity-60">
             {match.content}
           </del>
+        );
+      } else if (match.type === 'docLink') {
+        elements.push(
+          <button
+            key={`doclink-${segmentIndex}-${matchIndex}`}
+            className="text-accent-green hover:text-accent-green/80 underline decoration-dotted 
+                       underline-offset-2 cursor-pointer transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              // This will be handled by the parent component
+              if (window.handleDocumentLink) {
+                window.handleDocumentLink(match.content);
+              }
+            }}
+          >
+            {match.content}
+          </button>
         );
       }
 

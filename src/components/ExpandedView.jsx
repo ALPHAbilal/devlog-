@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
-import { X, Plus } from 'lucide-react';
+import { X, Plus, Link2 } from 'lucide-react';
 import Block from './Block';
 import AddBlockRow from './AddBlockRow';
+import { getBacklinks } from '../utils/extractLinks';
 
-export default function ExpandedView({ entry, onClose, onUpdate }) {
+export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
   const [blocks, setBlocks] = useState([]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
   const [title, setTitle] = useState(entry.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [backlinks, setBacklinks] = useState([]);
 
   // Initialize blocks from entry data
   useEffect(() => {
@@ -35,6 +37,12 @@ export default function ExpandedView({ entry, onClose, onUpdate }) {
       setBlocks(initialBlocks);
     }
   }, [entry]);
+
+  // Calculate backlinks
+  useEffect(() => {
+    const links = getBacklinks(entry.title, allEntries);
+    setBacklinks(links);
+  }, [entry.title, allEntries]);
 
   const updateBlock = (blockId, updates) => {
     const updatedBlocks = blocks.map(block => 
@@ -217,7 +225,7 @@ export default function ExpandedView({ entry, onClose, onUpdate }) {
       </div>
 
       {/* Tags */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap mb-8">
         {entry.tags?.map((tag, index) => (
           <span key={index} className="px-4 py-2 bg-dark-secondary/50 
                                       rounded-full text-text-secondary text-sm
@@ -233,6 +241,40 @@ export default function ExpandedView({ entry, onClose, onUpdate }) {
           Add tag...
         </button>
       </div>
+
+      {/* Backlinks */}
+      {backlinks.length > 0 && (
+        <div className="border-t border-dark-secondary/30 pt-8">
+          <h3 className="text-text-secondary text-sm font-medium mb-4 flex items-center gap-2">
+            <Link2 size={16} />
+            Linked References ({backlinks.length})
+          </h3>
+          <div className="space-y-3">
+            {backlinks.map((backlink) => (
+              <button
+                key={backlink.id}
+                onClick={() => {
+                  // Navigate to the linking document
+                  const linkedEntry = allEntries.find(e => e.id === backlink.id);
+                  if (linkedEntry && window.handleDocumentLink) {
+                    window.handleDocumentLink(linkedEntry.title);
+                  }
+                }}
+                className="w-full text-left p-3 bg-dark-secondary/30 rounded-lg
+                           hover:bg-dark-secondary/50 transition-colors group"
+              >
+                <div className="text-text-primary font-medium group-hover:text-accent-green 
+                                transition-colors">
+                  {backlink.title}
+                </div>
+                <div className="text-text-secondary text-sm line-clamp-1 mt-1">
+                  {backlink.preview}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

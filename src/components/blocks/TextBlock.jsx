@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import CommandPalette from '../CommandPalette';
-import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists } from '../../utils/parseMarkdown';
+import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists } from '../../utils/parseMarkdown.jsx';
 
 export default function TextBlock({ block, onUpdate, onConvert }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
@@ -51,6 +51,11 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
         // Hide command palette if user deleted the slash
         setShowCommandPalette(false);
       }
+    }
+
+    // Auto-complete document links
+    if (newContent.endsWith('[[')) {
+      // Could show document search modal here in the future
     }
   };
 

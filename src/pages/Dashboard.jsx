@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedView';
 import SearchBar from '../components/SearchBar';
+import DocumentLinkModal from '../components/DocumentLinkModal';
 import { Plus } from 'lucide-react';
 
 export default function Dashboard() {
   const [entries, setEntries] = useState([]);
   const [expandedEntry, setExpandedEntry] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showLinkModal, setShowLinkModal] = useState(false);
+  const [linkCallback, setLinkCallback] = useState(null);
 
   // Load entries from localStorage on mount
   useEffect(() => {
@@ -110,6 +113,46 @@ export default function Dashboard() {
     saveEntries(updatedEntries);
   };
 
+  // Handle document link clicks
+  useEffect(() => {
+    window.handleDocumentLink = (documentTitle) => {
+      // Find the document by title
+      const linkedDoc = entries.find(entry => 
+        entry.title.toLowerCase() === documentTitle.toLowerCase()
+      );
+      
+      if (linkedDoc) {
+        setExpandedEntry(linkedDoc);
+      } else {
+        // Show modal to create or select document
+        setShowLinkModal(true);
+        setLinkCallback(() => (selected) => {
+          if (selected.isNew) {
+            // Create new document with the title
+            const newEntry = {
+              id: Date.now().toString(),
+              title: selected.title,
+              preview: 'Click to start writing...',
+              blocks: [],
+              tags: [],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            const updatedEntries = [newEntry, ...entries];
+            saveEntries(updatedEntries);
+            setExpandedEntry(newEntry);
+          } else {
+            setExpandedEntry(selected);
+          }
+        });
+      }
+    };
+
+    return () => {
+      delete window.handleDocumentLink;
+    };
+  }, [entries]);
+
   // Filter entries based on search
   const filteredEntries = entries.filter(entry =>
     entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -123,6 +166,7 @@ export default function Dashboard() {
         entry={expandedEntry} 
         onClose={() => setExpandedEntry(null)}
         onUpdate={updateEntry}
+        allEntries={entries}
       />
     );
   }
@@ -172,6 +216,23 @@ export default function Dashboard() {
           </p>
         </div>
       )}
+
+      {/* Document Link Modal */}
+      <DocumentLinkModal
+        isOpen={showLinkModal}
+        onClose={() => {
+          setShowLinkModal(false);
+          setLinkCallback(null);
+        }}
+        onSelect={(selected) => {
+          if (linkCallback) {
+            linkCallback(selected);
+          }
+          setShowLinkModal(false);
+          setLinkCallback(null);
+        }}
+        entries={entries}
+      />
     </div>
   );
 }

@@ -56,12 +56,26 @@ Each document is an infinite canvas of blocks that can be:
   - Visual tag badges below content
 
 #### **Code Blocks**
-- **Syntax highlighting** for 14+ languages
+- **Syntax highlighting** for 20+ languages
+- **File path tracking** - Connect code to project structure
+- **Version tracking** - Track code evolution over time
+  - Visual timeline connecting versions
+  - "Original" and "v2, v3..." badges
+  - One-click navigation between versions
 - **Smart collapse** - Long code (15+ lines) auto-collapses
 - **Compact view** - Massive code (100+ lines) shows summary
 - **Line numbers** with proper alignment
 - **Fullscreen mode** for focused coding
 - **Auto-resize** editor that grows with content
+
+#### **File Tree Blocks**
+- **Visual project structure** - Build your project tree visually
+- **Drag & drop** - Reorganize files and folders by dragging
+- **Click to edit** - Rename items inline
+- **Smart detection** - Files have extensions, folders don't
+- **Duplicate warnings** - Orange indicators for same-named items
+- **Code block linking** - Connect to code blocks by file path
+- **Nested navigation** - Expand/collapse folders
 
 #### **AI Conversation Blocks**
 - **Chat-style interface** with distinct user/AI styling
@@ -115,6 +129,8 @@ Each document is an infinite canvas of blocks that can be:
 - **Code Editing**: `Tab` for indent, `Escape` to cancel
 - **Navigation**: Arrow keys in command palette
 - **Block Management**: `Enter` to add, `Escape` to exit
+- **Quick Commands**: `/` for command palette
+- **Create Block Types**: `/tree`, `/code`, `/ai`, `/heading`
 
 #### **Smart Behaviors**
 - **Auto-save** everything
@@ -210,6 +226,21 @@ Your personal wiki emerges naturally:
 
 ### **Recently Added**
 - **Tag System** - Select and tag important text snippets for better organization
+  - Tags no longer appear inline with text for cleaner reading
+  - Visual tag badges below text blocks
+  - Auto-extraction from content
+- **File Tree Block** - Visual project structure builder
+  - Drag & drop interface for organizing files/folders
+  - Click to edit names inline
+  - Auto-detection: files have extensions, folders don't
+  - Visual indicators for duplicate names
+  - Links to code blocks with matching file paths
+- **Code Block Enhancements**
+  - File path field to connect with File Tree blocks
+  - Version tracking system for code evolution
+  - Visual timeline connecting code versions
+  - Language selector dropdown in view mode
+  - Improved syntax highlighting
 - **Enhanced Navigation** - Back button replaces delete in document view
 - **Improved Block Interactions** - Removed juggling movement on hover
 

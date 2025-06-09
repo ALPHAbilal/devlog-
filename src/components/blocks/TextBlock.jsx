@@ -6,6 +6,7 @@ import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extrac
 export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [content, setContent] = useState(block.content || '');
+  const [displayContent, setDisplayContent] = useState(block.content || '');
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [commandPalettePosition, setCommandPalettePosition] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -13,9 +14,38 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
+  const imageMap = useRef(new Map()); // Store base64 -> placeholder mapping
   
   // Extract tags from content dynamically
   const tags = extractTagsFromContent(content);
+
+  // Convert base64 images to placeholders for display
+  const createImagePlaceholder = (index) => `📷[image-${index}]`;
+  
+  const processContentForDisplay = (text) => {
+    let processed = text;
+    let imageIndex = 0;
+    
+    // Replace base64 images with placeholders
+    processed = processed.replace(/!\[([^\]]*)\]\((data:image\/[^;]+;base64,[^)]+)\)/g, (match, alt, dataUrl) => {
+      const placeholder = createImagePlaceholder(imageIndex++);
+      imageMap.current.set(placeholder, { alt, dataUrl, fullMatch: match });
+      return placeholder;
+    });
+    
+    return processed;
+  };
+  
+  const processContentForSave = (text) => {
+    let processed = text;
+    
+    // Replace placeholders back with actual base64 images
+    imageMap.current.forEach((imageData, placeholder) => {
+      processed = processed.replace(placeholder, imageData.fullMatch);
+    });
+    
+    return processed;
+  };
 
   // Get all unique tags from localStorage
   const getAllTags = () => {
@@ -45,7 +75,15 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
     }
-  }, [isEditing, content]);
+  }, [isEditing, displayContent]);
+
+  // Initialize display content
+  useEffect(() => {
+    if (block.content) {
+      setContent(block.content);
+      setDisplayContent(processContentForDisplay(block.content));
+    }
+  }, [block.content]);
 
   // Handle text selection for toolbar
   useEffect(() => {
@@ -57,7 +95,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       const end = textarea.selectionEnd;
 
       if (start !== end) {
-        const selected = content.substring(start, end);
+        const selected = displayContent.substring(start, end);
         setSelectedText(selected);
 
         // Calculate position for toolbar
@@ -65,7 +103,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         const lineHeight = 24;
         
         // Get approximate position of selection
-        const beforeText = content.substring(0, start);
+        const beforeText = displayContent.substring(0, start);
         const lines = beforeText.split('\n');
         const currentLine = lines.length - 1;
         
@@ -98,12 +136,16 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         }
       };
     }
-  }, [isEditing, content]);
+  }, [isEditing, displayContent]);
 
   const handleSave = () => {
+    // Convert display content back to actual content
+    const actualContent = processContentForSave(displayContent);
+    setContent(actualContent);
+    
     // Extract tags from content before saving
-    const extractedTags = extractTagsFromContent(content);
-    onUpdate({ content, tags: extractedTags });
+    const extractedTags = extractTagsFromContent(actualContent);
+    onUpdate({ content: actualContent, tags: extractedTags });
     setIsEditing(false);
     setShowToolbar(false);
     if (onFocus) onFocus(null); // Clear focus
@@ -118,8 +160,12 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
 
     // Wrap selected text with tag format
     const taggedText = `#${tagName}[${selectedText}]`;
-    const newContent = content.substring(0, start) + taggedText + content.substring(end);
-    setContent(newContent);
+    const newDisplayContent = displayContent.substring(0, start) + taggedText + displayContent.substring(end);
+    setDisplayContent(newDisplayContent);
+    
+    // Update actual content
+    const actualContent = processContentForSave(newDisplayContent);
+    setContent(actualContent);
 
     // Set cursor position after the tagged text
     setTimeout(() => {
@@ -135,13 +181,14 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = content.substring(start, end);
+    const selectedText = displayContent.substring(start, end);
 
     if (isSpecial && action === 'link') {
       // For links, wrap in [[]] for document links
       const newText = `[[${selectedText}]]`;
-      const newContent = content.substring(0, start) + newText + content.substring(end);
-      setContent(newContent);
+      const newDisplayContent = displayContent.substring(0, start) + newText + displayContent.substring(end);
+      setDisplayContent(newDisplayContent);
+      setContent(processContentForSave(newDisplayContent));
       
       // Set cursor position after the link
       setTimeout(() => {
@@ -149,11 +196,25 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         textarea.selectionEnd = start + 2 + selectedText.length;
         textarea.focus();
       }, 0);
+    } else if (action === 'image') {
+      // For images, create image markdown with selected text as alt
+      const newText = `![${selectedText}](url)`;
+      const newDisplayContent = displayContent.substring(0, start) + newText + displayContent.substring(end);
+      setDisplayContent(newDisplayContent);
+      setContent(processContentForSave(newDisplayContent));
+      
+      // Select the 'url' part for easy replacement
+      setTimeout(() => {
+        textarea.selectionStart = start + 2 + selectedText.length + 2;
+        textarea.selectionEnd = start + 2 + selectedText.length + 5;
+        textarea.focus();
+      }, 0);
     } else if (wrapper) {
       // For regular formatting
       const newText = `${wrapper}${selectedText}${wrapper}`;
-      const newContent = content.substring(0, start) + newText + content.substring(end);
-      setContent(newContent);
+      const newDisplayContent = displayContent.substring(0, start) + newText + displayContent.substring(end);
+      setDisplayContent(newDisplayContent);
+      setContent(processContentForSave(newDisplayContent));
       
       // Keep selection on the formatted text
       setTimeout(() => {
@@ -164,12 +225,64 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     }
   };
 
+  const handlePaste = async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        // Convert to base64 data URL
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          const imageMarkdown = `![](${dataUrl})`;
+          
+          // Insert at cursor position
+          const textarea = textareaRef.current;
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          
+          // Create placeholder for display
+          const imageIndex = Array.from(imageMap.current.keys()).length;
+          const placeholder = createImagePlaceholder(imageIndex);
+          imageMap.current.set(placeholder, { alt: '', dataUrl, fullMatch: imageMarkdown });
+          
+          // Update display content with placeholder
+          const newDisplayContent = displayContent.substring(0, start) + placeholder + displayContent.substring(end);
+          setDisplayContent(newDisplayContent);
+          
+          // Update actual content
+          const actualContent = processContentForSave(newDisplayContent);
+          setContent(actualContent);
+          
+          // Set cursor after the placeholder
+          setTimeout(() => {
+            textarea.selectionStart = start + placeholder.length;
+            textarea.selectionEnd = start + placeholder.length;
+            textarea.focus();
+          }, 0);
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
+    }
+  };
+
   const handleChange = (e) => {
-    const newContent = e.target.value;
-    setContent(newContent);
+    const newDisplayContent = e.target.value;
+    setDisplayContent(newDisplayContent);
+    
+    // Update actual content in background
+    const actualContent = processContentForSave(newDisplayContent);
+    setContent(actualContent);
 
     // Check if user typed "/" at the beginning of an empty block or after a new line
-    const lines = newContent.split('\n');
+    const lines = newDisplayContent.split('\n');
     const currentLine = lines[lines.length - 1];
     
     // Check if it's a slash command (/ at the beginning of a line)
@@ -195,7 +308,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     }
 
     // Auto-complete document links
-    if (newContent.endsWith('[[')) {
+    if (newDisplayContent.endsWith('[[')) {
       // Could show document search modal here in the future
     }
   };
@@ -231,17 +344,20 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       if (showCommandPalette) {
         setShowCommandPalette(false);
         // Remove the slash
-        const lines = content.split('\n');
+        const lines = displayContent.split('\n');
         lines[lines.length - 1] = '';
-        setContent(lines.join('\n'));
+        const newDisplayContent = lines.join('\n');
+        setDisplayContent(newDisplayContent);
+        setContent(processContentForSave(newDisplayContent));
       } else {
         setContent(block.content || '');
+        setDisplayContent(processContentForDisplay(block.content || ''));
         setIsEditing(false);
         if (onFocus) onFocus(null); // Clear focus when escaping
       }
     } else if (e.key === 'Enter') {
       // Check for heading markdown at the start of the line
-      const lines = content.split('\n');
+      const lines = displayContent.split('\n');
       const currentLineIndex = lines.length - 1;
       const currentLine = lines[currentLineIndex];
       
@@ -257,7 +373,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       }
       
       // If pressing enter on empty block, exit edit mode
-      if (content.trim() === '') {
+      if (displayContent.trim() === '') {
         e.preventDefault();
         handleSave();
         if (onFocus) onFocus(null); // Clear focus
@@ -267,14 +383,15 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
 
   const handleCommandSelect = (type, meta) => {
     // Remove the slash from content
-    const lines = content.split('\n');
+    const lines = displayContent.split('\n');
     lines[lines.length - 1] = '';
-    const newContent = lines.join('\n').trimEnd();
+    const newDisplayContent = lines.join('\n').trimEnd();
+    const actualContent = processContentForSave(newDisplayContent);
     
-    if (newContent) {
+    if (actualContent) {
       // If there's content, save it first
-      const extractedTags = extractTagsFromContent(newContent);
-      onUpdate({ content: newContent, tags: extractedTags });
+      const extractedTags = extractTagsFromContent(actualContent);
+      onUpdate({ content: actualContent, tags: extractedTags });
     }
     
     // Convert block to selected type
@@ -291,8 +408,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       <>
         <textarea
           ref={textareaRef}
-          value={content}
+          value={displayContent}
           onChange={handleChange}
+          onPaste={handlePaste}
           onFocus={() => onFocus && onFocus(block.id)}
           onBlur={() => {
             if (!showCommandPalette && !showToolbar) {
@@ -312,9 +430,10 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
             onClose={() => {
               setShowCommandPalette(false);
               // Remove the slash
-              const lines = content.split('\n');
+              const lines = displayContent.split('\n');
               lines[lines.length - 1] = '';
-              setContent(lines.join('\n'));
+              setDisplayContent(lines.join('\n'));
+              setContent(processContentForSave(lines.join('\n')));
             }}
           />
         )}

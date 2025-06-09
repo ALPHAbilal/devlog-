@@ -4,6 +4,7 @@ import CodeBlock from './blocks/CodeBlock';
 import AIBlock from './blocks/AIBlockRefined';
 import HeadingBlock from './blocks/HeadingBlock';
 import FileTreeBlock from './blocks/FileTreeBlock';
+import TableBlock from './blocks/TableBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';
 
@@ -13,6 +14,7 @@ const blockComponents = {
   ai: AIBlock,
   heading: HeadingBlock,
   filetree: FileTreeBlock,
+  table: TableBlock,
 };
 
 export default function Block({ 
@@ -70,12 +72,6 @@ export default function Block({
           canMoveDown={canMoveDown}
         />
 
-        {/* Visual indicator for focused block */}
-        <div className={`
-          absolute -left-0.5 top-0 bottom-0 w-0.5 bg-accent-green rounded-full
-          transition-all duration-200
-          ${isFocused === true ? 'opacity-100' : 'opacity-0'}
-        `} />
 
         {/* Block Content */}
         <div className={`relative transition-all duration-200 ${

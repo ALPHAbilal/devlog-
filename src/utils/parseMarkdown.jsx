@@ -1,4 +1,5 @@
 import React from 'react';
+import InlineImage from '../components/InlineImage';
 
 // Parse markdown text and return JSX elements
 export function parseMarkdown(text) {
@@ -18,6 +19,8 @@ export function parseMarkdown(text) {
     docLink: /\[\[([^\]]+)\]\]/g,
     // Links: [text](url)
     link: /\[([^\]]+)\]\(([^)]+)\)/g,
+    // Images: ![alt](url)
+    image: /!\[([^\]]*)\]\(([^)]+)\)/g,
     // Tags: #tagname[text] - we'll extract but not display the tag syntax
     tag: /#(\w+)\[([^\]]+)\]/g,
     // Line breaks
@@ -158,8 +161,26 @@ export function parseMarkdown(text) {
       });
     }
 
+    // Process images
+    const imageRegex = new RegExp(patterns.image);
+    const imageMatches = [];
+    while ((match = imageRegex.exec(processedText)) !== null) {
+      // Check if it's a base64 image and shorten the match for display
+      const src = match[2];
+      const isBase64 = src.startsWith('data:image');
+      
+      imageMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        alt: match[1],
+        src: match[2],
+        type: 'image',
+        isBase64
+      });
+    }
+
     // Combine and sort all matches
-    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches, ...tagMatches].sort((a, b) => a.start - b.start);
+    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches, ...tagMatches, ...imageMatches].sort((a, b) => a.start - b.start);
 
     // Build elements
     allMatches.forEach((match, matchIndex) => {
@@ -210,6 +231,15 @@ export function parseMarkdown(text) {
           <span key={`tag-${segmentIndex}-${matchIndex}`} className="text-text-primary">
             {match.content}
           </span>
+        );
+      } else if (match.type === 'image') {
+        elements.push(
+          <InlineImage
+            key={`image-${segmentIndex}-${matchIndex}`}
+            src={match.src}
+            alt={match.alt}
+            className="mx-1"
+          />
         );
       }
 

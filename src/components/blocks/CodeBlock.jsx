@@ -13,6 +13,15 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState('normal'); // 'normal', 'compact'
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
+  const [showFilePathSuggestions, setShowFilePathSuggestions] = useState(false);
+  const [filePathSuggestions, setFilePathSuggestions] = useState([]);
+
+  // Update local state when block prop changes
+  useEffect(() => {
+    setCode(block.content || '');
+    setLanguage(block.language || 'javascript');
+    setFilePath(block.filePath || '');
+  }, [block.content, block.language, block.filePath]);
   const textareaRef = useRef(null);
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -55,6 +64,98 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  };
+
+  // Get all existing file paths from all code blocks and file trees
+  const getAllFilePaths = () => {
+    const paths = new Set();
+    
+    // Helper function to extract paths from file tree
+    const extractPathsFromTree = (items, currentPath = '') => {
+      items?.forEach(item => {
+        // FileTree uses isFolder property, not type
+        if (!item.isFolder && item.name) {
+          const fullPath = currentPath ? `${currentPath}/${item.name}` : item.name;
+          paths.add(fullPath);
+        } else if (item.isFolder && item.children) {
+          const folderPath = currentPath ? `${currentPath}/${item.name}` : item.name;
+          extractPathsFromTree(item.children, folderPath);
+        }
+      });
+    };
+    
+    // Get from current document's blocks
+    if (allBlocks) {
+      allBlocks.forEach(b => {
+        if (b.type === 'code' && b.filePath && b.id !== block.id) {
+          paths.add(b.filePath);
+        } else if (b.type === 'filetree' && b.treeData) {
+          // FileTree blocks store data in treeData property
+          extractPathsFromTree(b.treeData);
+        }
+      });
+    }
+    
+    // Get from all documents in localStorage
+    try {
+      const documents = JSON.parse(localStorage.getItem('journeyLoggerEntries') || '[]');
+      documents.forEach(doc => {
+        doc.blocks?.forEach(b => {
+          if (b.type === 'code' && b.filePath) {
+            paths.add(b.filePath);
+          } else if (b.type === 'filetree' && b.treeData) {
+            // FileTree blocks store data in treeData property
+            extractPathsFromTree(b.treeData);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Error getting file paths:', error);
+    }
+    
+    return Array.from(paths).sort();
+  };
+
+  // Handle file path input changes
+  const handleFilePathChange = (e) => {
+    const value = e.target.value;
+    setFilePath(value);
+    
+    if (value.length > 0) {
+      const allPaths = getAllFilePaths();
+      const searchValue = value.toLowerCase();
+      
+      // Sort suggestions by relevance
+      const suggestions = allPaths
+        .filter(path => path.toLowerCase().includes(searchValue))
+        .sort((a, b) => {
+          const aLower = a.toLowerCase();
+          const bLower = b.toLowerCase();
+          
+          // Prioritize exact matches
+          if (aLower === searchValue) return -1;
+          if (bLower === searchValue) return 1;
+          
+          // Then prioritize matches that start with the search
+          if (aLower.startsWith(searchValue)) return -1;
+          if (bLower.startsWith(searchValue)) return 1;
+          
+          // Then prioritize matches where filename starts with search
+          const aFilename = a.split('/').pop().toLowerCase();
+          const bFilename = b.split('/').pop().toLowerCase();
+          if (aFilename.startsWith(searchValue)) return -1;
+          if (bFilename.startsWith(searchValue)) return 1;
+          
+          // Otherwise sort alphabetically
+          return a.localeCompare(b);
+        })
+        .slice(0, 10); // Limit to 10 suggestions
+      
+      setFilePathSuggestions(suggestions);
+      setShowFilePathSuggestions(suggestions.length > 0);
+    } else {
+      setShowFilePathSuggestions(false);
     }
   };
 
@@ -145,18 +246,51 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
       : "space-y-2";
 
     return (
-      <div className={editorClasses}>
+      <div className={`${editorClasses} code-editor-container`}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={filePath}
-              onChange={(e) => setFilePath(e.target.value)}
-              placeholder="File path (e.g., src/components/Block.jsx)"
-              className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm
-                         placeholder-text-secondary/50 focus:outline-none focus:ring-1
-                         focus:ring-accent-green/50 min-w-[250px]"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={filePath}
+                onChange={handleFilePathChange}
+                onFocus={() => {
+                  if (filePath.length > 0) {
+                    handleFilePathChange({ target: { value: filePath } });
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowFilePathSuggestions(false), 200);
+                }}
+                placeholder="File path (e.g., src/components/Block.jsx)"
+                className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm
+                           placeholder-text-secondary/50 focus:outline-none focus:ring-1
+                           focus:ring-accent-green/50 min-w-[300px]"
+              />
+              
+              {/* File path suggestions dropdown */}
+              {showFilePathSuggestions && filePathSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto
+                                bg-dark-secondary rounded-lg shadow-xl border border-dark-primary/50
+                                z-50">
+                  {filePathSuggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => {
+                        setFilePath(suggestion);
+                        setShowFilePathSuggestions(false);
+                      }}
+                      className="w-full px-3 py-2 text-left text-sm text-text-secondary
+                                 hover:bg-dark-primary/50 hover:text-text-primary
+                                 transition-colors truncate"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
@@ -194,7 +328,16 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
             ref={textareaRef}
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            onBlur={() => !isFullscreen && handleSave()}
+            onBlur={(e) => {
+              // Check if the new focus target is within the same code block
+              const codeBlockContainer = e.currentTarget.closest('.code-editor-container');
+              const newFocusTarget = e.relatedTarget;
+              
+              // Only save if focus is moving outside the code block
+              if (!isFullscreen && (!newFocusTarget || !codeBlockContainer?.contains(newFocusTarget))) {
+                handleSave();
+              }
+            }}
             onKeyDown={handleKeyDown}
             className="flex-1 bg-transparent text-text-primary p-4 pl-4
                        font-mono text-sm resize-none overflow-hidden
@@ -311,10 +454,11 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
         position="top"
       />
       
-      {/* File path display */}
-      {block.filePath && (
-        <div className="absolute top-2 left-2 text-xs text-text-secondary/70 
-                        bg-dark-primary/80 px-2 py-1 rounded font-mono">
+      {/* File path display - only in view mode */}
+      {block.filePath && !isEditing && (
+        <div className="absolute -top-3 left-0 text-xs text-accent-green/80 
+                        bg-dark-primary px-2 py-1 rounded-t font-mono z-30
+                        border border-accent-green/30 border-b-0">
           {block.filePath}
         </div>
       )}

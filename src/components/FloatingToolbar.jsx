@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bold, Italic, Strikethrough, Code, Link2, Tag, Plus, X } from 'lucide-react';
+import { Bold, Italic, Strikethrough, Code, Link2, Tag, Plus, X, Image } from 'lucide-react';
 
 export default function FloatingToolbar({ 
   show, 
@@ -57,6 +57,13 @@ export default function FloatingToolbar({
       action: 'link', 
       title: 'Create Link (Ctrl+K)',
       special: true
+    },
+    { 
+      icon: Image, 
+      action: 'image', 
+      title: 'Insert Image',
+      wrapper: '![',
+      suffix: '](url)'
     },
   ];
 

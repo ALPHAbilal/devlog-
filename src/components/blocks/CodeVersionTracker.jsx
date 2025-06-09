@@ -38,7 +38,7 @@ export default function CodeVersionTracker({
 
   return (
     <div 
-      className={`absolute ${position === 'top' ? '-top-7' : '-bottom-7'} left-0 
+      className={`absolute ${position === 'top' ? '-top-10' : '-bottom-7'} left-0 
                   flex items-center gap-2 transition-all duration-200
                   ${isHovered ? 'opacity-100' : 'opacity-70'}`}
       onMouseEnter={() => setIsHovered(true)}

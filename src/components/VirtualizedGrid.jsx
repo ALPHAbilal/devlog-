@@ -1,5 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import EntryCard from './EntryCard';
+import Sparkline from './Sparkline';
+import { generateActivityData } from '../utils/activityData';
 import './VirtualizedGrid.css';
 
 export default function VirtualizedGrid({ 
@@ -12,11 +14,11 @@ export default function VirtualizedGrid({
   const [containerWidth, setContainerWidth] = useState(0);
   const [scrollProgress, setScrollProgress] = useState({ top: 0, bottom: 1 });
   
-  // Configuration for smaller cards
-  const CARD_WIDTH = 280; // Smaller width
-  const CARD_HEIGHT = 180; // Smaller height
-  const GAP = 24; // Gap between cards
-  const MAX_COLUMNS = 4; // Maximum columns even on wide screens
+  // Configuration for compact cards - maximize content density
+  const CARD_WIDTH = 260; // Compact width
+  const CARD_HEIGHT = 160; // Compact height  
+  const GAP = 16; // Tighter gap between cards
+  const MAX_COLUMNS = 5; // More columns on wide screens
   const BUFFER_ROWS = 2; // Extra rows to render for smooth scrolling
 
   // Calculate columns based on container width
@@ -117,8 +119,8 @@ export default function VirtualizedGrid({
         ref={containerRef}
         className="relative w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thin grid-container"
         style={{ 
-          paddingTop: 40,
-          paddingBottom: 40,
+          paddingTop: 20,
+          paddingBottom: 20,
           scrollbarWidth: 'thin',
           scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
         }}
@@ -152,6 +154,9 @@ export default function VirtualizedGrid({
 
 // Compact version of EntryCard
 function CompactEntryCard({ entry, onExpand, searchTerm }) {
+  // Generate activity data for the sparkline
+  const activityData = useMemo(() => generateActivityData(entry), [entry]);
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -190,57 +195,67 @@ function CompactEntryCard({ entry, onExpand, searchTerm }) {
   return (
     <div 
       onClick={() => onExpand(entry)}
-      className="w-full h-full bg-card-gradient rounded-lg p-4 cursor-pointer 
-                 transition-all duration-300 hover:scale-105 hover:shadow-xl
+      className="w-full h-full bg-card-gradient rounded p-3 cursor-pointer 
+                 transition-all duration-200 hover:scale-102 hover:shadow-lg
                  flex flex-col group"
     >
       {/* Compact header */}
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-2 text-xs text-text-secondary">
+      <div className="flex justify-between items-start mb-1">
+        <div className="flex items-center gap-1.5 text-xs text-text-secondary/60">
           {blockTypes.code > 0 && (
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
-              {blockTypes.code}
+            <span className="flex items-center gap-0.5">
+              <span className="w-1 h-1 bg-blue-500/70 rounded-full"></span>
+              <span className="text-[10px]">{blockTypes.code}</span>
             </span>
           )}
           {blockTypes.ai > 0 && (
-            <span className="flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>
-              {blockTypes.ai}
+            <span className="flex items-center gap-0.5">
+              <span className="w-1 h-1 bg-purple-500/70 rounded-full"></span>
+              <span className="text-[10px]">{blockTypes.ai}</span>
             </span>
           )}
         </div>
         {entry.updatedAt && (
-          <div className="text-text-secondary text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="text-text-secondary/50 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
             {formatDate(entry.updatedAt)}
           </div>
         )}
       </div>
       
       {/* Title */}
-      <h3 className="text-text-primary text-base font-medium mb-2 line-clamp-2">
+      <h3 className="text-text-primary text-sm font-medium mb-1.5 line-clamp-1 leading-tight">
         {highlightText(entry.title, searchTerm)}
       </h3>
       
-      {/* Preview - even more compact */}
-      <p className="text-text-secondary text-xs line-clamp-2 flex-grow leading-relaxed">
+      {/* Activity Sparkline */}
+      <div className="mb-1.5">
+        <Sparkline 
+          data={activityData} 
+          width={220} 
+          height={20}
+          className="opacity-50 group-hover:opacity-90 transition-opacity duration-200"
+        />
+      </div>
+      
+      {/* Preview - ultra compact */}
+      <p className="text-text-secondary/70 text-xs line-clamp-2 flex-grow leading-snug">
         {highlightText(entry.preview, searchTerm)}
       </p>
 
       {/* Minimal tags */}
       {entry.tags && entry.tags.length > 0 && (
-        <div className="mt-2 flex gap-1 overflow-hidden">
+        <div className="mt-1.5 flex gap-1 overflow-hidden">
           {entry.tags.slice(0, 2).map((tag, index) => (
             <span 
               key={index}
-              className="text-xs px-2 py-0.5 bg-dark-secondary/50 rounded-full 
-                         text-text-secondary truncate max-w-[80px]"
+              className="text-[10px] px-1.5 py-0.5 bg-dark-secondary/40 rounded 
+                         text-text-secondary/60 truncate max-w-[60px]"
             >
               {tag}
             </span>
           ))}
           {entry.tags.length > 2 && (
-            <span className="text-xs text-text-secondary">
+            <span className="text-[10px] text-text-secondary/50">
               +{entry.tags.length - 2}
             </span>
           )}

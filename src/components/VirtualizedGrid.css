@@ -26,28 +26,7 @@
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Edge shadows for depth */
+/* Grid container */
 .grid-container {
   position: relative;
-}
-
-.grid-container::before,
-.grid-container::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  pointer-events: none;
-  z-index: 5;
-}
-
-.grid-container::before {
-  top: 0;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
-}
-
-.grid-container::after {
-  bottom: 0;
-  background: linear-gradient(to top, rgba(255, 255, 255, 0.05), transparent);
 }

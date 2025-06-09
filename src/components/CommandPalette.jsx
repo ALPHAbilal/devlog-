@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Type, Code, MessageSquare, Heading, List, Hash, Folder } from 'lucide-react';
+import { Type, Code, MessageSquare, Heading, List, Hash, Folder, Table } from 'lucide-react';
 
 const commands = [
   { 
@@ -44,6 +44,14 @@ const commands = [
     description: 'Code block with syntax highlighting',
     icon: Code,
     shortcut: 'code'
+  },
+  { 
+    id: 'table',
+    type: 'table',
+    label: 'Table',
+    description: 'Editable table with rows and columns',
+    icon: Table,
+    shortcut: 'table'
   },
   { 
     id: 'ai',

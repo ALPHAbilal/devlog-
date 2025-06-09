@@ -4,7 +4,8 @@ import ExpandedView from '../components/ExpandedViewEnhanced';
 import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
-import { Plus } from 'lucide-react';
+import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
+import { Plus, User, Settings, LogOut } from 'lucide-react';
 
 export default function Dashboard() {
   const [entries, setEntries] = useState([]);
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkCallback, setLinkCallback] = useState(null);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Save entries to localStorage whenever they change
   const saveEntries = (updatedEntries) => {
@@ -35,6 +37,20 @@ export default function Dashboard() {
     saveEntries(updatedEntries);
     setExpandedEntry(newEntry);
   };
+
+  // Handle click outside for profile menu
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (showProfileMenu && !e.target.closest('.profile-menu-container')) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    if (showProfileMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showProfileMenu]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -206,47 +222,108 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with Search */}
-      <div className="flex-shrink-0 pt-6 pb-4 px-8">
-        <div className="max-w-2xl mx-auto space-y-6">
-          {/* Title and Stats */}
-          <div className="text-center mb-4">
-            <h1 className="text-3xl font-light text-text-primary mb-2">
-              Your Journey
-            </h1>
-            <p className="text-text-secondary text-sm">
-              {entries.length} {entries.length === 1 ? 'document' : 'documents'} • 
-              {entries.reduce((acc, e) => acc + (e.blocks?.length || 0), 0)} blocks
-            </p>
+      {/* Header */}
+      <div className="flex-shrink-0">
+        {/* Top Navigation Bar - Compact and Efficient */}
+        <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
+          {/* Logo and Brand - Professional Design */}
+          <div className="flex items-center gap-2.5">
+            <LogoMinimal size={32} />
+            <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
           </div>
-          
-          {/* Search Bar with Create Button */}
-          <div className="flex items-center gap-3 max-w-3xl mx-auto">
-            <SearchBar value={searchTerm} onChange={setSearchTerm} />
-            <button
-              onClick={createNewEntry}
-              className="flex-shrink-0 flex items-center gap-2 px-5 py-3 
-                         bg-dark-secondary/50 hover:bg-dark-secondary/70
-                         text-text-primary rounded-lg transition-all
-                         border border-dark-secondary hover:border-accent-green/50
-                         group relative overflow-hidden"
-              title="Create new document (⌘N)"
-            >
-              <div className="absolute inset-0 bg-accent-green/10 transform -translate-x-full 
-                              group-hover:translate-x-0 transition-transform duration-300" />
-              <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300 relative z-10" />
-              <span className="font-medium relative z-10">New</span>
-              <kbd className="hidden sm:inline-block ml-2 text-xs text-text-secondary 
-                              bg-dark-primary/50 px-1.5 py-0.5 rounded relative z-10">
-                ⌘N
-              </kbd>
-            </button>
+
+          {/* Stats and Profile - Compact and Functional */}
+          <div className="flex items-center gap-4">
+            {/* Document Stats - Inline and Minimal */}
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-text-secondary/70">
+                <span className="text-text-primary font-medium">{entries.length}</span> docs
+              </span>
+              <span className="text-text-secondary/40">•</span>
+              <span className="text-text-secondary/70">
+                <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || 0), 0)}</span> blocks
+              </span>
+            </div>
+
+            {/* Profile Dropdown - Smaller but Accessible */}
+            <div className="relative profile-menu-container">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-1.5 p-1.5 hover:bg-dark-secondary/40 
+                          rounded transition-colors group"
+              >
+                <div className="w-8 h-8 bg-gradient-to-br from-accent-green/20 to-accent-green/10 
+                                rounded-full flex items-center justify-center border border-accent-green/20
+                                group-hover:border-accent-green/40 transition-colors">
+                  <User size={16} className="text-accent-green" />
+                </div>
+                <div className="w-1.5 h-1.5 border-l border-b border-text-secondary/40 
+                                transform rotate-[-45deg] transition-transform duration-200
+                                group-hover:border-text-primary/60"
+                      style={{ transform: showProfileMenu ? 'rotate(135deg)' : 'rotate(-45deg)' }}
+                />
+              </button>
+
+              {/* Profile Menu - Compact */}
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-1 w-48 bg-dark-secondary rounded 
+                                shadow-xl border border-dark-primary/50 overflow-hidden z-50
+                                animate-in fade-in slide-in-from-top-1 duration-150">
+                  <div className="p-3 border-b border-dark-primary/50">
+                    <p className="text-sm font-medium text-text-primary">Developer</p>
+                    <p className="text-xs text-text-secondary/70">developer@journey.log</p>
+                  </div>
+                  
+                  <div className="p-1">
+                    <button className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
+                                     text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
+                                     rounded transition-colors text-sm">
+                      <Settings size={14} />
+                      <span>Settings</span>
+                    </button>
+                    <button className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
+                                     text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
+                                     rounded transition-colors text-sm">
+                      <LogOut size={14} />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Actions Bar - Compact and Efficient */}
+        <div className="px-6 py-3">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex items-center gap-2">
+              <SearchBar value={searchTerm} onChange={setSearchTerm} />
+              <button
+                onClick={createNewEntry}
+                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 
+                           bg-dark-secondary/40 hover:bg-dark-secondary/60
+                           text-text-primary rounded transition-all
+                           border border-dark-secondary/50 hover:border-accent-green/40
+                           group relative overflow-hidden text-sm"
+                title="Create new document (⌘N)"
+              >
+                <div className="absolute inset-0 bg-accent-green/10 transform -translate-x-full 
+                                group-hover:translate-x-0 transition-transform duration-300" />
+                <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300 relative z-10" />
+                <span className="font-medium relative z-10">New</span>
+                <kbd className="hidden sm:inline-block ml-1.5 text-xs text-text-secondary/70 
+                                bg-dark-primary/30 px-1 py-0.5 rounded relative z-10">
+                  ⌘N
+                </kbd>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Virtualized Grid */}
-      <div className="flex-grow overflow-hidden px-8">
+      {/* Virtualized Grid - Maximized Space */}
+      <div className="flex-grow overflow-hidden px-6">
         <VirtualizedGrid 
           entries={filteredEntries}
           onExpand={setExpandedEntry}

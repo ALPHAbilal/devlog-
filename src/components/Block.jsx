@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
-import AIBlock from './blocks/AIBlock';
+import AIBlock from './blocks/AIBlockRefined';
 import HeadingBlock from './blocks/HeadingBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';

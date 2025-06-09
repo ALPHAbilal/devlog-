@@ -1,13 +1,18 @@
 import { useState, useRef, useEffect } from 'react';
 import CommandPalette from '../CommandPalette';
+import FloatingToolbar from '../FloatingToolbar';
 import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists } from '../../utils/parseMarkdown.jsx';
 
-export default function TextBlock({ block, onUpdate, onConvert }) {
+export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [content, setContent] = useState(block.content || '');
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [commandPalettePosition, setCommandPalettePosition] = useState(null);
+  const [showToolbar, setShowToolbar] = useState(false);
+  const [toolbarPosition, setToolbarPosition] = useState(null);
+  const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef(null);
+  const selectionTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -18,9 +23,99 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
     }
   }, [isEditing, content]);
 
+  // Handle text selection for toolbar
+  useEffect(() => {
+    const handleSelection = () => {
+      if (!isEditing || !textareaRef.current) return;
+
+      const textarea = textareaRef.current;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      if (start !== end) {
+        const selected = content.substring(start, end);
+        setSelectedText(selected);
+
+        // Calculate position for toolbar
+        const rect = textarea.getBoundingClientRect();
+        const lineHeight = 24;
+        
+        // Get approximate position of selection
+        const beforeText = content.substring(0, start);
+        const lines = beforeText.split('\n');
+        const currentLine = lines.length - 1;
+        
+        // Position toolbar above selection
+        setToolbarPosition({
+          top: rect.top + (currentLine * lineHeight) - 40,
+          left: rect.left + rect.width / 2
+        });
+        
+        setShowToolbar(true);
+      } else {
+        setShowToolbar(false);
+      }
+    };
+
+    // Debounce selection detection
+    const handleSelectionChange = () => {
+      if (selectionTimeoutRef.current) {
+        clearTimeout(selectionTimeoutRef.current);
+      }
+      selectionTimeoutRef.current = setTimeout(handleSelection, 100);
+    };
+
+    if (isEditing) {
+      document.addEventListener('selectionchange', handleSelectionChange);
+      return () => {
+        document.removeEventListener('selectionchange', handleSelectionChange);
+        if (selectionTimeoutRef.current) {
+          clearTimeout(selectionTimeoutRef.current);
+        }
+      };
+    }
+  }, [isEditing, content]);
+
   const handleSave = () => {
     onUpdate({ content });
     setIsEditing(false);
+    setShowToolbar(false);
+    if (onFocus) onFocus(null); // Clear focus
+  };
+
+  const handleFormat = (action, wrapper, isSpecial) => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = content.substring(start, end);
+
+    if (isSpecial && action === 'link') {
+      // For links, wrap in [[]] for document links
+      const newText = `[[${selectedText}]]`;
+      const newContent = content.substring(0, start) + newText + content.substring(end);
+      setContent(newContent);
+      
+      // Set cursor position after the link
+      setTimeout(() => {
+        textarea.selectionStart = start + 2;
+        textarea.selectionEnd = start + 2 + selectedText.length;
+        textarea.focus();
+      }, 0);
+    } else if (wrapper) {
+      // For regular formatting
+      const newText = `${wrapper}${selectedText}${wrapper}`;
+      const newContent = content.substring(0, start) + newText + content.substring(end);
+      setContent(newContent);
+      
+      // Keep selection on the formatted text
+      setTimeout(() => {
+        textarea.selectionStart = start + wrapper.length;
+        textarea.selectionEnd = start + wrapper.length + selectedText.length;
+        textarea.focus();
+      }, 0);
+    }
   };
 
   const handleChange = (e) => {
@@ -60,6 +155,32 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
   };
 
   const handleKeyDown = (e) => {
+    // Keyboard shortcuts for formatting
+    if ((e.metaKey || e.ctrlKey) && !e.shiftKey) {
+      switch(e.key) {
+        case 'b':
+          e.preventDefault();
+          handleFormat('bold', '**');
+          return;
+        case 'i':
+          e.preventDefault();
+          handleFormat('italic', '*');
+          return;
+        case 'k':
+          e.preventDefault();
+          handleFormat('link', null, true);
+          return;
+        case '`':
+          e.preventDefault();
+          handleFormat('code', '`');
+          return;
+      }
+    } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 's') {
+      e.preventDefault();
+      handleFormat('strikethrough', '~~');
+      return;
+    }
+
     if (e.key === 'Escape') {
       if (showCommandPalette) {
         setShowCommandPalette(false);
@@ -70,6 +191,7 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
       } else {
         setContent(block.content || '');
         setIsEditing(false);
+        if (onFocus) onFocus(null); // Clear focus when escaping
       }
     } else if (e.key === 'Enter') {
       // Check for heading markdown at the start of the line
@@ -92,6 +214,7 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
       if (content.trim() === '') {
         e.preventDefault();
         handleSave();
+        if (onFocus) onFocus(null); // Clear focus
       }
     }
   };
@@ -113,6 +236,7 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
     }
     
     setShowCommandPalette(false);
+    if (onFocus) onFocus(null); // Clear focus after conversion
   };
 
   if (isEditing) {
@@ -122,14 +246,16 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
           ref={textareaRef}
           value={content}
           onChange={handleChange}
+          onFocus={() => onFocus && onFocus(block.id)}
           onBlur={() => {
-            if (!showCommandPalette) {
+            if (!showCommandPalette && !showToolbar) {
               handleSave();
             }
           }}
           onKeyDown={handleKeyDown}
           className="w-full bg-dark-secondary/50 text-text-primary p-4 rounded-lg
-                     resize-none focus:outline-none focus:ring-2 focus:ring-accent-green"
+                     resize-none focus:outline-none focus:ring-2 focus:ring-accent-green
+                     transition-all duration-200"
           placeholder="Type '/' for commands or start writing..."
         />
         {showCommandPalette && (
@@ -145,15 +271,25 @@ export default function TextBlock({ block, onUpdate, onConvert }) {
             }}
           />
         )}
+        <FloatingToolbar
+          show={showToolbar}
+          position={toolbarPosition}
+          selectedText={selectedText}
+          onFormat={handleFormat}
+        />
       </>
     );
   }
 
   return (
     <div 
-      onClick={() => setIsEditing(true)}
-      className="text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 
-                 cursor-text transition-colors min-h-[50px]"
+      onClick={() => {
+        setIsEditing(true);
+        if (onFocus) onFocus(block.id);
+      }}
+      className={`text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 
+                 cursor-text transition-all duration-200 min-h-[50px]
+                 ${isFocused === false ? 'opacity-40' : 'opacity-100'}`}
     >
       {block.content ? (
         <div className="space-y-1">

@@ -11,6 +11,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [title, setTitle] = useState(entry.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [backlinks, setBacklinks] = useState([]);
+  const [focusedBlockId, setFocusedBlockId] = useState(null);
 
   // Initialize blocks from entry data
   useEffect(() => {
@@ -145,8 +146,19 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setIsEditingTitle(false);
   };
 
+  // Clear focus when clicking outside any block
+  const handleBackgroundClick = (e) => {
+    // Only clear focus if clicking on the background, not on any child elements
+    if (e.target === e.currentTarget) {
+      setFocusedBlockId(null);
+    }
+  };
+
   return (
-    <div className="max-w-4xl mx-auto fade-in">
+    <div 
+      className="max-w-4xl mx-auto fade-in"
+      onClick={handleBackgroundClick}
+    >
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div className="flex-1">
@@ -185,7 +197,14 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       </div>
 
       {/* Blocks */}
-      <div className="space-y-4 mb-8">
+      <div 
+        className="space-y-4 mb-8 min-h-[400px]"
+        onClick={(e) => {
+          // Clear focus if clicking in empty space between blocks
+          if (e.target === e.currentTarget) {
+            setFocusedBlockId(null);
+          }
+        }}>
         {blocks.map((block, index) => (
           <div key={block.id} className="relative">
             <Block
@@ -195,6 +214,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               onAddBelow={handleAddBelowBlock}
               onConvert={convertBlock}
               showAddButton={true}
+              isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+              onFocus={setFocusedBlockId}
             />
             <AddBlockRow
               show={showBlockSelector && selectorPosition === block.id}

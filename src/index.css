@@ -46,3 +46,48 @@
     transform: translateY(0);
   }
 }
+
+/* Code block improvements */
+.code-block-fullscreen {
+  z-index: 9999;
+}
+
+/* Floating toolbar animation */
+.floating-toolbar {
+  animation: toolbar-fade-in 0.2s ease-out;
+}
+
+@keyframes toolbar-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Focus mode transitions */
+.focus-mode-dimmed {
+  transition: opacity 0.3s ease-out;
+}
+
+/* Custom scrollbar for code blocks */
+.code-block pre::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+
+.code-block pre::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.code-block pre::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.code-block pre::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

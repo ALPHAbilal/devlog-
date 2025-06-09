@@ -13,7 +13,7 @@ const blockComponents = {
   heading: HeadingBlock,
 };
 
-export default function Block({ block, onUpdate, onDelete, onAddBelow, onConvert, showAddButton }) {
+export default function Block({ block, onUpdate, onDelete, onAddBelow, onConvert, showAddButton, isFocused, onFocus }) {
   const [isHovered, setIsHovered] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
 
@@ -46,11 +46,15 @@ export default function Block({ block, onUpdate, onDelete, onAddBelow, onConvert
         </div>
 
         {/* Block Content */}
-        <div className="relative">
+        <div className={`relative transition-all duration-200 ${
+          isFocused === false ? 'opacity-40' : 'opacity-100'
+        }`}>
           <BlockComponent 
             block={block} 
             onUpdate={(updates) => onUpdate(block.id, updates)}
             onConvert={handleConvert}
+            isFocused={isFocused}
+            onFocus={onFocus}
           />
         </div>
       </div>

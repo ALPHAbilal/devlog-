@@ -1,22 +1,49 @@
 import { useState, useRef, useEffect } from 'react';
-import { Copy, Check } from 'lucide-react';
+import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code } from 'lucide-react';
+import { Highlight, themes } from 'prism-react-renderer';
 
 export default function CodeBlock({ block, onUpdate }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [code, setCode] = useState(block.content || '');
   const [language, setLanguage] = useState(block.language || 'javascript');
   const [copied, setCopied] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [viewMode, setViewMode] = useState('normal'); // 'normal', 'compact'
   const textareaRef = useRef(null);
+  const containerRef = useRef(null);
 
+  // Constants for collapse behavior
+  const MAX_COLLAPSED_LINES = 15;
+  const VERY_LARGE_THRESHOLD = 100; // Lines threshold for compact view
+  const CHARS_PER_LINE = 80; // Approximate
+  const MAX_COLLAPSED_HEIGHT = 400; // pixels
+
+  // Auto-resize textarea
   useEffect(() => {
     if (isEditing && textareaRef.current) {
       textareaRef.current.focus();
+      autoResize();
     }
   }, [isEditing]);
+
+  useEffect(() => {
+    if (isEditing) {
+      autoResize();
+    }
+  }, [code]);
+
+  const autoResize = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  };
 
   const handleSave = () => {
     onUpdate({ content: code, language });
     setIsEditing(false);
+    setIsFullscreen(false);
   };
 
   const handleCopy = () => {
@@ -25,44 +52,232 @@ export default function CodeBlock({ block, onUpdate }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleKeyDown = (e) => {
+    // Tab key - insert tab character
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      const newCode = code.substring(0, start) + '  ' + code.substring(end);
+      setCode(newCode);
+      // Move cursor after inserted spaces
+      setTimeout(() => {
+        e.target.selectionStart = e.target.selectionEnd = start + 2;
+      }, 0);
+    }
+    // Escape key - cancel editing
+    else if (e.key === 'Escape') {
+      setCode(block.content || '');
+      setIsEditing(false);
+      setIsFullscreen(false);
+    }
+    // Cmd/Ctrl + Enter - save and exit
+    else if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    }
+    // Cmd/Ctrl + S - save
+    else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      onUpdate({ content: code, language });
+    }
+  };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // Count lines for line numbers
+  const lineCount = code.split('\n').length;
+  const lineNumbers = Array.from({ length: lineCount }, (_, i) => i + 1);
+
+  const supportedLanguages = [
+    { value: 'javascript', label: 'JavaScript' },
+    { value: 'typescript', label: 'TypeScript' },
+    { value: 'jsx', label: 'JSX' },
+    { value: 'tsx', label: 'TSX' },
+    { value: 'python', label: 'Python' },
+    { value: 'css', label: 'CSS' },
+    { value: 'scss', label: 'SCSS' },
+    { value: 'html', label: 'HTML' },
+    { value: 'bash', label: 'Bash' },
+    { value: 'json', label: 'JSON' },
+    { value: 'sql', label: 'SQL' },
+    { value: 'markdown', label: 'Markdown' },
+    { value: 'yaml', label: 'YAML' },
+    { value: 'xml', label: 'XML' },
+  ];
+
   if (isEditing) {
+    const editorClasses = isFullscreen 
+      ? "fixed inset-0 z-50 bg-dark-primary p-8 overflow-auto"
+      : "space-y-2";
+
     return (
-      <div className="space-y-2">
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm"
-        >
-          <option value="javascript">JavaScript</option>
-          <option value="typescript">TypeScript</option>
-          <option value="python">Python</option>
-          <option value="jsx">JSX</option>
-          <option value="css">CSS</option>
-          <option value="html">HTML</option>
-          <option value="bash">Bash</option>
-          <option value="json">JSON</option>
-        </select>
-        <textarea
-          ref={textareaRef}
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          onBlur={handleSave}
-          className="w-full bg-dark-primary text-text-primary p-4 rounded-lg
-                     font-mono text-sm resize-y min-h-[100px]
-                     focus:outline-none focus:ring-2 focus:ring-accent-green"
-          placeholder="// Enter your code here..."
-        />
+      <div className={editorClasses}>
+        <div className="flex items-center justify-between mb-2">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm"
+          >
+            {supportedLanguages.map(lang => (
+              <option key={lang.value} value={lang.value}>{lang.label}</option>
+            ))}
+          </select>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={toggleFullscreen}
+              className="p-1 hover:bg-dark-secondary rounded text-text-secondary hover:text-text-primary"
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+            </button>
+            <span className="text-text-secondary text-xs">
+              {isFullscreen ? "Esc to exit • " : ""}Ctrl+Enter to save
+            </span>
+          </div>
+        </div>
+        
+        <div className="relative flex bg-dark-primary rounded-lg overflow-hidden">
+          {/* Line numbers */}
+          <div className="select-none text-text-secondary text-sm font-mono p-4 pr-0 text-right border-r border-dark-secondary">
+            {lineNumbers.map(num => (
+              <div key={num} className="leading-6">{num}</div>
+            ))}
+          </div>
+          
+          {/* Code editor */}
+          <textarea
+            ref={textareaRef}
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            onBlur={() => !isFullscreen && handleSave()}
+            onKeyDown={handleKeyDown}
+            className="flex-1 bg-transparent text-text-primary p-4 pl-4
+                       font-mono text-sm resize-none overflow-hidden
+                       focus:outline-none leading-6"
+            placeholder="// Enter your code here..."
+            spellCheck={false}
+            style={{ minHeight: '100px' }}
+          />
+        </div>
+        
+        {isFullscreen && (
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              onClick={() => {
+                setCode(block.content || '');
+                setIsEditing(false);
+                setIsFullscreen(false);
+              }}
+              className="px-4 py-2 text-text-secondary hover:text-text-primary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-accent-green text-dark-primary rounded hover:bg-accent-green/80"
+            >
+              Save
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Calculate if content should be collapsible
+  const codeLines = (block.content || '').split('\n');
+  const shouldShowToggle = codeLines.length > MAX_COLLAPSED_LINES;
+  const isVeryLarge = codeLines.length > VERY_LARGE_THRESHOLD;
+  const displayedLines = shouldShowToggle && !isExpanded 
+    ? codeLines.slice(0, MAX_COLLAPSED_LINES) 
+    : codeLines;
+  const hiddenLinesCount = codeLines.length - MAX_COLLAPSED_LINES;
+
+  // If very large and in compact mode, show summary
+  if (isVeryLarge && viewMode === 'compact' && !isEditing) {
+    return (
+      <div className="group relative bg-dark-primary rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Code size={24} className="text-text-secondary" />
+            <div>
+              <div className="text-text-primary font-medium">
+                {block.language || 'Code'} Block
+              </div>
+              <div className="text-text-secondary text-sm">
+                {codeLines.length} lines • {Math.round((block.content || '').length / 1024)}KB
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setViewMode('normal')}
+              className="px-3 py-1 text-sm bg-dark-secondary hover:bg-dark-secondary/80 
+                         rounded text-text-primary transition-colors"
+            >
+              View Code
+            </button>
+            <button
+              onClick={() => setIsEditing(true)}
+              className="px-3 py-1 text-sm bg-accent-green hover:bg-accent-green/80 
+                         rounded text-dark-primary transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              onClick={handleCopy}
+              className="p-1 hover:bg-dark-secondary rounded"
+              title="Copy code"
+            >
+              {copied ? (
+                <Check size={16} className="text-accent-green" />
+              ) : (
+                <Copy size={16} className="text-text-secondary" />
+              )}
+            </button>
+          </div>
+        </div>
+        
+        {/* Preview of first and last few lines */}
+        <div className="mt-3 p-3 bg-dark-secondary/30 rounded text-xs font-mono text-text-secondary">
+          <div className="opacity-70">
+            {codeLines.slice(0, 3).map((line, i) => (
+              <div key={i} className="truncate">{line || ' '}</div>
+            ))}
+          </div>
+          <div className="text-center py-1">...</div>
+          <div className="opacity-70">
+            {codeLines.slice(-3).map((line, i) => (
+              <div key={i} className="truncate">{line || ' '}</div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="group relative">
-      <div className="absolute top-2 right-2 flex items-center gap-2">
-        <span className="text-text-secondary text-xs">{block.language || 'javascript'}</span>
+    <div className="group relative" ref={containerRef}>
+      <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+        <span className="text-text-secondary text-xs bg-dark-primary/80 px-2 py-1 rounded">
+          {block.language || 'javascript'}
+        </span>
+        {isVeryLarge && (
+          <button
+            onClick={() => setViewMode('compact')}
+            className="p-1 hover:bg-dark-secondary rounded opacity-0 group-hover:opacity-100 transition-opacity bg-dark-primary/80"
+            title="Switch to compact view"
+          >
+            <Minimize2 size={16} className="text-text-secondary" />
+          </button>
+        )}
         <button
           onClick={handleCopy}
-          className="p-1 hover:bg-dark-secondary rounded opacity-0 group-hover:opacity-100 transition-opacity"
+          className="p-1 hover:bg-dark-secondary rounded opacity-0 group-hover:opacity-100 transition-opacity bg-dark-primary/80"
+          title="Copy code"
         >
           {copied ? (
             <Check size={16} className="text-accent-green" />
@@ -71,15 +286,92 @@ export default function CodeBlock({ block, onUpdate }) {
           )}
         </button>
       </div>
-      <pre 
-        onClick={() => setIsEditing(true)}
-        className="bg-dark-primary text-text-primary p-4 rounded-lg overflow-x-auto
-                   cursor-text hover:ring-1 hover:ring-dark-secondary transition-all"
-      >
-        <code className="font-mono text-sm">
-          {block.content || '// Click to add code...'}
-        </code>
-      </pre>
+      
+      <div className="bg-dark-primary rounded-lg overflow-hidden">
+        <div 
+          onClick={() => setIsEditing(true)}
+          className={`cursor-text hover:ring-1 hover:ring-dark-secondary transition-all ${
+            shouldShowToggle && !isExpanded ? 'max-h-[400px] overflow-hidden' : ''
+          }`}
+        >
+          {block.content ? (
+            <Highlight
+              theme={themes.nightOwl}
+              code={displayedLines.join('\n')}
+              language={block.language || 'javascript'}
+            >
+              {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                <div className="flex">
+                  {/* Line numbers */}
+                  <div className="select-none text-text-secondary text-sm font-mono p-4 pr-0 text-right border-r border-dark-secondary/50">
+                    {tokens.map((_, i) => (
+                      <div key={i} className="leading-6">
+                        {shouldShowToggle && !isExpanded ? i + 1 : i + 1}
+                      </div>
+                    ))}
+                    {shouldShowToggle && !isExpanded && (
+                      <div className="leading-6 text-text-secondary/50">...</div>
+                    )}
+                  </div>
+                  
+                  {/* Code with syntax highlighting */}
+                  <pre className={`${className} flex-1 p-4 pl-4 overflow-x-auto`} style={style}>
+                    <code className="font-mono text-sm">
+                      {tokens.map((line, i) => (
+                        <div key={i} {...getLineProps({ line })} className="leading-6">
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token })} />
+                          ))}
+                        </div>
+                      ))}
+                    </code>
+                  </pre>
+                </div>
+              )}
+            </Highlight>
+          ) : (
+            <div className="flex">
+              <div className="select-none text-text-secondary text-sm font-mono p-4 pr-0 text-right border-r border-dark-secondary/50">
+                1
+              </div>
+              <pre className="flex-1 p-4 pl-4">
+                <code className="font-mono text-sm text-text-secondary">
+                  // Click to add code...
+                </code>
+              </pre>
+            </div>
+          )}
+        </div>
+
+        {/* Expand/Collapse toggle */}
+        {shouldShowToggle && (
+          <div className="relative">
+            {/* Gradient fade effect when collapsed */}
+            {!isExpanded && (
+              <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-t from-dark-primary to-transparent pointer-events-none" />
+            )}
+            
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="w-full py-2 bg-dark-secondary/30 hover:bg-dark-secondary/50 
+                         text-text-secondary hover:text-text-primary transition-all
+                         flex items-center justify-center gap-2 text-sm font-medium"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp size={16} />
+                  Collapse
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={16} />
+                  Show {hiddenLinesCount} more lines
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -20,33 +20,65 @@ Journey Logger is not just another note-taking app. It's a **living documentatio
 
 ### 1. **Infinite Block Documents**
 Each document is an infinite canvas where you can add different types of blocks:
-- **Text Blocks** - With full markdown support
-- **Code Blocks** - Syntax highlighted code snippets
+- **Text Blocks** - With full markdown support and formatting toolbar
+- **Code Blocks** - Syntax highlighted with 14+ languages
 - **Heading Blocks** - For document structure
 - **AI Chat Blocks** - Preserve AI conversations
 
 ### 2. **Slash Commands (/)**
 Type `/` in any text block to quickly:
+- `/text` → Create a text block
 - `/code` → Create a code block
-- `/h1` → Create a heading
+- `/h1`, `/h2`, `/h3` → Create headings
 - `/ai` → Start an AI conversation block
-- And more...
+- Navigate with arrow keys and Enter to select
 
-### 3. **Smart Markdown**
+### 3. **Smart Markdown with Visual Formatting**
 Write naturally with markdown that renders in real-time:
 - `**bold text**` → **bold text**
 - `*italic*` → *italic*
 - `` `inline code` `` → `inline code`
+- `~~strikethrough~~` → ~~strikethrough~~
 - `## Heading` + Enter → Auto-converts to Heading block
+- **NEW**: Select text to see floating formatting toolbar
+- **NEW**: Keyboard shortcuts:
+  - `Ctrl/Cmd + B` → Bold
+  - `Ctrl/Cmd + I` → Italic
+  - `Ctrl/Cmd + Shift + S` → Strikethrough
+  - `Ctrl/Cmd + K` → Create link
+  - `Ctrl/Cmd + `` ` → Inline code
 
-### 4. **Document Linking & Backlinks**
+### 4. **Enhanced Code Blocks**
+Professional code editing experience:
+- **Syntax Highlighting** - Powered by Prism with Night Owl theme
+- **Line Numbers** - Clean, readable line numbering
+- **Auto-resize** - Editor grows with your code
+- **Smart Collapse** - Long code blocks (15+ lines) auto-collapse
+- **Compact View** - Very large blocks (100+ lines) show summary
+- **Fullscreen Mode** - Distraction-free coding
+- **14+ Languages** - JS, TS, Python, CSS, HTML, and more
+- **Keyboard Shortcuts**:
+  - `Tab` → Insert 2 spaces
+  - `Escape` → Cancel editing
+  - `Ctrl/Cmd + Enter` → Save and exit
+  - `Ctrl/Cmd + S` → Save
+
+### 5. **Document Linking & Backlinks**
 Build your personal knowledge graph:
 - Create links with `[[Document Name]]`
 - Automatic backlink tracking
 - See all documents that reference the current one
-- Navigate your knowledge network effortlessly
+- Click any link to navigate instantly
+- Create new documents on-the-fly from links
 
-### 5. **Persistent & Searchable**
+### 6. **Focus Mode**
+**NEW**: Enhanced writing experience:
+- Other blocks dim to 40% opacity when editing
+- Helps maintain concentration on current content
+- Smooth transitions for professional feel
+- Click anywhere to exit focus mode
+
+### 7. **Persistent & Searchable**
 - Everything saves automatically to localStorage
 - Search across all documents, tags, and content
 - Never lose a thought or code snippet again
@@ -56,8 +88,9 @@ Build your personal knowledge graph:
 ### For Learning
 ```
 Create a document called [[React Hooks Deep Dive]]
-Add code examples, link to [[useEffect Patterns]]
-Save AI explanations about complex concepts
+Add code examples with syntax highlighting
+Link to [[useEffect Patterns]] and [[Custom Hooks]]
+Save AI explanations with proper formatting
 Build your personal React knowledge base
 ```
 
@@ -66,16 +99,18 @@ Build your personal React knowledge base
 Document: [[E-commerce Project]]
 - Link to [[API Endpoints]]
 - Link to [[Database Schema]]
-- Add code snippets for key functions
-- Track decisions and reasoning
+- Add collapsible code snippets for key functions
+- Use focus mode for distraction-free writing
+- Track decisions with formatted text
 ```
 
 ### For Problem Solving
 ```
 Document: [[Bug: Authentication Loop]]
-- Add error messages as code blocks
+- Add error messages as syntax-highlighted code blocks
 - Save AI debugging conversations
 - Link to [[JWT Implementation]]
+- Use the formatting toolbar for emphasis
 - Document the solution for future reference
 ```
 
@@ -86,6 +121,7 @@ Document: [[Bug: Authentication Loop]]
 - **Tailwind CSS** - Utility-first styling
 - **React Router** - Navigation
 - **Lucide Icons** - Beautiful icons
+- **Prism React Renderer** - Syntax highlighting
 - **LocalStorage** - Data persistence
 
 ## 📦 Installation
@@ -116,24 +152,88 @@ Journey Logger follows these core principles:
 
 4. **Developer Focused** - Dark theme, code highlighting, markdown support - built by developers, for developers.
 
+5. **Minimal Yet Powerful** - Clean interface that reveals advanced features progressively.
+
 ## 🔥 Keyboard Shortcuts
 
+### General
 | Shortcut | Action |
 |----------|--------|
 | `/` | Open command palette |
 | `Enter` | Create new block |
 | `Escape` | Exit edit mode |
 | `[[` | Start document link |
-| `## ` | Convert to heading |
 
-## 🌈 Coming Soon
+### Text Formatting
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl/Cmd + B` | Bold |
+| `Ctrl/Cmd + I` | Italic |
+| `Ctrl/Cmd + Shift + S` | Strikethrough |
+| `Ctrl/Cmd + K` | Create link |
+| `Ctrl/Cmd + `` ` | Inline code |
 
-- [ ] Templates for common documentation patterns
+### Code Blocks
+| Shortcut | Action |
+|----------|--------|
+| `Tab` | Insert 2 spaces |
+| `Ctrl/Cmd + Enter` | Save and exit |
+| `Ctrl/Cmd + S` | Save |
+| `Escape` | Cancel editing |
+
+### Markdown Shortcuts
+| Syntax | Result |
+|--------|--------|
+| `## Heading` + Enter | Converts to Heading block |
+| `**text**` | Bold text |
+| `*text*` | Italic text |
+| `` `code` `` | Inline code |
+| `[[Document]]` | Document link |
+
+## 🌈 Recent Updates
+
+### Phase 1: Slash Commands ✅
+- Command palette with keyboard navigation
+- Quick block creation
+- Smart command filtering
+
+### Phase 2: Smart Markdown ✅
+- Real-time markdown rendering
+- Auto-conversion of headings
+- Inline formatting support
+
+### Phase 3: Block Linking & References ✅
+- Document linking with [[syntax]]
+- Backlinks tracking
+- Link navigation
+
+### Phase 4: Enhanced Code Blocks ✅
+- Syntax highlighting with Prism
+- Line numbers
+- Auto-collapse for long code
+- Compact view for very large blocks
+- Fullscreen editing mode
+
+### Phase 5: Visual Enhancements ✅
+- Floating formatting toolbar
+- Focus mode for distraction-free writing
+- Keyboard shortcuts for formatting
+
+## 🚧 Coming Soon
+
+### Phase 6: Templates
+- [ ] Template library
+- [ ] Custom templates
+- [ ] Quick starts for common patterns
+
+### Future Enhancements
 - [ ] Export to Markdown/PDF
 - [ ] Cloud sync
 - [ ] Collaborative editing
 - [ ] More block types (diagrams, tables, embeds)
 - [ ] Plugin system
+- [ ] Vim keybindings option
+- [ ] Theme customization
 
 ## 🤝 Contributing
 

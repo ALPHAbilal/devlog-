@@ -3,6 +3,7 @@ import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
 import AIBlock from './blocks/AIBlockRefined';
 import HeadingBlock from './blocks/HeadingBlock';
+import FileTreeBlock from './blocks/FileTreeBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';
 
@@ -11,6 +12,7 @@ const blockComponents = {
   code: CodeBlock,
   ai: AIBlock,
   heading: HeadingBlock,
+  filetree: FileTreeBlock,
 };
 
 export default function Block({ 
@@ -27,11 +29,19 @@ export default function Block({
   onMoveDown,
   canMoveUp,
   canMoveDown,
+  allBlocks,
+  onNavigateToBlock,
   index 
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
+  
+  // Debug log
+  if (!BlockComponent) {
+    console.error('BlockComponent is undefined for type:', block.type);
+    return <div>Error: Unknown block type "{block.type}"</div>;
+  }
 
   const handleConvert = (newType, meta = {}) => {
     if (onConvert) {
@@ -77,6 +87,8 @@ export default function Block({
             onConvert={handleConvert}
             isFocused={isFocused}
             onFocus={onFocus}
+            allBlocks={allBlocks}
+            onNavigateToBlock={onNavigateToBlock}
           />
         </div>
       </div>

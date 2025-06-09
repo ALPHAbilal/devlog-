@@ -18,6 +18,8 @@ export function parseMarkdown(text) {
     docLink: /\[\[([^\]]+)\]\]/g,
     // Links: [text](url)
     link: /\[([^\]]+)\]\(([^)]+)\)/g,
+    // Tags: #tagname[text] - we'll extract but not display the tag syntax
+    tag: /#(\w+)\[([^\]]+)\]/g,
     // Line breaks
     lineBreak: /\n/g,
   };
@@ -143,8 +145,21 @@ export function parseMarkdown(text) {
       });
     }
 
+    // Process tags - extract but show only the text content
+    const tagRegex = new RegExp(patterns.tag);
+    const tagMatches = [];
+    while ((match = tagRegex.exec(processedText)) !== null) {
+      tagMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        tagName: match[1],
+        content: match[2], // This is the actual text to display
+        type: 'tag'
+      });
+    }
+
     // Combine and sort all matches
-    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches].sort((a, b) => a.start - b.start);
+    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches, ...tagMatches].sort((a, b) => a.start - b.start);
 
     // Build elements
     allMatches.forEach((match, matchIndex) => {
@@ -188,6 +203,13 @@ export function parseMarkdown(text) {
           >
             {match.content}
           </button>
+        );
+      } else if (match.type === 'tag') {
+        // For tags, we only show the content text, not the tag syntax
+        elements.push(
+          <span key={`tag-${segmentIndex}-${matchIndex}`} className="text-text-primary">
+            {match.content}
+          </span>
         );
       }
 
@@ -254,4 +276,19 @@ export function processLineBreaksAndLists(text) {
   });
   
   return elements;
+}
+
+// Extract tags from content - returns array of unique tag names
+export function extractTagsFromContent(content) {
+  if (!content) return [];
+  
+  const tagPattern = /#(\w+)\[([^\]]+)\]/g;
+  const tags = new Set();
+  let match;
+  
+  while ((match = tagPattern.exec(content)) !== null) {
+    tags.add(match[1]);
+  }
+  
+  return Array.from(tags);
 }

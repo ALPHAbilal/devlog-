@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Plus, Link2 } from 'lucide-react';
 import Block from './Block';
 import AddBlockRow from './AddBlockRow';
 import { getBacklinks } from '../utils/extractLinks';
+import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -13,6 +14,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [backlinks, setBacklinks] = useState([]);
   const [focusedBlockId, setFocusedBlockId] = useState(null);
+  const contentContainerRef = useRef(null);
 
   // Initialize blocks from entry data
   useEffect(() => {
@@ -70,18 +72,35 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     if (blockIndex === -1) return;
     
     const blockToDuplicate = blocks[blockIndex];
-    const duplicatedBlock = {
+    let duplicatedBlock = {
       ...blockToDuplicate,
       id: Date.now().toString(),
       isNew: false
     };
     
-    const updatedBlocks = [...blocks];
-    updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
-    
-    setBlocks(updatedBlocks);
-    if (onUpdate) {
-      onUpdate(entry.id, { blocks: updatedBlocks });
+    // If duplicating a code block, set up version tracking
+    if (blockToDuplicate.type === 'code') {
+      // Link the new block to the original
+      duplicatedBlock = linkCodeVersions(blockToDuplicate, duplicatedBlock);
+      
+      // Update the original block to indicate it has versions
+      const updatedBlocks = [...blocks];
+      updatedBlocks[blockIndex] = markAsHavingVersions(blockToDuplicate);
+      updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
+      
+      setBlocks(updatedBlocks);
+      if (onUpdate) {
+        onUpdate(entry.id, { blocks: updatedBlocks });
+      }
+    } else {
+      // Normal duplication for non-code blocks
+      const updatedBlocks = [...blocks];
+      updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
+      
+      setBlocks(updatedBlocks);
+      if (onUpdate) {
+        onUpdate(entry.id, { blocks: updatedBlocks });
+      }
     }
   };
 
@@ -240,13 +259,33 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
       {/* Blocks */}
       <div 
-        className="space-y-4 mb-8 min-h-[400px]"
+        ref={contentContainerRef}
+        className="space-y-4 mb-8 min-h-[400px] relative pl-8"
         onClick={(e) => {
           // Clear focus if clicking in empty space between blocks
           if (e.target === e.currentTarget) {
             setFocusedBlockId(null);
           }
         }}>
+        {/* Render version timelines */}
+        {blocks.map((block, index) => {
+          if (block.versionOf) {
+            // Find the original block
+            const originalBlock = blocks.find(b => b.id === block.versionOf);
+            if (originalBlock) {
+              return (
+                <VersionTimeline
+                  key={`timeline-${block.id}`}
+                  startBlockId={block.versionOf}
+                  endBlockId={block.id}
+                  blocks={blocks}
+                  containerRef={contentContainerRef}
+                />
+              );
+            }
+          }
+          return null;
+        })}
         {blocks.map((block, index) => (
           <div key={block.id} className="relative">
             <Block
@@ -264,6 +303,16 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               showAddButton={true}
               isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
               onFocus={setFocusedBlockId}
+              allBlocks={blocks}
+              onNavigateToBlock={(targetBlockId) => {
+                // Scroll to target block
+                const element = document.querySelector(`[data-block-id="${targetBlockId}"]`);
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  // Highlight the target block briefly
+                  setFocusedBlockId(targetBlockId);
+                }
+              }}
             />
             <AddBlockRow
               show={showBlockSelector && selectorPosition === block.id}

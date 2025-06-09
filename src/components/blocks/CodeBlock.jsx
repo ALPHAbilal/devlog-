@@ -1,17 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
 import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
+import CodeVersionTracker, { VERSION_TRACKING_ENABLED } from './CodeVersionTracker';
 
-export default function CodeBlock({ block, onUpdate }) {
+export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [code, setCode] = useState(block.content || '');
   const [language, setLanguage] = useState(block.language || 'javascript');
+  const [filePath, setFilePath] = useState(block.filePath || '');
   const [copied, setCopied] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [viewMode, setViewMode] = useState('normal'); // 'normal', 'compact'
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const textareaRef = useRef(null);
   const containerRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   // Constants for collapse behavior
   const MAX_COLLAPSED_LINES = 15;
@@ -33,6 +37,20 @@ export default function CodeBlock({ block, onUpdate }) {
     }
   }, [code]);
 
+  // Handle click outside for language dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowLanguageDropdown(false);
+      }
+    };
+
+    if (showLanguageDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showLanguageDropdown]);
+
   const autoResize = () => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -41,7 +59,7 @@ export default function CodeBlock({ block, onUpdate }) {
   };
 
   const handleSave = () => {
-    onUpdate({ content: code, language });
+    onUpdate({ content: code, language, filePath });
     setIsEditing(false);
     setIsFullscreen(false);
   };
@@ -50,6 +68,12 @@ export default function CodeBlock({ block, onUpdate }) {
     navigator.clipboard.writeText(block.content || '');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
+    onUpdate({ ...block, language: newLanguage });
+    setShowLanguageDropdown(false);
   };
 
   const handleKeyDown = (e) => {
@@ -97,14 +121,21 @@ export default function CodeBlock({ block, onUpdate }) {
     { value: 'jsx', label: 'JSX' },
     { value: 'tsx', label: 'TSX' },
     { value: 'python', label: 'Python' },
+    { value: 'java', label: 'Java' },
+    { value: 'csharp', label: 'C#' },
+    { value: 'cpp', label: 'C++' },
+    { value: 'c', label: 'C' },
+    { value: 'html', label: 'HTML' },
     { value: 'css', label: 'CSS' },
     { value: 'scss', label: 'SCSS' },
-    { value: 'html', label: 'HTML' },
+    { value: 'sql', label: 'SQL' },
     { value: 'bash', label: 'Bash' },
     { value: 'json', label: 'JSON' },
-    { value: 'sql', label: 'SQL' },
-    { value: 'markdown', label: 'Markdown' },
     { value: 'yaml', label: 'YAML' },
+    { value: 'markdown', label: 'Markdown' },
+    { value: 'go', label: 'Go' },
+    { value: 'rust', label: 'Rust' },
+    { value: 'php', label: 'PHP' },
     { value: 'xml', label: 'XML' },
   ];
 
@@ -116,15 +147,26 @@ export default function CodeBlock({ block, onUpdate }) {
     return (
       <div className={editorClasses}>
         <div className="flex items-center justify-between mb-2">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm"
-          >
-            {supportedLanguages.map(lang => (
-              <option key={lang.value} value={lang.value}>{lang.label}</option>
-            ))}
-          </select>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={filePath}
+              onChange={(e) => setFilePath(e.target.value)}
+              placeholder="File path (e.g., src/components/Block.jsx)"
+              className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm
+                         placeholder-text-secondary/50 focus:outline-none focus:ring-1
+                         focus:ring-accent-green/50 min-w-[250px]"
+            />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm"
+            >
+              {supportedLanguages.map(lang => (
+                <option key={lang.value} value={lang.value}>{lang.label}</option>
+              ))}
+            </select>
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleFullscreen}
@@ -260,11 +302,56 @@ export default function CodeBlock({ block, onUpdate }) {
   }
 
   return (
-    <div className="group relative" ref={containerRef}>
-      <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
-        <span className="text-text-secondary text-xs bg-dark-primary/80 px-2 py-1 rounded">
-          {block.language || 'javascript'}
-        </span>
+    <div className="group relative overflow-visible" ref={containerRef} data-block-id={block.id}>
+      {/* Version Tracker - can be easily removed by setting VERSION_TRACKING_ENABLED to false */}
+      <CodeVersionTracker 
+        block={block}
+        allBlocks={allBlocks}
+        onNavigateToVersion={onNavigateToBlock}
+        position="top"
+      />
+      
+      {/* File path display */}
+      {block.filePath && (
+        <div className="absolute top-2 left-2 text-xs text-text-secondary/70 
+                        bg-dark-primary/80 px-2 py-1 rounded font-mono">
+          {block.filePath}
+        </div>
+      )}
+      
+      <div className="absolute top-2 right-2 flex items-center gap-2 z-20">
+        {/* Language selector dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
+            className="flex items-center gap-1 text-text-secondary text-xs bg-dark-primary/80 
+                       px-2 py-1 rounded hover:bg-dark-secondary/80 transition-colors"
+          >
+            {language || 'javascript'}
+            <ChevronDown size={12} className={`transition-transform ${showLanguageDropdown ? 'rotate-180' : ''}`} />
+          </button>
+          
+          {showLanguageDropdown && (
+            <div className="absolute top-full right-0 mt-1 w-48 bg-dark-secondary rounded-lg 
+                            shadow-xl border border-dark-primary/50 overflow-hidden z-50
+                            animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="max-h-64 overflow-y-auto">
+                {supportedLanguages.map(lang => (
+                  <button
+                    key={lang.value}
+                    onClick={() => handleLanguageChange(lang.value)}
+                    className={`w-full px-3 py-2 text-left text-sm transition-colors
+                                ${language === lang.value 
+                                  ? 'bg-accent-green/20 text-accent-green' 
+                                  : 'text-text-secondary hover:bg-dark-primary/50 hover:text-text-primary'}`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         {isVeryLarge && (
           <button
             onClick={() => setViewMode('compact')}

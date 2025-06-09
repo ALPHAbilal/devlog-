@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Type, Code, MessageSquare, Heading, List, Hash } from 'lucide-react';
+import { Type, Code, MessageSquare, Heading, List, Hash, Folder } from 'lucide-react';
 
 const commands = [
   { 
@@ -52,6 +52,14 @@ const commands = [
     description: 'AI conversation block',
     icon: MessageSquare,
     shortcut: 'ai'
+  },
+  { 
+    id: 'filetree',
+    type: 'filetree',
+    label: 'File Tree',
+    description: 'Project structure visualization',
+    icon: Folder,
+    shortcut: 'tree'
   }
 ];
 

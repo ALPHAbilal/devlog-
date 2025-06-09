@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import CommandPalette from '../CommandPalette';
 import FloatingToolbar from '../FloatingToolbar';
-import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists } from '../../utils/parseMarkdown.jsx';
+import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
 
 export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [content, setContent] = useState(block.content || '');
-  const [tags, setTags] = useState(block.tags || []);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [commandPalettePosition, setCommandPalettePosition] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -14,11 +13,14 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
+  
+  // Extract tags from content dynamically
+  const tags = extractTagsFromContent(content);
 
   // Get all unique tags from localStorage
   const getAllTags = () => {
     try {
-      const documents = JSON.parse(localStorage.getItem('journey-documents') || '[]');
+      const documents = JSON.parse(localStorage.getItem('journeyLoggerEntries') || '[]');
       const allTags = new Set();
       
       documents.forEach(doc => {
@@ -99,7 +101,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   }, [isEditing, content]);
 
   const handleSave = () => {
-    onUpdate({ content, tags });
+    // Extract tags from content before saving
+    const extractedTags = extractTagsFromContent(content);
+    onUpdate({ content, tags: extractedTags });
     setIsEditing(false);
     setShowToolbar(false);
     if (onFocus) onFocus(null); // Clear focus
@@ -111,11 +115,6 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-
-    // Add tag to the block's tags if not already present
-    if (!tags.includes(tagName)) {
-      setTags([...tags, tagName]);
-    }
 
     // Wrap selected text with tag format
     const taggedText = `#${tagName}[${selectedText}]`;
@@ -274,7 +273,8 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     
     if (newContent) {
       // If there's content, save it first
-      onUpdate({ content: newContent, tags });
+      const extractedTags = extractTagsFromContent(newContent);
+      onUpdate({ content: newContent, tags: extractedTags });
     }
     
     // Convert block to selected type
@@ -345,9 +345,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           <div className="space-y-1">
             {processLineBreaksAndLists(block.content)}
           </div>
-          {tags.length > 0 && (
+          {block.tags && block.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
-              {tags.map((tag, index) => (
+              {block.tags.map((tag, index) => (
                 <span 
                   key={index}
                   className="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded"

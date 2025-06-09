@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Type, Code, MessageSquare, Heading } from 'lucide-react';
+import { Type, Code, MessageSquare, Heading, Folder } from 'lucide-react';
 
 const blockTypes = [
   { type: 'text', label: 'Text', icon: Type },
   { type: 'heading', label: 'Heading', icon: Heading },
   { type: 'code', label: 'Code', icon: Code },
   { type: 'ai', label: 'AI Chat', icon: MessageSquare },
+  { type: 'filetree', label: 'File Tree', icon: Folder },
 ];
 
 export default function BlockTypeSelector({ onSelect, onClose }) {

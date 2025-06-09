@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Trash2, GripVertical } from 'lucide-react';
 import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
 import AIBlock from './blocks/AIBlock';
 import HeadingBlock from './blocks/HeadingBlock';
 import BlockDivider from './BlockDivider';
+import BlockControls from './BlockControls';
 
 const blockComponents = {
   text: TextBlock,
@@ -13,8 +13,24 @@ const blockComponents = {
   heading: HeadingBlock,
 };
 
-export default function Block({ block, onUpdate, onDelete, onAddBelow, onConvert, showAddButton, isFocused, onFocus }) {
+export default function Block({ 
+  block, 
+  onUpdate, 
+  onDelete, 
+  onAddBelow, 
+  onConvert, 
+  showAddButton, 
+  isFocused, 
+  onFocus,
+  onDuplicate,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp,
+  canMoveDown,
+  index 
+}) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
 
   const handleConvert = (newType, meta = {}) => {
@@ -26,29 +42,35 @@ export default function Block({ block, onUpdate, onDelete, onAddBelow, onConvert
   return (
     <>
       <div 
-        className="group relative"
+        className={`group relative transition-all duration-200 ${
+          isDragging ? 'opacity-50 scale-[0.98]' : ''
+        }`}
+        style={{ zIndex: isHovered ? 10 : 1 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Block Controls */}
-        <div className={`absolute -left-12 top-2 flex gap-1 transition-opacity duration-200 ${
-          isHovered ? 'opacity-100' : 'opacity-0'
-        }`}>
-          <button className="p-1 hover:bg-dark-secondary rounded cursor-move">
-            <GripVertical size={16} className="text-text-secondary" />
-          </button>
-          <button 
-            onClick={() => onDelete(block.id)}
-            className="p-1 hover:bg-dark-secondary rounded"
-          >
-            <Trash2 size={16} className="text-text-secondary hover:text-red-500" />
-          </button>
-        </div>
+        {/* Enhanced Block Controls */}
+        <BlockControls
+          isVisible={isHovered && !isDragging}
+          onDelete={() => onDelete(block.id)}
+          onDuplicate={() => onDuplicate?.(block.id)}
+          onMoveUp={() => onMoveUp?.(block.id)}
+          onMoveDown={() => onMoveDown?.(block.id)}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+        />
+
+        {/* Visual indicator for focused block */}
+        <div className={`
+          absolute -left-0.5 top-0 bottom-0 w-0.5 bg-accent-green rounded-full
+          transition-all duration-200
+          ${isFocused === true ? 'opacity-100' : 'opacity-0'}
+        `} />
 
         {/* Block Content */}
         <div className={`relative transition-all duration-200 ${
           isFocused === false ? 'opacity-40' : 'opacity-100'
-        }`}>
+        } ${isHovered && !isDragging ? 'transform translate-x-1' : ''}`}>
           <BlockComponent 
             block={block} 
             onUpdate={(updates) => onUpdate(block.id, updates)}

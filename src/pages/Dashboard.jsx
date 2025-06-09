@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import EntryCard from '../components/EntryCard';
-import ExpandedView from '../components/ExpandedView';
+import ExpandedView from '../components/ExpandedViewEnhanced';
 import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
+import VirtualizedGrid from '../components/VirtualizedGrid';
 import { Plus } from 'lucide-react';
 
 export default function Dashboard() {
@@ -11,6 +12,58 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkCallback, setLinkCallback] = useState(null);
+
+  // Save entries to localStorage whenever they change
+  const saveEntries = (updatedEntries) => {
+    setEntries(updatedEntries);
+    localStorage.setItem('journeyLoggerEntries', JSON.stringify(updatedEntries));
+  };
+
+  // Create new entry function (moved up for keyboard shortcut access)
+  const createNewEntry = () => {
+    const newEntry = {
+      id: Date.now().toString(),
+      title: 'Untitled Document',
+      preview: 'Click to start writing...',
+      blocks: [],
+      tags: [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const updatedEntries = [newEntry, ...entries];
+    saveEntries(updatedEntries);
+    setExpandedEntry(newEntry);
+  };
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Cmd/Ctrl + K - Focus search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        document.querySelector('input[type="text"]')?.focus();
+      }
+      // Cmd/Ctrl + N - Create new document
+      else if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+        e.preventDefault();
+        createNewEntry();
+      }
+      // Slash - Focus search (when not in input)
+      else if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(e.target.tagName)) {
+        e.preventDefault();
+        document.querySelector('input[type="text"]')?.focus();
+      }
+      // Escape - Clear search when in search input
+      else if (e.key === 'Escape' && e.target.tagName === 'INPUT') {
+        setSearchTerm('');
+        e.target.blur();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [entries]);
 
   // Load entries from localStorage on mount
   useEffect(() => {
@@ -23,7 +76,7 @@ export default function Dashboard() {
         {
           id: '1',
           title: 'Getting Started with Journey Logger',
-          preview: 'Welcome to Journey Logger! Click to start documenting...',
+          preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
           blocks: [
             {
               id: '1-1',
@@ -58,28 +111,6 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Save entries to localStorage whenever they change
-  const saveEntries = (updatedEntries) => {
-    setEntries(updatedEntries);
-    localStorage.setItem('journeyLoggerEntries', JSON.stringify(updatedEntries));
-  };
-
-  // Create new entry
-  const createNewEntry = () => {
-    const newEntry = {
-      id: Date.now().toString(),
-      title: 'Untitled Document',
-      preview: 'Click to start writing...',
-      blocks: [],
-      tags: [],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    const updatedEntries = [newEntry, ...entries];
-    saveEntries(updatedEntries);
-    setExpandedEntry(newEntry);
-  };
 
   // Update entry
   const updateEntry = (entryId, updates) => {
@@ -162,58 +193,105 @@ export default function Dashboard() {
 
   if (expandedEntry) {
     return (
-      <ExpandedView 
-        entry={expandedEntry} 
-        onClose={() => setExpandedEntry(null)}
-        onUpdate={updateEntry}
-        allEntries={entries}
-      />
+      <div className="h-full flex flex-col">
+        <ExpandedView 
+          entry={expandedEntry} 
+          onClose={() => setExpandedEntry(null)}
+          onUpdate={updateEntry}
+          allEntries={entries}
+        />
+      </div>
     );
   }
 
   return (
-    <div>
-      {/* Search Bar */}
-      <div className="max-w-2xl mx-auto mb-8">
-        <SearchBar value={searchTerm} onChange={setSearchTerm} />
+    <div className="flex flex-col h-full">
+      {/* Header with Search */}
+      <div className="flex-shrink-0 pt-6 pb-4 px-8">
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Title and Stats */}
+          <div className="text-center mb-4">
+            <h1 className="text-3xl font-light text-text-primary mb-2">
+              Your Journey
+            </h1>
+            <p className="text-text-secondary text-sm">
+              {entries.length} {entries.length === 1 ? 'document' : 'documents'} • 
+              {entries.reduce((acc, e) => acc + (e.blocks?.length || 0), 0)} blocks
+            </p>
+          </div>
+          
+          {/* Search Bar with Create Button */}
+          <div className="flex items-center gap-3 max-w-3xl mx-auto">
+            <SearchBar value={searchTerm} onChange={setSearchTerm} />
+            <button
+              onClick={createNewEntry}
+              className="flex-shrink-0 flex items-center gap-2 px-5 py-3 
+                         bg-dark-secondary/50 hover:bg-dark-secondary/70
+                         text-text-primary rounded-lg transition-all
+                         border border-dark-secondary hover:border-accent-green/50
+                         group relative overflow-hidden"
+              title="Create new document (⌘N)"
+            >
+              <div className="absolute inset-0 bg-accent-green/10 transform -translate-x-full 
+                              group-hover:translate-x-0 transition-transform duration-300" />
+              <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300 relative z-10" />
+              <span className="font-medium relative z-10">New</span>
+              <kbd className="hidden sm:inline-block ml-2 text-xs text-text-secondary 
+                              bg-dark-primary/50 px-1.5 py-0.5 rounded relative z-10">
+                ⌘N
+              </kbd>
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Entry Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* New Entry Card */}
-        <button
-          onClick={createNewEntry}
-          className="bg-card-gradient rounded-lg p-6 
-                     transition-all duration-300 hover:scale-105 hover:shadow-xl
-                     border-2 border-dashed border-dark-secondary/50
-                     hover:border-accent-green/50 group"
-        >
-          <div className="flex flex-col items-center justify-center h-full min-h-[150px]">
-            <Plus size={48} className="text-text-secondary group-hover:text-accent-green 
-                                       transition-colors mb-2" />
-            <span className="text-text-secondary group-hover:text-text-primary 
-                            transition-colors font-medium">
-              Create New Document
-            </span>
-          </div>
-        </button>
-
-        {/* Existing Entries */}
-        {filteredEntries.map(entry => (
-          <EntryCard 
-            key={entry.id} 
-            entry={entry} 
-            onExpand={setExpandedEntry}
-          />
-        ))}
+      {/* Virtualized Grid */}
+      <div className="flex-grow overflow-hidden px-8">
+        <VirtualizedGrid 
+          entries={filteredEntries}
+          onExpand={setExpandedEntry}
+          searchTerm={searchTerm}
+        />
       </div>
 
       {/* Empty State */}
       {filteredEntries.length === 0 && searchTerm && (
-        <div className="text-center py-12">
-          <p className="text-text-secondary text-lg">
-            No documents found matching "{searchTerm}"
-          </p>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-text-secondary text-lg mb-2">
+              No documents found matching "{searchTerm}"
+            </p>
+            <button
+              onClick={() => setSearchTerm('')}
+              className="text-accent-green hover:text-accent-green/80 text-sm"
+            >
+              Clear search
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Initial Empty State */}
+      {entries.length === 0 && !searchTerm && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-light text-text-primary mb-4">
+              Welcome to Journey Logger
+            </h2>
+            <p className="text-text-secondary mb-8 max-w-md">
+              Start documenting your developer journey with powerful blocks, 
+              markdown support, and interconnected knowledge.
+            </p>
+            <button
+              onClick={createNewEntry}
+              className="inline-flex items-center gap-2 px-6 py-3 
+                         bg-accent-green text-dark-primary rounded-lg
+                         hover:bg-accent-green/80 transition-colors"
+            >
+              <Plus size={20} />
+              Create Your First Document
+            </button>
+          </div>
         </div>
       )}
 

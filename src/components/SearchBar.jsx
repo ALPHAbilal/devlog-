@@ -2,18 +2,19 @@ import { Search } from 'lucide-react';
 
 export default function SearchBar({ value, onChange }) {
   return (
-    <div className="relative">
+    <div className="relative flex-grow">
       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 
                         text-text-secondary w-5 h-5" />
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Search entries..."
+        placeholder="Search your journey..."
         className="w-full bg-dark-secondary/50 border border-dark-secondary 
                    rounded-lg py-3 pl-10 pr-4 text-text-primary 
                    placeholder-text-secondary focus:outline-none 
-                   focus:border-accent-green"
+                   focus:border-accent-green transition-all
+                   hover:bg-dark-secondary/70"
       />
     </div>
   );

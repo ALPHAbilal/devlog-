@@ -70,7 +70,7 @@ export default function Block({
         {/* Block Content */}
         <div className={`relative transition-all duration-200 ${
           isFocused === false ? 'opacity-40' : 'opacity-100'
-        } ${isHovered && !isDragging ? 'transform translate-x-1' : ''}`}>
+        }`}>
           <BlockComponent 
             block={block} 
             onUpdate={(updates) => onUpdate(block.id, updates)}

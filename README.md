@@ -30,6 +30,7 @@ Everything is a block. This simple concept unlocks infinite flexibility:
 - **Smart Markdown** - Write naturally, format automatically
 - **Keyboard-First** - Every action optimized for speed
 - **Focus Mode** - Dims distractions when you're in the zone
+- **Inline Tagging** - Tag important concepts without leaving your flow
 
 ### **Built for Real Developer Workflows**
 - **Code blocks that understand** - Syntax highlighting, line numbers, collapsible sections
@@ -48,6 +49,11 @@ Each document is an infinite canvas of blocks that can be:
 - Smart conversions (e.g., `##` → Heading block)
 - Document linking with `[[Document Name]]`
 - Focus mode for distraction-free writing
+- **Tag System** - Select text and assign tags for organization
+  - Create custom tags on the fly
+  - Choose from existing tags
+  - Tagged text appears as `#tagname[selected text]`
+  - Visual tag badges below content
 
 #### **Code Blocks**
 - **Syntax highlighting** for 14+ languages
@@ -115,6 +121,7 @@ Each document is an infinite canvas of blocks that can be:
 - **Link autocomplete** for documents
 - **Backlink tracking** automatic
 - **Context preservation** between sessions
+- **Tag intelligence** - System remembers all tags across documents
 
 ## 💡 Use Cases
 
@@ -152,7 +159,8 @@ Your personal wiki emerges naturally:
 - [[JavaScript Gotchas]] links to [[Closure Explained]]
 - [[PostgreSQL Tips]] connects to [[Query Optimization]]
 - [[Docker Commands]] references [[Container Best Practices]]
-- Knowledge compounds through connections
+- Tag important concepts: #performance[memoization trick] #gotcha[async behavior]
+- Knowledge compounds through connections and tags
 ```
 
 ## 🛠️ Technical Implementation
@@ -199,6 +207,11 @@ Your personal wiki emerges naturally:
    - Every pixel has purpose
 
 ## 🚧 The Journey Continues
+
+### **Recently Added**
+- **Tag System** - Select and tag important text snippets for better organization
+- **Enhanced Navigation** - Back button replaces delete in document view
+- **Improved Block Interactions** - Removed juggling movement on hover
 
 ### **Coming Next**
 - **Templates** - Quick starts for common documentation patterns

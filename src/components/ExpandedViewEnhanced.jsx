@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, Plus, Link2 } from 'lucide-react';
+import { ArrowLeft, Plus, Link2 } from 'lucide-react';
 import Block from './Block';
 import AddBlockRow from './AddBlockRow';
 import { getBacklinks } from '../utils/extractLinks';
@@ -199,7 +199,16 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     >
       <div className="max-w-4xl mx-auto fade-in px-8 py-8">
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex items-start gap-4 mb-6">
+        <button 
+          onClick={onClose}
+          className="mt-1 p-2 text-text-secondary hover:text-text-primary 
+                     hover:bg-dark-secondary/50 rounded-lg transition-all
+                     group flex items-center gap-2"
+          title="Back to dashboard"
+        >
+          <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
+        </button>
         <div className="flex-1">
           <div className="text-text-secondary text-sm mb-2">
             Document
@@ -227,12 +236,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             </h1>
           )}
         </div>
-        <button 
-          onClick={onClose}
-          className="text-text-secondary hover:text-text-primary ml-4"
-        >
-          <X size={24} />
-        </button>
       </div>
 
       {/* Blocks */}

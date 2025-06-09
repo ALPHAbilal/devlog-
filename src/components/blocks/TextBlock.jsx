@@ -6,6 +6,7 @@ import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists } from 
 export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus }) {
   const [isEditing, setIsEditing] = useState(block.isNew || false);
   const [content, setContent] = useState(block.content || '');
+  const [tags, setTags] = useState(block.tags || []);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [commandPalettePosition, setCommandPalettePosition] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -13,6 +14,27 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
+
+  // Get all unique tags from localStorage
+  const getAllTags = () => {
+    try {
+      const documents = JSON.parse(localStorage.getItem('journey-documents') || '[]');
+      const allTags = new Set();
+      
+      documents.forEach(doc => {
+        doc.blocks?.forEach(block => {
+          if (block.tags && Array.isArray(block.tags)) {
+            block.tags.forEach(tag => allTags.add(tag));
+          }
+        });
+      });
+      
+      return Array.from(allTags);
+    } catch (error) {
+      console.error('Error getting tags:', error);
+      return [];
+    }
+  };
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -77,10 +99,35 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   }, [isEditing, content]);
 
   const handleSave = () => {
-    onUpdate({ content });
+    onUpdate({ content, tags });
     setIsEditing(false);
     setShowToolbar(false);
     if (onFocus) onFocus(null); // Clear focus
+  };
+
+  const handleTag = (selectedText, tagName) => {
+    if (!textareaRef.current) return;
+
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Add tag to the block's tags if not already present
+    if (!tags.includes(tagName)) {
+      setTags([...tags, tagName]);
+    }
+
+    // Wrap selected text with tag format
+    const taggedText = `#${tagName}[${selectedText}]`;
+    const newContent = content.substring(0, start) + taggedText + content.substring(end);
+    setContent(newContent);
+
+    // Set cursor position after the tagged text
+    setTimeout(() => {
+      textarea.selectionStart = start + taggedText.length;
+      textarea.selectionEnd = start + taggedText.length;
+      textarea.focus();
+    }, 0);
   };
 
   const handleFormat = (action, wrapper, isSpecial) => {
@@ -227,7 +274,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     
     if (newContent) {
       // If there's content, save it first
-      onUpdate({ content: newContent });
+      onUpdate({ content: newContent, tags });
     }
     
     // Convert block to selected type
@@ -276,6 +323,8 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           position={toolbarPosition}
           selectedText={selectedText}
           onFormat={handleFormat}
+          existingTags={getAllTags()}
+          onTag={handleTag}
         />
       </>
     );
@@ -292,8 +341,22 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
                  ${isFocused === false ? 'opacity-40' : 'opacity-100'}`}
     >
       {block.content ? (
-        <div className="space-y-1">
-          {processLineBreaksAndLists(block.content)}
+        <div className="space-y-2">
+          <div className="space-y-1">
+            {processLineBreaksAndLists(block.content)}
+          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-2">
+              {tags.map((tag, index) => (
+                <span 
+                  key={index}
+                  className="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       ) : (
         <span className="text-text-secondary">Type '/' for commands...</span>

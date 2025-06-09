@@ -52,8 +52,9 @@ Each document is an infinite canvas of blocks that can be:
 - **Tag System** - Select text and assign tags for organization
   - Create custom tags on the fly
   - Choose from existing tags
-  - Tagged text appears as `#tagname[selected text]`
-  - Visual tag badges below content
+  - Tagged text syntax: `#tagname[selected text]`
+  - Tags are extracted and hidden from content display
+  - Visual tag badges appear below text blocks
 
 #### **Code Blocks**
 - **Syntax highlighting** for 20+ languages
@@ -70,12 +71,14 @@ Each document is an infinite canvas of blocks that can be:
 
 #### **File Tree Blocks**
 - **Visual project structure** - Build your project tree visually
-- **Drag & drop** - Reorganize files and folders by dragging
+- **Drag & drop** - Move (not copy) files and folders by dragging
 - **Click to edit** - Rename items inline
 - **Smart detection** - Files have extensions, folders don't
-- **Duplicate warnings** - Orange indicators for same-named items
+- **Duplicate warnings** - Orange highlighting for same-named items
 - **Code block linking** - Connect to code blocks by file path
 - **Nested navigation** - Expand/collapse folders
+- **Add buttons** - Folder and file buttons at each level
+- **Minimalist interface** - No text instructions, purely visual
 
 #### **AI Conversation Blocks**
 - **Chat-style interface** with distinct user/AI styling
@@ -228,19 +231,24 @@ Your personal wiki emerges naturally:
 - **Tag System** - Select and tag important text snippets for better organization
   - Tags no longer appear inline with text for cleaner reading
   - Visual tag badges below text blocks
-  - Auto-extraction from content
+  - Auto-extraction from content using #tagname[text] syntax
+  - Tags are hidden in the actual text but displayed as badges
 - **File Tree Block** - Visual project structure builder
   - Drag & drop interface for organizing files/folders
   - Click to edit names inline
   - Auto-detection: files have extensions, folders don't
-  - Visual indicators for duplicate names
+  - Visual indicators for duplicate names (orange highlighting)
   - Links to code blocks with matching file paths
+  - Add file/folder buttons at each level
+  - Minimalist design with no text instructions
 - **Code Block Enhancements**
   - File path field to connect with File Tree blocks
-  - Version tracking system for code evolution
+  - Version tracking system for code evolution (with feature flag)
   - Visual timeline connecting code versions
-  - Language selector dropdown in view mode
+  - "Original" and "v2, v3..." version badges
+  - Language selector dropdown fixed (CSS Peeper conflict resolved)
   - Improved syntax highlighting
+- **Typography Improvements** - Increased icon and text sizes for better readability
 - **Enhanced Navigation** - Back button replaces delete in document view
 - **Improved Block Interactions** - Removed juggling movement on hover
 

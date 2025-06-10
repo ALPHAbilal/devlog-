@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkCallback, setLinkCallback] = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
 
   // Save entries to localStorage whenever they change
   const saveEntries = (updatedEntries) => {
@@ -200,12 +201,38 @@ export default function Dashboard() {
     };
   }, [entries]);
 
-  // Filter entries based on search
-  const filteredEntries = entries.filter(entry =>
-    entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.preview.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Get all unique tags from entries
+  const getAllTags = () => {
+    const tagSet = new Set();
+    entries.forEach(entry => {
+      entry.tags?.forEach(tag => tagSet.add(tag));
+    });
+    return Array.from(tagSet).sort();
+  };
+
+  // Filter entries based on search and selected tags
+  const filteredEntries = entries.filter(entry => {
+    // First filter by search term
+    const matchesSearch = searchTerm === '' || 
+      entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.preview.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      entry.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    // Then filter by selected tags (if any)
+    const matchesTags = selectedTags.length === 0 ||
+      selectedTags.every(tag => entry.tags?.includes(tag));
+    
+    return matchesSearch && matchesTags;
+  });
+
+  // Toggle tag selection
+  const toggleTag = (tag) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) 
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
+  };
 
   if (expandedEntry) {
     return (
@@ -221,7 +248,43 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Floating Tags */}
+      <div className="absolute left-3 top-24 bottom-6 z-30 max-w-[160px]">
+        <div className="h-full flex flex-col">
+          {selectedTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="self-start text-xs text-text-secondary/50 hover:text-accent-green 
+                         transition-colors mb-2"
+            >
+              Clear filters
+            </button>
+          )}
+          <div className="flex-1 overflow-y-auto pr-2 minimal-scrollbar">
+            <div className="flex flex-col gap-2">
+              {getAllTags().map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`
+                    text-left px-3 py-2 text-sm
+                    border border-dashed rounded
+                    transition-all duration-200
+                    ${selectedTags.includes(tag)
+                      ? 'border-accent-green text-accent-green bg-accent-green/5'
+                      : 'border-dark-secondary/40 text-text-secondary/70 hover:text-text-primary hover:border-text-secondary/50'
+                    }
+                  `}
+                >
+                  <span className="block truncate">{tag}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
@@ -295,7 +358,7 @@ export default function Dashboard() {
         </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
-        <div className="px-6 py-3">
+        <div className="px-6 py-3 ml-40">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-2">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
@@ -323,7 +386,7 @@ export default function Dashboard() {
       </div>
 
       {/* Virtualized Grid - Maximized Space */}
-      <div className="flex-grow overflow-hidden px-6">
+      <div className="flex-grow overflow-hidden px-6 ml-40">
         <VirtualizedGrid 
           entries={filteredEntries}
           onExpand={setExpandedEntry}

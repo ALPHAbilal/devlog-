@@ -14,6 +14,11 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [backlinks, setBacklinks] = useState([]);
   const [focusedBlockId, setFocusedBlockId] = useState(null);
+  const [tags, setTags] = useState(entry.tags || []);
+  const [isAddingTag, setIsAddingTag] = useState(false);
+  const [newTag, setNewTag] = useState('');
+  const [editingTagIndex, setEditingTagIndex] = useState(null);
+  const [editingTagValue, setEditingTagValue] = useState('');
   const contentContainerRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -204,6 +209,40 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setIsEditingTitle(false);
   };
 
+  // Tag management functions
+  const addTag = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      const updatedTags = [...tags, newTag.trim()];
+      setTags(updatedTags);
+      if (onUpdate) {
+        onUpdate(entry.id, { tags: updatedTags });
+      }
+      setNewTag('');
+      setIsAddingTag(false);
+    }
+  };
+
+  const updateTag = (index, value) => {
+    if (value.trim() && !tags.includes(value.trim())) {
+      const updatedTags = [...tags];
+      updatedTags[index] = value.trim();
+      setTags(updatedTags);
+      if (onUpdate) {
+        onUpdate(entry.id, { tags: updatedTags });
+      }
+      setEditingTagIndex(null);
+      setEditingTagValue('');
+    }
+  };
+
+  const deleteTag = (index) => {
+    const updatedTags = tags.filter((_, i) => i !== index);
+    setTags(updatedTags);
+    if (onUpdate) {
+      onUpdate(entry.id, { tags: updatedTags });
+    }
+  };
+
   // Clear focus when clicking outside any block
   const handleBackgroundClick = (e) => {
     // Only clear focus if clicking on the background, not on any child elements
@@ -356,20 +395,98 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
       {/* Tags */}
       <div className="flex items-center gap-3 flex-wrap mb-8">
-        {entry.tags?.map((tag, index) => (
-          <span key={index} className="px-4 py-2 bg-dark-secondary/50 
-                                      rounded-full text-text-secondary text-sm
-                                      hover:bg-dark-secondary transition-colors cursor-default">
-            {tag}
-          </span>
+        {tags.map((tag, index) => (
+          <div key={index} className="group relative">
+            {editingTagIndex === index ? (
+              <input
+                type="text"
+                value={editingTagValue}
+                onChange={(e) => setEditingTagValue(e.target.value)}
+                onBlur={() => {
+                  if (editingTagValue.trim()) {
+                    updateTag(index, editingTagValue);
+                  } else {
+                    setEditingTagIndex(null);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    updateTag(index, editingTagValue);
+                  } else if (e.key === 'Escape') {
+                    setEditingTagIndex(null);
+                    setEditingTagValue('');
+                  }
+                }}
+                className="px-4 py-2 bg-dark-secondary/50 rounded-full text-text-primary text-sm
+                           focus:outline-none focus:ring-2 focus:ring-accent-green/50"
+                autoFocus
+              />
+            ) : (
+              <span 
+                onClick={() => {
+                  setEditingTagIndex(index);
+                  setEditingTagValue(tag);
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-dark-secondary/50 
+                           rounded-full text-text-secondary text-sm
+                           hover:bg-dark-secondary transition-colors cursor-pointer group"
+              >
+                {tag}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteTag(index);
+                  }}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity
+                             text-text-secondary/50 hover:text-red-400"
+                  title="Delete tag"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+          </div>
         ))}
-        {/* Tag input - appears as a subtle clickable area */}
-        <button className="px-4 py-2 border border-dashed border-dark-secondary/50
-                          rounded-full text-text-secondary text-sm
-                          hover:border-text-secondary hover:text-text-primary
-                          transition-all opacity-60 hover:opacity-100">
-          Add tag...
-        </button>
+        
+        {/* Tag input */}
+        {isAddingTag ? (
+          <input
+            type="text"
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            onBlur={() => {
+              if (newTag.trim()) {
+                addTag();
+              } else {
+                setIsAddingTag(false);
+                setNewTag('');
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                addTag();
+              } else if (e.key === 'Escape') {
+                setIsAddingTag(false);
+                setNewTag('');
+              }
+            }}
+            placeholder="Type tag name..."
+            className="px-4 py-2 bg-dark-secondary/50 rounded-full text-text-primary text-sm
+                       focus:outline-none focus:ring-2 focus:ring-accent-green/50
+                       placeholder-text-secondary/50"
+            autoFocus
+          />
+        ) : (
+          <button 
+            onClick={() => setIsAddingTag(true)}
+            className="px-4 py-2 border border-dashed border-dark-secondary/50
+                       rounded-full text-text-secondary text-sm
+                       hover:border-text-secondary hover:text-text-primary
+                       transition-all opacity-60 hover:opacity-100"
+          >
+            Add tag...
+          </button>
+        )}
       </div>
 
       {/* Backlinks */}

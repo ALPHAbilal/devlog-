@@ -145,6 +145,13 @@ Each document is an infinite canvas of blocks that can be:
 - **Header toggle** - Optional header row styling
 - **Tag support** - Use `#tagname[text]` syntax in cells
 
+#### **Template Blocks**
+- **Interactive tools** - Not just static documentation, but working utilities
+- **Stateful components** - Your customizations are saved with the document
+- **Visual learning** - See concepts in action, not just in theory
+- **Developer-focused** - Templates for real programming scenarios
+- See "Recently Added" section for detailed template descriptions
+
 ### 2. **Navigation & Organization**
 
 #### **Dashboard**
@@ -186,7 +193,7 @@ Each document is an infinite canvas of blocks that can be:
 - **Navigation**: Arrow keys in command palette
 - **Block Management**: `Enter` to add, `Escape` to exit
 - **Quick Commands**: `/` for command palette
-- **Create Block Types**: `/text`, `/code`, `/table`, `/tree`, `/ai`, `/heading`
+- **Create Block Types**: `/text`, `/code`, `/table`, `/tree`, `/ai`, `/heading`, `/template`
 
 #### **Smart Behaviors**
 - **Auto-save** everything
@@ -282,17 +289,52 @@ Your personal wiki emerges naturally:
 ## 🚧 The Journey Continues
 
 ### **Recently Added**
-- **Template Block System** - Interactive, customizable developer reference templates
-  - **CSS Box Model Template** - Fully interactive visual representation
-    - Click any value to edit inline (margin, border, padding, content)
-    - Real-time visual updates with hover effects
-    - Edit content dimensions (width × height) individually
-    - Toggle between px and rem units
-    - Color-coded layers with enhanced visual feedback
-    - Smooth animations and backdrop-blur effects during editing
-  - **Smart Scaling** - Templates automatically scale to fit available space
-  - **Minimalist Design** - Clean interface with dotted borders and subtle colors
-  - **Extensible System** - Framework ready for additional templates
+- **Template Block System** - Interactive developer tools that live inside your documentation
+  
+  **What are Template Blocks?**
+  Template Blocks are interactive, visual tools embedded directly in your documentation. Unlike static code snippets or images, these templates are fully functional mini-applications that help you work with common development concepts. Think of them as "living documentation" - you can interact with them, customize them, and save their state as part of your notes.
+  
+  **Why Template Blocks?**
+  - **Learn by Doing**: Instead of reading about concepts, interact with them directly
+  - **Document Real Data**: Save actual API payloads, error states, or configurations
+  - **Build Personal References**: Customize templates to match your specific use cases
+  - **Share Context**: When sharing notes, others see exactly what you were working with
+  
+  **Current Templates**:
+  
+  1. **CSS Box Model** - Visual CSS box model editor
+     - Interactive visualization showing margin, border, padding, and content
+     - Click any value to edit it and see changes instantly
+     - Understand how box model values affect element sizing
+     - Toggle between px and rem units
+     - Perfect for: CSS debugging, teaching box model concepts, planning layouts
+  
+  2. **API Payload** - HTTP request builder and documenter
+     - Create and document API requests with method, endpoint, headers, and body
+     - Real-time JSON validation with error highlighting
+     - Preset templates for OpenAI, Anthropic Claude, GraphQL, and webhooks
+     - One-click formatting and copying
+     - Perfect for: API documentation, debugging requests, sharing examples
+  
+  3. **Python Traceback Analyzer** - Turn error messages into learning opportunities
+     - Paste any Python error and get an interactive, structured view
+     - Expand each stack frame to add notes about what went wrong
+     - Track variable values at each point in the stack
+     - Mark frames as resolved and document solutions
+     - Color-coded error types (SyntaxError, TypeError, etc.)
+     - Perfect for: Debugging sessions, learning from errors, building error pattern recognition
+  
+  **How to Use Templates**:
+  1. Add a Template Block (via `/template` command or block selector)
+  2. Choose from available templates
+  3. Interact with the template - all changes are automatically saved
+  4. Your customized template state persists with your document
+  
+  **Technical Implementation**:
+  - Component-based architecture allows easy addition of new templates
+  - Each template manages its own state and validation
+  - Templates can be as simple or complex as needed
+  - Consistent visual design maintains site aesthetics
 - **Enhanced Tag System** - Complete tag management and filtering system
   - **Floating Tag Sidebar** - Minimalist tags float on the left without disrupting layout
   - **Full CRUD Operations** - Add, edit, and delete tags directly in documents
@@ -327,7 +369,7 @@ Your personal wiki emerges naturally:
   - Improved spacing and visual balance in dashboard header
 
 ### **Coming Next**
-- **Templates** - Quick starts for common documentation patterns
+- **More Templates** - Regex builders, SQL query designers, Git command composers
 - **Plugins** - Extend with your own block types
 - **Sync** - Optional cloud backup
 - **Collaboration** - Share specific documents

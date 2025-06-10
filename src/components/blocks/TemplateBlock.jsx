@@ -3,10 +3,13 @@ import { Package } from 'lucide-react';
 
 // Template components
 import CSSBoxModel from './templates/CSSBoxModel';
+import PayloadTemplate from './templates/PayloadTemplate';
+import TracebackAnalyzer from './templates/TracebackAnalyzer';
 
 const templates = {
   'css-box-model': {
     name: 'CSS Box Model',
+    description: 'Visual box model with customizable margins, borders, and padding',
     component: CSSBoxModel,
     defaultData: {
       margin: { top: 20, right: 20, bottom: 20, left: 20 },
@@ -14,6 +17,39 @@ const templates = {
       padding: { top: 15, right: 15, bottom: 15, left: 15 },
       content: { width: 200, height: 100, text: 'Content' },
       unit: 'px'
+    }
+  },
+  'payload': {
+    name: 'API Payload',
+    description: 'API request builder with headers, methods, and JSON validation',
+    component: PayloadTemplate,
+    defaultData: {
+      method: 'POST',
+      endpoint: 'https://api.example.com/endpoint',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_TOKEN'
+      },
+      payload: JSON.stringify({
+        key: 'value',
+        nested: {
+          property: 'example'
+        }
+      }, null, 2)
+    }
+  },
+  'traceback': {
+    name: 'Python Traceback',
+    description: 'Interactive Python error analyzer with frame inspection',
+    component: TracebackAnalyzer,
+    defaultData: {
+      rawTraceback: '',
+      parsed: false,
+      frames: [],
+      errorType: '',
+      errorMessage: '',
+      status: 'analyzing',
+      solution: ''
     }
   }
   // More templates can be added here
@@ -60,7 +96,7 @@ export default function TemplateBlock({ block, onUpdate }) {
                 {template.name}
               </h3>
               <p className="text-text-secondary text-sm">
-                Interactive visual template
+                {template.description || 'Interactive visual template'}
               </p>
             </button>
           ))}

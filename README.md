@@ -282,11 +282,14 @@ Your personal wiki emerges naturally:
 ## 🚧 The Journey Continues
 
 ### **Recently Added**
-- **Tag System** - Select and tag important text snippets for better organization
-  - Tags no longer appear inline with text for cleaner reading
-  - Visual tag badges below text blocks
-  - Auto-extraction from content using #tagname[text] syntax
-  - Tags are hidden in the actual text but displayed as badges
+- **Enhanced Tag System** - Complete tag management and filtering system
+  - **Floating Tag Sidebar** - Minimalist tags float on the left without disrupting layout
+  - **Full CRUD Operations** - Add, edit, and delete tags directly in documents
+  - **Smart Filtering** - Click tags to filter documents, with multi-tag selection support
+  - **Visual Design** - Dotted border rectangles for each tag, no background colors
+  - **Inline Tag Creation** - Auto-extraction from content using #tagname[text] syntax
+  - **Tag Badges** - Clean visual indicators below text blocks
+  - **Scroll Support** - Tags scroll independently with ultra-minimal 3px scrollbar
 - **File Tree Block** - Visual project structure builder
   - Drag & drop interface for organizing files/folders
   - Click to edit names inline
@@ -304,7 +307,13 @@ Your personal wiki emerges naturally:
   - Improved syntax highlighting
 - **Typography Improvements** - Increased icon and text sizes for better readability
 - **Enhanced Navigation** - Back button replaces delete in document view
-- **Improved Block Interactions** - Removed juggling movement on hover
+- **Improved Block Interactions** - Fixed scroll reset issues and hover state problems
+  - Removed z-index changes that caused scroll position resets
+  - Fixed cursor positioning in AI conversation editing
+  - Eliminated layout shifts from hover states
+- **UI Refinements**
+  - Logo and profile sections pushed toward center for better symmetry
+  - Improved spacing and visual balance in dashboard header
 
 ### **Coming Next**
 - **Templates** - Quick starts for common documentation patterns

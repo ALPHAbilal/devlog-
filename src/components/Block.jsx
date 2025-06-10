@@ -5,6 +5,7 @@ import AIBlock from './blocks/AIBlockRefined';
 import HeadingBlock from './blocks/HeadingBlock';
 import FileTreeBlock from './blocks/FileTreeBlock';
 import TableBlock from './blocks/TableBlock';
+import TemplateBlock from './blocks/TemplateBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';
 
@@ -15,6 +16,7 @@ const blockComponents = {
   heading: HeadingBlock,
   filetree: FileTreeBlock,
   table: TableBlock,
+  template: TemplateBlock,
 };
 
 export default function Block({ 

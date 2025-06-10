@@ -282,6 +282,17 @@ Your personal wiki emerges naturally:
 ## 🚧 The Journey Continues
 
 ### **Recently Added**
+- **Template Block System** - Interactive, customizable developer reference templates
+  - **CSS Box Model Template** - Fully interactive visual representation
+    - Click any value to edit inline (margin, border, padding, content)
+    - Real-time visual updates with hover effects
+    - Edit content dimensions (width × height) individually
+    - Toggle between px and rem units
+    - Color-coded layers with enhanced visual feedback
+    - Smooth animations and backdrop-blur effects during editing
+  - **Smart Scaling** - Templates automatically scale to fit available space
+  - **Minimalist Design** - Clean interface with dotted borders and subtle colors
+  - **Extensible System** - Framework ready for additional templates
 - **Enhanced Tag System** - Complete tag management and filtering system
   - **Floating Tag Sidebar** - Minimalist tags float on the left without disrupting layout
   - **Full CRUD Operations** - Add, edit, and delete tags directly in documents

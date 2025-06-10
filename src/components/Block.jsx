@@ -35,7 +35,6 @@ export default function Block({
   onNavigateToBlock,
   index 
 }) {
-  const [isHovered, setIsHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
   
@@ -54,16 +53,14 @@ export default function Block({
   return (
     <>
       <div 
-        className={`group relative transition-all duration-200 ${
-          isDragging ? 'opacity-50 scale-[0.98]' : ''
+        className={`group relative ${
+          isDragging ? 'opacity-50 scale-[0.98] transition-all duration-200' : ''
         }`}
-        style={{ zIndex: isHovered ? 10 : 1 }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        data-block-id={block.id}
       >
-        {/* Enhanced Block Controls */}
+        {/* Enhanced Block Controls - Use CSS :hover instead of state */}
         <BlockControls
-          isVisible={isHovered && !isDragging}
+          isVisible={!isDragging}
           onDelete={() => onDelete(block.id)}
           onDuplicate={() => onDuplicate?.(block.id)}
           onMoveUp={() => onMoveUp?.(block.id)}
@@ -74,9 +71,9 @@ export default function Block({
 
 
         {/* Block Content */}
-        <div className={`relative transition-all duration-200 ${
+        <div className={`relative ${
           isFocused === false ? 'opacity-40' : 'opacity-100'
-        }`}>
+        } transition-opacity duration-200`}>
           <BlockComponent 
             block={block} 
             onUpdate={(updates) => onUpdate(block.id, updates)}

@@ -16,7 +16,8 @@ export default function BlockControls({
     <div className={`
       absolute -left-16 top-0 flex items-start gap-1 
       transition-all duration-200 ease-out z-20
-      ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}
+      opacity-0 group-hover:opacity-100
+      -translate-x-2 group-hover:translate-x-0
     `}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">

@@ -227,13 +227,13 @@ export default function Dashboard() {
         {/* Top Navigation Bar - Compact and Efficient */}
         <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
           {/* Logo and Brand - Professional Design */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 ml-8">
             <LogoMinimal size={32} />
             <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
           </div>
 
           {/* Stats and Profile - Compact and Functional */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 mr-8">
             {/* Document Stats - Inline and Minimal */}
             <div className="flex items-center gap-3 text-xs">
               <span className="text-text-secondary/70">

@@ -15,6 +15,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [backlinks, setBacklinks] = useState([]);
   const [focusedBlockId, setFocusedBlockId] = useState(null);
   const contentContainerRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
   // Initialize blocks from entry data
   useEffect(() => {
@@ -207,13 +208,24 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const handleBackgroundClick = (e) => {
     // Only clear focus if clicking on the background, not on any child elements
     if (e.target === e.currentTarget) {
+      // Preserve scroll position before clearing focus
+      const scrollTop = scrollContainerRef.current?.scrollTop;
       setFocusedBlockId(null);
+      // Restore scroll position after state update
+      if (scrollTop !== undefined) {
+        requestAnimationFrame(() => {
+          if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = scrollTop;
+          }
+        });
+      }
     }
   };
 
   return (
     <div 
-      className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin"
+      ref={scrollContainerRef}
+      className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
       onClick={handleBackgroundClick}
     >
       <div className="max-w-4xl mx-auto fade-in px-8 py-8">

@@ -300,8 +300,21 @@ export function processLineBreaksAndLists(text) {
       // Empty line
       elements.push(<div key={index} className="h-4" />);
     } else {
-      // Regular line
-      elements.push(<div key={index}>{parseMarkdown(line)}</div>);
+      // Regular line - preserve leading whitespace
+      const leadingWhitespace = line.match(/^(\s*)/)[1];
+      const content = line.trimStart();
+      
+      if (leadingWhitespace.length > 0) {
+        // Preserve indentation (both spaces and tabs)
+        elements.push(
+          <div key={index} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            <span style={{ whiteSpace: 'pre' }}>{leadingWhitespace}</span>
+            {parseMarkdown(content)}
+          </div>
+        );
+      } else {
+        elements.push(<div key={index}>{parseMarkdown(line)}</div>);
+      }
     }
   });
   

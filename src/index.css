@@ -52,6 +52,47 @@
   z-index: 9999;
 }
 
+/* Prevent hover reflows in AI blocks */
+.message-bubble button {
+  opacity: 0.5;
+  transition: opacity 150ms ease-in-out;
+}
+
+.message-bubble:hover button,
+.message-bubble button:focus {
+  opacity: 1;
+}
+
+/* Disable group hover opacity changes during edit */
+.ai-messages-container:has(textarea) .group:hover button {
+  opacity: inherit;
+}
+
+/* Block hover effects without JavaScript */
+.group {
+  /* Default z-index */
+  z-index: 1;
+  /* Create stacking context */
+  position: relative;
+  /* Smooth transitions */
+  transition: z-index 0ms;
+}
+
+/* Higher z-index on hover */
+.group:hover {
+  z-index: 10;
+}
+
+/* Prevent any layout shifts during AI block editing */
+.group:has(.ai-edit-textarea) {
+  z-index: 20 !important;
+}
+
+/* Disable all hover effects when AI block is being edited */
+.group:has(.ai-edit-textarea):hover {
+  z-index: 20 !important;
+}
+
 /* Floating toolbar animation */
 .floating-toolbar {
   animation: toolbar-fade-in 0.2s ease-out;

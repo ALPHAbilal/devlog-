@@ -1,0 +1,68 @@
+/* AI Block Scroll Stability Styles */
+
+/* Ensure the main container maintains scroll position */
+.ai-block-container {
+  /* Prevent layout shifts */
+  contain: layout style;
+  
+  /* Optimize scrolling performance */
+  will-change: contents;
+}
+
+/* Message container specific styles */
+.ai-messages-wrapper {
+  /* Stable layout */
+  position: relative;
+  
+  /* Prevent reflow from child changes */
+  isolation: isolate;
+  
+  /* Smooth but controlled scrolling */
+  scroll-behavior: auto;
+}
+
+/* Individual message stability */
+.ai-message-item {
+  /* Prevent layout thrashing */
+  contain: layout;
+  
+  /* Stable positioning */
+  position: relative;
+  
+  /* Prevent margin collapse */
+  display: flow-root;
+}
+
+/* Textarea in edit mode */
+.ai-edit-textarea {
+  /* Match the text layout exactly */
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  
+  /* Prevent scrollbar from appearing/disappearing */
+  scrollbar-gutter: stable;
+  
+  /* Smooth resize without jumps */
+  transition: none;
+}
+
+/* Disable all hover effects during editing */
+.ai-messages-wrapper:has(.ai-edit-textarea) * {
+  pointer-events: none;
+}
+
+.ai-messages-wrapper:has(.ai-edit-textarea) .ai-edit-textarea,
+.ai-messages-wrapper:has(.ai-edit-textarea) button {
+  pointer-events: auto;
+}
+
+/* Override any z-index changes during edit */
+.ai-messages-wrapper:has(.ai-edit-textarea) .group {
+  z-index: 1 !important;
+}
+
+/* Prevent opacity transitions during edit */
+.ai-messages-wrapper:has(.ai-edit-textarea) .transition-opacity {
+  transition: none !important;
+}

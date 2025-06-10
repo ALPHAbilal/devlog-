@@ -6,6 +6,7 @@
 
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -17,16 +18,73 @@
   border-radius: 3px;
 }
 
+/* Remove hover state that causes reflow */
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Hide scrollbar on hover for cleaner look */
-.scrollbar-thin:not(:hover)::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Grid container */
 .grid-container {
   position: relative;
+}
+
+/* Stable scrollbar - prevents position reset */
+.scrollbar-stable {
+  /* Preserve scroll position when focus changes */
+  overflow-anchor: auto;
+  
+  /* Prevent layout shift when scrollbar appears/disappears */
+  scrollbar-gutter: stable both-edges;
+  
+  /* Maintain scroll position */
+  scroll-behavior: auto;
+  will-change: scroll-position;
+}
+
+/* Consistent scrollbar appearance - no hover changes */
+.scrollbar-stable::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-stable::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.scrollbar-stable::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+}
+
+/* Minimal hover effect without changing size */
+.scrollbar-stable::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* AI Messages Container - Prevent scroll jumping */
+.ai-messages-container {
+  /* Prevent layout shifts during editing */
+  overflow-anchor: auto;
+  
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+/* Message bubble editing state */
+.message-bubble textarea {
+  /* Ensure scrollbar doesn't cause layout shift */
+  scrollbar-gutter: stable;
+}
+
+/* Prevent focus-related scroll jumps */
+.message-content {
+  /* Maintain layout stability */
+  position: relative;
+  
+  /* Prevent text selection from causing jumps */
+  user-select: text;
+  -webkit-user-select: text;
 }

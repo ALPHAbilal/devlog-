@@ -324,6 +324,15 @@ Your personal wiki emerges naturally:
      - Color-coded error types (SyntaxError, TypeError, etc.)
      - Perfect for: Debugging sessions, learning from errors, building error pattern recognition
   
+  4. **Git Command Composer** - Scenario-based Git command builder with smart placeholders
+     - Browse commands organized by common scenarios (Stage & Commit, Branches, History, etc.)
+     - Smart placeholder system prompts for exact values (branch names, commit messages, etc.)
+     - 14 categories covering 80+ Git commands with variations
+     - Safety indicators warn about potentially destructive operations
+     - Command history tracking with quick copy functionality
+     - Remembers your frequently used values for faster workflow
+     - Perfect for: Learning Git, quick command reference, avoiding syntax errors, building muscle memory
+  
   **How to Use Templates**:
   1. Add a Template Block (via `/template` command or block selector)
   2. Choose from available templates
@@ -367,9 +376,13 @@ Your personal wiki emerges naturally:
 - **UI Refinements**
   - Logo and profile sections pushed toward center for better symmetry
   - Improved spacing and visual balance in dashboard header
+- **Git Command Composer Enhanced**
+  - Added "Stage & Commit" category with essential Git commands (git add, commit, status, diff)
+  - Now includes 14 categories covering all common Git workflows
+  - Fixed z-index issues with sticky category headers
 
 ### **Coming Next**
-- **More Templates** - Regex builders, SQL query designers, Git command composers
+- **More Templates** - Regex builders, SQL query designers, Docker compose builders
 - **Plugins** - Extend with your own block types
 - **Sync** - Optional cloud backup
 - **Collaboration** - Share specific documents

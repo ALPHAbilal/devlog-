@@ -5,6 +5,7 @@ import { Package } from 'lucide-react';
 import CSSBoxModel from './templates/CSSBoxModel';
 import PayloadTemplate from './templates/PayloadTemplate';
 import TracebackAnalyzer from './templates/TracebackAnalyzer';
+import GitCommandComposer from './templates/GitCommandComposer';
 
 const templates = {
   'css-box-model': {
@@ -51,6 +52,16 @@ const templates = {
       status: 'analyzing',
       solution: ''
     }
+  },
+  'git-commands': {
+    name: 'Git Commands',
+    description: 'Scenario-based Git command builder with safety warnings',
+    component: GitCommandComposer,
+    defaultData: {
+      currentScenario: null,
+      history: [],
+      savedPlaceholders: {}
+    }
   }
   // More templates can be added here
 };
@@ -82,7 +93,7 @@ export default function TemplateBlock({ block, onUpdate }) {
           <span className="text-sm font-medium">Choose a Template</span>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
           {Object.entries(templates).map(([key, template]) => (
             <button
               key={key}

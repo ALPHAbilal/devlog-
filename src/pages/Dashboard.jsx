@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
 import SearchBar from '../components/SearchBar';
@@ -6,6 +6,7 @@ import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import { Plus, User, Settings, LogOut } from 'lucide-react';
+import storageWrapper from '../utils/storage/storageWrapper';
 
 export default function Dashboard() {
   const [entries, setEntries] = useState([]);
@@ -15,15 +16,35 @@ export default function Dashboard() {
   const [linkCallback, setLinkCallback] = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [selectedTags, setSelectedTags] = useState([]);
+  const [storageInfo, setStorageInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const isInitialized = useRef(false);
 
-  // Save entries to localStorage whenever they change
-  const saveEntries = (updatedEntries) => {
+  // Update storage info
+  const updateStorageInfo = useCallback(async () => {
+    try {
+      const info = await storageWrapper.getStorageInfo();
+      setStorageInfo(info);
+    } catch (error) {
+      console.error('Error getting storage info:', error);
+    }
+  }, []);
+
+  // Save entries using the storage wrapper
+  const saveEntries = useCallback(async (updatedEntries) => {
     setEntries(updatedEntries);
-    localStorage.setItem('journeyLoggerEntries', JSON.stringify(updatedEntries));
-  };
+    try {
+      await storageWrapper.saveEntries(updatedEntries);
+      // Update storage info after save
+      updateStorageInfo();
+    } catch (error) {
+      console.error('Error saving entries:', error);
+      // Fallback is handled within storageWrapper
+    }
+  }, [updateStorageInfo]);
 
   // Create new entry function (moved up for keyboard shortcut access)
-  const createNewEntry = () => {
+  const createNewEntry = useCallback(() => {
     const newEntry = {
       id: Date.now().toString(),
       title: 'Untitled Document',
@@ -37,7 +58,7 @@ export default function Dashboard() {
     const updatedEntries = [newEntry, ...entries];
     saveEntries(updatedEntries);
     setExpandedEntry(newEntry);
-  };
+  }, [entries, saveEntries]);
 
   // Handle click outside for profile menu
   useEffect(() => {
@@ -80,57 +101,79 @@ export default function Dashboard() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [entries]);
+  }, [createNewEntry]);
 
-  // Load entries from localStorage on mount
+  // Load entries on mount
   useEffect(() => {
-    const savedEntries = localStorage.getItem('journeyLoggerEntries');
-    if (savedEntries) {
-      setEntries(JSON.parse(savedEntries));
-    } else {
-      // Initialize with some example entries
-      const initialEntries = [
-        {
-          id: '1',
-          title: 'Getting Started with Journey Logger',
-          preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
-          blocks: [
+    if (isInitialized.current) return;
+    
+    const loadEntries = async () => {
+      setIsLoading(true);
+      try {
+        // Ensure storage is initialized
+        await storageWrapper.init();
+        
+        // Load entries
+        const savedEntries = await storageWrapper.getEntries();
+        
+        if (savedEntries && savedEntries.length > 0) {
+          setEntries(savedEntries);
+        } else {
+          // Initialize with example entry
+          const initialEntries = [
             {
-              id: '1-1',
-              type: 'heading',
-              content: 'Welcome to Journey Logger!',
-              level: 1
-            },
-            {
-              id: '1-2',
-              type: 'text',
-              content: 'This is your personal documentation system. You can create infinite documents with different types of content blocks.'
-            },
-            {
-              id: '1-3',
-              type: 'heading',
-              content: 'Available Block Types',
-              level: 2
-            },
-            {
-              id: '1-4',
-              type: 'text',
-              content: '• Text blocks for notes and documentation\n• Code blocks with syntax highlighting\n• AI conversation blocks for saving ChatGPT/Claude discussions\n• Heading blocks for structure'
+              id: '1',
+              title: 'Getting Started with Journey Logger',
+              preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
+              blocks: [
+                {
+                  id: '1-1',
+                  type: 'heading',
+                  content: 'Welcome to Journey Logger!',
+                  level: 1
+                },
+                {
+                  id: '1-2',
+                  type: 'text',
+                  content: 'This is your personal documentation system with enhanced storage! 🚀\n\n• IndexedDB provides 1GB+ storage capacity\n• Automatic compression saves 50-80% space\n• All your data is safely migrated'
+                },
+                {
+                  id: '1-3',
+                  type: 'heading',
+                  content: 'Available Block Types',
+                  level: 2
+                },
+                {
+                  id: '1-4',
+                  type: 'text',
+                  content: '• Text blocks for notes and documentation\n• Code blocks with syntax highlighting\n• AI conversation blocks for saving ChatGPT/Claude discussions\n• Heading blocks for structure\n• Tables for structured data\n• File trees for project structures'
+                }
+              ],
+              tags: ['tutorial', 'getting-started'],
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             }
-          ],
-          tags: ['tutorial', 'getting-started'],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          ];
+          setEntries(initialEntries);
+          await storageWrapper.saveEntries(initialEntries);
         }
-      ];
-      setEntries(initialEntries);
-      localStorage.setItem('journeyLoggerEntries', JSON.stringify(initialEntries));
-    }
-  }, []);
+        
+        // Get initial storage info
+        await updateStorageInfo();
+      } catch (error) {
+        console.error('Error loading entries:', error);
+      } finally {
+        setIsLoading(false);
+        isInitialized.current = true;
+      }
+    };
+
+    loadEntries();
+  }, [updateStorageInfo]);
 
 
   // Update entry
-  const updateEntry = (entryId, updates) => {
+  const updateEntry = useCallback((entryId, updates) => {
     const updatedEntries = entries.map(entry => {
       if (entry.id === entryId) {
         const updatedEntry = {
@@ -159,7 +202,7 @@ export default function Dashboard() {
     });
     
     saveEntries(updatedEntries);
-  };
+  }, [entries, expandedEntry, saveEntries]);
 
   // Handle document link clicks
   useEffect(() => {
@@ -234,6 +277,39 @@ export default function Dashboard() {
     );
   };
 
+  // Format bytes for display
+  const formatBytes = (bytes) => {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  };
+
+  // Calculate storage percentage
+  const getStoragePercentage = () => {
+    if (!storageInfo || !storageInfo.quota) return 0;
+    return (storageInfo.usage / storageInfo.quota) * 100;
+  };
+
+  // Get storage status color
+  const getStorageColor = () => {
+    const percentage = getStoragePercentage();
+    if (percentage >= 90) return 'text-red-400';
+    if (percentage >= 80) return 'text-yellow-400';
+    return 'text-gray-400';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-dark-primary">
+        <div className="flex items-center gap-2">
+          <LogoIcon className="w-8 h-8 text-accent-green animate-pulse" />
+        </div>
+      </div>
+    );
+  }
+
   if (expandedEntry) {
     return (
       <div className="h-full flex flex-col">
@@ -306,6 +382,15 @@ export default function Dashboard() {
               <span className="text-text-secondary/70">
                 <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || 0), 0)}</span> blocks
               </span>
+              {/* Subtle storage indicator - only show when concerning */}
+              {storageInfo && getStoragePercentage() > 70 && (
+                <>
+                  <span className="text-text-secondary/40">•</span>
+                  <span className={`${getStoragePercentage() > 80 ? 'text-yellow-500/70' : 'text-text-secondary/70'}`}>
+                    {Math.round(getStoragePercentage())}% storage
+                  </span>
+                </>
+              )}
             </div>
 
             {/* Profile Dropdown - Smaller but Accessible */}

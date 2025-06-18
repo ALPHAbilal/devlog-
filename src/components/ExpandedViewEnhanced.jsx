@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Link2 } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, List } from 'lucide-react';
 import Block from './Block';
 import AddBlockRow from './AddBlockRow';
+import DocumentTOC from './DocumentTOC';
 import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
 import './VirtualizedGrid.css'; // For scrollbar styles
@@ -19,6 +20,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [newTag, setNewTag] = useState('');
   const [editingTagIndex, setEditingTagIndex] = useState(null);
   const [editingTagValue, setEditingTagValue] = useState('');
+  const [showTOC, setShowTOC] = useState(false);
   const contentContainerRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -47,6 +49,17 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       setBlocks(initialBlocks);
     }
   }, [entry]);
+
+  // Auto-show TOC for long documents
+  useEffect(() => {
+    const headingCount = blocks.filter(b => b.type === 'heading').length;
+    const totalBlocks = blocks.length;
+    
+    // Show TOC if document has 3+ headings or 10+ blocks
+    if (headingCount >= 3 || totalBlocks >= 10) {
+      setShowTOC(true);
+    }
+  }, [blocks]);
 
   // Calculate backlinks
   useEffect(() => {
@@ -209,6 +222,28 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setIsEditingTitle(false);
   };
 
+  // Navigate to specific block
+  const handleNavigateToBlock = (blockId) => {
+    const element = document.querySelector(`[data-block-id="${blockId}"]`);
+    if (element && scrollContainerRef.current) {
+      const container = scrollContainerRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const elementRect = element.getBoundingClientRect();
+      
+      // Calculate scroll position to center the element
+      const scrollTop = container.scrollTop + elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
+      
+      container.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+      
+      // Highlight the block briefly
+      setFocusedBlockId(blockId);
+      setTimeout(() => setFocusedBlockId(null), 2000);
+    }
+  };
+
   // Tag management functions
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
@@ -267,7 +302,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
       onClick={handleBackgroundClick}
     >
-      <div className="max-w-4xl mx-auto fade-in px-8 py-8">
+      <div className="max-w-4xl mx-auto fade-in px-8 py-8" style={{ marginRight: showTOC ? '320px' : 'auto' }}>
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <button 
@@ -280,8 +315,25 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
         </button>
         <div className="flex-1">
-          <div className="text-text-secondary text-sm mb-2">
-            Document
+          <div className="flex items-center justify-between">
+            <div className="text-text-secondary text-sm mb-2">
+              Document
+            </div>
+            {/* TOC Toggle */}
+            <button
+              onClick={() => setShowTOC(!showTOC)}
+              className={`
+                p-2 rounded-lg transition-all text-sm flex items-center gap-2
+                ${showTOC 
+                  ? 'bg-accent-green/20 text-accent-green border border-accent-green/30' 
+                  : 'text-text-secondary hover:text-text-primary hover:bg-dark-secondary/30'
+                }
+              `}
+              title="Toggle document outline"
+            >
+              <List size={16} />
+              <span className="hidden sm:inline">Outline</span>
+            </button>
           </div>
           {isEditingTitle ? (
             <input
@@ -355,15 +407,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
               onFocus={setFocusedBlockId}
               allBlocks={blocks}
-              onNavigateToBlock={(targetBlockId) => {
-                // Scroll to target block
-                const element = document.querySelector(`[data-block-id="${targetBlockId}"]`);
-                if (element) {
-                  element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  // Highlight the target block briefly
-                  setFocusedBlockId(targetBlockId);
-                }
-              }}
+              onNavigateToBlock={handleNavigateToBlock}
             />
             <AddBlockRow
               show={showBlockSelector && selectorPosition === block.id}
@@ -523,6 +567,14 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         </div>
       )}
       </div>
+
+      {/* Document TOC */}
+      <DocumentTOC
+        blocks={blocks}
+        onNavigateToBlock={handleNavigateToBlock}
+        isVisible={showTOC}
+        onToggle={() => setShowTOC(!showTOC)}
+      />
     </div>
   );
 }

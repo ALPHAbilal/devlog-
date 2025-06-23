@@ -8,7 +8,10 @@ export default function BlockControls({
   onMoveDown,
   isVisible,
   canMoveUp,
-  canMoveDown 
+  canMoveDown,
+  onDragStart,
+  onDragEnd,
+  blockId
 }) {
   const [showMenu, setShowMenu] = useState(false);
 
@@ -21,15 +24,18 @@ export default function BlockControls({
     `}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
-        <button 
-          className="p-1.5 rounded-md cursor-move
+        <div 
+          className="drag-handle p-1.5 rounded-md cursor-move
                      text-text-secondary/40 hover:text-text-secondary
                      hover:bg-dark-secondary/50 transition-all duration-150
                      group"
           title="Drag to reorder"
+          draggable="true"
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
         >
-          <GripVertical size={14} className="group-hover:scale-110 transition-transform" />
-        </button>
+          <GripVertical size={14} className="group-hover:scale-110 transition-transform pointer-events-none" />
+        </div>
 
         {/* More Options */}
         <div className="relative">

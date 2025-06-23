@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 export default function HeadingBlock({ block, onUpdate }) {
-  const [isEditing, setIsEditing] = useState(block.isNew || false);
+  const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
   const [level, setLevel] = useState(block.level || 2);
   const inputRef = useRef(null);
@@ -20,7 +20,7 @@ export default function HeadingBlock({ block, onUpdate }) {
   }, [isEditing]);
 
   const handleSave = useCallback(() => {
-    onUpdate({ content, level });
+    onUpdate({ content, level, isNew: undefined });
     setIsEditing(false);
   }, [content, level, onUpdate]);
 

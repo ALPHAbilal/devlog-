@@ -1,20 +1,30 @@
 import { useState, useRef, useEffect } from 'react';
-import CommandPalette from '../CommandPalette';
 import FloatingToolbar from '../FloatingToolbar';
 import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
 
-export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus }) {
-  const [isEditing, setIsEditing] = useState(block.isNew || false);
+export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow }) {
+  // Only auto-edit if this is a truly new block (has no content)
+  const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
   const [displayContent, setDisplayContent] = useState(block.content || '');
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
-  const [commandPalettePosition, setCommandPalettePosition] = useState(null);
+  const [slashHint, setSlashHint] = useState('');
+  const [slashHintPosition, setSlashHintPosition] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState(null);
   const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
   const imageMap = useRef(new Map()); // Store base64 -> placeholder mapping
+  
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      setShowToolbar(false);
+      if (selectionTimeoutRef.current) {
+        clearTimeout(selectionTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Extract tags from content dynamically
   const tags = extractTagsFromContent(content);
@@ -74,6 +84,11 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       // Auto-resize textarea
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    } else if (!isEditing) {
+      // Clean up when exiting edit mode
+      setShowToolbar(false);
+      setSelectedText('');
+      setToolbarPosition(null);
     }
   }, [isEditing, displayContent]);
 
@@ -85,10 +100,43 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     }
   }, [block.content]);
 
+  // Handle clicks outside to exit edit mode and hide toolbar
+  useEffect(() => {
+    if (!isEditing) return;
+
+    const handleClickOutside = (e) => {
+      // Check if click is outside the textarea and toolbar
+      if (textareaRef.current && !textareaRef.current.contains(e.target)) {
+        // Check if click is on the toolbar
+        const toolbar = document.querySelector('.floating-toolbar');
+        if (toolbar && toolbar.contains(e.target)) {
+          return; // Don't exit if clicking on toolbar
+        }
+        
+        // Exit edit mode and hide everything
+        setShowToolbar(false);
+        setSelectedText('');
+        setToolbarPosition(null);
+        handleSave();
+      }
+    };
+
+    // Add click listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isEditing, displayContent]);
+
   // Handle text selection for toolbar
   useEffect(() => {
     const handleSelection = () => {
-      if (!isEditing || !textareaRef.current) return;
+      if (!isEditing || !textareaRef.current) {
+        // If not editing, ensure toolbar is hidden
+        setShowToolbar(false);
+        return;
+      }
 
       const textarea = textareaRef.current;
       const start = textarea.selectionStart;
@@ -135,19 +183,29 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           clearTimeout(selectionTimeoutRef.current);
         }
       };
+    } else {
+      // Ensure toolbar is hidden when not editing
+      setShowToolbar(false);
+      setSelectedText('');
+      setToolbarPosition(null);
     }
   }, [isEditing, displayContent]);
 
   const handleSave = () => {
+    // Hide toolbar immediately
+    setShowToolbar(false);
+    setSelectedText('');
+    setToolbarPosition(null);
+    
     // Convert display content back to actual content
     const actualContent = processContentForSave(displayContent);
     setContent(actualContent);
     
     // Extract tags from content before saving
     const extractedTags = extractTagsFromContent(actualContent);
-    onUpdate({ content: actualContent, tags: extractedTags });
+    // Remove isNew flag when saving
+    onUpdate({ content: actualContent, tags: extractedTags, isNew: undefined });
     setIsEditing(false);
-    setShowToolbar(false);
     if (onFocus) onFocus(null); // Clear focus
   };
 
@@ -273,6 +331,25 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     }
   };
 
+  // Slash commands mapping
+  const slashCommands = {
+    // Text insertions
+    '/h1': { type: 'insert', value: '# ' },
+    '/h2': { type: 'insert', value: '## ' },
+    '/h3': { type: 'insert', value: '### ' },
+    '/bullet': { type: 'insert', value: '- ' },
+    '/number': { type: 'insert', value: '1. ' },
+    '/checkbox': { type: 'insert', value: '- [ ] ' },
+    '/quote': { type: 'insert', value: '> ' },
+    '/hr': { type: 'insert', value: '---\n' },
+    // Block creations
+    '/table': { type: 'block', blockType: 'table' },
+    '/code': { type: 'block', blockType: 'code' },
+    '/ai': { type: 'block', blockType: 'ai' },
+    '/math': { type: 'block', blockType: 'math' },
+    '/todo': { type: 'block', blockType: 'todo' }
+  };
+
   const handleChange = (e) => {
     const newDisplayContent = e.target.value;
     setDisplayContent(newDisplayContent);
@@ -281,30 +358,88 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     const actualContent = processContentForSave(newDisplayContent);
     setContent(actualContent);
 
-    // Check if user typed "/" at the beginning of an empty block or after a new line
+    // Check if user is typing a slash command
     const lines = newDisplayContent.split('\n');
     const currentLine = lines[lines.length - 1];
     
-    // Check if it's a slash command (/ at the beginning of a line)
-    if (currentLine === '/' && textareaRef.current) {
-      // Calculate position for command palette
-      const rect = textareaRef.current.getBoundingClientRect();
-      const lineHeight = 24; // Approximate line height
-      const currentLineNumber = lines.length - 1;
+    // Check for slash commands at the beginning of a line
+    const slashMatch = currentLine.match(/^(\/)([a-z0-9]*)/i);
+    
+    if (slashMatch) {
+      const typedCommand = slashMatch[0]; // e.g., '/h' or '/h1'
       
-      setCommandPalettePosition({
-        top: rect.top + (currentLineNumber * lineHeight) + lineHeight,
-        left: rect.left
-      });
-      setShowCommandPalette(true);
-    } else if (showCommandPalette) {
-      // Update search in command palette
-      if (currentLine.startsWith('/')) {
-        // This will be used for filtering commands
+      // Find matching commands
+      const matchingCommands = Object.keys(slashCommands).filter(cmd => 
+        cmd.startsWith(typedCommand) && cmd !== typedCommand
+      );
+      
+      if (matchingCommands.length > 0) {
+        // Show hint for the first matching command
+        const fullCommand = matchingCommands[0];
+        const hint = fullCommand.slice(typedCommand.length);
+        setSlashHint(hint);
+        
+        // Better position calculation
+        if (textareaRef.current) {
+          const rect = textareaRef.current.getBoundingClientRect();
+          const lineHeight = 20;
+          const charWidth = 7.2; // More accurate for monospace
+          const lineNumber = lines.length - 1;
+          const cursorOffset = typedCommand.length * charWidth;
+          
+          setSlashHintPosition({
+            top: rect.top + (lineNumber * lineHeight) + 20,
+            left: rect.left + 16 + cursorOffset // 16px for padding
+          });
+        }
       } else {
-        // Hide command palette if user deleted the slash
-        setShowCommandPalette(false);
+        setSlashHint('');
+        setSlashHintPosition(null);
       }
+      
+      // Check if a complete command was typed
+      if (slashCommands[typedCommand]) {
+        const command = slashCommands[typedCommand];
+        console.log('Executing slash command:', typedCommand, '->', command);
+        
+        if (command.type === 'insert') {
+          // Text insertion commands
+          const beforeSlash = currentLine.substring(0, 0); // Everything before the slash
+          lines[lines.length - 1] = beforeSlash + command.value;
+          const expandedContent = lines.join('\n');
+          setDisplayContent(expandedContent);
+          setContent(processContentForSave(expandedContent));
+          setSlashHint('');
+          setSlashHintPosition(null);
+          
+          // Move cursor to end
+          setTimeout(() => {
+            if (textareaRef.current) {
+              textareaRef.current.selectionStart = expandedContent.length;
+              textareaRef.current.selectionEnd = expandedContent.length;
+            }
+          }, 0);
+        } else if (command.type === 'block' && onConvert) {
+          // Block creation commands
+          // Remove the slash line
+          lines[lines.length - 1] = '';
+          const cleanedContent = lines.join('\n').trimEnd();
+          
+          // Save current content if any
+          if (cleanedContent) {
+            const extractedTags = extractTagsFromContent(cleanedContent);
+            onUpdate({ content: cleanedContent, tags: extractedTags });
+          }
+          
+          // Convert to new block type
+          onConvert(command.blockType);
+          setSlashHint('');
+          setSlashHintPosition(null);
+        }
+      }
+    } else {
+      setSlashHint('');
+      setSlashHintPosition(null);
     }
 
     // Auto-complete document links
@@ -340,21 +475,45 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       return;
     }
 
-    if (e.key === 'Escape') {
-      if (showCommandPalette) {
-        setShowCommandPalette(false);
-        // Remove the slash
-        const lines = displayContent.split('\n');
-        lines[lines.length - 1] = '';
-        const newDisplayContent = lines.join('\n');
-        setDisplayContent(newDisplayContent);
-        setContent(processContentForSave(newDisplayContent));
-      } else {
-        setContent(block.content || '');
-        setDisplayContent(processContentForDisplay(block.content || ''));
-        setIsEditing(false);
-        if (onFocus) onFocus(null); // Clear focus when escaping
+    // Tab completion for slash commands
+    if (e.key === 'Tab' && slashHint) {
+      e.preventDefault();
+      const lines = displayContent.split('\n');
+      const currentLine = lines[lines.length - 1];
+      const completedCommand = currentLine + slashHint;
+      
+      if (slashCommands[completedCommand]) {
+        const command = slashCommands[completedCommand];
+        
+        if (command.type === 'insert') {
+          lines[lines.length - 1] = command.value;
+        } else if (command.type === 'block' && onConvert) {
+          // Handle block creation
+          lines[lines.length - 1] = '';
+          const cleanedContent = lines.join('\n').trimEnd();
+          if (cleanedContent) {
+            const extractedTags = extractTagsFromContent(cleanedContent);
+            onUpdate({ content: cleanedContent, tags: extractedTags });
+          }
+          onConvert(command.blockType);
+          setSlashHint('');
+          return;
+        }
+        const expandedContent = lines.join('\n');
+        setDisplayContent(expandedContent);
+        setContent(processContentForSave(expandedContent));
+        setSlashHint('');
       }
+      return;
+    }
+    
+    if (e.key === 'Escape') {
+      setContent(block.content || '');
+      setDisplayContent(processContentForDisplay(block.content || ''));
+      setIsEditing(false);
+      setShowToolbar(false); // Ensure toolbar is hidden
+      setSlashHint('');
+      if (onFocus) onFocus(null); // Clear focus when escaping
     } else if (e.key === 'Enter') {
       // Check for heading markdown at the start of the line
       const lines = displayContent.split('\n');
@@ -375,33 +534,14 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       // If pressing enter on empty block, exit edit mode
       if (displayContent.trim() === '') {
         e.preventDefault();
+        setShowToolbar(false); // Ensure toolbar is hidden
         handleSave();
         if (onFocus) onFocus(null); // Clear focus
       }
     }
   };
 
-  const handleCommandSelect = (type, meta) => {
-    // Remove the slash from content
-    const lines = displayContent.split('\n');
-    lines[lines.length - 1] = '';
-    const newDisplayContent = lines.join('\n').trimEnd();
-    const actualContent = processContentForSave(newDisplayContent);
-    
-    if (actualContent) {
-      // If there's content, save it first
-      const extractedTags = extractTagsFromContent(actualContent);
-      onUpdate({ content: actualContent, tags: extractedTags });
-    }
-    
-    // Convert block to selected type
-    if (onConvert) {
-      onConvert(type, meta);
-    }
-    
-    setShowCommandPalette(false);
-    if (onFocus) onFocus(null); // Clear focus after conversion
-  };
+  // Remove the old command select handler as we no longer need it
 
   if (isEditing) {
     return (
@@ -412,10 +552,17 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           onChange={handleChange}
           onPaste={handlePaste}
           onFocus={() => onFocus && onFocus(block.id)}
-          onBlur={() => {
-            if (!showCommandPalette && !showToolbar) {
-              handleSave();
+          onBlur={(e) => {
+            // Don't blur if clicking on toolbar
+            const relatedTarget = e.relatedTarget;
+            if (relatedTarget && relatedTarget.closest('.floating-toolbar')) {
+              return;
             }
+            
+            // Hide toolbar and save
+            setShowToolbar(false);
+            setSlashHint('');
+            handleSave();
           }}
           onKeyDown={handleKeyDown}
           className="w-full bg-dark-secondary/50 text-text-primary p-4 rounded-lg
@@ -423,28 +570,33 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
                      transition-all duration-200"
           placeholder="Type '/' for commands or start writing..."
         />
-        {showCommandPalette && (
-          <CommandPalette
-            position={commandPalettePosition}
-            onSelect={handleCommandSelect}
-            onClose={() => {
-              setShowCommandPalette(false);
-              // Remove the slash
-              const lines = displayContent.split('\n');
-              lines[lines.length - 1] = '';
-              setDisplayContent(lines.join('\n'));
-              setContent(processContentForSave(lines.join('\n')));
+        {/* Inline hint display */}
+        {slashHint && slashHintPosition && (
+          <div
+            className="fixed pointer-events-none z-50 flex items-baseline gap-2"
+            style={{
+              top: slashHintPosition.top + 'px',
+              left: slashHintPosition.left + 'px'
             }}
+          >
+            <span className="text-accent-green/30 text-sm font-mono">
+              {slashHint}
+            </span>
+            <span className="text-text-secondary/20 text-xs">
+              ↹ Tab
+            </span>
+          </div>
+        )}
+        {isEditing && showToolbar && (
+          <FloatingToolbar
+            show={showToolbar}
+            position={toolbarPosition}
+            selectedText={selectedText}
+            onFormat={handleFormat}
+            existingTags={getAllTags()}
+            onTag={handleTag}
           />
         )}
-        <FloatingToolbar
-          show={showToolbar}
-          position={toolbarPosition}
-          selectedText={selectedText}
-          onFormat={handleFormat}
-          existingTags={getAllTags()}
-          onTag={handleTag}
-        />
       </>
     );
   }
@@ -452,6 +604,10 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   return (
     <div 
       onClick={() => {
+        // Ensure toolbar is hidden before entering edit mode
+        setShowToolbar(false);
+        setSelectedText('');
+        setToolbarPosition(null);
         setIsEditing(true);
         if (onFocus) onFocus(block.id);
       }}

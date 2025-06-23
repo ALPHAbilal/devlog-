@@ -1,77 +1,82 @@
 import { useState, useEffect, useRef } from 'react';
-import { Type, Code, MessageSquare, Heading, List, Hash, Folder, Table } from 'lucide-react';
+import { List, Heading, Quote, Minus, Hash, CheckSquare } from 'lucide-react';
 
 const commands = [
   { 
-    id: 'text',
-    type: 'text',
-    label: 'Text',
-    description: 'Plain text block',
-    icon: Type,
-    shortcut: 'text'
-  },
-  { 
-    id: 'heading1',
-    type: 'heading',
+    id: 'h1',
+    type: 'insert',
     label: 'Heading 1',
-    description: 'Large heading',
+    description: 'Large section heading',
     icon: Heading,
     shortcut: 'h1',
-    meta: { level: 1 }
+    insert: '# '
   },
   { 
-    id: 'heading2',
-    type: 'heading',
+    id: 'h2',
+    type: 'insert',
     label: 'Heading 2',
-    description: 'Medium heading',
+    description: 'Medium section heading',
     icon: Heading,
     shortcut: 'h2',
-    meta: { level: 2 }
+    insert: '## '
   },
   { 
-    id: 'heading3',
-    type: 'heading',
+    id: 'h3',
+    type: 'insert',
     label: 'Heading 3',
-    description: 'Small heading',
+    description: 'Small section heading',
     icon: Heading,
     shortcut: 'h3',
-    meta: { level: 3 }
+    insert: '### '
   },
   { 
-    id: 'code',
-    type: 'code',
-    label: 'Code',
-    description: 'Code block with syntax highlighting',
-    icon: Code,
-    shortcut: 'code'
+    id: 'bullet',
+    type: 'insert',
+    label: 'Bullet List',
+    description: 'Unordered list item',
+    icon: List,
+    shortcut: 'bullet',
+    insert: '- '
   },
   { 
-    id: 'table',
-    type: 'table',
-    label: 'Table',
-    description: 'Editable table with rows and columns',
-    icon: Table,
-    shortcut: 'table'
+    id: 'number',
+    type: 'insert',
+    label: 'Numbered List',
+    description: 'Ordered list item',
+    icon: Hash,
+    shortcut: 'number',
+    insert: '1. '
   },
   { 
-    id: 'ai',
-    type: 'ai',
-    label: 'AI Chat',
-    description: 'AI conversation block',
-    icon: MessageSquare,
-    shortcut: 'ai'
+    id: 'todo',
+    type: 'insert',
+    label: 'Todo',
+    description: 'Checkbox task item',
+    icon: CheckSquare,
+    shortcut: 'todo',
+    insert: '- [ ] '
   },
   { 
-    id: 'filetree',
-    type: 'filetree',
-    label: 'File Tree',
-    description: 'Project structure visualization',
-    icon: Folder,
-    shortcut: 'tree'
+    id: 'quote',
+    type: 'insert',
+    label: 'Blockquote',
+    description: 'Quote or callout text',
+    icon: Quote,
+    shortcut: 'quote',
+    insert: '> '
+  },
+  { 
+    id: 'divider',
+    type: 'insert',
+    label: 'Divider',
+    description: 'Horizontal line separator',
+    icon: Minus,
+    shortcut: 'hr',
+    insert: '---\n'
   }
 ];
 
-export default function CommandPalette({ onSelect, onClose, position }) {
+export default function CommandPalette({ onSelect, onClose, position, selectedText = '', textareaRef }) {
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const paletteRef = useRef(null);
@@ -132,77 +137,86 @@ export default function CommandPalette({ onSelect, onClose, position }) {
   }, [onClose]);
 
   const handleSelect = (command) => {
-    onSelect(command.type, command.meta);
+    onSelect(command);
     onClose();
   };
 
   return (
     <div 
       ref={paletteRef}
-      className="fixed z-50 w-80 bg-dark-secondary/95 backdrop-blur-sm 
-                 rounded-lg shadow-xl border border-dark-secondary/50 overflow-hidden
-                 animate-in fade-in slide-in-from-top-1 duration-200"
+      className="fixed z-50 bg-dark-primary/20 backdrop-blur-sm 
+                 rounded-lg overflow-hidden
+                 animate-in fade-in-fast slide-in-from-top-0.5 duration-150"
       style={{ 
         top: position?.top || 0,
-        left: position?.left || 0 
+        left: position?.left || 0,
+        minWidth: '180px'
       }}
     >
-      {/* Search input */}
-      <div className="p-3 border-b border-dark-primary/50">
-        <input
-          ref={inputRef}
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search commands..."
-          className="w-full bg-dark-primary/50 text-text-primary px-3 py-2 rounded
-                     placeholder-text-secondary focus:outline-none focus:ring-1 
-                     focus:ring-accent-green/50"
-        />
+      {/* Ghost header - almost invisible */}
+      <div className="px-3 py-2">
+        <div className="flex items-center gap-1.5">
+          <span className="text-accent-green/70 font-mono text-xs">/</span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder=""
+            className="flex-1 bg-transparent text-text-primary text-xs
+                       placeholder-text-secondary/30 focus:outline-none"
+            style={{ width: '60px' }}
+          />
+        </div>
       </div>
 
-      {/* Commands list */}
-      <div className="max-h-80 overflow-y-auto">
+      {/* Ghost commands list */}
+      <div className="max-h-64 overflow-y-auto">
         {filteredCommands.length === 0 ? (
-          <div className="p-4 text-text-secondary text-center">
-            No commands found
+          <div className="py-4 px-3 text-center">
+            <div className="text-text-secondary/40 text-xs">No matches</div>
           </div>
         ) : (
           filteredCommands.map((command, index) => {
             const Icon = command.icon;
             const isSelected = index === selectedIndex;
             
+            // Add divider after headings group (h3 is at index 2)
+            const showDivider = command.id === 'h3' && index < filteredCommands.length - 1;
+            
             return (
-              <button
-                key={command.id}
-                onClick={() => handleSelect(command)}
-                onMouseEnter={() => setSelectedIndex(index)}
-                className={`w-full flex items-center gap-3 px-4 py-3 text-left
-                           transition-colors ${
-                             isSelected
-                               ? 'bg-dark-primary/80 text-text-primary'
-                               : 'text-text-secondary hover:text-text-primary hover:bg-dark-primary/50'
-                           }`}
-              >
-                <Icon size={18} className={isSelected ? 'text-accent-green' : ''} />
-                <div className="flex-1">
-                  <div className="font-medium">{command.label}</div>
-                  <div className="text-xs opacity-75">{command.description}</div>
-                </div>
-                <div className="text-xs opacity-50">/{command.shortcut}</div>
-              </button>
+              <div key={command.id}>
+                <button
+                  onClick={() => handleSelect(command)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  className={`w-full flex items-center gap-2 px-3 py-1.5 text-left
+                             transition-all duration-100 ${
+                               isSelected
+                                 ? 'bg-dark-primary/30 text-text-primary'
+                                 : 'text-text-secondary/70 hover:text-text-primary'
+                             }`}
+                >
+                  <span className={`font-mono text-xs w-4 ${
+                    isSelected ? 'text-accent-green/80' : 'text-text-secondary/50'
+                  }`}>
+                    {command.shortcut.charAt(0)}
+                  </span>
+                  
+                  <span className="text-xs font-medium">
+                    {command.label}
+                  </span>
+                </button>
+                
+                {showDivider && (
+                  <div className="my-1 mx-3 h-px bg-dark-secondary/20" />
+                )}
+              </div>
             );
           })
         )}
       </div>
 
-      {/* Footer hint */}
-      <div className="p-2 border-t border-dark-primary/50 text-xs text-text-secondary 
-                      flex items-center justify-between">
-        <span>↑↓ Navigate</span>
-        <span>↵ Select</span>
-        <span>ESC Close</span>
-      </div>
+      {/* No footer - ghost menu needs none */}
     </div>
   );
 }

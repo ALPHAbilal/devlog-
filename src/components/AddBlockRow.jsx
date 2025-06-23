@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Type, Code, MessageSquare, Heading, Folder, Package } from 'lucide-react';
+import { Plus, Type, Code, MessageSquare, Heading, Folder, Package, Table, Calculator } from 'lucide-react';
 
 const blockTypes = [
   { type: 'text', label: 'text', icon: Type },
   { type: 'heading', label: 'heading', icon: Heading },
   { type: 'code', label: 'code snippet', icon: Code },
+  { type: 'math', label: 'math equation', icon: Calculator },
+  { type: 'table', label: 'table', icon: Table },
   { type: 'ai', label: 'AI interaction', icon: MessageSquare },
   { type: 'filetree', label: 'file tree', icon: Folder },
   { type: 'template', label: 'template', icon: Package },

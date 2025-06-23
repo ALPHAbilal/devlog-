@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Link2, List } from 'lucide-react';
+import { ArrowLeft, Plus, Link2 } from 'lucide-react';
 import Block from './Block';
 import AddBlockRow from './AddBlockRow';
-import DocumentTOC from './DocumentTOC';
 import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
 import './VirtualizedGrid.css'; // For scrollbar styles
@@ -20,14 +19,25 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [newTag, setNewTag] = useState('');
   const [editingTagIndex, setEditingTagIndex] = useState(null);
   const [editingTagValue, setEditingTagValue] = useState('');
-  const [showTOC, setShowTOC] = useState(false);
+  const [draggedBlockId, setDraggedBlockId] = useState(null);
+  const [dropTargetId, setDropTargetId] = useState(null);
+  const [dropPosition, setDropPosition] = useState('after'); // 'before' or 'after'
   const contentContainerRef = useRef(null);
   const scrollContainerRef = useRef(null);
+  const dragScrollInterval = useRef(null);
 
   // Initialize blocks from entry data
   useEffect(() => {
     if (entry.blocks) {
-      setBlocks(entry.blocks);
+      // Clean up any stale isNew flags when loading
+      const cleanedBlocks = entry.blocks.map(block => {
+        if (block.isNew) {
+          const { isNew, ...blockWithoutNew } = block;
+          return blockWithoutNew;
+        }
+        return block;
+      });
+      setBlocks(cleanedBlocks);
     } else {
       // Convert legacy format to blocks
       const initialBlocks = [];
@@ -50,16 +60,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     }
   }, [entry]);
 
-  // Auto-show TOC for long documents
-  useEffect(() => {
-    const headingCount = blocks.filter(b => b.type === 'heading').length;
-    const totalBlocks = blocks.length;
-    
-    // Show TOC if document has 3+ headings or 10+ blocks
-    if (headingCount >= 3 || totalBlocks >= 10) {
-      setShowTOC(true);
-    }
-  }, [blocks]);
 
   // Calculate backlinks
   useEffect(() => {
@@ -68,9 +68,14 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   }, [entry.title, allEntries]);
 
   const updateBlock = (blockId, updates) => {
-    const updatedBlocks = blocks.map(block => 
-      block.id === blockId ? { ...block, ...updates } : block
-    );
+    const updatedBlocks = blocks.map(block => {
+      if (block.id === blockId) {
+        // Remove isNew flag when updating a block (user has interacted with it)
+        const { isNew, ...blockWithoutNew } = block;
+        return { ...blockWithoutNew, ...updates };
+      }
+      return block;
+    });
     setBlocks(updatedBlocks);
     // Save to parent/localStorage
     if (onUpdate) {
@@ -138,6 +143,108 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     if (onUpdate) {
       onUpdate(entry.id, { blocks: updatedBlocks });
     }
+  };
+
+  // Auto-scroll during drag
+  const startAutoScroll = (direction) => {
+    if (dragScrollInterval.current) return;
+    
+    dragScrollInterval.current = setInterval(() => {
+      if (scrollContainerRef.current) {
+        const scrollSpeed = 5;
+        scrollContainerRef.current.scrollTop += direction === 'up' ? -scrollSpeed : scrollSpeed;
+      }
+    }, 16); // ~60fps
+  };
+
+  const stopAutoScroll = () => {
+    if (dragScrollInterval.current) {
+      clearInterval(dragScrollInterval.current);
+      dragScrollInterval.current = null;
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (blockId) => {
+    setDraggedBlockId(blockId);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedBlockId(null);
+    setDropTargetId(null);
+    setDropPosition('after');
+    stopAutoScroll();
+  };
+
+  const handleDragOver = (e, blockId) => {
+    e.preventDefault();
+    
+    // Auto-scroll detection
+    if (scrollContainerRef.current) {
+      const rect = scrollContainerRef.current.getBoundingClientRect();
+      const scrollThreshold = 100;
+      
+      if (e.clientY < rect.top + scrollThreshold) {
+        startAutoScroll('up');
+      } else if (e.clientY > rect.bottom - scrollThreshold) {
+        startAutoScroll('down');
+      } else {
+        stopAutoScroll();
+      }
+    }
+    
+    // Determine drop position (before or after the block)
+    const blockElement = e.currentTarget;
+    const rect = blockElement.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    
+    if (e.clientY < midpoint) {
+      setDropPosition('before');
+    } else {
+      setDropPosition('after');
+    }
+    
+    setDropTargetId(blockId);
+  };
+
+  const handleDragLeave = (e) => {
+    // Only clear if leaving the entire block area
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDropTargetId(null);
+    }
+  };
+
+  const handleDrop = (draggedId, targetId) => {
+    if (draggedId === targetId) return;
+    
+    const draggedIndex = blocks.findIndex(b => b.id === draggedId);
+    const targetIndex = blocks.findIndex(b => b.id === targetId);
+    
+    if (draggedIndex === -1 || targetIndex === -1) return;
+    
+    const updatedBlocks = [...blocks];
+    const [draggedBlock] = updatedBlocks.splice(draggedIndex, 1);
+    
+    // Calculate insert index based on drop position
+    let insertIndex = targetIndex;
+    if (dropPosition === 'before') {
+      insertIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
+    } else {
+      insertIndex = draggedIndex < targetIndex ? targetIndex : targetIndex + 1;
+    }
+    
+    updatedBlocks.splice(insertIndex, 0, draggedBlock);
+    
+    setBlocks(updatedBlocks);
+    if (onUpdate) {
+      onUpdate(entry.id, { blocks: updatedBlocks });
+    }
+    
+    // Clean up
+    setDraggedBlockId(null);
+    setDropTargetId(null);
+    setDropPosition('after');
+    stopAutoScroll();
   };
 
   const convertBlock = (blockId, newType, meta = {}) => {
@@ -222,27 +329,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setIsEditingTitle(false);
   };
 
-  // Navigate to specific block
-  const handleNavigateToBlock = (blockId) => {
-    const element = document.querySelector(`[data-block-id="${blockId}"]`);
-    if (element && scrollContainerRef.current) {
-      const container = scrollContainerRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const elementRect = element.getBoundingClientRect();
-      
-      // Calculate scroll position to center the element
-      const scrollTop = container.scrollTop + elementRect.top - containerRect.top - containerRect.height / 2 + elementRect.height / 2;
-      
-      container.scrollTo({
-        top: scrollTop,
-        behavior: 'smooth'
-      });
-      
-      // Highlight the block briefly
-      setFocusedBlockId(blockId);
-      setTimeout(() => setFocusedBlockId(null), 2000);
-    }
-  };
 
   // Tag management functions
   const addTag = () => {
@@ -296,13 +382,20 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     }
   };
 
+  // Scroll to top when component mounts
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, []); // Only on mount
+
   return (
     <div 
       ref={scrollContainerRef}
       className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
       onClick={handleBackgroundClick}
     >
-      <div className="max-w-4xl mx-auto fade-in px-8 py-8" style={{ marginRight: showTOC ? '320px' : 'auto' }}>
+      <div className="max-w-4xl mx-auto fade-in px-8 py-8">
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <button 
@@ -319,21 +412,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             <div className="text-text-secondary text-sm mb-2">
               Document
             </div>
-            {/* TOC Toggle */}
-            <button
-              onClick={() => setShowTOC(!showTOC)}
-              className={`
-                p-2 rounded-lg transition-all text-sm flex items-center gap-2
-                ${showTOC 
-                  ? 'bg-accent-green/20 text-accent-green border border-accent-green/30' 
-                  : 'text-text-secondary hover:text-text-primary hover:bg-dark-secondary/30'
-                }
-              `}
-              title="Toggle document outline"
-            >
-              <List size={16} />
-              <span className="hidden sm:inline">Outline</span>
-            </button>
           </div>
           {isEditingTitle ? (
             <input
@@ -407,7 +485,14 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
               onFocus={setFocusedBlockId}
               allBlocks={blocks}
-              onNavigateToBlock={handleNavigateToBlock}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              draggedBlockId={draggedBlockId}
+              dropTargetId={dropTargetId}
+              dropPosition={dropPosition}
             />
             <AddBlockRow
               show={showBlockSelector && selectorPosition === block.id}
@@ -568,13 +653,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       )}
       </div>
 
-      {/* Document TOC */}
-      <DocumentTOC
-        blocks={blocks}
-        onNavigateToBlock={handleNavigateToBlock}
-        isVisible={showTOC}
-        onToggle={() => setShowTOC(!showTOC)}
-      />
     </div>
   );
 }

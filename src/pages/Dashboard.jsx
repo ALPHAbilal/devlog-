@@ -117,7 +117,30 @@ export default function Dashboard() {
         const savedEntries = await storageWrapper.getEntries();
         
         if (savedEntries && savedEntries.length > 0) {
-          setEntries(savedEntries);
+          // Clean up any stale isNew flags in existing documents
+          const cleanedEntries = savedEntries.map(entry => {
+            if (entry.blocks) {
+              return {
+                ...entry,
+                blocks: entry.blocks.map(block => {
+                  if (block.isNew) {
+                    const { isNew, ...blockWithoutNew } = block;
+                    return blockWithoutNew;
+                  }
+                  return block;
+                })
+              };
+            }
+            return entry;
+          });
+          
+          // Save cleaned entries if any were modified
+          const hasChanges = JSON.stringify(savedEntries) !== JSON.stringify(cleanedEntries);
+          if (hasChanges) {
+            await storageWrapper.saveEntries(cleanedEntries);
+          }
+          
+          setEntries(cleanedEntries);
         } else {
           // Initialize with example entry
           const initialEntries = [

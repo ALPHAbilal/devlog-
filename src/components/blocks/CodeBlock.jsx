@@ -4,7 +4,7 @@ import { Highlight, themes } from 'prism-react-renderer';
 import CodeVersionTracker, { VERSION_TRACKING_ENABLED } from './CodeVersionTracker';
 
 export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
-  const [isEditing, setIsEditing] = useState(block.isNew || false);
+  const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [code, setCode] = useState(block.content || '');
   const [language, setLanguage] = useState(block.language || 'javascript');
   const [filePath, setFilePath] = useState(block.filePath || '');
@@ -160,7 +160,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   };
 
   const handleSave = () => {
-    onUpdate({ content: code, language, filePath });
+    onUpdate({ content: code, language, filePath, isNew: undefined });
     setIsEditing(false);
     setIsFullscreen(false);
   };

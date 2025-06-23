@@ -1,8 +1,192 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronRight, ChevronDown, Folder, FolderOpen, File, Plus, X, Check, Grip } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { ChevronRight, ChevronDown, Folder, FolderOpen, File, Plus, X, Check, Grip, Code, FileText, Eye, Edit3 } from 'lucide-react';
+import { Highlight, themes } from 'prism-react-renderer';
+
+// File content editor modal
+function FileContentEditor({ file, onSave, onClose }) {
+  const [content, setContent] = useState(file.content || '');
+  const [isPreview, setIsPreview] = useState(false);
+  const textareaRef = useRef(null);
+  
+  // Detect language from file extension
+  const getLanguageFromFilename = (filename) => {
+    const ext = filename.split('.').pop().toLowerCase();
+    const languageMap = {
+      'js': 'javascript',
+      'jsx': 'javascript',
+      'ts': 'typescript',
+      'tsx': 'typescript',
+      'py': 'python',
+      'java': 'java',
+      'cpp': 'cpp',
+      'c': 'c',
+      'cs': 'csharp',
+      'php': 'php',
+      'rb': 'ruby',
+      'go': 'go',
+      'rs': 'rust',
+      'kt': 'kotlin',
+      'swift': 'swift',
+      'html': 'html',
+      'css': 'css',
+      'scss': 'scss',
+      'json': 'json',
+      'xml': 'xml',
+      'yaml': 'yaml',
+      'yml': 'yaml',
+      'md': 'markdown',
+      'sql': 'sql',
+      'sh': 'bash',
+      'bash': 'bash',
+      'txt': 'text'
+    };
+    return languageMap[ext] || 'text';
+  };
+
+  const language = getLanguageFromFilename(file.name);
+  const isCodeFile = language !== 'text' && language !== 'markdown';
+
+  useEffect(() => {
+    if (textareaRef.current && !isPreview) {
+      textareaRef.current.focus();
+      // Auto-resize
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, [content, isPreview]);
+
+  const handleSave = () => {
+    onSave(file.id, content);
+    onClose();
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      const newContent = content.substring(0, start) + '  ' + content.substring(end);
+      setContent(newContent);
+      setTimeout(() => {
+        textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 2;
+      }, 0);
+    } else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      onClose();
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-8" 
+         style={{ 
+           position: 'fixed', 
+           zIndex: 9999,
+           top: 0,
+           left: 0,
+           right: 0,
+           bottom: 0
+         }}>
+      <div className="bg-dark-secondary rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col" 
+           style={{ 
+             position: 'relative',
+             zIndex: 10000,
+             maxHeight: '90vh'
+           }}>
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-dark-primary/50">
+          <div className="flex items-center gap-3">
+            <File size={20} className="text-text-secondary" />
+            <span className="text-text-primary font-medium">{file.name}</span>
+            {isCodeFile && (
+              <span className="text-xs bg-dark-primary/50 text-text-secondary px-2 py-1 rounded">
+                {language}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {isCodeFile && (
+              <button
+                onClick={() => setIsPreview(!isPreview)}
+                className="p-2 text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
+                          rounded transition-colors"
+                title={isPreview ? "Edit" : "Preview"}
+              >
+                {isPreview ? <Edit3 size={16} /> : <Eye size={16} />}
+              </button>
+            )}
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-accent-green text-dark-primary font-medium rounded-lg
+                        hover:bg-accent-green/90 transition-colors flex items-center gap-2"
+            >
+              <Check size={16} />
+              Save
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
+                        rounded transition-colors"
+              title="Close (Esc)"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-4">
+          {isPreview && isCodeFile ? (
+            <div className="bg-dark-primary/50 rounded-lg p-4">
+              <Highlight theme={themes.nightOwl} code={content} language={language}>
+                {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                  <pre className={`${className} text-sm font-mono overflow-x-auto`} style={style}>
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line, key: i })}>
+                        <span className="inline-block w-12 text-text-secondary/50 text-right pr-4 select-none">
+                          {i + 1}
+                        </span>
+                        {line.map((token, key) => (
+                          <span key={key} {...getTokenProps({ token, key })} />
+                        ))}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
+            </div>
+          ) : (
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder={`Enter ${isCodeFile ? 'code' : 'content'} here...`}
+              className="w-full bg-dark-primary/50 text-text-primary p-4 rounded-lg
+                        font-mono text-sm resize-none focus:outline-none 
+                        focus:ring-2 focus:ring-accent-green/50 min-h-[300px]"
+              style={{ minHeight: '300px' }}
+            />
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-dark-primary/50 text-xs text-text-secondary">
+          <span>Press Ctrl+S to save, Esc to close</span>
+          {isCodeFile && (
+            <span className="ml-4">Tab inserts 2 spaces</span>
+          )}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
 
 // Visual tree node component
-function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, allNodes, isNew = false }) {
+function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onEditContent, allNodes, isNew = false }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(isNew);
   const [editName, setEditName] = useState(node.name);
@@ -55,6 +239,7 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, all
   };
 
   const isFolder = node.isFolder || node.children;
+  const hasContent = !isFolder && node.content;
   
   // Check for duplicate names at the same level
   const hasDuplicateName = allNodes && allNodes.some(n => 
@@ -101,7 +286,7 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, all
             <FolderOpen size={16} className="text-accent-green/60" /> : 
             <Folder size={16} className="text-text-secondary/60" />
         ) : (
-          <File size={16} className="text-text-secondary" />
+          <File size={16} className={hasContent ? 'text-accent-green' : 'text-text-secondary'} />
         )}
 
         {/* Name */}
@@ -141,11 +326,24 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, all
             {hasDuplicateName && (
               <span className="ml-2 text-orange-400/70">●</span>
             )}
+            {hasContent && (
+              <span className="ml-2 text-accent-green/50 text-xs">{node.content.length} chars</span>
+            )}
           </span>
         )}
 
         {/* Actions */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {!isFolder && (
+            <button
+              onClick={() => onEditContent(node)}
+              className="p-1 hover:bg-dark-primary/50 rounded text-text-secondary/60 
+                         hover:text-accent-green transition-colors"
+              title="Edit content"
+            >
+              <Code size={14} />
+            </button>
+          )}
           {isFolder && (
             <>
               <button
@@ -188,6 +386,7 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, all
               onDelete={onDelete}
               onAddChild={onAddChild}
               onMove={onMove}
+              onEditContent={onEditContent}
               allNodes={node.children}
             />
           ))}
@@ -201,6 +400,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
   const [treeData, setTreeData] = useState(block.treeData || [
     { id: '1', name: 'src', isFolder: true, children: [] }
   ]);
+  const [editingFile, setEditingFile] = useState(null);
 
   // Generate unique ID
   const generateId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
@@ -222,6 +422,11 @@ export default function FileTreeBlock({ block, onUpdate }) {
     const newTree = updateTree(treeData);
     setTreeData(newTree);
     onUpdate({ treeData: newTree });
+  };
+
+  // Update file content
+  const updateFileContent = (nodeId, content) => {
+    updateNode(nodeId, { content });
   };
 
   // Move node (for drag and drop)
@@ -290,7 +495,8 @@ export default function FileTreeBlock({ block, onUpdate }) {
       id: generateId(),
       name: isFolder ? 'New Folder' : 'new-file.js',
       isFolder,
-      children: isFolder ? [] : undefined
+      children: isFolder ? [] : undefined,
+      content: isFolder ? undefined : ''
     };
 
     updateNode(parentId, {
@@ -310,7 +516,8 @@ export default function FileTreeBlock({ block, onUpdate }) {
       id: generateId(),
       name: isFolder ? 'New Folder' : 'new-file.js',
       isFolder,
-      children: isFolder ? [] : undefined
+      children: isFolder ? [] : undefined,
+      content: isFolder ? undefined : ''
     };
 
     const newTree = [...treeData, newNode];
@@ -358,6 +565,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
               onDelete={removeNode}
               onAddChild={addChild}
               onMove={moveNode}
+              onEditContent={setEditingFile}
               allNodes={treeData}
               data-node-id={node.id}
             />
@@ -369,6 +577,15 @@ export default function FileTreeBlock({ block, onUpdate }) {
           </div>
         )}
       </div>
+
+      {/* File Content Editor Modal */}
+      {editingFile && (
+        <FileContentEditor
+          file={editingFile}
+          onSave={updateFileContent}
+          onClose={() => setEditingFile(null)}
+        />
+      )}
     </div>
   );
 }

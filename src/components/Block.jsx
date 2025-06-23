@@ -6,6 +6,8 @@ import HeadingBlock from './blocks/HeadingBlock';
 import FileTreeBlock from './blocks/FileTreeBlock';
 import TableBlock from './blocks/TableBlock';
 import TemplateBlock from './blocks/TemplateBlock';
+import MathBlock from './blocks/MathBlock';
+import TodoBlock from './blocks/TodoBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';
 
@@ -17,6 +19,8 @@ const blockComponents = {
   filetree: FileTreeBlock,
   table: TableBlock,
   template: TemplateBlock,
+  math: MathBlock,
+  todo: TodoBlock,
 };
 
 export default function Block({ 
@@ -35,10 +39,21 @@ export default function Block({
   canMoveDown,
   allBlocks,
   onNavigateToBlock,
-  index 
+  index,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  draggedBlockId,
+  dropTargetId,
+  dropPosition
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
+  
+  const isDropTarget = dropTargetId === block.id;
+  const isDraggedBlock = draggedBlockId === block.id;
   
   // Debug log
   if (!BlockComponent) {
@@ -52,13 +67,72 @@ export default function Block({
     }
   };
 
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', block.id);
+    
+    // Create a better drag image
+    const dragImage = document.createElement('div');
+    dragImage.style.cssText = `
+      position: absolute;
+      top: -1000px;
+      background: #1e3a5f;
+      color: #e0e7ff;
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-size: 14px;
+      font-family: inherit;
+    `;
+    dragImage.textContent = `Moving ${block.type} block`;
+    document.body.appendChild(dragImage);
+    e.dataTransfer.setDragImage(dragImage, 100, 20);
+    setTimeout(() => document.body.removeChild(dragImage), 0);
+    
+    if (onDragStart) onDragStart(block.id);
+  };
+
+  const handleDragEnd = (e) => {
+    setIsDragging(false);
+    if (onDragEnd) onDragEnd();
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (onDragOver) onDragOver(e, block.id);
+  };
+
+  const handleDragLeave = (e) => {
+    if (onDragLeave) onDragLeave(e);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const draggedId = e.dataTransfer.getData('text/plain');
+    if (draggedId && draggedId !== block.id && onDrop) {
+      onDrop(draggedId, block.id);
+    }
+  };
+
   return (
     <>
+      {/* Drop indicator before */}
+      {isDropTarget && dropPosition === 'before' && !isDraggedBlock && (
+        <div className="h-1 bg-accent-green rounded-full my-2 animate-pulse" />
+      )}
+      
       <div 
-        className={`group relative ${
-          isDragging ? 'opacity-50 scale-[0.98] transition-all duration-200' : ''
+        className={`group relative transition-all duration-200 ${
+          isDragging ? 'opacity-30 scale-[0.98]' : ''
+        } ${
+          isDropTarget && !isDraggedBlock ? 'transform scale-[0.98]' : ''
         }`}
         data-block-id={block.id}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         {/* Enhanced Block Controls - Use CSS :hover instead of state */}
         <BlockControls
@@ -69,6 +143,9 @@ export default function Block({
           onMoveDown={() => onMoveDown?.(block.id)}
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          blockId={block.id}
         />
 
 
@@ -88,8 +165,13 @@ export default function Block({
         </div>
       </div>
 
+      {/* Drop indicator after */}
+      {isDropTarget && dropPosition === 'after' && !isDraggedBlock && (
+        <div className="h-1 bg-accent-green rounded-full my-2 animate-pulse" />
+      )}
+      
       {/* Add Block Divider - Separate hover zone */}
-      {showAddButton && (
+      {showAddButton && !draggedBlockId && (
         <BlockDivider onAdd={() => onAddBelow(block.id)} />
       )}
     </>

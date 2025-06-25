@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Plus, Link2 } from 'lucide-react';
+import { flushSync } from 'react-dom';
+import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid } from 'lucide-react';
 import Block from './Block';
+import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
 import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
@@ -25,9 +27,18 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const contentContainerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const dragScrollInterval = useRef(null);
+  const [forceRenderCount, setForceRenderCount] = useState(0); // Dummy state for force re-render
+  const [isInternalUpdate, setIsInternalUpdate] = useState(false); // Track internal updates
+  const [viewMode, setViewMode] = useState('blocks'); // 'blocks' or 'lines'
+  const [selectedLineBlockId, setSelectedLineBlockId] = useState(null);
 
   // Initialize blocks from entry data
   useEffect(() => {
+    // Don't reset blocks if this is an internal update
+    if (isInternalUpdate) {
+      setIsInternalUpdate(false);
+      return;
+    }
     if (entry.blocks) {
       // Clean up any stale isNew flags when loading
       const cleanedBlocks = entry.blocks.map(block => {
@@ -67,6 +78,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setBacklinks(links);
   }, [entry.title, allEntries]);
 
+
   const updateBlock = (blockId, updates) => {
     const updatedBlocks = blocks.map(block => {
       if (block.id === blockId) {
@@ -79,6 +91,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setBlocks(updatedBlocks);
     // Save to parent/localStorage
     if (onUpdate) {
+      setIsInternalUpdate(true);
       onUpdate(entry.id, { blocks: updatedBlocks });
     }
   };
@@ -87,6 +100,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     const updatedBlocks = blocks.filter(block => block.id !== blockId);
     setBlocks(updatedBlocks);
     if (onUpdate) {
+      setIsInternalUpdate(true);
       onUpdate(entry.id, { blocks: updatedBlocks });
     }
   };
@@ -114,6 +128,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       
       setBlocks(updatedBlocks);
       if (onUpdate) {
+        setIsInternalUpdate(true);
         onUpdate(entry.id, { blocks: updatedBlocks });
       }
     } else {
@@ -123,6 +138,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       
       setBlocks(updatedBlocks);
       if (onUpdate) {
+        setIsInternalUpdate(true);
         onUpdate(entry.id, { blocks: updatedBlocks });
       }
     }
@@ -215,35 +231,62 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   };
 
   const handleDrop = (draggedId, targetId) => {
+    
     if (draggedId === targetId) return;
     
     const draggedIndex = blocks.findIndex(b => b.id === draggedId);
     const targetIndex = blocks.findIndex(b => b.id === targetId);
     
-    if (draggedIndex === -1 || targetIndex === -1) return;
-    
-    const updatedBlocks = [...blocks];
-    const [draggedBlock] = updatedBlocks.splice(draggedIndex, 1);
-    
-    // Calculate insert index based on drop position
-    let insertIndex = targetIndex;
-    if (dropPosition === 'before') {
-      insertIndex = draggedIndex < targetIndex ? targetIndex - 1 : targetIndex;
-    } else {
-      insertIndex = draggedIndex < targetIndex ? targetIndex : targetIndex + 1;
+    if (draggedIndex === -1 || targetIndex === -1) {
+      return;
     }
     
-    updatedBlocks.splice(insertIndex, 0, draggedBlock);
+    // Use flushSync to ensure immediate state update
+    flushSync(() => {
+      // Get the dragged block
+      const draggedBlock = blocks[draggedIndex];
+      
+      // Create a new array without the dragged block
+      const blocksWithoutDragged = blocks.filter((_, index) => index !== draggedIndex);
+      
+      // Calculate insert index based on drop position
+      let insertIndex = targetIndex;
+      if (draggedIndex < targetIndex) {
+        // If dragging down, adjust index since we removed an item
+        insertIndex = dropPosition === 'before' ? targetIndex - 1 : targetIndex;
+      } else {
+        // If dragging up
+        insertIndex = dropPosition === 'before' ? targetIndex : targetIndex + 1;
+      }
+      
+      // Create final array by inserting at the correct position
+      const updatedBlocks = [
+        ...blocksWithoutDragged.slice(0, insertIndex),
+        draggedBlock,
+        ...blocksWithoutDragged.slice(insertIndex)
+      ];
+      
+      
+      // Update state with completely new array
+      setBlocks(updatedBlocks);
+      
+      // Force a re-render to ensure React 19 updates the DOM
+      setForceRenderCount(prev => prev + 1);
+      
+      // Update parent/storage immediately
+      if (onUpdate) {
+        setIsInternalUpdate(true);
+        onUpdate(entry.id, { blocks: updatedBlocks });
+      }
+    });
     
-    setBlocks(updatedBlocks);
-    if (onUpdate) {
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    // Clean up drag state after flushSync
+    flushSync(() => {
+      setDraggedBlockId(null);
+      setDropTargetId(null);
+      setDropPosition('after');
+    });
     
-    // Clean up
-    setDraggedBlockId(null);
-    setDropTargetId(null);
-    setDropPosition('after');
     stopAutoScroll();
   };
 
@@ -412,6 +455,31 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             <div className="text-text-secondary text-sm mb-2">
               Document
             </div>
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-dark-secondary/50 rounded-lg p-1">
+              <button
+                onClick={() => setViewMode('blocks')}
+                className={`p-1.5 rounded transition-all ${
+                  viewMode === 'blocks' 
+                    ? 'bg-dark-primary text-accent-green' 
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+                title="Blocks view"
+              >
+                <LayoutGrid size={16} />
+              </button>
+              <button
+                onClick={() => setViewMode('lines')}
+                className={`p-1.5 rounded transition-all ${
+                  viewMode === 'lines' 
+                    ? 'bg-dark-primary text-accent-green' 
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
+                title="Lines view"
+              >
+                <LayoutList size={16} />
+              </button>
+            </div>
           </div>
           {isEditingTitle ? (
             <input
@@ -438,62 +506,89 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         </div>
       </div>
 
-      {/* Blocks */}
-      <div 
-        ref={contentContainerRef}
-        className="space-y-4 mb-8 min-h-[400px] relative pl-8"
-        onClick={(e) => {
-          // Clear focus if clicking in empty space between blocks
-          if (e.target === e.currentTarget) {
-            setFocusedBlockId(null);
-          }
-        }}>
-        {/* Render version timelines */}
-        {blocks.map((block, index) => {
-          if (block.versionOf) {
-            // Find the original block
-            const originalBlock = blocks.find(b => b.id === block.versionOf);
-            if (originalBlock) {
-              return (
-                <VersionTimeline
-                  key={`timeline-${block.id}`}
-                  startBlockId={block.versionOf}
-                  endBlockId={block.id}
-                  blocks={blocks}
-                  containerRef={contentContainerRef}
-                />
-              );
-            }
-          }
-          return null;
-        })}
-        {blocks.map((block, index) => (
-          <div key={block.id} className="relative">
-            <Block
+      {/* Blocks or Lines View */}
+      {viewMode === 'lines' ? (
+        /* Lines View */
+        <div className="space-y-1 mb-8 min-h-[400px]">
+          {blocks.map((block, index) => (
+            <CompactBlockLine
+              key={block.id}
               block={block}
               index={index}
-              onUpdate={updateBlock}
-              onDelete={deleteBlock}
-              onDuplicate={duplicateBlock}
-              onMoveUp={(id) => moveBlock(id, 'up')}
-              onMoveDown={(id) => moveBlock(id, 'down')}
-              canMoveUp={index > 0}
-              canMoveDown={index < blocks.length - 1}
-              onAddBelow={handleAddBelowBlock}
-              onConvert={convertBlock}
-              showAddButton={true}
-              isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-              onFocus={setFocusedBlockId}
-              allBlocks={blocks}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              draggedBlockId={draggedBlockId}
-              dropTargetId={dropTargetId}
-              dropPosition={dropPosition}
+              isSelected={selectedLineBlockId === block.id}
+              onClick={(blockId) => {
+                setSelectedLineBlockId(blockId);
+                // Scroll to the block if in blocks view
+                if (viewMode === 'lines') {
+                  setViewMode('blocks');
+                  setFocusedBlockId(blockId);
+                  // Scroll to block after view change
+                  setTimeout(() => {
+                    const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+                    blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 100);
+                }
+              }}
             />
+          ))}
+        </div>
+      ) : (
+        /* Blocks View */
+        <div 
+          ref={contentContainerRef}
+          className="space-y-4 mb-8 min-h-[400px] relative pl-8"
+          onClick={(e) => {
+            // Clear focus if clicking in empty space between blocks
+            if (e.target === e.currentTarget) {
+              setFocusedBlockId(null);
+            }
+          }}>
+          {/* Render version timelines */}
+          {blocks.map((block, index) => {
+            if (block.versionOf) {
+              // Find the original block
+              const originalBlock = blocks.find(b => b.id === block.versionOf);
+              if (originalBlock) {
+                return (
+                  <VersionTimeline
+                    key={`timeline-${block.id}`}
+                    startBlockId={block.versionOf}
+                    endBlockId={block.id}
+                    blocks={blocks}
+                    containerRef={contentContainerRef}
+                  />
+                );
+              }
+            }
+            return null;
+          })}
+          {blocks.map((block, index) => (
+            <div key={`${block.id}-${forceRenderCount}`} className="relative">
+              <Block
+                block={block}
+                index={index}
+                onUpdate={updateBlock}
+                onDelete={deleteBlock}
+                onDuplicate={duplicateBlock}
+                onMoveUp={(id) => moveBlock(id, 'up')}
+                onMoveDown={(id) => moveBlock(id, 'down')}
+                canMoveUp={index > 0}
+                canMoveDown={index < blocks.length - 1}
+                onAddBelow={handleAddBelowBlock}
+                onConvert={convertBlock}
+                showAddButton={true}
+                isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                onFocus={setFocusedBlockId}
+                allBlocks={blocks}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                draggedBlockId={draggedBlockId}
+                dropTargetId={dropTargetId}
+                dropPosition={dropPosition}
+              />
             <AddBlockRow
               show={showBlockSelector && selectorPosition === block.id}
               onSelect={(type) => addBlock(type, block.id)}
@@ -502,25 +597,26 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           </div>
         ))}
 
-        {/* Add block at end */}
-        <div className="relative pt-4">
-          <button
-            onClick={handleAddAtEnd}
-            className="w-full py-8 border-2 border-dashed border-dark-secondary/50
-                       rounded-lg text-text-secondary hover:text-text-primary
-                       hover:border-accent-green/50 transition-all
-                       flex items-center justify-center gap-2 group"
-          >
-            <Plus size={20} className="group-hover:scale-110 transition-transform" />
-            <span>Add a block</span>
-          </button>
-          <AddBlockRow
-            show={showBlockSelector && selectorPosition === 'end'}
-            onSelect={(type) => addBlock(type)}
-            onClose={() => setShowBlockSelector(false)}
-          />
+          {/* Add block at end */}
+          <div className="relative pt-4">
+            <button
+              onClick={handleAddAtEnd}
+              className="w-full py-8 border-2 border-dashed border-dark-secondary/50
+                         rounded-lg text-text-secondary hover:text-text-primary
+                         hover:border-accent-green/50 transition-all
+                         flex items-center justify-center gap-2 group"
+            >
+              <Plus size={20} className="group-hover:scale-110 transition-transform" />
+              <span>Add a block</span>
+            </button>
+            <AddBlockRow
+              show={showBlockSelector && selectorPosition === 'end'}
+              onSelect={(type) => addBlock(type)}
+              onClose={() => setShowBlockSelector(false)}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tags */}
       <div className="flex items-center gap-3 flex-wrap mb-8">

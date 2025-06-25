@@ -18,10 +18,11 @@ export default function BlockControls({
   return (
     <div className={`
       absolute -left-16 top-0 flex items-start gap-1 
-      transition-all duration-200 ease-out z-20
+      transition-all duration-200 ease-out
       opacity-0 group-hover:opacity-100
       -translate-x-2 group-hover:translate-x-0
-    `}>
+    `}
+    style={{ zIndex: isVisible ? 20 : 1 }}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
         <div
@@ -31,8 +32,22 @@ export default function BlockControls({
                      group"
           title="Drag to reorder"
           draggable={true}
-          onDragStart={onDragStart}
-          onDragEnd={onDragEnd}
+          onDragStart={(e) => {
+            // Stop propagation to prevent parent handlers
+            e.stopPropagation();
+            // Set the drag data
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', String(blockId));
+            // Set a drag image to prevent default ghost image issues
+            const dragImage = new Image();
+            dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
+            e.dataTransfer.setDragImage(dragImage, 0, 0);
+            if (onDragStart) onDragStart(e);
+          }}
+          onDragEnd={(e) => {
+            e.stopPropagation();
+            if (onDragEnd) onDragEnd(e);
+          }}
         >
           <GripVertical size={14} className="group-hover:scale-110 transition-transform pointer-events-none" />
         </div>

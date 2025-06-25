@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
 import AIBlock from './blocks/AIBlockRefined';
@@ -94,8 +94,9 @@ export default function Block({
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.stopPropagation();
+    
     const draggedId = e.dataTransfer.getData('text/plain');
+    
     if (draggedId && draggedId !== block.id && onDrop) {
       onDrop(draggedId, block.id);
     }
@@ -115,6 +116,21 @@ export default function Block({
           isDropTarget && !isDraggedBlock ? 'transform scale-[0.98]' : ''
         }`}
         data-block-id={block.id}
+        style={{ 
+          position: 'relative', 
+          zIndex: isDragging ? 10 : 'auto',
+          // Extend the drop zone to include the drag handle area
+          marginLeft: '-4rem',
+          paddingLeft: '4rem'
+        }}
+        // Make the whole block draggable as fallback
+        draggable={false}
+        onDragStart={(e) => {
+          // Prevent drag from block content
+          if (!e.target.classList.contains('drag-handle')) {
+            e.preventDefault();
+          }
+        }}
         onDragEnter={(e) => {
           e.preventDefault();
           if (onDragOver) onDragOver(e, block.id);

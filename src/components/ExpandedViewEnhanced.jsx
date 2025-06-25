@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid } from 'lucide-react';
 import Block from './Block';
@@ -31,6 +31,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [isInternalUpdate, setIsInternalUpdate] = useState(false); // Track internal updates
   const [viewMode, setViewMode] = useState('blocks'); // 'blocks' or 'lines'
   const [selectedLineBlockId, setSelectedLineBlockId] = useState(null);
+  const [linesScrollProgress, setLinesScrollProgress] = useState({ top: 0, bottom: 1 });
 
   // Initialize blocks from entry data
   useEffect(() => {
@@ -425,6 +426,20 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     }
   };
 
+  // Handle lines view scroll for shadow effects
+  const handleLinesScroll = useCallback((e) => {
+    const container = e.target;
+    const scrollTop = container.scrollTop;
+    const scrollHeight = container.scrollHeight;
+    const clientHeight = container.clientHeight;
+    const scrollBottom = scrollHeight - scrollTop - clientHeight;
+    
+    setLinesScrollProgress({
+      top: Math.min(scrollTop / 100, 1),
+      bottom: Math.min(scrollBottom / 100, 1)
+    });
+  }, []);
+
   // Scroll to top when component mounts
   useEffect(() => {
     if (scrollContainerRef.current) {
@@ -456,29 +471,40 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               Document
             </div>
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-dark-secondary/50 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode('blocks')}
-                className={`p-1.5 rounded transition-all ${
-                  viewMode === 'blocks' 
-                    ? 'bg-dark-primary text-accent-green' 
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-                title="Blocks view"
-              >
-                <LayoutGrid size={16} />
-              </button>
-              <button
-                onClick={() => setViewMode('lines')}
-                className={`p-1.5 rounded transition-all ${
-                  viewMode === 'lines' 
-                    ? 'bg-dark-primary text-accent-green' 
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-                title="Lines view"
-              >
-                <LayoutList size={16} />
-              </button>
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-accent-green/20 to-accent-green/10 
+                              rounded-lg blur-xl opacity-50" />
+              <div className="relative flex items-center gap-1 bg-dark-secondary/50 backdrop-blur-sm
+                              rounded-lg p-1 border border-dark-secondary/50">
+                <button
+                  onClick={() => setViewMode('blocks')}
+                  className={`relative p-1.5 rounded transition-all duration-200 ${
+                    viewMode === 'blocks' 
+                      ? 'bg-dark-primary text-accent-green shadow-lg' 
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                  title="Blocks view"
+                >
+                  {viewMode === 'blocks' && (
+                    <div className="absolute inset-0 bg-accent-green/20 rounded blur-sm" />
+                  )}
+                  <LayoutGrid size={16} className="relative z-10" />
+                </button>
+                <button
+                  onClick={() => setViewMode('lines')}
+                  className={`relative p-1.5 rounded transition-all duration-200 ${
+                    viewMode === 'lines' 
+                      ? 'bg-dark-primary text-accent-green shadow-lg' 
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                  title="Lines view"
+                >
+                  {viewMode === 'lines' && (
+                    <div className="absolute inset-0 bg-accent-green/20 rounded blur-sm" />
+                  )}
+                  <LayoutList size={16} className="relative z-10" />
+                </button>
+              </div>
             </div>
           </div>
           {isEditingTitle ? (
@@ -509,28 +535,54 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       {/* Blocks or Lines View */}
       {viewMode === 'lines' ? (
         /* Lines View */
-        <div className="space-y-1 mb-8 min-h-[400px]">
-          {blocks.map((block, index) => (
-            <CompactBlockLine
-              key={block.id}
-              block={block}
-              index={index}
-              isSelected={selectedLineBlockId === block.id}
-              onClick={(blockId) => {
-                setSelectedLineBlockId(blockId);
-                // Scroll to the block if in blocks view
-                if (viewMode === 'lines') {
-                  setViewMode('blocks');
-                  setFocusedBlockId(blockId);
-                  // Scroll to block after view change
-                  setTimeout(() => {
-                    const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
-                    blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                  }, 100);
-                }
-              }}
+        <div className="mb-8 -mx-8">
+          <div className="relative bg-dark-primary/30 backdrop-blur-sm rounded-lg 
+                          border border-dark-secondary/20 overflow-hidden"
+               style={{ maxHeight: '500px' }}>
+            {/* Top fade shadow - visible when scrolled */}
+            <div 
+              className="absolute top-0 left-0 right-0 h-20 
+                         bg-gradient-to-b from-dark-primary via-dark-primary/50 to-transparent 
+                         z-10 pointer-events-none transition-opacity duration-300"
+              style={{ opacity: linesScrollProgress.top * 0.9 }}
             />
-          ))}
+            
+            {/* Bottom fade shadow - visible when not at bottom */}
+            <div 
+              className="absolute bottom-0 left-0 right-0 h-20 
+                         bg-gradient-to-t from-dark-primary via-dark-primary/50 to-transparent 
+                         z-10 pointer-events-none transition-opacity duration-300"
+              style={{ opacity: linesScrollProgress.bottom * 0.9 }}
+            />
+            
+            {/* Scrollable container */}
+            <div className="overflow-y-auto overflow-x-hidden 
+                            scrollbar-thin scrollbar-stable"
+                 style={{ maxHeight: '500px' }}
+                 onScroll={handleLinesScroll}>
+              {blocks.map((block, index) => (
+                <CompactBlockLine
+                key={block.id}
+                block={block}
+                index={index}
+                isSelected={selectedLineBlockId === block.id}
+                onClick={(blockId) => {
+                  setSelectedLineBlockId(blockId);
+                  // Scroll to the block if in blocks view
+                  if (viewMode === 'lines') {
+                    setViewMode('blocks');
+                    setFocusedBlockId(blockId);
+                    // Scroll to block after view change
+                    setTimeout(() => {
+                      const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+                      blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 100);
+                  }
+                }}
+              />
+            ))}
+            </div>
+          </div>
         </div>
       ) : (
         /* Blocks View */

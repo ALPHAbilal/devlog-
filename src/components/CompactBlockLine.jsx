@@ -8,7 +8,8 @@ import {
   FileText, 
   Calculator,
   CheckSquare,
-  FileCode
+  FileCode,
+  ChevronRight
 } from 'lucide-react';
 
 // Icon mapping for each block type
@@ -24,22 +25,22 @@ const blockIcons = {
   todo: CheckSquare
 };
 
-// Color mapping for each block type
-const blockColors = {
-  text: 'text-blue-400',
-  code: 'text-green-400',
-  ai: 'text-purple-400',
-  heading: 'text-yellow-400',
-  filetree: 'text-cyan-400',
-  table: 'text-orange-400',
-  template: 'text-pink-400',
-  math: 'text-indigo-400',
-  todo: 'text-red-400'
+// Subtle gradient accents for each block type
+const blockAccents = {
+  text: 'from-blue-500/10 to-blue-600/5',
+  code: 'from-accent-green/10 to-accent-green/5',
+  ai: 'from-purple-500/10 to-purple-600/5',
+  heading: 'from-yellow-500/10 to-yellow-600/5',
+  filetree: 'from-cyan-500/10 to-cyan-600/5',
+  table: 'from-orange-500/10 to-orange-600/5',
+  template: 'from-pink-500/10 to-pink-600/5',
+  math: 'from-indigo-500/10 to-indigo-600/5',
+  todo: 'from-red-500/10 to-red-600/5'
 };
 
 export default function CompactBlockLine({ block, index, onClick, isSelected }) {
   const Icon = blockIcons[block.type] || FileCode;
-  const colorClass = blockColors[block.type] || 'text-gray-400';
+  const gradientClass = blockAccents[block.type] || 'from-gray-500/10 to-gray-600/5';
   
   // Extract preview text based on block type
   const getPreviewText = () => {
@@ -109,43 +110,82 @@ export default function CompactBlockLine({ block, index, onClick, isSelected }) 
     <div 
       onClick={() => onClick(block.id)}
       className={`
-        group flex items-center gap-3 px-4 py-2 
-        border-l-2 transition-all duration-200 cursor-pointer
-        hover:bg-dark-secondary/30
-        ${isSelected 
-          ? 'border-accent-green bg-dark-secondary/50' 
-          : 'border-transparent hover:border-text-secondary/30'
-        }
+        group relative overflow-hidden cursor-pointer
+        transition-all duration-300 ease-out
+        ${isSelected ? 'scale-[1.02]' : 'hover:scale-[1.01]'}
       `}
     >
-      {/* Index */}
-      <div className="text-text-secondary/40 text-xs font-mono w-8 flex-shrink-0">
-        {String(index + 1).padStart(2, '0')}
-      </div>
+      {/* Background gradient */}
+      <div className={`
+        absolute inset-0 bg-gradient-to-r ${gradientClass}
+        opacity-0 group-hover:opacity-100 transition-opacity duration-300
+        ${isSelected ? 'opacity-100' : ''}
+      `} />
       
-      {/* Icon */}
-      <div className={`${colorClass} flex-shrink-0 transition-colors group-hover:text-text-primary`}>
-        <Icon size={16} />
-      </div>
+      {/* Left accent bar */}
+      <div className={`
+        absolute left-0 top-0 bottom-0 w-0.5 
+        bg-gradient-to-b ${gradientClass.replace('/10', '/40').replace('/5', '/20')}
+        transform origin-left transition-all duration-300
+        ${isSelected ? 'scale-x-[200%]' : 'scale-x-0 group-hover:scale-x-100'}
+      `} />
       
-      {/* Content Preview */}
-      <div className="flex-1 min-w-0">
-        <div className="text-text-primary text-sm truncate">
-          {previewText}
+      <div className="relative flex items-center gap-4 px-6 py-3">
+        {/* Index with subtle background */}
+        <div className="relative">
+          <div className="absolute inset-0 bg-dark-secondary/20 rounded blur-sm" />
+          <div className="relative text-text-secondary/30 text-xs font-mono px-2 py-1">
+            {String(index + 1).padStart(2, '0')}
+          </div>
         </div>
-      </div>
-      
-      {/* Metadata */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {metadata.map((meta, i) => (
-          <span 
-            key={i}
-            className="text-xs text-text-secondary/60 bg-dark-secondary/50 
-                       px-2 py-0.5 rounded-full whitespace-nowrap"
-          >
-            {meta}
-          </span>
-        ))}
+        
+        {/* Icon with gradient background */}
+        <div className="relative">
+          <div className={`
+            absolute inset-0 bg-gradient-to-br ${gradientClass}
+            rounded-lg blur-md scale-150 opacity-50
+          `} />
+          <div className="relative p-2 bg-dark-secondary/50 rounded-lg
+                          border border-dark-secondary/50 group-hover:border-text-secondary/20
+                          transition-all duration-300">
+            <Icon size={14} className="text-text-secondary/70 group-hover:text-text-primary transition-colors" />
+          </div>
+        </div>
+        
+        {/* Content Preview with subtle typography */}
+        <div className="flex-1 min-w-0">
+          <div className="text-text-primary/90 text-sm truncate font-light
+                          group-hover:text-text-primary transition-colors">
+            {previewText}
+          </div>
+        </div>
+        
+        {/* Metadata with glass effect */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {metadata.map((meta, i) => (
+            <span 
+              key={i}
+              className="text-xs text-text-secondary/50 
+                         bg-dark-primary/30 backdrop-blur-sm
+                         border border-dark-secondary/20
+                         px-3 py-1 rounded-full whitespace-nowrap
+                         group-hover:border-text-secondary/30 
+                         group-hover:text-text-secondary/70
+                         transition-all duration-300"
+            >
+              {meta}
+            </span>
+          ))}
+        </div>
+        
+        {/* Hover indicator */}
+        <ChevronRight 
+          size={14} 
+          className="text-text-secondary/20 group-hover:text-text-secondary/50 
+                     transform translate-x-1 group-hover:translate-x-0
+                     opacity-0 group-hover:opacity-100
+                     transition-all duration-300" 
+        />
       </div>
     </div>
   );

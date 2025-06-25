@@ -1,38 +1,23 @@
 client:789 [vite] connecting...
-client:912 [vite] connected.
 IndexedDBAdapter.js:43 IndexedDB initialized successfully
 storageWrapper.js:18 Using IndexedDB for storage
 storageWrapper.js:18 Using IndexedDB for storage
 storageWrapper.js:18 Using IndexedDB for storage
-ExpandedViewEnhanced.jsx:41 [ExpandedViewEnhanced] Initializing blocks from entry data
-ExpandedViewEnhanced.jsx:83 [ExpandedViewEnhanced] Component re-rendered {blocksCount: 0, draggedBlockId: null, dropTargetId: null, dropPosition: 'after', forceRenderCount: 0}
-ExpandedViewEnhanced.jsx:94 [ExpandedViewEnhanced] Blocks state changed: []
-ExpandedViewEnhanced.jsx:41 [ExpandedViewEnhanced] Initializing blocks from entry data
-ExpandedViewEnhanced.jsx:83 [ExpandedViewEnhanced] Component re-rendered {blocksCount: 0, draggedBlockId: null, dropTargetId: null, dropPosition: 'after', forceRenderCount: 0}
-ExpandedViewEnhanced.jsx:94 [ExpandedViewEnhanced] Blocks state changed: []
-Block.jsx:60 [Block 1-2] Rendered at index 0 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1-1] Rendered at index 1 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-3] Rendered at index 2 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-4] Rendered at index 3 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1750878213559] Rendered at index 4 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-ExpandedViewEnhanced.jsx:83 [ExpandedViewEnhanced] Component re-rendered {blocksCount: 5, draggedBlockId: null, dropTargetId: null, dropPosition: 'after', forceRenderCount: 0}
-ExpandedViewEnhanced.jsx:94 [ExpandedViewEnhanced] Blocks state changed: (5) [{…}, {…}, {…}, {…}, {…}]
-Block.jsx:60 [Block 1-2] Rendered at index 0 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1-1] Rendered at index 1 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-3] Rendered at index 2 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-4] Rendered at index 3 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1750878213559] Rendered at index 4 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-BlockControls.jsx:36 [BlockControls] onDragStart {blockId: '1-1'}
-Block.jsx:60 [Block 1-2] Rendered at index 0 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1-1] Rendered at index 1 {isDropTarget: false, isDraggedBlock: true, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-3] Rendered at index 2 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-4] Rendered at index 3 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1750878213559] Rendered at index 4 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-ExpandedViewEnhanced.jsx:83 [ExpandedViewEnhanced] Component re-rendered {blocksCount: 5, draggedBlockId: '1-1', dropTargetId: null, dropPosition: 'after', forceRenderCount: 0}
-Block.jsx:60 [Block 1-2] Rendered at index 0 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1-1] Rendered at index 1 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-3] Rendered at index 2 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'heading'}
-Block.jsx:60 [Block 1-4] Rendered at index 3 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-Block.jsx:60 [Block 1750878213559] Rendered at index 4 {isDropTarget: false, isDraggedBlock: false, dropPosition: 'after', type: 'text'}
-ExpandedViewEnhanced.jsx:83 [ExpandedViewEnhanced] Component re-rendered {blocksCount: 5, draggedBlockId: null, dropTargetId: null, dropPosition: 'after', forceRenderCount: 0}
-Block.jsx:159 [Block] onMouseUp - potential drop missed {blockId: '1-2'}
+client:912 [vite] connected.
+ExpandedViewEnhanced.jsx:430 Uncaught ReferenceError: useCallback is not defined
+    at ExpandedView (ExpandedViewEnhanced.jsx:430:29)
+    at react-stack-bottom-frame (react-dom_client.js?v=fc53f42f:17424:20)
+    at renderWithHooks (react-dom_client.js?v=fc53f42f:4206:24)
+    at updateFunctionComponent (react-dom_client.js?v=fc53f42f:6619:21)
+    at beginWork (react-dom_client.js?v=fc53f42f:7654:20)
+    at runWithFiberInDEV (react-dom_client.js?v=fc53f42f:1485:72)
+    at performUnitOfWork (react-dom_client.js?v=fc53f42f:10868:98)
+    at workLoopSync (react-dom_client.js?v=fc53f42f:10728:43)
+    at renderRootSync (react-dom_client.js?v=fc53f42f:10711:13)
+    at performWorkOnRoot (react-dom_client.js?v=fc53f42f:10359:46)
+hook.js:608 An error occurred in the <ExpandedView> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+overrideMethod @ hook.js:608

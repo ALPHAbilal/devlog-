@@ -294,6 +294,50 @@ Your personal wiki emerges naturally:
 ## 🚧 The Journey Continues
 
 ### **Recently Added**
+- **Lines View System** - Compact overview mode for scanning large documents
+  
+  **What is Lines View?**
+  Lines View transforms your blocks into a condensed, scannable format - perfect for documents with 10+ blocks. Each block becomes a single line showing essential information at a glance. Think of it as a "table of contents" for your document that you can interact with.
+  
+  **Features**:
+  - **View Toggle** - Switch between blocks and lines view with a single click
+  - **Type-Specific Icons** - Each block type has its own color-coded icon
+  - **Smart Previews** - First 80-100 characters of content shown inline
+  - **Metadata Badges** - Quick stats like word count, completion %, language, etc.
+  - **Visual Hierarchy** - Subtle gradients and animations matching site aesthetics
+  - **Click to Navigate** - Click any line to jump back to blocks view at that exact block
+  - **Scroll Shadows** - Elegant fade effects indicate more content above/below
+  - **Selected State** - Visual feedback shows which block you're focused on
+  
+  **Design Philosophy**:
+  - Dark theme consistency with subtle gradient accents
+  - Glassmorphism effects on metadata badges
+  - Smooth scale transitions on hover (1.01x) and selection (1.02x)
+  - Left accent bars that animate in on hover
+  - Maximum 500px height with smooth scrolling for long documents
+  
+  **Perfect for**:
+  - Quickly finding specific content in long documents
+  - Getting an overview of document structure
+  - Identifying block types at a glance
+  - Navigating to specific sections without scrolling
+  
+- **API Endpoint Documenter Template** - Interactive API documentation tool
+  
+  **Features**:
+  - Method selector (GET, POST, PUT, DELETE, PATCH)
+  - Endpoint URL input with path parameter highlighting
+  - Dynamic parameter management with add/remove functionality
+  - Response examples with status codes
+  - cURL command generation
+  - Try It section with request/response preview
+  - Visual design matching the app's dark aesthetic
+  
+- **Todo Block Enhancement** - Removed timer functionality for cleaner task management
+  - Simplified interface focused purely on task tracking
+  - Cleaner visual design without countdown timers
+  - Better performance without continuous timer updates
+
 - **Template Block System** - Interactive developer tools that live inside your documentation
   
   **What are Template Blocks?**
@@ -337,6 +381,15 @@ Your personal wiki emerges naturally:
      - Command history tracking with quick copy functionality
      - Remembers your frequently used values for faster workflow
      - Perfect for: Learning Git, quick command reference, avoiding syntax errors, building muscle memory
+  
+  5. **API Endpoint Documenter** - Interactive API documentation builder
+     - Method selector with color-coded badges (GET, POST, PUT, DELETE, PATCH)
+     - Smart endpoint URL formatting with path parameter detection
+     - Dynamic parameter tables with add/remove functionality
+     - Response examples with HTTP status codes
+     - Auto-generated cURL commands for testing
+     - Interactive Try It section for live testing
+     - Perfect for: API documentation, endpoint testing, sharing API examples
   
   **How to Use Templates**:
   1. Add a Template Block (via `/template` command or block selector)

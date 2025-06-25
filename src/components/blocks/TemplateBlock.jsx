@@ -6,6 +6,7 @@ import CSSBoxModel from './templates/CSSBoxModel';
 import PayloadTemplate from './templates/PayloadTemplate';
 import TracebackAnalyzer from './templates/TracebackAnalyzer';
 import GitCommandComposer from './templates/GitCommandComposer';
+import APIEndpointDocumenter from './templates/APIEndpointDocumenter';
 
 const templates = {
   'css-box-model': {
@@ -61,6 +62,28 @@ const templates = {
       currentScenario: null,
       history: [],
       savedPlaceholders: {}
+    }
+  },
+  'api-endpoint': {
+    name: 'API Endpoint',
+    description: 'Interactive API endpoint documentation with examples',
+    component: APIEndpointDocumenter,
+    defaultData: {
+      method: 'GET',
+      path: '/api/v1/resource',
+      title: 'Get Resource',
+      description: 'Retrieve a specific resource by ID',
+      authentication: 'bearer',
+      parameters: [],
+      requestBody: null,
+      responses: [
+        {
+          status: 200,
+          description: 'Successful response',
+          example: '{\n  "id": "123",\n  "name": "Example",\n  "created_at": "2024-01-01T00:00:00Z"\n}'
+        }
+      ],
+      examples: []
     }
   }
   // More templates can be added here

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Play, Pause, Plus, Trash2, Clock, Calendar, 
-  ChevronDown, Check, X, AlertCircle, Timer,
+  Plus, Trash2, Calendar, 
+  ChevronDown, Check, X, AlertCircle,
   GripVertical, Filter
 } from 'lucide-react';
 
@@ -20,12 +20,10 @@ const PRIORITY_OPTIONS = [
 
 export default function TodoBlock({ block, onUpdate }) {
   const [todos, setTodos] = useState(block.data?.todos || []);
-  const [activeTimers, setActiveTimers] = useState({});
   const [filter, setFilter] = useState({ status: 'all', priority: 'all' });
   const [showFilters, setShowFilters] = useState(false);
   const [editingCell, setEditingCell] = useState(null);
   const [editValue, setEditValue] = useState('');
-  const timerIntervals = useRef({});
   const draggedItem = useRef(null);
   const draggedOverItem = useRef(null);
 
@@ -51,7 +49,6 @@ export default function TodoBlock({ block, onUpdate }) {
       status: todo.status || 'todo',
       priority: todo.priority || 'medium',
       dueDate: todo.dueDate || '',
-      timeSpent: todo.timeSpent || 0,
       tags: todo.tags || [],
       createdAt: todo.createdAt || new Date().toISOString()
     }));
@@ -62,31 +59,6 @@ export default function TodoBlock({ block, onUpdate }) {
     }
   }, []);
 
-  // Timer functionality
-  useEffect(() => {
-    Object.entries(activeTimers).forEach(([todoId, isActive]) => {
-      if (isActive && !timerIntervals.current[todoId]) {
-        timerIntervals.current[todoId] = setInterval(() => {
-          setTodos(prevTodos => {
-            const newTodos = prevTodos.map(todo => 
-              todo.id === todoId 
-                ? { ...todo, timeSpent: (todo.timeSpent || 0) + 1 }
-                : todo
-            );
-            onUpdate({ data: { todos: newTodos } });
-            return newTodos;
-          });
-        }, 1000);
-      } else if (!isActive && timerIntervals.current[todoId]) {
-        clearInterval(timerIntervals.current[todoId]);
-        delete timerIntervals.current[todoId];
-      }
-    });
-
-    return () => {
-      Object.values(timerIntervals.current).forEach(clearInterval);
-    };
-  }, [activeTimers]);
 
   const addTodo = () => {
     const newTodo = {
@@ -95,7 +67,6 @@ export default function TodoBlock({ block, onUpdate }) {
       status: 'todo',
       priority: 'medium',
       dueDate: '',
-      timeSpent: 0,
       tags: [],
       createdAt: new Date().toISOString()
     };
@@ -113,27 +84,11 @@ export default function TodoBlock({ block, onUpdate }) {
   };
 
   const deleteTodo = (id) => {
-    if (activeTimers[id]) {
-      toggleTimer(id);
-    }
     const newTodos = todos.filter(todo => todo.id !== id);
     setTodos(newTodos);
     onUpdate({ data: { todos: newTodos } });
   };
 
-  const toggleTimer = (todoId) => {
-    setActiveTimers(prev => ({
-      ...prev,
-      [todoId]: !prev[todoId]
-    }));
-  };
-
-  const formatTime = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
 
   const startEditing = (todoId, field, currentValue) => {
     setEditingCell(`${todoId}-${field}`);
@@ -224,8 +179,7 @@ export default function TodoBlock({ block, onUpdate }) {
     total: todos.length,
     done: todos.filter(t => t.status === 'done').length,
     inProgress: todos.filter(t => t.status === 'in_progress').length,
-    blocked: todos.filter(t => t.status === 'blocked').length,
-    totalTime: todos.reduce((acc, todo) => acc + (todo.timeSpent || 0), 0)
+    blocked: todos.filter(t => t.status === 'blocked').length
   };
 
   const StatusBadge = ({ status, todoId }) => {
@@ -317,12 +271,6 @@ export default function TodoBlock({ block, onUpdate }) {
                 />
               </div>
             </div>
-            {stats.totalTime > 0 && (
-              <div className="text-sm text-text-secondary">
-                <Timer size={14} className="inline mr-1" />
-                {formatTime(stats.totalTime)}
-              </div>
-            )}
           </div>
         </div>
 
@@ -390,7 +338,6 @@ export default function TodoBlock({ block, onUpdate }) {
               <th className="text-left py-2 px-3 text-xs font-medium text-text-secondary">Status</th>
               <th className="text-left py-2 px-3 text-xs font-medium text-text-secondary">Priority</th>
               <th className="text-left py-2 px-3 text-xs font-medium text-text-secondary">Due Date</th>
-              <th className="text-left py-2 px-3 text-xs font-medium text-text-secondary">Time</th>
               <th className="w-20"></th>
             </tr>
           </thead>
@@ -463,23 +410,6 @@ export default function TodoBlock({ block, onUpdate }) {
                       {todo.dueDate || 'Set date'}
                     </button>
                   )}
-                </td>
-                <td className="py-2 px-3">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleTimer(todo.id)}
-                      className={`p-1 rounded transition-colors ${
-                        activeTimers[todo.id] 
-                          ? 'text-accent-green bg-accent-green/10' 
-                          : 'text-text-secondary hover:text-text-primary'
-                      }`}
-                    >
-                      {activeTimers[todo.id] ? <Pause size={14} /> : <Play size={14} />}
-                    </button>
-                    <span className="text-xs font-mono text-text-secondary">
-                      {formatTime(todo.timeSpent || 0)}
-                    </span>
-                  </div>
                 </td>
                 <td className="py-2 px-2">
                   <button

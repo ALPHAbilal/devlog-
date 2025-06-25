@@ -24,13 +24,13 @@ export default function BlockControls({
     `}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
-        <div 
-          className="drag-handle p-1.5 rounded-md cursor-move
+        <div
+          className="drag-handle p-1.5 rounded-md cursor-grab active:cursor-grabbing
                      text-text-secondary/40 hover:text-text-secondary
                      hover:bg-dark-secondary/50 transition-all duration-150
                      group"
           title="Drag to reorder"
-          draggable="true"
+          draggable={true}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
         >

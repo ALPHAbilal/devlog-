@@ -70,27 +70,11 @@ export default function Block({
   const handleDragStart = (e) => {
     setIsDragging(true);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', block.id);
+    e.dataTransfer.setData('text/plain', String(block.id));
     
-    // Create a better drag image
-    const dragImage = document.createElement('div');
-    dragImage.style.cssText = `
-      position: absolute;
-      top: -1000px;
-      background: #1e3a5f;
-      color: #e0e7ff;
-      padding: 8px 16px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      font-size: 14px;
-      font-family: inherit;
-    `;
-    dragImage.textContent = `Moving ${block.type} block`;
-    document.body.appendChild(dragImage);
-    e.dataTransfer.setDragImage(dragImage, 100, 20);
-    setTimeout(() => document.body.removeChild(dragImage), 0);
-    
-    if (onDragStart) onDragStart(block.id);
+    if (onDragStart) {
+      onDragStart(block.id);
+    }
   };
 
   const handleDragEnd = (e) => {
@@ -110,6 +94,7 @@ export default function Block({
 
   const handleDrop = (e) => {
     e.preventDefault();
+    e.stopPropagation();
     const draggedId = e.dataTransfer.getData('text/plain');
     if (draggedId && draggedId !== block.id && onDrop) {
       onDrop(draggedId, block.id);
@@ -130,11 +115,15 @@ export default function Block({
           isDropTarget && !isDraggedBlock ? 'transform scale-[0.98]' : ''
         }`}
         data-block-id={block.id}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          if (onDragOver) onDragOver(e, block.id);
+        }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* Enhanced Block Controls - Use CSS :hover instead of state */}
+        {/* Enhanced Block Controls - Back to original position */}
         <BlockControls
           isVisible={!isDragging}
           onDelete={() => onDelete(block.id)}
@@ -147,7 +136,6 @@ export default function Block({
           onDragEnd={handleDragEnd}
           blockId={block.id}
         />
-
 
         {/* Block Content */}
         <div className={`relative ${

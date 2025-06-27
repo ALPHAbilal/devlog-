@@ -1,134 +1,160 @@
-// Storage wrapper that provides a migration path from localStorage to IndexedDB
-// This allows gradual adoption without breaking existing functionality
+// Storage wrapper that provides a unified interface for Supabase storage
+// Only uses Supabase - no local storage or migration
 
-import storage from './CompressedStorageAdapter';
+import { SupabaseAdapter } from './SupabaseAdapter';
+import { supabase } from '../../lib/supabase';
 
-// Storage wrapper that mimics localStorage API but uses IndexedDB when possible
+// Create a singleton instance
+const supabaseAdapter = new SupabaseAdapter();
+
+// Storage wrapper that uses only Supabase
 export const storageWrapper = {
-  // Flag to track if we should use IndexedDB
-  useIndexedDB: true,
+  // Flag to track if we're using Supabase
+  useSupabase: false,
   
   // Initialize the wrapper
   async init() {
     try {
-      const initialized = await storage.init();
-      this.useIndexedDB = initialized && storage.isAvailable;
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
       
-      if (this.useIndexedDB) {
-        console.log('Using IndexedDB for storage');
-        // Attempt migration if not already done
-        await storage.migrateFromLocalStorage();
+      if (user) {
+        const initialized = await supabaseAdapter.init();
+        this.useSupabase = initialized;
+        
+        if (this.useSupabase) {
+          console.log('Using Supabase for storage');
+        }
       } else {
-        console.log('Using localStorage as fallback');
+        console.log('No authenticated user, storage disabled');
+        this.useSupabase = false;
       }
     } catch (error) {
       console.error('Storage initialization error:', error);
-      this.useIndexedDB = false;
+      this.useSupabase = false;
     }
   },
 
-  // Get entries - compatible with existing localStorage calls
+  // Get entries
   async getEntries() {
-    if (this.useIndexedDB) {
-      try {
-        const documents = await storage.getAllDocuments();
-        // Also update localStorage as backup
-        localStorage.setItem('journeyLoggerEntries', JSON.stringify(documents));
-        return documents;
-      } catch (error) {
-        console.error('IndexedDB read error, falling back to localStorage:', error);
-        this.useIndexedDB = false;
-      }
+    if (!this.useSupabase) {
+      return [];
     }
     
-    // Fallback to localStorage
-    const saved = localStorage.getItem('journeyLoggerEntries');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      return await supabaseAdapter.getDocuments();
+    } catch (error) {
+      console.error('Supabase read error:', error);
+      return [];
+    }
   },
 
-  // Save entries - compatible with existing localStorage calls
+  // Save entries
   async saveEntries(entries) {
-    // Always save to localStorage as backup
-    localStorage.setItem('journeyLoggerEntries', JSON.stringify(entries));
-    
-    if (this.useIndexedDB) {
-      try {
-        await storage.saveAllDocuments(entries);
-        return entries;
-      } catch (error) {
-        console.error('IndexedDB write error:', error);
-        // localStorage already updated, so just return
-        return entries;
-      }
+    if (!this.useSupabase) {
+      console.warn('Cannot save - no authenticated user');
+      return entries;
     }
     
-    return entries;
+    try {
+      await supabaseAdapter.updateAllDocuments(entries);
+      return entries;
+    } catch (error) {
+      console.error('Supabase write error:', error);
+      throw error;
+    }
+  },
+
+  // Save single document
+  async saveDocument(document) {
+    if (!this.useSupabase) {
+      console.warn('Cannot save - no authenticated user');
+      return null;
+    }
+    
+    try {
+      return await supabaseAdapter.saveDocument(document);
+    } catch (error) {
+      console.error('Supabase save error:', error);
+      throw error;
+    }
+  },
+
+  // Delete document
+  async deleteDocument(documentId) {
+    if (!this.useSupabase) {
+      console.warn('Cannot delete - no authenticated user');
+      return;
+    }
+    
+    try {
+      await supabaseAdapter.deleteDocument(documentId);
+    } catch (error) {
+      console.error('Supabase delete error:', error);
+      throw error;
+    }
   },
 
   // Get settings
   async getSettings() {
-    if (this.useIndexedDB) {
-      try {
-        const settings = await storage.getSettings('devlogSettings');
-        if (settings) {
-          // Update localStorage backup
-          localStorage.setItem('devlogSettings', JSON.stringify(settings));
-        }
-        return settings;
-      } catch (error) {
-        console.error('IndexedDB settings read error:', error);
-      }
+    if (!this.useSupabase) {
+      return null;
     }
     
-    // Fallback to localStorage
-    const saved = localStorage.getItem('devlogSettings');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      return await supabaseAdapter.getItem('devlogSettings');
+    } catch (error) {
+      console.error('Supabase settings read error:', error);
+      return null;
+    }
   },
 
   // Save settings
   async saveSettings(settings) {
-    // Always save to localStorage as backup
-    localStorage.setItem('devlogSettings', JSON.stringify(settings));
-    
-    if (this.useIndexedDB) {
-      try {
-        await storage.saveSettings('devlogSettings', settings);
-        return settings;
-      } catch (error) {
-        console.error('IndexedDB settings write error:', error);
-        return settings;
-      }
+    if (!this.useSupabase) {
+      console.warn('Cannot save settings - no authenticated user');
+      return settings;
     }
     
-    return settings;
+    try {
+      await supabaseAdapter.setItem('devlogSettings', settings);
+      return settings;
+    } catch (error) {
+      console.error('Supabase settings write error:', error);
+      return settings;
+    }
   },
 
   // Get storage info
   async getStorageInfo() {
-    if (this.useIndexedDB) {
-      return await storage.getStorageEstimate();
+    if (!this.useSupabase) {
+      return {
+        usage: 0,
+        quota: 0,
+        percentUsed: 0
+      };
     }
     
-    // Estimate localStorage usage
-    let totalSize = 0;
-    for (const key in localStorage) {
-      if (localStorage.hasOwnProperty(key)) {
-        totalSize += localStorage[key].length + key.length;
-      }
-    }
-    
-    return {
-      usage: totalSize * 2, // UTF-16 uses 2 bytes per character
-      quota: 10 * 1024 * 1024, // Assume 10MB limit for localStorage
-      usageDetails: { localStorage: totalSize * 2 }
-    };
+    return await supabaseAdapter.getStorageInfo();
   },
 
-  // Check if we're using IndexedDB
-  isUsingIndexedDB() {
-    return this.useIndexedDB && storage.isAvailable;
+  // Check if we're using Supabase
+  isUsingSupabase() {
+    return this.useSupabase;
+  },
+
+  // Re-initialize when auth state changes
+  async reinit() {
+    await this.init();
   }
 };
+
+// Listen for auth state changes
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+    storageWrapper.reinit();
+  }
+});
 
 // Auto-initialize on import
 storageWrapper.init().catch(console.error);

@@ -403,7 +403,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
   const [editingFile, setEditingFile] = useState(null);
 
   // Generate unique ID
-  const generateId = () => Date.now().toString() + Math.random().toString(36).substr(2, 9);
+  const generateId = () => crypto.randomUUID();
 
   // Update tree structure
   const updateNode = (nodeId, updates) => {

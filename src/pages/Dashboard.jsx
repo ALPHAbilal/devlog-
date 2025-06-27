@@ -7,8 +7,10 @@ import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import { Plus, User, Settings, LogOut } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function Dashboard() {
+  const { user, signOut } = useAuth();
   const [entries, setEntries] = useState([]);
   const [expandedEntry, setExpandedEntry] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,7 +48,7 @@ export default function Dashboard() {
   // Create new entry function (moved up for keyboard shortcut access)
   const createNewEntry = useCallback(() => {
     const newEntry = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title: 'Untitled Document',
       preview: 'Click to start writing...',
       blocks: [],
@@ -145,29 +147,29 @@ export default function Dashboard() {
           // Initialize with example entry
           const initialEntries = [
             {
-              id: '1',
+              id: crypto.randomUUID(),
               title: 'Getting Started with Journey Logger',
               preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
               blocks: [
                 {
-                  id: '1-1',
+                  id: crypto.randomUUID(),
                   type: 'heading',
                   content: 'Welcome to Journey Logger!',
                   level: 1
                 },
                 {
-                  id: '1-2',
+                  id: crypto.randomUUID(),
                   type: 'text',
-                  content: 'This is your personal documentation system with enhanced storage! 🚀\n\n• IndexedDB provides 1GB+ storage capacity\n• Automatic compression saves 50-80% space\n• All your data is safely migrated'
+                  content: 'This is your personal documentation system powered by Supabase! 🚀\n\n• Cloud storage with real-time sync\n• Secure authentication\n• Access your documents from anywhere'
                 },
                 {
-                  id: '1-3',
+                  id: crypto.randomUUID(),
                   type: 'heading',
                   content: 'Available Block Types',
                   level: 2
                 },
                 {
-                  id: '1-4',
+                  id: crypto.randomUUID(),
                   type: 'text',
                   content: '• Text blocks for notes and documentation\n• Code blocks with syntax highlighting\n• AI conversation blocks for saving ChatGPT/Claude discussions\n• Heading blocks for structure\n• Tables for structured data\n• File trees for project structures'
                 }
@@ -244,7 +246,7 @@ export default function Dashboard() {
           if (selected.isNew) {
             // Create new document with the title
             const newEntry = {
-              id: Date.now().toString(),
+              id: crypto.randomUUID(),
               title: selected.title,
               preview: 'Click to start writing...',
               blocks: [],
@@ -442,7 +444,7 @@ export default function Dashboard() {
                                 animate-in fade-in slide-in-from-top-1 duration-150">
                   <div className="p-3 border-b border-dark-primary/50">
                     <p className="text-sm font-medium text-text-primary">Developer</p>
-                    <p className="text-xs text-text-secondary/70">developer@journey.log</p>
+                    <p className="text-xs text-text-secondary/70">{user?.email || 'developer@journey.log'}</p>
                   </div>
                   
                   <div className="p-1">
@@ -452,7 +454,9 @@ export default function Dashboard() {
                       <Settings size={14} />
                       <span>Settings</span>
                     </button>
-                    <button className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
+                    <button 
+                      onClick={() => signOut()}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
                                      text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
                                      rounded transition-colors text-sm">
                       <LogOut size={14} />

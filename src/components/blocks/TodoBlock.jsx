@@ -44,7 +44,7 @@ export default function TodoBlock({ block, onUpdate }) {
   // Initialize todos with IDs if they don't have them
   useEffect(() => {
     const todosWithIds = todos.map(todo => ({
-      id: todo.id || Date.now() + Math.random(),
+      id: todo.id || crypto.randomUUID(),
       task: todo.task || '',
       status: todo.status || 'todo',
       priority: todo.priority || 'medium',
@@ -62,7 +62,7 @@ export default function TodoBlock({ block, onUpdate }) {
 
   const addTodo = () => {
     const newTodo = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       task: 'New task',
       status: 'todo',
       priority: 'medium',

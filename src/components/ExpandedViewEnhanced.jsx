@@ -56,13 +56,13 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       
       if (entry.type === 'ai_interaction' && entry.fullContent?.messages) {
         initialBlocks.push({
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           type: 'ai',
           messages: entry.fullContent.messages
         });
       } else if (entry.fullContent) {
         initialBlocks.push({
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           type: 'text',
           content: entry.fullContent
         });
@@ -113,7 +113,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     const blockToDuplicate = blocks[blockIndex];
     let duplicatedBlock = {
       ...blockToDuplicate,
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       isNew: false
     };
     
@@ -325,7 +325,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
   const addBlock = (type, afterBlockId = null) => {
     const newBlock = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       type,
       content: '',
       isNew: true // Flag to trigger auto-focus

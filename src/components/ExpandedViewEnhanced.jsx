@@ -1,11 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2 } from 'lucide-react';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
+import BlockSkeleton from './blocks/BlockSkeleton';
 import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
+import { blockStreamer } from '../utils/blockStreamer';
+import { autoSaveManager } from '../utils/autoSaveManager';
+import { sessionCache } from '../utils/sessionCache';
+import storageWrapper from '../utils/storage/storageWrapper';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -32,6 +37,24 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [viewMode, setViewMode] = useState('blocks'); // 'blocks' or 'lines'
   const [selectedLineBlockId, setSelectedLineBlockId] = useState(null);
   const [linesScrollProgress, setLinesScrollProgress] = useState({ top: 0, bottom: 1 });
+  const [isLoadingBlocks, setIsLoadingBlocks] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState({ loaded: 0, total: 0 });
+  const cancelStreamRef = useRef(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Check for unsaved changes on mount
+  useEffect(() => {
+    const checkForBackup = async () => {
+      const backup = await autoSaveManager.recoverFromBackup(entry.id);
+      if (backup && backup.data && backup.data.blocks) {
+        console.log(`Found unsaved changes for document ${entry.id}`);
+        // You could show a notification here asking if user wants to restore
+        // For now, we'll just log it
+      }
+    };
+    checkForBackup();
+  }, [entry.id]);
 
   // Initialize blocks from entry data
   useEffect(() => {
@@ -40,8 +63,21 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       setIsInternalUpdate(false);
       return;
     }
-    if (entry.blocks) {
-      // Clean up any stale isNew flags when loading
+    
+    // Cancel any existing stream
+    if (cancelStreamRef.current) {
+      cancelStreamRef.current();
+    }
+    
+    // Check session cache first
+    const cachedBlocks = sessionCache.getBlocks(entry.id);
+    
+    if (cachedBlocks && cachedBlocks.length > 0) {
+      console.log(`Using cached blocks for document ${entry.id} (${cachedBlocks.length} blocks)`);
+      setBlocks(cachedBlocks);
+      setIsLoadingBlocks(false);
+    } else if (entry.blocks && entry.blocks.length > 0) {
+      // Use blocks from entry if available
       const cleanedBlocks = entry.blocks.map(block => {
         if (block.isNew) {
           const { isNew, ...blockWithoutNew } = block;
@@ -50,27 +86,117 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         return block;
       });
       setBlocks(cleanedBlocks);
+      sessionCache.cacheBlocks(entry.id, cleanedBlocks); // Cache for future use
+      setIsLoadingBlocks(false);
+    } else if (entry.blocks && Array.isArray(entry.blocks) && entry.blocks.length === 0) {
+      // Document explicitly has empty blocks array (new document)
+      console.log(`Document ${entry.id} is new with empty blocks array`);
+      setBlocks([]);
+      setIsLoadingBlocks(false);
     } else {
-      // Convert legacy format to blocks
-      const initialBlocks = [];
+      // Start progressive loading only when blocks is undefined/null
+      setIsLoadingBlocks(true);
+      // Show skeleton blocks immediately for better UX
+      setBlocks(blockStreamer.constructor.getSkeletonBlocks(5)); // Show 5 skeleton blocks initially
+      setLoadingProgress({ loaded: 0, total: 0 });
       
-      if (entry.type === 'ai_interaction' && entry.fullContent?.messages) {
-        initialBlocks.push({
-          id: crypto.randomUUID(),
-          type: 'ai',
-          messages: entry.fullContent.messages
-        });
-      } else if (entry.fullContent) {
-        initialBlocks.push({
-          id: crypto.randomUUID(),
-          type: 'text',
-          content: entry.fullContent
-        });
-      }
-      
-      setBlocks(initialBlocks);
+      // Start streaming blocks
+      cancelStreamRef.current = blockStreamer.streamBlocks(
+        entry.id,
+        (block, index, total) => {
+          // Handle empty documents
+          if (total === 0) {
+            setBlocks([]);
+            return;
+          }
+          
+          // Update progress first
+          setLoadingProgress({ loaded: index + 1, total });
+          
+          // Adjust skeleton blocks count on first block if needed
+          if (index === 0 && total > 0) {
+            setBlocks(prevBlocks => {
+              console.log(`ExpandedView: Adjusting skeleton blocks from ${prevBlocks.length} to ${total}`);
+              // Only adjust if we need more or fewer skeleton blocks
+              if (prevBlocks.length !== total) {
+                const newSkeletons = blockStreamer.constructor.getSkeletonBlocks(total);
+                // Replace the first skeleton with the actual block
+                newSkeletons[0] = block;
+                return newSkeletons;
+              } else {
+                // Just replace the first skeleton with actual block
+                const newBlocks = [...prevBlocks];
+                newBlocks[0] = block;
+                return newBlocks;
+              }
+            });
+            return; // Skip the regular block replacement below
+          }
+          
+          // Replace skeleton with actual block
+          setBlocks(prevBlocks => {
+            const newBlocks = [...prevBlocks];
+            console.log(`ExpandedView: Replacing skeleton at index ${index} with actual block`, {
+              skeltonBlocksLength: prevBlocks.length,
+              index,
+              blockId: block.id,
+              blockType: block.type
+            });
+            if (index < newBlocks.length) {
+              newBlocks[index] = block;
+            } else {
+              console.warn(`ExpandedView: Index ${index} out of bounds (array length: ${newBlocks.length})`);
+              // Extend array if needed
+              while (newBlocks.length <= index) {
+                newBlocks.push(null);
+              }
+              newBlocks[index] = block;
+            }
+            return newBlocks;
+          });
+        },
+        (error) => {
+          setIsLoadingBlocks(false);
+          if (error) {
+            console.error('Error loading blocks:', error);
+          } else {
+            // Loading completed successfully
+            console.log('All blocks loaded successfully');
+            // Cache the loaded blocks
+            setBlocks(prevBlocks => {
+              console.log('ExpandedView: Loading complete, checking blocks:', {
+                totalBlocks: prevBlocks.length,
+                skeletonBlocks: prevBlocks.filter(b => b && b.isLoading).length,
+                realBlocks: prevBlocks.filter(b => b && !b.isLoading).length
+              });
+              
+              const realBlocks = prevBlocks.filter(block => block && !block.isLoading);
+              
+              if (realBlocks.length > 0) {
+                // Cache the real blocks
+                sessionCache.cacheBlocks(entry.id, realBlocks);
+              }
+              
+              if (prevBlocks.every(block => block && block.isLoading)) {
+                // All blocks are still skeletons, meaning document is empty
+                console.log('ExpandedView: All blocks are still skeletons, clearing');
+                return [];
+              }
+              return prevBlocks;
+            });
+          }
+        }
+      );
     }
-  }, [entry]);
+    
+    return () => {
+      // Cleanup: cancel stream when component unmounts or entry changes
+      if (cancelStreamRef.current) {
+        cancelStreamRef.current();
+        cancelStreamRef.current = null;
+      }
+    };
+  }, [entry.id]);
 
 
   // Calculate backlinks
@@ -90,11 +216,17 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       return block;
     });
     setBlocks(updatedBlocks);
-    // Save to parent/localStorage
-    if (onUpdate) {
-      setIsInternalUpdate(true);
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    
+    // Update session cache
+    sessionCache.updateBlocks(entry.id, updatedBlocks);
+    
+    // Queue auto-save with debouncing
+    autoSaveManager.queueSave(entry.id, { blocks: updatedBlocks }, async (docId, updates) => {
+      if (onUpdate) {
+        setIsInternalUpdate(true);
+        await onUpdate(docId, updates);
+      }
+    });
   };
 
   const deleteBlock = (blockId) => {
@@ -457,7 +589,13 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <button 
-          onClick={onClose}
+          onClick={async () => {
+            // Save any pending changes before closing
+            if (autoSaveManager.hasUnsavedChanges()) {
+              await autoSaveManager.saveNow(entry.id);
+            }
+            onClose();
+          }}
           className="mt-1 p-2 text-text-secondary hover:text-text-primary 
                      hover:bg-dark-secondary/50 rounded-lg transition-all
                      group flex items-center gap-2"
@@ -470,12 +608,24 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             <div className="text-text-secondary text-sm mb-2">
               Document
             </div>
-            {/* View Mode Toggle */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-accent-green/20 to-accent-green/10 
-                              rounded-lg blur-xl opacity-50" />
-              <div className="relative flex items-center gap-1 bg-dark-secondary/50 backdrop-blur-sm
-                              rounded-lg p-1 border border-dark-secondary/50">
+            {/* View Mode Toggle and Actions */}
+            <div className="flex items-center gap-3">
+              {/* Delete Button */}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="p-1.5 text-text-secondary hover:text-red-400 
+                           hover:bg-red-400/10 rounded transition-all"
+                title="Delete document"
+              >
+                <Trash2 size={16} />
+              </button>
+              
+              {/* View Mode Toggle */}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-accent-green/20 to-accent-green/10 
+                                rounded-lg blur-xl opacity-50" />
+                <div className="relative flex items-center gap-1 bg-dark-secondary/50 backdrop-blur-sm
+                                rounded-lg p-1 border border-dark-secondary/50">
                 <button
                   onClick={() => setViewMode('blocks')}
                   className={`relative p-1.5 rounded transition-all duration-200 ${
@@ -507,6 +657,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               </div>
             </div>
           </div>
+          </div>
           {isEditingTitle ? (
             <input
               type="text"
@@ -531,6 +682,76 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           )}
         </div>
       </div>
+
+      {/* Loading Progress Indicator */}
+      {isLoadingBlocks && loadingProgress.total > 0 && loadingProgress.loaded < loadingProgress.total && (
+        <div className="mb-6 relative">
+          {/* Subtle glow effect */}
+          <div className="absolute inset-0 bg-accent-green/5 blur-2xl rounded-full" />
+          
+          <div className="relative bg-dark-secondary/20 backdrop-blur-sm rounded-xl p-4 
+                          border border-dark-secondary/30 shadow-lg">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                {/* Animated loading icon */}
+                <div className="relative">
+                  <div className="absolute inset-0 bg-accent-green/20 rounded-full blur animate-pulse" />
+                  <div className="relative w-2 h-2 bg-accent-green rounded-full animate-pulse" />
+                </div>
+                
+                <span className="text-sm font-medium text-text-primary">
+                  Loading blocks
+                  {loadingProgress.loaded > 0 && (
+                    <span className="text-xs text-text-secondary/70 ml-1">
+                      ({loadingProgress.loaded === 1 ? 'one by one' : 'optimized'})
+                    </span>
+                  )}
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-accent-green font-mono">
+                  {loadingProgress.loaded}
+                </span>
+                <span className="text-xs text-text-secondary/50">/</span>
+                <span className="text-xs text-text-secondary font-mono">
+                  {loadingProgress.total}
+                </span>
+              </div>
+            </div>
+            
+            {/* Progress bar container */}
+            <div className="relative h-1.5 bg-dark-primary/50 rounded-full overflow-hidden">
+              {/* Animated background pattern */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-green to-transparent 
+                                animate-pulse" />
+              </div>
+              
+              {/* Progress bar */}
+              <div 
+                className="relative h-full bg-gradient-to-r from-accent-green/80 to-accent-green 
+                           transition-all duration-500 ease-out rounded-full shadow-glow-green"
+                style={{ 
+                  width: `${(loadingProgress.loaded / loadingProgress.total) * 100}%`,
+                  boxShadow: '0 0 20px rgba(74, 222, 128, 0.5)'
+                }}
+              >
+                {/* Shine effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                                animate-shine" />
+              </div>
+            </div>
+            
+            {/* Percentage text */}
+            <div className="mt-2 text-center">
+              <span className="text-xs text-text-secondary/70">
+                {Math.round((loadingProgress.loaded / loadingProgress.total) * 100)}% complete
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Blocks or Lines View */}
       {viewMode === 'lines' ? (
@@ -614,38 +835,61 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             }
             return null;
           })}
-          {blocks.map((block, index) => (
+          {/* Empty state message */}
+          {blocks.length === 0 && !isLoadingBlocks && (
+            <div className="text-center py-12 mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 
+                              bg-dark-secondary/30 rounded-full mb-4">
+                <Plus size={24} className="text-text-secondary/50" />
+              </div>
+              <h3 className="text-lg font-medium text-text-primary mb-2">
+                Start documenting
+              </h3>
+              <p className="text-text-secondary/70 text-sm max-w-md mx-auto">
+                This document is empty. Click the button below to add your first block
+                and start writing.
+              </p>
+            </div>
+          )}
+          
+          {blocks.filter(block => block !== null).map((block, index) => (
             <div key={`${block.id}-${forceRenderCount}`} className="relative">
-              <Block
-                block={block}
-                index={index}
-                onUpdate={updateBlock}
-                onDelete={deleteBlock}
-                onDuplicate={duplicateBlock}
-                onMoveUp={(id) => moveBlock(id, 'up')}
-                onMoveDown={(id) => moveBlock(id, 'down')}
-                canMoveUp={index > 0}
-                canMoveDown={index < blocks.length - 1}
-                onAddBelow={handleAddBelowBlock}
-                onConvert={convertBlock}
-                showAddButton={true}
-                isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-                onFocus={setFocusedBlockId}
-                allBlocks={blocks}
-                onDragStart={handleDragStart}
-                onDragEnd={handleDragEnd}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                draggedBlockId={draggedBlockId}
-                dropTargetId={dropTargetId}
-                dropPosition={dropPosition}
-              />
-            <AddBlockRow
-              show={showBlockSelector && selectorPosition === block.id}
-              onSelect={(type) => addBlock(type, block.id)}
-              onClose={() => setShowBlockSelector(false)}
-            />
+              {block.isLoading ? (
+                <BlockSkeleton type={block.type} />
+              ) : (
+                <>
+                  <Block
+                    block={block}
+                    index={index}
+                    onUpdate={updateBlock}
+                    onDelete={deleteBlock}
+                    onDuplicate={duplicateBlock}
+                    onMoveUp={(id) => moveBlock(id, 'up')}
+                    onMoveDown={(id) => moveBlock(id, 'down')}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < blocks.length - 1}
+                    onAddBelow={handleAddBelowBlock}
+                    onConvert={convertBlock}
+                    showAddButton={true}
+                    isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                    onFocus={setFocusedBlockId}
+                    allBlocks={blocks}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    draggedBlockId={draggedBlockId}
+                    dropTargetId={dropTargetId}
+                    dropPosition={dropPosition}
+                  />
+                  <AddBlockRow
+                    show={showBlockSelector && selectorPosition === block.id}
+                    onSelect={(type) => addBlock(type, block.id)}
+                    onClose={() => setShowBlockSelector(false)}
+                  />
+                </>
+              )}
           </div>
         ))}
 
@@ -800,6 +1044,93 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         </div>
       )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
+             onClick={() => setShowDeleteConfirm(false)}>
+          <div className="bg-dark-secondary rounded-lg p-6 max-w-md w-full mx-4 
+                          border border-dark-primary/50 shadow-xl"
+               onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-semibold text-text-primary mb-4">
+              Delete Document?
+            </h3>
+            <p className="text-text-secondary mb-6">
+              Are you sure you want to delete "{title}"? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 text-text-secondary hover:text-text-primary 
+                           hover:bg-dark-primary/50 rounded transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  // Prevent multiple clicks
+                  if (isDeleting) return;
+                  
+                  try {
+                    setIsDeleting(true);
+                    console.log('Starting document deletion for:', entry.id);
+                    
+                    // Clear from session cache first
+                    sessionCache.clearDocument(entry.id);
+                    console.log('Cleared from session cache');
+                    
+                    // Delete from storage using the proper delete method
+                    await storageWrapper.deleteEntry(entry.id);
+                    console.log('Successfully deleted document from storage');
+                    
+                    // Close the delete confirmation modal
+                    setShowDeleteConfirm(false);
+                    
+                    // Notify parent component to update the list
+                    // The Dashboard will handle closing the expanded view
+                    if (onUpdate) {
+                      onUpdate(entry.id, null);
+                    }
+                  } catch (error) {
+                    console.error('Error deleting document:', error);
+                    console.error('Error details:', {
+                      message: error?.message,
+                      stack: error?.stack,
+                      name: error?.name,
+                      fullError: error
+                    });
+                    
+                    // More detailed error message
+                    const errorMessage = error?.message || 
+                                       (error?.error?.message) || 
+                                       (typeof error === 'string' ? error : 'Unknown error');
+                    
+                    alert(`Failed to delete document: ${errorMessage}`);
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+                className={`px-4 py-2 bg-red-500/20 text-red-400 hover:bg-red-500/30 
+                           rounded transition-colors flex items-center gap-2
+                           ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-red-400/50 border-t-red-400 
+                                    rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={16} />
+                    Delete
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

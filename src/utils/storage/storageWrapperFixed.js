@@ -130,24 +130,8 @@ export async function saveEntries(entries) {
 }
 
 export async function deleteEntry(id) {
-  try {
-    console.log(`StorageWrapper: Deleting entry ${id}`);
-    const storageAdapter = await init();
-    
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Delete operation timed out after 10 seconds')), 10000)
-    );
-    
-    const deletePromise = storageAdapter.deleteEntry(id);
-    
-    const result = await Promise.race([deletePromise, timeoutPromise]);
-    console.log(`StorageWrapper: Successfully deleted entry ${id}`);
-    return result;
-  } catch (error) {
-    console.error(`StorageWrapper: Error deleting entry ${id}:`, error);
-    throw error;
-  }
+  const storageAdapter = await init();
+  return storageAdapter.deleteEntry(id);
 }
 
 export async function searchEntries(query) {

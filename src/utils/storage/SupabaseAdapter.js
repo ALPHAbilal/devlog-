@@ -3,10 +3,25 @@ import { supabase } from '../../lib/supabase';
 export class SupabaseAdapter {
   constructor() {
     this.initialized = false;
+    this.documentsCache = null;
+    this.cacheTimestamp = 0;
+    this.CACHE_DURATION = 5000; // 5 seconds cache
+  }
+  
+  invalidateCache() {
+    this.documentsCache = null;
+    this.cacheTimestamp = 0;
   }
 
-  async init() {
-    // Check if user is authenticated
+  async init(userId = null) {
+    // If userId is provided, use it directly (avoid extra auth call)
+    if (userId) {
+      this.userId = userId;
+      this.initialized = true;
+      return true;
+    }
+    
+    // Otherwise check if user is authenticated
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('User must be authenticated');
@@ -130,38 +145,140 @@ export class SupabaseAdapter {
     }
   }
 
-  // Document-specific methods
-  async getDocuments() {
+  // Get documents list without blocks (for dashboard/list views)
+  async getDocumentsList() {
     if (!this.initialized) await this.init();
 
-    const { data, error } = await supabase
+    const queryStart = performance.now();
+    const { data: documents, error } = await supabase
       .from('documents')
-      .select(`
-        *,
-        blocks (
-          *
-        )
-      `)
+      .select('id, title, tags, created_at, updated_at, is_template, metadata')
       .eq('user_id', this.userId)
       .order('updated_at', { ascending: false });
-
+    
+    const queryTime = performance.now() - queryStart;
+    console.log(`SupabaseAdapter: Documents list query completed in ${Math.round(queryTime)}ms`);
+    
     if (error) {
-      console.error('Error getting documents:', error);
+      console.error('Error getting documents list:', error);
       return [];
     }
-
-    // Transform to legacy format
-    return data.map(doc => ({
+    
+    return documents.map(doc => ({
       id: doc.id,
       title: doc.title,
+      preview: 'Click to view document...', // Default preview since it's not in DB
       createdAt: doc.created_at,
       updatedAt: doc.updated_at,
       isTemplate: doc.is_template,
       tags: doc.tags || [],
-      blocks: (doc.blocks || [])
-        .sort((a, b) => a.position - b.position)
-        .map(block => this.transformBlockFromDB(block))
+      metadata: doc.metadata || {},
+      blocks: [] // Empty blocks array for list view
     }));
+  }
+
+  // Document-specific methods - NOW RETURNS DOCUMENTS WITHOUT BLOCKS
+  async getDocuments() {
+    if (!this.initialized) await this.init();
+
+    // Check cache first
+    const now = Date.now();
+    if (this.documentsCache && (now - this.cacheTimestamp) < this.CACHE_DURATION) {
+      console.log('SupabaseAdapter: Returning cached documents');
+      return this.documentsCache;
+    }
+
+    const queryStart = performance.now();
+    
+    // ONLY get documents - NO BLOCKS for dashboard view
+    // Add timeout and limit for better performance
+    // Use simplified query to avoid potential RLS issues
+    const { data: documents, error: docError } = await supabase
+      .from('documents')
+      .select('id, title, tags, created_at, updated_at, is_template, metadata')
+      .eq('user_id', this.userId)
+      .order('updated_at', { ascending: false })
+      .limit(50) // Reduce to 50 for better performance
+      .abortSignal(AbortSignal.timeout(10000)); // 10 second timeout
+    
+    const queryTime = performance.now() - queryStart;
+    console.log(`SupabaseAdapter: Documents query completed in ${Math.round(queryTime)}ms (NO BLOCKS)`);
+    
+    if (docError) {
+      console.error('Error getting documents:', docError);
+      return this.documentsCache || [];
+    }
+    
+    if (!documents || documents.length === 0) {
+      return [];
+    }
+    
+    // Transform to legacy format - with EMPTY blocks array
+    const transformedDocuments = documents.map(doc => ({
+      id: doc.id,
+      title: doc.title,
+      preview: 'Click to view document...', // Default preview since it's not in DB
+      createdAt: doc.created_at,
+      updatedAt: doc.updated_at,
+      isTemplate: doc.is_template,
+      tags: doc.tags || [],
+      metadata: doc.metadata || {},
+      blocks: [] // Empty blocks - will be loaded on demand
+    }));
+    
+    // Update cache
+    this.documentsCache = transformedDocuments;
+    this.cacheTimestamp = now;
+    
+    console.log(`SupabaseAdapter: Returning ${transformedDocuments.length} documents (blocks will load on demand)`);
+    
+    return transformedDocuments;
+  }
+
+  // Get a single document with blocks (for editing)
+  async getDocument(documentId) {
+    if (!this.initialized) await this.init();
+    
+    const queryStart = performance.now();
+    
+    // Get document
+    const { data: doc, error: docError } = await supabase
+      .from('documents')
+      .select('*')
+      .eq('id', documentId)
+      .eq('user_id', this.userId)
+      .single();
+    
+    if (docError) {
+      console.error('Error getting document:', docError);
+      return null;
+    }
+    
+    // Get blocks for this document
+    const { data: blocks, error: blockError } = await supabase
+      .from('blocks')
+      .select('*')
+      .eq('document_id', documentId)
+      .order('position');
+    
+    if (blockError) {
+      console.error('Error getting blocks:', blockError);
+    }
+    
+    const queryTime = performance.now() - queryStart;
+    console.log(`SupabaseAdapter: Single document query completed in ${Math.round(queryTime)}ms`);
+    
+    return {
+      id: doc.id,
+      title: doc.title,
+      preview: this.generatePreview(blocks || []),
+      createdAt: doc.created_at,
+      updatedAt: doc.updated_at,
+      isTemplate: doc.is_template,
+      tags: doc.tags || [],
+      metadata: doc.metadata || {},
+      blocks: (blocks || []).map(block => this.transformBlockFromDB(block))
+    };
   }
 
   async saveDocument(document) {
@@ -248,22 +365,83 @@ export class SupabaseAdapter {
       }
     }
 
+    // Invalidate cache after successful save
+    this.invalidateCache();
+
     return savedDoc.id;
   }
 
   async deleteDocument(documentId) {
     if (!this.initialized) await this.init();
 
-    const { error } = await supabase
-      .from('documents')
-      .delete()
-      .eq('id', documentId)
-      .eq('user_id', this.userId);
+    try {
+      console.log(`SupabaseAdapter: Starting deletion of document ${documentId}`);
+      
+      // Delete blocks and document in parallel for better performance
+      const deleteStart = performance.now();
+      
+      // Use Promise.allSettled to continue even if one fails
+      const [blocksResult, docResult] = await Promise.allSettled([
+        // Delete blocks
+        supabase
+          .from('blocks')
+          .delete()
+          .eq('document_id', documentId),
+        
+        // Delete document
+        supabase
+          .from('documents')
+          .delete()
+          .eq('id', documentId)
+          .eq('user_id', this.userId)
+      ]);
+      
+      const deleteTime = performance.now() - deleteStart;
+      console.log(`SupabaseAdapter: Delete operations completed in ${Math.round(deleteTime)}ms`);
+      
+      // Check results
+      if (blocksResult.status === 'rejected') {
+        console.error('Error deleting blocks:', blocksResult.reason);
+      } else if (blocksResult.value.error) {
+        console.error('Error deleting blocks:', blocksResult.value.error);
+      }
+      
+      if (docResult.status === 'rejected') {
+        console.error('Error deleting document:', docResult.reason);
+        throw docResult.reason;
+      } else if (docResult.value.error) {
+        console.error('Error deleting document:', docResult.value.error);
+        throw docResult.value.error;
+      }
 
-    if (error) {
-      console.error('Error deleting document:', error);
+      // Invalidate cache after successful delete
+      this.invalidateCache();
+      
+      console.log(`Successfully deleted document ${documentId}`);
+      return true;
+    } catch (error) {
+      console.error('Error in deleteDocument:', error);
       throw error;
     }
+  }
+
+  // Generate preview from blocks
+  generatePreview(blocks) {
+    if (!blocks || blocks.length === 0) {
+      return 'Click to view document...';
+    }
+    
+    // Find first text content block
+    const firstTextBlock = blocks.find(b => 
+      (b.type === 'text' || b.type === 'heading') && b.content
+    );
+    
+    if (firstTextBlock) {
+      const preview = firstTextBlock.content.substring(0, 150);
+      return preview.length < firstTextBlock.content.length ? preview + '...' : preview;
+    }
+    
+    return 'Click to view document...';
   }
 
   // Transform blocks between DB and app formats
@@ -325,6 +503,9 @@ export class SupabaseAdapter {
     for (const doc of documents) {
       await this.saveDocument(doc);
     }
+
+    // Invalidate cache after successful update
+    this.invalidateCache();
   }
 
   // Storage info methods (for compatibility)

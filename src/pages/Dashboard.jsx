@@ -7,7 +7,8 @@ import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import { Plus, User, Settings, LogOut } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContextOptimized';
+import { sessionCache } from '../utils/sessionCache';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -21,6 +22,12 @@ export default function Dashboard() {
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
+  
+  // Handle document expansion with lazy block loading
+  const handleDocumentExpand = useCallback((document) => {
+    // Open document immediately - ExpandedViewEnhanced will handle progressive loading
+    setExpandedEntry(document);
+  }, []);
 
   // Update storage info
   const updateStorageInfo = useCallback(async () => {
@@ -34,15 +41,20 @@ export default function Dashboard() {
 
   // Save entries using the storage wrapper
   const saveEntries = useCallback(async (updatedEntries) => {
+    // Update UI immediately for responsiveness
     setEntries(updatedEntries);
-    try {
-      await storageWrapper.saveEntries(updatedEntries);
-      // Update storage info after save
-      updateStorageInfo();
-    } catch (error) {
-      console.error('Error saving entries:', error);
-      // Fallback is handled within storageWrapper
-    }
+    
+    // Save to storage asynchronously
+    setTimeout(async () => {
+      try {
+        await storageWrapper.saveEntries(updatedEntries);
+        // Update storage info after save
+        updateStorageInfo();
+      } catch (error) {
+        console.error('Error saving entries:', error);
+        // Fallback is handled within storageWrapper
+      }
+    }, 0);
   }, [updateStorageInfo]);
 
   // Create new entry function (moved up for keyboard shortcut access)
@@ -107,20 +119,53 @@ export default function Dashboard() {
 
   // Load entries on mount
   useEffect(() => {
-    if (isInitialized.current) return;
+    let isMounted = true;
+    let loadingInProgress = false;
     
     const loadEntries = async () => {
+      // Prevent concurrent loads
+      if (loadingInProgress || isInitialized.current) {
+        console.log('Dashboard: Skipping load - already in progress or initialized');
+        return;
+      }
+      
+      loadingInProgress = true;
+      const startTime = performance.now();
+      console.log('Dashboard: Starting to load entries...');
       setIsLoading(true);
+      
       try {
         // Ensure storage is initialized
+        const initStart = performance.now();
         await storageWrapper.init();
+        if (!isMounted) return;
+        console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
         
         // Load entries
+        const loadStart = performance.now();
         const savedEntries = await storageWrapper.getEntries();
+        if (!isMounted) return;
+        console.log(`Dashboard: Loaded ${savedEntries?.length || 0} entries (${Math.round(performance.now() - loadStart)}ms)`);
+        console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
         
         if (savedEntries && savedEntries.length > 0) {
-          // Clean up any stale isNew flags in existing documents
-          const cleanedEntries = savedEntries.map(entry => {
+          // Check session cache first for any cached documents
+          const cachedDocs = sessionCache.getAllDocuments();
+          const cachedMap = new Map(cachedDocs.map(doc => [doc.id, doc]));
+          
+          // Merge cached data with saved entries
+          const mergedEntries = savedEntries.map(entry => {
+            const cached = cachedMap.get(entry.id);
+            if (cached) {
+              // Use cached version but update with any newer fields
+              return {
+                ...entry,
+                ...cached,
+                updatedAt: entry.updatedAt > cached.updatedAt ? entry.updatedAt : cached.updatedAt
+              };
+            }
+            
+            // Clean up any stale isNew flags
             if (entry.blocks) {
               return {
                 ...entry,
@@ -136,13 +181,7 @@ export default function Dashboard() {
             return entry;
           });
           
-          // Save cleaned entries if any were modified
-          const hasChanges = JSON.stringify(savedEntries) !== JSON.stringify(cleanedEntries);
-          if (hasChanges) {
-            await storageWrapper.saveEntries(cleanedEntries);
-          }
-          
-          setEntries(cleanedEntries);
+          setEntries(mergedEntries);
         } else {
           // Initialize with example entry
           const initialEntries = [
@@ -184,21 +223,44 @@ export default function Dashboard() {
         }
         
         // Get initial storage info
-        await updateStorageInfo();
+        if (isMounted) {
+          await updateStorageInfo();
+        }
       } catch (error) {
         console.error('Error loading entries:', error);
       } finally {
-        setIsLoading(false);
-        isInitialized.current = true;
+        if (isMounted) {
+          console.log('Dashboard: Setting isLoading to false');
+          setIsLoading(false);
+          isInitialized.current = true;
+          loadingInProgress = false;
+        }
       }
     };
 
     loadEntries();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [updateStorageInfo]);
 
 
   // Update entry
   const updateEntry = useCallback((entryId, updates) => {
+    // Handle deletion when updates is null
+    if (updates === null) {
+      const updatedEntries = entries.filter(entry => entry.id !== entryId);
+      saveEntries(updatedEntries);
+      
+      // If we're deleting the currently expanded entry, close it
+      if (expandedEntry && expandedEntry.id === entryId) {
+        setExpandedEntry(null);
+      }
+      
+      return;
+    }
+    
     const updatedEntries = entries.map(entry => {
       if (entry.id === entryId) {
         const updatedEntry = {
@@ -325,11 +387,82 @@ export default function Dashboard() {
     return 'text-gray-400';
   };
 
-  if (isLoading) {
+  // Show skeleton UI while loading for better perceived performance
+  if (isLoading && entries.length === 0) {
     return (
-      <div className="flex items-center justify-center h-screen bg-dark-primary">
-        <div className="flex items-center gap-2">
-          <LogoIcon className="w-8 h-8 text-accent-green animate-pulse" />
+      <div className="flex flex-col h-full relative bg-dark-primary">
+        {/* Floating Tags Skeleton */}
+        <div className="absolute left-3 top-24 bottom-6 z-30 max-w-[160px]">
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-hidden">
+              <div className="flex flex-col gap-2">
+                {[1, 2, 3, 4].map(i => (
+                  <div
+                    key={i}
+                    className="h-10 bg-gray-800/30 rounded border border-dashed border-dark-secondary/40 animate-pulse"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Header Skeleton */}
+        <div className="flex-shrink-0">
+          {/* Top Navigation Bar */}
+          <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
+            {/* Logo and Brand */}
+            <div className="flex items-center gap-2.5 ml-8">
+              <LogoMinimal size={32} />
+              <div className="h-7 w-16 bg-gray-800/50 rounded animate-pulse" />
+            </div>
+            
+            {/* Stats and Profile */}
+            <div className="flex items-center gap-4 mr-8">
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-20 bg-gray-800/50 rounded animate-pulse" />
+                <div className="h-4 w-24 bg-gray-800/50 rounded animate-pulse" />
+              </div>
+              <div className="w-8 h-8 bg-gray-800/50 rounded-full animate-pulse" />
+            </div>
+          </div>
+
+          {/* Search and Actions Bar */}
+          <div className="px-6 py-3 ml-40">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-10 bg-gray-800/30 rounded animate-pulse" />
+                <div className="w-20 h-10 bg-gray-800/30 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content Skeleton with margin for tags */}
+        <div className="flex-grow overflow-hidden px-6 ml-40">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="group">
+                <div className="bg-dark-secondary/30 rounded-lg p-4 h-[140px] 
+                                border border-dark-secondary/50">
+                  {/* Title skeleton */}
+                  <div className="h-5 bg-gray-800/50 rounded w-3/4 mb-3 animate-pulse" />
+                  
+                  {/* Preview skeleton */}
+                  <div className="space-y-2 mb-3">
+                    <div className="h-3 bg-gray-800/30 rounded animate-pulse" />
+                    <div className="h-3 bg-gray-800/30 rounded w-5/6 animate-pulse" />
+                  </div>
+                  
+                  {/* Tags skeleton */}
+                  <div className="flex gap-2 mt-auto">
+                    <div className="h-5 w-16 bg-gray-800/30 rounded-full animate-pulse" />
+                    <div className="h-5 w-20 bg-gray-800/30 rounded-full animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -501,7 +634,7 @@ export default function Dashboard() {
       <div className="flex-grow overflow-hidden px-6 ml-40">
         <VirtualizedGrid 
           entries={filteredEntries}
-          onExpand={setExpandedEntry}
+          onExpand={handleDocumentExpand}
           searchTerm={searchTerm}
         />
       </div>

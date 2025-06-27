@@ -1,33 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
+// Re-export from optimized version to maintain backward compatibility
+export { 
+  supabase, 
+  optimizedSupabase, 
+  getSession, 
+  onAuthStateChange, 
+  deduplicateRequest 
+} from './supabaseOptimized';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-console.log('Supabase Environment Variables:', {
-  url: supabaseUrl,
-  anonKey: supabaseAnonKey ? 'Present' : 'Missing'
-})
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    storage: window.localStorage,
-    storageKey: 'journey-log-auth',
-    debug: true
-  },
-  db: {
-    schema: 'public'
-  },
-  global: {
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    }
-  }
-})
+console.log('Using optimized Supabase client');

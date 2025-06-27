@@ -269,6 +269,35 @@ Your personal wiki emerges naturally:
 - **Progressive enhancement** - Advanced features (IndexedDB) with graceful fallbacks
 - **Storage-efficient** - Automatic compression maximizes available space
 
+### **Data Safety & Auto-Save System**
+
+#### **Auto-Save Features**
+- **Automatic Saving** - Changes are saved automatically after 1 second of inactivity
+- **Smart Debouncing** - Prevents excessive saves during rapid typing
+- **Retry Logic** - Failed saves are retried up to 3 times with exponential backoff
+- **Save on Exit** - Unsaved changes are saved when leaving a document or closing the tab
+
+#### **Local Backup Protection**
+- **Pre-Save Backups** - Before every save attempt, a local backup is created
+- **Automatic Cleanup** - Backups are deleted immediately after successful saves to conserve space
+- **Failure Recovery** - If saves fail after 3 retries, the local backup is preserved
+- **Memory + Storage** - Backups are kept in both memory and localStorage for redundancy
+- **Recovery on Load** - Documents check for unsaved backups when opened
+
+#### **How It Works**
+1. **You type** → Changes are queued for saving
+2. **1 second pause** → Auto-save triggers
+3. **Local backup created** → Your work is protected
+4. **Save attempt** → Data sent to database
+5. **Success** → Backup deleted automatically
+6. **Failure** → Backup kept, retries attempted
+
+This ensures:
+- ✅ **Zero data loss** - Even if database fails, local backup exists
+- ✅ **Clean storage** - Successful saves remove unnecessary backups
+- ✅ **Transparent operation** - Works silently in the background
+- ✅ **Fast recovery** - Unsaved work can be restored on next visit
+
 ## 🎨 Design Principles
 
 1. **Speed Over Everything**

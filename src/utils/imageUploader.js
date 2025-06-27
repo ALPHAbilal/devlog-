@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabaseOptimized';
 
 /**
  * Uploads an image to Supabase Storage and returns the public URL

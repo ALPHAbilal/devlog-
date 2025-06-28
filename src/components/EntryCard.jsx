@@ -1,4 +1,10 @@
+import { optimizedBlockLoader } from '../utils/optimizedBlockLoader';
+
 export default function EntryCard({ entry, onExpand }) {
+  // Preload blocks on hover
+  const handleMouseEnter = () => {
+    optimizedBlockLoader.preloadDocuments([entry.id]);
+  };
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -11,6 +17,7 @@ export default function EntryCard({ entry, onExpand }) {
   return (
     <div 
       onClick={() => onExpand(entry)}
+      onMouseEnter={handleMouseEnter}
       className="bg-card-gradient rounded-lg p-6 cursor-pointer 
                  transition-all duration-300 hover:scale-105 hover:shadow-xl
                  flex flex-col h-full"

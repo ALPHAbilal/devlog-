@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Supabase Connection</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Supabase Connection Test</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="testSimpleQuery()">Test Simple Query</button>
+    <button onclick="testDocumentQuery()">Test Document Query</button>
+    <button onclick="createTestDocument()">Create Test Document</button>
+    <pre id="output"></pre>
+
+    <script>
+        const supabaseUrl = 'https://zqcjipwiznesnbgbocnu.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxY2ppcHdpem5lc25iZ2JvY251Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI2Njk4MzcsImV4cCI6MjA0ODI0NTgzN30.ZY5kCBb5fAjGpjUUmQ-Sm-u4b3wvMH7c_8W5C1DJLkA';
+        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message) {
+            document.getElementById('output').textContent += message + '\n';
+        }
+
+        async function testConnection() {
+            log('Testing connection...');
+            const start = performance.now();
+            
+            try {
+                const { data: { user }, error } = await supabaseClientClient.auth.getUser();
+                const time = performance.now() - start;
+                
+                if (error) {
+                    log(`Auth error: ${error.message} (${time.toFixed(2)}ms)`);
+                } else if (user) {
+                    log(`✓ Authenticated as: ${user.email} (${time.toFixed(2)}ms)`);
+                    log(`  User ID: ${user.id}`);
+                } else {
+                    log(`No user logged in (${time.toFixed(2)}ms)`);
+                }
+            } catch (e) {
+                log(`Exception: ${e.message}`);
+            }
+        }
+
+        async function testSimpleQuery() {
+            log('\nTesting simple query...');
+            const start = performance.now();
+            
+            try {
+                const { count, error } = await supabaseClient
+                    .from('documents')
+                    .select('*', { count: 'exact', head: true });
+                
+                const time = performance.now() - start;
+                
+                if (error) {
+                    log(`Query error: ${error.message} (${time.toFixed(2)}ms)`);
+                } else {
+                    log(`✓ Found ${count} documents (${time.toFixed(2)}ms)`);
+                }
+            } catch (e) {
+                log(`Exception: ${e.message}`);
+            }
+        }
+
+        async function testDocumentQuery() {
+            log('\nTesting document query...');
+            const start = performance.now();
+            
+            try {
+                const { data: { user } } = await supabaseClientClient.auth.getUser();
+                if (!user) {
+                    log('Not authenticated');
+                    return;
+                }
+
+                const { data, error } = await supabaseClient
+                    .from('documents')
+                    .select('id, title, created_at')
+                    .eq('user_id', user.id)
+                    .limit(5);
+                
+                const time = performance.now() - start;
+                
+                if (error) {
+                    log(`Query error: ${error.message} (${time.toFixed(2)}ms)`);
+                } else {
+                    log(`✓ Retrieved ${data?.length || 0} documents (${time.toFixed(2)}ms)`);
+                    data?.forEach(doc => {
+                        log(`  - ${doc.title} (${doc.id})`);
+                    });
+                }
+            } catch (e) {
+                log(`Exception: ${e.message}`);
+            }
+        }
+
+        async function createTestDocument() {
+            log('\nCreating test document...');
+            const start = performance.now();
+            
+            try {
+                const { data: { user } } = await supabaseClientClient.auth.getUser();
+                if (!user) {
+                    log('Not authenticated');
+                    return;
+                }
+
+                const testDoc = {
+                    id: crypto.randomUUID(),
+                    user_id: user.id,
+                    title: 'Test Document ' + new Date().toISOString(),
+                    tags: ['test'],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                const { data, error } = await supabaseClient
+                    .from('documents')
+                    .insert(testDoc)
+                    .select();
+                
+                const time = performance.now() - start;
+                
+                if (error) {
+                    log(`Insert error: ${error.message} (${time.toFixed(2)}ms)`);
+                    log(`Error details: ${JSON.stringify(error)}`);
+                } else {
+                    log(`✓ Created document: ${data[0]?.title} (${time.toFixed(2)}ms)`);
+                }
+            } catch (e) {
+                log(`Exception: ${e.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

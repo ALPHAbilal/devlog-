@@ -31,6 +31,18 @@ function createIndexedDBWrapper() {
         entry.title?.toLowerCase().includes(lowerQuery) ||
         entry.content?.toLowerCase().includes(lowerQuery)
       );
+    },
+    async saveDocument(document) {
+      // For IndexedDB, we need to save the single document
+      const allDocs = await IndexedDBAdapter.getAllDocuments();
+      const updatedDocs = allDocs.map(doc => 
+        doc.id === document.id ? document : doc
+      );
+      // If document doesn't exist, add it
+      if (!allDocs.find(doc => doc.id === document.id)) {
+        updatedDocs.push(document);
+      }
+      return await IndexedDBAdapter.saveAllDocuments(updatedDocs);
     }
   };
 }
@@ -62,6 +74,10 @@ function createSupabaseWrapper(adapter) {
     // Add getDocument method for loading single document with blocks
     async getDocument(documentId) {
       return await adapter.getDocument(documentId);
+    },
+    // Add saveDocument method for saving single document
+    async saveDocument(document) {
+      return await adapter.saveDocument(document);
     }
   };
 }
@@ -129,6 +145,20 @@ export async function saveEntries(entries) {
   return storageAdapter.saveEntries(entries);
 }
 
+export async function saveDocument(document) {
+  const storageAdapter = await init();
+  
+  // Use the new safe save method if available
+  if (storageAdapter.saveDocumentSafe) {
+    return storageAdapter.saveDocumentSafe(document);
+  } else if (storageAdapter.saveDocument) {
+    return storageAdapter.saveDocument(document);
+  }
+  
+  // Fallback for adapters without saveDocument
+  throw new Error('Current storage adapter does not support single document saves');
+}
+
 export async function deleteEntry(id) {
   try {
     console.log(`StorageWrapper: Deleting entry ${id}`);
@@ -180,6 +210,7 @@ export const storageWrapper = {
   reset,
   loadEntries,
   saveEntries,
+  saveDocument,
   deleteEntry,
   searchEntries,
   // Backward compatibility aliases

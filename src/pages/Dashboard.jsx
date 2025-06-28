@@ -261,35 +261,54 @@ export default function Dashboard() {
       return;
     }
     
-    const updatedEntries = entries.map(entry => {
-      if (entry.id === entryId) {
-        const updatedEntry = {
-          ...entry,
-          ...updates,
-          updatedAt: new Date().toISOString()
-        };
-        
-        // Update preview based on blocks
-        if (updates.blocks) {
-          const firstTextBlock = updates.blocks.find(b => b.type === 'text' && b.content);
-          const firstHeading = updates.blocks.find(b => b.type === 'heading' && b.content);
-          updatedEntry.preview = firstTextBlock?.content.substring(0, 100) + '...' || 
-                                firstHeading?.content || 
-                                'Click to start writing...';
-        }
-        
-        // Update expandedEntry if it's the one being edited
-        if (expandedEntry && expandedEntry.id === entryId) {
-          setExpandedEntry(updatedEntry);
-        }
-        
-        return updatedEntry;
-      }
-      return entry;
-    });
+    // Find the entry being updated
+    const entryToUpdate = entries.find(entry => entry.id === entryId);
+    if (!entryToUpdate) return;
     
-    saveEntries(updatedEntries);
-  }, [entries, expandedEntry, saveEntries]);
+    // Create updated entry
+    const updatedEntry = {
+      ...entryToUpdate,
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update preview based on blocks
+    if (updates.blocks) {
+      const firstTextBlock = updates.blocks.find(b => b.type === 'text' && b.content);
+      const firstHeading = updates.blocks.find(b => b.type === 'heading' && b.content);
+      updatedEntry.preview = firstTextBlock?.content.substring(0, 100) + '...' || 
+                            firstHeading?.content || 
+                            'Click to start writing...';
+    }
+    
+    // Update local state
+    const updatedEntries = entries.map(entry => 
+      entry.id === entryId ? updatedEntry : entry
+    );
+    setEntries(updatedEntries);
+    
+    // Update expandedEntry if it's the one being edited
+    if (expandedEntry && expandedEntry.id === entryId) {
+      setExpandedEntry(updatedEntry);
+    }
+    
+    // Save only this document to storage
+    setTimeout(async () => {
+      try {
+        await storageWrapper.saveDocument(updatedEntry);
+        // Update storage info after save
+        updateStorageInfo();
+      } catch (error) {
+        console.error('Error saving document:', error);
+        // If single document save fails, fall back to saving all
+        try {
+          await storageWrapper.saveEntries(updatedEntries);
+        } catch (fallbackError) {
+          console.error('Fallback save also failed:', fallbackError);
+        }
+      }
+    }, 0);
+  }, [entries, expandedEntry, updateStorageInfo]);
 
   // Handle document link clicks
   useEffect(() => {

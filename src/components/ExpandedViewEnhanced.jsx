@@ -4,16 +4,24 @@ import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2 } from 'lucide-r
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
-import BlockSkeleton from './blocks/BlockSkeleton';
+import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
 import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
-import { blockStreamer } from '../utils/blockStreamer';
+import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
+  // Use optimized block loader
+  const { 
+    blocks: loadedBlocks, 
+    isLoading: isLoadingBlocks, 
+    updateBlocks: updateLoadedBlocks,
+    preloadNearbyDocuments 
+  } = useOptimizedBlockLoader(entry.id, entry);
+  
   const [blocks, setBlocks] = useState([]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
@@ -37,9 +45,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [viewMode, setViewMode] = useState('blocks'); // 'blocks' or 'lines'
   const [selectedLineBlockId, setSelectedLineBlockId] = useState(null);
   const [linesScrollProgress, setLinesScrollProgress] = useState({ top: 0, bottom: 1 });
-  const [isLoadingBlocks, setIsLoadingBlocks] = useState(false);
-  const [loadingProgress, setLoadingProgress] = useState({ loaded: 0, total: 0 });
-  const cancelStreamRef = useRef(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -56,147 +61,28 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     checkForBackup();
   }, [entry.id]);
 
-  // Initialize blocks from entry data
+  // Sync loaded blocks with local state
   useEffect(() => {
-    // Don't reset blocks if this is an internal update
-    if (isInternalUpdate) {
-      setIsInternalUpdate(false);
-      return;
-    }
-    
-    // Cancel any existing stream
-    if (cancelStreamRef.current) {
-      cancelStreamRef.current();
-    }
-    
-    // Check session cache first
-    const cachedBlocks = sessionCache.getBlocks(entry.id);
-    
-    if (cachedBlocks && cachedBlocks.length > 0) {
-      console.log(`Using cached blocks for document ${entry.id} (${cachedBlocks.length} blocks)`);
-      setBlocks(cachedBlocks);
-      setIsLoadingBlocks(false);
-    } else if (entry.blocks && entry.blocks.length > 0) {
-      // Use blocks from entry if available
-      const cleanedBlocks = entry.blocks.map(block => {
-        if (block.isNew) {
-          const { isNew, ...blockWithoutNew } = block;
-          return blockWithoutNew;
-        }
-        return block;
-      });
-      setBlocks(cleanedBlocks);
-      sessionCache.cacheBlocks(entry.id, cleanedBlocks); // Cache for future use
-      setIsLoadingBlocks(false);
-    } else if (entry.blocks && Array.isArray(entry.blocks) && entry.blocks.length === 0) {
-      // Document explicitly has empty blocks array (new document)
-      console.log(`Document ${entry.id} is new with empty blocks array`);
-      setBlocks([]);
-      setIsLoadingBlocks(false);
+    if (!isInternalUpdate) {
+      setBlocks(loadedBlocks);
     } else {
-      // Start progressive loading only when blocks is undefined/null
-      setIsLoadingBlocks(true);
-      // Show skeleton blocks immediately for better UX
-      setBlocks(blockStreamer.constructor.getSkeletonBlocks(5)); // Show 5 skeleton blocks initially
-      setLoadingProgress({ loaded: 0, total: 0 });
-      
-      // Start streaming blocks
-      cancelStreamRef.current = blockStreamer.streamBlocks(
-        entry.id,
-        (block, index, total) => {
-          // Handle empty documents
-          if (total === 0) {
-            setBlocks([]);
-            return;
-          }
-          
-          // Update progress first
-          setLoadingProgress({ loaded: index + 1, total });
-          
-          // Adjust skeleton blocks count on first block if needed
-          if (index === 0 && total > 0) {
-            setBlocks(prevBlocks => {
-              console.log(`ExpandedView: Adjusting skeleton blocks from ${prevBlocks.length} to ${total}`);
-              // Only adjust if we need more or fewer skeleton blocks
-              if (prevBlocks.length !== total) {
-                const newSkeletons = blockStreamer.constructor.getSkeletonBlocks(total);
-                // Replace the first skeleton with the actual block
-                newSkeletons[0] = block;
-                return newSkeletons;
-              } else {
-                // Just replace the first skeleton with actual block
-                const newBlocks = [...prevBlocks];
-                newBlocks[0] = block;
-                return newBlocks;
-              }
-            });
-            return; // Skip the regular block replacement below
-          }
-          
-          // Replace skeleton with actual block
-          setBlocks(prevBlocks => {
-            const newBlocks = [...prevBlocks];
-            console.log(`ExpandedView: Replacing skeleton at index ${index} with actual block`, {
-              skeltonBlocksLength: prevBlocks.length,
-              index,
-              blockId: block.id,
-              blockType: block.type
-            });
-            if (index < newBlocks.length) {
-              newBlocks[index] = block;
-            } else {
-              console.warn(`ExpandedView: Index ${index} out of bounds (array length: ${newBlocks.length})`);
-              // Extend array if needed
-              while (newBlocks.length <= index) {
-                newBlocks.push(null);
-              }
-              newBlocks[index] = block;
-            }
-            return newBlocks;
-          });
-        },
-        (error) => {
-          setIsLoadingBlocks(false);
-          if (error) {
-            console.error('Error loading blocks:', error);
-          } else {
-            // Loading completed successfully
-            console.log('All blocks loaded successfully');
-            // Cache the loaded blocks
-            setBlocks(prevBlocks => {
-              console.log('ExpandedView: Loading complete, checking blocks:', {
-                totalBlocks: prevBlocks.length,
-                skeletonBlocks: prevBlocks.filter(b => b && b.isLoading).length,
-                realBlocks: prevBlocks.filter(b => b && !b.isLoading).length
-              });
-              
-              const realBlocks = prevBlocks.filter(block => block && !block.isLoading);
-              
-              if (realBlocks.length > 0) {
-                // Cache the real blocks
-                sessionCache.cacheBlocks(entry.id, realBlocks);
-              }
-              
-              if (prevBlocks.every(block => block && block.isLoading)) {
-                // All blocks are still skeletons, meaning document is empty
-                console.log('ExpandedView: All blocks are still skeletons, clearing');
-                return [];
-              }
-              return prevBlocks;
-            });
-          }
-        }
-      );
+      setIsInternalUpdate(false);
     }
+  }, [loadedBlocks, isInternalUpdate]);
+
+  // Preload nearby documents when this one is opened
+  useEffect(() => {
+    // Get nearby document IDs (e.g., next/prev in the list)
+    const currentIndex = allEntries.findIndex(e => e.id === entry.id);
+    const nearbyIds = [];
     
-    return () => {
-      // Cleanup: cancel stream when component unmounts or entry changes
-      if (cancelStreamRef.current) {
-        cancelStreamRef.current();
-        cancelStreamRef.current = null;
-      }
-    };
-  }, [entry.id]);
+    if (currentIndex > 0) nearbyIds.push(allEntries[currentIndex - 1].id);
+    if (currentIndex < allEntries.length - 1) nearbyIds.push(allEntries[currentIndex + 1].id);
+    
+    if (nearbyIds.length > 0) {
+      preloadNearbyDocuments(nearbyIds);
+    }
+  }, [entry.id, allEntries, preloadNearbyDocuments]);
 
 
   // Calculate backlinks
@@ -216,9 +102,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       return block;
     });
     setBlocks(updatedBlocks);
-    
-    // Update session cache
-    sessionCache.updateBlocks(entry.id, updatedBlocks);
+    updateLoadedBlocks(updatedBlocks);
     
     // Queue auto-save with debouncing
     autoSaveManager.queueSave(entry.id, { blocks: updatedBlocks }, async (docId, updates) => {
@@ -683,75 +567,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         </div>
       </div>
 
-      {/* Loading Progress Indicator */}
-      {isLoadingBlocks && loadingProgress.total > 0 && loadingProgress.loaded < loadingProgress.total && (
-        <div className="mb-6 relative">
-          {/* Subtle glow effect */}
-          <div className="absolute inset-0 bg-accent-green/5 blur-2xl rounded-full" />
-          
-          <div className="relative bg-dark-secondary/20 backdrop-blur-sm rounded-xl p-4 
-                          border border-dark-secondary/30 shadow-lg">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                {/* Animated loading icon */}
-                <div className="relative">
-                  <div className="absolute inset-0 bg-accent-green/20 rounded-full blur animate-pulse" />
-                  <div className="relative w-2 h-2 bg-accent-green rounded-full animate-pulse" />
-                </div>
-                
-                <span className="text-sm font-medium text-text-primary">
-                  Loading blocks
-                  {loadingProgress.loaded > 0 && (
-                    <span className="text-xs text-text-secondary/70 ml-1">
-                      ({loadingProgress.loaded === 1 ? 'one by one' : 'optimized'})
-                    </span>
-                  )}
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-accent-green font-mono">
-                  {loadingProgress.loaded}
-                </span>
-                <span className="text-xs text-text-secondary/50">/</span>
-                <span className="text-xs text-text-secondary font-mono">
-                  {loadingProgress.total}
-                </span>
-              </div>
-            </div>
-            
-            {/* Progress bar container */}
-            <div className="relative h-1.5 bg-dark-primary/50 rounded-full overflow-hidden">
-              {/* Animated background pattern */}
-              <div className="absolute inset-0 opacity-10">
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent-green to-transparent 
-                                animate-pulse" />
-              </div>
-              
-              {/* Progress bar */}
-              <div 
-                className="relative h-full bg-gradient-to-r from-accent-green/80 to-accent-green 
-                           transition-all duration-500 ease-out rounded-full shadow-glow-green"
-                style={{ 
-                  width: `${(loadingProgress.loaded / loadingProgress.total) * 100}%`,
-                  boxShadow: '0 0 20px rgba(74, 222, 128, 0.5)'
-                }}
-              >
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
-                                animate-shine" />
-              </div>
-            </div>
-            
-            {/* Percentage text */}
-            <div className="mt-2 text-center">
-              <span className="text-xs text-text-secondary/70">
-                {Math.round((loadingProgress.loaded / loadingProgress.total) * 100)}% complete
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Blocks or Lines View */}
       {viewMode === 'lines' ? (
@@ -855,7 +670,10 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           {blocks.filter(block => block !== null).map((block, index) => (
             <div key={`${block.id}-${forceRenderCount}`} className="relative">
               {block.isLoading ? (
-                <BlockSkeleton type={block.type} />
+                <OptimizedBlockSkeleton 
+                  type={block.type} 
+                  estimatedHeight={block.estimatedHeight || 100}
+                />
               ) : (
                 <>
                   <Block

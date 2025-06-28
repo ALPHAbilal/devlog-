@@ -1,393 +1,437 @@
+# Supabase Data Deletion Issue - Expert Analysis and Solutions
+
+## Root Cause Analysis
+
+Your **delete-then-insert pattern is fundamentally flawed** when working with Supabase and RLS, creating multiple points of failure that explain your data loss symptoms. The core issue stems from several interconnected problems:
+
+### 1. The Delete-Then-Insert Anti-Pattern
+
+The current approach of deleting all blocks before inserting new ones is inherently dangerous because it creates a **destructive window** where data is permanently lost if anything goes wrong during the insert phase[1][2]. This pattern becomes especially problematic when:
+
+- The `blocks` array is empty or undefined
+- RLS policies prevent the insert operation after the delete succeeds
+- Network issues occur between delete and insert operations
+- Race conditions arise from rapid save operations
+
+### 2. RLS Policy Complications
+
+Your RLS policies create additional complexity with the delete-then-insert pattern. When using Supabase's delete operation with RLS enabled, **only rows visible through SELECT policies are deleted**[2]. This means:
+
+- The delete operation might succeed but not delete the intended rows
+- Subsequent inserts may fail if RLS policies are misconfigured
+- `auth.uid()` returning NULL can cause both delete and insert operations to fail[3][4][5]
+
+### 3. Cascade Delete Interactions
+
+Your foreign key constraint `ON DELETE CASCADE` means that when documents are deleted, blocks are automatically removed. However, this doesn't interact well with your manual delete-then-insert pattern, potentially creating **timing issues** between the cascade operation and your explicit block deletion[6].
+
+## Technical Issues Identified
+
+### Auth Token Problems
+
+The most critical issue is likely related to **JWT token handling**. Multiple sources indicate that `auth.uid()` returning NULL is a common problem that can cause both deletes and inserts to fail[3][4][5][7]. This happens when:
+
+- The JWT token expires during the save operation
+- The session is not properly maintained between operations
+- The client loses authentication state during async operations
+
+### Race Conditions in React
+
+Your React application's async save operations are susceptible to **race conditions**[8][9] where:
+
+- Multiple save operations execute simultaneously
+- Component state updates occur before saves complete
+- Optimistic updates mask underlying save failures
+
+## Recommended Solutions
+
+### 1. Implement UPSERT Strategy (Recommended)
+
+Replace the delete-then-insert pattern with **Supabase's native UPSERT functionality**[10][11][12]:
+
+```javascript
+async saveDocument(document) {
+  const { blocks, ...docData } = document;
+  
+  // 1. Save/update document metadata
+  const { data: savedDoc, error: docError } = await supabase
+    .from('documents')
+    .upsert(docData)
+    .select()
+    .single();
+  
+  if (docError) throw docError;
+  
+  // 2. UPSERT blocks instead of delete-then-insert
+  if (blocks && blocks.length > 0) {
+    const blocksToSave = blocks.map((block, index) => ({
+      ...this.transformBlockToDB(block, savedDoc.id, index),
+      // Ensure we have a unique constraint for upsert
+      document_id: savedDoc.id,
+      position: index
+    }));
+    
+    const { error: blocksError } = await supabase
+      .from('blocks')
+      .upsert(blocksToSave, {
+        onConflict: 'document_id,position' // or use a composite unique constraint
+      });
+    
+    if (blocksError) throw blocksError;
+  }
+}
+```
+
+**Benefits of UPSERT:**
+- **Atomic operations** that either fully succeed or fail
+- **No data loss window** during the operation
+- **Better performance** compared to delete-then-insert[13]
+- **Simpler error handling** and recovery
+
+### 2. Use Database Functions for Complex Operations (Alternative)
+
+For more complex scenarios, implement **security definer functions**[14][15][16] that handle the entire save operation within the database:
+
+```sql
+CREATE OR REPLACE FUNCTION save_document_with_blocks(
+  doc_data JSONB,
+  blocks_data JSONB[]
+)
+RETURNS TABLE(document_id UUID, blocks_count INTEGER)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  saved_doc_id UUID;
+BEGIN
+  -- Upsert document
+  INSERT INTO documents (id, user_id, title, tags, is_template, updated_at)
+  VALUES (
+    (doc_data->>'id')::UUID,
+    auth.uid(),
+    doc_data->>'title',
+    ARRAY(SELECT jsonb_array_elements_text(doc_data->'tags')),
+    (doc_data->>'is_template')::BOOLEAN,
+    NOW()
+  )
+  ON CONFLICT (id) 
+  DO UPDATE SET
+    title = EXCLUDED.title,
+    tags = EXCLUDED.tags,
+    is_template = EXCLUDED.is_template,
+    updated_at = NOW()
+  RETURNING id INTO saved_doc_id;
+  
+  -- Delete existing blocks for this document
+  DELETE FROM blocks WHERE document_id = saved_doc_id;
+  
+  -- Insert new blocks
+  INSERT INTO blocks (document_id, user_id, type, content, position, metadata)
+  SELECT 
+    saved_doc_id,
+    auth.uid(),
+    (block_data->>'type')::TEXT,
+    block_data->>'content',
+    (block_data->>'position')::INTEGER,
+    block_data->'metadata'
+  FROM unnest(blocks_data) AS block_data;
+  
+  RETURN QUERY SELECT saved_doc_id, array_length(blocks_data, 1);
+END;
+$$;
+```
+
+This approach provides **true transactional safety** with automatic rollback if any step fails[17][18][19].
+
+### 3. Implement Proper Error Handling and Race Condition Prevention
+
+Add **comprehensive error handling** and **race condition protection**:
+
+```javascript
+class SupabaseAdapter {
+  constructor() {
+    this.saveQueue = new Map(); // Prevent concurrent saves per document
+  }
+  
+  async saveDocument(document) {
+    const documentId = document.id;
+    
+    // Prevent concurrent saves for the same document
+    if (this.saveQueue.has(documentId)) {
+      await this.saveQueue.get(documentId);
+    }
+    
+    const savePromise = this._performSave(document);
+    this.saveQueue.set(documentId, savePromise);
+    
+    try {
+      const result = await savePromise;
+      return result;
+    } finally {
+      this.saveQueue.delete(documentId);
+    }
+  }
+  
+  async _performSave(document) {
+    // Verify authentication before saving
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      throw new Error('Authentication required for save operation');
+    }
+    
+    // Implement your UPSERT logic here
+    // ... (UPSERT code from above)
+  }
+}
+```
+
+### 4. Optimize RLS Policies
+
+Ensure your RLS policies are **properly optimized** and don't cause performance issues[1][20]:
+
+```sql
+-- Optimized policies using (SELECT auth.uid()) for performance
+CREATE POLICY "Users can manage own blocks" ON blocks
+  FOR ALL USING ((SELECT auth.uid()) = user_id)
+  WITH CHECK ((SELECT auth.uid()) = user_id);
+
+-- Ensure you have policies for all required operations
+CREATE POLICY "Users can select own blocks" ON blocks
+  FOR SELECT USING ((SELECT auth.uid()) = user_id);
+
+CREATE POLICY "Users can insert own blocks" ON blocks
+  FOR INSERT WITH CHECK ((SELECT auth.uid()) = user_id);
+
+CREATE POLICY "Users can update own blocks" ON blocks
+  FOR UPDATE USING ((SELECT auth.uid()) = user_id);
+
+CREATE POLICY "Users can delete own blocks" ON blocks
+  FOR DELETE USING ((SELECT auth.uid()) = user_id);
+```
+
+## Best Practices for Supabase with RLS
+
+### 1. Authentication Management
+- **Always verify authentication** before critical operations[5][7]
+- **Handle JWT token expiration** gracefully
+- **Use consistent session management** across your application
+
+### 2. Database Design
+- **Implement proper unique constraints** for UPSERT operations[21]
+- **Use database-level defaults** for timestamps and IDs
+- **Consider soft deletes** for critical data instead of hard deletes
+
+### 3. Performance Optimization
+- **Batch operations** when possible using arrays[22][23]
+- **Use database functions** for complex multi-table operations[15][17]
+- **Implement proper caching strategies** to reduce save frequency
+
+## Migration Strategy
+
+To migrate from your current implementation:
+
+1. **Add unique constraints** to the blocks table for UPSERT support
+2. **Implement the UPSERT approach** in a new save method
+3. **Test thoroughly** with your existing data
+4. **Gradually migrate** components to use the new save method
+5. **Monitor for race conditions** and authentication issues
+
+The **UPSERT approach is strongly recommended** as it eliminates the fundamental data loss risks of the delete-then-insert pattern while providing better performance and simpler error handling. Combined with proper authentication management and race condition prevention, this solution will resolve your data deletion issues and provide a more robust document management system.
+
+[1] https://supabase.com/docs/guides/database/postgres/row-level-security
+[2] https://supabase.com/docs/reference/javascript/delete
+[3] https://www.reddit.com/r/Supabase/comments/1komon8/need_clarity_on_external_jwt_provider_support/
+[4] https://www.reddit.com/r/Supabase/comments/1iwxbf9/authuid_returning_null/
+[5] https://github.com/orgs/supabase/discussions/6592
+[6] https://dorsetrigs.org.uk/post/supabase-linked-tables-foreign-key-violation
+[7] https://github.com/orgs/supabase/discussions/27193
+[8] https://www.reddit.com/r/reactjs/comments/op67d8/react_patterns_for_async_race_conditions/
+[9] https://learnersbucket.com/examples/interview/handle-race-condition-in-react/
+[10] https://dev.to/mwoollen/supabase-upsert-1ebc
+[11] https://velog.io/@kim9567/Supabase-Upsert
+[12] https://app.studyraid.com/en/read/12469/403024/handling-upsert-operations
+[13] https://dba.stackexchange.com/questions/246990/postgres-upsert-performance-considerations-millions-of-rows-hour
+[14] https://blog.entrostat.com/supabase-rls-functions/
+[15] https://supabase.com/docs/guides/database/functions
+[16] https://thelinuxcode.com/postgres-security-definer/
+[17] https://www.reddit.com/r/Supabase/comments/1hz9l0p/how_to_handle_transactions_and_rollbacks_in/
+[18] https://stackoverflow.com/questions/77052193/transactions-in-supabase
+[19] https://github.com/supabase/supabase-dart/issues/60
+[20] https://procodebase.com/article/mastering-row-level-security-and-policies-in-supabase
+[21] https://stackoverflow.com/questions/75247517/supabase-upsert-multiple-onconflict-constraints
+[22] https://bootstrapped.app/guide/how-to-perform-batch-operations-in-supabase
+[23] https://github.com/orgs/supabase/discussions/11349
+[24] https://github.com/supabase/realtime/issues/1114
+[25] https://stackoverflow.com/questions/78770969/how-can-i-fix-this-rls-policy-issue-with-supabase-on-insert
+[26] https://www.reddit.com/r/Supabase/comments/12zfn6p/supabase_error_new_row_violates_rowlevel_security/
+[27] https://dev.to/asheeshh/mastering-supabase-rls-row-level-security-as-a-beginner-5175
+[28] https://prosperasoft.com/blog/database/how-to-manage-row-level-security-policies-effectively-in-supabase/
+[29] https://github.com/orgs/supabase/discussions/526
+[30] https://community.weweb.io/t/bulk-update-supabase/15224
+[31] https://bootstrapped.app/guide/how-to-perform-transactional-operations-in-supabase
+[32] https://app.studyraid.com/en/read/12469/403023/deleting-records
+[33] https://bootstrapped.app/guide/how-to-handle-distributed-transactions-in-supabase
+[34] https://supabase.com/docs/guides/troubleshooting/do-i-need-to-expose-security-definer-functions-in-row-level-security-policies-iI0uOw
+[35] https://www.reddit.com/r/Supabase/comments/1aw1jqo/docs_confusing_me_about_security_definer_functions/
+[36] https://stackoverflow.com/questions/69261986/possible-to-restrict-postgresql-security-definer-function-to-rls-use
+[37] https://stackoverflow.com/questions/78203777/supabase-is-it-possible-to-return-data-from-multiple-tables-no-reference-or-f
+[38] https://dev.to/wagenrace/combining-multiple-tables-in-supabase-212o
+[39] https://dba.stackexchange.com/questions/8028/whats-better-for-large-changes-to-a-table-delete-and-insert-every-time-or-upd
+[40] https://community.weweb.io/t/supabase-auth-auth-uid-doesnt-work-but-user-id-does/4246
+[41] https://libreddit.in.projectsegfau.lt/r/Supabase/comments/1iwxbf9/authuid_returning_null/
+[42] https://github.com/supabase-community/supabase-csharp/discussions/115
+[43] https://linuxhint.com/security-definer-functions-postgresql/
+[44] https://github.com/orgs/supabase/discussions/1548
+[45] https://github.com/orgs/supabase/discussions/3563
+[46] https://stackoverflow.com/questions/77219866/issue-with-row-level-security-in-supabase
+----------------------
 ### Key Points
-- Research suggests that slow Supabase queries with nested selects often result from missing indexes on join, filter, or order-by columns.
-- It seems likely that RLS policies can impact performance, especially with joins, but proper indexing can mitigate this.
-- The evidence leans toward adding indexes on `user_id`, `updated_at` in the `documents` table, and the foreign key in `blocks` for better performance.
-- Splitting the query into separate fetches for documents and blocks might help, but it's complex and depends on data size.
-- Supabase-specific optimizations include using `index_advisor`, selecting specific columns, and pagination.
-- Connection pooling is likely handled by Supabase, and edge functions may not significantly reduce latency for this issue.
-- You can analyze query plans using the Supabase dashboard's Query Performance report or `EXPLAIN` in the SQL editor.
+- It seems likely that the "delete-then-insert" pattern is causing data loss, especially when blocks are empty or not loaded, due to race conditions and lack of transaction safety.
+- Research suggests using UPSERT or transactions for updating related records in Supabase with RLS to ensure data integrity and prevent loss.
+- The evidence leans toward implementing a PostgreSQL function for atomic operations, which could improve performance and reliability.
+
+---
 
 ### Direct Answer
 
-#### Understanding the Issue
-Your Supabase query, fetching documents with related blocks, is taking over 29 seconds, which is unusually slow. This likely stems from how the database handles joins, filters, and security policies, especially with large datasets.
+#### Overview
+Your document management application, Journey Log Compass, is experiencing data loss issues when saving documents, likely due to the current "delete-then-insert" pattern for blocks. This approach can fail if blocks are empty, not loaded, or if there are race conditions. Here's a simple breakdown to address your concerns and suggest a robust solution.
 
-#### Best Practices for Optimization
-- **Indexing:** Add indexes on `documents.user_id` and `documents.updated_at` to speed up filtering and ordering. Also, index the foreign key (likely `document_id`) in the `blocks` table for faster joins. Consider a composite index on `documents (user_id, updated_at DESC)` for efficiency.
-- **Query Structure:** Select only necessary columns instead of `*` to reduce data transfer. If fetching many rows, implement pagination to limit results, improving both server and network performance.
-- **Row Level Security (RLS):** Ensure RLS policies are simple and columns used in policies are indexed. This can prevent additional overhead during query execution.
-- **Analyze Performance:** Use the Supabase dashboard's Query Performance report ([Supabase Query Performance](https://supabase.com/docs/guides/platform/performance)) or run `EXPLAIN` in the SQL editor to identify bottlenecks.
+#### Why the Current Pattern Might Fail
+- **Data Loss Risk**: Deleting all blocks first and then inserting new ones can lead to loss if the insertion fails or if the blocks array is empty, leaving no blocks behind.
+- **Race Conditions**: If the save operation happens before blocks are fully loaded, it might delete existing data without re-inserting, causing empty documents after reload.
+- **RLS and Transactions**: Row Level Security (RLS) might block operations if user IDs don't match, and without transactions, partial failures can occur, leading to inconsistent states.
 
-#### Alternative Approaches
-- Splitting the query (fetch documents first, then blocks) might reduce load, but it could increase network round-trips, so test for your specific case.
-- Use Supabase's `index_advisor` tool ([Supabase Index Advisor](https://supabase.com/docs/guides/database/extensions/index_advisor)) to get tailored index recommendations, accessible via the dashboard.
+#### Best Practices for Supabase with RLS
+- **Use Transactions**: Implement a PostgreSQL function to handle both deletion and insertion in a single transaction, ensuring either both succeed or both fail, preventing data loss. For example, use `supabase.rpc` to call a function that wraps these operations.
+- **Consider UPSERT**: Instead of deleting all blocks, use UPSERT to update existing blocks and insert new ones, preserving data unless explicitly removed. This requires tracking block IDs.
+- **Batch Operations**: For performance, batch updates can help, but ensure they are wrapped in transactions to maintain consistency.
 
-#### Additional Considerations
-- Connection pooling is likely managed by Supabase, so it shouldn't be the main issue here. Edge functions might help with latency if network distance is a factor, but given the 29-second execution time, server processing seems primary.
-- Regularly review Supabase's Performance and Security Advisors ([Supabase Advisors](https://supabase.com/docs/guides/database/database-advisors)) for ongoing optimization.
+#### Recommended Save Strategy
+- Create a PostgreSQL function, like `save_document_blocks`, that deletes existing blocks and inserts new ones atomically. For instance:
+  ```sql
+  CREATE OR REPLACE FUNCTION save_document_blocks(doc_id UUID, blocks JSONB)
+  RETURNS VOID AS $$
+  BEGIN
+    DELETE FROM blocks WHERE document_id = doc_id;
+    INSERT INTO blocks (id, document_id, user_id, type, content, position, metadata, created_at)
+    SELECT COALESCE((b->>'id')::UUID, gen_random_uuid()), doc_id, auth.uid(), b->>'type', b->>'content', (b->>'position')::INTEGER, (b->>'metadata')::JSONB, NOW()
+    FROM jsonb_array_elements(blocks) AS b;
+  END;
+  $$ LANGUAGE plpgsql;
+  ```
+- Call this function from your JavaScript code using `supabase.rpc`, ensuring atomic operations and better error handling.
 
-These steps should significantly improve query performance, but testing in your environment is key due to data size and usage patterns.
+#### Supabase-Specific Gotchas
+- Ensure `user_id` is correctly set in blocks to comply with RLS policies, as mismatches can block insertions.
+- Watch for JWT token expiration, though Supabase typically handles refreshes; ensure saves complete within token validity.
+- Be aware that CASCADE deletes on the foreign key won't affect this scenario, as you're deleting blocks directly.
+
+This approach should prevent data loss, improve reliability, and maintain performance, especially with frequent saves.
 
 ---
 
 ### Survey Note: Detailed Analysis and Recommendations
 
-This section provides a comprehensive analysis of the performance issue with the Supabase query, addressing all aspects of the user's concerns and providing detailed guidance for optimization. The query, which fetches documents with related blocks and takes over 29 seconds, involves a React application using Supabase (PostgreSQL) with Row Level Security (RLS) enabled on both `documents` and `blocks` tables. The query structure is a nested select with filtering by `user_id` and ordering by `updated_at`, and performance metrics indicate a significant bottleneck in query execution (29,271ms).
+#### Introduction
+This analysis addresses the data deletion issue in your Journey Log Compass application, built with React 19, Supabase, and Row Level Security (RLS). The application manages documents and blocks in a one-to-many relationship, and the current save logic, which deletes all blocks before re-inserting, is causing data loss. This note provides a comprehensive examination of the problem, potential causes, and a recommended solution, ensuring data integrity and performance with Supabase and RLS.
 
-#### Background and Context
-The query is structured as follows:
-```javascript
-await supabase
-  .from('documents')
-  .select(`
-    *,
-    blocks (
-      *
-    )
-  `)
-  .eq('user_id', userId)
-  .order('updated_at', { ascending: false });
-```
-This translates to a SQL query involving a JOIN between `documents` and `blocks`, filtered by `user_id`, and ordered by `updated_at` in descending order. Given the one-to-many relationship between documents and blocks, and with RLS enabled, the query's performance degradation suggests issues with indexing, RLS overhead, or data volume.
+#### Problem Analysis
+The current implementation in `SupabaseAdapter.js` follows a "delete-then-insert" pattern for saving document blocks:
+- First, it deletes all existing blocks for the document using `.delete().eq('document_id', savedDoc.id)`.
+- Then, it inserts new blocks if the `blocks` array is non-empty, mapping them via `transformBlockToDB`.
 
-Performance metrics show:
-- Storage initialization: 138ms (acceptable)
-- Supabase query execution: 29,271ms (unacceptably slow)
-- Total load time: 29,412ms
+This approach has several risks:
+- **Data Loss Scenarios**: If the `blocks` array is empty or undefined (e.g., due to race conditions where blocks haven't loaded yet), the deletion occurs, but no insertion happens, leaving the document empty. This aligns with symptoms like documents appearing empty after reload and SQL queries showing only one block for multiple documents.
+- **Race Conditions**: Multiple save operations or concurrent UI updates (e.g., optimistic updates with a 5-second cache) can lead to inconsistent states, where one save deletes blocks before another can insert, resulting in data loss.
+- **Error Handling**: The code captures `blocksError` during insertion, but without explicit error handling shown, failures might go unnoticed, exacerbating data loss.
 
-The user's questions focus on common causes, RLS impact, indexing strategies, query splitting, Supabase optimizations, connection pooling, and query plan analysis. Below, we address each in detail.
+#### RLS and Supabase Considerations
+RLS is enabled on both `documents` and `blocks` tables, with policies likely ensuring operations are restricted to the authenticated user's data (e.g., `auth.uid() = user_id`). The schema includes:
+- `documents` table with `user_id` referencing `auth.users`.
+- `blocks` table with `document_id` (ON DELETE CASCADE) and `user_id`, ensuring blocks are tied to both documents and users.
 
-#### Common Causes of Slow Queries with Nested Selects
-Research suggests that slow Supabase queries with nested selects often arise from:
-- **Missing Indexes:** Without indexes on join columns (e.g., `blocks.document_id`), filter columns (e.g., `documents.user_id`), or order-by columns (e.g., `documents.updated_at`), the database may perform full table scans, significantly slowing execution.
-- **Large Result Sets:** Selecting all columns (`*`) and fetching all related blocks without pagination can lead to large data transfers, especially if users have many documents and blocks.
-- **RLS Overhead:** RLS policies add WHERE clauses to queries, and if not properly indexed, can cause additional scans or joins, impacting performance.
+Potential RLS-related issues include:
+- Insertions failing if `user_id` in blocks doesn't match `auth.uid()`, though the code likely sets this via `transformBlockToDB`.
+- Deletions succeeding but insertions being blocked, leading to the observed empty state.
 
-For example, if `documents` has thousands of rows and `blocks` has tens of thousands, a missing index on `user_id` could force a sequential scan, explaining the 29-second execution time.
+However, given the policies (e.g., "Users can insert own documents" with `WITH CHECK (auth.uid() = user_id)`), and assuming `user_id` is correctly set, RLS shouldn't be the primary issue. The CASCADE delete on `document_id` is irrelevant here, as we're deleting blocks directly, not documents.
 
-#### Impact of RLS Policies on Joined Queries
-It seems likely that RLS policies can impact performance, especially with joins. RLS adds security checks at the database level, effectively appending WHERE clauses to every query. For instance, if the RLS policy for `documents` is `user_id = current_user`, and for `blocks` involves checking the document's `user_id`, this could involve additional joins or subqueries. The evidence leans toward RLS overhead being significant if:
-- Policies are complex, involving multiple tables or functions.
-- Columns used in RLS conditions are not indexed, leading to full table scans.
+#### Investigating Potential Causes
+1. **Empty Blocks Array**: If `blocks` is empty during save (e.g., component not loaded), deletion happens without re-insertion, causing loss. This is likely a timing issue, as mentioned in symptoms.
+2. **Insertion Failures**: Errors during `.insert(blocksToSave)` might not be handled, leading to silent failures post-deletion. This could be due to invalid data, RLS violations, or network issues.
+3. **JWT Token Expiration**: While Supabase handles token refresh, if a save operation spans token expiration, it might fail, though this is less likely given typical session durations.
+4. **Concurrent Operations**: Multiple saves (e.g., rapid UI updates) could interfere, with one delete overwriting another's insert, leading to data loss.
 
-To mitigate, ensure RLS policies are simple (e.g., using `auth.uid()` directly) and that relevant columns are indexed. For very slow queries, temporarily disabling RLS in a non-production environment and comparing performance can help isolate the issue, as suggested by [Supabase RLS Performance](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv).
+#### Best Practices for Supabase with RLS
+Supabase documentation ([Supabase Best Practices](https://supabase.com/docs/guides/best-practices)) recommends:
+- Using transactions for related operations to ensure atomicity, especially with RLS.
+- Leveraging PostgreSQL functions for complex operations, marked as `SECURITY DEFINER` for privilege elevation, though RLS still applies.
+- Optimizing RLS policies with `SELECT auth.uid()` for better performance, as noted in user context.
 
-#### Indexing Strategies for This Use Case
-The evidence strongly supports adding the following indexes:
-- **On `documents.user_id`:** Speeds up filtering by `user_id`.
-- **On `documents.updated_at`:** Optimizes the `ORDER BY updated_at DESC` clause, especially for large result sets.
-- **On `blocks.document_id`:** Enhances join performance, as the query needs to fetch all blocks for each document.
+For updating related records (documents and blocks):
+- **Transactions**: Ensure deletion and insertion are atomic to prevent partial failures. This can be achieved via PostgreSQL functions called with `supabase.rpc`.
+- **Batch Operations**: For performance, batch updates are fine, but wrap them in transactions to maintain consistency.
+- **UPSERT**: Instead of delete-then-insert, use `.upsert()` to update existing blocks and insert new ones, preserving data unless explicitly removed. This requires block IDs to be tracked.
 
-Additionally, consider a composite index on `documents (user_id, updated_at DESC)` to handle both filtering and ordering efficiently in a single index scan. This is particularly effective for queries with WHERE and ORDER BY on the same table, as PostgreSQL can use the index for both operations.
+#### Recommended Solution: Atomic Save Strategy
+To address data loss and improve reliability, implement a PostgreSQL function for atomic operations:
+- Create a function `save_document_blocks` that deletes existing blocks and inserts new ones in a single transaction:
+  ```sql
+  CREATE OR REPLACE FUNCTION save_document_blocks(doc_id UUID, blocks JSONB)
+  RETURNS VOID AS $$
+  BEGIN
+    DELETE FROM blocks WHERE document_id = doc_id;
+    INSERT INTO blocks (id, document_id, user_id, type, content, position, metadata, created_at)
+    SELECT 
+      COALESCE((b->>'id')::UUID, gen_random_uuid()),
+      doc_id,
+      auth.uid(),
+      b->>'type',
+      b->>'content',
+      (b->>'position')::INTEGER,
+      (b->>'metadata')::JSONB,
+      NOW()
+    FROM jsonb_array_elements(blocks) AS b;
+  END;
+  $$ LANGUAGE plpgsql;
+  ```
+- Call this function from JavaScript:
+  ```javascript
+  const blocksToSave = blocks.map((block, index) => ({
+    id: block.id || null,
+    type: block.type,
+    content: block.content,
+    position: index,
+    metadata: block.metadata
+  }));
+  const { error } = await supabase.rpc('save_document_blocks', {
+    doc_id: savedDoc.id,
+    blocks: blocksToSave
+  });
+  if (error) {
+    console.error('Save failed:', error);
+    // Handle error, e.g., notify user
+  }
+  ```
+- This ensures atomicity: if insertion fails, the deletion is rolled back, preventing data loss. It also improves performance by reducing round-trips and handles RLS by setting `user_id = auth.uid()`.
 
-A table summarizing recommended indexes:
+#### Alternative Approaches
+- **Diff-Based Updates**: Compute differences (new, updated, deleted blocks) and perform targeted operations. This is more complex but efficient for large datasets:
+  - Insert new blocks (no ID).
+  - Update existing blocks (match by ID).
+  - Delete removed blocks (not in current array).
+- **Soft Deletes**: Instead of hard deletes, mark blocks as deleted with a flag, allowing recovery. This requires schema changes (e.g., `is_deleted BOOLEAN`) and RLS updates.
+- **Versioning**: Add a version column to documents, ensuring saves apply to the latest version, preventing race conditions. This adds complexity but enhances consistency.
 
-| Table        | Column(s)                  | Reason                                      |
-|--------------|---------------------------|---------------------------------------------|
-| documents    | user_id                   | Speeds up filtering by user_id              |
-| documents    | updated_at                | Optimizes ORDER BY for sorting              |
-| documents    | (user_id, updated_at DESC)| Combined filter and sort for efficiency     |
-| blocks       | document_id               | Improves join performance with documents    |
+#### Performance and Scalability
+- The proposed function is efficient for small to medium block counts, as it's a single database call. For large datasets, consider indexing `document_id` on the `blocks` table for faster deletes.
+- Batch operations via the function handle multiple blocks in one go, reducing network overhead compared to individual inserts.
 
-These indexes should significantly reduce query execution time, but monitor write performance, as indexes can slow down INSERTs, UPDATEs, and DELETEs.
-
-#### Splitting the Query: Documents First, Then Blocks
-Splitting the query into two parts—fetching documents first, then fetching blocks for each document—might improve performance if the number of documents is small. For example:
-- First query: Fetch documents with `select('id, updated_at').eq('user_id', userId).order('updated_at', { ascending: false }).limit(50)` for pagination.
-- Second query: For each document, fetch blocks with `select('*').eq('document_id', documentId)`.
-
-This approach reduces the initial data load and can leverage caching, but it increases network round-trips, potentially adding latency. The evidence suggests it's worth testing, especially if the blocks table is large, but for optimal performance, letting the database handle the join with proper indexes is generally preferred.
-
-#### Supabase-Specific Optimizations
-Supabase offers several tools and practices for improving query performance:
-- **Index Advisor:** Use the `index_advisor` extension ([Supabase Index Advisor](https://supabase.com/docs/guides/database/extensions/index_advisor)) to get tailored index recommendations. Accessible via the Query Performance Report in the dashboard, it suggests indexes based on query patterns, such as creating an index on `documents.user_id` or `blocks.document_id`.
-- **Select Specific Columns:** Instead of `select('*')`, specify only needed columns (e.g., `select('id, title, blocks(id, content)')`) to reduce data transfer and server load.
-- **Pagination:** Implement `range()` or `limit()` with `offset()` for paginated results, especially for large datasets, to manage server load and improve response times.
-- **Performance Advisors:** Regularly review the Performance and Security Advisors ([Supabase Advisors](https://supabase.com/docs/guides/database/database-advisors)) for issues like unindexed foreign keys or inefficient RLS policies.
-
-These optimizations are particularly effective for applications with growing data volumes, ensuring scalability and responsiveness.
-
-#### Connection Pooling and Edge Functions
-Connection pooling is likely handled by Supabase's infrastructure, so it shouldn't be the primary cause of the 29-second latency, which appears server-side. Edge functions, which run closer to the user, might reduce network latency if the client is far from the Supabase server, but given the execution time is dominated by server processing (29,271ms), their impact is likely minimal. Focus on server-side optimizations like indexing and query tuning instead.
-
-#### Analyzing Query Execution Plan
-You can analyze the query execution plan in Supabase using:
-- **Query Performance Report:** In the Supabase dashboard, navigate to "Reports" -> "Query Performance" to see slow queries and their plans, identifying issues like sequential scans or high costs.
-- **EXPLAIN Command:** Run the equivalent SQL query with `EXPLAIN` in the SQL editor to see the plan, looking for operations like Sequential Scans, which indicate missing indexes. For example, `EXPLAIN SELECT d.*, b.* FROM documents d LEFT JOIN blocks b ON d.id = b.document_id WHERE d.user_id = 'some_user_id' ORDER BY d.updated_at DESC;` can reveal bottlenecks.
-
-Regular analysis helps ensure indexes are used effectively and RLS policies aren't adding unnecessary overhead.
-
-#### Tools and Methods for Profiling and Debugging
-To profile and debug slow Supabase queries:
-- Use the Supabase dashboard's Query Performance report for historical data and slow query identification.
-- Run `ANALYZE` in the SQL editor to update statistics, ensuring the query planner has accurate data for optimization.
-- Leverage `index_advisor` for index recommendations and test their impact using `EXPLAIN ANALYZE`.
-- Monitor server load and concurrent queries, as high load can exacerbate performance issues, though this seems less likely given the consistent 29-second time.
+#### Supabase-Specific Gotchas
+- Ensure `pgcrypto` extension is enabled for `gen_random_uuid()`, which is typically the case in Supabase.
+- Monitor JWT token validity; while Supabase handles refreshes, ensure save operations complete within session limits (e.g., 60 minutes default).
+- RLS policies must allow the operations; verify `user_id` matches `auth.uid()` in all cases, especially for insertions.
 
 #### Conclusion
-The primary strategy for optimizing this query is to add appropriate indexes on `documents.user_id`, `documents.updated_at`, and `blocks.document_id`, potentially using a composite index for efficiency. Ensure RLS policies are indexed and simple, use `index_advisor` for recommendations, and analyze query plans with `EXPLAIN`. If data volume is high, implement pagination and select specific columns. Test splitting the query if network round-trips are manageable, but prioritize server-side optimizations first. Regular use of Supabase's performance tools will ensure ongoing efficiency.
-
----
-
-# Supabase Query Performance Optimization: Solving 29+ Second Query Issues
-
-Your 29-second query performance issue with nested selects in Supabase is a common problem that can be resolved through systematic optimization. Based on extensive research into Supabase and PostgreSQL performance patterns, here's a comprehensive analysis and solution guide.
-
-## Root Causes of Slow Supabase Queries
-
-The primary causes of your performance issue likely stem from several factors working in combination[1][2][3]:
-
-**Database Design Issues:**
-- Missing or suboptimal indexes on frequently queried columns
-- Row Level Security (RLS) policies causing expensive join operations
-- Nested select operations without proper optimization
-- Large result sets being processed without pagination
-
-**Query Structure Problems:**
-- The nested select pattern retrieving all columns with `*` instead of specific fields
-- RLS policies requiring complex joins for user authentication
-- Lack of proper filtering at the database level
-
-## Critical Indexing Strategies
-
-The most impactful optimization will be implementing strategic database indexes[4][5][6]:
-
-### Essential Indexes for Your Schema
-
-```sql
--- Index on user_id for documents table (most critical)
-CREATE INDEX idx_documents_user_id ON documents (user_id);
-
--- Composite index for filtering and sorting
-CREATE INDEX idx_documents_user_updated ON documents (user_id, updated_at DESC);
-
--- Index on foreign key relationship for blocks
-CREATE INDEX idx_blocks_document_id ON blocks (document_id);
-
--- Composite index for blocks if you filter by user
-CREATE INDEX idx_blocks_user_document ON blocks (user_id, document_id);
-```
-
-### Index Strategy Rationale
-
-Foreign key indexing is crucial for join performance[7][8]. Your query involves joining documents to blocks through a relationship, and without proper indexes on these foreign keys, PostgreSQL must perform expensive sequential scans[6][9].
-
-The composite index on `(user_id, updated_at DESC)` serves dual purposes: it accelerates the user filtering required by RLS and supports the `ORDER BY updated_at` clause efficiently[10][11].
-
-## RLS Performance Optimization
-
-Row Level Security can significantly impact query performance, especially with joins[12][13][14]. Here are optimization strategies:
-
-### RLS Policy Enhancement
-
-```sql
--- Example optimized RLS policy for documents
-CREATE POLICY "Users can view own documents" ON documents
-    FOR SELECT USING (user_id = auth.uid());
-
--- Add explicit filtering to your queries to help RLS
-```
-
-### Query-Level RLS Optimization
-
-Even with RLS enabled, explicitly adding user filters can improve performance by up to 94%[14]:
-
-```javascript
-const { data, error } = await supabase
-  .from('documents')
-  .select(`
-    *,
-    blocks (
-      *
-    )
-  `)
-  .eq('user_id', userId)  // Explicit filter helps RLS performance
-  .order('updated_at', { ascending: false });
-```
-
-## Alternative Query Patterns
-
-### Split Query Approach
-
-Instead of nested selects, consider splitting the query[15][16][17]:
-
-```javascript
-// First, get documents
-const { data: documents, error: docError } = await supabase
-  .from('documents')
-  .select('*')
-  .eq('user_id', userId)
-  .order('updated_at', { ascending: false });
-
-if (documents && documents.length > 0) {
-  const documentIds = documents.map(doc => doc.id);
-  
-  // Then get blocks for those documents
-  const { data: blocks, error: blocksError } = await supabase
-    .from('blocks')
-    .select('*')
-    .in('document_id', documentIds);
-  
-  // Combine in application code
-  const combinedData = documents.map(doc => ({
-    ...doc,
-    blocks: blocks.filter(block => block.document_id === doc.id)
-  }));
-}
-```
-
-### Optimized Nested Query
-
-If you prefer to keep the nested structure, optimize it:
-
-```javascript
-const { data, error } = await supabase
-  .from('documents')
-  .select(`
-    id,
-    title,
-    content,
-    updated_at,
-    blocks!inner (
-      id,
-      content,
-      type,
-      position
-    )
-  `)
-  .eq('user_id', userId)
-  .order('updated_at', { ascending: false })
-  .limit(50);  // Add pagination
-```
-
-## Query Analysis and Debugging Tools
-
-### Using Supabase's Built-in Tools
-
-Supabase provides several tools for query analysis[3][18][19]:
-
-**Index Advisor:**
-```sql
--- Enable and use the index advisor
-CREATE EXTENSION IF NOT EXISTS index_advisor;
-
-SELECT * FROM index_advisor('
-  SELECT d.*, b.*
-  FROM documents d
-  LEFT JOIN blocks b ON d.id = b.document_id
-  WHERE d.user_id = $1
-  ORDER BY d.updated_at DESC
-');
-```
-
-**Query Performance Analysis:**
-```sql
--- Enable explain functionality
-ALTER ROLE authenticator SET pgrst.db_plan_enabled TO 'true';
-NOTIFY pgrst, 'reload config';
-
--- Then use explain in your queries
-const { data, error } = await supabase
-  .from('documents')
-  .select('*')
-  .eq('user_id', userId)
-  .explain();
-```
-
-### PostgreSQL Performance Monitoring
-
-Use `pg_stat_statements` to identify slow queries[20][21][22]:
-
-```sql
--- Find slowest queries
-SELECT 
-  calls,
-  mean_exec_time,
-  max_exec_time,
-  total_exec_time,
-  query
-FROM pg_stat_statements
-WHERE calls > 10
-  AND mean_exec_time > 1000  -- queries taking more than 1 second
-ORDER BY mean_exec_time DESC;
-```
-
-## Connection and Infrastructure Optimizations
-
-### Connection Pooling
-
-Your performance issues might also relate to connection management[23][24]. Supabase uses PgBouncer for connection pooling, but you can optimize client-side connections:
-
-```javascript
-// Use connection pooling for better performance
-const supabase = createClient(url, key, {
-  db: {
-    pooler: {
-      connectionString: poolerConnectionString
-    }
-  }
-});
-```
-
-### Edge Functions for Complex Operations
-
-Consider moving complex data processing to Supabase Edge Functions:
-
-```javascript
-// Edge function for complex document processing
-const { data, error } = await supabase.functions.invoke('get-documents-with-blocks', {
-  body: { userId, limit: 50 }
-});
-```
-
-## Performance Monitoring Strategy
-
-### Dashboard Monitoring
-
-Utilize Supabase's built-in performance monitoring[25][26][27]:
-
-1. Monitor query execution times in the Dashboard
-2. Track database connection utilization
-3. Set up alerts for slow queries
-4. Use the Performance Advisor for ongoing optimization
-
-### Cache Hit Rate Analysis
-
-Monitor your database's cache performance[28]:
-
-```sql
-SELECT 
-  'index hit rate' as name,
-  (sum(idx_blks_hit)) / nullif(sum(idx_blks_hit + idx_blks_read), 0) as ratio
-FROM pg_statio_user_indexes
-UNION ALL
-SELECT 
-  'table hit rate' as name,
-  sum(heap_blks_hit) / nullif(sum(heap_blks_hit) + sum(heap_blks_read), 0) as ratio
-FROM pg_statio_user_tables;
-```
-
-## Implementation Roadmap
-
-### Immediate Actions (Hours)
-
-1. **Create essential indexes** on `user_id` and foreign key columns
-2. **Add explicit user filtering** to your queries
-3. **Implement pagination** with `LIMIT` clauses
-4. **Monitor query performance** using the Dashboard
-
-### Short-term Optimizations (Days)
-
-1. **Analyze query plans** using `EXPLAIN ANALYZE`
-2. **Optimize RLS policies** for better performance
-3. **Consider query splitting** for complex operations
-4. **Implement caching** strategies for frequently accessed data
-
-### Long-term Strategies (Weeks)
-
-1. **Regular performance monitoring** and optimization
-2. **Database schema refinement** based on usage patterns
-3. **Advanced indexing strategies** including partial and composite indexes
-4. **Infrastructure scaling** based on growth requirements
-
-The combination of proper indexing, RLS optimization, and query restructuring should reduce your 29-second query time to milliseconds. Start with the indexing strategy as it will provide the most immediate and significant performance improvement[4][6][9].
+The "delete-then-insert" pattern is likely failing due to race conditions, empty blocks, and lack of transaction safety. Implementing a PostgreSQL function for atomic saves, as outlined, ensures data integrity, leverages Supabase's transaction support, and aligns with best practices for RLS. For future scalability, consider diff-based updates or versioning, depending on your application's needs. This solution should resolve the data loss issue while maintaining performance, as of June 28, 2025.

@@ -6,6 +6,7 @@ export class SupabaseAdapter {
     this.documentsCache = null;
     this.cacheTimestamp = 0;
     this.CACHE_DURATION = 5000; // 5 seconds cache
+    this.saveQueue = new Map(); // Prevent concurrent saves
   }
   
   invalidateCache() {
@@ -16,16 +17,27 @@ export class SupabaseAdapter {
   async init(userId = null) {
     // If userId is provided, use it directly (avoid extra auth call)
     if (userId) {
+      console.log(`SupabaseAdapter: Init with provided userId ${userId}`);
       this.userId = userId;
       this.initialized = true;
       return true;
     }
     
     // Otherwise check if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    console.log('SupabaseAdapter: Getting user from auth...');
+    const { data: { user }, error } = await supabase.auth.getUser();
+    
+    if (error) {
+      console.error('SupabaseAdapter: Auth error:', error);
+      throw error;
+    }
+    
     if (!user) {
+      console.error('SupabaseAdapter: No authenticated user');
       throw new Error('User must be authenticated');
     }
+    
+    console.log(`SupabaseAdapter: Init with auth userId ${user.id}`);
     this.userId = user.id;
     this.initialized = true;
     return true;
@@ -191,15 +203,15 @@ export class SupabaseAdapter {
     const queryStart = performance.now();
     
     // ONLY get documents - NO BLOCKS for dashboard view
-    // Add timeout and limit for better performance
-    // Use simplified query to avoid potential RLS issues
+    // Temporarily remove timeout to debug
+    console.log(`SupabaseAdapter: Querying documents for user ${this.userId}`);
+    
     const { data: documents, error: docError } = await supabase
       .from('documents')
-      .select('id, title, tags, created_at, updated_at, is_template, metadata')
+      .select('id, title, tags, created_at, updated_at')
       .eq('user_id', this.userId)
       .order('updated_at', { ascending: false })
-      .limit(50) // Reduce to 50 for better performance
-      .abortSignal(AbortSignal.timeout(10000)); // 10 second timeout
+      .limit(20);
     
     const queryTime = performance.now() - queryStart;
     console.log(`SupabaseAdapter: Documents query completed in ${Math.round(queryTime)}ms (NO BLOCKS)`);
@@ -213,7 +225,7 @@ export class SupabaseAdapter {
       return [];
     }
     
-    // Transform to legacy format - with EMPTY blocks array
+    // Transform to legacy format - WITHOUT blocks array (will trigger on-demand loading)
     const transformedDocuments = documents.map(doc => ({
       id: doc.id,
       title: doc.title,
@@ -222,8 +234,8 @@ export class SupabaseAdapter {
       updatedAt: doc.updated_at,
       isTemplate: doc.is_template,
       tags: doc.tags || [],
-      metadata: doc.metadata || {},
-      blocks: [] // Empty blocks - will be loaded on demand
+      metadata: doc.metadata || {}
+      // NO blocks property - this will trigger progressive loading
     }));
     
     // Update cache
@@ -284,91 +296,93 @@ export class SupabaseAdapter {
   async saveDocument(document) {
     if (!this.initialized) await this.init();
 
+    console.log(`SupabaseAdapter: saveDocument called for ${document.id} with ${document.blocks?.length || 0} blocks`);
+    
+    // 1. Verify authentication first
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      throw new Error('Authentication required for save operation');
+    }
+    console.log(`SupabaseAdapter: Using userId ${this.userId} for save`);
+    
     const { blocks, ...docData } = document;
     
-    // Check if document exists
-    const { data: existingDoc } = await supabase
+    // 2. Save/update document metadata using UPSERT
+    const { data: savedDoc, error: docError } = await supabase
       .from('documents')
-      .select('id')
-      .eq('id', docData.id)
-      .eq('user_id', this.userId)
-      .maybeSingle();
+      .upsert({
+        id: docData.id,
+        user_id: this.userId,
+        title: docData.title,
+        is_template: docData.isTemplate || false,
+        tags: docData.tags || [],
+        created_at: docData.createdAt || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
     
-    let savedDoc;
+    if (docError) {
+      console.error('Error saving document:', docError);
+      throw docError;
+    }
     
-    if (existingDoc) {
-      // Update existing document
-      const { data, error } = await supabase
-        .from('documents')
-        .update({
-          title: docData.title,
-          is_template: docData.isTemplate || false,
-          tags: docData.tags || [],
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', docData.id)
-        .eq('user_id', this.userId)
-        .select()
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error updating document:', error);
-        throw error;
-      }
-      savedDoc = data;
-    } else {
-      // Insert new document
-      const { data, error } = await supabase
-        .from('documents')
-        .insert({
-          id: docData.id,
-          user_id: this.userId,
-          title: docData.title,
-          is_template: docData.isTemplate || false,
-          tags: docData.tags || [],
-          created_at: docData.createdAt || new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .maybeSingle();
-        
-      if (error) {
-        console.error('Error inserting document:', error);
-        throw error;
-      }
-      savedDoc = data;
+    if (!savedDoc) {
+      console.error('Document save returned no data');
+      throw new Error('Document save failed - no data returned');
     }
-
-    // Delete existing blocks
-    const { error: deleteError } = await supabase
-      .from('blocks')
-      .delete()
-      .eq('document_id', savedDoc.id);
-
-    if (deleteError) {
-      console.error('Error deleting old blocks:', deleteError);
+    
+    // 3. Use atomic function to save blocks
+    console.log(`SupabaseAdapter: Using atomic save for ${blocks?.length || 0} blocks`);
+    
+    // Prepare blocks for the RPC call
+    const blocksToSave = (blocks || []).map((block, index) => ({
+      id: block.id || null,
+      type: block.type,
+      content: block.content || '',
+      position: index,
+      metadata: block.metadata || {}
+    }));
+    
+    // Call the atomic save function
+    const { error: blocksError } = await supabase.rpc('save_document_blocks', {
+      doc_id: savedDoc.id,
+      blocks: blocksToSave
+    });
+    
+    if (blocksError) {
+      console.error('Error saving blocks atomically:', blocksError);
+      throw blocksError;
     }
-
-    // Save new blocks
-    if (blocks && blocks.length > 0) {
-      const blocksToSave = blocks.map((block, index) => 
-        this.transformBlockToDB(block, savedDoc.id, index)
-      );
-
-      const { error: blocksError } = await supabase
-        .from('blocks')
-        .insert(blocksToSave);
-
-      if (blocksError) {
-        console.error('Error saving blocks:', blocksError);
-        throw blocksError;
-      }
-    }
-
+    
+    console.log(`SupabaseAdapter: Successfully saved document ${savedDoc.id} with ${blocksToSave.length} blocks atomically`);
+    
     // Invalidate cache after successful save
     this.invalidateCache();
 
     return savedDoc.id;
+  }
+
+  // Safe save method that prevents concurrent saves for the same document
+  async saveDocumentSafe(document) {
+    const documentId = document.id;
+    
+    // Prevent concurrent saves for the same document
+    if (this.saveQueue.has(documentId)) {
+      console.log(`SupabaseAdapter: Waiting for previous save of document ${documentId} to complete`);
+      await this.saveQueue.get(documentId);
+    }
+    
+    const savePromise = this.saveDocument(document);
+    this.saveQueue.set(documentId, savePromise);
+    
+    try {
+      const result = await savePromise;
+      return result;
+    } finally {
+      this.saveQueue.delete(documentId);
+    }
   }
 
   async deleteDocument(documentId) {
@@ -471,6 +485,7 @@ export class SupabaseAdapter {
     const dbBlock = {
       id: block.id,
       document_id: documentId,
+      user_id: this.userId, // Add user_id for RLS policy
       type: block.type,
       content: block.content,
       position: position,

@@ -179,13 +179,14 @@ export class SupabaseAdapter {
     return documents.map(doc => ({
       id: doc.id,
       title: doc.title,
-      preview: 'Click to view document...', // Default preview since it's not in DB
+      preview: doc.metadata?.preview || 'Click to view document...', // Use stored preview
       createdAt: doc.created_at,
       updatedAt: doc.updated_at,
       isTemplate: doc.is_template,
       tags: doc.tags || [],
       metadata: doc.metadata || {},
-      blocks: [] // Empty blocks array for list view
+      blocks: [], // Empty blocks array for list view
+      blockCount: doc.metadata?.blockCount || 0 // Include block count
     }));
   }
 
@@ -208,13 +209,13 @@ export class SupabaseAdapter {
     
     const { data: documents, error: docError } = await supabase
       .from('documents')
-      .select('id, title, tags, created_at, updated_at')
+      .select('id, title, tags, created_at, updated_at, metadata, is_template')
       .eq('user_id', this.userId)
       .order('updated_at', { ascending: false })
       .limit(20);
     
     const queryTime = performance.now() - queryStart;
-    console.log(`SupabaseAdapter: Documents query completed in ${Math.round(queryTime)}ms (NO BLOCKS)`);
+    console.log(`SupabaseAdapter: Documents query completed in ${Math.round(queryTime)}ms`);
     
     if (docError) {
       console.error('Error getting documents:', docError);
@@ -225,24 +226,56 @@ export class SupabaseAdapter {
       return [];
     }
     
-    // Transform to legacy format - WITHOUT blocks array (will trigger on-demand loading)
-    const transformedDocuments = documents.map(doc => ({
-      id: doc.id,
-      title: doc.title,
-      preview: 'Click to view document...', // Default preview since it's not in DB
-      createdAt: doc.created_at,
-      updatedAt: doc.updated_at,
-      isTemplate: doc.is_template,
-      tags: doc.tags || [],
-      metadata: doc.metadata || {}
-      // NO blocks property - this will trigger progressive loading
+    // Load first block for each document for preview
+    const documentsWithBlocks = await Promise.all(documents.map(async (doc) => {
+      const { data: blockData, error: blockError } = await supabase
+        .from('blocks')
+        .select('*')
+        .eq('document_id', doc.id)
+        .order('position')
+        .limit(1);
+      
+      if (blockError) {
+        console.warn(`Error loading first block for document ${doc.id}:`, blockError);
+      }
+      
+      // Get the first block from the array (if any)
+      const firstBlock = blockData && blockData.length > 0 ? blockData[0] : null;
+      
+      // Generate preview from first block or use stored preview
+      let preview = doc.metadata?.preview || 'Click to view document...';
+      let blocks = [];
+      
+      if (firstBlock) {
+        blocks = [this.transformBlockFromDB(firstBlock)];
+        if (firstBlock.type === 'text' || firstBlock.type === 'heading') {
+          preview = firstBlock.content.substring(0, 150);
+          if (firstBlock.content.length > 150) preview += '...';
+        }
+      }
+      
+      return {
+        id: doc.id,
+        title: doc.title,
+        preview: preview,
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        isTemplate: doc.is_template || false,
+        tags: doc.tags || [],
+        metadata: doc.metadata || {},
+        blocks: blocks, // Contains first block only
+        blockCount: doc.metadata?.blockCount || (firstBlock ? 1 : 0)
+      };
     }));
+    
+    // Transform to legacy format
+    const transformedDocuments = documentsWithBlocks;
     
     // Update cache
     this.documentsCache = transformedDocuments;
     this.cacheTimestamp = now;
     
-    console.log(`SupabaseAdapter: Returning ${transformedDocuments.length} documents (blocks will load on demand)`);
+    console.log(`SupabaseAdapter: Returning ${transformedDocuments.length} documents with first blocks loaded`);
     
     return transformedDocuments;
   }
@@ -279,6 +312,7 @@ export class SupabaseAdapter {
     
     const queryTime = performance.now() - queryStart;
     console.log(`SupabaseAdapter: Single document query completed in ${Math.round(queryTime)}ms`);
+    console.log(`SupabaseAdapter: Loaded ${blocks?.length || 0} blocks for document ${documentId}`);
     
     return {
       id: doc.id,
@@ -308,6 +342,16 @@ export class SupabaseAdapter {
     
     const { blocks, ...docData } = document;
     
+    // Generate preview from blocks
+    let preview = 'Click to view document...';
+    if (blocks && blocks.length > 0) {
+      const firstTextBlock = blocks.find(b => b.type === 'text' && b.content);
+      const firstHeading = blocks.find(b => b.type === 'heading' && b.content);
+      preview = firstTextBlock?.content.substring(0, 100) + '...' || 
+                firstHeading?.content || 
+                'Click to start writing...';
+    }
+    
     // 2. Save/update document metadata using UPSERT
     const { data: savedDoc, error: docError } = await supabase
       .from('documents')
@@ -317,6 +361,11 @@ export class SupabaseAdapter {
         title: docData.title,
         is_template: docData.isTemplate || false,
         tags: docData.tags || [],
+        metadata: {
+          ...(docData.metadata || {}),
+          preview: preview,
+          blockCount: blocks?.length || 0
+        },
         created_at: docData.createdAt || new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
@@ -338,12 +387,18 @@ export class SupabaseAdapter {
     
     // Prepare blocks for the RPC call
     const blocksToSave = (blocks || []).map((block, index) => ({
-      id: block.id || null,
+      id: block.id || crypto.randomUUID(), // Generate ID if missing
       type: block.type,
       content: block.content || '',
       position: index,
-      metadata: block.metadata || {}
+      metadata: block.metadata || {},
+      language: block.language || null,
+      file_path: block.filePath || null
     }));
+    
+    console.log(`SupabaseAdapter: Preparing to save ${blocksToSave.length} blocks:`, 
+      blocksToSave.map(b => ({ id: b.id, type: b.type, content: b.content.substring(0, 50) + '...' }))
+    );
     
     // Call the atomic save function
     const { error: blocksError } = await supabase.rpc('save_document_blocks', {
@@ -357,6 +412,21 @@ export class SupabaseAdapter {
     }
     
     console.log(`SupabaseAdapter: Successfully saved document ${savedDoc.id} with ${blocksToSave.length} blocks atomically`);
+    
+    // Verify blocks were saved (in development only)
+    if (process.env.NODE_ENV === 'development') {
+      const { data: savedBlocks, error: verifyError } = await supabase
+        .from('blocks')
+        .select('id, type, content, position')
+        .eq('document_id', savedDoc.id)
+        .order('position');
+      
+      if (verifyError) {
+        console.error('Error verifying saved blocks:', verifyError);
+      } else {
+        console.log(`SupabaseAdapter: Verified ${savedBlocks?.length || 0} blocks saved for document ${savedDoc.id}`);
+      }
+    }
     
     // Invalidate cache after successful save
     this.invalidateCache();

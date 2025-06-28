@@ -650,22 +650,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             }
             return null;
           })}
-          {/* Empty state message */}
-          {blocks.length === 0 && !isLoadingBlocks && (
-            <div className="text-center py-12 mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 
-                              bg-dark-secondary/30 rounded-full mb-4">
-                <Plus size={24} className="text-text-secondary/50" />
-              </div>
-              <h3 className="text-lg font-medium text-text-primary mb-2">
-                Start documenting
-              </h3>
-              <p className="text-text-secondary/70 text-sm max-w-md mx-auto">
-                This document is empty. Click the button below to add your first block
-                and start writing.
-              </p>
-            </div>
-          )}
           
           {blocks.filter(block => block !== null).map((block, index) => (
             <div key={`${block.id}-${forceRenderCount}`} className="relative">

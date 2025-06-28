@@ -1,437 +1,344 @@
-# Supabase Data Deletion Issue - Expert Analysis and Solutions
+# Supabase Data Loss on Code Changes - Comprehensive Analysis
 
-## Root Cause Analysis
+Based on extensive research into your issue, this appears to be a **common development environment problem** with specific technical causes rather than a fundamental bug. The partial data loss you're experiencing - where document titles persist but blocks disappear after code changes and refresh - stems from the complex interaction between React's development behavior, Vite's Hot Module Replacement (HMR), and Supabase's authentication and caching mechanisms.
 
-Your **delete-then-insert pattern is fundamentally flawed** when working with Supabase and RLS, creating multiple points of failure that explain your data loss symptoms. The core issue stems from several interconnected problems:
+## Root Causes Analysis
 
-### 1. The Delete-Then-Insert Anti-Pattern
+### React 19 Strict Mode Double Effects
 
-The current approach of deleting all blocks before inserting new ones is inherently dangerous because it creates a **destructive window** where data is permanently lost if anything goes wrong during the insert phase[1][2]. This pattern becomes especially problematic when:
+**React 19's Strict Mode intentionally double-invokes effects during development** to help identify side effects[1][2][3]. This behavior can cause authentication and data loading functions to execute twice, potentially creating race conditions with your Supabase session management[4][5]. Since you're using lazy loading for blocks, the double execution may interfere with the timing of authentication verification and subsequent data fetching.
 
-- The `blocks` array is empty or undefined
-- RLS policies prevent the insert operation after the delete succeeds
-- Network issues occur between delete and insert operations
-- Race conditions arise from rapid save operations
+### Vite HMR and Session State Invalidation
 
-### 2. RLS Policy Complications
+**Vite's Hot Module Replacement can inadvertently clear browser storage** or reset application state during code changes[6][7]. While Vite doesn't directly clear localStorage/sessionStorage, HMR can trigger component remounting that affects how your application manages cached authentication tokens and session state[8][9]. Your 5-second application cache and sessionStorage for blocks may be getting invalidated during the HMR process.
 
-Your RLS policies create additional complexity with the delete-then-insert pattern. When using Supabase's delete operation with RLS enabled, **only rows visible through SELECT policies are deleted**[2]. This means:
+### Supabase Authentication Token Refresh Issues
 
-- The delete operation might succeed but not delete the intended rows
-- Subsequent inserts may fail if RLS policies are misconfigured
-- `auth.uid()` returning NULL can cause both delete and insert operations to fail[3][4][5]
+**Authentication tokens can become stale or invalid after development refreshes**[10][11][12]. The research reveals that Supabase's JWT tokens can sometimes show role as "anon" even after successful authentication, particularly in development environments[11]. This suggests that your blocks aren't loading because the authentication context isn't properly restored after code changes, causing RLS policies to deny access.
 
-### 3. Cascade Delete Interactions
+### Lazy Loading and Cache Invalidation Timing
 
-Your foreign key constraint `ON DELETE CASCADE` means that when documents are deleted, blocks are automatically removed. However, this doesn't interact well with your manual delete-then-insert pattern, potentially creating **timing issues** between the cascade operation and your explicit block deletion[6].
+**The combination of lazy loading and development environment cache clearing creates a race condition**[13][14]. Your blocks load on-demand when opening documents, but after a code refresh, the authentication session may not be fully restored by the time the lazy loading attempt occurs, resulting in empty results even though the data exists in the database.
 
-## Technical Issues Identified
+## Evidence-Based Solutions
 
-### Auth Token Problems
+### 1. Development-Specific Authentication Handling
 
-The most critical issue is likely related to **JWT token handling**. Multiple sources indicate that `auth.uid()` returning NULL is a common problem that can cause both deletes and inserts to fail[3][4][5][7]. This happens when:
-
-- The JWT token expires during the save operation
-- The session is not properly maintained between operations
-- The client loses authentication state during async operations
-
-### Race Conditions in React
-
-Your React application's async save operations are susceptible to **race conditions**[8][9] where:
-
-- Multiple save operations execute simultaneously
-- Component state updates occur before saves complete
-- Optimistic updates mask underlying save failures
-
-## Recommended Solutions
-
-### 1. Implement UPSERT Strategy (Recommended)
-
-Replace the delete-then-insert pattern with **Supabase's native UPSERT functionality**[10][11][12]:
+Implement more robust session restoration for development:
 
 ```javascript
-async saveDocument(document) {
-  const { blocks, ...docData } = document;
-  
-  // 1. Save/update document metadata
-  const { data: savedDoc, error: docError } = await supabase
-    .from('documents')
-    .upsert(docData)
-    .select()
-    .single();
-  
-  if (docError) throw docError;
-  
-  // 2. UPSERT blocks instead of delete-then-insert
-  if (blocks && blocks.length > 0) {
-    const blocksToSave = blocks.map((block, index) => ({
-      ...this.transformBlockToDB(block, savedDoc.id, index),
-      // Ensure we have a unique constraint for upsert
-      document_id: savedDoc.id,
-      position: index
-    }));
-    
-    const { error: blocksError } = await supabase
-      .from('blocks')
-      .upsert(blocksToSave, {
-        onConflict: 'document_id,position' // or use a composite unique constraint
-      });
-    
-    if (blocksError) throw blocksError;
-  }
-}
+// Enhanced session management for development
+const useDevAuth = () => {
+  const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Add longer timeout for development
+    const restoreSession = async () => {
+      try {
+        // Multiple attempts to restore session
+        let attempts = 0;
+        const maxAttempts = 3;
+        
+        while (attempts  setTimeout(resolve, 500));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  return { session, loading };
+};
 ```
 
-**Benefits of UPSERT:**
-- **Atomic operations** that either fully succeed or fail
-- **No data loss window** during the operation
-- **Better performance** compared to delete-then-insert[13]
-- **Simpler error handling** and recovery
+### 2. Robust Block Loading with Retry Logic
 
-### 2. Use Database Functions for Complex Operations (Alternative)
+Enhance your block loader to handle development environment quirks:
 
-For more complex scenarios, implement **security definer functions**[14][15][16] that handle the entire save operation within the database:
+```javascript
+const loadBlocksWithRetry = async (documentId, maxRetries = 3) => {
+  for (let attempt = 0; attempt  setTimeout(resolve, 1000));
+        continue;
+      }
 
-```sql
-CREATE OR REPLACE FUNCTION save_document_with_blocks(
-  doc_data JSONB,
-  blocks_data JSONB[]
-)
-RETURNS TABLE(document_id UUID, blocks_count INTEGER)
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-DECLARE
-  saved_doc_id UUID;
-BEGIN
-  -- Upsert document
-  INSERT INTO documents (id, user_id, title, tags, is_template, updated_at)
-  VALUES (
-    (doc_data->>'id')::UUID,
-    auth.uid(),
-    doc_data->>'title',
-    ARRAY(SELECT jsonb_array_elements_text(doc_data->'tags')),
-    (doc_data->>'is_template')::BOOLEAN,
-    NOW()
+      const { data: blocks, error } = await supabase
+        .from('blocks')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('position');
+
+      if (error) throw error;
+      return blocks;
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+    }
+  }
+};
+```
+
+### 3. Development Cache Strategy
+
+Implement a development-aware caching strategy[15][16]:
+
+```javascript
+const DevCache = {
+  set: (key, data, ttl = 5000) => {
+    const item = {
+      data,
+      timestamp: Date.now(),
+      ttl
+    };
+    
+    // Use a combination of memory and sessionStorage
+    if (typeof window !== 'undefined') {
+      try {
+        sessionStorage.setItem(`dev_cache_${key}`, JSON.stringify(item));
+      } catch (e) {
+        console.warn('SessionStorage not available, using memory cache only');
+      }
+    }
+    
+    // Memory fallback
+    if (!window.devCacheMemory) window.devCacheMemory = new Map();
+    window.devCacheMemory.set(key, item);
+  },
+
+  get: (key) => {
+    // Try memory first (survives some HMR scenarios)
+    if (window.devCacheMemory?.has(key)) {
+      const item = window.devCacheMemory.get(key);
+      if (Date.now() - item.timestamp 
+  ) : (
+    
+      
+    
   )
-  ON CONFLICT (id) 
-  DO UPDATE SET
-    title = EXCLUDED.title,
-    tags = EXCLUDED.tags,
-    is_template = EXCLUDED.is_template,
-    updated_at = NOW()
-  RETURNING id INTO saved_doc_id;
-  
-  -- Delete existing blocks for this document
-  DELETE FROM blocks WHERE document_id = saved_doc_id;
-  
-  -- Insert new blocks
-  INSERT INTO blocks (document_id, user_id, type, content, position, metadata)
-  SELECT 
-    saved_doc_id,
-    auth.uid(),
-    (block_data->>'type')::TEXT,
-    block_data->>'content',
-    (block_data->>'position')::INTEGER,
-    block_data->'metadata'
-  FROM unnest(blocks_data) AS block_data;
-  
-  RETURN QUERY SELECT saved_doc_id, array_length(blocks_data, 1);
-END;
-$$;
+);
 ```
 
-This approach provides **true transactional safety** with automatic rollback if any step fails[17][18][19].
+## Expected Behavior vs. Bug Classification
 
-### 3. Implement Proper Error Handling and Race Condition Prevention
+**This is expected development behavior, not a production bug**[3][4]. The research confirms that development environments with React Strict Mode, HMR, and authentication systems commonly experience these types of state management issues. The fact that your data persists in the database and normal app usage works perfectly indicates that your core implementation is sound.
 
-Add **comprehensive error handling** and **race condition protection**:
+## Best Practices for Development
+
+### 1. Implement Development-Specific Logging
 
 ```javascript
-class SupabaseAdapter {
-  constructor() {
-    this.saveQueue = new Map(); // Prevent concurrent saves per document
+const devLog = (message, data) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[DEV] ${message}`, data);
   }
-  
-  async saveDocument(document) {
-    const documentId = document.id;
-    
-    // Prevent concurrent saves for the same document
-    if (this.saveQueue.has(documentId)) {
-      await this.saveQueue.get(documentId);
-    }
-    
-    const savePromise = this._performSave(document);
-    this.saveQueue.set(documentId, savePromise);
-    
-    try {
-      const result = await savePromise;
-      return result;
-    } finally {
-      this.saveQueue.delete(documentId);
-    }
-  }
-  
-  async _performSave(document) {
-    // Verify authentication before saving
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication required for save operation');
-    }
-    
-    // Implement your UPSERT logic here
-    // ... (UPSERT code from above)
-  }
-}
+};
 ```
 
-### 4. Optimize RLS Policies
+### 2. Use Supabase Local Development
 
-Ensure your RLS policies are **properly optimized** and don't cause performance issues[1][20]:
+Consider setting up **local Supabase development**[17][18] to eliminate network-related authentication issues:
 
-```sql
--- Optimized policies using (SELECT auth.uid()) for performance
-CREATE POLICY "Users can manage own blocks" ON blocks
-  FOR ALL USING ((SELECT auth.uid()) = user_id)
-  WITH CHECK ((SELECT auth.uid()) = user_id);
-
--- Ensure you have policies for all required operations
-CREATE POLICY "Users can select own blocks" ON blocks
-  FOR SELECT USING ((SELECT auth.uid()) = user_id);
-
-CREATE POLICY "Users can insert own blocks" ON blocks
-  FOR INSERT WITH CHECK ((SELECT auth.uid()) = user_id);
-
-CREATE POLICY "Users can update own blocks" ON blocks
-  FOR UPDATE USING ((SELECT auth.uid()) = user_id);
-
-CREATE POLICY "Users can delete own blocks" ON blocks
-  FOR DELETE USING ((SELECT auth.uid()) = user_id);
+```bash
+supabase start
+# Your app connects to localhost:54321 instead of remote Supabase
 ```
 
-## Best Practices for Supabase with RLS
+### 3. Enhanced Error Boundaries
 
-### 1. Authentication Management
-- **Always verify authentication** before critical operations[5][7]
-- **Handle JWT token expiration** gracefully
-- **Use consistent session management** across your application
+Implement error boundaries that can gracefully handle authentication state issues during development.
 
-### 2. Database Design
-- **Implement proper unique constraints** for UPSERT operations[21]
-- **Use database-level defaults** for timestamps and IDs
-- **Consider soft deletes** for critical data instead of hard deletes
+## Community Validation
 
-### 3. Performance Optimization
-- **Batch operations** when possible using arrays[22][23]
-- **Use database functions** for complex multi-table operations[15][17]
-- **Implement proper caching strategies** to reduce save frequency
+The research reveals that **multiple developers face similar issues** with Supabase + React + Vite combinations[19][12][20]. The Supabase community discussions show this is a recognized development environment challenge rather than a unique problem with your implementation.
 
-## Migration Strategy
+Your issue represents a confluence of development-time behaviors that don't occur in production. The solutions above address the timing and state management issues that cause blocks to appear missing after code changes, while preserving the robustness of your production application.
 
-To migrate from your current implementation:
+[1] https://github.com/supabase/realtime-js/issues/169
+[2] https://www.reddit.com/r/reactjs/comments/1cidg60/react_double_useeffect_call_in_strictmode_server/
+[3] https://stackoverflow.com/questions/61254372/my-react-component-is-rendering-twice-because-of-strict-mode
+[4] https://www.lukinotes.com/2022/04/double-invoking-in-react-strict-mode.html
+[5] https://stackoverflow.com/questions/71992547/reactjs-class-component-mounting-twice
+[6] https://stackoverflow.com/questions/72222728/why-is-localstorage-getting-cleared-whenever-i-refresh-the-page
+[7] https://www.reddit.com/r/reactjs/comments/1l7osqr/those_of_you_using_vite_to_bundle_your/
+[8] https://github.com/vitejs/vite/discussions/3143
+[9] https://remslabs.com/blog/resolving-vite-cache-issues-with-dependency-changes-in-a-react-project
+[10] https://supabase.com/docs/guides/troubleshooting/why-is-my-service-role-key-client-getting-rls-errors-or-not-returning-data-7_1K9z
+[11] https://www.reddit.com/r/Supabase/comments/1h9nfx8/supabase_client_jwt_token_not_able_to_retrieve_if/
+[12] https://stackoverflow.com/questions/75058178/supabase-onauthstatechange-with-react-useeffect-lost-session-on-page-refresh
+[13] https://community.flutterflow.io/discussions/post/seamless-chat---realtime-supabase-infinite-loading-scroll-to-bottom-qgTtDnCQ2Y1FZY9
+[14] https://www.reddit.com/r/Supabase/comments/1ksdaym/some_queries_just_never_load/
+[15] https://www.reddit.com/r/Supabase/comments/1hwz0jn/caching_middleware_for_supabase/
+[16] https://app.studyraid.com/en/read/8395/231626/caching-strategies-in-supabase
+[17] https://dev.to/sreejinsreenivasan/supabase-a-guide-to-setting-up-your-local-environment-4cgf
+[18] https://supabase.com/docs/guides/deployment
+[19] https://www.reddit.com/r/Supabase/comments/1kggwkv/persistent_supabase_connectivitytimeout_issues_in/
+[20] https://github.com/supabase/supabase-js/issues/1434
+[21] https://github.com/orgs/supabase/discussions/27578
+[22] https://github.com/supabase/cli/issues/184
+[23] https://supabase.com/docs/guides/platform/backups
+[24] https://www.reddit.com/r/Supabase/comments/1ewj120/how_to_refresh_data_after_modification/
+[25] https://dev.to/supabase/safeguarding-data-integrity-with-pg-safeupdate-in-postgresql-and-supabase-2bgd?comments_sort=latest
+[26] https://supabase.com/blog/restore-to-a-new-project
+[27] https://stackoverflow.com/questions/76755864/supabase-not-storing-session-data-in-localstorage-correctly
+[28] https://github.com/apollographql/apollo-client/issues/9903
+[29] https://stackoverflow.com/questions/49055172/react-component-mounting-twice
+[30] https://www.reddit.com/r/Supabase/comments/16ihf13/getting_session_error_when_updating_users_details/
+[31] https://github.com/microsoft/playwright/issues/9164
+[32] https://www.reddit.com/r/reactjs/comments/1451w0x/clear_local_storage_when_the_user_leaves_the_page/
+[33] https://www.w3schools.com/jsref/met_storage_clear.asp
+[34] https://stackoverflow.com/questions/44279582/how-to-clear-the-sessionstorage-on-browser-refresh-but-this-should-not-clear-o
+[35] https://web3auth.io/community/t/how-to-clear-the-localstorage-when-session-expires/4978
+[36] https://app.studyraid.com/en/read/12382/399847/clearing-all-data-with-clear
+[37] https://github.com/supabase/supabase/issues/10553
+[38] https://www.reddit.com/r/Supabase/comments/1fyxdgl/database_row_disappearing/
+[39] https://github.com/orgs/supabase/discussions/34773
+[40] https://authjs.dev/guides/refresh-token-rotation
+[41] https://stackoverflow.com/questions/76510378/supabase-session-null-undefined-even-after-successful-authentication
+[42] https://stackoverflow.com/questions/78601890/why-is-supabase-not-returning-any-data-when-i-still-have-rows-of-data-in-my-tabl
+[43] https://fusionauth.io/community/forum/topic/568/refresh-tokens-going-stale
+[44] https://stackoverflow.com/questions/79593726/supabase-returning-empty-object-when-trying-to-insert-data-in-table-and-not-addi
+[45] https://github.com/radix-ui/primitives/issues/3295
+[46] https://www.reddit.com/r/reactnative/comments/1kp799a/supabase_broken_after_update/
+[47] https://supabase.com/docs/guides/getting-started/quickstarts/reactjs
+[48] https://stackoverflow.com/questions/74846884/supabase-to-react-data-fetch-error-supabaseurl-is-required
+[49] https://www.permit.io/blog/supabase-authentication-and-authorization-in-nextjs-implementation-guide
+[50] https://app.studyraid.com/en/read/8395/231591/managing-user-sessions
+[51] https://app.studyraid.com/en/read/8395/231628/using-supabase-with-react
+[52] https://github.com/being-devahmad/SupaAuth
+[53] https://app.studyraid.com/en/read/12469/403016/user-session-security-best-practices
+[54] https://supabase.com/blog/fetching-and-caching-supabase-data-in-next-js-server-components
+[55] https://www.linkedin.com/posts/bradmca_caching-strategies-in-supabase-comprehensive-activity-7268561918594891776-SlQp
+[56] https://stackoverflow.com/questions/79453323/does-caching-works-in-supabase-nextjs15
+[57] https://www.intel.com/content/www/us/en/developer/articles/technical/cache-blocking-techniques.html
+[58] https://chat2db.ai/resources/blog/optimizing-supabase-performance-with-caching-strategies
+[59] https://documentation.concretecms.org/9-x/user-guide/running-website/keeping-sites-fast
+[60] https://supabase.com/docs/guides/database/inspect
+[61] https://supabase.com/docs/guides/telemetry/logs
+[62] https://www.youtube.com/watch?v=Ai2BjHV36Ng
+[63] https://github.com/supabase/cli/issues/1055
+[64] https://app.studyraid.com/en/read/8395/231635/monitoring-and-maintaining-deployed-supabase-applications
+[65] https://www.cybertec-postgresql.com/en/prewarming-postgresql-i-o-caches/
+[66] https://docs.gitlab.com/development/data_retention_policies/
+[67] https://www.youtube.com/watch?v=811SiwHyTdM
+[68] https://app.studyraid.com/en/read/8395/231627/monitoring-and-improving-overall-performance
+[69] https://www.enterprisedb.com/blog/hibernating-and-restoring-postgres-buffer-cache?lang=en
+[70] https://www.developer.com/guides/properly-building-persistent-programs/
+[71] https://legacy.reactjs.org/docs/strict-mode.html
+[72] https://developer.atlassian.com/cloud/oauth/getting-started/refresh-tokens/
 
-1. **Add unique constraints** to the blocks table for UPSERT support
-2. **Implement the UPSERT approach** in a new save method
-3. **Test thoroughly** with your existing data
-4. **Gradually migrate** components to use the new save method
-5. **Monitor for race conditions** and authentication issues
+-------------------------
 
-The **UPSERT approach is strongly recommended** as it eliminates the fundamental data loss risks of the delete-then-insert pattern while providing better performance and simpler error handling. Combined with proper authentication management and race condition prevention, this solution will resolve your data deletion issues and provide a more robust document management system.
-
-[1] https://supabase.com/docs/guides/database/postgres/row-level-security
-[2] https://supabase.com/docs/reference/javascript/delete
-[3] https://www.reddit.com/r/Supabase/comments/1komon8/need_clarity_on_external_jwt_provider_support/
-[4] https://www.reddit.com/r/Supabase/comments/1iwxbf9/authuid_returning_null/
-[5] https://github.com/orgs/supabase/discussions/6592
-[6] https://dorsetrigs.org.uk/post/supabase-linked-tables-foreign-key-violation
-[7] https://github.com/orgs/supabase/discussions/27193
-[8] https://www.reddit.com/r/reactjs/comments/op67d8/react_patterns_for_async_race_conditions/
-[9] https://learnersbucket.com/examples/interview/handle-race-condition-in-react/
-[10] https://dev.to/mwoollen/supabase-upsert-1ebc
-[11] https://velog.io/@kim9567/Supabase-Upsert
-[12] https://app.studyraid.com/en/read/12469/403024/handling-upsert-operations
-[13] https://dba.stackexchange.com/questions/246990/postgres-upsert-performance-considerations-millions-of-rows-hour
-[14] https://blog.entrostat.com/supabase-rls-functions/
-[15] https://supabase.com/docs/guides/database/functions
-[16] https://thelinuxcode.com/postgres-security-definer/
-[17] https://www.reddit.com/r/Supabase/comments/1hz9l0p/how_to_handle_transactions_and_rollbacks_in/
-[18] https://stackoverflow.com/questions/77052193/transactions-in-supabase
-[19] https://github.com/supabase/supabase-dart/issues/60
-[20] https://procodebase.com/article/mastering-row-level-security-and-policies-in-supabase
-[21] https://stackoverflow.com/questions/75247517/supabase-upsert-multiple-onconflict-constraints
-[22] https://bootstrapped.app/guide/how-to-perform-batch-operations-in-supabase
-[23] https://github.com/orgs/supabase/discussions/11349
-[24] https://github.com/supabase/realtime/issues/1114
-[25] https://stackoverflow.com/questions/78770969/how-can-i-fix-this-rls-policy-issue-with-supabase-on-insert
-[26] https://www.reddit.com/r/Supabase/comments/12zfn6p/supabase_error_new_row_violates_rowlevel_security/
-[27] https://dev.to/asheeshh/mastering-supabase-rls-row-level-security-as-a-beginner-5175
-[28] https://prosperasoft.com/blog/database/how-to-manage-row-level-security-policies-effectively-in-supabase/
-[29] https://github.com/orgs/supabase/discussions/526
-[30] https://community.weweb.io/t/bulk-update-supabase/15224
-[31] https://bootstrapped.app/guide/how-to-perform-transactional-operations-in-supabase
-[32] https://app.studyraid.com/en/read/12469/403023/deleting-records
-[33] https://bootstrapped.app/guide/how-to-handle-distributed-transactions-in-supabase
-[34] https://supabase.com/docs/guides/troubleshooting/do-i-need-to-expose-security-definer-functions-in-row-level-security-policies-iI0uOw
-[35] https://www.reddit.com/r/Supabase/comments/1aw1jqo/docs_confusing_me_about_security_definer_functions/
-[36] https://stackoverflow.com/questions/69261986/possible-to-restrict-postgresql-security-definer-function-to-rls-use
-[37] https://stackoverflow.com/questions/78203777/supabase-is-it-possible-to-return-data-from-multiple-tables-no-reference-or-f
-[38] https://dev.to/wagenrace/combining-multiple-tables-in-supabase-212o
-[39] https://dba.stackexchange.com/questions/8028/whats-better-for-large-changes-to-a-table-delete-and-insert-every-time-or-upd
-[40] https://community.weweb.io/t/supabase-auth-auth-uid-doesnt-work-but-user-id-does/4246
-[41] https://libreddit.in.projectsegfau.lt/r/Supabase/comments/1iwxbf9/authuid_returning_null/
-[42] https://github.com/supabase-community/supabase-csharp/discussions/115
-[43] https://linuxhint.com/security-definer-functions-postgresql/
-[44] https://github.com/orgs/supabase/discussions/1548
-[45] https://github.com/orgs/supabase/discussions/3563
-[46] https://stackoverflow.com/questions/77219866/issue-with-row-level-security-in-supabase
-----------------------
 ### Key Points
-- It seems likely that the "delete-then-insert" pattern is causing data loss, especially when blocks are empty or not loaded, due to race conditions and lack of transaction safety.
-- Research suggests using UPSERT or transactions for updating related records in Supabase with RLS to ensure data integrity and prevent loss.
-- The evidence leans toward implementing a PostgreSQL function for atomic operations, which could improve performance and reliability.
+- Research suggests that partial data loss during development is likely due to React 18's strict mode, causing components to mount twice and potentially interfering with data fetching.
+- It seems likely that the issue is related to useEffect running twice, leading to race conditions or inconsistent state in data fetching, especially for blocks loaded on-demand.
+- The evidence leans toward improper handling of sessionStorage caching or authentication timing, exacerbated by development tools like Vite HMR, though this is not confirmed without code review.
+
+### Understanding the Issue
+The problem occurs when making code changes and refreshing the application during development, leading to partial data loss where document titles and counts are preserved, but blocks inside documents are lost. This is specific to development and does not happen in normal usage, suggesting an interaction between development tools and React's strict mode.
+
+### Possible Causes
+- **React 18 Strict Mode:** Strict mode causes components to mount, unmount, and remount, which can lead to useEffect hooks running twice. This might cause double data fetches, potentially leading to race conditions or state inconsistencies, especially for on-demand block loading.
+- **Vite HMR and Session Handling:** It seems likely that Vite's Hot Module Replacement (HMR) or full page reloads might affect sessionStorage or authentication, though research suggests localStorage and sessionStorage typically persist across refreshes.
+- **Supabase RLS and Authentication:** There could be timing issues where data fetching occurs before authentication is fully restored, potentially failing Row Level Security (RLS) policies, though documents still load, suggesting partial success.
+
+### Recommended Actions
+- Ensure useEffect hooks for data fetching include cleanup functions, such as using AbortController, to handle double mounting in strict mode.
+- Verify sessionStorage caching logic to ensure blocks are correctly retrieved after refresh, checking for any unintended clears or key mismatches.
+- Consider temporarily disabling strict mode in development to confirm the issue, though this is not a long-term solution.
+- Explore using data fetching libraries like React Query ([Using Supabase with React Query](https://makerkit.dev/blog/saas/supabase-react-query)) for better caching and deduplication, especially in strict mode environments.
 
 ---
 
-### Direct Answer
+### Survey Note: Detailed Analysis of Supabase Data Loss on Code Changes
 
-#### Overview
-Your document management application, Journey Log Compass, is experiencing data loss issues when saving documents, likely due to the current "delete-then-insert" pattern for blocks. This approach can fail if blocks are empty, not loaded, or if there are race conditions. Here's a simple breakdown to address your concerns and suggest a robust solution.
+This survey note provides a comprehensive analysis of the reported issue of partial data loss in a React/Supabase application during development, focusing on code changes and refreshes. The investigation covers technical context, potential causes, and best practices, drawing from extensive research into React, Supabase, and Vite interactions.
 
-#### Why the Current Pattern Might Fail
-- **Data Loss Risk**: Deleting all blocks first and then inserting new ones can lead to loss if the insertion fails or if the blocks array is empty, leaving no blocks behind.
-- **Race Conditions**: If the save operation happens before blocks are fully loaded, it might delete existing data without re-inserting, causing empty documents after reload.
-- **RLS and Transactions**: Row Level Security (RLS) might block operations if user IDs don't match, and without transactions, partial failures can occur, leading to inconsistent states.
+#### Technical Context and Symptoms
+The application stack includes React 19 with Vite dev server, Supabase (PostgreSQL with RLS enabled), and Supabase Auth with JWT tokens, using Hot Module Replacement (HMR) in development. The database structure separates documents and blocks, with blocks loaded on-demand via lazy loading, cached for 5 seconds, and stored in sessionStorage.
 
-#### Best Practices for Supabase with RLS
-- **Use Transactions**: Implement a PostgreSQL function to handle both deletion and insertion in a single transaction, ensuring either both succeed or both fail, preventing data loss. For example, use `supabase.rpc` to call a function that wraps these operations.
-- **Consider UPSERT**: Instead of deleting all blocks, use UPSERT to update existing blocks and insert new ones, preserving data unless explicitly removed. This requires tracking block IDs.
-- **Batch Operations**: For performance, batch updates can help, but ensure they are wrapped in transactions to maintain consistency.
+Symptoms include:
+- Document titles and counts are preserved after refresh.
+- Blocks inside documents are lost, appearing empty, despite existing in the database (verified via SQL queries).
+- This issue occurs only during development (code changes + refresh), not in normal usage.
 
-#### Recommended Save Strategy
-- Create a PostgreSQL function, like `save_document_blocks`, that deletes existing blocks and inserts new ones atomically. For instance:
-  ```sql
-  CREATE OR REPLACE FUNCTION save_document_blocks(doc_id UUID, blocks JSONB)
-  RETURNS VOID AS $$
-  BEGIN
-    DELETE FROM blocks WHERE document_id = doc_id;
-    INSERT INTO blocks (id, document_id, user_id, type, content, position, metadata, created_at)
-    SELECT COALESCE((b->>'id')::UUID, gen_random_uuid()), doc_id, auth.uid(), b->>'type', b->>'content', (b->>'position')::INTEGER, (b->>'metadata')::JSONB, NOW()
-    FROM jsonb_array_elements(blocks) AS b;
-  END;
-  $$ LANGUAGE plpgsql;
-  ```
-- Call this function from your JavaScript code using `supabase.rpc`, ensuring atomic operations and better error handling.
+#### Research Findings
 
-#### Supabase-Specific Gotchas
-- Ensure `user_id` is correctly set in blocks to comply with RLS policies, as mismatches can block insertions.
-- Watch for JWT token expiration, though Supabase typically handles refreshes; ensure saves complete within token validity.
-- Be aware that CASCADE deletes on the foreign key won't affect this scenario, as you're deleting blocks directly.
+##### 1. React 18 Strict Mode and Double Mounting
+Research suggests that React 18's strict mode, enabled by default in development, causes components to mount, unmount, and remount to detect issues with effects and state ([Strict Mode – React](https://legacy.reactjs.org/docs/strict-mode.html)). This leads to useEffect hooks running twice on mount, which can cause problems for data fetching if not handled properly. For instance, a useEffect fetching blocks on document open might trigger two fetches, potentially leading to race conditions or state inconsistencies ([React 18 Strict Mode and data fetching](https://github.com/reduxjs/redux-toolkit/issues/2441)).
 
-This approach should prevent data loss, improve reliability, and maintain performance, especially with frequent saves.
+To mitigate, developers should ensure effects are idempotent and include cleanup functions, such as using AbortController to cancel ongoing requests. For example:
 
----
+```javascript
+useEffect(() => {
+  const controller = new AbortController();
+  const signal = controller.signal;
 
-### Survey Note: Detailed Analysis and Recommendations
-
-#### Introduction
-This analysis addresses the data deletion issue in your Journey Log Compass application, built with React 19, Supabase, and Row Level Security (RLS). The application manages documents and blocks in a one-to-many relationship, and the current save logic, which deletes all blocks before re-inserting, is causing data loss. This note provides a comprehensive examination of the problem, potential causes, and a recommended solution, ensuring data integrity and performance with Supabase and RLS.
-
-#### Problem Analysis
-The current implementation in `SupabaseAdapter.js` follows a "delete-then-insert" pattern for saving document blocks:
-- First, it deletes all existing blocks for the document using `.delete().eq('document_id', savedDoc.id)`.
-- Then, it inserts new blocks if the `blocks` array is non-empty, mapping them via `transformBlockToDB`.
-
-This approach has several risks:
-- **Data Loss Scenarios**: If the `blocks` array is empty or undefined (e.g., due to race conditions where blocks haven't loaded yet), the deletion occurs, but no insertion happens, leaving the document empty. This aligns with symptoms like documents appearing empty after reload and SQL queries showing only one block for multiple documents.
-- **Race Conditions**: Multiple save operations or concurrent UI updates (e.g., optimistic updates with a 5-second cache) can lead to inconsistent states, where one save deletes blocks before another can insert, resulting in data loss.
-- **Error Handling**: The code captures `blocksError` during insertion, but without explicit error handling shown, failures might go unnoticed, exacerbating data loss.
-
-#### RLS and Supabase Considerations
-RLS is enabled on both `documents` and `blocks` tables, with policies likely ensuring operations are restricted to the authenticated user's data (e.g., `auth.uid() = user_id`). The schema includes:
-- `documents` table with `user_id` referencing `auth.users`.
-- `blocks` table with `document_id` (ON DELETE CASCADE) and `user_id`, ensuring blocks are tied to both documents and users.
-
-Potential RLS-related issues include:
-- Insertions failing if `user_id` in blocks doesn't match `auth.uid()`, though the code likely sets this via `transformBlockToDB`.
-- Deletions succeeding but insertions being blocked, leading to the observed empty state.
-
-However, given the policies (e.g., "Users can insert own documents" with `WITH CHECK (auth.uid() = user_id)`), and assuming `user_id` is correctly set, RLS shouldn't be the primary issue. The CASCADE delete on `document_id` is irrelevant here, as we're deleting blocks directly, not documents.
-
-#### Investigating Potential Causes
-1. **Empty Blocks Array**: If `blocks` is empty during save (e.g., component not loaded), deletion happens without re-insertion, causing loss. This is likely a timing issue, as mentioned in symptoms.
-2. **Insertion Failures**: Errors during `.insert(blocksToSave)` might not be handled, leading to silent failures post-deletion. This could be due to invalid data, RLS violations, or network issues.
-3. **JWT Token Expiration**: While Supabase handles token refresh, if a save operation spans token expiration, it might fail, though this is less likely given typical session durations.
-4. **Concurrent Operations**: Multiple saves (e.g., rapid UI updates) could interfere, with one delete overwriting another's insert, leading to data loss.
-
-#### Best Practices for Supabase with RLS
-Supabase documentation ([Supabase Best Practices](https://supabase.com/docs/guides/best-practices)) recommends:
-- Using transactions for related operations to ensure atomicity, especially with RLS.
-- Leveraging PostgreSQL functions for complex operations, marked as `SECURITY DEFINER` for privilege elevation, though RLS still applies.
-- Optimizing RLS policies with `SELECT auth.uid()` for better performance, as noted in user context.
-
-For updating related records (documents and blocks):
-- **Transactions**: Ensure deletion and insertion are atomic to prevent partial failures. This can be achieved via PostgreSQL functions called with `supabase.rpc`.
-- **Batch Operations**: For performance, batch updates are fine, but wrap them in transactions to maintain consistency.
-- **UPSERT**: Instead of delete-then-insert, use `.upsert()` to update existing blocks and insert new ones, preserving data unless explicitly removed. This requires block IDs to be tracked.
-
-#### Recommended Solution: Atomic Save Strategy
-To address data loss and improve reliability, implement a PostgreSQL function for atomic operations:
-- Create a function `save_document_blocks` that deletes existing blocks and inserts new ones in a single transaction:
-  ```sql
-  CREATE OR REPLACE FUNCTION save_document_blocks(doc_id UUID, blocks JSONB)
-  RETURNS VOID AS $$
-  BEGIN
-    DELETE FROM blocks WHERE document_id = doc_id;
-    INSERT INTO blocks (id, document_id, user_id, type, content, position, metadata, created_at)
-    SELECT 
-      COALESCE((b->>'id')::UUID, gen_random_uuid()),
-      doc_id,
-      auth.uid(),
-      b->>'type',
-      b->>'content',
-      (b->>'position')::INTEGER,
-      (b->>'metadata')::JSONB,
-      NOW()
-    FROM jsonb_array_elements(blocks) AS b;
-  END;
-  $$ LANGUAGE plpgsql;
-  ```
-- Call this function from JavaScript:
-  ```javascript
-  const blocksToSave = blocks.map((block, index) => ({
-    id: block.id || null,
-    type: block.type,
-    content: block.content,
-    position: index,
-    metadata: block.metadata
-  }));
-  const { error } = await supabase.rpc('save_document_blocks', {
-    doc_id: savedDoc.id,
-    blocks: blocksToSave
+  fetchBlocks({ signal }).then(data => {
+    // set state
+  }).catch(error => {
+    if (error.name !== 'AbortError') {
+      // handle error
+    }
   });
-  if (error) {
-    console.error('Save failed:', error);
-    // Handle error, e.g., notify user
-  }
-  ```
-- This ensures atomicity: if insertion fails, the deletion is rolled back, preventing data loss. It also improves performance by reducing round-trips and handles RLS by setting `user_id = auth.uid()`.
 
-#### Alternative Approaches
-- **Diff-Based Updates**: Compute differences (new, updated, deleted blocks) and perform targeted operations. This is more complex but efficient for large datasets:
-  - Insert new blocks (no ID).
-  - Update existing blocks (match by ID).
-  - Delete removed blocks (not in current array).
-- **Soft Deletes**: Instead of hard deletes, mark blocks as deleted with a flag, allowing recovery. This requires schema changes (e.g., `is_deleted BOOLEAN`) and RLS updates.
-- **Versioning**: Add a version column to documents, ensuring saves apply to the latest version, preventing race conditions. This adds complexity but enhances consistency.
+  return () => {
+    controller.abort();
+  };
+}, [documentId]);
+```
 
-#### Performance and Scalability
-- The proposed function is efficient for small to medium block counts, as it's a single database call. For large datasets, consider indexing `document_id` on the `blocks` table for faster deletes.
-- Batch operations via the function handle multiple blocks in one go, reducing network overhead compared to individual inserts.
+This approach ensures that if the component is unmounted during strict mode's double mount, the first fetch is cancelled, preventing interference with the second.
 
-#### Supabase-Specific Gotchas
-- Ensure `pgcrypto` extension is enabled for `gen_random_uuid()`, which is typically the case in Supabase.
-- Monitor JWT token validity; while Supabase handles refreshes, ensure save operations complete within session limits (e.g., 60 minutes default).
-- RLS policies must allow the operations; verify `user_id` matches `auth.uid()` in all cases, especially for insertions.
+##### 2. Vite HMR and Session Handling
+Vite's HMR typically updates modules without full page reloads, but full reloads can occur in cases like circular dependencies ([HMR API | Vite](https://vite.dev/guide/api-hmr)). Research indicates that localStorage and sessionStorage generally persist across refreshes, but there are reports of localStorage being cleared in Vite, though not specifically for sessionStorage ([LocalStorage on Vite gets cleared on every refresh](https://github.com/vitejs/vite/issues/14825)). Given the user's use of sessionStorage for block caching, it's possible that development-specific behaviors (e.g., HMR-induced reloads) might affect cache persistence, though this is not confirmed without code review.
 
-#### Conclusion
-The "delete-then-insert" pattern is likely failing due to race conditions, empty blocks, and lack of transaction safety. Implementing a PostgreSQL function for atomic saves, as outlined, ensures data integrity, leverages Supabase's transaction support, and aligns with best practices for RLS. For future scalability, consider diff-based updates or versioning, depending on your application's needs. This solution should resolve the data loss issue while maintaining performance, as of June 28, 2025.
+##### 3. Supabase RLS and Authentication Timing
+Supabase Auth uses JWT tokens, typically stored in localStorage, and handles session restoration asynchronously ([Use Supabase Auth with React | Supabase Docs](https://supabase.com/docs/guides/auth/quickstarts/react)). If data fetching occurs before the session is fully restored, RLS policies might fail, though the user's ability to fetch documents suggests partial success. Research into Supabase issues revealed problems with realtime subscriptions in strict mode due to double mounting ([When used with react strict mode, the realtime database does not subscribe properly](https://github.com/supabase/realtime-js/issues/169)), suggesting potential similar issues with data fetching, though not directly documented.
+
+##### 4. SessionStorage and Caching
+The application uses a 5-second cache and sessionStorage for blocks, which should persist across refreshes in the same tab. However, if the application clears sessionStorage on load or uses keys based on state that changes between mounts, cached data might be inaccessible. Research did not find specific Vite behaviors clearing sessionStorage, but double mounting in strict mode could lead to cache access issues if not handled correctly.
+
+##### 5. Common Patterns and Solutions
+Best practices for preserving state during development include:
+- Using data fetching libraries like React Query for caching and deduplication, which handle strict mode better ([How to use Supabase with React Query](https://makerkit.dev/blog/saas/supabase-react-query)).
+- Ensuring effects are resilient to multiple executions, with proper cleanup.
+- Logging fetch calls and responses to debug timing issues, especially in strict mode.
+
+#### Detailed Analysis Table
+
+| **Aspect**               | **Findings**                                                                 | **Implications**                                      |
+|--------------------------|-----------------------------------------------------------------------------|------------------------------------------------------|
+| React Strict Mode        | Causes double mounting, leading to useEffect running twice in development.  | Potential race conditions in data fetching, especially for blocks. |
+| Vite HMR                | May trigger full reloads, potentially affecting sessionStorage, though not confirmed. | Possible cache loss, needs verification.             |
+| Supabase Auth            | Session restoration is asynchronous; timing issues possible with RLS.       | Data fetches before session restoration may fail, though documents load. |
+| SessionStorage Caching   | Should persist across refreshes, but double mounting might affect access.   | Verify cache logic for key consistency and clearing. |
+| Data Fetching Libraries  | React Query offers robust caching and deduplication, suitable for strict mode. | Could resolve issues, but introduces additional dependency. |
+
+#### Recommendations
+Given the research, the most likely cause is React 18 strict mode's double mounting affecting data fetching, particularly for blocks loaded on-demand. To address:
+1. Implement cleanup in useEffect for data fetches, using AbortController to handle double mounting.
+2. Verify sessionStorage caching logic, ensuring keys are consistent and no unintended clears occur.
+3. Consider using React Query for better handling of caching and fetches, especially in strict mode environments.
+4. Temporarily disable strict mode to confirm the issue, though maintain it for long-term development benefits.
+
+This approach should mitigate the partial data loss, ensuring a smoother development experience while maintaining production reliability.
+
+#### Key Citations
+- [Strict Mode React Legacy Documentation](https://legacy.reactjs.org/docs/strict-mode.html)
+- [React 18 Strict Mode and Data Fetching Issue](https://github.com/reduxjs/redux-toolkit/issues/2441)
+- [LocalStorage on Vite Gets Cleared Issue](https://github.com/vitejs/vite/issues/14825)
+- [Use Supabase Auth with React Documentation](https://supabase.com/docs/guides/auth/quickstarts/react)
+- [HMR API Vite Documentation](https://vite.dev/guide/api-hmr)
+- [When Used with React Strict Mode Realtime Issue](https://github.com/supabase/realtime-js/issues/169)
+- [Using Supabase with React Query Blog](https://makerkit.dev/blog/saas/supabase-react-query)

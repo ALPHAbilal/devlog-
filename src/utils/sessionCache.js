@@ -1,12 +1,27 @@
 /**
  * Session-based cache for documents and blocks
- * Data persists until page refresh or explicit clear
+ * Enhanced for development to survive HMR better
  */
 class SessionCache {
   constructor() {
-    this.documents = new Map(); // documentId -> document data
-    this.blocks = new Map(); // documentId -> blocks array
-    this.metadata = new Map(); // documentId -> { lastAccessed, loadedAt }
+    // In development, try to restore from window object (survives HMR)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      if (window.__devSessionCache) {
+        console.log('[Dev] Restoring session cache from window');
+        this.documents = window.__devSessionCache.documents || new Map();
+        this.blocks = window.__devSessionCache.blocks || new Map();
+        this.metadata = window.__devSessionCache.metadata || new Map();
+      } else {
+        this.documents = new Map();
+        this.blocks = new Map();
+        this.metadata = new Map();
+        window.__devSessionCache = { documents: this.documents, blocks: this.blocks, metadata: this.metadata };
+      }
+    } else {
+      this.documents = new Map(); // documentId -> document data
+      this.blocks = new Map(); // documentId -> blocks array
+      this.metadata = new Map(); // documentId -> { lastAccessed, loadedAt }
+    }
   }
 
   /**

@@ -31,26 +31,69 @@ export class OptimizedBlockLoader {
     this.activeLoads.set(documentId, controller);
 
     try {
-      // Fetch all blocks in one query - much faster than streaming
-      const { data: blocks, error } = await supabase
-        .from('blocks')
-        .select('*')
-        .eq('document_id', documentId)
-        .order('position');
-
-      if (error) throw error;
-      if (controller.signal.aborted) return null;
-
-      const transformedBlocks = blocks.map(this.transformBlockFromDB);
+      // In development, add retry logic for auth timing issues
+      const maxRetries = process.env.NODE_ENV === 'development' ? 3 : 1;
+      let lastError;
       
-      // Cache the result
-      this.cache.set(documentId, {
-        blocks: transformedBlocks,
-        timestamp: Date.now()
-      });
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          if (controller.signal.aborted) return null;
+          
+          // Check auth status before loading (important for development)
+          if (process.env.NODE_ENV === 'development') {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (authError || !user) {
+              if (attempt < maxRetries - 1) {
+                console.log(`[Dev] Auth not ready, retrying in ${500 * (attempt + 1)}ms...`);
+                await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+                continue;
+              }
+              throw new Error('Authentication required');
+            }
+          }
+          
+          // Fetch all blocks in one query - much faster than streaming
+          console.log(`OptimizedBlockLoader: Loading blocks for document ${documentId}`);
+          const { data: blocks, error } = await supabase
+            .from('blocks')
+            .select('*')
+            .eq('document_id', documentId)
+            .order('position');
 
-      this.activeLoads.delete(documentId);
-      return { blocks: transformedBlocks, fromCache: false };
+          if (error) throw error;
+          if (controller.signal.aborted) return null;
+
+          console.log(`OptimizedBlockLoader: Loaded ${blocks?.length || 0} blocks for document ${documentId}`);
+          const transformedBlocks = blocks.map(this.transformBlockFromDB);
+          
+          // Cache the result
+          this.cache.set(documentId, {
+            blocks: transformedBlocks,
+            timestamp: Date.now()
+          });
+
+          this.activeLoads.delete(documentId);
+          return { blocks: transformedBlocks, fromCache: false };
+        } catch (error) {
+          lastError = error;
+          
+          if (controller.signal.aborted) {
+            throw error;
+          }
+          
+          // Log in development
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`[Dev] Block load attempt ${attempt + 1} failed:`, error.message);
+          }
+          
+          // Wait before retry (except on last attempt)
+          if (attempt < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+          }
+        }
+      }
+      
+      throw lastError;
     } catch (error) {
       this.activeLoads.delete(documentId);
       throw error;

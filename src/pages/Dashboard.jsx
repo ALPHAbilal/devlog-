@@ -26,7 +26,12 @@ export default function Dashboard() {
   // Handle document expansion with lazy block loading
   const handleDocumentExpand = useCallback((document) => {
     // Open document immediately - ExpandedViewEnhanced will handle progressive loading
-    setExpandedEntry(document);
+    // Clear blocks array to force full reload from database
+    const documentForEdit = {
+      ...document,
+      blocks: undefined // Force block loader to fetch all blocks
+    };
+    setExpandedEntry(documentForEdit);
   }, []);
 
   // Update storage info
@@ -557,7 +562,7 @@ export default function Dashboard() {
               </span>
               <span className="text-text-secondary/40">•</span>
               <span className="text-text-secondary/70">
-                <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || 0), 0)}</span> blocks
+                <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || e.blockCount || 0), 0)}</span> blocks
               </span>
               {/* Subtle storage indicator - only show when concerning */}
               {storageInfo && getStoragePercentage() > 70 && (

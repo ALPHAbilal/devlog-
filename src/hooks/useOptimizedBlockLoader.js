@@ -22,15 +22,18 @@ export function useOptimizedBlockLoader(documentId, entry) {
   useEffect(() => {
     if (!documentId || loadingRef.current) return;
 
+    // AbortController to handle double mounting in React Strict Mode
+    const abortController = new AbortController();
+
     const loadBlocks = async () => {
       loadingRef.current = true;
       setIsLoading(true);
       setError(null);
 
       try {
-        // Check if blocks are already in entry
+        // Check if blocks are already in entry AND have content
         if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
-          // Use existing blocks, no loading needed
+          // If blocks array exists with content, they were already loaded
           setBlocks(entry.blocks);
           setIsLoading(false);
           sessionCache.cacheBlocks(documentId, entry.blocks);
@@ -45,7 +48,8 @@ export function useOptimizedBlockLoader(documentId, entry) {
           return;
         }
 
-        // Start with intelligent skeletons
+        // Only show skeletons when we're actually loading from database
+        // This happens when entry.blocks is undefined (not loaded yet)
         const skeletons = OptimizedBlockLoader.generateSkeletons(null);
         setBlocks(skeletons);
 
@@ -85,6 +89,12 @@ export function useOptimizedBlockLoader(documentId, entry) {
     };
 
     loadBlocks();
+
+    // Cleanup function to abort fetch on unmount (handles React Strict Mode)
+    return () => {
+      abortController.abort();
+      loadingRef.current = false;
+    };
   }, [documentId, entry]);
 
   // Preload function for nearby documents

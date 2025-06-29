@@ -421,7 +421,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = updateTree(treeData);
     setTreeData(newTree);
-    onUpdate({ treeData: newTree });
+    onUpdate(block.id, { treeData: newTree });
   };
 
   // Update file content
@@ -456,7 +456,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
 
     newTree = addToTarget(newTree);
     setTreeData(newTree);
-    onUpdate({ treeData: newTree });
+    onUpdate(block.id, { treeData: newTree });
   };
 
   // Remove node from tree (returns new tree without the node)
@@ -486,7 +486,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
   const removeNode = (nodeId) => {
     const newTree = removeNodeFromTree(treeData, nodeId);
     setTreeData(newTree);
-    onUpdate({ treeData: newTree });
+    onUpdate(block.id, { treeData: newTree });
   };
 
   // Add child node
@@ -522,7 +522,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = [...treeData, newNode];
     setTreeData(newTree);
-    onUpdate({ treeData: newTree });
+    onUpdate(block.id, { treeData: newTree });
   };
 
   return (

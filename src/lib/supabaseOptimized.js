@@ -68,12 +68,16 @@ class OptimizedSupabaseClient {
         },
         global: {
           headers: {
-            'x-client-info': 'journey-log-compass'
+            'x-client-info': 'journey-log-compass',
+            'x-connection-pooling': 'session' // Enable session pooling
           }
         },
         db: {
           schema: 'public'
-        }
+        },
+        // Connection pooling configuration
+        connectionTimeout: 10000, // 10 seconds
+        poolSize: 10 // Number of connections in the pool
       });
 
       // Initialize auth state only once

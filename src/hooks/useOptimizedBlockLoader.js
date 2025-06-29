@@ -1,16 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, startTransition } from 'react';
 import { optimizedBlockLoader, OptimizedBlockLoader } from '../utils/optimizedBlockLoader';
 import { sessionCache } from '../utils/sessionCache';
 
 /**
  * React hook for optimized block loading with skeleton management
  */
-export function useOptimizedBlockLoader(documentId, entry) {
+export function useOptimizedBlockLoader(documentId, entry, options = {}) {
+  const { skip = false } = options;
   const [blocks, setBlocks] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!skip);
   const [error, setError] = useState(null);
   const loadingRef = useRef(false);
   const mountedRef = useRef(true);
+  const lastLoadedDocRef = useRef(null); // Track last loaded document
 
   useEffect(() => {
     mountedRef.current = true;
@@ -20,13 +22,21 @@ export function useOptimizedBlockLoader(documentId, entry) {
   }, []);
 
   useEffect(() => {
-    if (!documentId || loadingRef.current) return;
+    // Check if we're already loading this document
+    if (!documentId || loadingRef.current || skip || lastLoadedDocRef.current === documentId) {
+      // If skipped, set loading to false immediately
+      if (skip && isLoading) {
+        setIsLoading(false);
+      }
+      return;
+    }
 
     // AbortController to handle double mounting in React Strict Mode
     const abortController = new AbortController();
 
     const loadBlocks = async () => {
       loadingRef.current = true;
+      lastLoadedDocRef.current = documentId; // Mark as loading
       setIsLoading(true);
       setError(null);
 
@@ -95,7 +105,7 @@ export function useOptimizedBlockLoader(documentId, entry) {
       abortController.abort();
       loadingRef.current = false;
     };
-  }, [documentId, entry]);
+  }, [documentId, entry, skip, isLoading]);
 
   // Preload function for nearby documents
   const preloadNearbyDocuments = (documentIds) => {
@@ -109,11 +119,33 @@ export function useOptimizedBlockLoader(documentId, entry) {
     optimizedBlockLoader.clearCache(documentId);
   };
 
+  // Function to update a single block
+  const updateBlock = (blockId, updates) => {
+    setBlocks(prevBlocks => 
+      prevBlocks.map(block => 
+        block.id === blockId ? { ...block, ...updates } : block
+      )
+    );
+  };
+
+  // Function to remove a block
+  const removeBlock = (blockId) => {
+    setBlocks(prevBlocks => prevBlocks.filter(block => block.id !== blockId));
+  };
+
   return {
     blocks,
     isLoading,
     error,
     updateBlocks,
-    preloadNearbyDocuments
+    updateBlock,
+    removeBlock,
+    preloadNearbyDocuments,
+    // Provide empty implementations for pagination-specific features
+    isLoadingMore: false,
+    hasMore: false,
+    loadMore: () => {},
+    checkLoadMore: () => {},
+    progress: null
   };
 }

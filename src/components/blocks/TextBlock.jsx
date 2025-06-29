@@ -1,8 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import FloatingToolbar from '../FloatingToolbar';
 import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
+import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
+import { useAuth } from '../../contexts/AuthContextOptimized';
 
 export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow }) {
+  const { user } = useAuth();
   // Only auto-edit if this is a truly new block (has no content)
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
@@ -204,7 +207,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     // Extract tags from content before saving
     const extractedTags = extractTagsFromContent(actualContent);
     // Remove isNew flag when saving
-    onUpdate({ content: actualContent, tags: extractedTags, isNew: undefined });
+    onUpdate(block.id, { content: actualContent, tags: extractedTags, isNew: undefined });
     setIsEditing(false);
     if (onFocus) onFocus(null); // Clear focus
   };
@@ -294,28 +297,46 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         const file = item.getAsFile();
         if (!file) continue;
 
-        // Convert to base64 data URL
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          const imageMarkdown = `![](${dataUrl})`;
-          
-          // Insert at cursor position
+        if (!user) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        try {
+          // Show placeholder immediately
           const textarea = textareaRef.current;
           const start = textarea.selectionStart;
           const end = textarea.selectionEnd;
           
+          // Create temporary placeholder
+          const tempPlaceholder = '![Uploading image...](...)';
+          const newDisplayContent = displayContent.substring(0, start) + tempPlaceholder + displayContent.substring(end);
+          setDisplayContent(newDisplayContent);
+          
+          // Compress image if needed
+          let imageToUpload = file;
+          if (file.size > 1024 * 1024) { // Compress if > 1MB
+            imageToUpload = await compressImage(file, 1920, 0.85);
+          }
+          
+          // Upload to Supabase Storage
+          const { url, path } = await uploadImageToSupabase(imageToUpload, user.id);
+          
+          // Replace placeholder with actual URL
+          const imageMarkdown = `![](${url})`;
+          const finalDisplayContent = newDisplayContent.replace(tempPlaceholder, imageMarkdown);
+          
           // Create placeholder for display
           const imageIndex = Array.from(imageMap.current.keys()).length;
           const placeholder = createImagePlaceholder(imageIndex);
-          imageMap.current.set(placeholder, { alt: '', dataUrl, fullMatch: imageMarkdown });
+          imageMap.current.set(placeholder, { alt: '', dataUrl: url, fullMatch: imageMarkdown });
           
-          // Update display content with placeholder
-          const newDisplayContent = displayContent.substring(0, start) + placeholder + displayContent.substring(end);
-          setDisplayContent(newDisplayContent);
+          // Update display with final placeholder
+          const displayWithPlaceholder = finalDisplayContent.replace(imageMarkdown, placeholder);
+          setDisplayContent(displayWithPlaceholder);
           
           // Update actual content
-          const actualContent = processContentForSave(newDisplayContent);
+          const actualContent = processContentForSave(displayWithPlaceholder);
           setContent(actualContent);
           
           // Set cursor after the placeholder
@@ -324,8 +345,11 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
             textarea.selectionEnd = start + placeholder.length;
             textarea.focus();
           }, 0);
-        };
-        reader.readAsDataURL(file);
+        } catch (error) {
+          console.error('Failed to upload image:', error);
+          // Remove placeholder on error
+          setDisplayContent(displayContent);
+        }
         return;
       }
     }
@@ -347,7 +371,8 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     '/code': { type: 'block', blockType: 'code' },
     '/ai': { type: 'block', blockType: 'ai' },
     '/math': { type: 'block', blockType: 'math' },
-    '/todo': { type: 'block', blockType: 'todo' }
+    '/todo': { type: 'block', blockType: 'todo' },
+    '/image': { type: 'block', blockType: 'image' }
   };
 
   const handleChange = (e) => {
@@ -428,7 +453,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           // Save current content if any
           if (cleanedContent) {
             const extractedTags = extractTagsFromContent(cleanedContent);
-            onUpdate({ content: cleanedContent, tags: extractedTags });
+            onUpdate(block.id, { content: cleanedContent, tags: extractedTags });
           }
           
           // Convert to new block type
@@ -493,7 +518,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           const cleanedContent = lines.join('\n').trimEnd();
           if (cleanedContent) {
             const extractedTags = extractTagsFromContent(cleanedContent);
-            onUpdate({ content: cleanedContent, tags: extractedTags });
+            onUpdate(block.id, { content: cleanedContent, tags: extractedTags });
           }
           onConvert(command.blockType);
           setSlashHint('');
@@ -524,7 +549,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       if (headingData && currentLineIndex === 0 && lines.length === 1) {
         // Convert to heading block
         e.preventDefault();
-        onUpdate({ content: '' }); // Clear current block
+        onUpdate(block.id, { content: '' }); // Clear current block
         if (onConvert) {
           onConvert('heading', { level: headingData.level, content: headingData.content });
         }

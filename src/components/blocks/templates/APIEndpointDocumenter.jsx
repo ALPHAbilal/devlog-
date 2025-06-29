@@ -26,7 +26,7 @@ const AUTH_TYPES = {
   oauth2: { label: 'OAuth 2.0', icon: Server }
 };
 
-export default function APIEndpointDocumenter({ data, onUpdate }) {
+export default function APIEndpointDocumenter({ block, data, onUpdate }) {
   const [expandedSections, setExpandedSections] = useState({
     request: true,
     parameters: true,
@@ -57,7 +57,7 @@ export default function APIEndpointDocumenter({ data, onUpdate }) {
   };
 
   const updateEndpoint = (field, value) => {
-    onUpdate({ ...data, [field]: value });
+    onUpdate(block.id, { ...data, [field]: value });
   };
 
   const toggleSection = (section) => {

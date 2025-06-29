@@ -55,7 +55,7 @@ export default function TodoBlock({ block, onUpdate }) {
     
     if (JSON.stringify(todosWithIds) !== JSON.stringify(todos)) {
       setTodos(todosWithIds);
-      onUpdate({ data: { todos: todosWithIds } });
+      onUpdate(block.id, { data: { todos: todosWithIds } });
     }
   }, []);
 
@@ -72,7 +72,7 @@ export default function TodoBlock({ block, onUpdate }) {
     };
     const newTodos = [...todos, newTodo];
     setTodos(newTodos);
-    onUpdate({ data: { todos: newTodos } });
+    onUpdate(block.id, { data: { todos: newTodos } });
   };
 
   const updateTodo = (id, field, value) => {
@@ -80,13 +80,13 @@ export default function TodoBlock({ block, onUpdate }) {
       todo.id === id ? { ...todo, [field]: value } : todo
     );
     setTodos(newTodos);
-    onUpdate({ data: { todos: newTodos } });
+    onUpdate(block.id, { data: { todos: newTodos } });
   };
 
   const deleteTodo = (id) => {
     const newTodos = todos.filter(todo => todo.id !== id);
     setTodos(newTodos);
-    onUpdate({ data: { todos: newTodos } });
+    onUpdate(block.id, { data: { todos: newTodos } });
   };
 
 
@@ -156,7 +156,7 @@ export default function TodoBlock({ block, onUpdate }) {
       newTodos.splice(draggedOverItem.current, 0, draggedTodo);
       
       setTodos(newTodos);
-      onUpdate({ data: { todos: newTodos } });
+      onUpdate(block.id, { data: { todos: newTodos } });
     }
     
     draggedItem.current = null;

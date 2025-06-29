@@ -20,7 +20,7 @@ export default function HeadingBlock({ block, onUpdate }) {
   }, [isEditing]);
 
   const handleSave = useCallback(() => {
-    onUpdate({ content, level, isNew: undefined });
+    onUpdate(block.id, { content, level, isNew: undefined });
     setIsEditing(false);
   }, [content, level, onUpdate]);
 
@@ -62,7 +62,7 @@ export default function HeadingBlock({ block, onUpdate }) {
             const newLevel = Number(e.target.value);
             setLevel(newLevel);
             // Update immediately when level changes
-            onUpdate({ content, level: newLevel });
+            onUpdate(block.id, { content, level: newLevel });
           }}
           className="bg-dark-secondary text-text-primary px-3 py-1.5 rounded text-sm
                      border border-dark-secondary/50 focus:outline-none

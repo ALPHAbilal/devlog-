@@ -10,7 +10,7 @@ export default function AIBlock({ block, onUpdate }) {
     if (newMessage.content.trim()) {
       const updatedMessages = [...messages, newMessage];
       setMessages(updatedMessages);
-      onUpdate({ messages: updatedMessages });
+      onUpdate(block.id, { messages: updatedMessages });
       setNewMessage({ role: 'user', content: '' });
       setIsAddingMessage(false);
     }
@@ -19,14 +19,14 @@ export default function AIBlock({ block, onUpdate }) {
   const removeMessage = (index) => {
     const updatedMessages = messages.filter((_, i) => i !== index);
     setMessages(updatedMessages);
-    onUpdate({ messages: updatedMessages });
+    onUpdate(block.id, { messages: updatedMessages });
   };
 
   const updateMessage = (index, content) => {
     const updatedMessages = [...messages];
     updatedMessages[index].content = content;
     setMessages(updatedMessages);
-    onUpdate({ messages: updatedMessages });
+    onUpdate(block.id, { messages: updatedMessages });
   };
 
   return (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function CSSBoxModel({ data, onUpdate }) {
+export default function CSSBoxModel({ block, data, onUpdate }) {
   const [editingField, setEditingField] = useState(null);
   const [tempValue, setTempValue] = useState('');
 
@@ -19,7 +19,7 @@ export default function CSSBoxModel({ data, onUpdate }) {
     }
     
     current[keys[keys.length - 1]] = parseInt(value) || 0;
-    onUpdate(newData);
+    onUpdate(block.id, newData);
     setEditingField(null);
   };
 
@@ -203,14 +203,14 @@ export default function CSSBoxModel({ data, onUpdate }) {
                 onBlur={() => {
                   const newData = { ...data };
                   newData.content.text = tempValue;
-                  onUpdate(newData);
+                  onUpdate(block.id, newData);
                   setEditingField(null);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     const newData = { ...data };
                     newData.content.text = tempValue;
-                    onUpdate(newData);
+                    onUpdate(block.id, newData);
                     setEditingField(null);
                   } else if (e.key === 'Escape') {
                     setEditingField(null);
@@ -316,7 +316,7 @@ export default function CSSBoxModel({ data, onUpdate }) {
           <button
             onClick={() => {
               const newData = { ...data, unit: data.unit === 'px' ? 'rem' : 'px' };
-              onUpdate(newData);
+              onUpdate(block.id, newData);
             }}
             className="text-xs px-4 py-1.5 
                        bg-dark-secondary/30 hover:bg-dark-secondary/50

@@ -59,7 +59,7 @@ export default function MathBlock({ block, onUpdate, isFocused, onFocus }) {
         throwOnError: true 
       });
       
-      onUpdate({ 
+      onUpdate(block.id, { 
         latex,
         displayMode,
         isNew: undefined // Clear isNew flag

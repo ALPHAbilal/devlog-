@@ -160,7 +160,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   };
 
   const handleSave = () => {
-    onUpdate({ content: code, language, filePath, isNew: undefined });
+    onUpdate(block.id, { content: code, language, filePath, isNew: undefined });
     setIsEditing(false);
     setIsFullscreen(false);
   };
@@ -173,7 +173,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
 
   const handleLanguageChange = (newLanguage) => {
     setLanguage(newLanguage);
-    onUpdate({ ...block, language: newLanguage });
+    onUpdate(block.id, { ...block, language: newLanguage });
     setShowLanguageDropdown(false);
   };
 
@@ -204,7 +204,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
     // Cmd/Ctrl + S - save
     else if ((e.metaKey || e.ctrlKey) && e.key === 's') {
       e.preventDefault();
-      onUpdate({ content: code, language });
+      onUpdate(block.id, { content: code, language });
     }
   };
 

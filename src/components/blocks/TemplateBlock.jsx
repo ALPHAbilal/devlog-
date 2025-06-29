@@ -96,7 +96,7 @@ export default function TemplateBlock({ block, onUpdate }) {
   const handleTemplateSelect = (templateKey) => {
     setSelectedTemplate(templateKey);
     setTemplateData(templates[templateKey].defaultData);
-    onUpdate({ 
+    onUpdate(block.id, { 
       template: templateKey, 
       data: templates[templateKey].defaultData 
     });
@@ -104,7 +104,7 @@ export default function TemplateBlock({ block, onUpdate }) {
 
   const handleDataUpdate = (newData) => {
     setTemplateData(newData);
-    onUpdate({ data: newData });
+    onUpdate(block.id, { data: newData });
   };
 
   // If no template selected, show template selector
@@ -152,7 +152,7 @@ export default function TemplateBlock({ block, onUpdate }) {
         <button
           onClick={() => {
             setSelectedTemplate(null);
-            onUpdate({ template: null, data: {} });
+            onUpdate(block.id, { template: null, data: {} });
           }}
           className="text-xs text-text-secondary/50 hover:text-text-primary
                      transition-colors"
@@ -162,6 +162,7 @@ export default function TemplateBlock({ block, onUpdate }) {
       </div>
       
       <TemplateComponent 
+        block={block}
         data={templateData}
         onUpdate={handleDataUpdate}
       />

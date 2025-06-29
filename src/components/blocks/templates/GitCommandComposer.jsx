@@ -745,7 +745,7 @@ const scenarios = {
   ]
 };
 
-export default function GitCommandComposer({ data, onUpdate }) {
+export default function GitCommandComposer({ block, data, onUpdate }) {
   const [copied, setCopied] = useState(null);
   const [selectedOption, setSelectedOption] = useState(null);
   const [placeholderValues, setPlaceholderValues] = useState({});
@@ -768,7 +768,7 @@ export default function GitCommandComposer({ data, onUpdate }) {
   }
 
   const selectScenario = (category, scenario) => {
-    onUpdate({
+    onUpdate(block.id, {
       ...data,
       currentScenarioId: scenario.id,
       currentScenarioCategory: category
@@ -800,7 +800,7 @@ export default function GitCommandComposer({ data, onUpdate }) {
     
     // Save placeholder value for future use
     const placeholderKey = `${currentScenario.id}-${selectedOption.label}-${key}`;
-    onUpdate({
+    onUpdate(block.id, {
       ...data,
       savedPlaceholders: {
         ...savedPlaceholders,
@@ -832,7 +832,7 @@ export default function GitCommandComposer({ data, onUpdate }) {
       ...commandHistory
     ].slice(0, 20);
 
-    onUpdate({
+    onUpdate(block.id, {
       ...data,
       history: newHistory
     });
@@ -847,11 +847,11 @@ export default function GitCommandComposer({ data, onUpdate }) {
   };
 
   const clearHistory = () => {
-    onUpdate({ ...data, history: [] });
+    onUpdate(block.id, { ...data, history: [] });
   };
 
   const clearScenario = () => {
-    onUpdate({ 
+    onUpdate(block.id, { 
       ...data, 
       currentScenarioId: null,
       currentScenarioCategory: null 

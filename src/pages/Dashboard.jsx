@@ -297,8 +297,8 @@ export default function Dashboard() {
       setExpandedEntry(updatedEntry);
     }
     
-    // Save only this document to storage
-    setTimeout(async () => {
+    // Save only this document to storage - use requestIdleCallback for non-blocking save
+    const saveOperation = async () => {
       try {
         await storageWrapper.saveDocument(updatedEntry);
         // Update storage info after save
@@ -312,7 +312,21 @@ export default function Dashboard() {
           console.error('Fallback save also failed:', fallbackError);
         }
       }
-    }, 0);
+    };
+    
+    // Use requestIdleCallback for truly non-blocking saves
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        saveOperation();
+      }, { timeout: 2000 }); // Fallback to 2 seconds if idle time not available
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          saveOperation();
+        });
+      }, 16); // Wait for next frame
+    }
   }, [entries, expandedEntry, updateStorageInfo]);
 
   // Handle document link clicks
@@ -412,7 +426,8 @@ export default function Dashboard() {
   };
 
   // Show skeleton UI while loading for better perceived performance
-  if (isLoading && entries.length === 0) {
+  // Show loading skeleton only during initial load
+  if (isLoading && !isInitialized.current) {
     return (
       <div className="flex flex-col h-full relative bg-dark-primary">
         {/* Floating Tags Skeleton */}

@@ -193,6 +193,7 @@ export class SupabaseAdapter {
   // Document-specific methods - NOW RETURNS DOCUMENTS WITHOUT BLOCKS
   async getDocuments() {
     if (!this.initialized) await this.init();
+    console.log('SupabaseAdapter: getDocuments called');
 
     // Check cache first
     const now = Date.now();
@@ -203,16 +204,43 @@ export class SupabaseAdapter {
 
     const queryStart = performance.now();
     
-    // ONLY get documents - NO BLOCKS for dashboard view
-    // Temporarily remove timeout to debug
-    console.log(`SupabaseAdapter: Querying documents for user ${this.userId}`);
+    // Try optimized function first
+    let documents = null;
+    let docError = null;
     
-    const { data: documents, error: docError } = await supabase
-      .from('documents')
-      .select('id, title, tags, created_at, updated_at, metadata, is_template')
-      .eq('user_id', this.userId)
-      .order('updated_at', { ascending: false })
-      .limit(20);
+    try {
+      // Try the optimized get_documents_with_stats function
+      const { data, error } = await supabase.rpc('get_documents_with_stats', {
+        p_user_id: this.userId,
+        p_limit: 20
+      });
+      
+      if (!error && data) {
+        console.log('SupabaseAdapter: Using optimized document query');
+        documents = data;
+      } else if (error?.message?.includes('function') && error?.message?.includes('does not exist')) {
+        console.log('SupabaseAdapter: Optimized function not available');
+      } else {
+        docError = error;
+      }
+    } catch (e) {
+      // Fallback to regular query
+    }
+    
+    // Fallback to regular query if optimized not available
+    if (!documents && !docError) {
+      console.log(`SupabaseAdapter: Querying documents for user ${this.userId}`);
+      
+      const { data, error } = await supabase
+        .from('documents')
+        .select('id, title, tags, created_at, updated_at, metadata, is_template')
+        .eq('user_id', this.userId)
+        .order('updated_at', { ascending: false })
+        .limit(20);
+      
+      documents = data;
+      docError = error;
+    }
     
     const queryTime = performance.now() - queryStart;
     console.log(`SupabaseAdapter: Documents query completed in ${Math.round(queryTime)}ms`);
@@ -223,49 +251,24 @@ export class SupabaseAdapter {
     }
     
     if (!documents || documents.length === 0) {
+      console.log('SupabaseAdapter: No documents found, returning empty array');
       return [];
     }
     
-    // Load first block for each document for preview
-    const documentsWithBlocks = await Promise.all(documents.map(async (doc) => {
-      const { data: blockData, error: blockError } = await supabase
-        .from('blocks')
-        .select('*')
-        .eq('document_id', doc.id)
-        .order('position')
-        .limit(1);
-      
-      if (blockError) {
-        console.warn(`Error loading first block for document ${doc.id}:`, blockError);
-      }
-      
-      // Get the first block from the array (if any)
-      const firstBlock = blockData && blockData.length > 0 ? blockData[0] : null;
-      
-      // Generate preview from first block or use stored preview
-      let preview = doc.metadata?.preview || 'Click to view document...';
-      let blocks = [];
-      
-      if (firstBlock) {
-        blocks = [this.transformBlockFromDB(firstBlock)];
-        if (firstBlock.type === 'text' || firstBlock.type === 'heading') {
-          preview = firstBlock.content.substring(0, 150);
-          if (firstBlock.content.length > 150) preview += '...';
-        }
-      }
-      
-      return {
-        id: doc.id,
-        title: doc.title,
-        preview: preview,
-        createdAt: doc.created_at,
-        updatedAt: doc.updated_at,
-        isTemplate: doc.is_template || false,
-        tags: doc.tags || [],
-        metadata: doc.metadata || {},
-        blocks: blocks, // Contains first block only
-        blockCount: doc.metadata?.blockCount || (firstBlock ? 1 : 0)
-      };
+    console.log(`SupabaseAdapter: Found ${documents.length} documents`);
+    
+    // Transform documents to app format
+    const documentsWithBlocks = documents.map(doc => ({
+      id: doc.id,
+      title: doc.title,
+      preview: doc.metadata?.preview || doc.preview || 'Click to view document...',
+      createdAt: doc.created_at,
+      updatedAt: doc.updated_at,
+      isTemplate: doc.is_template || false,
+      tags: doc.tags || [],
+      metadata: doc.metadata || {},
+      blocks: [], // Don't load blocks on document list - let ExpandedView handle it
+      blockCount: doc.metadata?.blockCount || doc.block_count || 0
     }));
     
     // Transform to legacy format
@@ -275,7 +278,7 @@ export class SupabaseAdapter {
     this.documentsCache = transformedDocuments;
     this.cacheTimestamp = now;
     
-    console.log(`SupabaseAdapter: Returning ${transformedDocuments.length} documents with first blocks loaded`);
+    console.log(`SupabaseAdapter: Returning ${transformedDocuments.length} documents`);
     
     return transformedDocuments;
   }
@@ -332,19 +335,21 @@ export class SupabaseAdapter {
 
     console.log(`SupabaseAdapter: saveDocument called for ${document.id} with ${document.blocks?.length || 0} blocks`);
     
-    // 1. Verify authentication first
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.error('Authentication error:', authError);
-      throw new Error('Authentication required for save operation');
+    // Skip auth check if we already have userId (reduces latency)
+    if (!this.userId) {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        console.error('Authentication error:', authError);
+        throw new Error('Authentication required for save operation');
+      }
     }
     console.log(`SupabaseAdapter: Using userId ${this.userId} for save`);
     
     const { blocks, ...docData } = document;
     
-    // Generate preview from blocks
-    let preview = 'Click to view document...';
-    if (blocks && blocks.length > 0) {
+    // Use preview from document if already provided, otherwise generate
+    let preview = docData.preview || 'Click to view document...';
+    if (!docData.preview && blocks && blocks.length > 0) {
       const firstTextBlock = blocks.find(b => b.type === 'text' && b.content);
       const firstHeading = blocks.find(b => b.type === 'heading' && b.content);
       preview = firstTextBlock?.content.substring(0, 100) + '...' || 
@@ -383,35 +388,100 @@ export class SupabaseAdapter {
     }
     
     // 3. Use atomic function to save blocks
-    console.log(`SupabaseAdapter: Using atomic save for ${blocks?.length || 0} blocks`);
+    // console.log(`SupabaseAdapter: Using atomic save for ${blocks?.length || 0} blocks`);
     
-    // Prepare blocks for the RPC call
-    const blocksToSave = (blocks || []).map((block, index) => ({
-      id: block.id || crypto.randomUUID(), // Generate ID if missing
-      type: block.type,
-      content: block.content || '',
-      position: index,
-      metadata: block.metadata || {},
-      language: block.language || null,
-      file_path: block.filePath || null
+    // Prepare blocks for the RPC call - use Promise.resolve to prevent blocking
+    const blocksToSave = await Promise.resolve((blocks || []).map((block, index) => {
+      // console.log(`🟨 SupabaseAdapter: Processing block for save:`, {
+      //   index: index,
+      //   blockId: block.id,
+      //   blockType: block.type,
+      //   hasData: !!block.data,
+      //   hasMetadata: !!block.metadata,
+      //   dataContent: block.data,
+      //   metadataContent: block.metadata,
+      //   blockKeys: Object.keys(block)
+      // });
+      
+      const blockToSave = {
+        id: block.id || crypto.randomUUID(), // Generate ID if missing
+        type: block.type,
+        content: block.content || '',
+        position: index,
+        metadata: block.data || block.metadata || {},  // Use block.data if present, fallback to metadata
+        tags: block.tags || [],  // Include tags for the RPC function
+        language: block.language || null,
+        file_path: block.filePath || null
+      };
+      
+      // console.log(`🟨 SupabaseAdapter: Block prepared for DB:`, {
+      //   blockId: blockToSave.id,
+      //   blockType: blockToSave.type,
+      //   metadataAssigned: blockToSave.metadata,
+      //   metadataSource: block.data ? 'block.data' : (block.metadata ? 'block.metadata' : 'empty object')
+      // });
+      
+      return blockToSave;
     }));
     
-    console.log(`SupabaseAdapter: Preparing to save ${blocksToSave.length} blocks:`, 
-      blocksToSave.map(b => ({ id: b.id, type: b.type, content: b.content.substring(0, 50) + '...' }))
-    );
+    // console.log(`SupabaseAdapter: Preparing to save ${blocksToSave.length} blocks:`, 
+    //   blocksToSave.map(b => ({ id: b.id, type: b.type, content: b.content.substring(0, 50) + '...' }))
+    // );
     
-    // Call the atomic save function
-    const { error: blocksError } = await supabase.rpc('save_document_blocks', {
-      doc_id: savedDoc.id,
-      blocks: blocksToSave
-    });
+    // Try optimized save function first, fallback to original if not available
+    let blocksError = null;
+    let useOptimized = true;
+    
+    try {
+      // Try the optimized save_document_blocks_v2 function
+      const { error } = await supabase.rpc('save_document_blocks_v2', {
+        p_document_id: savedDoc.id,
+        p_blocks: blocksToSave
+      });
+      
+      if (error) {
+        if (error.message?.includes('function') && error.message?.includes('does not exist')) {
+          console.log('SupabaseAdapter: Optimized function not available, falling back to original');
+          useOptimized = false;
+        } else {
+          blocksError = error;
+        }
+      }
+    } catch (e) {
+      useOptimized = false;
+    }
+    
+    // Fallback to original function with retry logic
+    if (!useOptimized) {
+      let retryCount = 0;
+      const maxRetries = 2;
+      
+      while (retryCount <= maxRetries) {
+        const { error } = await supabase.rpc('save_document_blocks', {
+          doc_id: savedDoc.id,
+          blocks: blocksToSave
+        });
+        
+        blocksError = error;
+        
+        // If no error or not a duplicate key error, break
+        if (!error || error.code !== '23505') {
+          break;
+        }
+        
+        // On duplicate key error, wait and retry
+        console.log(`Duplicate key error, retrying (${retryCount + 1}/${maxRetries})...`);
+        await new Promise(resolve => setTimeout(resolve, 500 * (retryCount + 1)));
+        retryCount++;
+      }
+    }
     
     if (blocksError) {
       console.error('Error saving blocks atomically:', blocksError);
       throw blocksError;
     }
     
-    console.log(`SupabaseAdapter: Successfully saved document ${savedDoc.id} with ${blocksToSave.length} blocks atomically`);
+    // console.log(`SupabaseAdapter: Successfully saved document ${savedDoc.id} with ${blocksToSave.length} blocks atomically`);
     
     // Verify blocks were saved (in development only)
     if (process.env.NODE_ENV === 'development') {
@@ -424,7 +494,7 @@ export class SupabaseAdapter {
       if (verifyError) {
         console.error('Error verifying saved blocks:', verifyError);
       } else {
-        console.log(`SupabaseAdapter: Verified ${savedBlocks?.length || 0} blocks saved for document ${savedDoc.id}`);
+        // console.log(`SupabaseAdapter: Verified ${savedBlocks?.length || 0} blocks saved for document ${savedDoc.id}`);
       }
     }
     
@@ -461,8 +531,32 @@ export class SupabaseAdapter {
     try {
       console.log(`SupabaseAdapter: Starting deletion of document ${documentId}`);
       
-      // Delete blocks and document in parallel for better performance
       const deleteStart = performance.now();
+      
+      // Try soft delete first (if function exists)
+      try {
+        const { data, error } = await supabase.rpc('soft_delete_document', {
+          p_document_id: documentId
+        });
+        
+        if (!error) {
+          console.log('SupabaseAdapter: Soft delete successful');
+          this.invalidateCache();
+          const deleteTime = performance.now() - deleteStart;
+          console.log(`SupabaseAdapter: Soft delete completed in ${Math.round(deleteTime)}ms`);
+          return true;
+        } else if (!error.message?.includes('function') || !error.message?.includes('does not exist')) {
+          // If it's not a "function doesn't exist" error, throw it
+          throw error;
+        }
+      } catch (e) {
+        if (!e.message?.includes('function') || !e.message?.includes('does not exist')) {
+          throw e;
+        }
+      }
+      
+      // Fallback to hard delete if soft delete not available
+      console.log('SupabaseAdapter: Soft delete not available, using hard delete');
       
       // Use Promise.allSettled to continue even if one fails
       const [blocksResult, docResult] = await Promise.allSettled([
@@ -481,7 +575,7 @@ export class SupabaseAdapter {
       ]);
       
       const deleteTime = performance.now() - deleteStart;
-      console.log(`SupabaseAdapter: Delete operations completed in ${Math.round(deleteTime)}ms`);
+      console.log(`SupabaseAdapter: Hard delete operations completed in ${Math.round(deleteTime)}ms`);
       
       // Check results
       if (blocksResult.status === 'rejected') {
@@ -530,6 +624,14 @@ export class SupabaseAdapter {
 
   // Transform blocks between DB and app formats
   transformBlockFromDB(block) {
+    // console.log(`🟧 SupabaseAdapter: transformBlockFromDB called:`, {
+    //   blockId: block.id,
+    //   blockType: block.type,
+    //   hasMetadata: !!block.metadata,
+    //   metadataContent: block.metadata,
+    //   dbBlockKeys: Object.keys(block)
+    // });
+    
     const baseBlock = {
       id: block.id,
       type: block.type,
@@ -543,10 +645,26 @@ export class SupabaseAdapter {
       baseBlock.versionOf = block.version_of;
     }
 
-    // Parse metadata if needed
-    if (block.metadata) {
+    // For blocks that use 'data' property (table, todo, template), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template') {
+      baseBlock.data = block.metadata || {};
+      // console.log(`🟧 SupabaseAdapter: Restoring data property for ${block.type} block:`, {
+      //   blockId: block.id,
+      //   restoredData: baseBlock.data,
+      //   isEmptyData: Object.keys(baseBlock.data).length === 0
+      // });
+    } else if (block.metadata) {
+      // For other blocks, merge metadata properties directly
       Object.assign(baseBlock, block.metadata);
     }
+
+    // console.log(`🟧 SupabaseAdapter: Block transformed from DB:`, {
+    //   blockId: baseBlock.id,
+    //   blockType: baseBlock.type,
+    //   hasData: !!baseBlock.data,
+    //   transformedBlockKeys: Object.keys(baseBlock),
+    //   finalBlock: baseBlock
+    // });
 
     return baseBlock;
   }

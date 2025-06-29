@@ -8,6 +8,7 @@ import TableBlock from './blocks/TableBlock';
 import TemplateBlock from './blocks/TemplateBlock';
 import MathBlock from './blocks/MathBlock';
 import TodoBlock from './blocks/TodoBlock';
+import ImageBlock from './blocks/ImageBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';
 
@@ -21,6 +22,7 @@ const blockComponents = {
   template: TemplateBlock,
   math: MathBlock,
   todo: TodoBlock,
+  image: ImageBlock,
 };
 
 export default function Block({ 
@@ -159,7 +161,7 @@ export default function Block({
         } transition-opacity duration-200`}>
           <BlockComponent 
             block={block} 
-            onUpdate={(updates) => onUpdate(block.id, updates)}
+            onUpdate={onUpdate}
             onConvert={handleConvert}
             isFocused={isFocused}
             onFocus={onFocus}

@@ -32,7 +32,7 @@ export default function AIBlock({ block, onUpdate }) {
     const newMessage = { role, content: content.trim() };
     const updatedMessages = [...messages, newMessage];
     setMessages(updatedMessages);
-    onUpdate({ messages: updatedMessages });
+    onUpdate(block.id, { messages: updatedMessages });
     setIsAddingMessage(false);
     
     // Auto-collapse long messages
@@ -46,7 +46,7 @@ export default function AIBlock({ block, onUpdate }) {
     const updatedMessages = [...messages];
     updatedMessages[index].content = content;
     setMessages(updatedMessages);
-    onUpdate({ messages: updatedMessages });
+    onUpdate(block.id, { messages: updatedMessages });
   }, [messages, onUpdate]);
 
   const copyMessage = useCallback((index) => {

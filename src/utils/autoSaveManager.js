@@ -13,7 +13,7 @@ class AutoSaveManager {
     this.saveTimers = new Map(); // documentId -> timer
     this.localBackups = new Map(); // documentId -> backup data
     this.saveInProgress = new Set(); // documentIds currently being saved
-    this.DEBOUNCE_DELAY = 1000; // 1 second
+    this.DEBOUNCE_DELAY = 3000; // 3 seconds - prevent rapid saves
     this.MAX_RETRIES = 3;
     this.BACKUP_KEY_PREFIX = 'journey_log_backup_';
   }
@@ -22,7 +22,7 @@ class AutoSaveManager {
    * Queue a document update for auto-save
    */
   queueSave(documentId, updates, saveFunction) {
-    console.log(`AutoSave: Queueing save for document ${documentId}`);
+    // console.log(`AutoSave: Queueing save for document ${documentId}`);
     
     // Store the latest updates
     this.saveQueue.set(documentId, {
@@ -68,13 +68,13 @@ class AutoSaveManager {
       // Create local backup first
       await this.createLocalBackup(documentId, saveData.updates);
       
-      console.log(`AutoSave: Saving document ${documentId}`);
+      // console.log(`AutoSave: Saving document ${documentId}`);
       await saveData.saveFunction(documentId, saveData.updates);
       
       // Success - clear queue and backup
       this.saveQueue.delete(documentId);
       this.clearLocalBackup(documentId);
-      console.log(`AutoSave: Successfully saved ${documentId}`);
+      // console.log(`AutoSave: Successfully saved ${documentId}`);
       
     } catch (error) {
       console.error(`AutoSave: Failed to save ${documentId}:`, error);
@@ -116,7 +116,7 @@ class AutoSaveManager {
       // Also store in memory
       this.localBackups.set(documentId, backup);
       
-      console.log(`AutoSave: Created local backup for ${documentId}`);
+      // console.log(`AutoSave: Created local backup for ${documentId}`);
     } catch (error) {
       console.error('AutoSave: Failed to create backup:', error);
     }

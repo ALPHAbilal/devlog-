@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { AlertCircle, ChevronDown, ChevronRight, CheckCircle, XCircle, 
          FileCode, Hash, Package, Lightbulb, Copy, Check } from 'lucide-react';
 
-export default function TracebackAnalyzer({ data, onUpdate }) {
+export default function TracebackAnalyzer({ block, data, onUpdate }) {
   const [expandedFrames, setExpandedFrames] = useState({});
   const [copied, setCopied] = useState(false);
   const [editingField, setEditingField] = useState(null);
@@ -57,7 +57,7 @@ export default function TracebackAnalyzer({ data, onUpdate }) {
       }
     }
 
-    onUpdate({
+    onUpdate(block.id, {
       ...data,
       parsed: true,
       errorType,
@@ -78,7 +78,7 @@ export default function TracebackAnalyzer({ data, onUpdate }) {
     const newFrames = data.frames.map(frame => 
       frame.id === frameId ? { ...frame, ...updates } : frame
     );
-    onUpdate({ ...data, frames: newFrames });
+    onUpdate(block.id, { ...data, frames: newFrames });
   };
 
   const addVariable = (frameId) => {
@@ -146,7 +146,7 @@ export default function TracebackAnalyzer({ data, onUpdate }) {
           onChange={(e) => setTempValue(e.target.value)}
           onBlur={() => {
             if (tempValue.trim()) {
-              onUpdate({ ...data, rawTraceback: tempValue });
+              onUpdate(block.id, { ...data, rawTraceback: tempValue });
               setTempValue('');
             }
           }}
@@ -166,7 +166,7 @@ ZeroDivisionError: division by zero`}
         <button
           onClick={() => {
             if (tempValue.trim()) {
-              onUpdate({ ...data, rawTraceback: tempValue });
+              onUpdate(block.id, { ...data, rawTraceback: tempValue });
               setTempValue('');
             }
           }}
@@ -191,7 +191,7 @@ ZeroDivisionError: division by zero`}
             </span>
             <select
               value={data.status || 'analyzing'}
-              onChange={(e) => onUpdate({ ...data, status: e.target.value })}
+              onChange={(e) => onUpdate(block.id, { ...data, status: e.target.value })}
               className={`px-3 py-1 rounded-full text-xs font-medium border
                          ${getStatusColor(data.status || 'analyzing')}
                          bg-dark-primary focus:outline-none cursor-pointer`}
@@ -224,7 +224,7 @@ ZeroDivisionError: division by zero`}
           </div>
           <textarea
             value={data.solution || ''}
-            onChange={(e) => onUpdate({ ...data, solution: e.target.value })}
+            onChange={(e) => onUpdate(block.id, { ...data, solution: e.target.value })}
             placeholder="Describe how you fixed this error..."
             className="w-full p-2 bg-dark-primary/30 border border-dark-secondary/50
                        rounded text-text-primary text-sm
@@ -417,7 +417,7 @@ ZeroDivisionError: division by zero`}
       {/* Reset button */}
       <div className="flex justify-end">
         <button
-          onClick={() => onUpdate({ 
+          onClick={() => onUpdate(block.id, { 
             rawTraceback: '', 
             parsed: false, 
             frames: [], 

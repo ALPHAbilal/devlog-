@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Copy, Check, AlertCircle, ChevronDown, ChevronRight, RefreshCw } from 'lucide-react';
 
-export default function PayloadTemplate({ data, onUpdate }) {
+export default function PayloadTemplate({ block, data, onUpdate }) {
   const [copied, setCopied] = useState(false);
   const [editingField, setEditingField] = useState(null);
   const [tempValue, setTempValue] = useState('');
@@ -23,11 +23,11 @@ export default function PayloadTemplate({ data, onUpdate }) {
       // Try to parse to check validity
       JSON.parse(value);
       setJsonError(null);
-      onUpdate({ ...data, payload: value });
+      onUpdate(block.id, { ...data, payload: value });
     } catch (error) {
       // Still update but show error
       setJsonError(error.message);
-      onUpdate({ ...data, payload: value });
+      onUpdate(block.id, { ...data, payload: value });
     }
   };
 
@@ -35,7 +35,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
     try {
       const parsed = JSON.parse(data.payload);
       const formatted = JSON.stringify(parsed, null, 2);
-      onUpdate({ ...data, payload: formatted });
+      onUpdate(block.id, { ...data, payload: formatted });
       setJsonError(null);
     } catch (error) {
       setJsonError(error.message);
@@ -55,7 +55,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
     } else {
       newHeaders[key] = value;
     }
-    onUpdate({ ...data, headers: newHeaders });
+    onUpdate(block.id, { ...data, headers: newHeaders });
   };
 
   const addHeader = () => {
@@ -88,7 +88,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
         <div className="flex items-center gap-2">
           <select
             value={data.method}
-            onChange={(e) => onUpdate({ ...data, method: e.target.value })}
+            onChange={(e) => onUpdate(block.id, { ...data, method: e.target.value })}
             className={`px-3 py-1.5 rounded border font-mono text-sm
                        focus:outline-none cursor-pointer
                        focus:ring-1 focus:ring-accent-green/50
@@ -109,7 +109,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
           <input
             type="text"
             value={data.endpoint}
-            onChange={(e) => onUpdate({ ...data, endpoint: e.target.value })}
+            onChange={(e) => onUpdate(block.id, { ...data, endpoint: e.target.value })}
             placeholder="https://api.example.com/endpoint"
             className="flex-1 px-3 py-1.5 rounded border border-dark-secondary/50
                        bg-dark-primary/50 text-text-primary font-mono text-sm
@@ -148,7 +148,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
                         const newHeaders = { ...data.headers };
                         delete newHeaders[key];
                         newHeaders[tempValue] = value;
-                        onUpdate({ ...data, headers: newHeaders });
+                        onUpdate(block.id, { ...data, headers: newHeaders });
                         setEditingField(null);
                       }}
                       onKeyDown={(e) => {
@@ -156,7 +156,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
                           const newHeaders = { ...data.headers };
                           delete newHeaders[key];
                           newHeaders[tempValue] = value;
-                          onUpdate({ ...data, headers: newHeaders });
+                          onUpdate(block.id, { ...data, headers: newHeaders });
                           setEditingField(null);
                         } else if (e.key === 'Escape') {
                           setEditingField(null);
@@ -281,7 +281,7 @@ export default function PayloadTemplate({ data, onUpdate }) {
           {Object.entries(payloadPresets).map(([key, preset]) => (
             <button
               key={key}
-              onClick={() => onUpdate({
+              onClick={() => onUpdate(block.id, {
                 ...data,
                 method: preset.method,
                 endpoint: preset.endpoint,

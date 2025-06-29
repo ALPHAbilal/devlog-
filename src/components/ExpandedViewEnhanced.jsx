@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2 } from 'lucide-react';
 import Block from './Block';
@@ -8,21 +8,46 @@ import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
 import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
 import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
+import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
-  // Use optimized block loader
+  // Check if document might have many blocks (use pagination for documents with 50+ blocks)
+  const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
+  
+  // Always call both hooks to maintain hook order, but only use one
+  const paginatedLoader = usePaginatedBlockLoader(entry.id, entry, {
+    pageSize: 50,
+    enableInfiniteScroll: true,
+    skip: !shouldUsePagination
+  });
+  
+  const optimizedLoader = useOptimizedBlockLoader(entry.id, entry, {
+    skip: shouldUsePagination
+  });
+  
+  // Select which loader to use
+  const loader = shouldUsePagination ? paginatedLoader : optimizedLoader;
+  
   const { 
     blocks: loadedBlocks, 
-    isLoading: isLoadingBlocks, 
+    isLoading: isLoadingBlocks,
+    isLoadingMore = false,
+    hasMore = false,
+    loadMore = () => {},
     updateBlocks: updateLoadedBlocks,
-    preloadNearbyDocuments 
-  } = useOptimizedBlockLoader(entry.id, entry);
+    updateBlock: updateSingleBlock,
+    removeBlock,
+    checkLoadMore = () => {},
+    progress = null,
+    preloadNearbyDocuments = () => {}
+  } = loader;
   
-  const [blocks, setBlocks] = useState([]);
+  // We'll use loadedBlocks directly instead of duplicating state
+  const blocks = loadedBlocks || [];
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
   const [title, setTitle] = useState(entry.title);
@@ -40,13 +65,14 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const contentContainerRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const dragScrollInterval = useRef(null);
-  const [forceRenderCount, setForceRenderCount] = useState(0); // Dummy state for force re-render
+  // Removed forceRenderCount - was causing excessive re-renders
   const [isInternalUpdate, setIsInternalUpdate] = useState(false); // Track internal updates
   const [viewMode, setViewMode] = useState('blocks'); // 'blocks' or 'lines'
   const [selectedLineBlockId, setSelectedLineBlockId] = useState(null);
   const [linesScrollProgress, setLinesScrollProgress] = useState({ top: 0, bottom: 1 });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
 
   // Check for unsaved changes on mount
   useEffect(() => {
@@ -59,16 +85,22 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       }
     };
     checkForBackup();
+    
+    // Mark initial load as complete after 3 seconds to prevent cascade saves
+    const timer = setTimeout(() => {
+      console.log('ExpandedView: Initial load period complete, enabling saves');
+      isInitialLoadRef.current = false;
+    }, 3000);
+    
+    return () => clearTimeout(timer);
   }, [entry.id]);
 
-  // Sync loaded blocks with local state
+  // Handle internal updates
   useEffect(() => {
-    if (!isInternalUpdate) {
-      setBlocks(loadedBlocks);
-    } else {
+    if (isInternalUpdate) {
       setIsInternalUpdate(false);
     }
-  }, [loadedBlocks, isInternalUpdate]);
+  }, [isInternalUpdate]);
 
   // Preload nearby documents when this one is opened
   useEffect(() => {
@@ -93,29 +125,70 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
 
   const updateBlock = (blockId, updates) => {
-    const updatedBlocks = blocks.map(block => {
-      if (block.id === blockId) {
-        // Remove isNew flag when updating a block (user has interacted with it)
-        const { isNew, ...blockWithoutNew } = block;
-        return { ...blockWithoutNew, ...updates };
-      }
-      return block;
-    });
-    setBlocks(updatedBlocks);
-    updateLoadedBlocks(updatedBlocks);
+    // console.log('🟩 ExpandedViewEnhanced: updateBlock called:', {
+    //   blockId: blockId,
+    //   updates: updates,
+    //   hasDataField: 'data' in updates,
+    //   dataContent: updates.data
+    // });
     
-    // Queue auto-save with debouncing
-    autoSaveManager.queueSave(entry.id, { blocks: updatedBlocks }, async (docId, updates) => {
-      if (onUpdate) {
-        setIsInternalUpdate(true);
-        await onUpdate(docId, updates);
-      }
+    // Use the loader's updateBlock method
+    startTransition(() => {
+      updateSingleBlock(blockId, updates);
     });
+    
+    // Check if this is a significant update that needs saving
+    const needsSave = updates.content !== undefined || 
+                     updates.data !== undefined || 
+                     updates.metadata !== undefined ||
+                     updates.tags !== undefined;
+    
+    // Skip saves during initial load
+    if (needsSave && !isInitialLoadRef.current) {
+      // Get the updated blocks for auto-save
+      const updatedBlocks = blocks.map(block => {
+        if (block.id === blockId) {
+          // Remove isNew flag when updating a block (user has interacted with it)
+          const { isNew, ...blockWithoutNew } = block;
+          const updatedBlock = { ...blockWithoutNew, ...updates };
+          
+          // console.log('🟩 ExpandedViewEnhanced: Block before and after update:', {
+          //   blockId: blockId,
+          //   blockType: block.type,
+          //   before: block,
+          //   after: updatedBlock,
+          //   hadData: !!block.data,
+          //   hasData: !!updatedBlock.data
+          // });
+          
+          return updatedBlock;
+        }
+        return block;
+      });
+      
+      // console.log('🟩 ExpandedViewEnhanced: Passing to autoSaveManager:', {
+      //   entryId: entry.id,
+      //   blocksCount: updatedBlocks.length,
+      //   updatedBlockId: blockId,
+      //   updatedBlock: updatedBlocks.find(b => b.id === blockId)
+      // });
+      
+      // Queue auto-save with debouncing
+      autoSaveManager.queueSave(entry.id, { blocks: updatedBlocks }, async (docId, updates) => {
+        if (onUpdate) {
+          setIsInternalUpdate(true);
+          await onUpdate(docId, updates);
+        }
+      });
+    }
   };
 
   const deleteBlock = (blockId) => {
+    // Use the loader's removeBlock method
+    removeBlock(blockId);
+    
+    // Get updated blocks for the parent update
     const updatedBlocks = blocks.filter(block => block.id !== blockId);
-    setBlocks(updatedBlocks);
     if (onUpdate) {
       setIsInternalUpdate(true);
       onUpdate(entry.id, { blocks: updatedBlocks });
@@ -143,8 +216,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       updatedBlocks[blockIndex] = markAsHavingVersions(blockToDuplicate);
       updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
       
-      setBlocks(updatedBlocks);
-      if (onUpdate) {
+      updateLoadedBlocks(updatedBlocks);
+      if (onUpdate && !isInitialLoadRef.current) {
         setIsInternalUpdate(true);
         onUpdate(entry.id, { blocks: updatedBlocks });
       }
@@ -153,8 +226,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
       
-      setBlocks(updatedBlocks);
-      if (onUpdate) {
+      updateLoadedBlocks(updatedBlocks);
+      if (onUpdate && !isInitialLoadRef.current) {
         setIsInternalUpdate(true);
         onUpdate(entry.id, { blocks: updatedBlocks });
       }
@@ -172,8 +245,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     const [movedBlock] = updatedBlocks.splice(blockIndex, 1);
     updatedBlocks.splice(newIndex, 0, movedBlock);
     
-    setBlocks(updatedBlocks);
-    if (onUpdate) {
+    updateLoadedBlocks(updatedBlocks);
+    if (onUpdate && !isInitialLoadRef.current) {
       onUpdate(entry.id, { blocks: updatedBlocks });
     }
   };
@@ -285,10 +358,9 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       
       
       // Update state with completely new array
-      setBlocks(updatedBlocks);
+      updateLoadedBlocks(updatedBlocks);
       
-      // Force a re-render to ensure React 19 updates the DOM
-      setForceRenderCount(prev => prev + 1);
+      // Block state update will trigger re-render automatically
       
       // Update parent/storage immediately
       if (onUpdate) {
@@ -333,8 +405,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       return block;
     });
     
-    setBlocks(updatedBlocks);
-    if (onUpdate) {
+    updateLoadedBlocks(updatedBlocks);
+    if (onUpdate && !isInitialLoadRef.current) {
       onUpdate(entry.id, { blocks: updatedBlocks });
     }
   };
@@ -363,8 +435,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       updatedBlocks = [...blocks, newBlock];
     }
     
-    setBlocks(updatedBlocks);
-    if (onUpdate) {
+    updateLoadedBlocks(updatedBlocks);
+    if (onUpdate && !isInitialLoadRef.current) {
       onUpdate(entry.id, { blocks: updatedBlocks });
     }
 
@@ -463,6 +535,21 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     }
   }, []); // Only on mount
 
+  // Handle infinite scroll
+  useEffect(() => {
+    if (!shouldUsePagination || !checkLoadMore) return;
+
+    const scrollElement = scrollContainerRef.current;
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      checkLoadMore(scrollElement);
+    };
+
+    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  }, [shouldUsePagination, checkLoadMore])
+
   return (
     <div 
       ref={scrollContainerRef}
@@ -494,6 +581,19 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             </div>
             {/* View Mode Toggle and Actions */}
             <div className="flex items-center gap-3">
+              {/* Progress Indicator for Large Documents */}
+              {shouldUsePagination && progress && progress.total > 0 && (
+                <div className="flex items-center gap-2 text-xs text-text-secondary/60">
+                  <span>{progress.loaded}/{progress.total} blocks</span>
+                  <div className="w-16 h-1 bg-dark-secondary/50 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-accent-green/50 transition-all duration-300"
+                      style={{ width: `${progress.percentage}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+              
               {/* Delete Button */}
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -652,7 +752,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           })}
           
           {blocks.filter(block => block !== null).map((block, index) => (
-            <div key={`${block.id}-${forceRenderCount}`} className="relative">
+            <div key={block.id} className="relative">
               {block.isLoading ? (
                 <OptimizedBlockSkeleton 
                   type={block.type} 
@@ -694,6 +794,37 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               )}
           </div>
         ))}
+
+          {/* Load More Indicator for Paginated Documents */}
+          {shouldUsePagination && hasMore && (
+            <div className="relative py-8">
+              {isLoadingMore ? (
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-3 text-text-secondary">
+                    <div className="w-5 h-5 border-2 border-text-secondary/30 border-t-accent-green 
+                                    rounded-full animate-spin" />
+                    <span>Loading more blocks...</span>
+                  </div>
+                  <div className="text-xs text-text-secondary/60">
+                    {progress.loaded} of {progress.total} blocks loaded
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={loadMore}
+                  className="w-full py-4 border border-dark-secondary/50 rounded-lg 
+                             text-text-secondary hover:text-text-primary 
+                             hover:border-accent-green/50 transition-all
+                             flex items-center justify-center gap-2 group"
+                >
+                  <span>Load more blocks</span>
+                  <span className="text-xs text-text-secondary/60">
+                    ({progress.total - progress.loaded} remaining)
+                  </span>
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Add block at end */}
           <div className="relative pt-4">

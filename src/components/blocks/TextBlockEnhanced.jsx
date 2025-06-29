@@ -114,7 +114,7 @@ export default function TextBlockEnhanced({ block, onUpdate, isFocused, onFocus 
       // Auto-save after successful upload
       setTimeout(() => {
         const restoredContent = restoreImagesInContent(finalContent);
-        onUpdate({ content: restoredContent });
+        onUpdate(block.id, { content: restoredContent });
       }, 100);
 
     } catch (error) {
@@ -154,7 +154,7 @@ export default function TextBlockEnhanced({ block, onUpdate, isFocused, onFocus 
   const handleSave = () => {
     const restoredContent = restoreImagesInContent(displayContent);
     setContent(restoredContent);
-    onUpdate({ content: restoredContent });
+    onUpdate(block.id, { content: restoredContent });
     setIsEditing(false);
     setShowPreview(false);
   };

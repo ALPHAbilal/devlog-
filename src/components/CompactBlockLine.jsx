@@ -9,7 +9,8 @@ import {
   Calculator,
   CheckSquare,
   FileCode,
-  ChevronRight
+  ChevronRight,
+  Image
 } from 'lucide-react';
 
 // Icon mapping for each block type
@@ -22,7 +23,9 @@ const blockIcons = {
   table: Table,
   template: FileText,
   math: Calculator,
-  todo: CheckSquare
+  todo: CheckSquare,
+  image: Image,
+  'inline-image': Image
 };
 
 // Subtle gradient accents for each block type
@@ -35,7 +38,9 @@ const blockAccents = {
   table: 'from-orange-500/10 to-orange-600/5',
   template: 'from-pink-500/10 to-pink-600/5',
   math: 'from-indigo-500/10 to-indigo-600/5',
-  todo: 'from-red-500/10 to-red-600/5'
+  todo: 'from-red-500/10 to-red-600/5',
+  image: 'from-teal-500/10 to-teal-600/5',
+  'inline-image': 'from-teal-500/10 to-teal-600/5'
 };
 
 export default function CompactBlockLine({ block, index, onClick, isSelected }) {
@@ -68,6 +73,16 @@ export default function CompactBlockLine({ block, index, onClick, isSelected }) 
         const completed = block.todos?.filter(t => t.completed).length || 0;
         const total = block.todos?.length || 0;
         return `Tasks: ${completed}/${total} completed`;
+      case 'image':
+        const imageCount = block.images?.length || (block.url ? 1 : 0);
+        if (imageCount === 0) return 'Empty image block';
+        if (imageCount === 1) {
+          const firstImage = block.images?.[0] || block;
+          return firstImage.alt || 'Image';
+        }
+        return `Gallery: ${imageCount} images`;
+      case 'inline-image':
+        return block.alt || 'Inline image';
       default:
         return 'Unknown Block';
     }
@@ -98,6 +113,29 @@ export default function CompactBlockLine({ block, index, onClick, isSelected }) 
     if ((block.type === 'text' || block.type === 'heading') && block.content) {
       const words = block.content.split(/\s+/).filter(w => w.length > 0).length;
       metadata.push(`${words} words`);
+    }
+    
+    // Add image count and size for image blocks
+    if (block.type === 'image') {
+      const imageCount = block.images?.length || (block.url ? 1 : 0);
+      if (imageCount > 0) {
+        metadata.push(`${imageCount} ${imageCount === 1 ? 'image' : 'images'}`);
+        
+        // Calculate total size if available
+        if (block.images?.length > 0) {
+          const totalSize = block.images.reduce((sum, img) => sum + (img.size || 0), 0);
+          if (totalSize > 0) {
+            metadata.push(`${(totalSize / 1024 / 1024).toFixed(1)} MB`);
+          }
+        } else if (block.size) {
+          metadata.push(`${(block.size / 1024).toFixed(1)} KB`);
+        }
+      }
+    }
+    
+    // Add dimensions for inline images
+    if (block.type === 'inline-image' && block.dimensions) {
+      metadata.push(`${block.dimensions.width}×${block.dimensions.height}`);
     }
     
     return metadata;

@@ -9,6 +9,7 @@ import TemplateBlock from './blocks/TemplateBlock';
 import MathBlock from './blocks/MathBlock';
 import TodoBlock from './blocks/TodoBlock';
 import ImageBlock from './blocks/ImageBlock';
+import InlineImageBlock from './blocks/InlineImageBlock';
 import BlockDivider from './BlockDivider';
 import BlockControls from './BlockControls';
 
@@ -23,6 +24,7 @@ const blockComponents = {
   math: MathBlock,
   todo: TodoBlock,
   image: ImageBlock,
+  'inline-image': InlineImageBlock,
 };
 
 export default function Block({ 
@@ -165,6 +167,7 @@ export default function Block({
             onConvert={handleConvert}
             isFocused={isFocused}
             onFocus={onFocus}
+            onAddBelow={onAddBelow}
             allBlocks={allBlocks}
             onNavigateToBlock={onNavigateToBlock}
           />

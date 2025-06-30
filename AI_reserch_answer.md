@@ -1,344 +1,474 @@
-# Supabase Data Loss on Code Changes - Comprehensive Analysis
+# Supabase Enterprise Data Protection: Comprehensive Research Report
 
-Based on extensive research into your issue, this appears to be a **common development environment problem** with specific technical causes rather than a fundamental bug. The partial data loss you're experiencing - where document titles persist but blocks disappear after code changes and refresh - stems from the complex interaction between React's development behavior, Vite's Hot Module Replacement (HMR), and Supabase's authentication and caching mechanisms.
+## Major Companies Using Supabase in Production
 
-## Root Causes Analysis
+Supabase has gained significant traction with major enterprises and high-growth companies. **Enterprise customers include Mozilla, PwC, Johnson & Johnson, and 1Password**[1], demonstrating enterprise-grade adoption. Additional notable companies using Supabase in production include:
 
-### React 19 Strict Mode Double Effects
+- **Mozilla** - Uses Supabase for GenAI and RAG, storing embeddings in PostgreSQL for similarity searches[2]
+- **1Password** - Enterprise customer utilizing Supabase's managed platform[1]
+- **Epsilon3** - Builds software for NASA using Supabase for "billion dollar missions" requiring high reliability and security[2]
+- **GitHub** - Uses Supabase for prototyping through GitHub Next[2]
+- **Shotgun** - Achieved 83% cost reduction migrating to Supabase[2]
+- **Maergo** - Handled 100x their highest sustained traffic with Supabase[2]
+- **Mobbin** - Migrated 200,000 users from Firebase[3]
+- **Udio, Krea, Humata, and Pika** - Described as "rocketships" using Supabase to build fast and scale faster[1]
 
-**React 19's Strict Mode intentionally double-invokes effects during development** to help identify side effects[1][2][3]. This behavior can cause authentication and data loading functions to execute twice, potentially creating race conditions with your Supabase session management[4][5]. Since you're using lazy loading for blocks, the double execution may interfere with the timing of authentication verification and subsequent data fetching.
+According to Supabase, **36% of the last Y Combinator batch used Supabase to launch their start-up**[1], and the platform serves over **1 million databases** with **3,500+ enterprise customers**[2].
 
-### Vite HMR and Session State Invalidation
+## Supabase's Native Data Protection Features
 
-**Vite's Hot Module Replacement can inadvertently clear browser storage** or reset application state during code changes[6][7]. While Vite doesn't directly clear localStorage/sessionStorage, HMR can trigger component remounting that affects how your application manages cached authentication tokens and session state[8][9]. Your 5-second application cache and sessionStorage for blocks may be getting invalidated during the HMR process.
+### Point-in-Time Recovery (PITR)
+**PITR is available as an add-on for Pro, Team, and Enterprise plans**[4][5]. Key features include:
 
-### Supabase Authentication Token Refresh Issues
+- **Recovery granularity**: Down to seconds-level precision[4]
+- **Recovery Point Objective (RPO)**: 2 minutes in worst-case scenarios[4]
+- **WAL file backup frequency**: Every 2 minutes by default, or immediately when file size thresholds are crossed[4]
+- **Pricing**: Approximately $100/month for the add-on (requires Small compute minimum)[4]
 
-**Authentication tokens can become stale or invalid after development refreshes**[10][11][12]. The research reveals that Supabase's JWT tokens can sometimes show role as "anon" even after successful authentication, particularly in development environments[11]. This suggests that your blocks aren't loading because the authentication context isn't properly restored after code changes, causing RLS policies to deny access.
+### Automated Backup Schedules
+Supabase provides automatic daily backups with different retention periods:
 
-### Lazy Loading and Cache Invalidation Timing
+- **Pro Plan**: 7 days retention[4][5]
+- **Team Plan**: 14 days retention[4][5]  
+- **Enterprise Plan**: Up to 30 days retention[4][5]
 
-**The combination of lazy loading and development environment cache clearing creates a race condition**[13][14]. Your blocks load on-demand when opening documents, but after a code refresh, the authentication session may not be fully restored by the time the lazy loading attempt occurs, resulting in empty results even though the data exists in the database.
+**Backup process**: Uses PostgreSQL's `pg_dumpall` utility for logical backups (databases 15GB)[4].
 
-## Evidence-Based Solutions
+### Database Branching
+**Supabase Branching is now in open beta** for Pro Plan and above[6]. Features include:
 
-### 1. Development-Specific Authentication Handling
+- **Preview environments**: Each pull request creates a corresponding database branch[6]
+- **Persistent branches**: Long-running branches that remain active even after PR merges[6]
+- **Ephemeral branches**: Short-lived branches tied to pull requests[6]
+- **Cost**: Approximately $0.32 per day ($10/month) per branch[7]
+- **GitHub integration**: Automatic migration deployment when merging pull requests[6]
 
-Implement more robust session restoration for development:
+### Enterprise SLA and Support
+**Supabase Enterprise offers a 99.9% uptime SLA**[8] with:
 
-```javascript
-// Enhanced session management for development
-const useDevAuth = () => {
-  const [session, setSession] = useState(null);
-  const [loading, setLoading] = useState(true);
+- **24/7 global support coverage**[2]
+- **Dedicated team of experts**[2]
+- **Migration and success support**[2]
+- **SOC 2 Type 2 compliance**[9]
+- **HIPAA compliance** (with Business Associate Agreement)[9]
+- **Service credit structure**: 10-30% credits for downtime events[8]
 
-  useEffect(() => {
-    // Add longer timeout for development
-    const restoreSession = async () => {
-      try {
-        // Multiple attempts to restore session
-        let attempts = 0;
-        const maxAttempts = 3;
-        
-        while (attempts  setTimeout(resolve, 500));
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+## Real-World Migration Strategies and Case Studies
 
-    restoreSession();
+### Zero-Downtime Migration Patterns
+Based on production examples, successful companies follow these patterns:
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setLoading(false);
-      }
-    );
+1. **Dual-write approach**: Start writing to both databases simultaneously[10]
+2. **Backfill strategy**: Dump all existing data up to the first row written to Supabase[10]
+3. **Gradual cutover**: Switch read traffic progressively[10]
 
-    return () => subscription.unsubscribe();
-  }, []);
+### Mobbin's Firebase to Supabase Migration
+**Mobbin successfully migrated 200,000 users from Firebase to Supabase**[11], primarily driven by indexing limitations in Firebase. Their CTO cited the need for more flexible SQL-based querying and better performance optimization capabilities.
 
-  return { session, loading };
-};
-```
+### Common Migration Pain Points
+Real users report several challenges:
 
-### 2. Robust Block Loading with Retry Logic
+- **CLI version inconsistencies**: Teams have lost "2 separate days handling migrations" due to CLI and Docker version conflicts[12]
+- **Migration file proliferation**: Creating separate migration files for every function iteration creates poor developer experience[13]
+- **Unknown limits**: Authentication randomly failing due to undocumented rate limits[13]
 
-Enhance your block loader to handle development environment quirks:
+## Database Design Patterns for Zero Data Loss
 
-```javascript
-const loadBlocksWithRetry = async (documentId, maxRetries = 3) => {
-  for (let attempt = 0; attempt  setTimeout(resolve, 1000));
-        continue;
-      }
+### Event Sourcing Implementation
+For event sourcing in Supabase, the recommended pattern includes:
 
-      const { data: blocks, error } = await supabase
-        .from('blocks')
-        .select('*')
-        .eq('document_id', documentId)
-        .order('position');
-
-      if (error) throw error;
-      return blocks;
-    } catch (error) {
-      if (attempt === maxRetries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
-    }
-  }
-};
-```
-
-### 3. Development Cache Strategy
-
-Implement a development-aware caching strategy[15][16]:
-
-```javascript
-const DevCache = {
-  set: (key, data, ttl = 5000) => {
-    const item = {
-      data,
-      timestamp: Date.now(),
-      ttl
-    };
-    
-    // Use a combination of memory and sessionStorage
-    if (typeof window !== 'undefined') {
-      try {
-        sessionStorage.setItem(`dev_cache_${key}`, JSON.stringify(item));
-      } catch (e) {
-        console.warn('SessionStorage not available, using memory cache only');
-      }
-    }
-    
-    // Memory fallback
-    if (!window.devCacheMemory) window.devCacheMemory = new Map();
-    window.devCacheMemory.set(key, item);
-  },
-
-  get: (key) => {
-    // Try memory first (survives some HMR scenarios)
-    if (window.devCacheMemory?.has(key)) {
-      const item = window.devCacheMemory.get(key);
-      if (Date.now() - item.timestamp 
-  ) : (
-    
-      
-    
-  )
+```sql
+CREATE TABLE events (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  aggregate_id UUID NOT NULL,
+  event_type TEXT NOT NULL,
+  event_data JSONB NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  version INTEGER NOT NULL
 );
 ```
 
-## Expected Behavior vs. Bug Classification
+### Audit Logging Pattern
+**Production-tested audit log implementation**[14]:
 
-**This is expected development behavior, not a production bug**[3][4]. The research confirms that development environments with React Strict Mode, HMR, and authentication systems commonly experience these types of state management issues. The fact that your data persists in the database and normal app usage works perfectly indicates that your core implementation is sound.
+```sql
+CREATE TABLE audit_logs (
+  id SERIAL PRIMARY KEY,
+  table_name TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  timestamp TIMESTAMP DEFAULT NOW(),
+  old_values JSONB,
+  new_values JSONB,
+  performed_by UUID
+);
 
-## Best Practices for Development
-
-### 1. Implement Development-Specific Logging
-
-```javascript
-const devLog = (message, data) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[DEV] ${message}`, data);
-  }
-};
+CREATE OR REPLACE FUNCTION log_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    INSERT INTO audit_logs (table_name, operation, new_values, performed_by)
+    VALUES (TG_TABLE_NAME, 'INSERT', row_to_json(NEW), NEW.user_id);
+    RETURN NEW;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    INSERT INTO audit_logs (table_name, operation, old_values, new_values, performed_by)
+    VALUES (TG_TABLE_NAME, 'UPDATE', row_to_json(OLD), row_to_json(NEW), NEW.user_id);
+    RETURN NEW;
+  ELSIF (TG_OP = 'DELETE') THEN
+    INSERT INTO audit_logs (table_name, operation, old_values, performed_by)
+    VALUES (TG_TABLE_NAME, 'DELETE', row_to_json(OLD), OLD.user_id);
+    RETURN OLD;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
-### 2. Use Supabase Local Development
+### Soft Delete Implementation
+**Production-ready soft delete pattern**[15]:
 
-Consider setting up **local Supabase development**[17][18] to eliminate network-related authentication issues:
+```sql
+ALTER TABLE items ADD COLUMN deleted_at TIMESTAMPTZ;
+
+CREATE VIEW active_items AS 
+SELECT * FROM items WHERE deleted_at IS NULL;
+
+-- Soft delete operation
+UPDATE items SET deleted_at = NOW() WHERE id = ?;
+```
+
+## External Backup Solutions and Integrations
+
+### Automated GitHub Actions Backup
+**Copy-paste ready GitHub Actions workflow**[16]:
+
+```yaml
+name: 'backup-database'
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    env:
+      supabase_db_url: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Backup roles
+        run: supabase db dump --db-url "$supabase_db_url" -f roles.sql --role-only
+      - name: Backup schema
+        run: supabase db dump --db-url "$supabase_db_url" -f schema.sql
+      - name: Backup data
+        run: supabase db dump --db-url "$supabase_db_url" -f data.sql --data-only --use-copy
+```
+
+### Change Data Capture (CDC) Integration
+**Production CDC setup with Kafka**[17]:
+
+Companies use **Debezium PostgreSQL Source Connector** with Supabase to stream changes to Kafka topics, enabling real-time data replication to external systems like data warehouses or analytics platforms.
+
+## Production Horror Stories and Recovery Examples
+
+### Critical Database Disappearance
+**Recent incident**: A user reported databases disappearing after migration between Supabase accounts, stating "we recently logged into the Supabase dashboard and discovered that two of the migrated databases are missing from the project"[18]. This highlights the importance of independent backup strategies.
+
+### Project Pausing Issues
+**Common problem**: Users report projects getting stuck in "restoration" mode for hours or even "weeks if not months"[19]. Supabase maintainers state restoration should take "no more than a few minutes"[19], indicating potential platform reliability issues.
+
+### Data Loss During Pausing
+**Warning case**: A developer reported "all my tables and data is wiped out" after project restoration from pause[20], leading to consideration of switching platforms.
+
+## Critical Supabase Features to Enable
+
+### Must-Enable Settings for Production
+1. **Row Level Security (RLS)**: Mandatory for any tables in exposed schemas[21]
+2. **Point-in-Time Recovery**: Essential for production workloads[4]
+3. **pgAudit extension**: For comprehensive query logging[22]
+4. **Database Webhooks**: If using realtime features[23]
+5. **Small compute minimum**: Required for PITR functionality[4]
+
+### Row Level Security Implementation
+**Essential RLS pattern**[21]:
+
+```sql
+ALTER TABLE "table_name" ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own data"
+ON table_name FOR SELECT
+USING ( auth.uid() = user_id );
+```
+
+## Practical Backup Implementation
+
+### CLI-Based Backup Script
+**Production-tested backup commands**[23]:
 
 ```bash
-supabase start
-# Your app connects to localhost:54321 instead of remote Supabase
+# Full backup sequence
+supabase db dump --db-url $CONNECTION_STRING -f roles.sql --role-only
+supabase db dump --db-url $CONNECTION_STRING -f schema.sql
+supabase db dump --db-url $CONNECTION_STRING -f data.sql --use-copy --data-only
 ```
 
-### 3. Enhanced Error Boundaries
+### Laravel Automated Backup
+**Real implementation**[24] for Laravel applications:
 
-Implement error boundaries that can gracefully handle authentication state issues during development.
+```php
+php artisan make:command SupabaseBackupViaPDO
 
-## Community Validation
+// Backup command implementation
+$tables = $pdo->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'")
+    ->fetchAll(\PDO::FETCH_COLUMN);
 
-The research reveals that **multiple developers face similar issues** with Supabase + React + Vite combinations[19][12][20]. The Supabase community discussions show this is a recognized development environment challenge rather than a unique problem with your implementation.
+foreach ($tables as $table) {
+    // Generate SQL backup for each table
+}
+```
 
-Your issue represents a confluence of development-time behaviors that don't occur in production. The solutions above address the timing and state management issues that cause blocks to appear missing after code changes, while preserving the robustness of your production application.
+## Supabase vs Alternatives for Data Protection
 
-[1] https://github.com/supabase/realtime-js/issues/169
-[2] https://www.reddit.com/r/reactjs/comments/1cidg60/react_double_useeffect_call_in_strictmode_server/
-[3] https://stackoverflow.com/questions/61254372/my-react-component-is-rendering-twice-because-of-strict-mode
-[4] https://www.lukinotes.com/2022/04/double-invoking-in-react-strict-mode.html
-[5] https://stackoverflow.com/questions/71992547/reactjs-class-component-mounting-twice
-[6] https://stackoverflow.com/questions/72222728/why-is-localstorage-getting-cleared-whenever-i-refresh-the-page
-[7] https://www.reddit.com/r/reactjs/comments/1l7osqr/those_of_you_using_vite_to_bundle_your/
-[8] https://github.com/vitejs/vite/discussions/3143
-[9] https://remslabs.com/blog/resolving-vite-cache-issues-with-dependency-changes-in-a-react-project
-[10] https://supabase.com/docs/guides/troubleshooting/why-is-my-service-role-key-client-getting-rls-errors-or-not-returning-data-7_1K9z
-[11] https://www.reddit.com/r/Supabase/comments/1h9nfx8/supabase_client_jwt_token_not_able_to_retrieve_if/
-[12] https://stackoverflow.com/questions/75058178/supabase-onauthstatechange-with-react-useeffect-lost-session-on-page-refresh
-[13] https://community.flutterflow.io/discussions/post/seamless-chat---realtime-supabase-infinite-loading-scroll-to-bottom-qgTtDnCQ2Y1FZY9
-[14] https://www.reddit.com/r/Supabase/comments/1ksdaym/some_queries_just_never_load/
-[15] https://www.reddit.com/r/Supabase/comments/1hwz0jn/caching_middleware_for_supabase/
-[16] https://app.studyraid.com/en/read/8395/231626/caching-strategies-in-supabase
-[17] https://dev.to/sreejinsreenivasan/supabase-a-guide-to-setting-up-your-local-environment-4cgf
-[18] https://supabase.com/docs/guides/deployment
-[19] https://www.reddit.com/r/Supabase/comments/1kggwkv/persistent_supabase_connectivitytimeout_issues_in/
-[20] https://github.com/supabase/supabase-js/issues/1434
-[21] https://github.com/orgs/supabase/discussions/27578
-[22] https://github.com/supabase/cli/issues/184
-[23] https://supabase.com/docs/guides/platform/backups
-[24] https://www.reddit.com/r/Supabase/comments/1ewj120/how_to_refresh_data_after_modification/
-[25] https://dev.to/supabase/safeguarding-data-integrity-with-pg-safeupdate-in-postgresql-and-supabase-2bgd?comments_sort=latest
-[26] https://supabase.com/blog/restore-to-a-new-project
-[27] https://stackoverflow.com/questions/76755864/supabase-not-storing-session-data-in-localstorage-correctly
-[28] https://github.com/apollographql/apollo-client/issues/9903
-[29] https://stackoverflow.com/questions/49055172/react-component-mounting-twice
-[30] https://www.reddit.com/r/Supabase/comments/16ihf13/getting_session_error_when_updating_users_details/
-[31] https://github.com/microsoft/playwright/issues/9164
-[32] https://www.reddit.com/r/reactjs/comments/1451w0x/clear_local_storage_when_the_user_leaves_the_page/
-[33] https://www.w3schools.com/jsref/met_storage_clear.asp
-[34] https://stackoverflow.com/questions/44279582/how-to-clear-the-sessionstorage-on-browser-refresh-but-this-should-not-clear-o
-[35] https://web3auth.io/community/t/how-to-clear-the-localstorage-when-session-expires/4978
-[36] https://app.studyraid.com/en/read/12382/399847/clearing-all-data-with-clear
-[37] https://github.com/supabase/supabase/issues/10553
-[38] https://www.reddit.com/r/Supabase/comments/1fyxdgl/database_row_disappearing/
-[39] https://github.com/orgs/supabase/discussions/34773
-[40] https://authjs.dev/guides/refresh-token-rotation
-[41] https://stackoverflow.com/questions/76510378/supabase-session-null-undefined-even-after-successful-authentication
-[42] https://stackoverflow.com/questions/78601890/why-is-supabase-not-returning-any-data-when-i-still-have-rows-of-data-in-my-tabl
-[43] https://fusionauth.io/community/forum/topic/568/refresh-tokens-going-stale
-[44] https://stackoverflow.com/questions/79593726/supabase-returning-empty-object-when-trying-to-insert-data-in-table-and-not-addi
-[45] https://github.com/radix-ui/primitives/issues/3295
-[46] https://www.reddit.com/r/reactnative/comments/1kp799a/supabase_broken_after_update/
-[47] https://supabase.com/docs/guides/getting-started/quickstarts/reactjs
-[48] https://stackoverflow.com/questions/74846884/supabase-to-react-data-fetch-error-supabaseurl-is-required
-[49] https://www.permit.io/blog/supabase-authentication-and-authorization-in-nextjs-implementation-guide
-[50] https://app.studyraid.com/en/read/8395/231591/managing-user-sessions
-[51] https://app.studyraid.com/en/read/8395/231628/using-supabase-with-react
-[52] https://github.com/being-devahmad/SupaAuth
-[53] https://app.studyraid.com/en/read/12469/403016/user-session-security-best-practices
-[54] https://supabase.com/blog/fetching-and-caching-supabase-data-in-next-js-server-components
-[55] https://www.linkedin.com/posts/bradmca_caching-strategies-in-supabase-comprehensive-activity-7268561918594891776-SlQp
-[56] https://stackoverflow.com/questions/79453323/does-caching-works-in-supabase-nextjs15
-[57] https://www.intel.com/content/www/us/en/developer/articles/technical/cache-blocking-techniques.html
-[58] https://chat2db.ai/resources/blog/optimizing-supabase-performance-with-caching-strategies
-[59] https://documentation.concretecms.org/9-x/user-guide/running-website/keeping-sites-fast
-[60] https://supabase.com/docs/guides/database/inspect
-[61] https://supabase.com/docs/guides/telemetry/logs
-[62] https://www.youtube.com/watch?v=Ai2BjHV36Ng
-[63] https://github.com/supabase/cli/issues/1055
-[64] https://app.studyraid.com/en/read/8395/231635/monitoring-and-maintaining-deployed-supabase-applications
-[65] https://www.cybertec-postgresql.com/en/prewarming-postgresql-i-o-caches/
-[66] https://docs.gitlab.com/development/data_retention_policies/
-[67] https://www.youtube.com/watch?v=811SiwHyTdM
-[68] https://app.studyraid.com/en/read/8395/231627/monitoring-and-improving-overall-performance
-[69] https://www.enterprisedb.com/blog/hibernating-and-restoring-postgres-buffer-cache?lang=en
-[70] https://www.developer.com/guides/properly-building-persistent-programs/
-[71] https://legacy.reactjs.org/docs/strict-mode.html
-[72] https://developer.atlassian.com/cloud/oauth/getting-started/refresh-tokens/
+### Comparison with Competitors
 
--------------------------
+| Feature | Supabase | Neon | PlanetScale |
+|---------|----------|------|-------------|
+| **Backup Type** | Daily + PITR | Automated snapshots | Branch-based |
+| **PITR Granularity** | Seconds[4] | Point-in-time | N/A |
+| **Branching** | Yes ($10/month)[7] | Yes (included) | Yes (core feature) |
+| **Enterprise SLA** | 99.9%[8] | 99.95% | 99.99% |
+| **Migration Safety** | Manual process | Automated | Zero-downtime |
+
+### Why Companies Choose Supabase
+- **Open-source transparency**: Self-hosting option for critical applications[2]
+- **PostgreSQL compatibility**: Full SQL feature set[25]
+- **Integrated ecosystem**: Auth, storage, functions in one platform[25]
+- **Cost efficiency**: 83% cost reduction reported by Shotgun[2]
+
+## Pricing for Data Protection
+
+### Enterprise Tier Costs
+Based on recent analysis[26]:
+
+- **Enterprise Plan**: $1,999/month base cost
+- **PITR add-on**: ~$100/month 
+- **Additional storage**: $0.125/GB beyond base allocation
+- **Compute scaling**: $4,000/month for max-tier dedicated instances
+
+### Cost Comparison Example
+For a **1.5M MAU application with 2TB database**:
+- **Total monthly cost**: $19,383[26]
+- **Includes**: Enterprise features, PITR, dedicated support
+- **Cost breakdown**: Transparent, single-vendor billing
+
+## Key Contacts and Communities
+
+### Official Support Channels
+- **Enterprise sales**: Available through supabase.com/enterprise
+- **Technical support**: support@supabase.io
+- **SLA requests**: Must be submitted within 30 days[8]
+
+### Community Resources
+- **GitHub Discussions**: Active community with maintainer responses[19]
+- **Discord**: Real-time community support
+- **Reddit r/Supabase**: User experiences and troubleshooting[27]
+
+## Immediate Action Items
+
+### This Week Implementation Checklist
+1. **Enable RLS** on all production tables
+2. **Add PITR** as add-on to current plan  
+3. **Set up GitHub Actions backup** using provided workflow
+4. **Implement audit logging** using provided SQL triggers
+5. **Create database branch** for safe migration testing
+6. **Configure pgAudit** for comprehensive logging
+7. **Document recovery procedures** including restore commands
+
+### The Secret of Zero-Loss Companies
+Companies that never lose data in Supabase consistently:
+
+1. **Use independent backup strategies** beyond Supabase's built-in features
+2. **Enable PITR on all production databases**
+3. **Implement comprehensive audit logging** 
+4. **Test recovery procedures regularly**
+5. **Use database branching** for migration testing
+6. **Maintain RLS policies** as defense-in-depth
+7. **Monitor with external tools** rather than relying solely on Supabase
+
+The most critical insight is that **successful Supabase users don't rely on any single backup mechanism** - they implement layered protection including PITR, external backups, audit logging, and regular testing of recovery procedures.
+
+
+-----------------
 
 ### Key Points
-- Research suggests that partial data loss during development is likely due to React 18's strict mode, causing components to mount twice and potentially interfering with data fetching.
-- It seems likely that the issue is related to useEffect running twice, leading to race conditions or inconsistent state in data fetching, especially for blocks loaded on-demand.
-- The evidence leans toward improper handling of sessionStorage caching or authentication timing, exacerbated by development tools like Vite HMR, though this is not confirmed without code review.
+- **Supabase Data Protection**: Supabase offers robust data protection through daily backups, Point-in-Time Recovery (PITR), Row Level Security (RLS), and encryption, ensuring minimal data loss risk when configured correctly.
+- **Real-World Usage**: Companies like Xendit, Mobbin, and Pebblely use Supabase in production, leveraging its features for scalability and data safety, though specific data protection strategies vary.
+- **Migration Safety**: Testing migrations in staging environments or branches prevents data loss, with PITR enabling quick rollbacks if issues arise.
+- **Backup Automation**: Daily backups are automatic for paid plans, with PITR offering finer recovery granularity; external tools like pg_dump can enhance redundancy.
+- **Outage Protection**: Supabase’s 99.9% uptime SLA for Enterprise plans and read replicas help mitigate outages, but multi-provider replication adds extra resilience.
+- **Cost Considerations**: PITR starts at $100/month, with daily backups included in Pro ($25/month) and higher plans, balancing cost and protection for startups.
 
-### Understanding the Issue
-The problem occurs when making code changes and refreshing the application during development, leading to partial data loss where document titles and counts are preserved, but blocks inside documents are lost. This is specific to development and does not happen in normal usage, suggesting an interaction between development tools and React's strict mode.
+### Companies Using Supabase
+Research suggests that companies like Xendit, Mobbin, Pebblely, Chatbase, Quivr, and others rely on Supabase for production applications. For example, Xendit shipped a solution in under a week, while Pebblely scaled to one million users in seven months using Supabase Auth. These companies likely chose Supabase for its open-source nature, PostgreSQL foundation, and integrated features like authentication and real-time APIs, which streamline development compared to alternatives like AWS RDS or Firebase. However, specific data volumes or transaction rates are not publicly detailed, and direct quotes on data protection strategies are scarce, indicating a need for custom configurations tailored to each company’s needs.
 
-### Possible Causes
-- **React 18 Strict Mode:** Strict mode causes components to mount, unmount, and remount, which can lead to useEffect hooks running twice. This might cause double data fetches, potentially leading to race conditions or state inconsistencies, especially for on-demand block loading.
-- **Vite HMR and Session Handling:** It seems likely that Vite's Hot Module Replacement (HMR) or full page reloads might affect sessionStorage or authentication, though research suggests localStorage and sessionStorage typically persist across refreshes.
-- **Supabase RLS and Authentication:** There could be timing issues where data fetching occurs before authentication is fully restored, potentially failing Row Level Security (RLS) policies, though documents still load, suggesting partial success.
+### Core Data Protection Features
+Supabase provides several features to protect data:
+- **Daily Backups**: Automatic for Pro, Team, and Enterprise plans, stored for 7, 14, and 30 days, respectively. These are accessible via the Supabase dashboard and can be restored to new projects.
+- **Point-in-Time Recovery (PITR)**: Available as an add-on ($100/month for 7-day retention), allowing restoration to any moment with seconds-level granularity, ideal for minimizing data loss.
+- **Row Level Security (RLS)**: Ensures users only access authorized data, critical for secure applications.
+- **Encryption**: Data is encrypted at rest (AES-256) and in transit (TLS), with sensitive information like access tokens encrypted at the application level.
+- **Network Restrictions**: Limit database access to specific IPs, reducing unauthorized access risks.
 
-### Recommended Actions
-- Ensure useEffect hooks for data fetching include cleanup functions, such as using AbortController, to handle double mounting in strict mode.
-- Verify sessionStorage caching logic to ensure blocks are correctly retrieved after refresh, checking for any unintended clears or key mismatches.
-- Consider temporarily disabling strict mode in development to confirm the issue, though this is not a long-term solution.
-- Explore using data fetching libraries like React Query ([Using Supabase with React Query](https://makerkit.dev/blog/saas/supabase-react-query)) for better caching and deduplication, especially in strict mode environments.
+### Migration and Recovery Strategies
+To avoid data loss during migrations, companies test changes in Supabase branches or staging projects created from backups. If a migration fails, PITR allows quick restoration to a pre-migration state. The process involves selecting a backup or specific time in the dashboard and restoring to a new project, with downtime depending on database size. For redundancy, some companies use external tools like pg_dump or services like SimpleBackups for off-site backups, ensuring data safety beyond Supabase’s infrastructure.
+
+### Protecting Against Outages
+Supabase’s Enterprise plan offers a 99.9% uptime SLA, with service credits for downtime. To protect against outages, you can deploy read replicas for redundancy or set up logical replication to another PostgreSQL database on a different provider, ensuring real-time data synchronization. Monitoring Supabase’s status page and implementing caching can further reduce outage impacts.
+
+```x-shellscript
+#!/bin/bash
+
+# Supabase Backup Script
+# This script creates a local backup of a Supabase PostgreSQL database using pg_dump
+# Ensure you have PostgreSQL installed and pg_dump available
+
+# Configuration
+SUPABASE_HOST="aws-0-us-east-1.pooler.supabase.com"
+SUPABASE_PORT="5432"
+SUPABASE_DB="postgres"
+SUPABASE_USER="your_username"
+SUPABASE_PASSWORD="your_password"
+BACKUP_FILE="supabase_backup_$(date +%Y%m%d_%H%M%S).dump"
+
+# Create backup
+pg_dump -h $SUPABASE_HOST -p $SUPABASE_PORT -U $SUPABASE_USER -d $SUPABASE_DB --format=c --blobs --verbose -f $BACKUP_FILE
+
+# Check if backup was successful
+if [ $? -eq 0 ]; then
+    echo "Backup created successfully: $BACKUP_FILE"
+else
+    echo "Backup failed!"
+    exit 1
+fi
+
+# Optional: Upload to AWS S3 for redundancy
+# AWS_S3_BUCKET="your-s3-bucket"
+# aws s3 cp $BACKUP_FILE s3://$AWS_S3_BUCKET/$BACKUP_FILE
+```
 
 ---
 
-### Survey Note: Detailed Analysis of Supabase Data Loss on Code Changes
+### Comprehensive Report on Supabase Data Protection
 
-This survey note provides a comprehensive analysis of the reported issue of partial data loss in a React/Supabase application during development, focusing on code changes and refreshes. The investigation covers technical context, potential causes, and best practices, drawing from extensive research into React, Supabase, and Vite interactions.
+#### 1. Major Companies Using Supabase in Production
+Several companies leverage Supabase for production applications, as highlighted on the [Supabase Customer Stories](https://supabase.com/customers) page. Notable examples include:
+- **Xendit**: Shipped a full solution in under a week, leveraging Supabase’s rapid development capabilities.
+- **Mobbin**: Migrated 200,000 users from Firebase for improved authentication, emphasizing Supabase’s auth system.
+- **Pebblely**: Scaled to one million users in seven months using Supabase Auth, showcasing scalability.
+- **Chatbase**: A bootstrapped AI app scaled to $1M in five months, relying on Supabase’s database and auth features.
+- **Quivr**: Launched 5,000 vector databases, choosing Supabase for its PostgreSQL familiarity over Pinecone or Chroma.
+- **Berri AI**: Migrated from AWS RDS to Supabase Vector for cost-effective vector embeddings.
+- **Maergo**: Achieved scalability and cost savings with Supabase’s infrastructure.
+- **Epsilon3**: Digitized space industry procedures using telemetry data, valuing Supabase’s reliability.
+- **Shotgun**: Reduced data infrastructure costs by 83% after migrating to Supabase.
+- **Replenysh**: Implemented OTP in under 24 hours, highlighting Supabase’s ease of use.
 
-#### Technical Context and Symptoms
-The application stack includes React 19 with Vite dev server, Supabase (PostgreSQL with RLS enabled), and Supabase Auth with JWT tokens, using Hot Module Replacement (HMR) in development. The database structure separates documents and blocks, with blocks loaded on-demand via lazy loading, cached for 5 seconds, and stored in sessionStorage.
+**Data Volume and Transaction Rates**: Specific data volumes or transaction rates are not publicly detailed, but companies like Pebblely and Mobbin handle millions of users, suggesting high transaction capabilities. Supabase’s PostgreSQL foundation and read replicas support such scale.
 
-Symptoms include:
-- Document titles and counts are preserved after refresh.
-- Blocks inside documents are lost, appearing empty, despite existing in the database (verified via SQL queries).
-- This issue occurs only during development (code changes + refresh), not in normal usage.
+**Why Supabase?**: Companies choose Supabase for its open-source nature, PostgreSQL reliability, and integrated features like authentication, real-time APIs, and storage, which reduce development time compared to AWS RDS, PlanetScale, or Neon. For instance, Quivr’s founder cited familiarity with PostgreSQL, while Mobbin valued better authentication over Firebase.
 
-#### Research Findings
+**Data Protection Quotes**: Direct quotes on data protection are limited, but Mobbin’s migration to Supabase for a “better authentication experience” implies robust security configurations, likely including RLS and encryption.
 
-##### 1. React 18 Strict Mode and Double Mounting
-Research suggests that React 18's strict mode, enabled by default in development, causes components to mount, unmount, and remount to detect issues with effects and state ([Strict Mode – React](https://legacy.reactjs.org/docs/strict-mode.html)). This leads to useEffect hooks running twice on mount, which can cause problems for data fetching if not handled properly. For instance, a useEffect fetching blocks on document open might trigger two fetches, potentially leading to race conditions or state inconsistencies ([React 18 Strict Mode and data fetching](https://github.com/reduxjs/redux-toolkit/issues/2441)).
+#### 2. Supabase’s Native Data Protection Features
+Supabase offers several built-in features to ensure data safety, as detailed in the [Supabase Security](https://supabase.com/security) and [Database Backups](https://supabase.com/docs/guides/platform/backups) documentation:
+- **Point-in-Time Recovery (PITR)**: Available as an add-on for Pro, Team, and Enterprise plans ($100/month for 7-day retention, $200 for 14 days, $400 for 28 days). PITR uses physical backups and Write-Ahead Log (WAL) files via WAL-G, allowing restoration to any point with seconds-level granularity. It’s ideal for minimizing data loss.
+- **Automated Backup Schedules**: Daily backups are automatic for paid plans, stored for 7 days (Pro), 14 days (Team), and 30 days (Enterprise). Logical backups (via pg_dumpall) are used for databases <15GB, while physical backups are used for larger databases. Backups are accessible via the dashboard but do not include Storage API objects.
+- **Streaming Replication/Read Replicas**: Supabase supports read replicas for Pro, Team, and Enterprise plans on AWS with at least a Small compute add-on. Replicas are asynchronous, with some replication lag, enhancing redundancy and performance ([Read Replicas](https://supabase.com/docs/guides/platform/read-replicas)).
+- **Branching**: Supabase branches create isolated environments for testing, but they do not preserve production data unless seeded. They are production-ready for testing migrations or schema changes ([Branching](https://supabase.com/docs/guides/deployment/branching)).
+- **Automatic Failover**: Not explicitly supported; Supabase relies on AWS infrastructure for high availability, with a 99.9% uptime SLA for Enterprise plans.
+- **SLAs**: Enterprise plans guarantee 99.9% uptime, with service credits for downtime. Team plans include priority support SLAs, while Pro plans lack formal uptime guarantees ([Service Level Agreement](https://supabase.com/sla)).
 
-To mitigate, developers should ensure effects are idempotent and include cleanup functions, such as using AbortController to cancel ongoing requests. For example:
+#### 3. Real-World Supabase Migration Strategies
+While specific step-by-step migration guides from companies are scarce, the [Supabase Migration Docs](https://supabase.com/docs/guides/deployment/database-migrations) and customer stories provide insights:
+- **Examples**: Mobbin migrated 200,000 users from Firebase, and Shotgun reduced costs by 83% after migrating to Supabase. These suggest careful planning and testing in staging environments.
+- **Steps**: Companies typically:
+  1. Create a staging project or branch.
+  2. Export data using pg_dump or Supabase CLI.
+  3. Test migrations in the staging environment.
+  4. Apply migrations to production with minimal downtime.
+  5. Use PITR for rollback if needed.
+- **Tools**: Supabase CLI for managing migrations, pg_dump for data export, and dashboard for restoring backups. Some use custom scripts for automation.
+- **Pitfalls**: Common issues include schema drift, invalid constraints, or triggers firing during restoration. These are mitigated by testing in branches and using schema-qualified names.
+- **Testing**: Companies restore backups to new projects or use branches to test migrations, ensuring no production impact.
 
-```javascript
-useEffect(() => {
-  const controller = new AbortController();
-  const signal = controller.signal;
+#### 4. Supabase Database Design for Zero Data Loss
+Successful Supabase users design databases with:
+- **Schema Structure**: Use RLS to enforce access control, soft deletes to preserve data, and audit logs to track changes.
+- **Event Sourcing**: No specific examples, but Supabase’s real-time capabilities support event-driven architectures via publications ([Replication](https://supabase.com/docs/guides/database/replication)).
+- **Soft Deletes**: Implement a `deleted_at` timestamp column to mark records as deleted without removing them, recoverable via PITR or backups.
+- **Audit Logs**: Use PostgreSQL triggers with RLS to log changes, ensuring traceability ([Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security)).
+- **Eventual Consistency**: Design tables with asynchronous replication in mind, using read replicas for read-heavy workloads.
 
-  fetchBlocks({ signal }).then(data => {
-    // set state
-  }).catch(error => {
-    if (error.name !== 'AbortError') {
-      // handle error
-    }
-  });
+#### 5. Supabase + External Backup Solutions
+- **Temporal/Debezium**: No documented cases of companies using these with Supabase, but Debezium can capture changes from PostgreSQL for CDC.
+- **AWS S3 Pipelines**: Companies use pg_dump to create backups and upload them to S3 for redundancy, as shown in the backup script below.
+- **Change Data Capture (CDC)**: Supabase supports logical replication via publications, enabling CDC to other Postgres databases ([Replication](https://supabase.com/docs/guides/database/replication)).
+- **Airbyte/Fivetran**: No specific examples, but these tools can connect to Supabase’s PostgreSQL database for data integration.
+- **Cost Comparison**: PITR ($100-$400/month) is costlier than daily backups (included in Pro plan). External S3 backups incur storage and transfer costs, typically lower than PITR.
 
-  return () => {
-    controller.abort();
-  };
-}, [documentId]);
-```
+#### 6. Supabase Disaster Recovery Case Studies
+No public case studies detail specific data loss incidents, but the [Supabase Docs](https://supabase.com/docs/guides/platform/backups) emphasize PITR’s role in recovering from accidental deletions. Recovery time depends on database size, with PITR offering near-instantaneous restoration to a chosen point. Companies likely adjust RLS policies and test backups post-incident to prevent recurrence.
 
-This approach ensures that if the component is unmounted during strict mode's double mount, the first fetch is cancelled, preventing interference with the second.
+#### 7. Supabase Enterprise Features
+Enterprise plans offer:
+- **Additional Protection**: Uptime SLAs (99.9%), priority support, custom security questionnaires, and private Slack channels.
+- **Worth Upgrading?**: For startups, the Pro plan with PITR may suffice unless uptime guarantees or dedicated support are critical.
+- **Examples**: GitHub and PwC use Supabase for scalable, secure backends ([Enterprise](https://supabase.com/enterprise)).
+- **Custom Backups**: Enterprise customers can negotiate tailored backup solutions.
+- **Support Experiences**: Faster response times (1 hour for urgent issues) enhance recovery during incidents.
 
-##### 2. Vite HMR and Session Handling
-Vite's HMR typically updates modules without full page reloads, but full reloads can occur in cases like circular dependencies ([HMR API | Vite](https://vite.dev/guide/api-hmr)). Research indicates that localStorage and sessionStorage generally persist across refreshes, but there are reports of localStorage being cleared in Vite, though not specifically for sessionStorage ([LocalStorage on Vite gets cleared on every refresh](https://github.com/vitejs/vite/issues/14825)). Given the user's use of sessionStorage for block caching, it's possible that development-specific behaviors (e.g., HMR-induced reloads) might affect cache persistence, though this is not confirmed without code review.
+#### 8. Supabase vs. Alternatives for Data Protection
+- **Switching From Supabase**: No specific examples, but concerns about incomplete S3 compatibility for storage backups are noted ([GitHub Discussion](https://github.com/orgs/supabase/discussions/28377)).
+- **Switching To Supabase**: Mobbin and Berri AI migrated for better authentication and cost savings, ensuring data safety via RLS and backups.
+- **Comparison**:
+  | Feature                | Supabase                     | Neon                       | PlanetScale                | Railway                    |
+  |------------------------|------------------------------|----------------------------|----------------------------|----------------------------|
+  | Backups                | Daily (7-30 days), PITR      | Daily, PITR                | Daily, PITR                | Manual Backups             |
+  | Uptime SLA             | 99.9% (Enterprise)           | 99.99% (Business)          | 99.95%                     | Not specified              |
+  | Replication            | Read Replicas, Logical       | Read Replicas              | Multi-Region Replication   | Limited                    |
+  | Encryption             | AES-256, TLS                 | AES-256, TLS               | AES-256, TLS               | AES-256, TLS               |
+  | Cost (Backup)          | $100+/month (PITR)           | Included in higher tiers   | Included in higher tiers   | Varies                     |
+- **Best for Zero Data Loss**: Supabase and Neon are strong contenders due to PITR and robust replication.
 
-##### 3. Supabase RLS and Authentication Timing
-Supabase Auth uses JWT tokens, typically stored in localStorage, and handles session restoration asynchronously ([Use Supabase Auth with React | Supabase Docs](https://supabase.com/docs/guides/auth/quickstarts/react)). If data fetching occurs before the session is fully restored, RLS policies might fail, though the user's ability to fetch documents suggests partial success. Research into Supabase issues revealed problems with realtime subscriptions in strict mode due to double mounting ([When used with react strict mode, the realtime database does not subscribe properly](https://github.com/supabase/realtime-js/issues/169)), suggesting potential similar issues with data fetching, though not directly documented.
+#### 9. Supabase Production Horror Stories & Solutions
+No public horror stories were found on Reddit, HackerNews, or Discord, but a [GitHub Discussion](https://github.com/orgs/supabase/discussions/28377) highlights concerns about storage bucket backups. Teams recover by restoring from daily backups or PITR, emphasizing the need for external backups and thorough testing.
 
-##### 4. SessionStorage and Caching
-The application uses a 5-second cache and sessionStorage for blocks, which should persist across refreshes in the same tab. However, if the application clears sessionStorage on load or uses keys based on state that changes between mounts, cached data might be inaccessible. Research did not find specific Vite behaviors clearing sessionStorage, but double mounting in strict mode could lead to cache access issues if not handled correctly.
+#### 10. Practical Supabase Backup Implementations
+The provided backup script uses pg_dump for manual backups, which can be automated via cron jobs or GitHub Actions. GitHub repositories like [SimpleBackups](https://simplebackups.com/blog/how-to-backup-supabase) offer similar scripts. Companies automate backups to S3 for redundancy, ensuring battle-tested recovery.
 
-##### 5. Common Patterns and Solutions
-Best practices for preserving state during development include:
-- Using data fetching libraries like React Query for caching and deduplication, which handle strict mode better ([How to use Supabase with React Query](https://makerkit.dev/blog/saas/supabase-react-query)).
-- Ensuring effects are resilient to multiple executions, with proper cleanup.
-- Logging fetch calls and responses to debug timing issues, especially in strict mode.
+#### Specific Questions Answered
+1. **Automatic Backups**: Yes, daily for paid plans, stored by Supabase (7-30 days retention). Accessible via dashboard; logical backups downloadable, physical backups restorable to new projects.
+2. **Rollback Migration**: Write reverse migrations or restore from backups/PITR. PITR restores quickly (seconds to minutes, depending on size). Process: Select backup/time in dashboard, restore to new project.
+3. **Supabase Outage**: Enterprise SLA guarantees 99.9% uptime. Protect via read replicas, logical replication to another provider, and caching.
+4. **Real-Time Replication**: Use logical replication to another Postgres database via publications and subscriptions.
+5. **Restore Process**: For PITR, select time in dashboard and restore to new project. For daily backups, restore to new project or download and use pg_restore locally.
+6. **Database Branches**: Do not preserve production data unless seeded. Safe for testing migrations in isolated environments.
+7. **Must-Enable Features**: RLS, SSL Enforcement, Network Restrictions, MFA, PITR (for large databases), custom SMTP, and regular backup testing.
 
-#### Detailed Analysis Table
+#### Deliverables
+- **Companies**: Xendit, Mobbin, Pebblely, Chatbase, Quivr, Berri AI, Maergo, Epsilon3, Shotgun, Replenysh, and more ([Customer Stories](https://supabase.com/customers)).
+- **Features**: RLS, daily backups, PITR, SSL, network restrictions, MFA.
+- **Backup Code**: See artifact above.
+- **Migration Checklist**: Create staging project, export data, test migrations, apply to production, use PITR for rollback.
+- **Pricing**: Pro ($25/month), PITR ($100-$400/month), Enterprise (custom).
+- **Communities**: Supabase Discord, GitHub discussions ([GitHub](https://github.com/orgs/supabase/discussions)).
+- **Comparison Table**: See above.
 
-| **Aspect**               | **Findings**                                                                 | **Implications**                                      |
-|--------------------------|-----------------------------------------------------------------------------|------------------------------------------------------|
-| React Strict Mode        | Causes double mounting, leading to useEffect running twice in development.  | Potential race conditions in data fetching, especially for blocks. |
-| Vite HMR                | May trigger full reloads, potentially affecting sessionStorage, though not confirmed. | Possible cache loss, needs verification.             |
-| Supabase Auth            | Session restoration is asynchronous; timing issues possible with RLS.       | Data fetches before session restoration may fail, though documents load. |
-| SessionStorage Caching   | Should persist across refreshes, but double mounting might affect access.   | Verify cache logic for key consistency and clearing. |
-| Data Fetching Libraries  | React Query offers robust caching and deduplication, suitable for strict mode. | Could resolve issues, but introduces additional dependency. |
+#### Secrets of Companies with No Data Loss
+Companies that avoid data loss likely:
+- Enable PITR for near-zero RPO.
+- Use RLS and encryption rigorously.
+- Test migrations in branches or staging projects.
+- Maintain external backups (e.g., S3).
+- Monitor performance and security via Supabase advisors.
 
-#### Recommendations
-Given the research, the most likely cause is React 18 strict mode's double mounting affecting data fetching, particularly for blocks loaded on-demand. To address:
-1. Implement cleanup in useEffect for data fetches, using AbortController to handle double mounting.
-2. Verify sessionStorage caching logic, ensuring keys are consistent and no unintended clears occur.
-3. Consider using React Query for better handling of caching and fetches, especially in strict mode environments.
-4. Temporarily disable strict mode to confirm the issue, though maintain it for long-term development benefits.
-
-This approach should mitigate the partial data loss, ensuring a smoother development experience while maintaining production reliability.
-
-#### Key Citations
-- [Strict Mode React Legacy Documentation](https://legacy.reactjs.org/docs/strict-mode.html)
-- [React 18 Strict Mode and Data Fetching Issue](https://github.com/reduxjs/redux-toolkit/issues/2441)
-- [LocalStorage on Vite Gets Cleared Issue](https://github.com/vitejs/vite/issues/14825)
-- [Use Supabase Auth with React Documentation](https://supabase.com/docs/guides/auth/quickstarts/react)
-- [HMR API Vite Documentation](https://vite.dev/guide/api-hmr)
-- [When Used with React Strict Mode Realtime Issue](https://github.com/supabase/realtime-js/issues/169)
-- [Using Supabase with React Query Blog](https://makerkit.dev/blog/saas/supabase-react-query)
+By combining these features and practices, startups can achieve robust data protection on Supabase’s hosted service within a week, balancing cost and reliability.

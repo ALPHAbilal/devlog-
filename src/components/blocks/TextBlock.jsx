@@ -4,12 +4,11 @@ import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extrac
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
 
-export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow }) {
+export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow, allBlocks }) {
   const { user } = useAuth();
   // Only auto-edit if this is a truly new block (has no content)
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
-  const [displayContent, setDisplayContent] = useState(block.content || '');
   const [slashHint, setSlashHint] = useState('');
   const [slashHintPosition, setSlashHintPosition] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -17,7 +16,6 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
-  const imageMap = useRef(new Map()); // Store base64 -> placeholder mapping
   
   // Cleanup on unmount
   useEffect(() => {
@@ -32,33 +30,6 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   // Extract tags from content dynamically
   const tags = extractTagsFromContent(content);
 
-  // Convert base64 images to placeholders for display
-  const createImagePlaceholder = (index) => `📷[image-${index}]`;
-  
-  const processContentForDisplay = (text) => {
-    let processed = text;
-    let imageIndex = 0;
-    
-    // Replace base64 images with placeholders
-    processed = processed.replace(/!\[([^\]]*)\]\((data:image\/[^;]+;base64,[^)]+)\)/g, (match, alt, dataUrl) => {
-      const placeholder = createImagePlaceholder(imageIndex++);
-      imageMap.current.set(placeholder, { alt, dataUrl, fullMatch: match });
-      return placeholder;
-    });
-    
-    return processed;
-  };
-  
-  const processContentForSave = (text) => {
-    let processed = text;
-    
-    // Replace placeholders back with actual base64 images
-    imageMap.current.forEach((imageData, placeholder) => {
-      processed = processed.replace(placeholder, imageData.fullMatch);
-    });
-    
-    return processed;
-  };
 
   // Get all unique tags from localStorage
   const getAllTags = () => {
@@ -93,13 +64,12 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       setSelectedText('');
       setToolbarPosition(null);
     }
-  }, [isEditing, displayContent]);
+  }, [isEditing, content]);
 
-  // Initialize display content
+  // Initialize content
   useEffect(() => {
     if (block.content) {
       setContent(block.content);
-      setDisplayContent(processContentForDisplay(block.content));
     }
   }, [block.content]);
 
@@ -130,7 +100,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isEditing, displayContent]);
+  }, [isEditing, content]);
 
   // Handle text selection for toolbar
   useEffect(() => {
@@ -146,7 +116,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       const end = textarea.selectionEnd;
 
       if (start !== end) {
-        const selected = displayContent.substring(start, end);
+        const selected = content.substring(start, end);
         setSelectedText(selected);
 
         // Calculate position for toolbar
@@ -154,7 +124,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         const lineHeight = 24;
         
         // Get approximate position of selection
-        const beforeText = displayContent.substring(0, start);
+        const beforeText = content.substring(0, start);
         const lines = beforeText.split('\n');
         const currentLine = lines.length - 1;
         
@@ -192,7 +162,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       setSelectedText('');
       setToolbarPosition(null);
     }
-  }, [isEditing, displayContent]);
+  }, [isEditing, content]);
 
   const handleSave = () => {
     // Hide toolbar immediately
@@ -200,14 +170,10 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     setSelectedText('');
     setToolbarPosition(null);
     
-    // Convert display content back to actual content
-    const actualContent = processContentForSave(displayContent);
-    setContent(actualContent);
-    
     // Extract tags from content before saving
-    const extractedTags = extractTagsFromContent(actualContent);
+    const extractedTags = extractTagsFromContent(content);
     // Remove isNew flag when saving
-    onUpdate(block.id, { content: actualContent, tags: extractedTags, isNew: undefined });
+    onUpdate(block.id, { content: content, tags: extractedTags, isNew: undefined });
     setIsEditing(false);
     if (onFocus) onFocus(null); // Clear focus
   };
@@ -221,12 +187,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
 
     // Wrap selected text with tag format
     const taggedText = `#${tagName}[${selectedText}]`;
-    const newDisplayContent = displayContent.substring(0, start) + taggedText + displayContent.substring(end);
-    setDisplayContent(newDisplayContent);
+    const newContent = content.substring(0, start) + taggedText + content.substring(end);
+    setContent(newContent);
     
-    // Update actual content
-    const actualContent = processContentForSave(newDisplayContent);
-    setContent(actualContent);
 
     // Set cursor position after the tagged text
     setTimeout(() => {
@@ -242,14 +205,14 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     const textarea = textareaRef.current;
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
-    const selectedText = displayContent.substring(start, end);
+    const selectedText = content.substring(start, end);
 
     if (isSpecial && action === 'link') {
       // For links, wrap in [[]] for document links
       const newText = `[[${selectedText}]]`;
-      const newDisplayContent = displayContent.substring(0, start) + newText + displayContent.substring(end);
-      setDisplayContent(newDisplayContent);
-      setContent(processContentForSave(newDisplayContent));
+      const newContent = content.substring(0, start) + newText + content.substring(end);
+      setContent(newContent);
+      setContent(processContentForSave(newContent));
       
       // Set cursor position after the link
       setTimeout(() => {
@@ -260,9 +223,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     } else if (action === 'image') {
       // For images, create image markdown with selected text as alt
       const newText = `![${selectedText}](url)`;
-      const newDisplayContent = displayContent.substring(0, start) + newText + displayContent.substring(end);
-      setDisplayContent(newDisplayContent);
-      setContent(processContentForSave(newDisplayContent));
+      const newContent = content.substring(0, start) + newText + content.substring(end);
+      setContent(newContent);
+      setContent(processContentForSave(newContent));
       
       // Select the 'url' part for easy replacement
       setTimeout(() => {
@@ -273,9 +236,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     } else if (wrapper) {
       // For regular formatting
       const newText = `${wrapper}${selectedText}${wrapper}`;
-      const newDisplayContent = displayContent.substring(0, start) + newText + displayContent.substring(end);
-      setDisplayContent(newDisplayContent);
-      setContent(processContentForSave(newDisplayContent));
+      const newContent = content.substring(0, start) + newText + content.substring(end);
+      setContent(newContent);
+      setContent(processContentForSave(newContent));
       
       // Keep selection on the formatted text
       setTimeout(() => {
@@ -303,52 +266,71 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         }
 
         try {
-          // Show placeholder immediately
-          const textarea = textareaRef.current;
-          const start = textarea.selectionStart;
-          const end = textarea.selectionEnd;
-          
-          // Create temporary placeholder
-          const tempPlaceholder = '![Uploading image...](...)';
-          const newDisplayContent = displayContent.substring(0, start) + tempPlaceholder + displayContent.substring(end);
-          setDisplayContent(newDisplayContent);
+          // Save current text content first
+          handleSave();
           
           // Compress image if needed
           let imageToUpload = file;
-          if (file.size > 1024 * 1024) { // Compress if > 1MB
+          if (file.size > 100 * 1024) { // Compress if > 100KB
             imageToUpload = await compressImage(file, 1920, 0.85);
           }
           
           // Upload to Supabase Storage
           const { url, path } = await uploadImageToSupabase(imageToUpload, user.id);
           
-          // Replace placeholder with actual URL
-          const imageMarkdown = `![](${url})`;
-          const finalDisplayContent = newDisplayContent.replace(tempPlaceholder, imageMarkdown);
+          // Create alt text
+          const timestamp = new Date().toLocaleString('en-US', { 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit' 
+          });
+          const altText = `Image pasted at ${timestamp}`;
           
-          // Create placeholder for display
-          const imageIndex = Array.from(imageMap.current.keys()).length;
-          const placeholder = createImagePlaceholder(imageIndex);
-          imageMap.current.set(placeholder, { alt: '', dataUrl: url, fullMatch: imageMarkdown });
+          // Check if the previous block is an image block created recently
+          let addedToExisting = false;
+          if (allBlocks && allBlocks.length > 0) {
+            const currentIndex = allBlocks.findIndex(b => b.id === block.id);
+            if (currentIndex > 0) {
+              const prevBlock = allBlocks[currentIndex - 1];
+              // Check if previous block is an image block created within last 30 seconds
+              if (prevBlock.type === 'image' && prevBlock.createdAt && 
+                  (Date.now() - new Date(prevBlock.createdAt).getTime() < 30000)) {
+                // Add to existing image block
+                const newImage = {
+                  id: crypto.randomUUID(),
+                  url: url,
+                  alt: altText,
+                  size: imageToUpload.size,
+                  dimensions: { width: 0, height: 0 } // Will be calculated on display
+                };
+                const updatedImages = [...(prevBlock.images || []), newImage];
+                onUpdate(prevBlock.id, { images: updatedImages });
+                addedToExisting = true;
+              }
+            }
+          }
           
-          // Update display with final placeholder
-          const displayWithPlaceholder = finalDisplayContent.replace(imageMarkdown, placeholder);
-          setDisplayContent(displayWithPlaceholder);
+          // If not added to existing block, create a new image block
+          if (!addedToExisting && onAddBelow) {
+            onAddBelow({
+              type: 'image',
+              images: [{
+                id: crypto.randomUUID(),
+                url: url,
+                alt: altText,
+                size: imageToUpload.size,
+                dimensions: { width: 0, height: 0 }
+              }],
+              createdAt: new Date().toISOString(),
+              content: '' // Required field for blocks
+            });
+          }
           
-          // Update actual content
-          const actualContent = processContentForSave(displayWithPlaceholder);
-          setContent(actualContent);
-          
-          // Set cursor after the placeholder
-          setTimeout(() => {
-            textarea.selectionStart = start + placeholder.length;
-            textarea.selectionEnd = start + placeholder.length;
-            textarea.focus();
-          }, 0);
+          // Exit edit mode to see the new image block
+          setIsEditing(false);
         } catch (error) {
           console.error('Failed to upload image:', error);
-          // Remove placeholder on error
-          setDisplayContent(displayContent);
         }
         return;
       }
@@ -376,15 +358,11 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   };
 
   const handleChange = (e) => {
-    const newDisplayContent = e.target.value;
-    setDisplayContent(newDisplayContent);
-    
-    // Update actual content in background
-    const actualContent = processContentForSave(newDisplayContent);
-    setContent(actualContent);
+    const newContent = e.target.value;
+    setContent(newContent);
 
     // Check if user is typing a slash command
-    const lines = newDisplayContent.split('\n');
+    const lines = newContent.split('\n');
     const currentLine = lines[lines.length - 1];
     
     // Check for slash commands at the beginning of a line
@@ -432,7 +410,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           const beforeSlash = currentLine.substring(0, 0); // Everything before the slash
           lines[lines.length - 1] = beforeSlash + command.value;
           const expandedContent = lines.join('\n');
-          setDisplayContent(expandedContent);
+          setContent(expandedContent);
           setContent(processContentForSave(expandedContent));
           setSlashHint('');
           setSlashHintPosition(null);
@@ -468,7 +446,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     }
 
     // Auto-complete document links
-    if (newDisplayContent.endsWith('[[')) {
+    if (newContent.endsWith('[[')) {
       // Could show document search modal here in the future
     }
   };
@@ -503,7 +481,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     // Tab completion for slash commands
     if (e.key === 'Tab' && slashHint) {
       e.preventDefault();
-      const lines = displayContent.split('\n');
+      const lines = content.split('\n');
       const currentLine = lines[lines.length - 1];
       const completedCommand = currentLine + slashHint;
       
@@ -525,7 +503,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           return;
         }
         const expandedContent = lines.join('\n');
-        setDisplayContent(expandedContent);
+        setContent(expandedContent);
         setContent(processContentForSave(expandedContent));
         setSlashHint('');
       }
@@ -534,14 +512,13 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     
     if (e.key === 'Escape') {
       setContent(block.content || '');
-      setDisplayContent(processContentForDisplay(block.content || ''));
       setIsEditing(false);
       setShowToolbar(false); // Ensure toolbar is hidden
       setSlashHint('');
       if (onFocus) onFocus(null); // Clear focus when escaping
     } else if (e.key === 'Enter') {
       // Check for heading markdown at the start of the line
-      const lines = displayContent.split('\n');
+      const lines = content.split('\n');
       const currentLineIndex = lines.length - 1;
       const currentLine = lines[currentLineIndex];
       
@@ -557,7 +534,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       }
       
       // If pressing enter on empty block, exit edit mode
-      if (displayContent.trim() === '') {
+      if (content.trim() === '') {
         e.preventDefault();
         setShowToolbar(false); // Ensure toolbar is hidden
         handleSave();
@@ -573,7 +550,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       <>
         <textarea
           ref={textareaRef}
-          value={displayContent}
+          value={content}
           onChange={handleChange}
           onPaste={handlePaste}
           onFocus={() => onFocus && onFocus(block.id)}

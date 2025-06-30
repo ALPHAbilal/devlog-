@@ -444,9 +444,32 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setSelectorPosition(null);
   };
 
-  const handleAddBelowBlock = (blockId) => {
-    setSelectorPosition(blockId);
-    setShowBlockSelector(true);
+  const handleAddBelowBlock = (blockIdOrData) => {
+    // If a block object is passed (from TextBlock paste), create it directly
+    if (typeof blockIdOrData === 'object' && blockIdOrData.type) {
+      // Find the TextBlock that called this function
+      const callingBlockId = blocks.find(b => b.isNew || b.id === focusedBlockId)?.id;
+      if (!callingBlockId) return;
+      
+      const newBlock = {
+        id: crypto.randomUUID(),
+        ...blockIdOrData,
+        createdAt: blockIdOrData.createdAt || new Date().toISOString()
+      };
+      
+      const index = blocks.findIndex(b => b.id === callingBlockId);
+      const updatedBlocks = [...blocks];
+      updatedBlocks.splice(index + 1, 0, newBlock);
+      
+      updateLoadedBlocks(updatedBlocks);
+      if (onUpdate && !isInitialLoadRef.current) {
+        onUpdate(entry.id, { blocks: updatedBlocks });
+      }
+    } else {
+      // Normal behavior - show block selector
+      setSelectorPosition(blockIdOrData);
+      setShowBlockSelector(true);
+    }
   };
 
   const handleAddAtEnd = () => {
@@ -770,7 +793,27 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                     onMoveDown={(id) => moveBlock(id, 'down')}
                     canMoveUp={index > 0}
                     canMoveDown={index < blocks.length - 1}
-                    onAddBelow={handleAddBelowBlock}
+                    onAddBelow={(data) => {
+                      if (typeof data === 'object' && data.type) {
+                        // Direct block creation from TextBlock
+                        const newBlock = {
+                          id: crypto.randomUUID(),
+                          ...data,
+                          createdAt: data.createdAt || new Date().toISOString()
+                        };
+                        
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks.splice(index + 1, 0, newBlock);
+                        
+                        updateLoadedBlocks(updatedBlocks);
+                        if (onUpdate && !isInitialLoadRef.current) {
+                          onUpdate(entry.id, { blocks: updatedBlocks });
+                        }
+                      } else {
+                        // Show selector
+                        handleAddBelowBlock(block.id);
+                      }
+                    }}
                     onConvert={convertBlock}
                     showAddButton={true}
                     isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}

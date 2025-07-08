@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Upload, X, Maximize2, Download, Trash2, Image as ImageIcon, Plus, Grid3x3, Move, Edit2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
@@ -273,14 +273,28 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   };
   
   // Handle mouse wheel zoom
-  const handleWheel = (e) => {
+  const handleWheel = useCallback((e) => {
+    // Always prevent default when over the image to avoid scroll issues
     e.preventDefault();
     if (e.deltaY < 0) {
       handleZoomIn();
     } else {
       handleZoomOut();
     }
-  };
+  }, []);
+  
+  // Attach wheel event listener with passive: false
+  useEffect(() => {
+    const container = imageContainerRef.current;
+    if (!container || !lightboxImage) return;
+    
+    // Add non-passive wheel event listener
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [handleWheel, lightboxImage]);
   
   // Handle image dragging when zoomed
   const handleMouseDown = (e) => {
@@ -674,7 +688,6 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
             className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center 
                        overflow-hidden"
             onClick={(e) => e.stopPropagation()}
-            onWheel={handleWheel}
           >
             <div 
               className="relative max-w-full max-h-[80vh] overflow-hidden rounded-lg"

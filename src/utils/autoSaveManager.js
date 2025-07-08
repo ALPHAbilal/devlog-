@@ -24,9 +24,13 @@ class AutoSaveManager {
   queueSave(documentId, updates, saveFunction) {
     // console.log(`AutoSave: Queueing save for document ${documentId}`);
     
-    // Store the latest updates
+    // Merge with existing updates if any
+    const existing = this.saveQueue.get(documentId);
+    const mergedUpdates = existing ? { ...existing.updates, ...updates } : updates;
+    
+    // Store the merged updates
     this.saveQueue.set(documentId, {
-      updates,
+      updates: mergedUpdates,
       saveFunction,
       timestamp: Date.now()
     });
@@ -50,9 +54,8 @@ class AutoSaveManager {
   async executeSave(documentId, retryCount = 0) {
     // Check if already saving
     if (this.saveInProgress.has(documentId)) {
-      console.log(`AutoSave: Save already in progress for ${documentId}, queuing retry`);
-      // Retry after current save completes
-      setTimeout(() => this.executeSave(documentId), 500);
+      console.log(`AutoSave: Save already in progress for ${documentId}, skipping`);
+      // Don't retry immediately - let the debounce handle it
       return;
     }
 

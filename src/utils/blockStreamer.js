@@ -203,9 +203,29 @@ export class BlockStreamer {
       baseBlock.versionOf = block.version_of;
     }
 
-    // Parse metadata if needed
-    if (block.metadata) {
+    // For blocks that use 'data' property (table, todo, template), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template') {
+      baseBlock.data = block.metadata || {};
+    } else if (block.metadata) {
+      // For other blocks, merge metadata properties directly
       Object.assign(baseBlock, block.metadata);
+      
+      // Also handle specific known properties for certain block types
+      if (block.type === 'filetree' && block.metadata.treeData) {
+        baseBlock.treeData = block.metadata.treeData;
+      }
+      if (block.type === 'ai' && block.metadata.messages) {
+        baseBlock.messages = block.metadata.messages;
+      }
+      if (block.type === 'image' && block.metadata.images) {
+        baseBlock.images = block.metadata.images;
+      }
+      if (block.type === 'inline-image') {
+        // inline-image stores properties directly in metadata
+        if (block.metadata.url) baseBlock.url = block.metadata.url;
+        if (block.metadata.alt) baseBlock.alt = block.metadata.alt;
+        if (block.metadata.dimensions) baseBlock.dimensions = block.metadata.dimensions;
+      }
     }
 
     return baseBlock;

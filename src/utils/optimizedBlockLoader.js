@@ -190,6 +190,34 @@ export class OptimizedBlockLoader {
     } else if (block.metadata) {
       // For other blocks, merge metadata properties directly
       Object.assign(baseBlock, block.metadata);
+      
+      // Debug logging for AI blocks
+      if (block.type === 'ai') {
+        console.log('🔵 AI Block Load Debug (OptimizedBlockLoader):', {
+          blockId: block.id,
+          metadataKeys: Object.keys(block.metadata || {}),
+          hasMessagesInMetadata: !!block.metadata?.messages,
+          messageCount: block.metadata?.messages?.length || 0,
+          hasMessagesInBaseBlock: !!baseBlock.messages
+        });
+      }
+      
+      // Also handle specific known properties for certain block types
+      if (block.type === 'filetree' && block.metadata.treeData) {
+        baseBlock.treeData = block.metadata.treeData;
+      }
+      if (block.type === 'ai' && block.metadata.messages) {
+        baseBlock.messages = block.metadata.messages;
+      }
+      if (block.type === 'image' && block.metadata.images) {
+        baseBlock.images = block.metadata.images;
+      }
+      if (block.type === 'inline-image') {
+        // inline-image stores properties directly in metadata
+        if (block.metadata.url) baseBlock.url = block.metadata.url;
+        if (block.metadata.alt) baseBlock.alt = block.metadata.alt;
+        if (block.metadata.dimensions) baseBlock.dimensions = block.metadata.dimensions;
+      }
     }
 
     return baseBlock;

@@ -403,12 +403,48 @@ export class SupabaseAdapter {
       //   blockKeys: Object.keys(block)
       // });
       
+      // Extract all block data that should be persisted in metadata
+      const extractBlockData = (block) => {
+        const metadata = {};
+        
+        // List of properties to exclude from metadata (they have their own columns)
+        const excludedProps = ['id', 'type', 'content', 'position', 'tags', 'language', 'filePath', 'isNew', 'createdAt', 'updatedAt'];
+        
+        // Copy all non-excluded properties to metadata
+        Object.keys(block).forEach(key => {
+          if (!excludedProps.includes(key) && block[key] !== undefined) {
+            metadata[key] = block[key];
+          }
+        });
+        
+        // Also merge any existing data or metadata
+        if (block.data) {
+          Object.assign(metadata, block.data);
+        }
+        if (block.metadata) {
+          Object.assign(metadata, block.metadata);
+        }
+        
+        // Debug logging for AI blocks
+        if (block.type === 'ai') {
+          console.log('🔵 AI Block Save Debug:', {
+            blockId: block.id,
+            hasMessages: !!block.messages,
+            messageCount: block.messages?.length || 0,
+            metadataKeys: Object.keys(metadata),
+            hasMessagesInMetadata: !!metadata.messages
+          });
+        }
+        
+        return metadata;
+      };
+      
       const blockToSave = {
         id: block.id || crypto.randomUUID(), // Generate ID if missing
         type: block.type,
         content: block.content || '',
         position: index,
-        metadata: block.data || block.metadata || {},  // Use block.data if present, fallback to metadata
+        metadata: extractBlockData(block),  // Extract all block-specific data
         tags: block.tags || [],  // Include tags for the RPC function
         language: block.language || null,
         file_path: block.filePath || null
@@ -656,6 +692,34 @@ export class SupabaseAdapter {
     } else if (block.metadata) {
       // For other blocks, merge metadata properties directly
       Object.assign(baseBlock, block.metadata);
+      
+      // Debug logging for AI blocks
+      if (block.type === 'ai') {
+        console.log('🔵 AI Block Load Debug:', {
+          blockId: block.id,
+          metadataKeys: Object.keys(block.metadata || {}),
+          hasMessagesInMetadata: !!block.metadata?.messages,
+          messageCount: block.metadata?.messages?.length || 0,
+          hasMessagesInBaseBlock: !!baseBlock.messages
+        });
+      }
+      
+      // Also handle specific known properties for certain block types
+      if (block.type === 'filetree' && block.metadata.treeData) {
+        baseBlock.treeData = block.metadata.treeData;
+      }
+      if (block.type === 'ai' && block.metadata.messages) {
+        baseBlock.messages = block.metadata.messages;
+      }
+      if (block.type === 'image' && block.metadata.images) {
+        baseBlock.images = block.metadata.images;
+      }
+      if (block.type === 'inline-image') {
+        // inline-image stores properties directly in metadata
+        if (block.metadata.url) baseBlock.url = block.metadata.url;
+        if (block.metadata.alt) baseBlock.alt = block.metadata.alt;
+        if (block.metadata.dimensions) baseBlock.dimensions = block.metadata.dimensions;
+      }
     }
 
     // console.log(`🟧 SupabaseAdapter: Block transformed from DB:`, {

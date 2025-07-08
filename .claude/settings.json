@@ -1,0 +1,27 @@
+{
+  "projectName": "journey-log-compass",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "edit_file|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/scripts/format_code.sh"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '📝 About to edit: $CLAUDE_FILE_PATHS' >> .claude/logs/activity.log"
+          }
+        ]
+      }
+    ]
+  }
+}

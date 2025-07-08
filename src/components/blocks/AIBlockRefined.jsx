@@ -31,6 +31,13 @@ export default function AIBlock({ block, onUpdate }) {
     
     const newMessage = { role, content: content.trim() };
     const updatedMessages = [...messages, newMessage];
+    console.log('🟢 AI Block: Adding message', {
+      blockId: block.id,
+      role,
+      contentLength: content.length,
+      previousMessageCount: messages.length,
+      newMessageCount: updatedMessages.length
+    });
     setMessages(updatedMessages);
     onUpdate(block.id, { messages: updatedMessages });
     setIsAddingMessage(false);

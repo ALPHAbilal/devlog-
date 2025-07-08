@@ -125,6 +125,19 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
 
   const updateBlock = (blockId, updates) => {
+    // Debug AI blocks specifically
+    const block = blocks.find(b => b.id === blockId);
+    if (block && block.type === 'ai') {
+      console.log('🟣 AI Block Update:', {
+        blockId,
+        blockType: block.type,
+        updates,
+        hasMessages: 'messages' in updates,
+        messageCount: updates.messages?.length || 0,
+        currentMessageCount: block.messages?.length || 0
+      });
+    }
+    
     // console.log('🟩 ExpandedViewEnhanced: updateBlock called:', {
     //   blockId: blockId,
     //   updates: updates,
@@ -141,7 +154,16 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     const needsSave = updates.content !== undefined || 
                      updates.data !== undefined || 
                      updates.metadata !== undefined ||
-                     updates.tags !== undefined;
+                     updates.tags !== undefined ||
+                     updates.messages !== undefined ||     // AI blocks
+                     updates.treeData !== undefined ||     // FileTree blocks  
+                     updates.images !== undefined ||       // Image blocks
+                     updates.items !== undefined ||        // Todo blocks
+                     updates.url !== undefined ||          // InlineImage blocks
+                     updates.dimensions !== undefined ||   // InlineImage blocks
+                     updates.language !== undefined ||     // Code blocks
+                     updates.filePath !== undefined ||     // Code blocks
+                     updates.level !== undefined;          // Heading blocks
     
     // Skip saves during initial load
     if (needsSave && !isInitialLoadRef.current) {
@@ -397,7 +419,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         // Clear content for AI blocks as they use different structure
         if (newType === 'ai') {
           newBlock.content = '';
-          newBlock.messages = [];
         }
         
         return newBlock;
@@ -420,9 +441,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     };
 
     // Initialize block based on type
-    if (type === 'ai') {
-      newBlock.messages = [];
-    } else if (type === 'heading') {
+    if (type === 'heading') {
       newBlock.level = 2;
     }
 

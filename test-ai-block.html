@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Block Test</title>
+    <script type="module">
+        import { supabase } from './src/lib/supabase.js';
+        
+        async function testAIBlock() {
+            console.log('Testing AI block save...');
+            
+            // Get session
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                console.error('Not authenticated');
+                return;
+            }
+            
+            // Create test document
+            const testDoc = {
+                id: crypto.randomUUID(),
+                title: 'AI Block Test ' + new Date().toISOString(),
+                preview: 'Testing AI block messages',
+                tags: [],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                user_id: session.user.id
+            };
+            
+            // Create test AI block with messages
+            const testAIBlock = {
+                id: crypto.randomUUID(),
+                type: 'ai',
+                content: '',
+                position: 0,
+                messages: [
+                    { role: 'user', content: 'What is React?' },
+                    { role: 'ai', content: 'React is a JavaScript library for building user interfaces.' }
+                ]
+            };
+            
+            console.log('Test document:', testDoc);
+            console.log('Test AI block:', testAIBlock);
+            
+            // Save document
+            const { error: docError } = await supabase
+                .from('documents')
+                .insert(testDoc);
+                
+            if (docError) {
+                console.error('Document save error:', docError);
+                return;
+            }
+            
+            // Prepare block for save (mimicking SupabaseAdapter logic)
+            const blockToSave = {
+                id: testAIBlock.id,
+                type: testAIBlock.type,
+                content: testAIBlock.content || '',
+                position: testAIBlock.position,
+                metadata: { messages: testAIBlock.messages },
+                tags: [],
+                language: null,
+                file_path: null
+            };
+            
+            console.log('Block to save:', blockToSave);
+            
+            // Save block using RPC
+            const { error: blockError } = await supabase.rpc('save_document_blocks', {
+                doc_id: testDoc.id,
+                blocks: [blockToSave]
+            });
+            
+            if (blockError) {
+                console.error('Block save error:', blockError);
+                return;
+            }
+            
+            console.log('Save successful!');
+            
+            // Verify the save
+            const { data: savedBlock, error: verifyError } = await supabase
+                .from('blocks')
+                .select('*')
+                .eq('id', testAIBlock.id)
+                .single();
+                
+            if (verifyError) {
+                console.error('Verify error:', verifyError);
+                return;
+            }
+            
+            console.log('Saved block from DB:', savedBlock);
+            console.log('Messages in metadata:', savedBlock.metadata?.messages);
+            
+            document.getElementById('result').textContent = JSON.stringify({
+                success: true,
+                savedBlock: savedBlock,
+                messagesFound: savedBlock.metadata?.messages?.length || 0
+            }, null, 2);
+        }
+        
+        window.testAIBlock = testAIBlock;
+    </script>
+</head>
+<body>
+    <h1>AI Block Save Test</h1>
+    <button onclick="testAIBlock()">Test AI Block Save</button>
+    <pre id="result"></pre>
+</body>
+</html>

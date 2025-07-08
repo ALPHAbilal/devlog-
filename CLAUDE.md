@@ -313,3 +313,148 @@ supabase db dump --db-url "$DATABASE_URL" -f backup_before_migration_$(date +%Y%
 ```
 
 Remember: **Data loss in Supabase is 99% human error during migrations, not platform failure**.
+
+## 🔴 CRITICAL: Block Data Persistence Architecture
+
+### The Problem We Solved
+Complex block types (FileTreeBlock, AIBlock, ImageBlock, etc.) store data in custom properties that weren't being saved to Supabase. This caused data loss when reloading documents.
+
+### How Block Data Storage Works
+
+#### Database Schema
+The `blocks` table uses a JSONB `metadata` column to store all block-specific data:
+```sql
+blocks table:
+- id (uuid)
+- type (text) 
+- content (text) -- For simple text content
+- metadata (jsonb) -- For ALL complex data structures
+- position, document_id, etc.
+```
+
+#### Saving Blocks (SupabaseAdapter.js)
+When saving, ALL non-standard properties are extracted into metadata:
+```javascript
+const extractBlockData = (block) => {
+  const metadata = {};
+  const excludedProps = ['id', 'type', 'content', 'position', 'tags', 'language', 'filePath', 'isNew', 'createdAt', 'updatedAt'];
+  
+  // Copy ALL other properties to metadata
+  Object.keys(block).forEach(key => {
+    if (!excludedProps.includes(key) && block[key] !== undefined) {
+      metadata[key] = block[key];
+    }
+  });
+  
+  return metadata;
+};
+```
+
+#### Loading Blocks (transformBlockFromDB)
+When loading, block-specific properties are restored from metadata:
+```javascript
+// Special handling for known block types
+if (block.type === 'filetree' && block.metadata.treeData) {
+  baseBlock.treeData = block.metadata.treeData;
+}
+if (block.type === 'ai' && block.metadata.messages) {
+  baseBlock.messages = block.metadata.messages;
+}
+if (block.type === 'image' && block.metadata.images) {
+  baseBlock.images = block.metadata.images;
+}
+// ... etc
+```
+
+### Block Type Data Mappings
+
+| Block Type | Custom Properties | Storage Location |
+|------------|------------------|------------------|
+| filetree | `treeData` (nested folder/file structure) | metadata.treeData |
+| ai | `messages` (array of conversations) | metadata.messages |
+| image | `images` (array of image objects) | metadata.images |
+| table | `data` (headers, rows) | metadata (as data property) |
+| todo | `data` (todos array) | metadata (as data property) |
+| template | `data` (template-specific) | metadata (as data property) |
+| inline-image | `url`, `alt`, `dimensions` | metadata.* |
+
+### Files That MUST Be Synchronized
+When adding new block types or modifying data persistence, ALL these files must be updated:
+
+1. **`/src/utils/storage/SupabaseAdapter.js`**
+   - `extractBlockData()` - Saves block data
+   - `transformBlockFromDB()` - Loads block data
+
+2. **`/src/utils/optimizedBlockLoader.js`**
+   - `transformBlockFromDB()` - Must match SupabaseAdapter
+
+3. **`/src/utils/blockStreamer.js`**  
+   - `transformBlockFromDB()` - Must match SupabaseAdapter
+
+4. **`/src/utils/paginatedBlockLoader.js`**
+   - Uses optimizedBlockLoader.transformBlockFromDB
+
+### Adding a New Block Type Checklist
+
+1. **Create the block component** in `/src/components/blocks/`
+
+2. **Update ALL transformBlockFromDB functions** to handle your data:
+   ```javascript
+   if (block.type === 'your-type' && block.metadata.yourData) {
+     baseBlock.yourData = block.metadata.yourData;
+   }
+   ```
+
+3. **Update the database constraint** if needed:
+   ```sql
+   ALTER TABLE blocks DROP CONSTRAINT blocks_type_check;
+   ALTER TABLE blocks ADD CONSTRAINT blocks_type_check 
+   CHECK (type = ANY (ARRAY['text', 'code', 'heading', 'ai', 'table', 
+                            'filetree', 'todo', 'template', 'math', 
+                            'image', 'inline-image', 'your-type']));
+   ```
+
+4. **Test persistence**:
+   - Create a block with complex data
+   - Save the document
+   - Refresh the page
+   - Verify ALL data is restored
+
+### Common Data Loss Scenarios
+
+1. **Forgetting to update transformBlockFromDB** - Data saves but doesn't load back
+2. **Not including properties in extractBlockData** - Data never gets saved
+3. **Mismatched property names** - Saving as `data` but loading as `yourData`
+4. **Missing database constraint** - Block type rejected by database
+
+### Debugging Data Persistence
+
+1. **Check what's being saved**:
+   ```javascript
+   console.log('Block being saved:', blockToSave);
+   console.log('Metadata field:', blockToSave.metadata);
+   ```
+
+2. **Check database directly**:
+   ```sql
+   SELECT id, type, metadata 
+   FROM blocks 
+   WHERE document_id = 'your-doc-id'
+   AND type = 'your-block-type';
+   ```
+
+3. **Check what's being loaded**:
+   ```javascript
+   console.log('Block from DB:', block);
+   console.log('Transformed block:', transformedBlock);
+   ```
+
+### CRITICAL: Multi-Image Block Implementation
+
+The `ImageBlock` now supports multiple images with:
+- `images` array stored in metadata
+- Each image has: `{id, url, storagePath, alt, size, dimensions}`
+- Backward compatibility for old single-image blocks
+- Smart paste handling to group images pasted within 30 seconds
+
+This pattern can be used for any block type that needs to store arrays or complex nested data.

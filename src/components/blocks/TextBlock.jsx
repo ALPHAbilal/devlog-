@@ -3,6 +3,7 @@ import FloatingToolbar from '../FloatingToolbar';
 import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow, allBlocks }) {
   const { user } = useAuth();
@@ -14,8 +15,13 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState(null);
   const [selectedText, setSelectedText] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(block.metadata?.isCollapsed || false);
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
+  
+  // Constants for collapse behavior
+  const MAX_LINES_BEFORE_COLLAPSE = 15;
+  const MAX_COLLAPSED_LINES = 10;
   
   // Cleanup on unmount
   useEffect(() => {
@@ -173,10 +179,24 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     // Extract tags from content before saving
     const extractedTags = extractTagsFromContent(content);
     // Remove isNew flag when saving
-    onUpdate(block.id, { content: content, tags: extractedTags, isNew: undefined });
+    onUpdate(block.id, { 
+      content: content, 
+      tags: extractedTags, 
+      isNew: undefined,
+      metadata: { ...block.metadata, isCollapsed }
+    });
     setIsEditing(false);
     if (onFocus) onFocus(null); // Clear focus
   };
+  
+  // Update metadata when collapse state changes
+  useEffect(() => {
+    if (block.metadata?.isCollapsed !== isCollapsed) {
+      onUpdate(block.id, { 
+        metadata: { ...block.metadata, isCollapsed }
+      });
+    }
+  }, [isCollapsed]);
 
   const handleTag = (selectedText, tagName) => {
     if (!textareaRef.current) return;
@@ -603,41 +623,88 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     );
   }
 
+  // Check if content is long enough to show collapse button
+  const lines = block.content?.split('\n') || [];
+  const isLongContent = lines.length > MAX_LINES_BEFORE_COLLAPSE;
+  const displayContent = isCollapsed 
+    ? lines.slice(0, MAX_COLLAPSED_LINES).join('\n')
+    : block.content;
+
   return (
-    <div 
-      onClick={() => {
-        // Ensure toolbar is hidden before entering edit mode
-        setShowToolbar(false);
-        setSelectedText('');
-        setToolbarPosition(null);
-        setIsEditing(true);
-        if (onFocus) onFocus(block.id);
-      }}
-      className={`text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 
-                 cursor-text transition-all duration-200 min-h-[50px]
-                 ${isFocused === false ? 'opacity-40' : 'opacity-100'}`}
-    >
-      {block.content ? (
-        <div className="space-y-2">
-          <div className="space-y-1">
-            {processLineBreaksAndLists(block.content)}
-          </div>
-          {block.tags && block.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {block.tags.map((tag, index) => (
-                <span 
-                  key={index}
-                  className="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      ) : (
-        <span className="text-text-secondary">Type '/' for commands...</span>
+    <div className="relative group">
+      {/* Collapse button - show when content is long */}
+      {isLongContent && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsCollapsed(!isCollapsed);
+          }}
+          className="absolute right-2 top-2 p-2 bg-dark-primary/80 border border-dark-secondary/50
+                     hover:bg-dark-primary hover:border-accent-green/50 rounded-lg 
+                     transition-all z-10 flex items-center gap-1.5 shadow-lg"
+          title={isCollapsed ? "Expand text" : "Collapse text"}
+        >
+          {isCollapsed ? 
+            <ChevronDown size={16} className="text-accent-green" /> : 
+            <ChevronUp size={16} className="text-accent-green" />
+          }
+          <span className="text-xs text-text-secondary font-medium">
+            {isCollapsed ? 'Expand' : 'Collapse'}
+          </span>
+        </button>
       )}
+      
+      <div 
+        onClick={() => {
+          // Don't enter edit mode if clicking on collapsed content
+          if (!isCollapsed) {
+            // Ensure toolbar is hidden before entering edit mode
+            setShowToolbar(false);
+            setSelectedText('');
+            setToolbarPosition(null);
+            setIsEditing(true);
+            if (onFocus) onFocus(block.id);
+          }
+        }}
+        className={`text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 
+                   cursor-text transition-all duration-200 min-h-[50px]
+                   ${isFocused === false ? 'opacity-40' : 'opacity-100'}
+                   ${isCollapsed ? 'border-l-4 border-accent-green/30 pl-3' : ''}`}
+      >
+        {block.content ? (
+          <div className="space-y-2">
+            <div className="space-y-1">
+              {processLineBreaksAndLists(displayContent)}
+              {isCollapsed && lines.length > MAX_COLLAPSED_LINES && (
+                <div 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsCollapsed(false);
+                  }}
+                  className="mt-2 text-text-secondary/50 text-sm hover:text-text-secondary 
+                             cursor-pointer transition-colors"
+                >
+                  ... {lines.length - MAX_COLLAPSED_LINES} more lines - click to expand
+                </div>
+              )}
+            </div>
+            {block.tags && block.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {block.tags.map((tag, index) => (
+                  <span 
+                    key={index}
+                    className="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <span className="text-text-secondary">Type '/' for commands...</span>
+        )}
+      </div>
     </div>
   );
 }

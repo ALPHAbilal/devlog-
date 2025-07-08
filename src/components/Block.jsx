@@ -5,8 +5,6 @@ import AIBlock from './blocks/AIBlockRefined';
 import HeadingBlock from './blocks/HeadingBlock';
 import FileTreeBlock from './blocks/FileTreeBlock';
 import TableBlock from './blocks/TableBlock';
-import TemplateBlock from './blocks/TemplateBlock';
-import MathBlock from './blocks/MathBlock';
 import TodoBlock from './blocks/TodoBlock';
 import ImageBlock from './blocks/ImageBlock';
 import InlineImageBlock from './blocks/InlineImageBlock';
@@ -20,8 +18,6 @@ const blockComponents = {
   heading: HeadingBlock,
   filetree: FileTreeBlock,
   table: TableBlock,
-  template: TemplateBlock,
-  math: MathBlock,
   todo: TodoBlock,
   image: ImageBlock,
   'inline-image': InlineImageBlock,

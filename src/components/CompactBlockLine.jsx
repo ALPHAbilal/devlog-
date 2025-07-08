@@ -5,8 +5,6 @@ import {
   Hash, 
   FolderTree, 
   Table, 
-  FileText, 
-  Calculator,
   CheckSquare,
   FileCode,
   ChevronRight,
@@ -21,8 +19,6 @@ const blockIcons = {
   heading: Hash,
   filetree: FolderTree,
   table: Table,
-  template: FileText,
-  math: Calculator,
   todo: CheckSquare,
   image: Image,
   'inline-image': Image
@@ -36,11 +32,25 @@ const blockAccents = {
   heading: 'from-yellow-500/10 to-yellow-600/5',
   filetree: 'from-cyan-500/10 to-cyan-600/5',
   table: 'from-orange-500/10 to-orange-600/5',
-  template: 'from-pink-500/10 to-pink-600/5',
-  math: 'from-indigo-500/10 to-indigo-600/5',
   todo: 'from-red-500/10 to-red-600/5',
   image: 'from-teal-500/10 to-teal-600/5',
   'inline-image': 'from-teal-500/10 to-teal-600/5'
+};
+
+// Helper function to clean markdown from text
+const cleanMarkdown = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/^#+\s+/gm, '') // Remove heading markers
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+    .replace(/\*(.*?)\*/g, '$1') // Remove italic
+    .replace(/`(.*?)`/g, '$1') // Remove inline code
+    .replace(/~~(.*?)~~/g, '$1') // Remove strikethrough
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Convert links to text
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, '[Image: $1]') // Convert images
+    .replace(/\[\[([^\]]+)\]\]/g, '$1') // Document links
+    .replace(/#(\w+)\[([^\]]+)\]/g, '$2') // Remove tag syntax
+    .trim();
 };
 
 export default function CompactBlockLine({ block, index, onClick, isSelected }) {
@@ -51,24 +61,25 @@ export default function CompactBlockLine({ block, index, onClick, isSelected }) 
   const getPreviewText = () => {
     switch (block.type) {
       case 'heading':
-        return block.content || 'Untitled Heading';
+        return cleanMarkdown(block.content || 'Untitled Heading');
       case 'text':
-        return (block.content || '').substring(0, 100).replace(/\n/g, ' ');
+        const cleanedText = cleanMarkdown(block.content || '');
+        return cleanedText.substring(0, 100).replace(/\n/g, ' ');
       case 'code':
         return `${block.language || 'code'}: ${(block.content || '').substring(0, 80).replace(/\n/g, ' ')}`;
       case 'ai':
         const lastMessage = block.messages?.[block.messages.length - 1];
-        return lastMessage ? `${lastMessage.role}: ${lastMessage.content.substring(0, 80)}` : 'AI Conversation';
+        if (lastMessage) {
+          const cleanedAIContent = cleanMarkdown(lastMessage.content);
+          return `${lastMessage.role}: ${cleanedAIContent.substring(0, 80)}`;
+        }
+        return 'AI Conversation';
       case 'table':
-        const rows = block.rows?.length || 0;
-        const cols = block.headers?.length || 0;
+        const rows = block.data?.rows?.length || 0;
+        const cols = block.data?.headers?.length || 0;
         return `Table (${rows}×${cols})`;
       case 'filetree':
         return `File Tree: ${block.name || 'Project Structure'}`;
-      case 'template':
-        return `Template: ${block.templateType || 'Unknown'}`;
-      case 'math':
-        return block.content || 'Math Expression';
       case 'todo':
         const completed = block.todos?.filter(t => t.completed).length || 0;
         const total = block.todos?.length || 0;
@@ -111,7 +122,9 @@ export default function CompactBlockLine({ block, index, onClick, isSelected }) 
     
     // Add word count for text blocks
     if ((block.type === 'text' || block.type === 'heading') && block.content) {
-      const words = block.content.split(/\s+/).filter(w => w.length > 0).length;
+      // Count words in cleaned text for more accurate count
+      const cleanedContent = cleanMarkdown(block.content);
+      const words = cleanedContent.split(/\s+/).filter(w => w.length > 0).length;
       metadata.push(`${words} words`);
     }
     

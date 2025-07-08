@@ -66,3 +66,98 @@
 .ai-messages-wrapper:has(.ai-edit-textarea) .transition-opacity {
   transition: none !important;
 }
+
+/* Smooth height transitions for collapsed states */
+.ai-messages-wrapper {
+  transition: height 300ms ease-in-out;
+  overflow: hidden;
+}
+
+/* Collapsed block summary styling */
+.ai-block-collapsed-summary {
+  animation: fadeIn 200ms ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover state for collapse buttons */
+.ai-collapse-button {
+  transition: all 150ms ease;
+}
+
+.ai-collapse-button:hover {
+  transform: scale(1.1);
+}
+
+/* Message collapse animation */
+.ai-message-collapsed {
+  max-height: 300px;
+  overflow: hidden;
+  transition: max-height 300ms ease-in-out;
+}
+
+.ai-message-expanded {
+  max-height: none;
+  transition: max-height 300ms ease-in-out;
+}
+
+/* Markdown styling for AI blocks */
+.ai-message-item .prose-sm {
+  max-width: none;
+}
+
+.ai-message-item h1,
+.ai-message-item h2,
+.ai-message-item h3,
+.ai-message-item h4,
+.ai-message-item h5,
+.ai-message-item h6 {
+  font-weight: 600;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: #f5f5f5;
+}
+
+.ai-message-item h1 { font-size: 1.5rem; }
+.ai-message-item h2 { font-size: 1.25rem; }
+.ai-message-item h3 { font-size: 1.125rem; }
+.ai-message-item h4 { font-size: 1rem; }
+.ai-message-item h5 { font-size: 0.875rem; }
+.ai-message-item h6 { font-size: 0.875rem; }
+
+.ai-message-item strong {
+  font-weight: 600;
+  color: #f5f5f5;
+}
+
+.ai-message-item em {
+  font-style: italic;
+}
+
+.ai-message-item code {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  font-family: 'SF Mono', Monaco, Consolas, monospace;
+}
+
+.ai-message-item a {
+  color: #10b981;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ai-message-item a:hover {
+  text-decoration-thickness: 2px;
+}

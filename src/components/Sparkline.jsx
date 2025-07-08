@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 export default function Sparkline({ data, width = 100, height = 30, className = '' }) {
+  // data: Array of numbers representing activity levels (weekly data for 6 months)
   // Normalize data to fit within the height
   const normalizedData = useMemo(() => {
     if (!data || data.length === 0) return [];

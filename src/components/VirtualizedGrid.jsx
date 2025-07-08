@@ -227,13 +227,13 @@ function CompactEntryCard({ entry, onExpand, searchTerm }) {
         {highlightText(entry.title, searchTerm)}
       </h3>
       
-      {/* Activity Sparkline */}
+      {/* Activity Sparkline - 6 months of weekly data */}
       <div className="mb-1.5">
         <Sparkline 
           data={activityData} 
-          width={220} 
-          height={20}
-          className="opacity-50 group-hover:opacity-90 transition-opacity duration-200"
+          width={230} 
+          height={24}
+          className="opacity-60 group-hover:opacity-100 transition-opacity duration-200"
         />
       </div>
       

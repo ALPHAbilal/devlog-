@@ -730,5 +730,90 @@ Start building your second brain with Devlog. Because the best documentation is 
     - Knowledge gaps identification
     - Coding pattern analysis
 
+## 📅 Recent Updates (January 2025)
+
+### **Professional Image Viewer** 
+*Enhanced image viewing experience with smooth zoom and pan capabilities*
+
+**Features:**
+- **Smooth Zoom Controls** - Mouse wheel zoom toward cursor position
+- **Momentum-Based Panning** - Natural drag behavior with velocity tracking
+- **Double-Click Actions** - Quick 2x zoom or reset to original size
+- **Keyboard Shortcuts** - +/-, 0 for reset, arrow keys for navigation
+- **Professional UI** - Zoom percentage display, control buttons with tooltips
+- **Smart Boundaries** - Automatic constraint handling with smooth animations
+- **Touch-Friendly** - Full support for touch devices using pointer events API
+
+**Technical Implementation:**
+- RequestAnimationFrame for 60fps animations
+- Momentum damping (0.92) for natural deceleration
+- Proper event handling to prevent flicker
+- Support for tall/wide images with automatic pan capability
+
+### **Text Block Collapse Feature**
+*Manage long text content with collapsible blocks*
+
+**Features:**
+- **Auto-Collapse Threshold** - Blocks over 15 lines show collapse button
+- **Persistent State** - Collapse state saved in block metadata
+- **Visual Indicators** - Always-visible collapse/expand button with text labels
+- **Collapsed Preview** - Shows first 10 lines with "X more lines" indicator
+- **Left Border** - Green accent border on collapsed blocks for easy identification
+
+### **Markdown Rendering Improvements**
+*Fixed raw markdown display issues across the application*
+
+**AI Conversation Blocks:**
+- Proper markdown parsing for all messages
+- Clean rendering of headings, bold, italic, code, and links
+- Fixed infinite loop issue caused by metadata updates
+- Collapsed state preview shows cleaned markdown
+
+**Lines View:**
+- Added `cleanMarkdown` helper to strip syntax from previews
+- Applied to text, heading, AI conversation, and math blocks
+- Cleaner, more readable compact view
+
+### **Extended Activity Sparklines**
+*Expanded from 14 days to 6 months of activity visualization*
+
+**Implementation:**
+- **Weekly Aggregation** - 26 data points representing 6 months
+- **Smart Activity Calculation**:
+  - Creation week: 50-70 activity points
+  - Update week: 40-60 activity points
+  - Code blocks add technical activity bonus
+  - AI blocks add research activity bonus
+  - Seasonal variation using sine wave
+  - Decay factor for older documents
+
+**Visual Updates:**
+- Slightly wider sparkline (230px) for better data display
+- Increased height (24px) for improved visibility
+- Enhanced opacity transitions on hover
+- Trend indicators (green/red/gray) based on 4-week comparisons
+
+### **Table Block Improvements**
+*Fixed dimension display in lines view*
+
+**Fix:**
+- Corrected data path from `block.rows` to `block.data.rows`
+- Now properly shows table dimensions (e.g., "Table (3×4)")
+
+### **Template and Math Block Removal**
+*Simplified block system by removing less-used block types*
+
+**Changes:**
+- Removed all template types except Git Commands (later removed entirely)
+- Deleted Math equation block type
+- Cleaned up related imports and references
+- Simplified block type selector
+
+### **Bug Fixes**
+- **Image Zoom** - Fixed width constraint issue during zoom
+- **Drag Flicker** - Resolved position reset when starting drag
+- **Table Preview** - Fixed 0×0 display in lines view
+- **AI Block Loop** - Fixed infinite update loop in metadata handling
+
   Your infrastructure is absolutely capable of exponential scaling. The architecture is clean, the security model is solid, and the performance optimizations show foresight. You're
   building something that could become the "GitHub for personal developer documentation" - a space that's currently underserved but has massive potential.

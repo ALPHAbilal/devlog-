@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Bot, User, Plus, Copy, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import { parseMarkdown } from '../../utils/parseMarkdown.jsx';
 import '../AIBlockScroll.css';
 
 export default function AIBlock({ block, onUpdate }) {
@@ -7,7 +8,8 @@ export default function AIBlock({ block, onUpdate }) {
   const [isAddingMessage, setIsAddingMessage] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [copiedIndex, setCopiedIndex] = useState(null);
-  const [collapsedMessages, setCollapsedMessages] = useState(new Set());
+  const [collapsedMessages, setCollapsedMessages] = useState(new Set(block.metadata?.collapsedMessages || []));
+  const [isBlockCollapsed, setIsBlockCollapsed] = useState(block.metadata?.isBlockCollapsed || false);
   const textareaRef = useRef(null);
 
   // Auto-resize textarea helper
@@ -176,8 +178,8 @@ export default function AIBlock({ block, onUpdate }) {
               {isUser ? 'You' : 'AI Assistant'}
             </span>
             
-            {/* Action buttons - always visible during edit, hover otherwise */}
-            <div className={`flex gap-1 ${isEditing ? 'opacity-100' : 'opacity-0 hover:opacity-100'} transition-opacity`}>
+            {/* Action buttons - always visible for long messages, full opacity on hover */}
+            <div className={`flex gap-1 ${isLong || isEditing ? 'opacity-50 hover:opacity-100' : 'opacity-0 hover:opacity-100'} transition-opacity`}>
               <button
                 onClick={() => copyMessage(index)}
                 className="p-0.5 hover:bg-dark-secondary/50 rounded"
@@ -252,9 +254,16 @@ export default function AIBlock({ block, onUpdate }) {
                   startEdit(e);
                 }}
                 className="text-text-primary text-[15px] leading-[1.6] cursor-text
-                         whitespace-pre-wrap break-words font-sans"
+                         whitespace-pre-wrap break-words font-sans prose-sm"
               >
-                {displayContent}
+                {/* Parse markdown for better display */}
+                <div className="space-y-2">
+                  {displayContent.split('\n').map((line, lineIndex) => (
+                    <div key={lineIndex}>
+                      {line.trim() ? parseMarkdown(line) : <br />}
+                    </div>
+                  ))}
+                </div>
                 {isCollapsed && lines.length > MAX_COLLAPSED_LINES && (
                   <div className="mt-2 text-text-secondary/50 text-sm">
                     ({lines.length - MAX_COLLAPSED_LINES} more lines hidden)
@@ -268,37 +277,116 @@ export default function AIBlock({ block, onUpdate }) {
     );
   }, [editingIndex, collapsedMessages, copyMessage, toggleCollapse, updateMessage, autoResize, copiedIndex]);
 
+  // Update metadata when collapse states change
+  useEffect(() => {
+    // Check if metadata actually changed to prevent infinite loops
+    const currentCollapsedArray = Array.from(collapsedMessages);
+    const prevCollapsedArray = block.metadata?.collapsedMessages || [];
+    const prevIsBlockCollapsed = block.metadata?.isBlockCollapsed || false;
+    
+    const collapsedChanged = currentCollapsedArray.length !== prevCollapsedArray.length || 
+      !currentCollapsedArray.every(val => prevCollapsedArray.includes(val));
+    const blockCollapsedChanged = isBlockCollapsed !== prevIsBlockCollapsed;
+    
+    if (collapsedChanged || blockCollapsedChanged) {
+      const metadata = {
+        ...block.metadata,
+        collapsedMessages: currentCollapsedArray,
+        isBlockCollapsed
+      };
+      onUpdate(block.id, { metadata });
+    }
+  }, [collapsedMessages, isBlockCollapsed, block.id, block.metadata, onUpdate]);
+
+  const toggleBlockCollapse = useCallback(() => {
+    setIsBlockCollapsed(prev => !prev);
+  }, []);
+
   return (
     <div className="ai-block-container space-y-6">
       {/* Header */}
       <div className="flex items-center gap-2 text-text-secondary">
         <Bot size={18} />
         <span className="text-sm font-medium">AI Conversation</span>
+        {messages.length > 0 && (
+          <span className="text-xs text-text-secondary/70">({messages.length} messages)</span>
+        )}
         <div className="flex-grow h-px bg-dark-secondary/30" />
+        {messages.length > 0 && (
+          <button
+            onClick={toggleBlockCollapse}
+            className="p-1 hover:bg-dark-secondary/50 rounded transition-colors"
+            title={isBlockCollapsed ? "Expand conversation" : "Collapse conversation"}
+          >
+            {isBlockCollapsed ? 
+              <ChevronDown size={16} className="text-text-secondary/70" /> : 
+              <ChevronUp size={16} className="text-text-secondary/70" />
+            }
+          </button>
+        )}
       </div>
 
       {/* Messages Container */}
-      <div className="ai-messages-wrapper space-y-4">
-        {messages.length === 0 && !isAddingMessage && (
-          <div className="text-center py-12">
-            <Bot size={32} className="text-text-secondary/30 mx-auto mb-3" />
-            <p className="text-text-secondary text-sm">
-              No messages yet. Start by adding a conversation.
-            </p>
-          </div>
-        )}
+      {!isBlockCollapsed && (
+        <div className="ai-messages-wrapper space-y-4">
+          {messages.length === 0 && !isAddingMessage && (
+            <div className="text-center py-12">
+              <Bot size={32} className="text-text-secondary/30 mx-auto mb-3" />
+              <p className="text-text-secondary text-sm">
+                No messages yet. Start by adding a conversation.
+              </p>
+            </div>
+          )}
 
-        {messages.map((message, index) => (
-          <MessageBubble 
-            key={`${index}-${message.role}`} 
-            message={message} 
-            index={index} 
-          />
-        ))}
-      </div>
+          {messages.map((message, index) => (
+            <MessageBubble 
+              key={`${index}-${message.role}`} 
+              message={message} 
+              index={index} 
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Collapsed State Summary */}
+      {isBlockCollapsed && messages.length > 0 && (
+        <div 
+          onClick={toggleBlockCollapse}
+          className="bg-dark-secondary/20 rounded-lg p-4 cursor-pointer hover:bg-dark-secondary/30 transition-colors"
+        >
+          <div className="space-y-2">
+            {messages.slice(0, 3).map((message, index) => {
+              const firstLine = message.content.split('\n')[0];
+              // Remove markdown symbols for cleaner preview
+              const cleanedLine = firstLine
+                .replace(/^#+\s+/, '') // Remove heading markers
+                .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+                .replace(/\*(.*?)\*/g, '$1') // Remove italic
+                .replace(/`(.*?)`/g, '$1') // Remove inline code
+                .substring(0, 80);
+              
+              return (
+                <div key={index} className="flex items-start gap-2 text-sm">
+                  <span className="text-text-secondary/70 flex-shrink-0">
+                    {message.role === 'user' ? 'U:' : 'AI:'}
+                  </span>
+                  <span className="text-text-secondary truncate">
+                    {cleanedLine}...
+                  </span>
+                </div>
+              );
+            })}
+            {messages.length > 3 && (
+              <div className="text-xs text-text-secondary/50 text-center">
+                ... and {messages.length - 3} more messages
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Add Message Interface */}
-      {isAddingMessage && (
+      {!isBlockCollapsed && isAddingMessage && (
         <div className="space-y-3 p-4 bg-dark-secondary/20 rounded-lg border border-dark-secondary/30">
           <div className="flex gap-2">
             <button
@@ -364,7 +452,7 @@ export default function AIBlock({ block, onUpdate }) {
       )}
 
       {/* Add Button */}
-      {!isAddingMessage && (
+      {!isBlockCollapsed && !isAddingMessage && (
         <button
           onClick={() => setIsAddingMessage(true)}
           className="w-full py-3 border border-dashed border-dark-secondary/50

@@ -3,6 +3,7 @@ import { Upload, X, Maximize2, Download, Trash2, Image as ImageIcon, Plus, Grid3
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
 import InlineImage from '../InlineImage';
+import ImageViewer from '../ImageViewer';
 
 export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   const { user } = useAuth();
@@ -15,12 +16,7 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   const [draggedImageId, setDraggedImageId] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [zoomLevel, setZoomLevel] = useState(1);
-  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const fileInputRef = useRef(null);
-  const imageContainerRef = useRef(null);
   
   // Initialize images array from block data
   useEffect(() => {
@@ -238,8 +234,6 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   
   const closeLightbox = () => {
     setLightboxImage(null);
-    setZoomLevel(1);
-    setImagePosition({ x: 0, y: 0 });
   };
   
   const navigateLightbox = (direction) => {
@@ -248,112 +242,10 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
       : (lightboxIndex - 1 + images.length) % images.length;
     setLightboxIndex(newIndex);
     setLightboxImage(images[newIndex]);
-    setZoomLevel(1);
-    setImagePosition({ x: 0, y: 0 });
   };
   
-  // Zoom functions
-  const handleZoomIn = () => {
-    setZoomLevel(prev => Math.min(prev + 0.5, 4));
-  };
-  
-  const handleZoomOut = () => {
-    setZoomLevel(prev => {
-      const newZoom = Math.max(prev - 0.5, 0.5);
-      if (newZoom === 1) {
-        setImagePosition({ x: 0, y: 0 });
-      }
-      return newZoom;
-    });
-  };
-  
-  const handleResetZoom = () => {
-    setZoomLevel(1);
-    setImagePosition({ x: 0, y: 0 });
-  };
-  
-  // Handle mouse wheel zoom
-  const handleWheel = useCallback((e) => {
-    // Always prevent default when over the image to avoid scroll issues
-    e.preventDefault();
-    if (e.deltaY < 0) {
-      handleZoomIn();
-    } else {
-      handleZoomOut();
-    }
-  }, []);
-  
-  // Attach wheel event listener with passive: false
-  useEffect(() => {
-    const container = imageContainerRef.current;
-    if (!container || !lightboxImage) return;
-    
-    // Add non-passive wheel event listener
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    
-    return () => {
-      container.removeEventListener('wheel', handleWheel);
-    };
-  }, [handleWheel, lightboxImage]);
-  
-  // Handle image dragging when zoomed
-  const handleMouseDown = (e) => {
-    if (zoomLevel > 1) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX - imagePosition.x, y: e.clientY - imagePosition.y });
-    }
-  };
-  
-  const handleMouseMove = (e) => {
-    if (isDragging && zoomLevel > 1) {
-      setImagePosition({
-        x: e.clientX - dragStart.x,
-        y: e.clientY - dragStart.y
-      });
-    }
-  };
-  
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-  
-  // Handle keyboard navigation in lightbox
-  useEffect(() => {
-    if (!lightboxImage) return;
-    
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') closeLightbox();
-      if (e.key === 'ArrowRight' && !e.ctrlKey) navigateLightbox('next');
-      if (e.key === 'ArrowLeft' && !e.ctrlKey) navigateLightbox('prev');
-      if (e.key === '+' || e.key === '=') handleZoomIn();
-      if (e.key === '-' || e.key === '_') handleZoomOut();
-      if (e.key === '0') handleResetZoom();
-      
-      // Arrow keys with Ctrl for panning when zoomed
-      if (zoomLevel > 1 && e.ctrlKey) {
-        const moveAmount = 50;
-        if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          setImagePosition(prev => ({ ...prev, y: prev.y + moveAmount }));
-        }
-        if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          setImagePosition(prev => ({ ...prev, y: prev.y - moveAmount }));
-        }
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          setImagePosition(prev => ({ ...prev, x: prev.x + moveAmount }));
-        }
-        if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          setImagePosition(prev => ({ ...prev, x: prev.x - moveAmount }));
-        }
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxImage, lightboxIndex, zoomLevel]);
+  const handleNext = () => navigateLightbox('next');
+  const handlePrev = () => navigateLightbox('prev');
 
   return (
     <div 
@@ -598,156 +490,18 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
         </div>
       )}
       
-      {/* Lightbox Modal */}
+      {/* Professional Image Viewer */}
       {lightboxImage && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm 
-                     flex items-center justify-center p-4"
-          onClick={closeLightbox}
-        >
-          {/* Close button */}
-          <button
-            onClick={closeLightbox}
-            className="absolute top-4 right-4 p-2 bg-dark-primary/50 
-                       rounded-lg text-text-secondary hover:text-text-primary 
-                       hover:bg-dark-primary/80 transition-all z-10"
-          >
-            <X size={20} />
-          </button>
-          
-          {/* Navigation buttons */}
-          {images.length > 1 && (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateLightbox('prev');
-                }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 p-3 
-                           bg-dark-primary/50 rounded-lg text-text-secondary 
-                           hover:text-text-primary hover:bg-dark-primary/80 
-                           transition-all"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigateLightbox('next');
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-3 
-                           bg-dark-primary/50 rounded-lg text-text-secondary 
-                           hover:text-text-primary hover:bg-dark-primary/80 
-                           transition-all"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </>
-          )}
-          
-          {/* Zoom controls */}
-          <div className="absolute top-4 left-4 flex gap-2">
-            <button
-              onClick={handleZoomOut}
-              className="p-2 bg-dark-primary/50 rounded-lg text-text-secondary 
-                         hover:text-text-primary hover:bg-dark-primary/80 
-                         transition-all disabled:opacity-50"
-              disabled={zoomLevel <= 0.5}
-              title="Zoom out"
-            >
-              <ZoomOut size={20} />
-            </button>
-            <button
-              onClick={handleZoomIn}
-              className="p-2 bg-dark-primary/50 rounded-lg text-text-secondary 
-                         hover:text-text-primary hover:bg-dark-primary/80 
-                         transition-all disabled:opacity-50"
-              disabled={zoomLevel >= 4}
-              title="Zoom in"
-            >
-              <ZoomIn size={20} />
-            </button>
-            <button
-              onClick={handleResetZoom}
-              className="p-2 bg-dark-primary/50 rounded-lg text-text-secondary 
-                         hover:text-text-primary hover:bg-dark-primary/80 
-                         transition-all"
-              title="Reset zoom"
-            >
-              <RotateCw size={20} />
-            </button>
-            <span className="px-3 py-2 bg-dark-primary/50 rounded-lg 
-                           text-text-secondary text-sm flex items-center">
-              {Math.round(zoomLevel * 100)}%
-            </span>
-          </div>
-          
-          {/* Image container */}
-          <div 
-            ref={imageContainerRef}
-            className="relative max-w-[90vw] max-h-[90vh] flex flex-col items-center 
-                       overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div 
-              className="relative max-w-full max-h-[80vh] overflow-hidden rounded-lg"
-              style={{ cursor: zoomLevel > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default' }}
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-            >
-              <img
-                src={lightboxImage.url}
-                alt={lightboxImage.alt || 'Full size image'}
-                className="max-w-full max-h-[80vh] object-contain transition-transform duration-200"
-                style={{
-                  transform: `translate(${imagePosition.x}px, ${imagePosition.y}px) scale(${zoomLevel})`,
-                  transformOrigin: 'center'
-                }}
-                draggable={false}
-              />
-            </div>
-            
-            {/* Image info */}
-            <div className="mt-4 text-center">
-              <p className="text-text-primary text-sm mb-1">
-                {lightboxImage.alt || `Image ${lightboxIndex + 1}`}
-              </p>
-              {lightboxImage.dimensions && (
-                <p className="text-text-secondary text-xs">
-                  {lightboxImage.dimensions.width} × {lightboxImage.dimensions.height}
-                  {lightboxImage.size && ` • ${(lightboxImage.size / 1024).toFixed(1)} KB`}
-                </p>
-              )}
-              {images.length > 1 && (
-                <p className="text-text-secondary/60 text-xs mt-1">
-                  {lightboxIndex + 1} of {images.length}
-                </p>
-              )}
-            </div>
-            
-            {/* Action buttons */}
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => handleDownload(lightboxImage)}
-                className="px-4 py-2 bg-dark-secondary/50 hover:bg-dark-secondary 
-                           rounded-lg text-text-secondary hover:text-text-primary 
-                           transition-all flex items-center gap-2 text-sm"
-              >
-                <Download size={16} />
-                Download
-              </button>
-            </div>
-            
-            {/* Zoom instructions */}
-            {zoomLevel === 1 && (
-              <p className="text-text-secondary/40 text-xs mt-2">
-                Use mouse wheel or zoom buttons to zoom • Drag to pan when zoomed
-              </p>
-            )}
-          </div>
-        </div>
+        <ImageViewer
+          image={lightboxImage}
+          onClose={closeLightbox}
+          onDownload={handleDownload}
+          showNavigation={images.length > 1}
+          onNext={images.length > 1 ? handleNext : null}
+          onPrev={images.length > 1 ? handlePrev : null}
+          currentIndex={lightboxIndex}
+          totalImages={images.length}
+        />
       )}
     </div>
   );

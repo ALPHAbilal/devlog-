@@ -74,6 +74,12 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [isDeleting, setIsDeleting] = useState(false);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
 
+  // Update title and tags when entry changes (e.g., when navigating via document links)
+  useEffect(() => {
+    setTitle(entry.title);
+    setTags(entry.tags || []);
+  }, [entry.id]);
+
   // Check for unsaved changes on mount
   useEffect(() => {
     const checkForBackup = async () => {

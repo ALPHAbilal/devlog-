@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Dark background -->
+  <rect width="32" height="32" rx="6" fill="#0a1628"/>
+  
+  <!-- Terminal prompt symbol -->
+  <g transform="translate(4, 8)">
+    <!-- Chevron -->
+    <path
+      d="M6 6L12 12L6 18"
+      stroke="#10b981"
+      stroke-width="3"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    
+    <!-- Underscore -->
+    <path
+      d="M15 16L20 16"
+      stroke="#10b981"
+      stroke-width="3"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>

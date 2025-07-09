@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoMinimal from '../components/LogoMinimal';
-import { ChevronRight, Code2, Brain, Link2, Shield, Zap, GitBranch, FileCode, MessageSquare, Table, FolderTree, Heading } from 'lucide-react';
+import { ChevronRight, Code2, Brain, Link2, Shield, Zap, GitBranch, FileCode, MessageSquare, Table, FolderTree, Heading, ArrowRight, Menu, X } from 'lucide-react';
+import PricingSection from '../components/PricingSection';
+import TestimonialsSection from '../components/TestimonialsSection';
+import HeroWithScreenshots from '../components/HeroWithScreenshots';
+import EnhancedInteractiveDemo from '../components/EnhancedInteractiveDemo';
+import InteractiveDocumentDemoUnified from '../components/InteractiveDocumentDemoUnified';
+import { DemoModeProvider } from '../contexts/DemoModeContext';
 
-export default function Landing() {
+function LandingContent() {
   const navigate = useNavigate();
   const [activeDemo, setActiveDemo] = useState('code');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Demo content for different block types
   const demoContent = {
@@ -91,12 +98,20 @@ export default function Landing() {
     <div className="min-h-screen bg-dark-primary text-text-primary overflow-x-hidden">
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-primary/80 backdrop-blur-md border-b border-dark-secondary/20">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <LogoMinimal size={32} />
             <h1 className="text-xl font-semibold">Devlog</h1>
           </div>
-          <div className="flex items-center gap-4">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            <a
+              href="#pricing"
+              className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Pricing
+            </a>
             <button
               onClick={() => navigate('/auth')}
               className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
@@ -108,69 +123,125 @@ export default function Landing() {
               className="px-4 py-2 bg-accent-green text-dark-primary rounded font-medium 
                          hover:bg-accent-green/80 transition-colors"
             >
-              Get Started
+              Start Free Trial
             </button>
           </div>
+          
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="md:hidden p-2 text-text-primary hover:text-accent-green transition-colors"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Your code-first
-              <br />
-              <span className="text-accent-green">second brain</span>
-            </h2>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto mb-4">
-              Capture, connect, and search your development insights without leaving your flow.
-            </p>
-            <p className="text-lg text-text-secondary/80 max-w-2xl mx-auto mb-8">
-              How many times have you solved the same problem twice? Never again.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="fixed right-0 top-0 h-full w-full max-w-sm bg-dark-primary shadow-2xl mobile-menu-enter">
+            <div className="flex items-center justify-between p-4 border-b border-dark-secondary/20">
+              <div className="flex items-center gap-2.5">
+                <LogoMinimal size={32} />
+                <h1 className="text-xl font-semibold">Devlog</h1>
+              </div>
               <button
-                onClick={() => navigate('/auth')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-accent-green text-dark-primary 
-                           rounded-lg font-medium hover:bg-accent-green/80 transition-all group"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 text-text-secondary hover:text-text-primary transition-colors"
               >
-                Start Building
-                <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={() => document.getElementById('demo').scrollIntoView({ behavior: 'smooth' })}
-                className="px-6 py-3 border border-dark-secondary text-text-primary rounded-lg 
-                           hover:border-accent-green/50 hover:text-accent-green transition-all"
-              >
-                See How It Works
+                <X size={24} />
               </button>
             </div>
-            <p className="text-sm text-text-secondary/70 mt-4">
-              Free forever • No credit card • 2-minute setup
-            </p>
+            
+            <div className="p-4 space-y-4">
+              <a
+                href="#pricing"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block px-4 py-3 text-lg text-text-primary hover:text-accent-green transition-colors"
+              >
+                Pricing
+              </a>
+              <button
+                onClick={() => {
+                  navigate('/auth');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-3 text-lg text-text-primary hover:text-accent-green transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/auth');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="block w-full px-4 py-3 bg-accent-green text-dark-primary rounded-lg font-medium 
+                           text-lg hover:bg-accent-green/80 transition-colors"
+              >
+                Start Free Trial
+              </button>
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Key Benefits */}
-          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+      {/* Hero Section with Screenshots */}
+      <div className="pt-20">
+        <HeroWithScreenshots />
+      </div>
+
+      {/* Key Benefits */}
+      <section className="py-12 md:py-16 px-4 md:px-6 bg-dark-secondary/10">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto">
             <div className="text-center">
-              <div className="text-3xl font-bold text-accent-green mb-1"><100ms</div>
-              <div className="text-text-secondary">Search Time</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-green mb-1">&lt;100ms</div>
+              <div className="text-sm md:text-base text-text-secondary">Search Time</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-accent-green mb-1">Zero</div>
-              <div className="text-text-secondary">Learning Curve</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-green mb-1">Zero</div>
+              <div className="text-sm md:text-base text-text-secondary">Learning Curve</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-accent-green mb-1">Forever</div>
-              <div className="text-text-secondary">Your Knowledge</div>
+              <div className="text-2xl md:text-3xl font-bold text-accent-green mb-1">Forever</div>
+              <div className="text-sm md:text-base text-text-secondary">Your Knowledge</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Interactive Demo */}
-      <section id="demo" className="py-20 px-6 bg-dark-secondary/20">
+      {/* Real Interactive Demo */}
+      <section id="demo" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-8 md:mb-12">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4">Try Devlog Right Now</h3>
+            <p className="text-text-secondary text-base md:text-lg max-w-2xl mx-auto">
+              This is the actual Devlog editor. Create, edit, and organize your knowledge — no sign-up required.
+            </p>
+          </div>
+          
+          <InteractiveDocumentDemoUnified />
+          
+          <div className="mt-8 text-center">
+            <p className="text-text-secondary mb-4">
+              Like what you see? Start building your own knowledge base.
+            </p>
+            <button
+              onClick={() => navigate('/auth')}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-green text-dark-primary 
+                         rounded-lg font-medium hover:bg-accent-green/80 transition-all group"
+            >
+              Create Your Account
+              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Original Interactive Demo - Hidden */}
+      <section id="demo-old" className="py-20 px-6 bg-dark-secondary/20 hidden">
         <div className="max-w-6xl mx-auto">
           <h3 className="text-3xl font-bold text-center mb-4">See It in Action</h3>
           <p className="text-text-secondary text-center mb-12 max-w-2xl mx-auto">
@@ -201,7 +272,7 @@ export default function Landing() {
               {activeDemo === 'code' && (
                 <div className="space-y-4">
                   <div className="text-sm text-text-secondary mb-2">
-                    💡 <strong>Scenario:</strong> You solved a tricky algorithm. Save it with context.
+                    <strong>Scenario:</strong> You solved a tricky algorithm. Save it with context.
                   </div>
                   <div className="bg-dark-primary rounded border border-dark-primary/50 p-4">
                     <div className="flex items-center justify-between mb-3">
@@ -219,7 +290,7 @@ export default function Landing() {
                   </div>
                   <div className="mt-4 p-3 bg-accent-green/10 rounded border border-accent-green/30">
                     <p className="text-sm text-accent-green">
-                      ✨ <strong>Later:</strong> Search "fibonacci optimization" and find this instantly, 
+                      <strong>Later:</strong> Search "fibonacci optimization" and find this instantly, 
                       with all your notes about why this approach works.
                     </p>
                   </div>
@@ -229,7 +300,7 @@ export default function Landing() {
               {activeDemo === 'ai' && (
                 <div className="space-y-4">
                   <div className="text-sm text-text-secondary mb-2">
-                    💡 <strong>Scenario:</strong> Got a perfect explanation from ChatGPT? Don\'t lose it.
+                    <strong>Scenario:</strong> Got a perfect explanation from ChatGPT? Don't lose it.
                   </div>
                   <div className="space-y-3">
                     {demoContent.ai.content.map((msg, i) => (
@@ -249,7 +320,7 @@ export default function Landing() {
                   </div>
                   <div className="mt-4 p-3 bg-accent-green/10 rounded border border-accent-green/30">
                     <p className="text-sm text-accent-green">
-                      ✨ <strong>Result:</strong> AI explanations preserved forever. No more 
+                      <strong>Result:</strong> AI explanations preserved forever. No more 
                       "I know ChatGPT explained this perfectly last week..."
                     </p>
                   </div>
@@ -259,14 +330,14 @@ export default function Landing() {
               {activeDemo === 'tree' && (
                 <div className="space-y-4">
                   <div className="text-sm text-text-secondary mb-2">
-                    💡 <strong>Scenario:</strong> Document your project structure visually.
+                    <strong>Scenario:</strong> Document your project structure visually.
                   </div>
                   <div className="bg-dark-primary rounded border border-dark-primary/50 p-4">
                     <TreeNode node={demoContent.tree.content} />
                   </div>
                   <div className="mt-4 p-3 bg-accent-green/10 rounded border border-accent-green/30">
                     <p className="text-sm text-accent-green">
-                      ✨ <strong>Bonus:</strong> File paths auto-complete in code blocks. 
+                      <strong>Bonus:</strong> File paths auto-complete in code blocks. 
                       Your documentation stays in sync with your thinking.
                     </p>
                   </div>
@@ -278,10 +349,10 @@ export default function Landing() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-20 px-6">
+      <section className="py-16 md:py-20 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-4">Stop Searching. Start Finding.</h3>
-          <p className="text-text-secondary text-center mb-12 max-w-2xl mx-auto">
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4">Stop Searching. Start Finding.</h3>
+          <p className="text-text-secondary text-center mb-8 md:mb-12 max-w-2xl mx-auto">
             Built by developers who got tired of losing solutions in Slack threads, browser bookmarks, and random text files.
           </p>
 
@@ -301,8 +372,14 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <TestimonialsSection />
+
+      {/* Pricing */}
+      <PricingSection />
+
       {/* Use Cases */}
-      <section className="py-20 px-6 bg-dark-secondary/20">
+      <section className="py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <h3 className="text-3xl font-bold text-center mb-12">Transform How You Document</h3>
           
@@ -387,10 +464,10 @@ export default function Landing() {
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h3 className="text-4xl font-bold mb-6">
-            Ready to Never Lose a Solution Again?
+            Ready to Build Your Second Brain?
           </h3>
           <p className="text-xl text-text-secondary mb-8">
-            Join developers who\'ve transformed scattered notes into searchable knowledge.
+            Join 5,000+ developers who\'ve transformed scattered notes into searchable knowledge.
           </p>
           <div className="flex flex-col items-center gap-4">
             <button
@@ -398,11 +475,11 @@ export default function Landing() {
               className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
                          rounded-lg font-medium text-lg hover:bg-accent-green/80 transition-all group"
             >
-              Start Building Your Knowledge Base
-              <ChevronRight size={24} className="group-hover:translate-x-1 transition-transform" />
+              Start Your Free Trial
+              <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <p className="text-sm text-text-secondary/70">
-              Free forever for personal use • No credit card • GitHub SSO available
+              14-day free trial • No credit card required • Cancel anytime
             </p>
           </div>
         </div>
@@ -417,7 +494,7 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-6 text-sm text-text-secondary">
             <a 
-              href="https://github.com/yourusername/devlog" 
+              href="https://github.com/devlog-app/devlog" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-accent-green transition-colors"
@@ -425,15 +502,35 @@ export default function Landing() {
               GitHub
             </a>
             <a 
-              href="#" 
+              href="/docs" 
               className="hover:text-accent-green transition-colors"
             >
               Documentation
+            </a>
+            <a 
+              href="/privacy" 
+              className="hover:text-accent-green transition-colors"
+            >
+              Privacy
+            </a>
+            <a 
+              href="/terms" 
+              className="hover:text-accent-green transition-colors"
+            >
+              Terms
             </a>
           </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function Landing() {
+  return (
+    <DemoModeProvider>
+      <LandingContent />
+    </DemoModeProvider>
   );
 }
 
@@ -449,12 +546,12 @@ function TreeNode({ node, level = 0 }) {
       >
         {node.type === 'folder' ? (
           <>
-            <span className="text-text-secondary">{expanded ? '▼' : '▶'}</span>
-            <span>📁 {node.name}</span>
+            <FolderTree size={16} className="text-text-secondary" />
+            <span>{node.name}</span>
           </>
         ) : (
           <>
-            <span className="ml-4">📄</span>
+            <FileCode size={16} className="ml-4 text-gray-400" />
             <span className="text-gray-400">{node.name}</span>
           </>
         )}

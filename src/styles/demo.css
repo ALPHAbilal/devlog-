@@ -1,0 +1,500 @@
+/* Enterprise-grade Professional Demo CSS System */
+
+/* Professional Color System Based on AI Research */
+:root {
+  /* Professional backgrounds */
+  --bg-primary: #0a0b0d;
+  --bg-secondary: #1a1d21;
+  --bg-subtle: #21262d;
+  
+  /* Professional borders */
+  --border-default: #30363d;
+  --border-subtle: #21262d;
+  --border-primary: #388bfd;
+  
+  /* Professional text */
+  --text-primary: #ffffff;
+  --text-secondary: #8b949e;
+  --text-muted: #6e7681;
+  
+  /* Professional accents */
+  --accent-primary: #238636;
+  --accent-warning: #d29922;
+  --accent-error: #f85149;
+  
+  /* Legacy demo colors (for backwards compatibility) */
+  --demo-dark-primary: var(--bg-primary);
+  --demo-dark-secondary: var(--bg-secondary);
+  --demo-accent-green: var(--accent-primary);
+  --demo-text-primary: var(--text-primary);
+  --demo-text-secondary: var(--text-secondary);
+  --demo-border-color: var(--border-default);
+}
+
+/* Professional Demo Wrapper */
+.demo-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Professional guidance outside demo container */
+.demo-guidance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+}
+
+.demo-indicator {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.demo-features {
+  display: flex;
+  gap: 16px;
+}
+
+.feature-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.feature-indicator svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5px;
+}
+
+/* Clean demo container without instructions */
+.demo-container {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+              0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Professional tabs */
+.demo-tabs-nav {
+  display: flex;
+  gap: 1px;
+  background: var(--bg-subtle);
+  padding: 8px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.demo-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Professional icon styling */
+.demo-tab svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5px;
+}
+
+.demo-tab:hover {
+  background: var(--border-default);
+  color: var(--text-primary);
+}
+
+.demo-tab.active {
+  background: var(--accent-primary);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+.demo-tab-content {
+  padding: 24px;
+  min-height: 400px;
+  background: var(--bg-primary);
+}
+
+
+/* Professional block styling */
+.demo-block {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.demo-block:hover {
+  border-color: var(--border-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Professional code blocks */
+.demo-code-block {
+  background: #161b22;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 16px;
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e6edf3;
+  overflow-x: auto;
+}
+
+/* Professional input fields */
+.demo-input {
+  width: 100%;
+  background: #0d1117;
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 14px;
+  color: #e6edf3;
+  transition: border-color 0.15s ease;
+}
+
+.demo-input:focus {
+  outline: none;
+  border-color: #388bfd;
+  box-shadow: 0 0 0 3px rgba(56, 139, 253, 0.1);
+}
+
+/* Progressive disclosure sections */
+.demo-section {
+  margin-bottom: 16px;
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.demo-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  border: none;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.demo-section-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.demo-section-content {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.01);
+  animation: slideDown 0.3s ease;
+}
+
+/* Professional animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Subtle professional animations */
+.demo-element {
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.demo-element:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Professional focus states */
+.demo-interactive:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Professional skeleton loading */
+.demo-skeleton {
+  background: linear-gradient(90deg, 
+    var(--bg-secondary) 25%, 
+    rgba(255, 255, 255, 0.05) 50%, 
+    var(--bg-secondary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Professional typography */
+.demo-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+               'Noto Sans', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.demo-code {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', 
+               Menlo, Monaco, Consolas, 'Liberation Mono', 
+               'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-primary);
+}
+
+/* Professional headings */
+.demo-heading {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .demo-guidance {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  
+  .demo-features {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .demo-tabs-nav {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .demo-tab-content {
+    padding: 16px;
+    min-height: 300px;
+  }
+  
+  .demo-shortcuts {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .demo-tab {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+  
+  .demo-tab svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Ensure all demo text uses correct colors */
+.demo-interface h1, .demo-interface h2, .demo-interface h3,
+.demo-interface h4, .demo-interface h5, .demo-interface h6 {
+  color: var(--text-primary);
+}
+
+.demo-interface p, .demo-interface span, .demo-interface div {
+  color: var(--text-primary);
+}
+
+.demo-interface .text-muted {
+  color: var(--text-secondary);
+}
+
+/* Unified Demo Styles */
+.demo-document-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.demo-document-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.demo-document-meta {
+  display: flex;
+  gap: 12px;
+}
+
+.demo-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.demo-meta-item svg {
+  width: 14px;
+  height: 14px;
+}
+
+.demo-document-content {
+  padding: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Block wrapper styles */
+.demo-block-wrapper {
+  position: relative;
+  margin-bottom: 32px;
+  transition: all 0.2s ease;
+}
+
+.demo-block-wrapper:last-child {
+  margin-bottom: 16px;
+}
+
+.demo-block-wrapper:hover .demo-drag-handle {
+  opacity: 1;
+}
+
+.demo-block-wrapper:hover .demo-add-block-container {
+  opacity: 1;
+}
+
+.demo-block-wrapper.dragging {
+  opacity: 0.5;
+}
+
+/* Drag handle */
+.demo-drag-handle {
+  position: absolute;
+  left: -24px;
+  top: 8px;
+  width: 16px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.demo-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Block content */
+.demo-block-content {
+  position: relative;
+}
+
+/* Add block button */
+.demo-add-block-container {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -24px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.demo-add-block-button {
+  width: 32px;
+  height: 32px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-add-block-button:hover {
+  background: var(--accent-primary);
+  color: var(--text-primary);
+  border-color: var(--accent-primary);
+}
+
+/* Block type selector */
+.demo-block-selector {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+}
+
+.demo-block-type {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-block-type:hover {
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+}
+

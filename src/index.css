@@ -1,9 +1,31 @@
 /* Import custom animations - must be before @tailwind */
 @import './styles/animations.css';
+@import './styles/demo.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Smooth scrolling globally */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Mobile menu slide-in animation */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.mobile-menu-enter {
+  animation: slideInRight 0.3s ease-out;
+}
 
 /* Custom animations */
 @layer utilities {

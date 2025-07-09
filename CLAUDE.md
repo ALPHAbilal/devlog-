@@ -458,3 +458,108 @@ The `ImageBlock` now supports multiple images with:
 - Smart paste handling to group images pasted within 30 seconds
 
 This pattern can be used for any block type that needs to store arrays or complex nested data.
+
+## Recent Updates (January 2025)
+
+### Critical Bug Fixes
+
+#### Tag Save Data Loss Fix
+**Problem**: Adding tags to a document caused all content to disappear on reload.
+**Root Cause**: 
+- Dashboard's updateEntry sent incomplete document data (with empty blocks array)
+- Supabase's save_document_blocks RPC deletes all blocks before inserting new ones
+- Result: Empty blocks array = all content deleted
+
+**Solution**:
+1. Modified SupabaseAdapter.js to detect partial updates (when blocks === undefined)
+2. Partial updates now only update document metadata, not blocks
+3. Dashboard.jsx now explicitly sets blocks: undefined for non-block updates
+
+#### Document Link Navigation Fix
+**Problem**: Clicking [[document links]] showed wrong document title in header.
+**Solution**: Added useEffect in ExpandedViewEnhanced to update title when entry.id changes.
+
+### Landing Page Conversion Optimization
+Based on developer conversion research, redesigned landing page to focus on:
+- Problem-first messaging ("How many times have you solved the same problem twice?")
+- Outcome-based features ("Never lose a solution again")
+- Action-oriented CTAs ("Start Building" not "Sign Up")
+- Trust elements (data ownership, export anytime)
+- Removed all tech stack mentions (React, Vite, etc.)
+
+### UI/UX Improvements
+- **Professional Image Viewer** with zoom/pan capabilities for tall/wide images
+- **Collapsible Text Blocks** for long content (15+ lines) with persistent state
+- **Extended Activity Sparklines** from 14 days to 6 months with weekly aggregation
+- **Fixed Table Dimensions** display in lines view (was showing 0×0)
+- **Custom Favicon** with Devlog terminal prompt logo
+- **Template System Removal** - Simplified by removing all template blocks
+
+### Performance & Architecture
+- Fixed React 19 Strict Mode compatibility issues
+- Optimized block loading with single-query approach
+- Added 5-second document cache for faster navigation
+- Improved auto-save reliability with local backup protection
+
+## Important Commands to Run
+
+Always run these before committing (if available):
+```bash
+npm run lint        # Check for code issues
+npm run typecheck   # Check TypeScript types (if applicable)
+```
+
+If these commands are not available, ask the user for the correct commands and update this file.
+
+## Future Actions & Roadmap
+
+### High Priority
+1. **GitHub SSO Implementation**
+   - Research shows 34% conversion increase with GitHub login
+   - Enable GitHub provider in Supabase Auth
+   - Add GitHub button to Auth component
+   - Update landing page when implemented
+
+2. **Real Screenshots for Landing Page**
+   - Replace simplified demos with actual product screenshots
+   - Show real Devlog interface in action
+   - Include search, code blocks, and document linking
+
+3. **Settings Panel Implementation**
+   - Currently Settings button has no functionality
+   - Add user preferences (theme, editor settings)
+   - Export/import options
+   - Account management
+
+### Medium Priority
+1. **Enhanced Search**
+   - Full-text search across all blocks
+   - Search filters (by type, date, tags)
+   - Search history and suggestions
+
+2. **Performance Monitoring**
+   - Implement telemetry for save operations
+   - Track document load times
+   - Monitor block rendering performance
+
+3. **Collaboration Features**
+   - Share read-only documents
+   - Public document links
+   - Team workspaces
+
+### Long Term Vision
+1. **Plugin System**
+   - Custom block types
+   - Third-party integrations
+   - Community marketplace
+
+2. **Mobile Apps**
+   - React Native implementation
+   - Offline-first architecture
+   - Cross-device sync
+
+3. **AI Features**
+   - Smart suggestions based on content
+   - Auto-tagging and categorization
+   - Similar document recommendations
+   - Content summarization

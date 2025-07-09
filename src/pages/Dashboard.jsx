@@ -300,7 +300,13 @@ export default function Dashboard() {
     // Save only this document to storage - use requestIdleCallback for non-blocking save
     const saveOperation = async () => {
       try {
-        await storageWrapper.saveDocument(updatedEntry);
+        // CRITICAL FIX: Don't send blocks if they weren't in the update
+        // This prevents overwriting blocks with empty array when updating tags/title
+        const documentToSave = updates.blocks !== undefined 
+          ? updatedEntry 
+          : { ...updatedEntry, blocks: undefined };
+          
+        await storageWrapper.saveDocument(documentToSave);
         // Update storage info after save
         updateStorageInfo();
       } catch (error) {

@@ -347,6 +347,50 @@ export class SupabaseAdapter {
     
     const { blocks, ...docData } = document;
     
+    // CRITICAL FIX: If blocks are not provided, this is a partial update
+    // Don't touch the blocks - only update document metadata
+    if (blocks === undefined) {
+      console.log('SupabaseAdapter: Partial update detected (no blocks provided), updating only document metadata');
+      
+      const updateData = {};
+      
+      // Only include fields that were explicitly provided
+      if (docData.title !== undefined) updateData.title = docData.title;
+      if (docData.tags !== undefined) updateData.tags = docData.tags;
+      if (docData.metadata !== undefined) {
+        // Merge with existing metadata to not lose fields
+        const { data: currentDoc } = await supabase
+          .from('documents')
+          .select('metadata')
+          .eq('id', docData.id)
+          .single();
+        
+        updateData.metadata = {
+          ...(currentDoc?.metadata || {}),
+          ...docData.metadata
+        };
+      }
+      
+      updateData.updated_at = new Date().toISOString();
+      
+      const { data: savedDoc, error: docError } = await supabase
+        .from('documents')
+        .update(updateData)
+        .eq('id', docData.id)
+        .eq('user_id', this.userId)
+        .select()
+        .single();
+      
+      if (docError) {
+        console.error('Error updating document metadata:', docError);
+        throw docError;
+      }
+      
+      // Invalidate cache and return
+      this.invalidateCache();
+      return savedDoc.id;
+    }
+    
     // Use preview from document if already provided, otherwise generate
     let preview = docData.preview || 'Click to view document...';
     if (!docData.preview && blocks && blocks.length > 0) {

@@ -138,7 +138,7 @@ const StorageUsage = ({ used, total, breakdown }) => {
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { databaseSize, storageLimit, usagePercentage, isLoading: usageLoading, error: usageError } = useDatabaseUsage();
+  const { databaseSize, storageLimit, usagePercentage, isLoading: usageLoading, error: usageError, dataBreakdown } = useDatabaseUsage();
   const { settings, updateSetting, isLoading: settingsLoading } = useSettings();
   
   const [activeTab, setActiveTab] = useState('account');
@@ -444,7 +444,26 @@ export default function Settings() {
               {!usageLoading && !usageError && (
                 <StorageUsage 
                   {...calculateStorageUsage()}
-                  breakdown={[
+                  breakdown={dataBreakdown ? [
+                    { 
+                      type: 'documents', 
+                      label: `Documents (${dataBreakdown.documents.count})`, 
+                      size: dataBreakdown.documents.size || 0, 
+                      color: '#10b981' 
+                    },
+                    { 
+                      type: 'blocks', 
+                      label: `Content Blocks (${dataBreakdown.blocks.count})`, 
+                      size: dataBreakdown.blocks.size || 0, 
+                      color: '#3b82f6' 
+                    },
+                    { 
+                      type: 'images', 
+                      label: `Images (${dataBreakdown.images.count})`, 
+                      size: dataBreakdown.images.size || 0, 
+                      color: '#f59e0b' 
+                    }
+                  ] : [
                     { type: 'documents', label: 'Documents & Notes', size: calculateStorageUsage().used * 0.8, color: '#10b981' },
                     { type: 'cache', label: 'Cache & Temp', size: calculateStorageUsage().used * 0.2, color: '#3b82f6' }
                   ]}

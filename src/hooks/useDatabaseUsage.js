@@ -9,6 +9,7 @@ export function useDatabaseUsage() {
   const [usagePercentage, setUsagePercentage] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dataBreakdown, setDataBreakdown] = useState(null);
 
   useEffect(() => {
     if (!user) return;
@@ -18,42 +19,78 @@ export function useDatabaseUsage() {
       setError(null);
       
       try {
-        // Get database size
-        const { data: sizeData, error: sizeError } = await supabase.rpc('get_database_size');
+        // Get user-specific data size
+        const { data: userData, error: userError } = await supabase.rpc('get_user_data_size');
         
-        if (sizeError) {
-          // If the function doesn't exist, use a simpler query
-          const { data: dbSize, error: dbError } = await supabase
-            .from('documents')
-            .select('*', { count: 'exact', head: true });
+        if (!userError && userData && userData.length > 0) {
+          const result = userData[0];
+          setDatabaseSize(result.total_size_pretty || '0 bytes');
           
-          if (dbError) throw dbError;
+          // Set data breakdown for the Settings page
+          setDataBreakdown({
+            documents: {
+              count: result.documents_count,
+              size: result.documents_size_bytes
+            },
+            blocks: {
+              count: result.blocks_count,
+              size: result.blocks_size_bytes
+            },
+            images: {
+              count: result.images_count,
+              size: result.images_size_bytes
+            }
+          });
           
-          // Estimate size based on document count (rough estimate)
-          const estimatedSizeMB = ((dbSize || 0) * 0.1).toFixed(2);
-          setDatabaseSize(`${estimatedSizeMB} MB`);
+          // Get the size in MB for percentage calculation
+          const sizeInBytes = result.total_size_bytes || 0;
+          const sizeInMB = sizeInBytes / (1024 * 1024);
+          
+          // Try to detect user's plan
+          const { data: authData } = await supabase.auth.getUser();
+          
+          // Default to Free plan limits
+          let limit = 500; // MB
+          
+          // Check if user has custom metadata indicating plan
+          if (authData?.user?.user_metadata?.plan === 'pro') {
+            limit = 8192; // 8 GB in MB
+          }
+          
+          setStorageLimit(limit >= 1024 ? `${(limit / 1024).toFixed(1)} GB` : `${limit} MB`);
+          
+          // Calculate percentage
+          const percentage = Math.round((sizeInMB / limit) * 100);
+          setUsagePercentage(Math.min(percentage, 100)); // Cap at 100%
         } else {
-          setDatabaseSize(sizeData || '0 MB');
+          // Fallback to general database size
+          const { data: sizeData, error: sizeError } = await supabase.rpc('get_database_size');
+          
+          if (!sizeError && sizeData && sizeData.length > 0) {
+            setDatabaseSize(sizeData[0].size_pretty || '0 MB');
+            
+            // Calculate percentage from the database size
+            const sizeInBytes = sizeData[0].size_bytes || 0;
+            const sizeInMB = sizeInBytes / (1024 * 1024);
+            
+            // Default to Free plan limits
+            let limit = 500; // MB
+            setStorageLimit(`${limit} MB`);
+            
+            const percentage = Math.round((sizeInMB / limit) * 100);
+            setUsagePercentage(Math.min(percentage, 100));
+          } else {
+            // Final fallback - estimate based on document count
+            const { count } = await supabase
+              .from('documents')
+              .select('*', { count: 'exact', head: true });
+            
+            // Rough estimate: 100KB per document
+            const estimatedSizeMB = ((count || 0) * 0.1).toFixed(2);
+            setDatabaseSize(`~${estimatedSizeMB} MB`);
+            setUsagePercentage(Math.round((parseFloat(estimatedSizeMB) / 500) * 100));
+          }
         }
-
-        // Try to detect user's plan
-        // For now, we'll check if user has any payment methods to determine if they're on Pro
-        const { data: userData } = await supabase.auth.getUser();
-        
-        // Default to Free plan limits
-        let limit = 500; // MB
-        
-        // Check if user has custom metadata indicating plan
-        if (userData?.user?.user_metadata?.plan === 'pro') {
-          limit = 8192; // 8 GB in MB
-        }
-        
-        setStorageLimit(limit >= 1024 ? `${(limit / 1024).toFixed(1)} GB` : `${limit} MB`);
-        
-        // Calculate percentage
-        const sizeInMB = parseFloat(databaseSize) || 0;
-        const percentage = Math.round((sizeInMB / limit) * 100);
-        setUsagePercentage(percentage);
         
       } catch (err) {
         console.error('Error fetching database usage:', err);
@@ -81,6 +118,7 @@ export function useDatabaseUsage() {
     storageLimit,
     usagePercentage,
     isLoading,
-    error
+    error,
+    dataBreakdown
   };
 }

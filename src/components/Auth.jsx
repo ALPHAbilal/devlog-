@@ -77,7 +77,7 @@ export default function AuthComponent() {
               },
             }}
             theme="dark"
-            providers={['google']}
+            providers={['google', 'github']}
             redirectTo={getURL() + 'auth/callback'}
           />
         </div>

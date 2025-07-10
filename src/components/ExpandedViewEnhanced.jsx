@@ -9,7 +9,7 @@ import { getBacklinks } from '../utils/extractLinks';
 import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
 import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
 import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
-import { autoSaveManager } from '../utils/globalAutoSave';
+import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import './VirtualizedGrid.css'; // For scrollbar styles

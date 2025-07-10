@@ -19,8 +19,10 @@ export function useDatabaseUsage() {
       setError(null);
       
       try {
-        // Get user-specific data size
-        const { data: userData, error: userError } = await supabase.rpc('get_user_data_size');
+        // Get user-specific data size - pass user ID explicitly
+        const { data: userData, error: userError } = await supabase.rpc('get_user_data_size', {
+          p_user_id: user.id
+        });
         
         if (!userError && userData && userData.length > 0) {
           const result = userData[0];
@@ -42,9 +44,21 @@ export function useDatabaseUsage() {
             }
           });
           
+          // Also get the total database size for accurate percentage
+          const { data: dbSizeData } = await supabase.rpc('get_database_size');
+          let totalDbSizeBytes = result.total_size_bytes || 0;
+          
+          if (dbSizeData && dbSizeData.length > 0) {
+            // Use the larger of user data or total database size
+            totalDbSizeBytes = Math.max(totalDbSizeBytes, dbSizeData[0].size_bytes || 0);
+            // Update display to show total database size if it's larger
+            if (dbSizeData[0].size_bytes > result.total_size_bytes) {
+              setDatabaseSize(dbSizeData[0].size_pretty || result.total_size_pretty);
+            }
+          }
+          
           // Get the size in MB for percentage calculation
-          const sizeInBytes = result.total_size_bytes || 0;
-          const sizeInMB = sizeInBytes / (1024 * 1024);
+          const sizeInMB = totalDbSizeBytes / (1024 * 1024);
           
           // Try to detect user's plan
           const { data: authData } = await supabase.auth.getUser();
@@ -59,7 +73,7 @@ export function useDatabaseUsage() {
           
           setStorageLimit(limit >= 1024 ? `${(limit / 1024).toFixed(1)} GB` : `${limit} MB`);
           
-          // Calculate percentage
+          // Calculate percentage using the total database size
           const percentage = Math.round((sizeInMB / limit) * 100);
           setUsagePercentage(Math.min(percentage, 100)); // Cap at 100%
         } else {

@@ -1,7 +1,7 @@
-index-mtYE2yjz.js:83 Using optimized Supabase client
-index-mtYE2yjz.js:786 IndexedDB initialized successfully
-index-mtYE2yjz.js:83 Auth event: SIGNED_IN
-index-mtYE2yjz.js:786 Storage wrapper: Auth state changed: SIGNED_IN
+index-DOenEfC0.js:83 Using optimized Supabase client
+index-DOenEfC0.js:786 IndexedDB initialized successfully
+index-DOenEfC0.js:83 Auth event: SIGNED_IN
+index-DOenEfC0.js:786 Storage wrapper: Auth state changed: SIGNED_IN
 ads.914af30a.js:1 Ads initialization already in progress or completed
 ads.914af30a.js:1 Ads initialization already in progress or completed
 ads.914af30a.js:1 Ads initialization already in progress or completed
@@ -50,26 +50,28 @@ C @ inspector.b9415ea5.js:1
 T @ inspector.b9415ea5.js:1
 ads.914af30a.js:1 Attempting to initialize AdUnit
 ads.914af30a.js:1 AdUnit initialized successfully
-index-mtYE2yjz.js:83 Auth event: INITIAL_SESSION
+index-DOenEfC0.js:83 Auth event: INITIAL_SESSION
 ads.914af30a.js:1 Ads initialized successfully for: https://www.devlog.design/dashboard
-index-mtYE2yjz.js:786 Storage wrapper: Auth state changed: INITIAL_SESSION
-index-mtYE2yjz.js:841 Dashboard: Starting to load entries...
+index-DOenEfC0.js:786 Storage wrapper: Auth state changed: INITIAL_SESSION
+index-DOenEfC0.js:841 Dashboard: Starting to load entries...
+ads.914af30a.js:1 Ads initialization already in progress or completed
 dashboard:1 Error in event handler: TypeError: Cannot read properties of null (reading 'excerpt')
     at Object.article (chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:153:39)
     at Object.article (chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:198:23)
     at Object.init (chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:570:19)
     at chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:514:23
-ads.914af30a.js:1 Ads initialization already in progress or completed
 dashboard:1 Error while trying to use the following icon from the Manifest: https://www.devlog.design/logo192.png (Download error or resource isn't a valid image)
-index-mtYE2yjz.js:786 Using Supabase for storage
-index-mtYE2yjz.js:786 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-mtYE2yjz.js:841 Dashboard: Storage initialized (428ms)
-index-mtYE2yjz.js:786 SupabaseAdapter: getDocuments called
-index-mtYE2yjz.js:786 SupabaseAdapter: Using optimized document query
-index-mtYE2yjz.js:786 SupabaseAdapter: Documents query completed in 323ms
-index-mtYE2yjz.js:786 SupabaseAdapter: Found 5 documents
-index-mtYE2yjz.js:786 SupabaseAdapter: Returning 5 documents
-index-mtYE2yjz.js:841 Dashboard: Loaded 5 entries (323ms)
-index-mtYE2yjz.js:841 Dashboard: Total load time: 752ms
-index-mtYE2yjz.js:850 Dashboard: Setting isLoading to false
+index-DOenEfC0.js:786 Using Supabase for storage
+index-DOenEfC0.js:786 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DOenEfC0.js:841 Dashboard: Storage initialized (450ms)
+index-DOenEfC0.js:786 SupabaseAdapter: getDocuments called
+index-DOenEfC0.js:786 SupabaseAdapter: Using optimized document query
+index-DOenEfC0.js:786 SupabaseAdapter: Documents query completed in 323ms
+index-DOenEfC0.js:786 SupabaseAdapter: Found 5 documents
+index-DOenEfC0.js:786 SupabaseAdapter: Returning 5 documents
+index-DOenEfC0.js:841 Dashboard: Loaded 5 entries (323ms)
+index-DOenEfC0.js:841 Dashboard: Total load time: 774ms
+index-DOenEfC0.js:850 Dashboard: Setting isLoading to false
+index-DOenEfC0.js:786 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document 34a49131-94a5-48cb-8dcb-adbe2b7bd579
+index-DOenEfC0.js:786 PaginatedBlockLoader: Loaded 10 blocks for page 0 of document 34a49131-94a5-48cb-8dcb-adbe2b7bd579
 ads.914af30a.js:1 Page navigation detected, resetting ads initialization

@@ -57,7 +57,7 @@ export class MultiLayerStorage {
     // Initialize Supabase if authenticated
     if (useSupabase && userId) {
       this.supabase = new SupabaseAdapterOptimized();
-      await this.supabase.init(userId);
+      // No init method needed for SupabaseAdapterOptimized
       
       // Start background sync
       this.startBackgroundSync();

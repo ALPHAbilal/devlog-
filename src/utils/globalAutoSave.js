@@ -19,9 +19,15 @@ class GlobalAutoSaveManager {
    */
   async performAutoSave() {
     try {
+      // Add defensive check
+      if (!this.autoSaveManager || typeof this.autoSaveManager.getUnsavedDocuments !== 'function') {
+        console.warn('Auto-save: Manager not properly initialized');
+        return;
+      }
+      
       const unsavedDocuments = this.getUnsavedDocuments();
       
-      if (unsavedDocuments.length === 0) {
+      if (!unsavedDocuments || unsavedDocuments.length === 0) {
         return;
       }
 
@@ -121,16 +127,39 @@ export const globalAutoSaveManager = new GlobalAutoSaveManager();
 
 // Set up global references that the production build might be looking for
 if (typeof window !== 'undefined') {
+  // Create defensive wrapper methods that check initialization
+  const createSafeMethod = (methodName) => {
+    return (...args) => {
+      try {
+        if (!globalAutoSaveManager || !globalAutoSaveManager.autoSaveManager) {
+          console.warn(`Auto-save: ${methodName} called before initialization`);
+          return methodName === 'getUnsavedDocuments' ? [] : undefined;
+        }
+        
+        const method = globalAutoSaveManager[methodName];
+        if (typeof method === 'function') {
+          return method.apply(globalAutoSaveManager, args);
+        } else {
+          console.warn(`Auto-save: ${methodName} is not a function`);
+          return methodName === 'getUnsavedDocuments' ? [] : undefined;
+        }
+      } catch (error) {
+        console.error(`Auto-save: Error in ${methodName}:`, error);
+        return methodName === 'getUnsavedDocuments' ? [] : undefined;
+      }
+    };
+  };
+
   // Create a wrapper that has all the methods the production code might expect
   const wrapper = {
-    performAutoSave: () => globalAutoSaveManager.performAutoSave(),
-    getUnsavedDocuments: () => globalAutoSaveManager.getUnsavedDocuments(),
-    hasUnsavedChanges: () => globalAutoSaveManager.hasUnsavedChanges(),
-    saveAll: () => globalAutoSaveManager.saveAll(),
-    queueSave: (docId, updates, saveFunc) => globalAutoSaveManager.queueSave(docId, updates, saveFunc),
-    saveNow: (docId) => globalAutoSaveManager.saveNow(docId),
-    start: (interval) => globalAutoSaveManager.start(interval),
-    stop: () => globalAutoSaveManager.stop()
+    performAutoSave: createSafeMethod('performAutoSave'),
+    getUnsavedDocuments: createSafeMethod('getUnsavedDocuments'),
+    hasUnsavedChanges: createSafeMethod('hasUnsavedChanges'),
+    saveAll: createSafeMethod('saveAll'),
+    queueSave: createSafeMethod('queueSave'),
+    saveNow: createSafeMethod('saveNow'),
+    start: createSafeMethod('start'),
+    stop: createSafeMethod('stop')
   };
 
   // Try to patch any global objects that might exist
@@ -138,26 +167,38 @@ if (typeof window !== 'undefined') {
   window.__autoSaveWrapper = wrapper;
   
   // Create Xt namespace if it doesn't exist and add methods
-  if (!window.Xt) {
-    window.Xt = {};
-  }
-  // Add methods individually to avoid overwriting existing properties
-  window.Xt.performAutoSave = wrapper.performAutoSave;
-  window.Xt.getUnsavedDocuments = wrapper.getUnsavedDocuments;
-  window.Xt.hasUnsavedChanges = wrapper.hasUnsavedChanges;
-  window.Xt.saveAll = wrapper.saveAll;
-  window.Xt.queueSave = wrapper.queueSave;
-  window.Xt.saveNow = wrapper.saveNow;
-  window.Xt.start = wrapper.start;
-  window.Xt.stop = wrapper.stop;
+  window.Xt = window.Xt || {};
+  Object.keys(wrapper).forEach(key => {
+    window.Xt[key] = wrapper[key];
+  });
   
   // Add to any other potential global namespaces
-  if (!window.H_) {
-    window.H_ = {};
-  }
+  window.H_ = window.H_ || {};
   window.H_.performAutoSave = wrapper.performAutoSave;
   window.H_.getUnsavedDocuments = wrapper.getUnsavedDocuments;
   
+  // Also try to intercept any minified references by monitoring property access
+  const handler = {
+    get(target, prop) {
+      if (prop === 'getUnsavedDocuments' || prop === 'performAutoSave') {
+        return wrapper[prop];
+      }
+      return target[prop];
+    }
+  };
+  
+  // Try to proxy common minified namespaces
+  try {
+    if (window.Xt && typeof window.Xt === 'object') {
+      window.Xt = new Proxy(window.Xt, handler);
+    }
+    if (window.H_ && typeof window.H_ === 'object') {
+      window.H_ = new Proxy(window.H_, handler);
+    }
+  } catch (e) {
+    // Proxy might not be supported in some environments
+  }
+  
   // Log for debugging
-  console.log('Global auto-save manager initialized');
+  console.log('Global auto-save manager initialized with defensive wrappers');
 }

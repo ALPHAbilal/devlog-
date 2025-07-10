@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clear Cache - Devlog</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a1628;
+            color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            padding: 2rem;
+            background: rgba(30, 58, 95, 0.5);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        h1 {
+            color: #10b981;
+            margin-bottom: 1rem;
+        }
+        button {
+            background: #10b981;
+            color: #0a1628;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        button:hover {
+            background: #0d9668;
+        }
+        .log {
+            background: #0a1628;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #10b981;
+        }
+        .error {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Clear Cache & Service Worker</h1>
+        <p>Use this tool to clear all cached data and service workers. This will fix issues with outdated manifest icons and cached files.</p>
+        
+        <button onclick="clearEverything()">Clear All Cache & Reload</button>
+        <button onclick="unregisterServiceWorkers()">Unregister Service Workers Only</button>
+        
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const log = (message, type = 'info') => {
+            const logEl = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : '';
+            logEl.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+            logEl.scrollTop = logEl.scrollHeight;
+        };
+
+        async function clearEverything() {
+            try {
+                log('Starting cache clear process...');
+                
+                // 1. Clear all caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    log(`Found ${cacheNames.length} cache(s) to clear`);
+                    
+                    for (const name of cacheNames) {
+                        await caches.delete(name);
+                        log(`Deleted cache: ${name}`, 'success');
+                    }
+                }
+                
+                // 2. Unregister all service workers
+                await unregisterServiceWorkers();
+                
+                // 3. Clear localStorage
+                localStorage.clear();
+                log('Cleared localStorage', 'success');
+                
+                // 4. Clear sessionStorage
+                sessionStorage.clear();
+                log('Cleared sessionStorage', 'success');
+                
+                // 5. Clear IndexedDB (optional - commented out to preserve user data)
+                // const dbs = await indexedDB.databases();
+                // for (const db of dbs) {
+                //     indexedDB.deleteDatabase(db.name);
+                //     log(`Deleted IndexedDB: ${db.name}`, 'success');
+                // }
+                
+                log('All cache cleared successfully!', 'success');
+                log('Reloading page in 2 seconds...');
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                
+            } catch (error) {
+                log(`Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function unregisterServiceWorkers() {
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log(`Found ${registrations.length} service worker(s)`);
+                    
+                    for (const registration of registrations) {
+                        const success = await registration.unregister();
+                        if (success) {
+                            log(`Unregistered service worker: ${registration.scope}`, 'success');
+                        } else {
+                            log(`Failed to unregister: ${registration.scope}`, 'error');
+                        }
+                    }
+                    
+                    if (registrations.length === 0) {
+                        log('No service workers found', 'success');
+                    }
+                }
+            } catch (error) {
+                log(`Service worker error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', async () => {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                if (registrations.length > 0) {
+                    log(`Warning: ${registrations.length} service worker(s) are currently registered`);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 import { optimizedSupabase, deduplicateRequest } from '../../lib/supabaseOptimized';
+import circuitBreakerManager from '../network/CircuitBreaker';
 
 /**
  * Optimized Supabase Storage Adapter
@@ -112,28 +113,45 @@ export class SupabaseAdapterOptimized {
     if (cached) return cached;
 
     try {
-      const result = await deduplicateRequest(cacheKey, async () => {
-        // Single query with joins
-        return this.supabase
-          .from('documents')
-          .select(`
-            *,
-            blocks (
-              id,
-              type,
-              content,
-              position,
-              metadata
-            )
-          `)
-          .eq('id', documentId)
-          .single();
+      // Use circuit breaker for resilience
+      const breaker = circuitBreakerManager.getBreaker('supabase-read', {
+        failureThreshold: 3,
+        resetTimeout: 30000,
+        timeout: 15000,
+        fallback: () => {
+          console.warn('Supabase read circuit open - using cached data');
+          return null;
+        }
       });
 
-      if (result.error) throw result.error;
+      const result = await breaker.execute(async () => {
+        return deduplicateRequest(cacheKey, async () => {
+          // Single query with joins
+          return this.supabase
+            .from('documents')
+            .select(`
+              *,
+              blocks (
+                id,
+                type,
+                content,
+                position,
+                metadata
+              )
+            `)
+            .eq('id', documentId)
+            .single();
+        });
+      });
 
-      this.setCache(cacheKey, result.data);
-      return result.data;
+      if (result?.error) throw result.error;
+
+      if (result?.data) {
+        this.setCache(cacheKey, result.data);
+        return result.data;
+      }
+      
+      return null;
     } catch (error) {
       console.error('Error loading document:', error);
       throw error;
@@ -187,13 +205,31 @@ export class SupabaseAdapterOptimized {
           updated_at: new Date().toISOString()
         }));
 
-        const { data, error } = await this.supabase
-          .from('documents')
-          .upsert(documents, {
-            onConflict: 'id',
-            returning: 'minimal'
-          });
+        // Use circuit breaker for writes
+        const breaker = circuitBreakerManager.getBreaker('supabase-write', {
+          failureThreshold: 2,
+          resetTimeout: 60000,
+          timeout: 20000,
+          fallback: () => {
+            console.warn('Supabase write circuit open - queueing for retry');
+            // Queue for later retry
+            documents.forEach((doc, index) => {
+              this.batchQueue.push(documentUpdates[index]);
+            });
+            return { error: new Error('Circuit open - queued for retry') };
+          }
+        });
 
+        const result = await breaker.execute(async () => {
+          return this.supabase
+            .from('documents')
+            .upsert(documents, {
+              onConflict: 'id',
+              returning: 'minimal'
+            });
+        });
+
+        const { data, error } = result;
         if (error) throw error;
 
         // Resolve all promises

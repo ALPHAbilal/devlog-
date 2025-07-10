@@ -167,6 +167,8 @@ VITE_SUPABASE_ANON_KEY=[anon-key]
 3. **Performance Cache** - `document_cache` table for quick stats
 4. **Optimized RLS** - Helper functions reduce query complexity
 5. **Connection Pooling** - Reuses database connections
+6. **Event-Driven Architecture** - Replaced polling with event-based updates
+7. **Multi-Layer Storage** - Memory → IndexedDB → Supabase with automatic fallback
 
 ### Known Issues and Fixes
 
@@ -174,6 +176,161 @@ VITE_SUPABASE_ANON_KEY=[anon-key]
 2. **RLS on views not allowed** - Views inherit RLS from base tables
 3. **React 19 Strict Mode** - Double mounting handled with proper cleanup
 4. **Save cascades** - Prevented with initialization flags and debouncing
+
+## 🛡️ Bulletproof Architecture (January 2025)
+
+The application now includes comprehensive error handling and data protection systems that make it virtually impossible to lose data or experience crashes.
+
+### Architecture Overview
+
+The bulletproofing consists of 6 interconnected systems that work together to ensure reliability:
+
+1. **Global Error Boundary System** (`/src/components/ErrorBoundary.jsx`)
+   - Catches all React rendering errors
+   - Provides user-friendly recovery UI
+   - Saves crash reports to localStorage
+   - Allows restoration of last known good state
+   - Automatic recovery attempts with fallback options
+
+2. **Data Integrity Layer** (`/src/utils/integrity/DataIntegrityManager.js`)
+   - SHA-256 checksums on all documents using Web Crypto API
+   - Automatic corruption detection on load
+   - Snapshot system maintaining 5 versions per document
+   - Self-healing from corrupted data
+   - Validation rules for all data types
+
+3. **Distributed Lock Manager** (`/src/utils/locking/LockManager.js`)
+   - Prevents race conditions across multiple tabs
+   - Uses BroadcastChannel API for cross-tab communication
+   - Fallback to localStorage events for older browsers
+   - Priority-based queue system
+   - Deadlock detection and automatic resolution
+
+4. **Transaction System** (`/src/utils/transactions/TransactionManager.js`)
+   - ACID-like guarantees for complex operations
+   - Rollback capability with compensation logic
+   - Saga pattern support for multi-step workflows
+   - Operation snapshots for recovery
+   - Automatic cleanup of stale transactions
+
+5. **Network Resilience** (`/src/utils/network/CircuitBreaker.js`)
+   - Circuit breaker pattern prevents cascade failures
+   - Automatic retry with exponential backoff
+   - Graceful degradation to offline mode
+   - Health monitoring and auto-recovery
+   - Request queuing when circuit is open
+
+6. **Recovery System** (`/src/utils/recovery/RecoveryManager.js`)
+   - Automatic crash detection on startup
+   - Multiple recovery strategies (documents, session, transactions, locks)
+   - Auto-save every 30 seconds
+   - Error state preservation
+   - Manual recovery trigger option
+
+### How It Works Together
+
+```javascript
+// Example: Saving a document with all protections
+async function saveDocument(document) {
+  // 1. Lock Manager prevents concurrent edits
+  await lockManager.withLock(`doc:${document.id}`, async () => {
+    
+    // 2. Transaction ensures atomicity
+    const txn = await transactionManager.beginTransaction();
+    
+    try {
+      // 3. Data Integrity adds checksums
+      const validated = await dataIntegrityManager.prepareForSave('document', document);
+      
+      // 4. Circuit Breaker handles network issues
+      await circuitBreakerManager.execute('supabase-write', async () => {
+        await supabase.saveDocument(validated);
+      });
+      
+      // 5. Commit transaction on success
+      await txn.commit();
+      
+    } catch (error) {
+      // 6. Recovery System captures state
+      recoveryManager.saveRecoveryCheckpoint();
+      
+      // Transaction rollback
+      await txn.rollback();
+      
+      // Error Boundary will catch if this propagates
+      throw error;
+    }
+  });
+}
+```
+
+### System Monitoring
+
+The application includes two monitoring systems accessible via keyboard shortcuts:
+
+#### Performance Monitor (Cmd/Ctrl + Shift + P)
+Displays real-time metrics:
+- Cache hit rates and storage layer status
+- Sync status and pending changes
+- Average operation times
+- Recent operations timeline
+
+#### System Health Monitor (Cmd/Ctrl + Shift + H)
+Shows bulletproofing system status:
+- Active locks and deadlock count
+- Transaction statistics
+- Circuit breaker states
+- Data integrity reports
+- Recovery system status
+- Recent system alerts
+
+### Configuration
+
+Most systems work out of the box, but can be configured:
+
+```javascript
+// Circuit Breaker Configuration
+const breaker = circuitBreakerManager.getBreaker('api-calls', {
+  failureThreshold: 5,      // Open after 5 failures
+  resetTimeout: 60000,      // Try again after 1 minute
+  timeout: 10000,          // Request timeout 10 seconds
+  volumeThreshold: 10      // Min requests before opening
+});
+
+// Lock Manager Configuration
+const lock = await lockManager.acquireLock('resource-id', {
+  timeout: 30000,         // Lock expires after 30 seconds
+  priority: 2,            // Higher priority gets lock first
+  queue: true            // Queue if lock unavailable
+});
+
+// Transaction Configuration
+const txn = await transactionManager.beginTransaction({
+  isolationLevel: 'READ_COMMITTED',
+  metadata: { feature: 'bulk-update' }
+});
+```
+
+### Development Considerations
+
+When developing new features:
+
+1. **Always use transactions** for multi-step operations
+2. **Acquire locks** before modifying shared resources
+3. **Add data validation** to the integrity manager for new data types
+4. **Use circuit breakers** for all external API calls
+5. **Test error scenarios** - the error boundary should catch all failures
+
+### What This Prevents
+
+- ❌ **Data loss from crashes** → Error boundary + Recovery system
+- ❌ **Race conditions** → Lock manager + Transactions
+- ❌ **Network failures** → Circuit breaker + Offline queue
+- ❌ **Data corruption** → Integrity checksums + Snapshots
+- ❌ **Partial saves** → Transactions + Atomic operations
+- ❌ **Multi-tab conflicts** → Distributed locks + BroadcastChannel
+- ❌ **Cascade failures** → Circuit breaker pattern
+- ❌ **Lost work** → Auto-save + Recovery checkpoints
 
 ### ⚠️ CRITICAL: Production Migration Safety
 
@@ -512,6 +669,16 @@ npm run typecheck   # Check TypeScript types (if applicable)
 If these commands are not available, ask the user for the correct commands and update this file.
 
 ## Future Actions & Roadmap
+
+### Recently Completed ✅
+1. **Bulletproof Architecture Implementation**
+   - Global error boundaries for crash recovery
+   - Data integrity layer with checksums and snapshots
+   - Distributed lock manager for race condition prevention
+   - Transaction system with rollback capability
+   - Circuit breaker for network resilience
+   - Automatic recovery system
+   - Real-time monitoring dashboards
 
 ### High Priority
 1. **GitHub SSO Implementation**

@@ -1,6 +1,32 @@
 import { Search } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import eventBus, { EVENT_TYPES } from '../utils/eventBus';
 
 export default function SearchBar({ value, onChange }) {
+  const debounceTimer = useRef(null);
+  
+  // Emit search event after user stops typing
+  useEffect(() => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    
+    if (value) {
+      debounceTimer.current = setTimeout(() => {
+        eventBus.emit(EVENT_TYPES.SEARCH_PERFORMED, { 
+          query: value,
+          timestamp: Date.now()
+        });
+      }, 500); // 500ms debounce
+    }
+    
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [value]);
+  
   return (
     <div className="relative flex-grow">
       <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 

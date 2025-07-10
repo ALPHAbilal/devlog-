@@ -9,8 +9,20 @@ import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import GlobalPerformanceMonitor from './components/GlobalPerformanceMonitor';
+import ErrorBoundary from './components/ErrorBoundary';
+import { useEffect } from 'react';
+import recoveryManager from './utils/recovery/RecoveryManager';
 
 function AppContent() {
+  // Initialize recovery system
+  useEffect(() => {
+    // Recovery manager initializes automatically, but we can check status
+    const status = recoveryManager.getRecoveryStatus();
+    if (status.recoveryInProgress) {
+      console.log('Recovery in progress...');
+    }
+  }, []);
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -35,26 +47,31 @@ function AppContent() {
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </Layout>
+    <>
+      <Layout>
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<Navigate to="/dashboard" />} />
+        </Routes>
+      </Layout>
+      <GlobalPerformanceMonitor />
+    </>
   );
 }
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <SettingsProvider>
-          <AppContent />
-        </SettingsProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <SettingsProvider>
+            <AppContent />
+          </SettingsProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

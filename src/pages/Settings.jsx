@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { exportSupabaseData, importSupabaseData } from '../utils/supabaseDataExport';
-import { useDatabaseUsage } from '../hooks/useDatabaseUsage';
+import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
 import { useSettings } from '../contexts/SettingsContext';
 import storageWrapper from '../utils/storage/storageWrapper';
 import '../styles/settings.css';
@@ -67,6 +67,32 @@ const FormSelect = ({ id, label, value, onChange, options, help }) => (
       ))}
     </select>
     {help && <span className="field-help">{help}</span>}
+  </div>
+);
+
+// Storage Usage Skeleton Component
+const StorageUsageSkeleton = () => (
+  <div className="storage-usage skeleton">
+    <div className="storage-header">
+      <div className="skeleton-text" style={{ width: '120px', height: '20px' }} />
+      <div className="skeleton-text" style={{ width: '150px', height: '16px' }} />
+    </div>
+    
+    <div className="progress-bar">
+      <div className="skeleton-progress" />
+    </div>
+    
+    <div className="storage-breakdown">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="breakdown-item">
+          <div className="item-info">
+            <div className="skeleton-color" />
+            <div className="skeleton-text" style={{ width: '120px', height: '14px' }} />
+          </div>
+          <div className="skeleton-text" style={{ width: '60px', height: '14px' }} />
+        </div>
+      ))}
+    </div>
   </div>
 );
 
@@ -138,7 +164,7 @@ const StorageUsage = ({ used, total, breakdown }) => {
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { databaseSize, storageLimit, usagePercentage, isLoading: usageLoading, error: usageError, dataBreakdown } = useDatabaseUsage();
+  const { databaseSize, storageLimit, usagePercentage, isLoading: usageLoading, error: usageError, dataBreakdown, refresh: refreshUsage } = useSmartDatabaseUsage();
   const { settings, updateSetting, isLoading: settingsLoading } = useSettings();
   
   const [activeTab, setActiveTab] = useState('account');
@@ -476,7 +502,9 @@ export default function Settings() {
               </div>
 
               {/* Storage Usage */}
-              {!usageLoading && !usageError && (
+              {usageLoading ? (
+                <StorageUsageSkeleton />
+              ) : !usageError ? (
                 <StorageUsage 
                   {...calculateStorageUsage()}
                   breakdown={dataBreakdown ? [
@@ -503,7 +531,7 @@ export default function Settings() {
                     { type: 'cache', label: 'Cache & Temp', size: calculateStorageUsage().used * 0.2, color: '#3b82f6' }
                   ]}
                 />
-              )}
+              ) : null}
 
               {/* Export Data */}
               <div className="settings-group">

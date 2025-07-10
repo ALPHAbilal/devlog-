@@ -10,6 +10,7 @@ import { Plus, User, Settings, LogOut } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -24,6 +25,9 @@ export default function Dashboard() {
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
+  
+  // Initialize auto-save functionality
+  const { performAutoSave } = useAutoSave();
   
   // Handle document expansion with lazy block loading
   const handleDocumentExpand = useCallback((document) => {

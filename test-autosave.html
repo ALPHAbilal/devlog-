@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Save Test</title>
+</head>
+<body>
+    <h1>Auto-Save Functionality Test</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        // Test the auto-save manager
+        import { autoSaveManager, globalAutoSave } from './src/utils/globalAutoSave.js';
+        
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(p);
+            console.log(message);
+        }
+        
+        // Test 1: Check if methods exist
+        log('Testing autoSaveManager methods:');
+        log(`- getUnsavedDocuments: ${typeof autoSaveManager.getUnsavedDocuments}`);
+        log(`- hasUnsavedChanges: ${typeof autoSaveManager.hasUnsavedChanges}`);
+        log(`- saveAll: ${typeof autoSaveManager.saveAll}`);
+        
+        log('\nTesting globalAutoSave methods:');
+        log(`- performAutoSave: ${typeof globalAutoSave.performAutoSave}`);
+        log(`- getUnsavedDocuments: ${typeof globalAutoSave.getUnsavedDocuments}`);
+        
+        // Test 2: Check if global references exist
+        log('\nChecking global window references:');
+        log(`- window.autoSaveManager: ${typeof window.autoSaveManager}`);
+        log(`- window.globalAutoSave: ${typeof window.globalAutoSave}`);
+        
+        // Test 3: Try calling methods
+        try {
+            const unsaved = autoSaveManager.getUnsavedDocuments();
+            log(`\nUnsaved documents: ${JSON.stringify(unsaved)}`);
+            
+            await globalAutoSave.performAutoSave();
+            log('performAutoSave executed successfully');
+        } catch (error) {
+            log(`Error testing methods: ${error.message}`);
+        }
+    </script>
+</body>
+</html>

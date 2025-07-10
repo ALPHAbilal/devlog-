@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { useGlobalAutoSave } from './hooks/useAutoSave';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
@@ -9,6 +10,12 @@ import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+
+// Component to handle global auto-save
+function AutoSaveProvider() {
+  useGlobalAutoSave();
+  return null;
+}
 
 function AppContent() {
   const { user, loading } = useAuth();
@@ -51,6 +58,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <SettingsProvider>
+          <AutoSaveProvider />
           <AppContent />
         </SettingsProvider>
       </AuthProvider>

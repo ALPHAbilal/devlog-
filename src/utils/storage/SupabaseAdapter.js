@@ -345,6 +345,32 @@ export class SupabaseAdapter {
     }
     console.log(`SupabaseAdapter: Using userId ${this.userId} for save`);
     
+    // CRITICAL: Prevent data loss - check if we're trying to save 0 blocks for a document that has blocks
+    const blocks = document.blocks || [];
+    const documentId = document.id;
+    
+    if (blocks.length === 0 && documentId && documentId !== 'new') {
+      // Check if this document already has blocks
+      const { data: existingBlocks, error: checkError } = await supabase
+        .from('blocks')
+        .select('id')
+        .eq('document_id', documentId)
+        .eq('deleted_at', null)
+        .limit(1);
+      
+      if (!checkError && existingBlocks && existingBlocks.length > 0) {
+        console.error(`🚨 CRITICAL: Attempted to save 0 blocks for document ${documentId} that has existing blocks. Preventing data loss.`);
+        console.warn('Stack trace:', new Error().stack);
+        
+        // Return the document without saving to prevent data loss
+        return {
+          ...document,
+          id: documentId,
+          blocks: [] // Return empty blocks as requested, but don't delete existing ones
+        };
+      }
+    }
+    
     const { blocks, ...docData } = document;
     
     // CRITICAL FIX: If blocks are not provided, this is a partial update
@@ -513,8 +539,8 @@ export class SupabaseAdapter {
     let useOptimized = true;
     
     try {
-      // Try the optimized save_document_blocks_v2 function
-      const { error } = await supabase.rpc('save_document_blocks_v2', {
+      // Try the safer save_document_blocks_v3 function that prevents data loss
+      const { error } = await supabase.rpc('save_document_blocks_v3', {
         p_document_id: savedDoc.id,
         p_blocks: blocksToSave
       });

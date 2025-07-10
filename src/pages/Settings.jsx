@@ -258,14 +258,49 @@ export default function Settings() {
 
   // Calculate storage usage
   const calculateStorageUsage = () => {
-    const sizeValue = parseFloat(databaseSize) || 0;
-    const limitValue = parseFloat(storageLimit) || 500;
-    const sizeUnit = databaseSize.includes('GB') ? 1024 : 1;
-    const limitUnit = storageLimit.includes('GB') ? 1024 : 1;
+    // Parse database size to bytes
+    let usedBytes = 0;
+    const sizeMatch = databaseSize.match(/^([\d.]+)\s*(\w+)?$/);
+    if (sizeMatch) {
+      const value = parseFloat(sizeMatch[1]) || 0;
+      const unit = sizeMatch[2] || 'bytes';
+      
+      switch (unit.toLowerCase()) {
+        case 'bytes':
+        case 'b':
+          usedBytes = value;
+          break;
+        case 'kb':
+          usedBytes = value * 1024;
+          break;
+        case 'mb':
+          usedBytes = value * 1024 * 1024;
+          break;
+        case 'gb':
+          usedBytes = value * 1024 * 1024 * 1024;
+          break;
+        default:
+          usedBytes = value;
+      }
+    }
+    
+    // Parse storage limit to bytes
+    let totalBytes = 500 * 1024 * 1024; // Default 500MB
+    const limitMatch = storageLimit.match(/^([\d.]+)\s*(\w+)?$/);
+    if (limitMatch) {
+      const value = parseFloat(limitMatch[1]) || 500;
+      const unit = limitMatch[2] || 'MB';
+      
+      if (unit.toUpperCase() === 'GB') {
+        totalBytes = value * 1024 * 1024 * 1024;
+      } else {
+        totalBytes = value * 1024 * 1024; // MB
+      }
+    }
     
     return {
-      used: sizeValue * sizeUnit * 1024 * 1024,
-      total: limitValue * limitUnit * 1024 * 1024
+      used: usedBytes,
+      total: totalBytes
     };
   };
 

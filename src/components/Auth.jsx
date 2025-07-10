@@ -1,6 +1,7 @@
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabaseOptimized'
+import { getURL } from '../utils/auth'
 
 export default function AuthComponent() {
   return (
@@ -76,8 +77,8 @@ export default function AuthComponent() {
               },
             }}
             theme="dark"
-            providers={[]}
-            redirectTo={window.location.origin}
+            providers={['google']}
+            redirectTo={getURL() + 'auth/callback'}
           />
         </div>
       </div>

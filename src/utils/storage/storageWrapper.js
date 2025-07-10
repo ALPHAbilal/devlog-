@@ -224,6 +224,30 @@ export const storageWrapper = {
       percentUsed: 0
     };
   },
+  async clearLocalCache() {
+    try {
+      // Clear IndexedDB
+      await IndexedDBAdapter.clear();
+      
+      // Clear localStorage items related to devlog
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('devlog') || key.startsWith('journeyLogger'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key));
+      
+      // Clear session storage
+      sessionStorage.clear();
+      
+      return true;
+    } catch (error) {
+      console.error('Error clearing local cache:', error);
+      throw error;
+    }
+  },
   get isSupabase() {
     // Check if we're using the Supabase wrapper
     return adapter && adapter.loadEntries && adapter.loadEntries.toString().includes('getDocuments');

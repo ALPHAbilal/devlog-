@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
 import SearchBar from '../components/SearchBar';
@@ -11,6 +12,7 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [entries, setEntries] = useState([]);
   const [expandedEntry, setExpandedEntry] = useState(null);
@@ -626,7 +628,9 @@ export default function Dashboard() {
                   </div>
                   
                   <div className="p-1">
-                    <button className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
+                    <button 
+                      onClick={() => navigate('/settings')}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
                                      text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
                                      rounded transition-colors text-sm">
                       <Settings size={14} />

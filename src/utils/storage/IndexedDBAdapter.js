@@ -403,6 +403,11 @@ class IndexedDBAdapter {
       throw error;
     }
   }
+
+  // Alias for clearAllData
+  async clear() {
+    return this.clearAllData();
+  }
 }
 
 // Create and export a singleton instance

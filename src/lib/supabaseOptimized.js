@@ -31,6 +31,7 @@ class OptimizedSupabaseClient {
           autoRefreshToken: true,
           persistSession: true,
           detectSessionInUrl: true,
+          flowType: 'pkce', // Enhanced security for OAuth
           storage: {
             getItem: (key) => {
               // Use a simple cache to reduce localStorage access

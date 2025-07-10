@@ -258,15 +258,26 @@ export default function Dashboard() {
 
 
   // Update entry
-  const updateEntry = useCallback((entryId, updates) => {
+  const updateEntry = useCallback(async (entryId, updates) => {
     // Handle deletion when updates is null
     if (updates === null) {
-      const updatedEntries = entries.filter(entry => entry.id !== entryId);
-      saveEntries(updatedEntries);
-      
-      // If we're deleting the currently expanded entry, close it
-      if (expandedEntry && expandedEntry.id === entryId) {
-        setExpandedEntry(null);
+      try {
+        // Delete from storage first
+        await storageWrapper.deleteEntry(entryId);
+        
+        // Then update local state
+        const updatedEntries = entries.filter(entry => entry.id !== entryId);
+        setEntries(updatedEntries);
+        
+        // If we're deleting the currently expanded entry, close it
+        if (expandedEntry && expandedEntry.id === entryId) {
+          setExpandedEntry(null);
+        }
+        
+        // Update storage info after deletion
+        updateStorageInfo();
+      } catch (error) {
+        console.error('Error deleting entry:', error);
       }
       
       return;

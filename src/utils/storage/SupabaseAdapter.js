@@ -836,8 +836,19 @@ export class SupabaseAdapter {
   async updateAllDocuments(documents) {
     if (!this.initialized) await this.init();
 
-    // Save each document
+    console.log(`SupabaseAdapter: updateAllDocuments called with ${documents.length} documents`);
+    
+    // Only save documents that have blocks loaded
+    // Skip documents where blocks are undefined (not loaded from getDocuments)
     for (const doc of documents) {
+      // CRITICAL: Skip documents without loaded blocks to prevent data loss
+      if (doc.blocks === undefined) {
+        console.log(`SupabaseAdapter: Skipping save for document ${doc.id} - blocks not loaded`);
+        continue;
+      }
+      
+      // Only save if blocks are explicitly provided (even if empty array)
+      console.log(`SupabaseAdapter: Saving document ${doc.id} with ${doc.blocks.length} blocks`);
       await this.saveDocument(doc);
     }
 

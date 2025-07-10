@@ -10,6 +10,7 @@ import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Component to handle global auto-save
 function AutoSaveProvider() {
@@ -55,14 +56,16 @@ function AppContent() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <SettingsProvider>
-          <AutoSaveProvider />
-          <AppContent />
-        </SettingsProvider>
-      </AuthProvider>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
+          <SettingsProvider>
+            <AutoSaveProvider />
+            <AppContent />
+          </SettingsProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

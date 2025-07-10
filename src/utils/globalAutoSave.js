@@ -137,11 +137,27 @@ if (typeof window !== 'undefined') {
   window.__globalAutoSaveManager = globalAutoSaveManager;
   window.__autoSaveWrapper = wrapper;
   
-  // Also create a placeholder for any minified references
-  window.Xt = window.Xt || {};
-  Object.assign(window.Xt, wrapper);
+  // Create Xt namespace if it doesn't exist and add methods
+  if (!window.Xt) {
+    window.Xt = {};
+  }
+  // Add methods individually to avoid overwriting existing properties
+  window.Xt.performAutoSave = wrapper.performAutoSave;
+  window.Xt.getUnsavedDocuments = wrapper.getUnsavedDocuments;
+  window.Xt.hasUnsavedChanges = wrapper.hasUnsavedChanges;
+  window.Xt.saveAll = wrapper.saveAll;
+  window.Xt.queueSave = wrapper.queueSave;
+  window.Xt.saveNow = wrapper.saveNow;
+  window.Xt.start = wrapper.start;
+  window.Xt.stop = wrapper.stop;
   
   // Add to any other potential global namespaces
-  window.H_ = window.H_ || {};
-  Object.assign(window.H_, wrapper);
+  if (!window.H_) {
+    window.H_ = {};
+  }
+  window.H_.performAutoSave = wrapper.performAutoSave;
+  window.H_.getUnsavedDocuments = wrapper.getUnsavedDocuments;
+  
+  // Log for debugging
+  console.log('Global auto-save manager initialized');
 }

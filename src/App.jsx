@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { useGlobalAutoSave } from './hooks/useAutoSave';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
@@ -9,20 +10,14 @@ import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
-import GlobalPerformanceMonitor from './components/GlobalPerformanceMonitor';
-import ErrorBoundary from './components/ErrorBoundary';
-import { useEffect } from 'react';
-import recoveryManager from './utils/recovery/RecoveryManager';
+
+// Component to handle global auto-save
+function AutoSaveProvider() {
+  useGlobalAutoSave();
+  return null;
+}
 
 function AppContent() {
-  // Initialize recovery system
-  useEffect(() => {
-    // Recovery manager initializes automatically, but we can check status
-    const status = recoveryManager.getRecoveryStatus();
-    if (status.recoveryInProgress) {
-      console.log('Recovery in progress...');
-    }
-  }, []);
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -47,31 +42,27 @@ function AppContent() {
   }
 
   return (
-    <>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
-        </Routes>
-      </Layout>
-      <GlobalPerformanceMonitor />
-    </>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/dashboard" />} />
+      </Routes>
+    </Layout>
   );
 }
 
 function App() {
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
-        <AuthProvider>
-          <SettingsProvider>
-            <AppContent />
-          </SettingsProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </ErrorBoundary>
+    <BrowserRouter>
+      <AuthProvider>
+        <SettingsProvider>
+          <AutoSaveProvider />
+          <AppContent />
+        </SettingsProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 

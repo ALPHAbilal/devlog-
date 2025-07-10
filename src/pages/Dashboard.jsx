@@ -10,7 +10,7 @@ import { Plus, User, Settings, LogOut } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -26,6 +26,9 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
   
+  // Initialize auto-save functionality
+  const { performAutoSave } = useAutoSave();
+  
   // Handle document expansion with lazy block loading
   const handleDocumentExpand = useCallback((document) => {
     // Open document immediately - ExpandedViewEnhanced will handle progressive loading
@@ -35,9 +38,6 @@ export default function Dashboard() {
       blocks: undefined // Force block loader to fetch all blocks
     };
     setExpandedEntry(documentForEdit);
-    
-    // Emit document opened event for predictive prefetching
-    eventBus.emit(EVENT_TYPES.DOCUMENT_OPENED, { documentId: document.id });
   }, []);
 
   // Update storage info

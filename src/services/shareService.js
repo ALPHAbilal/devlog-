@@ -177,7 +177,7 @@ export class ShareService {
       await this.logAccess(accessCheck.share_id, 'view', accessCheck.document_id);
 
       // Get document with permissions applied
-      const { data: document, error } = await supabase
+      const { data: documents, error } = await supabase
         .from('documents')
         .select(`
           id,
@@ -188,10 +188,16 @@ export class ShareService {
           metadata,
           user_id
         `)
-        .eq('id', accessCheck.document_id)
-        .single();
+        .eq('id', accessCheck.document_id);
 
       if (error) throw error;
+      
+      // Check if document exists
+      if (!documents || documents.length === 0) {
+        throw new Error('Document not found or has been deleted');
+      }
+      
+      const document = documents[0];
 
       // Fetch the profile separately
       let profile = null;

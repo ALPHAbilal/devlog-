@@ -54,8 +54,14 @@ export default function SharedDocument() {
         setError(access.message || 'Access denied');
       }
     } catch (err) {
-      setError('Failed to load shared document');
-      console.error(err);
+      console.error('Share access error:', err);
+      if (err.message && err.message.includes('not found')) {
+        setError('This document no longer exists or has been deleted.');
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Failed to load shared document');
+      }
     } finally {
       setLoading(false);
     }
@@ -143,14 +149,23 @@ export default function SharedDocument() {
       <div className="min-h-screen bg-dark-primary flex items-center justify-center p-4">
         <div className="bg-dark-lighter rounded-lg p-8 max-w-md w-full text-center">
           <AlertCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-white mb-2">Access Denied</h2>
+          <h2 className="text-xl font-semibold text-white mb-2">
+            {error.includes('no longer exists') ? 'Document Not Found' : 'Access Denied'}
+          </h2>
           <p className="text-gray-400">{error}</p>
-          <button
-            onClick={() => navigate('/')}
-            className="mt-6 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            Go to Homepage
-          </button>
+          <div className="mt-6 space-y-3">
+            <button
+              onClick={() => navigate('/')}
+              className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+            >
+              Go to Homepage
+            </button>
+            {error.includes('no longer exists') && (
+              <p className="text-sm text-gray-500">
+                The document may have been deleted by its owner.
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );

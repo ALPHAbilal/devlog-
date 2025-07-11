@@ -3,17 +3,39 @@
  * 
  * Configures Sentry for error tracking and performance monitoring
  * in production environments.
+ * 
+ * NOTE: Sentry is currently disabled due to React 19 compatibility.
+ * To enable Sentry when it supports React 19:
+ * 1. Add to package.json: "@sentry/react": "^8.x.x" and "@sentry/tracing": "^8.x.x"
+ * 2. Uncomment the Sentry imports and initialization below
  */
 
-import * as Sentry from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
+// Sentry imports - uncomment when React 19 is supported
+// import * as Sentry from "@sentry/react";
+// import { BrowserTracing } from "@sentry/tracing";
+
+// Temporary mock Sentry object for compatibility
+const Sentry = {
+  init: () => {},
+  captureException: () => {},
+  captureMessage: () => {},
+  addBreadcrumb: () => {},
+  setUser: () => {},
+  setContext: () => {},
+  startTransaction: () => ({ setData: () => {}, setStatus: () => {}, finish: () => {} }),
+  ErrorBoundary: ({ children }) => children,
+  Profiler: ({ children }) => children,
+  withProfiler: (component) => component,
+  withSentryRouting: (component) => component,
+};
 
 /**
  * Initialize Sentry monitoring
  * Should be called early in the application lifecycle
  */
 export function initMonitoring() {
-  // Only initialize in production
+  // Uncomment this block when Sentry supports React 19
+  /*
   if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
     Sentry.init({
       dsn: import.meta.env.VITE_SENTRY_DSN,
@@ -119,6 +141,12 @@ export function initMonitoring() {
       ],
     });
   }
+  */
+  
+  // For now, just log that monitoring is disabled
+  if (import.meta.env.DEV) {
+    console.log('Monitoring disabled: Sentry doesn\'t support React 19 yet');
+  }
 }
 
 /**
@@ -127,8 +155,10 @@ export function initMonitoring() {
  * @param {Object} context - Additional context
  */
 export function logError(error, context = {}) {
-  console.error(error);
+  console.error(error, context);
   
+  // When Sentry is enabled, uncomment:
+  /*
   if (import.meta.env.PROD) {
     Sentry.captureException(error, {
       extra: context,
@@ -137,6 +167,7 @@ export function logError(error, context = {}) {
       },
     });
   }
+  */
 }
 
 /**
@@ -149,9 +180,12 @@ export function logMessage(message, level = 'info', context = {}) {
   const logFn = console[level] || console.log;
   logFn(message, context);
   
+  // When Sentry is enabled, uncomment:
+  /*
   if (import.meta.env.PROD) {
     Sentry.captureMessage(message, level);
   }
+  */
 }
 
 /**
@@ -160,6 +194,12 @@ export function logMessage(message, level = 'info', context = {}) {
  * @param {Object} data - Event data
  */
 export function trackEvent(name, data = {}) {
+  if (import.meta.env.DEV) {
+    console.log('Event:', name, data);
+  }
+  
+  // When Sentry is enabled, uncomment:
+  /*
   if (import.meta.env.PROD) {
     Sentry.addBreadcrumb({
       message: name,
@@ -168,6 +208,7 @@ export function trackEvent(name, data = {}) {
       data,
     });
   }
+  */
 }
 
 /**
@@ -177,6 +218,15 @@ export function trackEvent(name, data = {}) {
  * @returns {Object} Transaction object
  */
 export function startTransaction(name, op = 'custom') {
+  // Return mock transaction
+  return {
+    setData: () => {},
+    setStatus: () => {},
+    finish: () => {},
+  };
+  
+  // When Sentry is enabled, uncomment:
+  /*
   if (import.meta.env.PROD) {
     return Sentry.startTransaction({ name, op });
   }
@@ -187,6 +237,7 @@ export function startTransaction(name, op = 'custom') {
     setStatus: () => {},
     finish: () => {},
   };
+  */
 }
 
 /**
@@ -200,6 +251,8 @@ export function logPerformance(metric, value, tags = {}) {
     console.log(`Performance: ${metric}`, value, tags);
   }
   
+  // When Sentry is enabled, uncomment:
+  /*
   if (import.meta.env.PROD) {
     Sentry.addBreadcrumb({
       category: 'performance',
@@ -208,6 +261,7 @@ export function logPerformance(metric, value, tags = {}) {
       data: { value, ...tags },
     });
   }
+  */
 }
 
 /**
@@ -215,6 +269,8 @@ export function logPerformance(metric, value, tags = {}) {
  * @param {Object} user - User object
  */
 export function setUserContext(user) {
+  // When Sentry is enabled, uncomment:
+  /*
   if (user) {
     Sentry.setUser({
       id: user.id,
@@ -223,6 +279,7 @@ export function setUserContext(user) {
   } else {
     Sentry.setUser(null);
   }
+  */
 }
 
 /**
@@ -231,25 +288,30 @@ export function setUserContext(user) {
  * @param {Object} context - Context data
  */
 export function setContext(key, context) {
-  Sentry.setContext(key, context);
+  // When Sentry is enabled, uncomment:
+  // Sentry.setContext(key, context);
 }
 
 /**
  * Create an error boundary component
+ * Currently returns a pass-through component
  */
 export const ErrorBoundary = Sentry.ErrorBoundary;
 
 /**
  * Profiler component for performance monitoring
+ * Currently returns a pass-through component
  */
 export const Profiler = Sentry.Profiler;
 
 /**
  * withProfiler HOC for component performance monitoring
+ * Currently returns the component unchanged
  */
 export const withProfiler = Sentry.withProfiler;
 
 /**
  * withSentryRouting HOC for route change tracking
+ * Currently returns the component unchanged
  */
 export const withSentryRouting = Sentry.withSentryRouting;

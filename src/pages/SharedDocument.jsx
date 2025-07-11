@@ -14,7 +14,6 @@ import {
 import { shareService } from '../services/shareService';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import Block from '../components/Block';
-import LoadingSpinner from '../components/LoadingSpinner';
 
 export default function SharedDocument() {
   const { shareCode } = useParams();
@@ -95,7 +94,7 @@ export default function SharedDocument() {
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-primary flex items-center justify-center">
-        <LoadingSpinner />
+        <div className="text-gray-400">Loading...</div>
       </div>
     );
   }

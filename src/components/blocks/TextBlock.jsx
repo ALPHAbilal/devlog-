@@ -232,7 +232,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       const newText = `[[${selectedText}]]`;
       const newContent = content.substring(0, start) + newText + content.substring(end);
       setContent(newContent);
-      setContent(processContentForSave(newContent));
+      // Removed processContentForSave - function was undefined
       
       // Set cursor position after the link
       setTimeout(() => {
@@ -245,7 +245,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       const newText = `![${selectedText}](url)`;
       const newContent = content.substring(0, start) + newText + content.substring(end);
       setContent(newContent);
-      setContent(processContentForSave(newContent));
+      // Removed processContentForSave - function was undefined
       
       // Select the 'url' part for easy replacement
       setTimeout(() => {
@@ -258,7 +258,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       const newText = `${wrapper}${selectedText}${wrapper}`;
       const newContent = content.substring(0, start) + newText + content.substring(end);
       setContent(newContent);
-      setContent(processContentForSave(newContent));
+      // Removed processContentForSave - function was undefined
       
       // Keep selection on the formatted text
       setTimeout(() => {
@@ -431,7 +431,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           lines[lines.length - 1] = beforeSlash + command.value;
           const expandedContent = lines.join('\n');
           setContent(expandedContent);
-          setContent(processContentForSave(expandedContent));
+          // Removed processContentForSave - function was undefined
           setSlashHint('');
           setSlashHintPosition(null);
           
@@ -524,7 +524,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         }
         const expandedContent = lines.join('\n');
         setContent(expandedContent);
-        setContent(processContentForSave(expandedContent));
+        // Removed processContentForSave - function was undefined
         setSlashHint('');
       }
       return;

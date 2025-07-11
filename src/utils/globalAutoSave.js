@@ -10,7 +10,7 @@ class GlobalAutoSaveManager {
   constructor() {
     this.autoSaveManager = autoSaveManager;
     this.intervalId = null;
-    this.intervalMs = 1000; // Default 1 second
+    this.intervalMs = 3000; // Default 3 seconds
     this.isRunning = false;
   }
 
@@ -60,7 +60,7 @@ class GlobalAutoSaveManager {
   /**
    * Start auto-save with the given interval (in seconds)
    */
-  start(intervalSeconds = 1) {
+  start(intervalSeconds = 3) {
     if (this.isRunning) {
       this.stop();
     }

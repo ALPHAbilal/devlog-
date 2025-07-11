@@ -183,17 +183,8 @@ export const storageWrapper = {
   }
 };
 
-// Re-init when auth state changes
-let lastAuthEvent = null;
-supabase.auth.onAuthStateChange((event) => {
-  console.log('Storage wrapper: Auth state changed:', event);
-  // Only reset on SIGNED_OUT or if switching users
-  if (event === 'SIGNED_OUT' || (event === 'SIGNED_IN' && lastAuthEvent === 'SIGNED_OUT')) {
-    console.log('Storage wrapper: Resetting due to auth change');
-    reset();
-  }
-  lastAuthEvent = event;
-});
+// Auth state changes are now handled centrally in AuthContext
+// Storage reset is triggered via event bus when needed
 
 // Default export for backward compatibility
 export default storageWrapper;

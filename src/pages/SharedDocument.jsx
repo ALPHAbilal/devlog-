@@ -14,11 +14,13 @@ import {
 import { shareService } from '../services/shareService';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import Block from '../components/Block';
+import { useToast } from '../hooks/useToast';
 
 export default function SharedDocument() {
   const { shareCode } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { showToast } = useToast();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,17 +41,17 @@ export default function SharedDocument() {
       const access = await shareService.checkShareAccess(shareCode, providedPassword);
       setAccessCheck(access);
 
-      if (access.access) {
+      if (access.has_access) {
         // Access granted, load document
         const sharedDoc = await shareService.getSharedDocument(shareCode, providedPassword);
         setDocument(sharedDoc.document);
-      } else if (access.password_required) {
+      } else if (access.requires_password) {
         setShowPasswordPrompt(true);
-      } else if (access.auth_required && !user) {
+      } else if (access.message === 'Authentication required' && !user) {
         // Redirect to login with return URL
         navigate(`/auth?redirect=/shared/${shareCode}`);
       } else {
-        setError(access.reason);
+        setError(access.message || 'Access denied');
       }
     } catch (err) {
       setError('Failed to load shared document');
@@ -83,7 +85,7 @@ export default function SharedDocument() {
         case 'copy':
           // Copy link
           await navigator.clipboard.writeText(window.location.href);
-          alert('Link copied to clipboard!');
+          showToast('Link copied to clipboard!', 'success');
           break;
       }
     } catch (error) {
@@ -174,7 +176,7 @@ export default function SharedDocument() {
                 <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
                   <span className="flex items-center gap-1">
                     <User className="w-3 h-3" />
-                    Shared by {document.user?.display_name || 'Anonymous'}
+                    Shared by {document.profiles?.display_name || document.profiles?.username || 'Anonymous'}
                   </span>
                   <span className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
@@ -240,7 +242,7 @@ export default function SharedDocument() {
 
         {/* Blocks */}
         <div className="space-y-2">
-          {document.blocks.map((block, index) => (
+          {document.blocks && document.blocks.map((block, index) => (
             <div key={block.id} className="relative">
               <Block
                 block={block}
@@ -277,7 +279,7 @@ export default function SharedDocument() {
         )}
 
         {/* Empty State */}
-        {document.blocks.length === 0 && (
+        {(!document.blocks || document.blocks.length === 0) && (
           <div className="text-center py-12 text-gray-400">
             <p>This document has no content yet.</p>
           </div>

@@ -186,15 +186,24 @@ export class ShareService {
           created_at,
           updated_at,
           metadata,
-          profiles!documents_user_id_fkey(
-            username,
-            display_name
-          )
+          user_id
         `)
         .eq('id', accessCheck.document_id)
         .single();
 
       if (error) throw error;
+
+      // Fetch the profile separately
+      let profile = null;
+      if (document.user_id) {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('username, display_name')
+          .eq('id', document.user_id)
+          .single();
+        
+        profile = profileData;
+      }
 
       // Get blocks if user has view permission
       let blocks = [];
@@ -226,6 +235,7 @@ export class ShareService {
         document: {
           ...document,
           blocks,
+          profiles: profile,
           isShared: true,
           permissions: accessCheck.permissions,
           shareSettings: shareData?.settings || {}

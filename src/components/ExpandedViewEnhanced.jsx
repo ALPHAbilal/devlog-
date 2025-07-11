@@ -12,7 +12,7 @@ import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
-import { ShareDialog } from './ShareDialog';
+import { ShareDialogEnhanced } from './ShareDialogEnhanced';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -1147,7 +1147,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
       {/* Share Dialog */}
       {showShareDialog && (
-        <ShareDialog 
+        <ShareDialogEnhanced 
           document={{
             id: entry.id,
             title: title,

@@ -55,36 +55,32 @@ export class ShareService {
         passwordHash = await this.hashPassword(password);
       }
 
-      // Call the database function to create share
-      const { data, error } = await supabase.rpc('create_document_share', {
-        p_document_id: documentId,
-        p_user_id: (await supabase.auth.getUser()).data.user.id,
-        p_share_type: shareType,
-        p_permissions: permissions,
-        p_settings: settings
-      });
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Insert share directly
+      const { data, error } = await supabase
+        .from('document_shares')
+        .insert({
+          document_id: documentId,
+          created_by: user.id,
+          share_type: shareType,
+          permissions: permissions,
+          password_hash: passwordHash,
+          expires_at: expiresAt,
+          max_views: maxViews,
+          settings: settings
+        })
+        .select('*')
+        .single();
 
       if (error) throw error;
 
-      // Update with additional settings if needed
-      if (passwordHash || expiresAt || maxViews) {
-        const { error: updateError } = await supabase
-          .from('document_shares')
-          .update({
-            password_hash: passwordHash,
-            expires_at: expiresAt,
-            max_views: maxViews
-          })
-          .eq('id', data.share_id);
-
-        if (updateError) throw updateError;
-      }
-
       return {
-        shareId: data.share_id,
+        shareId: data.id,
         shareCode: data.share_code,
         shareUrl: `${window.location.origin}/shared/${data.share_code}`,
-        fullUrl: data.share_url,
         permissions,
         expiresAt
       };
@@ -114,7 +110,7 @@ export class ShareService {
       // Add users to the share
       const invitations = emails.map(email => ({
         share_id: share.shareId,
-        user_email: email.toLowerCase()
+        email: email.toLowerCase()
       }));
 
       const { error } = await supabase
@@ -155,7 +151,8 @@ export class ShareService {
 
       if (error) throw error;
 
-      return data;
+      // The function returns a single row, extract it
+      return data[0] || { has_access: false, message: 'Share not found' };
     } catch (error) {
       logError(error, { context: 'checkShareAccess' });
       throw error;
@@ -172,12 +169,12 @@ export class ShareService {
       // First check access
       const accessCheck = await this.checkShareAccess(shareCode, password);
       
-      if (!accessCheck.access) {
-        throw new Error(accessCheck.reason);
+      if (!accessCheck.has_access) {
+        throw new Error(accessCheck.message || 'Access denied');
       }
 
       // Log the access
-      await this.logAccess(accessCheck.share_id, 'view');
+      await this.logAccess(accessCheck.share_id, 'view', accessCheck.document_id);
 
       // Get document with permissions applied
       const { data: document, error } = await supabase
@@ -189,7 +186,7 @@ export class ShareService {
           created_at,
           updated_at,
           metadata,
-          user:profiles!documents_user_id_fkey(
+          profiles!documents_user_id_fkey(
             username,
             display_name
           )
@@ -213,8 +210,15 @@ export class ShareService {
         blocks = blocksData || [];
       }
 
+      // Get share details
+      const { data: shareData } = await supabase
+        .from('document_shares')
+        .select('*')
+        .eq('id', accessCheck.share_id)
+        .single();
+
       // Apply watermark if required
-      if (accessCheck.settings?.watermark) {
+      if (shareData?.settings?.watermark) {
         document.watermark = this.generateWatermark();
       }
 
@@ -224,7 +228,7 @@ export class ShareService {
           blocks,
           isShared: true,
           permissions: accessCheck.permissions,
-          shareSettings: accessCheck.settings
+          shareSettings: shareData?.settings || {}
         },
         shareId: accessCheck.share_id
       };
@@ -245,12 +249,12 @@ export class ShareService {
         .select(`
           *,
           document_share_users(
-            user_email,
+            email,
             accepted_at
           )
         `)
         .eq('document_id', documentId)
-        .is('revoked_at', null)
+        .eq('is_active', true)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -277,14 +281,13 @@ export class ShareService {
         .from('document_shares')
         .update({
           revoked_at: new Date().toISOString(),
-          revoked_by: (await supabase.auth.getUser()).data.user.id
+          is_active: false
         })
         .eq('id', shareId);
 
       if (error) throw error;
 
-      // Log the revocation
-      await this.logAccess(shareId, 'revoked');
+      // Log the revocation is not needed as it's not a valid action in our schema
 
       return { success: true };
     } catch (error) {
@@ -385,7 +388,12 @@ export class ShareService {
    */
   async getSharedWithMe() {
     try {
-      const { data, error } = await supabase.rpc('get_shared_documents');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      const { data, error } = await supabase.rpc('get_shared_documents', {
+        p_user_id: user.id
+      });
 
       if (error) throw error;
 
@@ -431,21 +439,36 @@ export class ShareService {
    * @param {string} password - Plain text password
    */
   async hashPassword(password) {
-    // For now, we'll use a simple approach
-    // In production, this should use bcrypt through a server function
+    // For client-side, we'll use a salted SHA-256 hash
+    // In production, this should ideally be done server-side with bcrypt
+    const salt = crypto.randomUUID();
     const encoder = new TextEncoder();
-    const data = encoder.encode(password);
-    const hash = await crypto.subtle.digest('SHA-256', data);
-    return btoa(String.fromCharCode(...new Uint8Array(hash)));
+    const data = encoder.encode(salt + password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Store salt with hash for verification
+    return `${salt}:${hashHex}`;
   }
 
   /**
    * Generate watermark text
    */
   generateWatermark() {
-    const user = supabase.auth.getUser();
-    const timestamp = new Date().toISOString();
-    return `Shared document - ${user?.email || 'Guest'} - ${timestamp}`;
+    const timestamp = new Date().toLocaleString();
+    return `Shared document - Viewed ${timestamp}`;
+  }
+
+  /**
+   * Get or create anonymous ID for tracking
+   */
+  getAnonymousId() {
+    let anonId = localStorage.getItem('devlog_anon_id');
+    if (!anonId) {
+      anonId = crypto.randomUUID();
+      localStorage.setItem('devlog_anon_id', anonId);
+    }
+    return anonId;
   }
 
   /**
@@ -453,12 +476,26 @@ export class ShareService {
    * @param {string} shareId - The share accessed
    * @param {string} action - The action performed
    */
-  async logAccess(shareId, action) {
+  async logAccess(shareId, action, documentId) {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get document ID if not provided
+      if (!documentId) {
+        const { data } = await supabase
+          .from('document_shares')
+          .select('document_id')
+          .eq('id', shareId)
+          .single();
+        documentId = data?.document_id;
+      }
+
       await supabase.rpc('log_share_access', {
         p_share_id: shareId,
+        p_document_id: documentId,
         p_action: action,
-        p_user_id: (await supabase.auth.getUser()).data.user?.id || null,
+        p_user_id: user?.id || null,
+        p_anonymous_id: !user ? this.getAnonymousId() : null,
         p_ip_address: null, // Would be set server-side
         p_user_agent: navigator.userAgent
       });

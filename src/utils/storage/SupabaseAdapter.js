@@ -371,11 +371,11 @@ export class SupabaseAdapter {
       }
     }
     
-    const { blocks, ...docData } = document;
+    const { blocks: documentBlocks, ...docData } = document;
     
     // CRITICAL FIX: If blocks are not provided, this is a partial update
     // Don't touch the blocks - only update document metadata
-    if (blocks === undefined) {
+    if (documentBlocks === undefined) {
       console.log('SupabaseAdapter: Partial update detected (no blocks provided), updating only document metadata');
       
       const updateData = {};
@@ -419,9 +419,9 @@ export class SupabaseAdapter {
     
     // Use preview from document if already provided, otherwise generate
     let preview = docData.preview || 'Click to view document...';
-    if (!docData.preview && blocks && blocks.length > 0) {
-      const firstTextBlock = blocks.find(b => b.type === 'text' && b.content);
-      const firstHeading = blocks.find(b => b.type === 'heading' && b.content);
+    if (!docData.preview && documentBlocks && documentBlocks.length > 0) {
+      const firstTextBlock = documentBlocks.find(b => b.type === 'text' && b.content);
+      const firstHeading = documentBlocks.find(b => b.type === 'heading' && b.content);
       preview = firstTextBlock?.content.substring(0, 100) + '...' || 
                 firstHeading?.content || 
                 'Click to start writing...';
@@ -439,7 +439,7 @@ export class SupabaseAdapter {
         metadata: {
           ...(docData.metadata || {}),
           preview: preview,
-          blockCount: blocks?.length || 0
+          blockCount: documentBlocks?.length || 0
         },
         created_at: docData.createdAt || new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -458,10 +458,10 @@ export class SupabaseAdapter {
     }
     
     // 3. Use atomic function to save blocks
-    // console.log(`SupabaseAdapter: Using atomic save for ${blocks?.length || 0} blocks`);
+    // console.log(`SupabaseAdapter: Using atomic save for ${documentBlocks?.length || 0} blocks`);
     
     // Prepare blocks for the RPC call - use Promise.resolve to prevent blocking
-    const blocksToSave = await Promise.resolve((blocks || []).map((block, index) => {
+    const blocksToSave = await Promise.resolve((documentBlocks || []).map((block, index) => {
       // console.log(`🟨 SupabaseAdapter: Processing block for save:`, {
       //   index: index,
       //   blockId: block.id,

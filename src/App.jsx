@@ -3,6 +3,8 @@ import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthC
 import { SettingsProvider } from './contexts/SettingsContext';
 import { useGlobalAutoSave } from './hooks/useAutoSave';
 import { initMonitoring, setUserContext } from './utils/monitoring';
+import { register as registerServiceWorker } from './utils/serviceWorker';
+import { preloadResources } from './utils/performance';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
@@ -12,10 +14,19 @@ import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import ErrorBoundary from './components/ErrorBoundary';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 
 // Initialize monitoring
 initMonitoring();
+
+// Register service worker for caching
+registerServiceWorker();
+
+// Preload critical resources
+preloadResources([
+  '/fonts/inter-var.woff2',
+  '/icons/sprite.svg'
+]);
 
 // Component to handle global auto-save
 function AutoSaveProvider() {

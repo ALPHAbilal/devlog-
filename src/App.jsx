@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { useGlobalAutoSave } from './hooks/useAutoSave';
+import { initMonitoring, setUserContext } from './utils/monitoring';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
@@ -11,6 +12,10 @@ import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import ErrorBoundary from './components/ErrorBoundary';
+import { useEffect } from 'react';
+
+// Initialize monitoring
+initMonitoring();
 
 // Component to handle global auto-save
 function AutoSaveProvider() {
@@ -20,6 +25,11 @@ function AutoSaveProvider() {
 
 function AppContent() {
   const { user, loading } = useAuth();
+
+  // Set user context for monitoring
+  useEffect(() => {
+    setUserContext(user);
+  }, [user]);
 
   if (loading) {
     return (

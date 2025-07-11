@@ -658,6 +658,46 @@ Based on developer conversion research, redesigned landing page to focus on:
 - Added 5-second document cache for faster navigation
 - Improved auto-save reliability with local backup protection
 
+## Deployment Workflow
+
+### IMPORTANT: How Changes Are Deployed
+
+1. **All code changes are made in the local directory**
+   - Working directory: `/mnt/c/Users/User004/Desktop/ma/devlog-`
+   - I make changes to files in this directory only
+
+2. **GitHub deployment process**
+   - After I complete changes, the user manually commits and pushes to GitHub
+   - I should NEVER attempt to use git commands to push changes
+   - User handles all git operations
+
+3. **Vercel automatic deployment**
+   - Vercel is connected to the GitHub repository
+   - When user pushes to GitHub, Vercel automatically deploys frontend changes
+   - No manual deployment steps needed for frontend
+
+4. **Supabase database changes**
+   - I provide SQL queries or step-by-step instructions
+   - User executes these manually in the Supabase dashboard
+   - I should NEVER attempt to run migrations directly
+   - All database changes must be provided as SQL scripts with clear instructions
+
+5. **What I should NEVER do**
+   - Push to GitHub directly
+   - Deploy to Vercel
+   - Execute Supabase migrations automatically
+   - Run any deployment commands
+
+### Typical Workflow Example
+```
+1. I make code changes locally
+2. I provide SQL scripts if database changes are needed
+3. User reviews changes
+4. User runs: git add, commit, push
+5. Vercel auto-deploys frontend
+6. User runs SQL scripts in Supabase if needed
+```
+
 ## Important Commands to Run
 
 Always run these before committing (if available):

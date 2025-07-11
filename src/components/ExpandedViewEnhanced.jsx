@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
@@ -12,6 +12,7 @@ import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
+import { ShareDialog } from './ShareDialog';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -72,6 +73,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [linesScrollProgress, setLinesScrollProgress] = useState({ top: 0, bottom: 1 });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
@@ -642,6 +644,16 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                 </div>
               )}
               
+              {/* Share Button */}
+              <button
+                onClick={() => setShowShareDialog(true)}
+                className="p-1.5 text-text-secondary hover:text-blue-400 
+                           hover:bg-blue-400/10 rounded transition-all"
+                title="Share document"
+              >
+                <Share2 size={16} />
+              </button>
+              
               {/* Delete Button */}
               <button
                 onClick={() => setShowDeleteConfirm(true)}
@@ -1131,6 +1143,22 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             </div>
           </div>
         </div>
+      )}
+
+      {/* Share Dialog */}
+      {showShareDialog && (
+        <ShareDialog 
+          document={{
+            id: entry.id,
+            title: title,
+            blocks: blocks,
+            tags: tags,
+            user: entry.user,
+            updated_at: entry.updated_at
+          }}
+          isOpen={showShareDialog}
+          onClose={() => setShowShareDialog(false)}
+        />
       )}
 
     </div>

@@ -13,7 +13,9 @@ import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
+import SharedDocument from './pages/SharedDocument';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './hooks/useToast';
 import { useEffect, lazy, Suspense } from 'react';
 
 // Initialize monitoring
@@ -58,6 +60,7 @@ function AppContent() {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/shared/:shareCode" element={<SharedDocument />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );
@@ -69,6 +72,7 @@ function AppContent() {
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/shared/:shareCode" element={<SharedDocument />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Layout>
@@ -81,8 +85,10 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <SettingsProvider>
-            <AutoSaveProvider />
-            <AppContent />
+            <ToastProvider>
+              <AutoSaveProvider />
+              <AppContent />
+            </ToastProvider>
           </SettingsProvider>
         </AuthProvider>
       </BrowserRouter>

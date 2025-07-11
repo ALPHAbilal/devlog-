@@ -1,39 +1,66 @@
 /**
  * Session-based cache for documents and blocks
- * Enhanced for development to survive HMR better
+ * Now using LRU cache to prevent memory leaks
+ */
+import { getSessionCache } from './LRUCache';
+
+// Get the singleton LRU cache instance
+const lruCache = getSessionCache();
+
+/**
+ * SessionCache API wrapper for backward compatibility
+ * This maintains the existing API while using LRU cache underneath
  */
 class SessionCache {
   constructor() {
-    // In development, try to restore from window object (survives HMR)
-    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
-      if (window.__devSessionCache) {
-        console.log('[Dev] Restoring session cache from window');
-        this.documents = window.__devSessionCache.documents || new Map();
-        this.blocks = window.__devSessionCache.blocks || new Map();
-        this.metadata = window.__devSessionCache.metadata || new Map();
-      } else {
-        this.documents = new Map();
-        this.blocks = new Map();
-        this.metadata = new Map();
-        window.__devSessionCache = { documents: this.documents, blocks: this.blocks, metadata: this.metadata };
-      }
-    } else {
-      this.documents = new Map(); // documentId -> document data
-      this.blocks = new Map(); // documentId -> blocks array
-      this.metadata = new Map(); // documentId -> { lastAccessed, loadedAt }
+    this.cache = lruCache;
+    
+    // In development, log cache stats periodically
+    if (process.env.NODE_ENV === 'development') {
+      this.statsInterval = setInterval(() => {
+        const stats = this.cache.getStats();
+        if (stats.size > 0) {
+          console.log('SessionCache Stats:', {
+            ...stats,
+            documents: this.getDocumentCount(),
+            blocks: this.getBlocksCount()
+          });
+        }
+      }, 60000); // Every minute
     }
+  }
+
+  /**
+   * Generate cache key for documents
+   */
+  getDocumentKey(documentId) {
+    return `doc:${documentId}`;
+  }
+
+  /**
+   * Generate cache key for blocks
+   */
+  getBlocksKey(documentId) {
+    return `blocks:${documentId}`;
+  }
+
+  /**
+   * Generate cache key for metadata
+   */
+  getMetadataKey(documentId) {
+    return `meta:${documentId}`;
   }
 
   /**
    * Cache a document
    */
   cacheDocument(document) {
-    this.documents.set(document.id, {
-      ...document,
-      blocks: undefined // Don't store blocks here to avoid duplication
-    });
+    // Store document without blocks to avoid duplication
+    const docToCache = { ...document, blocks: undefined };
+    this.cache.set(this.getDocumentKey(document.id), docToCache);
     
-    this.metadata.set(document.id, {
+    // Update metadata
+    this.cache.set(this.getMetadataKey(document.id), {
       lastAccessed: Date.now(),
       loadedAt: Date.now()
     });
@@ -45,10 +72,12 @@ class SessionCache {
    * Cache blocks for a document
    */
   cacheBlocks(documentId, blocks) {
-    this.blocks.set(documentId, blocks);
+    this.cache.set(this.getBlocksKey(documentId), blocks);
     
-    const meta = this.metadata.get(documentId) || {};
-    this.metadata.set(documentId, {
+    // Update metadata
+    const metaKey = this.getMetadataKey(documentId);
+    const meta = this.cache.get(metaKey) || {};
+    this.cache.set(metaKey, {
       ...meta,
       lastAccessed: Date.now(),
       blocksLoadedAt: Date.now()
@@ -61,11 +90,12 @@ class SessionCache {
    * Get cached document
    */
   getDocument(documentId) {
-    const doc = this.documents.get(documentId);
+    const doc = this.cache.get(this.getDocumentKey(documentId));
     if (doc) {
-      // Update last accessed
-      const meta = this.metadata.get(documentId) || {};
-      this.metadata.set(documentId, {
+      // Update last accessed in metadata
+      const metaKey = this.getMetadataKey(documentId);
+      const meta = this.cache.get(metaKey) || {};
+      this.cache.set(metaKey, {
         ...meta,
         lastAccessed: Date.now()
       });
@@ -77,11 +107,12 @@ class SessionCache {
    * Get cached blocks
    */
   getBlocks(documentId) {
-    const blocks = this.blocks.get(documentId);
+    const blocks = this.cache.get(this.getBlocksKey(documentId));
     if (blocks) {
-      // Update last accessed
-      const meta = this.metadata.get(documentId) || {};
-      this.metadata.set(documentId, {
+      // Update last accessed in metadata
+      const metaKey = this.getMetadataKey(documentId);
+      const meta = this.cache.get(metaKey) || {};
+      this.cache.set(metaKey, {
         ...meta,
         lastAccessed: Date.now()
       });
@@ -93,30 +124,44 @@ class SessionCache {
    * Check if document is cached
    */
   hasDocument(documentId) {
-    return this.documents.has(documentId);
+    return this.cache.has(this.getDocumentKey(documentId));
   }
 
   /**
    * Check if blocks are cached
    */
   hasBlocks(documentId) {
-    return this.blocks.has(documentId);
+    return this.cache.has(this.getBlocksKey(documentId));
   }
 
   /**
    * Get all cached documents
    */
   getAllDocuments() {
-    return Array.from(this.documents.values());
+    const documents = [];
+    const keys = this.cache.keys();
+    
+    for (const key of keys) {
+      if (key.startsWith('doc:')) {
+        const doc = this.cache.get(key);
+        if (doc) {
+          documents.push(doc);
+        }
+      }
+    }
+    
+    return documents;
   }
 
   /**
    * Update a cached document
    */
   updateDocument(documentId, updates) {
-    const existing = this.documents.get(documentId);
+    const docKey = this.getDocumentKey(documentId);
+    const existing = this.cache.get(docKey);
+    
     if (existing) {
-      this.documents.set(documentId, {
+      this.cache.set(docKey, {
         ...existing,
         ...updates,
         updatedAt: new Date().toISOString()
@@ -128,9 +173,12 @@ class SessionCache {
    * Update cached blocks
    */
   updateBlocks(documentId, blocks) {
-    this.blocks.set(documentId, blocks);
-    const meta = this.metadata.get(documentId) || {};
-    this.metadata.set(documentId, {
+    this.cache.set(this.getBlocksKey(documentId), blocks);
+    
+    // Update metadata
+    const metaKey = this.getMetadataKey(documentId);
+    const meta = this.cache.get(metaKey) || {};
+    this.cache.set(metaKey, {
       ...meta,
       lastAccessed: Date.now(),
       blocksUpdatedAt: Date.now()
@@ -141,9 +189,9 @@ class SessionCache {
    * Clear cache for a specific document
    */
   clearDocument(documentId) {
-    this.documents.delete(documentId);
-    this.blocks.delete(documentId);
-    this.metadata.delete(documentId);
+    this.cache.delete(this.getDocumentKey(documentId));
+    this.cache.delete(this.getBlocksKey(documentId));
+    this.cache.delete(this.getMetadataKey(documentId));
     console.log(`SessionCache: Cleared cache for document ${documentId}`);
   }
 
@@ -151,9 +199,7 @@ class SessionCache {
    * Clear all cached data
    */
   clearAll() {
-    this.documents.clear();
-    this.blocks.clear();
-    this.metadata.clear();
+    this.cache.clear();
     console.log('SessionCache: Cleared all cached data');
   }
 
@@ -161,78 +207,66 @@ class SessionCache {
    * Get cache statistics
    */
   getStats() {
+    const cacheStats = this.cache.getStats();
+    
     return {
-      documentCount: this.documents.size,
-      blocksCount: this.blocks.size,
-      totalSize: this.estimateSize(),
-      oldestEntry: this.getOldestEntry(),
-      newestEntry: this.getNewestEntry()
+      documentCount: this.getDocumentCount(),
+      blocksCount: this.getBlocksCount(),
+      totalSize: `${cacheStats.memoryUsageMB} MB`,
+      maxSize: `${cacheStats.maxMemoryMB} MB`,
+      hitRate: cacheStats.hitRate,
+      evictions: cacheStats.evictions
     };
   }
 
   /**
-   * Estimate cache size in bytes
+   * Get count of cached documents
    */
-  estimateSize() {
-    let size = 0;
+  getDocumentCount() {
+    let count = 0;
+    const keys = this.cache.keys();
     
-    // Estimate documents size
-    for (const doc of this.documents.values()) {
-      size += JSON.stringify(doc).length * 2; // UTF-16
-    }
-    
-    // Estimate blocks size
-    for (const blocks of this.blocks.values()) {
-      size += JSON.stringify(blocks).length * 2; // UTF-16
-    }
-    
-    return size;
-  }
-
-  /**
-   * Get oldest cached entry
-   */
-  getOldestEntry() {
-    let oldest = null;
-    let oldestTime = Date.now();
-    
-    for (const [id, meta] of this.metadata.entries()) {
-      if (meta.loadedAt < oldestTime) {
-        oldestTime = meta.loadedAt;
-        oldest = id;
+    for (const key of keys) {
+      if (key.startsWith('doc:')) {
+        count++;
       }
     }
     
-    return oldest;
+    return count;
   }
 
   /**
-   * Get newest cached entry
+   * Get count of cached block arrays
    */
-  getNewestEntry() {
-    let newest = null;
-    let newestTime = 0;
+  getBlocksCount() {
+    let count = 0;
+    const keys = this.cache.keys();
     
-    for (const [id, meta] of this.metadata.entries()) {
-      if (meta.loadedAt > newestTime) {
-        newestTime = meta.loadedAt;
-        newest = id;
+    for (const key of keys) {
+      if (key.startsWith('blocks:')) {
+        count++;
       }
     }
     
-    return newest;
+    return count;
+  }
+
+  /**
+   * Clean up resources
+   */
+  destroy() {
+    if (this.statsInterval) {
+      clearInterval(this.statsInterval);
+    }
   }
 }
 
 // Export singleton instance
 export const sessionCache = new SessionCache();
 
-// Log cache stats periodically in development
-if (process.env.NODE_ENV === 'development') {
-  setInterval(() => {
-    const stats = sessionCache.getStats();
-    if (stats.documentCount > 0) {
-      console.log('SessionCache Stats:', stats);
-    }
-  }, 60000); // Every minute
+// Clean up on window unload
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeunload', () => {
+    sessionCache.destroy();
+  });
 }

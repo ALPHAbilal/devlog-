@@ -1,32 +1,40 @@
-[15:11:06.124] Running build in Washington, D.C., USA (East) – iad1
-[15:11:06.125] Build machine configuration: 2 cores, 8 GB
-[15:11:06.141] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: edb3747)
-[15:11:06.685] Cloning completed: 544.000ms
-[15:11:06.796] Restored build cache from previous deployment (8UaPneXcjLcteqB4j7P5spNzwLFU)
-[15:11:07.176] Running "vercel build"
-[15:11:07.589] Vercel CLI 44.3.0
-[15:11:08.139] Installing dependencies...
-[15:11:09.586] npm error code ERESOLVE
-[15:11:09.587] npm error ERESOLVE unable to resolve dependency tree
-[15:11:09.587] npm error
-[15:11:09.588] npm error While resolving: journey-log-compass@0.0.0
-[15:11:09.588] npm error Found: react@19.1.0
-[15:11:09.588] npm error node_modules/react
-[15:11:09.588] npm error   react@"^19.1.0" from the root project
-[15:11:09.589] npm error
-[15:11:09.589] npm error Could not resolve dependency:
-[15:11:09.589] npm error peer react@"^18.0.0" from @testing-library/react@14.3.1
-[15:11:09.589] npm error node_modules/@testing-library/react
-[15:11:09.590] npm error   dev @testing-library/react@"^14.1.2" from the root project
-[15:11:09.590] npm error
-[15:11:09.590] npm error Fix the upstream dependency conflict, or retry
-[15:11:09.590] npm error this command with --force or --legacy-peer-deps
-[15:11:09.590] npm error to accept an incorrect (and potentially broken) dependency resolution.
-[15:11:09.591] npm error
-[15:11:09.591] npm error
-[15:11:09.591] npm error For a full report see:
-[15:11:09.591] npm error /vercel/.npm/_logs/2025-07-11T14_11_08_418Z-eresolve-report.txt
-[15:11:09.593] npm error A complete log of this run can be found in: /vercel/.npm/_logs/2025-07-11T14_11_08_418Z-debug-0.log
-[15:11:09.624] Error: Command "npm install" exited with 1
-[15:11:09.837] 
-[15:11:12.978] Exiting build container
+[16:54:00.117] Running build in Washington, D.C., USA (East) – iad1
+[16:54:00.118] Build machine configuration: 2 cores, 8 GB
+[16:54:00.141] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: a1f4f4f)
+[16:54:00.713] Cloning completed: 571.000ms
+[16:54:00.823] Restored build cache from previous deployment (9f9Qqi7ZKHMnmZXjNPxEQcJGVjrf)
+[16:54:01.187] Running "vercel build"
+[16:54:01.619] Vercel CLI 44.3.0
+[16:54:02.211] Installing dependencies...
+[16:54:04.819] 
+[16:54:04.820] up to date in 2s
+[16:54:04.821] 
+[16:54:04.822] 70 packages are looking for funding
+[16:54:04.822]   run `npm fund` for details
+[16:54:04.968] 
+[16:54:04.969] > journey-log-compass@0.0.0 build
+[16:54:04.969] > vite build
+[16:54:04.970] 
+[16:54:05.284] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[16:54:05.370] transforming...
+[16:54:05.791] [32m✓[39m 10 modules transformed.
+[16:54:05.800] [31m✗[39m Build failed in 485ms
+[16:54:05.800] [31merror during build:
+[16:54:05.801] [31m[vite:build-import-analysis] [plugin vite:build-import-analysis] src/hooks/useToast.js (39:28): Failed to parse source for import analysis because the content contains invalid JS syntax. If you are using JSX, make sure to name the file with the .jsx or .tsx extension.[31m
+[16:54:05.801] file: [36m/vercel/path0/src/hooks/useToast.js:39:28[31m
+[16:54:05.801] [33m
+[16:54:05.801] 37:       {children}
+[16:54:05.802] 38:       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+[16:54:05.802] 39:     </ToastContext.Provider>
+[16:54:05.802]                                 ^
+[16:54:05.802] 40:   );
+[16:54:05.803] 41: }
+[16:54:05.803] [31m
+[16:54:05.803]     at getRollupError (file:///vercel/path0/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+[16:54:05.803]     at error (file:///vercel/path0/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+[16:54:05.804]     at Object.error (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21966:20)
+[16:54:05.804]     at Object.error (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21028:42)
+[16:54:05.804]     at Object.handler (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:45389:16)[39m
+[16:54:05.857] Error: Command "npm run build" exited with 1
+[16:54:06.049] 
+[16:54:09.027] Exiting build container

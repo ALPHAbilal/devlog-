@@ -22,14 +22,6 @@ export function initMonitoring() {
         new BrowserTracing({
           // Set sampling to control performance overhead
           tracingOrigins: ['localhost', /^\//],
-          // Capture interactions (clicks, navigation)
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
-            React.useEffect,
-            useLocation,
-            useNavigationType,
-            createRoutesFromChildren,
-            matchRoutes
-          ),
         }),
       ],
       

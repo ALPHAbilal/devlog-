@@ -13,9 +13,12 @@
     "test:coverage": "vitest --coverage"
   },
   "dependencies": {
+    "@sentry/react": "^7.99.0",
+    "@sentry/tracing": "^7.99.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.46.2",
+    "isomorphic-dompurify": "^2.9.0",
     "katex": "^0.16.9",
     "lucide-react": "^0.513.0",
     "lz-string": "^1.5.0",
@@ -27,16 +30,22 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",
+    "@testing-library/jest-dom": "^6.2.0",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
+    "@vitest/ui": "^1.2.1",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.25.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^16.0.0",
+    "jsdom": "^24.0.0",
     "postcss": "^8.5.4",
     "tailwindcss": "^3.4.17",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^1.2.1"
   }
 }

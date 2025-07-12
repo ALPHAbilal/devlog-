@@ -393,7 +393,6 @@ export class SupabaseAdapter {
         .from('blocks')
         .select('id')
         .eq('document_id', documentId)
-        .eq('deleted_at', null)
         .limit(1);
       
       if (!checkError && existingBlocks && existingBlocks.length > 0) {
@@ -466,24 +465,33 @@ export class SupabaseAdapter {
     }
     
     // 2. Save/update document metadata using UPSERT
+    const documentToSave = {
+      id: docData.id,
+      user_id: this.userId,
+      title: docData.title,
+      is_template: docData.isTemplate || false,
+      tags: docData.tags || [],
+      metadata: {
+        ...(docData.metadata || {}),
+        preview: preview,
+        blockCount: documentBlocks?.length || 0,
+        syncStatus: 'synced', // Mark as synced when saved to Supabase
+        lastSyncedAt: new Date().toISOString()
+      },
+      created_at: docData.createdAt || new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    console.log('SupabaseAdapter: Saving document to Supabase:', {
+      id: documentToSave.id,
+      title: documentToSave.title,
+      blockCount: documentBlocks?.length || 0,
+      userId: this.userId
+    });
+    
     const { data: savedDoc, error: docError } = await supabase
       .from('documents')
-      .upsert({
-        id: docData.id,
-        user_id: this.userId,
-        title: docData.title,
-        is_template: docData.isTemplate || false,
-        tags: docData.tags || [],
-        metadata: {
-          ...(docData.metadata || {}),
-          preview: preview,
-          blockCount: documentBlocks?.length || 0,
-          syncStatus: 'synced', // Mark as synced when saved to Supabase
-          lastSyncedAt: new Date().toISOString()
-        },
-        created_at: docData.createdAt || new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
+      .upsert(documentToSave)
       .select()
       .single();
     
@@ -496,6 +504,12 @@ export class SupabaseAdapter {
       console.error('Document save returned no data');
       throw new Error('Document save failed - no data returned');
     }
+    
+    console.log('SupabaseAdapter: Document saved successfully:', {
+      id: savedDoc.id,
+      title: savedDoc.title,
+      updated_at: savedDoc.updated_at
+    });
     
     // 3. Use atomic function to save blocks
     // console.log(`SupabaseAdapter: Using atomic save for ${documentBlocks?.length || 0} blocks`);

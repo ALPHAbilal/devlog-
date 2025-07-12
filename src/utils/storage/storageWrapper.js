@@ -227,6 +227,7 @@ export const storageWrapper = {
   saveDocument,
   deleteEntry,
   searchEntries,
+  getAdapter,
   // Backward compatibility aliases
   getEntries: loadEntries,
   deleteDocument: deleteEntry,

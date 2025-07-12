@@ -218,7 +218,6 @@ export class ShareService {
           .from('blocks')
           .select('*')
           .eq('document_id', accessCheck.document_id)
-          .eq('deleted_at', null)
           .order('position');
 
         if (blocksError) throw blocksError;

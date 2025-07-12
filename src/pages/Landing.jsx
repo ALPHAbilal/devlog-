@@ -7,8 +7,6 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import HeroWithScreenshots from '../components/HeroWithScreenshots';
 import EnhancedInteractiveDemo from '../components/EnhancedInteractiveDemo';
 import InteractiveDocumentDemoUnified from '../components/InteractiveDocumentDemoUnified';
-import LiveCounter from '../components/LiveCounter';
-import SocialProofNotifications from '../components/SocialProofNotifications';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 
 function LandingContent() {
@@ -120,12 +118,6 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-dark-primary text-text-primary overflow-x-hidden">
-      {/* Live counters */}
-      <LiveCounter />
-      
-      {/* Social proof notifications */}
-      <SocialProofNotifications isActive={isDemoVisible} />
-
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-primary/80 backdrop-blur-md border-b border-dark-secondary/20">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
@@ -255,14 +247,9 @@ function LandingContent() {
           <InteractiveDocumentDemoUnified />
           
           <div className="mt-8 text-center">
-            <div className="bg-accent-green/10 border border-accent-green/30 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
-              <p className="text-accent-green font-medium mb-1">
-                🎉 You just experienced the power of DevLog!
-              </p>
-              <p className="text-text-secondary text-sm">
-                Join 5,247 developers who save 2+ hours per week finding their code solutions
-              </p>
-            </div>
+            <p className="text-text-secondary mb-6">
+              Like what you see? Start building your own knowledge base.
+            </p>
             
             <button
               onClick={() => navigate('/auth')}
@@ -512,28 +499,11 @@ function LandingContent() {
           </div>
           
           <h3 className="text-4xl font-bold mb-6">
-            Stop Losing Your Solutions Forever
+            Ready to Build Your Second Brain?
           </h3>
           <p className="text-xl text-text-secondary mb-8">
-            Every day without DevLog is another solution lost, another hour wasted searching.
+            Join thousands of developers who've transformed scattered notes into searchable knowledge.
           </p>
-          
-          <div className="bg-dark-secondary/50 rounded-lg p-6 mb-8 max-w-2xl mx-auto border border-accent-green/20">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="text-2xl font-bold text-accent-green">127,849</div>
-                <div className="text-sm text-text-secondary">Solutions saved today</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-accent-green">2.3 hrs</div>
-                <div className="text-sm text-text-secondary">Avg. time saved/week</div>
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-accent-green">99.8%</div>
-                <div className="text-sm text-text-secondary">Keep using after trial</div>
-              </div>
-            </div>
-          </div>
           <div className="flex flex-col items-center gap-4">
             <button
               onClick={() => navigate('/auth')}

@@ -12,12 +12,9 @@ export default function HeroWithScreenshots() {
     <section className="relative overflow-hidden py-20 md:py-32">
       <div className="max-w-4xl mx-auto px-4 md:px-6 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent-green/10 
-                       text-accent-green rounded-full text-sm mb-6 relative">
+                       text-accent-green rounded-full text-sm mb-6">
           <span className="animate-pulse">●</span>
-          <span>5,247 developers saving 2+ hours per week</span>
-          <div className="absolute -top-1 -right-1 bg-accent-green text-dark-primary text-xs px-2 py-0.5 rounded-full font-medium">
-            NEW
-          </div>
+          <span>Trusted by thousands of developers</span>
         </div>
         
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 leading-tight">

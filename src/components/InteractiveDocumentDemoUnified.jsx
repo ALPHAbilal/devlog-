@@ -3,7 +3,8 @@ import { useDemoMode } from '../contexts/DemoModeContext';
 import Block from './Block';
 import { 
   Plus, Edit3, Code2, Bot, Search, Hash, MessageSquare,
-  FileText, Sparkles, ChevronDown, Command, GripVertical
+  FileText, Sparkles, ChevronDown, Command, GripVertical,
+  Table, CheckSquare, FolderTree
 } from 'lucide-react';
 import DemoOnboarding from './DemoOnboarding';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +33,8 @@ export default function InteractiveDocumentDemoUnified() {
   const [isVisible, setIsVisible] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [showBlockSelector, setShowBlockSelector] = useState(false);
+  const [selectorPosition, setSelectorPosition] = useState(null);
   const demoRef = useRef(null);
 
   // Relatable demo content that resonates with every developer
@@ -45,7 +48,7 @@ export default function InteractiveDocumentDemoUnified() {
     {
       id: 'demo-unified-2',
       type: 'text',
-      content: `## That regex I always forget
+      content: `**That regex I always forget**
 
 Found it! Here's the email validation regex that actually works:
 
@@ -157,21 +160,21 @@ app.use(cors(corsOptions));`,
     {
       id: 'demo-unified-6',
       type: 'text',
-      content: `## Quick Links to My Solutions
+      content: `**Quick Links to My Solutions**
 
-### 🔥 Frequently Used
+**🔥 Frequently Used**
 - [[Docker compose for dev environment]] - My go-to setup
 - [[Git aliases that save time]] - Especially the \`git undo\` one
 - [[VS Code snippets collection]] - React, TypeScript, testing
 - [[Database optimization queries]] - That JOIN vs subquery comparison
 
-### 📚 Learning Notes
+**📚 Learning Notes**
 - [[WebSocket reconnection strategy]] - Saved from production incident
 - [[JWT refresh token flow]] - With the security considerations
 - [[Webpack config that actually works]] - For React + TypeScript
 - [[Testing async Redux actions]] - The pattern that clicked
 
-### 🏷️ Tags
+**🏷️ Tags**
 #debugging #performance #react #nodejs #postgresql #docker
 
 **Pro tip:** Everything is searchable! Try typing "cors" or "hook" in the search above 👆`,
@@ -225,12 +228,24 @@ app.use(cors(corsOptions));`,
     );
   }, []);
 
+  // Show block selector
+  const handleShowBlockSelector = useCallback((afterIndex) => {
+    setShowBlockSelector(true);
+    setSelectorPosition(afterIndex);
+  }, []);
+
   // Add new block
-  const handleAddBlock = useCallback((afterIndex, type = 'text') => {
+  const handleAddBlock = useCallback((afterIndex, type) => {
     const newBlock = {
       id: `demo-unified-${Date.now()}`,
       type,
-      content: type === 'text' ? '' : type === 'code' ? '// New code block' : '# New heading',
+      content: type === 'text' ? '' : 
+                type === 'code' ? '// New code block' : 
+                type === 'heading' ? '# New heading' :
+                type === 'ai' ? JSON.stringify({ messages: [] }) :
+                type === 'table' ? JSON.stringify({ headers: ['Column 1', 'Column 2'], rows: [['', '']] }) :
+                type === 'todo' ? JSON.stringify({ items: [{ id: Date.now(), text: '', checked: false }] }) :
+                type === 'filetree' ? JSON.stringify({ name: 'root', type: 'folder', children: [] }) : '',
       position: afterIndex + 1,
       isNew: true
     };
@@ -241,6 +256,8 @@ app.use(cors(corsOptions));`,
       return newBlocks.map((block, index) => ({ ...block, position: index }));
     });
     setHasInteracted(true);
+    setShowBlockSelector(false);
+    setSelectorPosition(null);
   }, []);
 
   // Drag and drop handlers
@@ -271,26 +288,52 @@ app.use(cors(corsOptions));`,
   }, [draggedIndex]);
 
   // Block type selector
-  const BlockTypeSelector = ({ onSelect }) => (
-    <div className="demo-block-selector">
-      <button onClick={() => onSelect('text')} className="demo-block-type">
-        <FileText size={16} />
-        <span>Text</span>
-      </button>
-      <button onClick={() => onSelect('code')} className="demo-block-type">
-        <Code2 size={16} />
-        <span>Code</span>
-      </button>
-      <button onClick={() => onSelect('heading')} className="demo-block-type">
-        <Hash size={16} />
-        <span>Heading</span>
-      </button>
-      <button onClick={() => onSelect('ai')} className="demo-block-type">
-        <MessageSquare size={16} />
-        <span>AI Chat</span>
-      </button>
-    </div>
-  );
+  const BlockTypeSelector = ({ onSelect, onClose }) => {
+    const selectorRef = useRef(null);
+
+    useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (selectorRef.current && !selectorRef.current.contains(e.target)) {
+          onClose();
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [onClose]);
+
+    return (
+      <div ref={selectorRef} className="demo-block-selector">
+        <button onClick={() => onSelect('text')} className="demo-block-type">
+          <FileText size={16} />
+          <span>Text</span>
+        </button>
+        <button onClick={() => onSelect('heading')} className="demo-block-type">
+          <Hash size={16} />
+          <span>Heading</span>
+        </button>
+        <button onClick={() => onSelect('code')} className="demo-block-type">
+          <Code2 size={16} />
+          <span>Code</span>
+        </button>
+        <button onClick={() => onSelect('table')} className="demo-block-type">
+          <Table size={16} />
+          <span>Table</span>
+        </button>
+        <button onClick={() => onSelect('todo')} className="demo-block-type">
+          <CheckSquare size={16} />
+          <span>Todo List</span>
+        </button>
+        <button onClick={() => onSelect('ai')} className="demo-block-type">
+          <MessageSquare size={16} />
+          <span>AI Chat</span>
+        </button>
+        <button onClick={() => onSelect('filetree')} className="demo-block-type">
+          <FolderTree size={16} />
+          <span>File Tree</span>
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div ref={demoRef} className="demo-wrapper">
@@ -384,10 +427,21 @@ app.use(cors(corsOptions));`,
                   <div className="demo-add-block-container">
                     <button
                       className="demo-add-block-button"
-                      onClick={() => handleAddBlock(index)}
+                      onClick={() => handleShowBlockSelector(index)}
                     >
                       <Plus size={16} />
                     </button>
+                    
+                    {/* Block type selector */}
+                    {showBlockSelector && selectorPosition === index && (
+                      <BlockTypeSelector 
+                        onSelect={(type) => handleAddBlock(index, type)}
+                        onClose={() => {
+                          setShowBlockSelector(false);
+                          setSelectorPosition(null);
+                        }}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

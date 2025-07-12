@@ -5,6 +5,8 @@ import {
   Plus, Edit3, Code2, Bot, Search, Hash, MessageSquare,
   FileText, Sparkles, ChevronDown, Command, GripVertical
 } from 'lucide-react';
+import DemoOnboarding from './DemoOnboarding';
+import { useNavigate } from 'react-router-dom';
 import '../styles/demo.css';
 
 // Loading skeleton component
@@ -22,67 +24,60 @@ export default function InteractiveDocumentDemoUnified() {
     searchDemoDocuments 
   } = useDemoMode();
 
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const demoRef = useRef(null);
 
-  // Professional demo document with mixed content
+  // Relatable demo content that resonates with every developer
   const [demoBlocks, setDemoBlocks] = useState([
     {
       id: 'demo-unified-1',
       type: 'heading',
-      content: '# API Performance Investigation',
+      content: '# My Development Solutions 🚀',
       position: 0
     },
     {
       id: 'demo-unified-2',
       type: 'text',
-      content: `## Problem Statement
+      content: `## That regex I always forget
 
-Our API endpoints are experiencing latency spikes during peak hours. Response times are exceeding 2 seconds for critical endpoints, impacting user experience.
+Found it! Here's the email validation regex that actually works:
 
-### Metrics
-- P95 latency: 2.3s (target: <500ms)
-- Error rate: 0.4% (acceptable: <0.1%)
-- CPU utilization: 85% during peaks`,
+\`\`\`regex
+^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$
+\`\`\`
+
+**Why this works:** Handles most common email formats without being overly complex. Saved me hours of debugging last time!`,
       position: 1
     },
     {
       id: 'demo-unified-3',
       type: 'code',
-      content: `// Current implementation - performance monitoring
-class APIMonitor {
-  async trackRequest(endpoint, handler) {
-    const start = performance.now();
-    const metrics = {
-      endpoint,
-      timestamp: new Date().toISOString(),
-      userId: this.context.userId
-    };
+      content: `// That React hook that fixed everything
+function useDebounce(value, delay) {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
     
-    try {
-      const result = await handler();
-      metrics.duration = performance.now() - start;
-      metrics.status = 'success';
-      
-      // Bottleneck: Synchronous logging
-      this.logger.info('Request completed', metrics);
-      return result;
-    } catch (error) {
-      metrics.duration = performance.now() - start;
-      metrics.status = 'error';
-      metrics.error = error.message;
-      
-      this.logger.error('Request failed', metrics);
-      throw error;
-    }
-  }
-}`,
-      language: 'typescript',
-      filePath: 'src/monitoring/APIMonitor.ts',
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  
+  return debouncedValue;
+}
+
+// Usage: Prevented 1000s of API calls!
+const searchTerm = useDebounce(userInput, 300);`,
+      language: 'javascript',
+      filePath: 'hooks/useDebounce.js',
       position: 2
     },
     {
@@ -92,44 +87,38 @@ class APIMonitor {
         messages: [
           {
             role: 'user',
-            content: 'The synchronous logging seems to be adding latency. What\'s the best approach to optimize this without losing observability?'
+            content: 'Why is my React component re-rendering so much?'
           },
           {
             role: 'assistant',
-            content: `Great observation! Synchronous logging is indeed a common performance bottleneck. Here's an optimized approach:
+            content: `This is a common React performance issue! Here are the main culprits and solutions:
 
-1. **Implement Async Logging with Buffering**
-\`\`\`typescript
-class AsyncLogger {
-  private buffer: LogEntry[] = [];
-  private flushInterval: number = 100; // ms
-  
-  async log(level: string, message: string, metadata: any) {
-    this.buffer.push({ level, message, metadata, timestamp: Date.now() });
-    
-    if (this.buffer.length >= 100) {
-      await this.flush();
-    }
-  }
-  
-  private async flush() {
-    const entries = this.buffer.splice(0);
-    await this.batchWrite(entries); // Non-blocking
-  }
-}
+**1. Unstable Dependencies**
+\`\`\`javascript
+// ❌ Creates new object every render
+<Child config={{theme: 'dark'}} />
+
+// ✅ Stable reference
+const config = useMemo(() => ({theme: 'dark'}), []);
+<Child config={config} />
 \`\`\`
 
-2. **Use a Queue-Based System**
-- Implement a message queue (Redis, RabbitMQ)
-- Decouple logging from request handling
-- Process logs asynchronously
+**2. Inline Function Props**
+\`\`\`javascript
+// ❌ New function every render
+<Button onClick={() => handleClick(id)} />
 
-3. **Consider Sampling for High-Volume Endpoints**
-- Log only a percentage of successful requests
-- Always log errors and slow requests
-- Maintain statistical accuracy
+// ✅ Stable callback
+const handleButtonClick = useCallback(() => {
+  handleClick(id);
+}, [id]);
+<Button onClick={handleButtonClick} />
+\`\`\`
 
-This approach can reduce logging overhead from ~50ms to <1ms per request.`
+**3. Missing React.memo**
+Wrap child components that receive props in React.memo() to prevent unnecessary re-renders when props haven't changed.
+
+Use the React DevTools Profiler to identify which components are rendering and why!`
           }
         ]
       }),
@@ -138,70 +127,54 @@ This approach can reduce logging overhead from ~50ms to <1ms per request.`
     {
       id: 'demo-unified-5',
       type: 'code',
-      content: `// Optimized implementation with async logging
-class OptimizedAPIMonitor {
-  private metricsQueue: MetricsQueue;
-  
-  constructor() {
-    this.metricsQueue = new MetricsQueue({
-      batchSize: 100,
-      flushInterval: 100,
-      onFlush: async (batch) => {
-        // Non-blocking write to monitoring service
-        await this.monitoringService.writeBatch(batch);
-      }
-    });
-  }
-  
-  async trackRequest(endpoint: string, handler: () => Promise<any>) {
-    const start = performance.now();
-    const requestId = crypto.randomUUID();
+      content: `// CORS fix that actually works (after 2 hours of debugging 😅)
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps)
+    if (!origin) return callback(null, true);
     
-    try {
-      const result = await handler();
-      
-      // Non-blocking metric collection
-      this.metricsQueue.push({
-        requestId,
-        endpoint,
-        duration: performance.now() - start,
-        status: 'success',
-        timestamp: Date.now()
-      });
-      
-      return result;
-    } catch (error) {
-      // Always log errors immediately
-      await this.logError(requestId, endpoint, error);
-      throw error;
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://myapp.com',
+      process.env.FRONTEND_URL
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
-  }
-}`,
-      language: 'typescript',
-      filePath: 'src/monitoring/OptimizedAPIMonitor.ts',
+  },
+  credentials: true, // This was the missing piece!
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));`,
+      language: 'javascript',
+      filePath: 'server/middleware/cors.js',
       position: 4
     },
     {
       id: 'demo-unified-6',
       type: 'text',
-      content: `## Results After Implementation
+      content: `## Quick Links to My Solutions
 
-The async logging optimization delivered immediate improvements:
+### 🔥 Frequently Used
+- [[Docker compose for dev environment]] - My go-to setup
+- [[Git aliases that save time]] - Especially the \`git undo\` one
+- [[VS Code snippets collection]] - React, TypeScript, testing
+- [[Database optimization queries]] - That JOIN vs subquery comparison
 
-### Performance Gains
-- **P95 latency**: 2.3s → 450ms (80% reduction)
-- **P99 latency**: 3.1s → 780ms  
-- **Throughput**: +35% requests/second
+### 📚 Learning Notes
+- [[WebSocket reconnection strategy]] - Saved from production incident
+- [[JWT refresh token flow]] - With the security considerations
+- [[Webpack config that actually works]] - For React + TypeScript
+- [[Testing async Redux actions]] - The pattern that clicked
 
-### Resource Usage
-- CPU utilization down to 45% during peaks
-- Memory usage stable with buffering
-- No loss in observability
+### 🏷️ Tags
+#debugging #performance #react #nodejs #postgresql #docker
 
-### Next Steps
-- [ ] Implement distributed tracing
-- [ ] Add circuit breakers for external services
-- [ ] Optimize database connection pooling`,
+**Pro tip:** Everything is searchable! Try typing "cors" or "hook" in the search above 👆`,
       position: 5
     }
   ]);
@@ -242,6 +215,7 @@ The async logging optimization delivered immediate improvements:
         block.id === blockId ? { ...block, ...updates } : block
       )
     );
+    setHasInteracted(true);
   }, []);
 
   // Handle block deletion
@@ -266,6 +240,7 @@ The async logging optimization delivered immediate improvements:
       newBlocks.splice(afterIndex + 1, 0, newBlock);
       return newBlocks.map((block, index) => ({ ...block, position: index }));
     });
+    setHasInteracted(true);
   }, []);
 
   // Drag and drop handlers
@@ -319,6 +294,17 @@ The async logging optimization delivered immediate improvements:
 
   return (
     <div ref={demoRef} className="demo-wrapper">
+      {/* Onboarding overlay */}
+      {showOnboarding && isVisible && (
+        <DemoOnboarding
+          onComplete={() => {
+            setShowOnboarding(false);
+            navigate('/auth');
+          }}
+          onSkip={() => setShowOnboarding(false)}
+        />
+      )}
+
       {/* Professional guidance outside demo */}
       <div className="demo-guidance">
         <span className="demo-indicator">Interactive Demo</span>
@@ -346,19 +332,23 @@ The async logging optimization delivered immediate improvements:
         <div className="demo-container">
           {/* Document header */}
           <div className="demo-document-header">
-            <h2 className="demo-document-title">API Performance Investigation</h2>
+            <h2 className="demo-document-title">My Development Solutions 🚀</h2>
             <div className="demo-document-meta">
               <span className="demo-meta-item">
                 <Hash size={14} />
-                performance
-              </span>
-              <span className="demo-meta-item">
-                <Hash size={14} />
-                optimization
+                react
               </span>
               <span className="demo-meta-item">
                 <Hash size={14} />
                 debugging
+              </span>
+              <span className="demo-meta-item">
+                <Hash size={14} />
+                snippets
+              </span>
+              <span className="demo-meta-item demo-meta-highlight">
+                <Sparkles size={14} />
+                Try editing!
               </span>
             </div>
           </div>

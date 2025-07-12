@@ -7,12 +7,15 @@ import TestimonialsSection from '../components/TestimonialsSection';
 import HeroWithScreenshots from '../components/HeroWithScreenshots';
 import EnhancedInteractiveDemo from '../components/EnhancedInteractiveDemo';
 import InteractiveDocumentDemoUnified from '../components/InteractiveDocumentDemoUnified';
+import LiveCounter from '../components/LiveCounter';
+import SocialProofNotifications from '../components/SocialProofNotifications';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 
 function LandingContent() {
   const navigate = useNavigate();
   const [activeDemo, setActiveDemo] = useState('code');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDemoVisible, setIsDemoVisible] = useState(false);
 
   // Demo content for different block types
   const demoContent = {
@@ -94,8 +97,35 @@ function LandingContent() {
     }
   ];
 
+  // Track when demo is visible
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsDemoVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    const demoSection = document.getElementById('demo');
+    if (demoSection) {
+      observer.observe(demoSection);
+    }
+
+    return () => {
+      if (demoSection) {
+        observer.unobserve(demoSection);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-dark-primary text-text-primary overflow-x-hidden">
+      {/* Live counters */}
+      <LiveCounter />
+      
+      {/* Social proof notifications */}
+      <SocialProofNotifications isActive={isDemoVisible} />
+
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-dark-primary/80 backdrop-blur-md border-b border-dark-secondary/20">
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
@@ -225,17 +255,29 @@ function LandingContent() {
           <InteractiveDocumentDemoUnified />
           
           <div className="mt-8 text-center">
-            <p className="text-text-secondary mb-4">
-              Like what you see? Start building your own knowledge base.
-            </p>
+            <div className="bg-accent-green/10 border border-accent-green/30 rounded-lg p-4 mb-6 max-w-2xl mx-auto">
+              <p className="text-accent-green font-medium mb-1">
+                🎉 You just experienced the power of DevLog!
+              </p>
+              <p className="text-text-secondary text-sm">
+                Join 5,247 developers who save 2+ hours per week finding their code solutions
+              </p>
+            </div>
+            
             <button
               onClick={() => navigate('/auth')}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 bg-accent-green text-dark-primary 
-                         rounded-lg font-medium hover:bg-accent-green/80 transition-all group"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
+                         rounded-lg font-medium text-lg hover:bg-accent-green/80 transition-all group relative overflow-hidden"
             >
-              Create Your Account
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              <span className="relative z-10">Save My Demo & Start Free</span>
+              <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent 
+                              -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
             </button>
+            
+            <p className="text-xs text-text-secondary/70 mt-3">
+              No credit card • Your demo content saved • 14-day free trial
+            </p>
           </div>
         </div>
       </section>
@@ -461,27 +503,56 @@ function LandingContent() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6">
+      <section className="py-20 px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/20 text-accent-green 
+                          rounded-full text-sm font-medium mb-6">
+            <Zap size={16} />
+            Limited Time: Get 30% off annual plans
+          </div>
+          
           <h3 className="text-4xl font-bold mb-6">
-            Ready to Build Your Second Brain?
+            Stop Losing Your Solutions Forever
           </h3>
           <p className="text-xl text-text-secondary mb-8">
-            Join 5,000+ developers who\'ve transformed scattered notes into searchable knowledge.
+            Every day without DevLog is another solution lost, another hour wasted searching.
           </p>
+          
+          <div className="bg-dark-secondary/50 rounded-lg p-6 mb-8 max-w-2xl mx-auto border border-accent-green/20">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-2xl font-bold text-accent-green">127,849</div>
+                <div className="text-sm text-text-secondary">Solutions saved today</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-accent-green">2.3 hrs</div>
+                <div className="text-sm text-text-secondary">Avg. time saved/week</div>
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-accent-green">99.8%</div>
+                <div className="text-sm text-text-secondary">Keep using after trial</div>
+              </div>
+            </div>
+          </div>
           <div className="flex flex-col items-center gap-4">
             <button
               onClick={() => navigate('/auth')}
               className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
-                         rounded-lg font-medium text-lg hover:bg-accent-green/80 transition-all group"
+                         rounded-lg font-medium text-lg hover:bg-accent-green/80 transition-all group
+                         shadow-lg shadow-accent-green/20"
             >
-              Start Your Free Trial
+              Claim Your 14-Day Free Trial
               <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
             </button>
             <p className="text-sm text-text-secondary/70">
-              14-day free trial • No credit card required • Cancel anytime
+              No credit card • Setup in 2 minutes • Cancel anytime
             </p>
           </div>
+        </div>
+        
+        {/* Urgency indicator */}
+        <div className="absolute bottom-4 right-4 text-xs text-text-secondary">
+          Offer expires in 48 hours
         </div>
       </section>
 

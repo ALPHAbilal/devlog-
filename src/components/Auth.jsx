@@ -8,8 +8,14 @@ export default function AuthComponent() {
     <div className="min-h-screen bg-dark-primary flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-200 mb-2">Welcome to Devlog</h1>
-          <p className="text-gray-400">Sign in to continue your journey</p>
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 bg-emerald-500 rounded-lg flex items-center justify-center">
+              <span className="text-2xl font-bold text-white">D</span>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-200 mb-2">Welcome to DevLog</h1>
+          <p className="text-gray-400">Your personal development journey tracker</p>
+          <p className="text-xs text-gray-500 mt-2">devlog.design</p>
         </div>
         
         <div className="bg-dark-secondary rounded-lg p-6 shadow-lg">
@@ -80,6 +86,15 @@ export default function AuthComponent() {
             providers={['google', 'github']}
             redirectTo={getURL() + 'auth/callback'}
           />
+        </div>
+        
+        <div className="text-center mt-6">
+          <p className="text-xs text-gray-500">
+            Secure authentication powered by DevLog
+          </p>
+          <p className="text-xs text-gray-600 mt-1">
+            You'll be redirected to Google for secure sign-in
+          </p>
         </div>
       </div>
     </div>

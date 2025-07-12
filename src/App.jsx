@@ -16,7 +16,7 @@ import Terms from './pages/Terms';
 import SharedDocument from './pages/SharedDocument';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './hooks/useToast';
-import { useEffect, lazy, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 
 // Initialize monitoring
 initMonitoring();
@@ -43,6 +43,43 @@ function AppContent() {
   useEffect(() => {
     setUserContext(user);
   }, [user]);
+
+  // Add beforeunload handler to save pending changes
+  useEffect(() => {
+    const handleBeforeUnload = async (e) => {
+      // Check if there are unsaved changes
+      const { globalAutoSaveManager } = await import('./utils/globalAutoSave');
+      
+      if (globalAutoSaveManager.hasUnsavedChanges()) {
+        // Save all pending changes
+        await globalAutoSaveManager.saveAll();
+        
+        // Show browser warning
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Also use Page Visibility API as a more reliable alternative
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'hidden') {
+        const { globalAutoSaveManager } = await import('./utils/globalAutoSave');
+        if (globalAutoSaveManager.hasUnsavedChanges()) {
+          await globalAutoSaveManager.saveAll();
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   if (loading) {
     return (

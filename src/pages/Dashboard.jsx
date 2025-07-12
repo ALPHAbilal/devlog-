@@ -8,6 +8,7 @@ import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import { Plus, User, Settings, LogOut } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
+import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
@@ -55,21 +56,19 @@ export default function Dashboard() {
     // Update UI immediately for responsiveness
     setEntries(updatedEntries);
     
-    // Save to storage asynchronously
-    setTimeout(async () => {
-      try {
-        await storageWrapper.saveEntries(updatedEntries);
-        // Update storage info after save
-        updateStorageInfo();
-      } catch (error) {
-        console.error('Error saving entries:', error);
-        // Fallback is handled within storageWrapper
-      }
-    }, 0);
+    // Save to storage immediately
+    try {
+      await storageWrapper.saveEntries(updatedEntries);
+      // Update storage info after save
+      updateStorageInfo();
+    } catch (error) {
+      console.error('Error saving entries:', error);
+      // Fallback is handled within storageWrapper
+    }
   }, [updateStorageInfo]);
 
   // Create new entry function (moved up for keyboard shortcut access)
-  const createNewEntry = useCallback(() => {
+  const createNewEntry = useCallback(async () => {
     const newEntry = {
       id: crypto.randomUUID(),
       title: 'Untitled Document',
@@ -77,8 +76,33 @@ export default function Dashboard() {
       blocks: [],
       tags: [],
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      metadata: {
+        syncStatus: 'pending', // Track sync status
+        createdLocally: true
+      }
     };
+    
+    // Immediately save to IndexedDB for safety
+    try {
+      await IndexedDBAdapter.saveDocument(newEntry);
+      console.log('New document saved to IndexedDB immediately');
+    } catch (error) {
+      console.error('Failed to save to IndexedDB:', error);
+    }
+    
+    // Invalidate cache to ensure new document appears
+    try {
+      const adapter = await storageWrapper.getAdapter();
+      if (adapter && typeof adapter.invalidateCache === 'function') {
+        adapter.invalidateCache();
+      } else if (adapter && adapter.supabaseAdapter && typeof adapter.supabaseAdapter.invalidateCache === 'function') {
+        // For wrapped adapters
+        adapter.supabaseAdapter.invalidateCache();
+      }
+    } catch (error) {
+      console.warn('Could not invalidate cache:', error);
+    }
     
     const updatedEntries = [newEntry, ...entries];
     saveEntries(updatedEntries);
@@ -365,7 +389,7 @@ export default function Dashboard() {
       } else {
         // Show modal to create or select document
         setShowLinkModal(true);
-        setLinkCallback(() => (selected) => {
+        setLinkCallback(() => async (selected) => {
           if (selected.isNew) {
             // Create new document with the title
             const newEntry = {
@@ -375,8 +399,33 @@ export default function Dashboard() {
               blocks: [],
               tags: [],
               createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              updatedAt: new Date().toISOString(),
+              metadata: {
+                syncStatus: 'pending',
+                createdLocally: true
+              }
             };
+            
+            // Immediately save to IndexedDB
+            try {
+              await IndexedDBAdapter.saveDocument(newEntry);
+              console.log('New linked document saved to IndexedDB');
+            } catch (error) {
+              console.error('Failed to save to IndexedDB:', error);
+            }
+            
+            // Invalidate cache
+            try {
+              const adapter = await storageWrapper.getAdapter();
+              if (adapter && typeof adapter.invalidateCache === 'function') {
+                adapter.invalidateCache();
+              } else if (adapter && adapter.supabaseAdapter && typeof adapter.supabaseAdapter.invalidateCache === 'function') {
+                adapter.supabaseAdapter.invalidateCache();
+              }
+            } catch (error) {
+              console.warn('Could not invalidate cache:', error);
+            }
+            
             const updatedEntries = [newEntry, ...entries];
             saveEntries(updatedEntries);
             setExpandedEntry(newEntry);

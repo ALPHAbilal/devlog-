@@ -13,6 +13,7 @@ import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogEnhanced } from './ShareDialogEnhanced';
+import SaveIndicator from './SaveIndicator';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -74,13 +75,24 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [saveStatus, setSaveStatus] = useState(null);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
+  const saveStatusTimeoutRef = useRef(null);
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
   useEffect(() => {
     setTitle(entry.title);
     setTags(entry.tags || []);
   }, [entry.id]);
+  
+  // Cleanup save status timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveStatusTimeoutRef.current) {
+        clearTimeout(saveStatusTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Check for unsaved changes on mount
   useEffect(() => {
@@ -94,14 +106,17 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     };
     checkForBackup();
     
-    // Mark initial load as complete after 3 seconds to prevent cascade saves
+    // Mark initial load as complete - shorter delay for new documents
+    const isNewDocument = entry.metadata?.createdLocally || entry.blocks?.length === 0;
+    const delay = isNewDocument ? 500 : 2000; // 0.5s for new docs, 2s for existing
+    
     const timer = setTimeout(() => {
       console.log('ExpandedView: Initial load period complete, enabling saves');
       isInitialLoadRef.current = false;
-    }, 3000);
+    }, delay);
     
     return () => clearTimeout(timer);
-  }, [entry.id]);
+  }, [entry.id, entry.metadata]);
 
   // Handle internal updates
   useEffect(() => {
@@ -203,11 +218,37 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       //   updatedBlock: updatedBlocks.find(b => b.id === blockId)
       // });
       
+      // Show saving status
+      setSaveStatus('pending');
+      
       // Queue auto-save with debouncing
       autoSaveManager.queueSave(entry.id, { blocks: updatedBlocks }, async (docId, updates) => {
-        if (onUpdate) {
-          setIsInternalUpdate(true);
-          await onUpdate(docId, updates);
+        setSaveStatus('saving');
+        try {
+          if (onUpdate) {
+            setIsInternalUpdate(true);
+            const result = await onUpdate(docId, updates);
+            
+            // Check if saved to cloud or locally
+            if (result?.savedToCloud === false) {
+              setSaveStatus('offline');
+            } else {
+              setSaveStatus('saved');
+            }
+          } else {
+            setSaveStatus('saved');
+          }
+          
+          // Clear status after 2 seconds
+          if (saveStatusTimeoutRef.current) {
+            clearTimeout(saveStatusTimeoutRef.current);
+          }
+          saveStatusTimeoutRef.current = setTimeout(() => {
+            setSaveStatus(null);
+          }, 2000);
+        } catch (error) {
+          console.error('Save failed:', error);
+          setSaveStatus('error');
         }
       });
     }
@@ -504,45 +545,72 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     setShowBlockSelector(true);
   };
 
-  const handleTitleSave = () => {
-    if (onUpdate) {
-      onUpdate(entry.id, { title });
+  // Helper function for saving with status updates
+  const saveWithStatus = async (updates, description = 'changes') => {
+    setSaveStatus('saving');
+    try {
+      const result = await onUpdate(entry.id, updates);
+      
+      // Check if saved to cloud or locally
+      if (result?.savedToCloud === false) {
+        setSaveStatus('offline');
+      } else {
+        setSaveStatus('saved');
+      }
+      
+      // Clear status after 2 seconds
+      if (saveStatusTimeoutRef.current) {
+        clearTimeout(saveStatusTimeoutRef.current);
+      }
+      saveStatusTimeoutRef.current = setTimeout(() => {
+        setSaveStatus(null);
+      }, 2000);
+    } catch (error) {
+      console.error(`Failed to save ${description}:`, error);
+      setSaveStatus('error');
+      throw error;
+    }
+  };
+
+  const handleTitleSave = async () => {
+    if (onUpdate && title !== entry.title) {
+      await saveWithStatus({ title }, 'title');
     }
     setIsEditingTitle(false);
   };
 
 
   // Tag management functions
-  const addTag = () => {
+  const addTag = async () => {
     if (newTag.trim() && !tags.includes(newTag.trim())) {
       const updatedTags = [...tags, newTag.trim()];
       setTags(updatedTags);
       if (onUpdate) {
-        onUpdate(entry.id, { tags: updatedTags });
+        await saveWithStatus({ tags: updatedTags }, 'tags');
       }
       setNewTag('');
       setIsAddingTag(false);
     }
   };
 
-  const updateTag = (index, value) => {
+  const updateTag = async (index, value) => {
     if (value.trim() && !tags.includes(value.trim())) {
       const updatedTags = [...tags];
       updatedTags[index] = value.trim();
       setTags(updatedTags);
       if (onUpdate) {
-        onUpdate(entry.id, { tags: updatedTags });
+        await saveWithStatus({ tags: updatedTags }, 'tags');
       }
       setEditingTagIndex(null);
       setEditingTagValue('');
     }
   };
 
-  const deleteTag = (index) => {
+  const deleteTag = async (index) => {
     const updatedTags = tags.filter((_, i) => i !== index);
     setTags(updatedTags);
     if (onUpdate) {
-      onUpdate(entry.id, { tags: updatedTags });
+      await saveWithStatus({ tags: updatedTags }, 'tags');
     }
   };
 
@@ -631,6 +699,9 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             </div>
             {/* View Mode Toggle and Actions */}
             <div className="flex items-center gap-3">
+              {/* Save Status Indicator */}
+              <SaveIndicator status={saveStatus} />
+              
               {/* Progress Indicator for Large Documents */}
               {shouldUsePagination && progress && progress.total > 0 && (
                 <div className="flex items-center gap-2 text-xs text-text-secondary/60">

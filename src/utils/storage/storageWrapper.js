@@ -78,7 +78,15 @@ function createSupabaseWrapper(adapter) {
     // Add saveDocument method for saving single document
     async saveDocument(document) {
       return await adapter.saveDocument(document);
-    }
+    },
+    // Expose invalidateCache method
+    invalidateCache() {
+      if (adapter.invalidateCache) {
+        adapter.invalidateCache();
+      }
+    },
+    // Expose the underlying adapter for direct access if needed
+    supabaseAdapter: adapter
   };
 }
 
@@ -199,6 +207,12 @@ export function reset() {
   adapter = null;
   isInitialized = false;
   initPromise = null;
+}
+
+// Get the current adapter (useful for accessing adapter-specific methods)
+export async function getAdapter() {
+  await init();
+  return adapter;
 }
 
 // Re-export the init function for components that need it

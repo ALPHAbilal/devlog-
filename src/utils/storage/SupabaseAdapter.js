@@ -211,8 +211,8 @@ export class SupabaseAdapter {
     try {
       // Try the optimized get_documents_with_stats function
       const { data, error } = await supabase.rpc('get_documents_with_stats', {
-        p_user_id: this.userId,
-        p_limit: 20
+        p_limit: 20,
+        p_offset: 0
       });
       
       if (!error && data) {
@@ -235,6 +235,7 @@ export class SupabaseAdapter {
         .from('documents')
         .select('id, title, tags, created_at, updated_at, metadata, is_template')
         .eq('user_id', this.userId)
+        .is('deleted_at', null)
         .order('updated_at', { ascending: false })
         .limit(20);
       
@@ -257,18 +258,55 @@ export class SupabaseAdapter {
     
     console.log(`SupabaseAdapter: Found ${documents.length} documents`);
     
+    // Check IndexedDB for unsynced documents
+    let unsyncedDocs = [];
+    try {
+      const { IndexedDBAdapter } = await import('./IndexedDBAdapter.js');
+      const allIndexedDBDocs = await IndexedDBAdapter.getDocuments();
+      
+      // Filter for documents that are marked as unsynced
+      unsyncedDocs = allIndexedDBDocs.filter(doc => 
+        doc.metadata?.syncStatus === 'pending' || 
+        doc.metadata?.createdLocally === true
+      );
+      
+      console.log(`SupabaseAdapter: Found ${unsyncedDocs.length} unsynced documents in IndexedDB`);
+    } catch (error) {
+      console.warn('Could not check IndexedDB for unsynced documents:', error);
+    }
+    
+    // Create a map of Supabase documents for easy lookup
+    const supabaseDocMap = new Map(documents.map(doc => [doc.id, doc]));
+    
+    // Merge unsynced documents with Supabase results
+    const mergedDocuments = [...documents];
+    
+    for (const unsyncedDoc of unsyncedDocs) {
+      if (!supabaseDocMap.has(unsyncedDoc.id)) {
+        // This document only exists in IndexedDB
+        mergedDocuments.push({
+          ...unsyncedDoc,
+          created_at: unsyncedDoc.createdAt,
+          updated_at: unsyncedDoc.updatedAt,
+          is_template: unsyncedDoc.isTemplate || false
+        });
+      }
+    }
+    
+    console.log(`SupabaseAdapter: Total documents after merge: ${mergedDocuments.length}`);
+    
     // Transform documents to app format
-    const documentsWithBlocks = documents.map(doc => ({
+    const documentsWithBlocks = mergedDocuments.map(doc => ({
       id: doc.id,
       title: doc.title,
       preview: doc.metadata?.preview || doc.preview || 'Click to view document...',
-      createdAt: doc.created_at,
-      updatedAt: doc.updated_at,
-      isTemplate: doc.is_template || false,
+      createdAt: doc.created_at || doc.createdAt,
+      updatedAt: doc.updated_at || doc.updatedAt,
+      isTemplate: doc.is_template || doc.isTemplate || false,
       tags: doc.tags || [],
       metadata: doc.metadata || {},
       blocks: [], // Don't load blocks on document list - let ExpandedView handle it
-      blockCount: doc.metadata?.blockCount || doc.block_count || 0
+      blockCount: doc.metadata?.blockCount || doc.block_count || doc.blockCount || 0
     }));
     
     // Transform to legacy format
@@ -439,7 +477,9 @@ export class SupabaseAdapter {
         metadata: {
           ...(docData.metadata || {}),
           preview: preview,
-          blockCount: documentBlocks?.length || 0
+          blockCount: documentBlocks?.length || 0,
+          syncStatus: 'synced', // Mark as synced when saved to Supabase
+          lastSyncedAt: new Date().toISOString()
         },
         created_at: docData.createdAt || new Date().toISOString(),
         updated_at: new Date().toISOString()

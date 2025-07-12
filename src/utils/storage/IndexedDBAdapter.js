@@ -129,13 +129,23 @@ class IndexedDBAdapter {
     try {
       await this.init();
       
+      // Ensure sync status is set for tracking
+      const documentToSave = {
+        ...document,
+        metadata: {
+          ...document.metadata,
+          syncStatus: document.metadata?.syncStatus || 'pending',
+          savedAt: new Date().toISOString()
+        }
+      };
+      
       return new Promise((resolve, reject) => {
         const transaction = this.db.transaction(['documents'], 'readwrite');
         const store = transaction.objectStore('documents');
-        const request = store.put(document);
+        const request = store.put(documentToSave);
 
         request.onsuccess = () => {
-          resolve(document);
+          resolve(documentToSave);
         };
 
         request.onerror = () => {

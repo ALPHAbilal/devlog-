@@ -1,14 +1,41 @@
 import { useState, useEffect } from 'react';
-import { Search, Clock, ArrowRight, ChevronDown } from 'lucide-react';
+import { Clock, ArrowRight, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function HeroSectionV2() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  const [currentBlock, setCurrentBlock] = useState(0);
+  const [isTyping, setIsTyping] = useState(false);
+  const [typedContent, setTypedContent] = useState('');
 
-  // Simulate the search animation with requestAnimationFrame for better performance
+  // Demo content showing documentation workflow
+  const demoBlocks = [
+    {
+      type: 'heading',
+      content: 'WebSocket Connection Handling',
+      typed: true
+    },
+    {
+      type: 'text',
+      content: 'Implemented reconnection logic with exponential backoff to handle network interruptions gracefully.',
+      typed: true
+    },
+    {
+      type: 'code',
+      content: `const reconnect = () => {
+  const delay = Math.min(1000 * Math.pow(2, attempts), 30000);
+  setTimeout(() => connect(), delay);
+};`,
+      typed: false
+    },
+    {
+      type: 'link',
+      content: '[[WebSocket Best Practices]] [[Error Handling Patterns]]',
+      typed: false
+    }
+  ];
+
+  // Simulate the documentation workflow
   useEffect(() => {
     let timeoutId;
     let mounted = true;
@@ -16,39 +43,41 @@ export default function HeroSectionV2() {
     const sequence = async () => {
       if (!mounted) return;
       
-      // Wait a bit then start typing
-      await new Promise(resolve => timeoutId = setTimeout(resolve, 1500));
+      // Wait before starting
+      await new Promise(resolve => timeoutId = setTimeout(resolve, 1000));
       if (!mounted) return;
       
-      // Type "cors error"
-      const term = 'cors error';
-      for (let i = 0; i <= term.length; i++) {
+      // Show blocks one by one
+      for (let i = 0; i < demoBlocks.length; i++) {
         if (!mounted) return;
-        setSearchTerm(term.substring(0, i));
-        await new Promise(resolve => timeoutId = setTimeout(resolve, 100));
+        setCurrentBlock(i);
+        
+        if (demoBlocks[i].typed) {
+          setIsTyping(true);
+          const content = demoBlocks[i].content;
+          
+          // Type out the content
+          for (let j = 0; j <= content.length; j++) {
+            if (!mounted) return;
+            setTypedContent(content.substring(0, j));
+            await new Promise(resolve => timeoutId = setTimeout(resolve, 50));
+          }
+          setIsTyping(false);
+        }
+        
+        await new Promise(resolve => timeoutId = setTimeout(resolve, 1500));
       }
       
-      // Trigger search
-      await new Promise(resolve => timeoutId = setTimeout(resolve, 300));
+      // Reset after showing all blocks
+      await new Promise(resolve => timeoutId = setTimeout(resolve, 2000));
       if (!mounted) return;
-      setIsSearching(true);
-      
-      // Show result quickly
-      await new Promise(resolve => timeoutId = setTimeout(resolve, 300));
-      if (!mounted) return;
-      setIsSearching(false);
-      setShowResult(true);
-      
-      // Reset after a delay
-      await new Promise(resolve => timeoutId = setTimeout(resolve, 4000));
-      if (!mounted) return;
-      setSearchTerm('');
-      setShowResult(false);
+      setCurrentBlock(0);
+      setTypedContent('');
     };
 
     const interval = setInterval(() => {
       if (mounted) sequence();
-    }, 8000);
+    }, 10000);
     sequence(); // Run immediately
 
     return () => {
@@ -73,16 +102,16 @@ export default function HeroSectionV2() {
           {/* Left side - Value proposition */}
           <div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Never solve the
+              Document as you
               <br />
-              <span className="text-accent-green">same problem</span>
+              <span className="text-accent-green">code</span>.
               <br />
-              twice.
+              Find when you need.
             </h1>
             
             <p className="text-xl text-text-secondary mb-8 leading-relaxed">
-              Your code solutions, instantly searchable. 
-              Build your personal knowledge base that grows with every bug you fix.
+              The documentation tool that thinks like a developer. 
+              Capture solutions, link concepts, and build your searchable knowledge base.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -92,7 +121,7 @@ export default function HeroSectionV2() {
                          bg-accent-green text-dark-primary rounded-lg font-medium
                          hover:bg-accent-green/80 transition-all group"
               >
-                Start Building Your Second Brain
+                Start Documenting Better
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
               
@@ -117,74 +146,95 @@ export default function HeroSectionV2() {
             </div>
           </div>
 
-          {/* Right side - Animated demo */}
+          {/* Right side - Documentation demo */}
           <div className="relative">
-            <div className="bg-dark-secondary rounded-lg p-6 shadow-2xl border border-dark-secondary/50">
-              {/* Mock search bar */}
-              <div className="bg-dark-primary rounded-lg p-4 mb-4">
+            <div className="bg-dark-secondary rounded-lg shadow-2xl border border-dark-secondary/50 overflow-hidden">
+              {/* Editor header */}
+              <div className="bg-dark-primary px-4 py-3 border-b border-dark-secondary/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <Search size={20} className="text-text-secondary" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    readOnly
-                    placeholder="Search your solutions..."
-                    className="bg-transparent outline-none text-text-primary flex-1"
-                  />
-                  {isSearching && (
-                    <div className="text-accent-green text-sm">Searching...</div>
-                  )}
+                  <div className="flex gap-1.5">
+                    <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                    <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+                  </div>
+                  <span className="text-sm text-text-secondary">Documenting your solution...</span>
+                </div>
+                <div className="text-xs text-text-secondary">
+                  Press <code className="px-1.5 py-0.5 bg-dark-secondary rounded">/ </code> for commands
                 </div>
               </div>
 
-              {/* Search result */}
-              <div className={`transition-all duration-500 ${showResult ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'}`}>
-                {showResult && (
-                  <>
-                    <div className="text-xs text-accent-green mb-2 flex items-center gap-2">
-                      <Clock size={12} />
-                      Found in 0.3 seconds
-                    </div>
-                    
-                    <div className="bg-dark-primary rounded-lg p-4 border border-accent-green/30">
-                      <h3 className="font-medium text-text-primary mb-2">
-                        ✅ CORS Configuration for Express.js
-                      </h3>
-                      <pre className="text-sm text-text-secondary mb-3 font-mono">
-{`app.use(cors({
-  origin: process.env.CLIENT_URL,
-  credentials: true
-}));`}
-                      </pre>
-                      <div className="flex items-center gap-4 text-xs text-text-secondary">
-                        <span>Last used: 2 weeks ago</span>
-                        <span>•</span>
-                        <span>Project: E-commerce API</span>
-                      </div>
-                    </div>
+              {/* Editor content */}
+              <div className="p-6 space-y-4 min-h-[400px]">
+                {/* Heading block */}
+                {currentBlock >= 0 && (
+                  <div className={`transition-all duration-300 ${currentBlock >= 0 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <h2 className="text-2xl font-bold text-text-primary">
+                      {demoBlocks[0].typed && currentBlock === 0 && isTyping ? typedContent : (currentBlock >= 0 ? demoBlocks[0].content : '')}
+                      {currentBlock === 0 && isTyping && <span className="animate-pulse">|</span>}
+                    </h2>
+                  </div>
+                )}
 
-                    <div className="mt-4 text-sm text-text-secondary">
-                      Also found: 
-                      <span className="text-accent-green"> 4 related solutions</span>
+                {/* Text block */}
+                {currentBlock >= 1 && (
+                  <div className={`transition-all duration-300 ${currentBlock >= 1 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <p className="text-text-secondary">
+                      {demoBlocks[1].typed && currentBlock === 1 && isTyping ? typedContent : (currentBlock >= 1 ? demoBlocks[1].content : '')}
+                      {currentBlock === 1 && isTyping && <span className="animate-pulse">|</span>}
+                    </p>
+                  </div>
+                )}
+
+                {/* Code block */}
+                {currentBlock >= 2 && (
+                  <div className={`transition-all duration-300 ${currentBlock >= 2 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <div className="bg-dark-primary rounded-lg p-4 border border-dark-secondary/50">
+                      <pre className="text-sm font-mono text-accent-green">
+                        <code>{demoBlocks[2].content}</code>
+                      </pre>
                     </div>
-                  </>
+                  </div>
+                )}
+
+                {/* Link block */}
+                {currentBlock >= 3 && (
+                  <div className={`transition-all duration-300 ${currentBlock >= 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                    <div className="flex gap-2">
+                      <span className="text-sm px-3 py-1 bg-accent-green/10 text-accent-green rounded-full hover:bg-accent-green/20 cursor-pointer transition-colors">
+                        [[WebSocket Best Practices]]
+                      </span>
+                      <span className="text-sm px-3 py-1 bg-accent-green/10 text-accent-green rounded-full hover:bg-accent-green/20 cursor-pointer transition-colors">
+                        [[Error Handling Patterns]]
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Slash command hint */}
+                {currentBlock < demoBlocks.length - 1 && (
+                  <div className="text-xs text-text-secondary/50 animate-pulse">
+                    Type to continue documenting...
+                  </div>
                 )}
               </div>
-
-              {/* Placeholder when not showing result */}
-              {!showResult && (
-                <div className="space-y-3">
-                  <div className="h-20 bg-dark-primary rounded animate-pulse" />
-                  <div className="h-20 bg-dark-primary rounded animate-pulse opacity-50" />
-                </div>
-              )}
             </div>
 
-            {/* Floating metrics */}
+            {/* Floating features */}
             <div className="absolute -bottom-4 -right-4 bg-dark-primary border border-accent-green/30 
                             rounded-lg px-4 py-2 shadow-lg">
-              <div className="text-2xl font-bold text-accent-green">50x</div>
-              <div className="text-xs text-text-secondary">Faster than searching</div>
+              <div className="text-sm font-medium text-accent-green">Rich Markdown</div>
+              <div className="text-xs text-text-secondary">Code, links, and more</div>
+            </div>
+
+            {/* Feature tags */}
+            <div className="absolute -top-3 right-4 flex gap-2">
+              <span className="text-xs px-2 py-1 bg-accent-green/20 text-accent-green rounded-full">
+                Slash Commands
+              </span>
+              <span className="text-xs px-2 py-1 bg-accent-green/20 text-accent-green rounded-full">
+                Live Preview
+              </span>
             </div>
           </div>
         </div>

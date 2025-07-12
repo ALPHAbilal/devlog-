@@ -1,36 +1,42 @@
 import { useState } from 'react';
-import { Play, Pause, Terminal, Code2, Search, Clock, CheckCircle } from 'lucide-react';
+import { Play, Pause, Terminal, Code2, FileText, Hash, Link2, CheckCircle, Save } from 'lucide-react';
 
 const workflowSteps = [
   {
     time: '0:00',
-    title: 'Hit a familiar error',
-    description: 'CORS error in production',
+    title: 'Encounter a problem',
+    description: 'CORS error blocks your API call',
     icon: <Terminal className="text-red-400" size={20} />
   },
   {
-    time: '0:08',
-    title: 'Search DevLog',
-    description: 'Type "cors production"',
-    icon: <Search className="text-accent-green" size={20} />
+    time: '0:05',
+    title: 'Solve it (the hard way)',
+    description: 'Research, debug, test different solutions',
+    icon: <Code2 className="text-yellow-400" size={20} />
   },
   {
-    time: '0:12',
-    title: 'Find your solution',
-    description: 'With full context from 3 months ago',
-    icon: <CheckCircle className="text-accent-green" size={20} />
-  },
-  {
-    time: '0:18',
-    title: 'Copy & implement',
-    description: 'Working code with your notes',
-    icon: <Code2 className="text-blue-400" size={20} />
+    time: '0:15',
+    title: 'Document immediately',
+    description: 'Create a DevLog entry while it\'s fresh',
+    icon: <FileText className="text-accent-green" size={20} />
   },
   {
     time: '0:25',
-    title: 'Back to building',
-    description: 'Problem solved in seconds, not hours',
-    icon: <Clock className="text-accent-green" size={20} />
+    title: 'Add context & code',
+    description: 'Include working solution with explanation',
+    icon: <Save className="text-blue-400" size={20} />
+  },
+  {
+    time: '0:35',
+    title: 'Tag & link',
+    description: 'Connect to related docs (#cors, [[Auth Setup]])',
+    icon: <Link2 className="text-purple-400" size={20} />
+  },
+  {
+    time: '0:45',
+    title: 'Find instantly next time',
+    description: 'Search "cors" → Your solution appears',
+    icon: <CheckCircle className="text-accent-green" size={20} />
   }
 ];
 
@@ -48,11 +54,11 @@ export default function WorkflowVideoSection() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Your Daily Workflow, <span className="text-accent-green">Transformed</span>
+            From Problem to <span className="text-accent-green">Permanent Solution</span>
           </h2>
           <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-            Watch how DevLog turns hours of searching into seconds of finding.
-            This is a real developer solving a real problem.
+            Watch how DevLog transforms your debugging sessions into a growing knowledge base. 
+            Document once, benefit forever.
           </p>
         </div>
 
@@ -60,33 +66,55 @@ export default function WorkflowVideoSection() {
           {/* Video player */}
           <div className="lg:col-span-2">
             <div className="relative bg-dark-primary rounded-lg overflow-hidden shadow-2xl">
-              {/* Video placeholder */}
+              {/* Video placeholder showing documentation process */}
               <div className="aspect-video bg-gradient-to-br from-dark-secondary to-dark-primary 
                               flex items-center justify-center relative">
-                {/* Terminal mockup */}
-                <div className="absolute inset-4 bg-black/50 rounded-lg p-4 font-mono text-sm">
+                {/* DevLog editor mockup */}
+                <div className="absolute inset-4 bg-black/50 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-4">
                     <div className="w-3 h-3 rounded-full bg-red-500" />
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
                     <div className="w-3 h-3 rounded-full bg-green-500" />
+                    <span className="text-xs text-text-secondary ml-2">DevLog Editor</span>
                   </div>
                   
-                  {currentStep >= 0 && (
-                    <div className="text-red-400 mb-2">
-                      Error: Access to fetch at 'https://api.example.com' from origin 
-                      'http://localhost:3000' has been blocked by CORS policy
-                    </div>
-                  )}
-                  
-                  {currentStep >= 1 && (
-                    <div className="text-accent-green mb-2">
-                      $ devlog search "cors production"
-                    </div>
-                  )}
-                  
                   {currentStep >= 2 && (
-                    <div className="text-text-primary">
-                      Found: CORS Configuration for Production (Last used: 3 months ago)
+                    <div className="space-y-3">
+                      <h3 className="text-text-primary font-medium">
+                        {currentStep >= 3 ? 'Fixed CORS error in production' : 'New Document'}
+                      </h3>
+                      
+                      {currentStep >= 4 && (
+                        <>
+                          <div className="flex gap-2">
+                            <span className="text-xs px-2 py-1 bg-accent-green/20 text-accent-green rounded">
+                              #cors
+                            </span>
+                            <span className="text-xs px-2 py-1 bg-accent-green/20 text-accent-green rounded">
+                              #express
+                            </span>
+                          </div>
+                          
+                          <div className="bg-black/30 rounded p-2 font-mono text-xs text-accent-green">
+                            <pre>{`app.use(cors({
+  origin: process.env.CLIENT_URL,
+  credentials: true
+}));`}</pre>
+                          </div>
+                        </>
+                      )}
+                      
+                      {currentStep >= 5 && (
+                        <p className="text-sm text-text-secondary">
+                          Related: <span className="text-accent-green">[[Authentication Setup]]</span>
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {currentStep < 2 && (
+                    <div className="text-red-400 font-mono text-sm">
+                      Error: Access to fetch at 'https://api.example.com' blocked by CORS
                     </div>
                   )}
                 </div>
@@ -120,12 +148,12 @@ export default function WorkflowVideoSection() {
                   <div className="flex-1 bg-dark-primary rounded-full h-2 relative">
                     <div 
                       className="absolute left-0 top-0 h-full bg-accent-green rounded-full transition-all"
-                      style={{ width: `${(currentStep + 1) * 20}%` }}
+                      style={{ width: `${(currentStep + 1) * 16.67}%` }}
                     />
                   </div>
                   
                   <span className="text-sm text-text-secondary">
-                    {workflowSteps[currentStep]?.time || '0:00'} / 0:30
+                    {workflowSteps[currentStep]?.time || '0:00'} / 1:00
                   </span>
                 </div>
               </div>
@@ -134,7 +162,7 @@ export default function WorkflowVideoSection() {
 
           {/* Timeline */}
           <div className="space-y-4">
-            <h3 className="text-xl font-semibold mb-4">What happens:</h3>
+            <h3 className="text-xl font-semibold mb-4">The DevLog Workflow:</h3>
             
             {workflowSteps.map((step, index) => (
               <button
@@ -164,18 +192,34 @@ export default function WorkflowVideoSection() {
           </div>
         </div>
 
+        {/* Key benefits */}
+        <div className="grid md:grid-cols-3 gap-6 mt-12">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-accent-green mb-2">2 minutes</div>
+            <p className="text-text-secondary">Average time to document a solution properly</p>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-accent-green mb-2">2 hours</div>
+            <p className="text-text-secondary">Saved when you encounter it again</p>
+          </div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-accent-green mb-2">∞ value</div>
+            <p className="text-text-secondary">Compounds as your knowledge base grows</p>
+          </div>
+        </div>
+
         {/* Bottom CTA */}
         <div className="text-center mt-12">
           <p className="text-lg text-text-secondary mb-6">
-            Stop wasting hours. Start building faster.
+            Stop losing your hard-won solutions. Start building your second brain.
           </p>
           <button
             onClick={() => window.location.href = '/auth'}
             className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
                        rounded-lg font-medium text-lg hover:bg-accent-green/80 transition-all"
           >
-            Start Your Free Trial
-            <Clock size={20} />
+            Start Documenting Today
+            <FileText size={20} />
           </button>
         </div>
       </div>

@@ -3,27 +3,27 @@ import { useEffect } from 'react';
 
 const problems = [
   {
-    icon: <MessageSquare className="text-red-400" size={24} />,
-    title: 'Lost in Slack threads',
-    description: 'That perfect solution buried in a 200-message thread from 3 months ago',
+    icon: <BookOpen className="text-red-400" size={24} />,
+    title: 'No time to document',
+    description: 'You solve problems daily but never capture the solutions properly',
     delay: '0ms'
   },
   {
-    icon: <Search className="text-orange-400" size={24} />,
-    title: 'Browser bookmark chaos',
-    description: 'Hundreds of "useful" links you\'ll never find when you need them',
+    icon: <MessageSquare className="text-orange-400" size={24} />,
+    title: 'Knowledge scattered everywhere',
+    description: 'Solutions in Slack, notes in Notion, code in GitHub - nothing connected',
     delay: '100ms'
   },
   {
-    icon: <BookOpen className="text-yellow-400" size={24} />,
-    title: 'ChatGPT amnesia',
-    description: 'That brilliant AI explanation you can\'t recreate or find again',
+    icon: <Brain className="text-yellow-400" size={24} />,
+    title: 'Context evaporates',
+    description: 'Three months later, you can\'t remember why that solution worked',
     delay: '200ms'
   },
   {
-    icon: <Brain className="text-purple-400" size={24} />,
-    title: 'Context lost forever',
-    description: 'You fixed it before, but can\'t remember why that solution worked',
+    icon: <Search className="text-purple-400" size={24} />,
+    title: 'Can\'t find what you wrote',
+    description: 'You documented it somewhere, but good luck finding it when you need it',
     delay: '300ms'
   }
 ];
@@ -53,11 +53,11 @@ export default function ProblemSection() {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            Sound familiar?
+            The documentation problem
           </h2>
           <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-            Every developer loses hours searching for solutions they've already found. 
-            It's not your fault — it's a broken system.
+            You're too busy coding to document properly. And when you do, 
+            it's scattered across tools that weren't built for developers.
           </p>
         </div>
 
@@ -97,13 +97,13 @@ export default function ProblemSection() {
           </div>
           
           <h3 className="text-3xl font-bold mb-4">
-            Your code. Your solutions. 
-            <span className="text-accent-green"> Intelligently connected.</span>
+            Documentation that 
+            <span className="text-accent-green"> actually works</span>
           </h3>
           
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            DevLog creates your personal knowledge graph, connecting every solution 
-            with its context, making everything instantly searchable.
+            DevLog makes documenting as natural as coding. Capture solutions in context, 
+            connect related concepts, and build a searchable knowledge base that grows with you.
           </p>
         </div>
       </div>

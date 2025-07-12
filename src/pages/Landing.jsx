@@ -2,7 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LogoMinimal from '../components/LogoMinimal';
 import { Code2, Link2, Shield, Zap, GitBranch, FolderTree, ArrowRight, Menu, X } from 'lucide-react';
-import HeroSectionV2 from '../components/HeroSectionV2';
+import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
 import DeveloperTestimonial, { testimonials } from '../components/DeveloperTestimonial';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
@@ -10,8 +10,11 @@ import { DemoModeProvider } from '../contexts/DemoModeContext';
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
 const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
-const KnowledgeGraphDemo = lazy(() => import('../components/KnowledgeGraphDemo'));
+const LinkingDemo = lazy(() => import('../components/LinkingDemo'));
 const WorkflowVideoSection = lazy(() => import('../components/WorkflowVideoSection'));
+const InteractiveDocumentDemoUnified = lazy(() => import('../components/InteractiveDocumentDemoUnified'));
+const HowItWorks = lazy(() => import('../components/HowItWorks'));
+const InteractiveDocumentDemo = lazy(() => import('../components/InteractiveDocumentDemo'));
 
 function LandingContent() {
   const navigate = useNavigate();
@@ -20,33 +23,33 @@ function LandingContent() {
   const features = [
     {
       icon: <Code2 className="text-accent-green" size={32} />,
-      title: 'Never lose a solution again',
-      description: 'Code blocks with syntax highlighting, file paths, and version tracking. Your snippets, organized.'
+      title: 'Rich markdown editor built for code',
+      description: 'Syntax highlighting, slash commands, and keyboard shortcuts. Document as fast as you code.'
     },
     {
       icon: <Link2 className="text-accent-green" size={32} />,
-      title: 'Connect ideas like you think',
-      description: 'Link between notes, code, and resources. Build your personal knowledge graph naturally.'
-    },
-    {
-      icon: <Zap className="text-accent-green" size={32} />,
-      title: 'Find any snippet in milliseconds',
-      description: 'Full-text search across all your notes. Never solve the same problem twice.'
+      title: 'Wiki-style linking between documents',
+      description: 'Create connections with [[links]]. Build your personal knowledge graph naturally.'
     },
     {
       icon: <FolderTree className="text-accent-green" size={32} />,
-      title: 'Organize by project, language, or concept',
-      description: 'Flexible tagging and structure. Your knowledge scales with your career.'
+      title: 'Organize with tags and collections',
+      description: 'Structure by project, technology, or concept. Your documentation scales with your career.'
     },
     {
       icon: <GitBranch className="text-accent-green" size={32} />,
-      title: 'Learn from your past approaches',
-      description: 'Track how your solutions evolved. See what worked and what didn\'t.'
+      title: 'Version history for every document',
+      description: 'Track how your solutions evolved. See what changed and why.'
+    },
+    {
+      icon: <Zap className="text-accent-green" size={32} />,
+      title: 'Lightning-fast search when you need it',
+      description: 'Find any document, code block, or concept instantly. Search is the result of good documentation.'
     },
     {
       icon: <Shield className="text-accent-green" size={32} />,
-      title: 'Your data stays yours',
-      description: 'Export anytime. No vendor lock-in. Self-host if you want. We respect your ownership.'
+      title: 'Your knowledge, your control',
+      description: 'Export anytime. API access. Self-host option. Your documentation stays yours.'
     }
   ];
 
@@ -145,19 +148,61 @@ function LandingContent() {
       )}
 
       {/* New Hero Section */}
-      <HeroSectionV2 />
+      <HeroSectionV3 />
 
       {/* Problem Section */}
       <ProblemSection />
+      
+      {/* How It Works */}
+      <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading...</div></div>}>
+        <HowItWorks />
+      </Suspense>
+      
+      {/* Interactive Document Demo */}
+      <section className="py-20 px-4 md:px-6 bg-dark-secondary/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Experience the <span className="text-accent-green">DevLog Editor</span>
+            </h2>
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+              Rich markdown, code blocks, linking, and tags. Everything you need to document 
+              your solutions properly. Try it yourself below.
+            </p>
+          </div>
+          <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading editor...</div></div>}>
+            <InteractiveDocumentDemoUnified />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Interactive Document Demo */}
+      <section className="py-20 px-4 md:px-6 bg-dark-secondary/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Experience the <span className="text-accent-green">DevLog Editor</span>
+            </h2>
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+              Rich markdown, slash commands, and intelligent linking. 
+              This is how documentation should feel.
+            </p>
+          </div>
+          
+          <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading editor demo...</div></div>}>
+            <InteractiveDocumentDemo />
+          </Suspense>
+        </div>
+      </section>
 
       {/* Developer Testimonial */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <DeveloperTestimonial {...testimonials[0]} />
       </div>
 
-      {/* Knowledge Graph Demo */}
-      <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading visualization...</div></div>}>
-        <KnowledgeGraphDemo />
+      {/* Linking Demo */}
+      <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading demo...</div></div>}>
+        <LinkingDemo />
       </Suspense>
 
       {/* Developer Testimonial */}
@@ -183,9 +228,10 @@ function LandingContent() {
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4">Stop Searching. Start Finding.</h3>
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4">Everything You Need to Document Better</h3>
           <p className="text-text-secondary text-center mb-8 md:mb-12 max-w-2xl mx-auto">
-            Built by developers who got tired of losing solutions in Slack threads, browser bookmarks, and random text files.
+            Built by developers who believe documentation should be as enjoyable as coding. 
+            Every feature designed to make capturing knowledge effortless.
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -200,6 +246,91 @@ function LandingContent() {
                 <p className="text-text-secondary text-sm">{feature.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How DevLog Works */}
+      <section className="py-20 px-4 md:px-6 bg-dark-secondary/20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              How <span className="text-accent-green">DevLog</span> Works
+            </h2>
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+              A simple workflow that transforms how you capture and retrieve knowledge
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8">
+            {/* Step 1 */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-accent-green">1</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Encounter Problem</h3>
+              <p className="text-text-secondary text-sm">
+                Hit a bug, learn something new, or solve a challenge
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-accent-green">2</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Document Solution</h3>
+              <p className="text-text-secondary text-sm">
+                Open DevLog, capture code, context, and explanation
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-accent-green">3</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Link & Tag</h3>
+              <p className="text-text-secondary text-sm">
+                Connect to related docs, add tags for organization
+              </p>
+            </div>
+
+            {/* Step 4 */}
+            <div className="text-center">
+              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-accent-green">4</span>
+              </div>
+              <h3 className="text-lg font-semibold mb-2">Find Instantly</h3>
+              <p className="text-text-secondary text-sm">
+                Search when needed, find exactly what you documented
+              </p>
+            </div>
+          </div>
+
+          {/* Visual workflow */}
+          <div className="mt-16 bg-dark-secondary rounded-lg p-8 border border-dark-secondary/50">
+            <div className="grid md:grid-cols-3 gap-8 items-center">
+              <div className="text-center">
+                <Code2 className="text-accent-green mx-auto mb-3" size={48} />
+                <h4 className="font-semibold mb-2">Write Once</h4>
+                <p className="text-text-secondary text-sm">
+                  Document your solution properly, with all the context
+                </p>
+              </div>
+              
+              <div className="hidden md:flex items-center justify-center">
+                <ArrowRight className="text-accent-green" size={32} />
+              </div>
+
+              <div className="text-center">
+                <Zap className="text-accent-green mx-auto mb-3" size={48} />
+                <h4 className="font-semibold mb-2">Find Forever</h4>
+                <p className="text-text-secondary text-sm">
+                  Your future self (and team) will thank you
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

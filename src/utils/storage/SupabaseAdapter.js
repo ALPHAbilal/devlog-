@@ -262,8 +262,8 @@ export class SupabaseAdapter {
     // Check IndexedDB for unsynced documents
     let unsyncedDocs = [];
     try {
-      const { IndexedDBAdapter } = await import('./IndexedDBAdapter.js');
-      const allIndexedDBDocs = await IndexedDBAdapter.getDocuments();
+      const IndexedDBAdapter = (await import('./IndexedDBAdapter.js')).default;
+      const allIndexedDBDocs = await IndexedDBAdapter.getAllDocuments();
       
       // Filter for documents that are marked as unsynced
       unsyncedDocs = allIndexedDBDocs.filter(doc => 
@@ -394,7 +394,7 @@ export class SupabaseAdapter {
         .from('blocks')
         .select('id')
         .eq('document_id', documentId)
-        .eq('deleted_at', null)
+        .is('deleted_at', null)
         .limit(1);
       
       if (!checkError && existingBlocks && existingBlocks.length > 0) {

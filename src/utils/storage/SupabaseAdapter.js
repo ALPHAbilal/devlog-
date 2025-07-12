@@ -211,6 +211,7 @@ export class SupabaseAdapter {
     try {
       // Try the optimized get_documents_with_stats function
       const { data, error } = await supabase.rpc('get_documents_with_stats', {
+        p_user_id: this.userId,
         p_limit: 20,
         p_offset: 0
       });
@@ -393,6 +394,7 @@ export class SupabaseAdapter {
         .from('blocks')
         .select('id')
         .eq('document_id', documentId)
+        .eq('deleted_at', null)
         .limit(1);
       
       if (!checkError && existingBlocks && existingBlocks.length > 0) {

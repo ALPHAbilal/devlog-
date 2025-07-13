@@ -10,11 +10,7 @@ import { DemoModeProvider } from '../contexts/DemoModeContext';
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
 const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
-const LinkingDemo = lazy(() => import('../components/LinkingDemo'));
-const WorkflowVideoSection = lazy(() => import('../components/WorkflowVideoSection'));
-const InteractiveDocumentDemoUnified = lazy(() => import('../components/InteractiveDocumentDemoUnified'));
 const HowItWorks = lazy(() => import('../components/HowItWorks'));
-const InteractiveDocumentDemo = lazy(() => import('../components/InteractiveDocumentDemo'));
 
 function LandingContent() {
   const navigate = useNavigate();
@@ -158,62 +154,16 @@ function LandingContent() {
         <HowItWorks />
       </Suspense>
       
-      {/* Interactive Document Demo */}
-      <section className="py-20 px-4 md:px-6 bg-dark-secondary/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Experience the <span className="text-accent-green">DevLog Editor</span>
-            </h2>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-              Rich markdown, code blocks, linking, and tags. Everything you need to document 
-              your solutions properly. Try it yourself below.
-            </p>
-          </div>
-          <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading editor...</div></div>}>
-            <InteractiveDocumentDemoUnified />
-          </Suspense>
-        </div>
-      </section>
-
-      {/* Interactive Document Demo */}
-      <section className="py-20 px-4 md:px-6 bg-dark-secondary/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              Experience the <span className="text-accent-green">DevLog Editor</span>
-            </h2>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-              Rich markdown, slash commands, and intelligent linking. 
-              This is how documentation should feel.
-            </p>
-          </div>
-          
-          <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading editor demo...</div></div>}>
-            <InteractiveDocumentDemo />
-          </Suspense>
-        </div>
-      </section>
 
       {/* Developer Testimonial */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <DeveloperTestimonial {...testimonials[0]} />
       </div>
 
-      {/* Linking Demo */}
-      <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading demo...</div></div>}>
-        <LinkingDemo />
-      </Suspense>
-
       {/* Developer Testimonial */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <DeveloperTestimonial {...testimonials[1]} />
       </div>
-
-      {/* Workflow Video Section */}
-      <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading workflow demo...</div></div>}>
-        <WorkflowVideoSection />
-      </Suspense>
       
       {/* More testimonials */}
       <div className="max-w-4xl mx-auto px-4 py-8">

@@ -4,12 +4,10 @@ import LogoMinimal from '../components/LogoMinimal';
 import { Code2, Link2, Shield, Zap, GitBranch, FolderTree, ArrowRight, Menu, X } from 'lucide-react';
 import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
-import DeveloperTestimonial, { testimonials } from '../components/DeveloperTestimonial';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
-const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
 
 function LandingContent() {
   const navigate = useNavigate();
@@ -43,8 +41,8 @@ function LandingContent() {
     },
     {
       icon: <Shield className="text-accent-green" size={32} />,
-      title: 'Your knowledge, your control',
-      description: 'Export anytime. API access. Self-host option. Your documentation stays yours.'
+      title: 'Private & Secure',
+      description: 'Your documentation is private by default. Only you have access to your knowledge base.'
     }
   ];
 
@@ -149,10 +147,6 @@ function LandingContent() {
       <ProblemSection />
       
 
-      {/* Developer Testimonial */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <DeveloperTestimonial {...testimonials[0]} />
-      </div>
 
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6">
@@ -176,10 +170,6 @@ function LandingContent() {
       </section>
 
 
-      {/* Testimonials */}
-      <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="text-text-secondary">Loading testimonials...</div></div>}>
-        <TestimonialsSection />
-      </Suspense>
 
       {/* Pricing */}
       <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading pricing...</div></div>}>
@@ -219,10 +209,6 @@ function LandingContent() {
           </div>
         </div>
         
-        {/* Urgency indicator */}
-        <div className="absolute bottom-4 right-4 text-xs text-text-secondary">
-          Offer expires in 48 hours
-        </div>
       </section>
 
       {/* Footer */}

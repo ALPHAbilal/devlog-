@@ -256,7 +256,7 @@ export default function SharedDocument() {
         )}
 
         {/* Blocks */}
-        <div className="space-y-2">
+        <div className="space-y-4">
           {document.blocks && document.blocks.map((block, index) => (
             <div key={block.id} className="relative">
               <Block

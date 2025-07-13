@@ -187,34 +187,6 @@ function LandingContent() {
       </Suspense>
 
 
-      {/* Trust Elements */}
-      <section className="py-16 px-6 bg-dark-secondary/20">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <div>
-              <Shield className="text-accent-green mx-auto mb-3" size={40} />
-              <h4 className="text-lg font-semibold mb-2">Your Data, Always</h4>
-              <p className="text-text-secondary text-sm">
-                Export anytime. No vendor lock-in. Self-host option available.
-              </p>
-            </div>
-            <div>
-              <GitBranch className="text-accent-green mx-auto mb-3" size={40} />
-              <h4 className="text-lg font-semibold mb-2">Open Development</h4>
-              <p className="text-text-secondary text-sm">
-                Built in the open. Community-driven. Your feedback shapes the product.
-              </p>
-            </div>
-            <div>
-              <Zap className="text-accent-green mx-auto mb-3" size={40} />
-              <h4 className="text-lg font-semibold mb-2">Developer Focused</h4>
-              <p className="text-text-secondary text-sm">
-                GitHub SSO. API access. Keyboard-first. Built how developers work.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20 px-6 relative">

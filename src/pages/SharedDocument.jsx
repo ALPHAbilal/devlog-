@@ -179,7 +179,7 @@ export default function SharedDocument() {
   const canDownload = permissions.includes('download');
 
   return (
-    <div className="min-h-screen bg-dark-primary">
+    <div className="h-screen bg-dark-primary overflow-y-auto">
       {/* Header */}
       <div className="bg-dark-lighter border-b border-gray-700 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -240,7 +240,7 @@ export default function SharedDocument() {
       )}
 
       {/* Document Content */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8 pb-20">
         {/* Tags */}
         {document.tags && document.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
@@ -263,9 +263,12 @@ export default function SharedDocument() {
                 block={block}
                 isFirst={index === 0}
                 isLast={index === document.blocks.length - 1}
-                onUpdate={canEdit ? () => {} : null} // Disable editing for now
-                readOnly={!canEdit}
-                isShared={true}
+                onUpdate={() => {}}
+                onDelete={() => {}}
+                onAddBelow={() => {}}
+                onConvert={() => {}}
+                showAddButton={false}
+                isFocused={false}
               />
               
               {/* Comment indicator */}
@@ -284,7 +287,7 @@ export default function SharedDocument() {
 
         {/* Watermark Overlay */}
         {shareSettings.watermark && (
-          <div className="fixed inset-0 pointer-events-none z-50">
+          <div className="fixed inset-0 pointer-events-none z-30 overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center opacity-5">
               <div className="transform rotate-45 text-6xl font-bold text-white whitespace-nowrap">
                 {document.watermark}

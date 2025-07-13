@@ -268,7 +268,7 @@ export default function SharedDocument() {
                 onAddBelow={() => {}}
                 onConvert={() => {}}
                 showAddButton={false}
-                isFocused={false}
+                isFocused={true}
               />
               
               {/* Comment indicator */}

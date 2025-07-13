@@ -102,7 +102,7 @@ export default function SharedDocument() {
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-primary flex items-center justify-center">
-        <div className="text-gray-400">Loading...</div>
+        <div className="text-text-secondary">Loading...</div>
       </div>
     );
   }
@@ -113,10 +113,10 @@ export default function SharedDocument() {
         <div className="bg-dark-lighter rounded-lg p-8 max-w-md w-full">
           <div className="text-center mb-6">
             <Lock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">
+            <h2 className="text-xl font-semibold text-text-primary mb-2">
               Password Protected Document
             </h2>
-            <p className="text-gray-400 text-sm">
+            <p className="text-text-secondary text-sm">
               Enter the password to view this document
             </p>
           </div>
@@ -152,7 +152,7 @@ export default function SharedDocument() {
           <h2 className="text-xl font-semibold text-white mb-2">
             {error.includes('no longer exists') ? 'Document Not Found' : 'Access Denied'}
           </h2>
-          <p className="text-gray-400">{error}</p>
+          <p className="text-text-secondary">{error}</p>
           <div className="mt-6 space-y-3">
             <button
               onClick={() => navigate('/')}
@@ -161,7 +161,7 @@ export default function SharedDocument() {
               Go to Homepage
             </button>
             {error.includes('no longer exists') && (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-text-secondary/70">
                 The document may have been deleted by its owner.
               </p>
             )}
@@ -187,8 +187,8 @@ export default function SharedDocument() {
             <div className="flex items-center gap-4">
               <Share2 className="w-5 h-5 text-blue-400" />
               <div>
-                <h1 className="text-lg font-semibold text-white">{document.title}</h1>
-                <div className="flex items-center gap-3 text-xs text-gray-400 mt-1">
+                <h1 className="text-lg font-semibold text-text-primary">{document.title}</h1>
+                <div className="flex items-center gap-3 text-xs text-text-secondary mt-1">
                   <span className="flex items-center gap-1">
                     <User className="w-3 h-3" />
                     Shared by {document.profiles?.display_name || document.profiles?.username || 'Anonymous'}
@@ -212,7 +212,7 @@ export default function SharedDocument() {
                   className="p-2 hover:bg-dark rounded-lg transition-colors"
                   title="Download"
                 >
-                  <Download className="w-5 h-5 text-gray-400" />
+                  <Download className="w-5 h-5 text-text-secondary" />
                 </button>
               )}
               <button
@@ -220,7 +220,7 @@ export default function SharedDocument() {
                 className="p-2 hover:bg-dark rounded-lg transition-colors"
                 title="Copy link"
               >
-                <Share2 className="w-5 h-5 text-gray-400" />
+                <Share2 className="w-5 h-5 text-text-secondary" />
               </button>
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function SharedDocument() {
                            hover:opacity-100 transition-opacity"
                   title="Add comment"
                 >
-                  <MessageSquare className="w-4 h-4 text-gray-400" />
+                  <MessageSquare className="w-4 h-4 text-text-secondary" />
                 </button>
               )}
             </div>
@@ -289,7 +289,7 @@ export default function SharedDocument() {
         {shareSettings.watermark && (
           <div className="fixed inset-0 pointer-events-none z-30 overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center opacity-5">
-              <div className="transform rotate-45 text-6xl font-bold text-white whitespace-nowrap">
+              <div className="transform rotate-45 text-6xl font-bold text-text-primary whitespace-nowrap">
                 {document.watermark}
               </div>
             </div>
@@ -298,7 +298,7 @@ export default function SharedDocument() {
 
         {/* Empty State */}
         {(!document.blocks || document.blocks.length === 0) && (
-          <div className="text-center py-12 text-gray-400">
+          <div className="text-center py-12 text-text-secondary">
             <p>This document has no content yet.</p>
           </div>
         )}

@@ -1,91 +1,357 @@
-# How Top SaaS Landing Pages Achieve Near-100% Demo Engagement
+# Implementing secure document sharing in Supabase applications with Row Level Security
 
-Based on comprehensive research analyzing 200+ SaaS landing pages and conversion data from leading companies like Notion, Linear, GitHub, and Vercel, this report reveals the strategies that drive exceptional demo engagement and conversion rates. While true 100% conversion is unrealistic, top performers achieve 25-30% demo-to-signup rates through strategic demonstration approaches tailored to their audiences.
+When implementing document sharing in a Supabase application, the fundamental challenge is that Row Level Security (RLS) policies designed to protect documents can inadvertently block legitimate shared access. Based on comprehensive research of implementation patterns, security considerations, and real-world examples, this report provides actionable solutions for your specific use case.
 
-## The psychology behind instant product understanding
+## The core problem: RLS blocking valid shares
 
-The most successful SaaS demos leverage what neuroscientists call "aha moments" - sudden insights where users recognize how a product solves their specific problem. Research from Carnegie Mellon and Nielsen Norman Group reveals that **40-60% of users who don't experience this moment during their first interaction never return**. This neurological response occurs in the right anterior superior temporal gyrus and triggers both emotional connection (System 1 thinking) and analytical validation (System 2).
+Your current RLS policy restricts document access to owners only:
 
-Leading SaaS companies engineer these moments by minimizing cognitive load. Humans can process only 7±2 pieces of information simultaneously, and with attention spans averaging 8 seconds, demos must deliver value instantly. The most effective approaches use progressive disclosure - starting with a single, powerful concept before layering complexity. For instance, Obsidian leads with its simple graph view visualization before revealing deeper features, while Linear emphasizes speed with "7 minutes to 40 seconds" build time improvements.
+```sql
+-- Current restrictive policy
+ON documents FOR SELECT USING (user_id = auth.uid() AND deleted_at IS NULL)
+```
 
-Social proof amplifies these psychological triggers. Landing pages with testimonials convert **34% higher**, but the placement matters. Top performers like Railway and Supabase weave developer testimonials throughout their demos rather than relegating them to a separate section. This creates what ConversionXL calls the C-R-A-V-E-N-S effect: Credible, Relevant, Attractive, Visual, Enumerated, Nearby, and Specific social validation that reduces uncertainty at decision points.
+This creates a conflict where `checkShareAccess` validates the share successfully, but `getSharedDocument` fails because RLS blocks the subsequent document query. The solution requires modifying your security architecture to accommodate both ownership and sharing patterns while maintaining robust security.
 
-## Demo formats that drive developer engagement
+## Three proven implementation approaches
 
-Interactive demos dominate the conversion landscape, showing **4x higher engagement than static content** and achieving 89% engagement on dedicated landing pages. However, the research reveals that successful companies rarely rely on a single format. Instead, they employ what we call "progressive demonstration layers":
+### Approach 1: Modified RLS policies with share validation
 
-**Layer 1: Animated GIFs and micro-interactions** capture attention within the crucial 8-second window. These lightweight demonstrations load instantly and communicate core value without requiring commitment. GitHub uses this approach brilliantly, showing Copilot's AI suggestions inline with code editing.
+The most straightforward solution involves updating your RLS policies to check both ownership and valid shares. This approach maintains security within the database layer while enabling shared access.
 
-**Layer 2: Interactive playgrounds** allow hands-on exploration for engaged visitors. Companies using HTML-based interactive demos report 2x faster sales cycles. Vercel's deployment playground and Figma's design canvas exemplify this approach, letting users experience actual product functionality without signup.
+```sql
+-- Enhanced RLS policy that checks both ownership and shares
+CREATE POLICY "documents_access_policy" ON documents
+  FOR SELECT TO authenticated
+  USING (
+    -- Owner access
+    user_id = auth.uid() AND deleted_at IS NULL
+    OR
+    -- Shared access (authenticated users)
+    id IN (
+      SELECT document_id 
+      FROM document_shares 
+      WHERE share_code = current_setting('app.share_code', true)
+        AND (expires_at IS NULL OR expires_at > now())
+        AND is_active = true
+    )
+  );
 
-**Layer 3: Guided product tours** provide structured exploration for users ready to invest time. These typically last 3-5 steps and focus on specific workflows. The key is maintaining authenticity - using real UI elements rather than simplified mockups, which technical audiences quickly identify as misleading.
+-- Anonymous access policy
+CREATE POLICY "anonymous_shared_documents" ON documents
+  FOR SELECT TO anon
+  USING (
+    id IN (
+      SELECT document_id 
+      FROM document_shares 
+      WHERE share_code = current_setting('app.share_code', true)
+        AND allow_anonymous = true
+        AND (expires_at IS NULL OR expires_at > now())
+        AND is_active = true
+    )
+  );
+```
 
-**Layer 4: Video demonstrations** serve users who prefer passive consumption or need stakeholder buy-in. Optimal length is 2 minutes 31 seconds, with successful examples showing complete workflows rather than feature lists.
+To use this approach, your client code needs to set the share code in the session:
 
-## Strategic demo placement and conversion flow
+```javascript
+// Set share code before querying
+const { data: document } = await supabase
+  .rpc('set_config', { key: 'app.share_code', value: shareCode })
+  .then(() => supabase
+    .from('documents')
+    .select('*')
+    .eq('id', documentId)
+    .single()
+  );
+```
 
-Contrary to conventional wisdom, our analysis shows that **below-the-fold demo placement outperforms above-the-fold by 20%** when preceded by value-building content. This finding is particularly pronounced for developer tools and complex SaaS products. The most effective landing pages follow this architecture:
+**Pros**: Simple implementation, leverages existing RLS infrastructure, good performance with proper indexes
+**Cons**: Requires session variable management, complex policies can impact query performance
+**Security**: High - maintains database-level security
+**Performance**: Good with proper indexing
 
-1. **Hero section**: Clear value proposition with a soft CTA ("See How It Works")
-2. **Problem articulation**: Specific pain points your audience faces
-3. **Solution preview**: High-level benefits with visual proof
-4. **Interactive demo**: Placed where users have context to appreciate it
-5. **Immediate action**: Hard CTA with calendar booking or trial signup
+### Approach 2: SECURITY DEFINER functions for controlled access
 
-This flow addresses what Baymard Institute identifies as the "holistic view" requirement - users need comprehensive understanding before committing. For DevLog specifically, this means explaining the "second brain" concept and "never lose solutions" value proposition before demonstrating the linking and search capabilities.
+A more sophisticated approach uses PostgreSQL's SECURITY DEFINER functions to bypass RLS in a controlled manner. This provides fine-grained control over access logic while maintaining security.
 
-The transition from demo to signup proves critical. Companies implementing immediate calendar booking post-demo achieve **66.7% form-to-meeting conversion** compared to 30% without. Progressive profiling during the demo - capturing email before access, then gradually requesting more information - reduces abandonment while maintaining lead quality.
+```sql
+CREATE OR REPLACE FUNCTION get_shared_document(
+  p_share_code TEXT,
+  p_password TEXT DEFAULT NULL
+)
+RETURNS JSON
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public, pg_catalog
+AS $$
+DECLARE
+  share_record RECORD;
+  document_data JSON;
+BEGIN
+  -- Validate share code format
+  IF p_share_code IS NULL OR LENGTH(p_share_code) < 10 THEN
+    RAISE EXCEPTION 'Invalid share code';
+  END IF;
+  
+  -- Get share details with document
+  SELECT ds.*, d.id, d.title, d.content, d.user_id, d.created_at
+  INTO share_record
+  FROM document_shares ds
+  JOIN documents d ON ds.document_id = d.id
+  WHERE ds.share_code = p_share_code
+    AND ds.is_active = true
+    AND (ds.expires_at IS NULL OR ds.expires_at > NOW())
+    AND d.deleted_at IS NULL;
+  
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Share not found or expired';
+  END IF;
+  
+  -- Check password if required
+  IF share_record.password_hash IS NOT NULL THEN
+    IF p_password IS NULL OR NOT verify_password(p_password, share_record.password_hash) THEN
+      RAISE EXCEPTION 'Invalid password';
+    END IF;
+  END IF;
+  
+  -- Check permissions
+  IF auth.uid() IS NULL AND NOT share_record.allow_anonymous THEN
+    RAISE EXCEPTION 'Authentication required';
+  END IF;
+  
+  -- Log access for analytics
+  INSERT INTO share_analytics (document_id, share_code, accessed_at, accessed_by)
+  VALUES (share_record.id, p_share_code, NOW(), auth.uid());
+  
+  -- Return document data based on permissions
+  document_data := json_build_object(
+    'id', share_record.id,
+    'title', share_record.title,
+    'created_at', share_record.created_at,
+    'permissions', share_record.permissions
+  );
+  
+  -- Include content for view permissions and above
+  IF share_record.permissions IN ('view', 'comment', 'edit') THEN
+    document_data := document_data || json_build_object('content', share_record.content);
+  END IF;
+  
+  RETURN document_data;
+END;
+$$;
 
-## Visual demonstration techniques for technical audiences
+-- Restrict function execution
+REVOKE EXECUTE ON FUNCTION get_shared_document FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION get_shared_document TO authenticated, anon;
+```
 
-Developer-focused tools require distinct approaches that prioritize **technical authenticity over polish**. Our analysis of GitHub, Vercel, Railway, and Supabase reveals consistent patterns:
+Client implementation:
+```javascript
+const { data, error } = await supabase
+  .rpc('get_shared_document', { 
+    p_share_code: shareCode,
+    p_password: password 
+  });
+```
 
-**Performance quantification** dominates messaging. Developers respond to specific metrics: "55% faster development" (GitHub), "24x faster builds" (Vercel), "60-second deployments" (Railway). These aren't marketing fluff - they're backed by benchmarks and real user data.
+**Pros**: Fine-grained access control, supports complex business logic, built-in audit trail
+**Cons**: Requires careful security implementation, function maintenance overhead
+**Security**: Excellent when properly implemented
+**Performance**: Good, but adds function call overhead
 
-**Code-first demonstrations** using syntax highlighting and real examples outperform abstract visualizations. Successful demos show actual terminal output, API responses, and integration code. Supabase excels here, demonstrating SQL queries and row-level security policies rather than just describing features.
+### Approach 3: Hybrid approach with share access tables
 
-**Workflow integration** matters more than isolated features. Developers evaluate tools based on ecosystem fit. The most effective demos show GitHub integration, CLI usage, IDE extensions, and CI/CD pipelines. This contextual demonstration reduces the perceived switching cost and implementation complexity.
+This approach uses a materialized share access pattern that maintains a dedicated table for users who have access to documents, simplifying RLS policies while maintaining performance.
 
-**Community validation** carries unique weight in developer tools. GitHub stars, contributor counts, and authentic Twitter testimonials from recognized developers provide credibility that traditional case studies cannot match. Railway's extensive use of developer tweets exemplifies this approach.
+```sql
+-- Share access tracking table
+CREATE TABLE user_document_access (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  document_id UUID REFERENCES documents(id),
+  access_level TEXT CHECK (access_level IN ('view', 'comment', 'edit')),
+  granted_via TEXT, -- 'owner', 'share', 'team'
+  expires_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-## Mobile responsiveness and performance imperatives
+-- Simplified RLS policy
+CREATE POLICY "document_access_via_access_table" ON documents
+  FOR SELECT TO authenticated
+  USING (
+    deleted_at IS NULL AND
+    id IN (
+      SELECT document_id 
+      FROM user_document_access 
+      WHERE user_id = auth.uid()
+        AND (expires_at IS NULL OR expires_at > NOW())
+    )
+  );
 
-With 60% of web traffic from mobile devices, demo optimization extends beyond desktop experiences. Mobile-responsive demos show **2x better conversion rates**, but implementation requires specific considerations:
+-- Function to grant access via share
+CREATE OR REPLACE FUNCTION grant_share_access(
+  p_share_code TEXT,
+  p_user_id UUID DEFAULT NULL
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+  share_record RECORD;
+BEGIN
+  -- Validate share
+  SELECT * INTO share_record
+  FROM document_shares
+  WHERE share_code = p_share_code
+    AND is_active = true
+    AND (expires_at IS NULL OR expires_at > NOW());
+    
+  IF NOT FOUND THEN
+    RETURN FALSE;
+  END IF;
+  
+  -- Grant access
+  INSERT INTO user_document_access (
+    user_id, 
+    document_id, 
+    access_level, 
+    granted_via,
+    expires_at
+  ) VALUES (
+    COALESCE(p_user_id, auth.uid()),
+    share_record.document_id,
+    share_record.permissions,
+    'share',
+    share_record.expires_at
+  ) ON CONFLICT (user_id, document_id) 
+  DO UPDATE SET 
+    access_level = EXCLUDED.access_level,
+    expires_at = EXCLUDED.expires_at;
+    
+  RETURN TRUE;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
 
-**Performance thresholds** are unforgiving. Each second of load time reduces conversions by 7%, with a hard cutoff at 3 seconds for mobile users. Top performers achieve sub-1-second initial content display through aggressive optimization: lazy loading, CDN distribution, WebP images, and minimal JavaScript for initial render.
+**Pros**: Excellent read performance, simple RLS policies, supports complex permission hierarchies
+**Cons**: Requires maintaining access records, potential for stale data
+**Security**: Good with proper maintenance
+**Performance**: Excellent for reads
 
-**Touch-optimized interactions** require 44px minimum touch targets and gesture-friendly navigation. Interactive elements must work seamlessly across devices without sacrificing functionality. Progressive web app techniques enable offline demo access, particularly valuable for developer tools used in varied environments.
+## Security considerations for anonymous access
 
-**Simplified mobile experiences** don't mean dumbed-down demos. Instead, they employ responsive progressive disclosure - showing core functionality on mobile while providing paths to deeper exploration. Notion's mobile demo focuses on note capture and search, deferring database features to larger screens.
+Supporting anonymous users requires additional security measures:
 
-## Creating urgency without desperation
+1. **Token Security**: Generate cryptographically secure share codes with at least 256 bits of entropy:
+```sql
+CREATE OR REPLACE FUNCTION generate_secure_share_code()
+RETURNS TEXT AS $$
+BEGIN
+  RETURN encode(gen_random_bytes(32), 'base64url');
+END;
+$$ LANGUAGE plpgsql;
+```
 
-The most successful SaaS companies create conversion urgency through value amplification rather than artificial scarcity. Effective techniques include:
+2. **Rate Limiting**: Implement rate limiting to prevent share enumeration:
+```sql
+CREATE OR REPLACE FUNCTION check_share_rate_limit(p_share_code TEXT)
+RETURNS BOOLEAN AS $$
+DECLARE
+  request_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO request_count
+  FROM share_access_log 
+  WHERE share_code = p_share_code
+    AND client_ip = inet_client_addr()
+    AND created_at > NOW() - INTERVAL '1 hour';
+    
+  RETURN request_count < 100; -- 100 requests per hour limit
+END;
+$$ LANGUAGE plpgsql;
+```
 
-**Limited-time bonuses** for enhanced features or extended trials convert 15% better than baseline. The key is offering genuine additional value rather than threatening feature removal.
+3. **Access Logging**: Maintain comprehensive audit logs for security monitoring:
+```sql
+CREATE TABLE share_analytics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_id UUID REFERENCES documents(id),
+  share_code TEXT,
+  client_ip INET,
+  user_agent TEXT,
+  accessed_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-**Real-time social proof** notifications ("5 developers signed up in the last hour") leverage FOMO authentically. When combined with specific use cases ("John from Spotify just created a workspace"), conversions increase by 18%.
+## Performance optimization strategies
 
-**Progressive value revelation** creates natural urgency. As users explore demos and discover features solving their specific problems, the cost of not adopting becomes apparent. This intrinsic motivation proves more powerful than external pressure.
+Regardless of the approach chosen, performance optimization is crucial:
 
-## Recommendations for DevLog's landing page
+1. **Critical Indexes**:
+```sql
+CREATE INDEX idx_document_shares_lookup ON document_shares(share_code, is_active, expires_at);
+CREATE INDEX idx_user_document_access_lookup ON user_document_access(user_id, document_id, expires_at);
+CREATE INDEX idx_documents_owner ON documents(user_id) WHERE deleted_at IS NULL;
+```
 
-Based on this research, DevLog should implement a **three-tier demonstration strategy**:
+2. **Query Optimization**: Use EXISTS instead of IN for better performance in RLS policies:
+```sql
+-- More efficient
+EXISTS (SELECT 1 FROM document_shares WHERE ...)
+-- Less efficient
+id IN (SELECT document_id FROM document_shares WHERE ...)
+```
 
-**Tier 1: Instant value visualization** - An animated GIF showing the speed of solution retrieval, with a developer searching for a past fix and instantly finding connected solutions. This addresses the "never lose solutions" promise within the 8-second attention window.
+3. **Connection Pooling**: For high-traffic applications, implement connection pooling to manage database connections efficiently.
 
-**Tier 2: Interactive knowledge graph** - A simplified, interactive version of DevLog's connection visualization, allowing visitors to explore how solutions link together. This demonstrates the "second brain" concept tangibly without requiring full product access.
+## Handling different share permissions
 
-**Tier 3: Workflow integration demo** - A 2-minute video showing a day-in-the-life scenario: a developer encountering a bug, searching DevLog, finding a previous solution with context, and implementing it successfully. Include terminal commands, IDE integration, and time savings.
+Implement a hierarchical permission system that scales with your needs:
 
-**Placement strategy**: Position the demo below an initial value proposition that establishes the problem ("How many times have you solved the same problem?") and solution preview ("Your code, your solutions, intelligently connected"). Use progressive CTAs: "See Your Second Brain" → "Try Interactive Demo" → "Start Building Your DevLog".
+```sql
+CREATE TYPE permission_level AS ENUM ('view', 'comment', 'edit', 'admin');
 
-**Conversion optimization**: Implement immediate value capture by offering a "Download Chrome Extension" CTA that provides instant utility while beginning the onboarding process. Use developer testimonials throughout, focusing on specific time savings and solution discovery stories.
+-- Permission checking function
+CREATE OR REPLACE FUNCTION has_document_permission(
+  p_document_id UUID,
+  p_required_level permission_level
+)
+RETURNS BOOLEAN AS $$
+DECLARE
+  user_level permission_level;
+BEGIN
+  -- Get user's permission level
+  SELECT GREATEST(
+    CASE WHEN d.user_id = auth.uid() THEN 'admin'::permission_level END,
+    MAX(ds.permissions::permission_level)
+  ) INTO user_level
+  FROM documents d
+  LEFT JOIN document_shares ds ON d.id = ds.document_id 
+    AND ds.user_id = auth.uid()
+    AND ds.is_active = true
+  WHERE d.id = p_document_id;
+  
+  RETURN user_level >= p_required_level;
+END;
+$$ LANGUAGE plpgsql;
+```
 
-**Performance priorities**: Ensure sub-1-second demo loading through CDN delivery and lazy loading. Make the interactive demo touch-friendly for mobile developers reviewing during commutes or downtime.
+## Common pitfalls to avoid
 
-## The path to exceptional conversion
+1. **Insufficient RLS Coverage**: Always create policies for all operations (SELECT, INSERT, UPDATE, DELETE)
+2. **Predictable Share Codes**: Never use sequential or predictable patterns
+3. **Missing Expiration Checks**: Always validate expiration timestamps in policies
+4. **Ignoring Anonymous Access**: Design policies specifically for the anon role
+5. **Poor Error Handling**: Use generic error messages to prevent information leakage
 
-The research definitively shows that achieving exceptional demo engagement requires orchestrating multiple elements: psychological triggers that create aha moments, authentic demonstrations that respect user intelligence, strategic placement that builds context before interaction, and relentless performance optimization. While 100% conversion remains unrealistic, implementing these evidence-based strategies can push DevLog's demo-to-signup rates toward the 25-30% achieved by top performers.
+## Recommended implementation for your use case
 
-The key insight across all successful SaaS demos is that **authentic value demonstration trumps polished marketing**. For DevLog, this means showing real developer workflows, quantifying actual time savings, and letting the product's unique knowledge-connection capabilities speak for themselves through interactive, performant demonstrations that developers can explore on their own terms.
+Given your specific requirements (React + Supabase, client-only, existing share validation logic), I recommend **Approach 2: SECURITY DEFINER functions** for the following reasons:
+
+1. **Minimal changes to existing code**: Your `checkShareAccess` logic can be incorporated into the function
+2. **Supports all requirements**: Handles authenticated/anonymous users, different permissions, and password protection
+3. **Best security**: Centralized validation logic with proper error handling
+4. **Good performance**: Single database round-trip for document access
+5. **Future flexibility**: Easy to add new features like analytics or rate limiting
+
+The implementation would involve creating the SECURITY DEFINER function as shown above, then updating your client code to use the function instead of direct table queries. This approach maintains your existing share validation logic while solving the RLS blocking issue.
+
+By implementing these patterns with proper security measures, indexing, and monitoring, you can create a robust document sharing system that balances security, performance, and user experience while working seamlessly with Supabase's Row Level Security model.

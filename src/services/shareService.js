@@ -141,20 +141,41 @@ export class ShareService {
    */
   async checkShareAccess(shareCode, password = null) {
     try {
-      const user = (await supabase.auth.getUser()).data.user;
+      console.log('Checking share access for code:', shareCode);
       
-      const { data, error } = await supabase.rpc('check_share_access', {
-        p_share_code: shareCode,
-        p_user_id: user?.id || null,
-        p_password: password
-      });
+      // Since the SECURITY DEFINER function handles all validation,
+      // we can simplify this to just check if password is required
+      const { data: share, error: shareError } = await supabase
+        .from('document_shares')
+        .select('password_hash, is_active')
+        .eq('share_code', shareCode)
+        .single();
 
-      if (error) throw error;
+      if (shareError || !share) {
+        return { 
+          has_access: false, 
+          message: 'Share link not found or has been deleted' 
+        };
+      }
 
-      // The function returns a single row, extract it
-      return data[0] || { has_access: false, message: 'Share not found' };
+      if (!share.is_active) {
+        return { has_access: false, message: 'Share link has been disabled' };
+      }
+
+      // Check if password is required but not provided
+      if (share.password_hash && !password) {
+        return { has_access: false, requires_password: true, message: 'Password required' };
+      }
+
+      // For all other validation, we'll let the SECURITY DEFINER function handle it
+      // This simplifies the client-side logic significantly
+      return {
+        has_access: true,
+        message: 'Proceeding to document access'
+      };
     } catch (error) {
-      logError(error, { context: 'checkShareAccess' });
+      console.error('checkShareAccess error:', error);
+      logError(error, { context: 'checkShareAccess', shareCode });
       throw error;
     }
   }
@@ -166,74 +187,81 @@ export class ShareService {
    */
   async getSharedDocument(shareCode, password = null) {
     try {
-      // First check access
-      const accessCheck = await this.checkShareAccess(shareCode, password);
+      console.log('Getting shared document for code:', shareCode);
       
-      if (!accessCheck.has_access) {
-        throw new Error(accessCheck.message || 'Access denied');
+      // Use the SECURITY DEFINER function to get document data
+      const { data: documentData, error: docError } = await supabase
+        .rpc('get_shared_document', {
+          p_share_code: shareCode,
+          p_password: password
+        });
+
+      if (docError) {
+        console.error('Error fetching shared document:', docError);
+        
+        // Handle specific error messages
+        if (docError.message.includes('Password required')) {
+          throw new Error('Password required');
+        } else if (docError.message.includes('Invalid password')) {
+          throw new Error('Invalid password');
+        } else if (docError.message.includes('expired')) {
+          throw new Error('Share link has expired');
+        } else if (docError.message.includes('view limit')) {
+          throw new Error('Share link has reached its view limit');
+        } else if (docError.message.includes('Authentication required')) {
+          throw new Error('Authentication required');
+        } else if (docError.message.includes('not found')) {
+          throw new Error('Document not found or has been deleted');
+        } else {
+          throw new Error(docError.message || 'Failed to access shared document');
+        }
       }
 
-      // Log the access
-      await this.logAccess(accessCheck.share_id, 'view', accessCheck.document_id);
-
-      // Get document with permissions applied
-      const { data: documents, error } = await supabase
-        .from('documents')
-        .select(`
-          id,
-          title,
-          tags,
-          created_at,
-          updated_at,
-          metadata,
-          user_id
-        `)
-        .eq('id', accessCheck.document_id);
-
-      if (error) throw error;
-      
-      // Check if document exists
-      if (!documents || documents.length === 0) {
+      if (!documentData || documentData.length === 0) {
         throw new Error('Document not found or has been deleted');
       }
-      
-      const document = documents[0];
 
-      // Fetch the profile separately
+      const document = documentData[0];
+
+      // Fetch the profile using SECURITY DEFINER function
       let profile = null;
       if (document.user_id) {
         const { data: profileData } = await supabase
-          .from('profiles')
-          .select('username, display_name')
-          .eq('id', document.user_id)
-          .single();
+          .rpc('get_shared_document_profile', {
+            p_user_id: document.user_id
+          });
         
-        profile = profileData;
+        profile = profileData?.[0] || null;
       }
 
-      // Get blocks if user has view permission
+      // Get blocks using SECURITY DEFINER function
       let blocks = [];
-      if (accessCheck.permissions.includes('view')) {
+      if (document.permissions && 
+          (document.permissions.includes('view') || 
+           document.permissions.includes('comment') || 
+           document.permissions.includes('edit'))) {
         const { data: blocksData, error: blocksError } = await supabase
-          .from('blocks')
-          .select('*')
-          .eq('document_id', accessCheck.document_id)
-          .is('deleted_at', null)
-          .order('position');
+          .rpc('get_shared_document_blocks', {
+            p_share_code: shareCode,
+            p_document_id: document.id
+          });
 
-        if (blocksError) throw blocksError;
-        blocks = blocksData || [];
+        if (blocksError) {
+          console.error('Error fetching blocks:', blocksError);
+          // Don't throw, just leave blocks empty
+          blocks = [];
+        } else {
+          blocks = blocksData || [];
+        }
       }
 
-      // Get share details
-      const { data: shareData } = await supabase
-        .from('document_shares')
-        .select('*')
-        .eq('id', accessCheck.share_id)
-        .single();
+      // Log the access (non-blocking)
+      this.logAccess(shareCode, 'view', document.id).catch(err => 
+        console.error('Failed to log access:', err)
+      );
 
       // Apply watermark if required
-      if (shareData?.settings?.watermark) {
+      if (document.share_settings?.watermark) {
         document.watermark = this.generateWatermark();
       }
 
@@ -243,10 +271,10 @@ export class ShareService {
           blocks,
           profiles: profile,
           isShared: true,
-          permissions: accessCheck.permissions,
-          shareSettings: shareData?.settings || {}
+          permissions: document.permissions || ['view'],
+          shareSettings: document.share_settings || {}
         },
-        shareId: accessCheck.share_id
+        shareId: shareCode // Use share code as identifier
       };
     } catch (error) {
       logError(error, { context: 'getSharedDocument' });
@@ -468,6 +496,30 @@ export class ShareService {
   }
 
   /**
+   * Verify a password against a hash
+   */
+  async verifyPassword(password, storedHash) {
+    try {
+      // Extract salt and hash from stored value
+      const [salt, hash] = storedHash.split(':');
+      if (!salt || !hash) return false;
+      
+      // Hash the provided password with the same salt
+      const encoder = new TextEncoder();
+      const data = encoder.encode(salt + password);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      // Compare hashes
+      return hash === hashHex;
+    } catch (error) {
+      console.error('Password verification error:', error);
+      return false;
+    }
+  }
+
+  /**
    * Generate watermark text
    */
   generateWatermark() {
@@ -492,23 +544,25 @@ export class ShareService {
    * @param {string} shareId - The share accessed
    * @param {string} action - The action performed
    */
-  async logAccess(shareId, action, documentId) {
+  async logAccess(shareCode, action, documentId) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Get document ID if not provided
-      if (!documentId) {
-        const { data } = await supabase
-          .from('document_shares')
-          .select('document_id')
-          .eq('id', shareId)
-          .single();
-        documentId = data?.document_id;
+      // Get share ID from share code
+      const { data: share } = await supabase
+        .from('document_shares')
+        .select('id, document_id')
+        .eq('share_code', shareCode)
+        .single();
+      
+      if (!share) {
+        console.error('Share not found for logging');
+        return;
       }
 
       await supabase.rpc('log_share_access', {
-        p_share_id: shareId,
-        p_document_id: documentId,
+        p_share_id: share.id,
+        p_document_id: documentId || share.document_id,
         p_action: action,
         p_user_id: user?.id || null,
         p_anonymous_id: !user ? this.getAnonymousId() : null,

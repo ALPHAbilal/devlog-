@@ -10,7 +10,6 @@ import { DemoModeProvider } from '../contexts/DemoModeContext';
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
 const TestimonialsSection = lazy(() => import('../components/TestimonialsSection'));
-const HowItWorks = lazy(() => import('../components/HowItWorks'));
 
 function LandingContent() {
   const navigate = useNavigate();
@@ -149,40 +148,16 @@ function LandingContent() {
       {/* Problem Section */}
       <ProblemSection />
       
-      {/* How It Works */}
-      <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading...</div></div>}>
-        <HowItWorks />
-      </Suspense>
-      
 
       {/* Developer Testimonial */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <DeveloperTestimonial {...testimonials[0]} />
       </div>
 
-      {/* Developer Testimonial */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <DeveloperTestimonial {...testimonials[1]} />
-      </div>
-      
-      {/* More testimonials */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <DeveloperTestimonial {...testimonials[2]} />
-      </div>
-      
-      {/* Final testimonial before features */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <DeveloperTestimonial {...testimonials[3]} />
-      </div>
-
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
-          <h3 className="text-2xl md:text-3xl font-bold text-center mb-4">Everything You Need to Document Better</h3>
-          <p className="text-text-secondary text-center mb-8 md:mb-12 max-w-2xl mx-auto">
-            Built by developers who believe documentation should be as enjoyable as coding. 
-            Every feature designed to make capturing knowledge effortless.
-          </p>
+          <h3 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12">Core Features</h3>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, i) => (
@@ -200,90 +175,6 @@ function LandingContent() {
         </div>
       </section>
 
-      {/* How DevLog Works */}
-      <section className="py-20 px-4 md:px-6 bg-dark-secondary/20">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">
-              How <span className="text-accent-green">DevLog</span> Works
-            </h2>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto">
-              A simple workflow that transforms how you capture and retrieve knowledge
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Step 1 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-accent-green">1</span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Encounter Problem</h3>
-              <p className="text-text-secondary text-sm">
-                Hit a bug, learn something new, or solve a challenge
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-accent-green">2</span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Document Solution</h3>
-              <p className="text-text-secondary text-sm">
-                Open DevLog, capture code, context, and explanation
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-accent-green">3</span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Link & Tag</h3>
-              <p className="text-text-secondary text-sm">
-                Connect to related docs, add tags for organization
-              </p>
-            </div>
-
-            {/* Step 4 */}
-            <div className="text-center">
-              <div className="w-16 h-16 bg-accent-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-accent-green">4</span>
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Find Instantly</h3>
-              <p className="text-text-secondary text-sm">
-                Search when needed, find exactly what you documented
-              </p>
-            </div>
-          </div>
-
-          {/* Visual workflow */}
-          <div className="mt-16 bg-dark-secondary rounded-lg p-8 border border-dark-secondary/50">
-            <div className="grid md:grid-cols-3 gap-8 items-center">
-              <div className="text-center">
-                <Code2 className="text-accent-green mx-auto mb-3" size={48} />
-                <h4 className="font-semibold mb-2">Write Once</h4>
-                <p className="text-text-secondary text-sm">
-                  Document your solution properly, with all the context
-                </p>
-              </div>
-              
-              <div className="hidden md:flex items-center justify-center">
-                <ArrowRight className="text-accent-green" size={32} />
-              </div>
-
-              <div className="text-center">
-                <Zap className="text-accent-green mx-auto mb-3" size={48} />
-                <h4 className="font-semibold mb-2">Find Forever</h4>
-                <p className="text-text-secondary text-sm">
-                  Your future self (and team) will thank you
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Testimonials */}
       <Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="text-text-secondary">Loading testimonials...</div></div>}>
@@ -295,58 +186,6 @@ function LandingContent() {
         <PricingSection />
       </Suspense>
 
-      {/* Use Cases */}
-      <section className="py-20 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h3 className="text-3xl font-bold text-center mb-12">Transform How You Document</h3>
-          
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary/50">
-              <h4 className="text-xl font-semibold mb-3 text-accent-green">Learning & Exploration</h4>
-              <p className="text-text-secondary mb-4">
-                Create deep dives into new technologies. Link concepts, preserve AI explanations, 
-                and build your understanding through connections.
-              </p>
-              <div className="text-sm font-mono text-text-secondary/70">
-                [[React Performance]] → [[useMemo Patterns]] → [[React.memo Usage]]
-              </div>
-            </div>
-
-            <div className="bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary/50">
-              <h4 className="text-xl font-semibold mb-3 text-accent-green">Debugging Sessions</h4>
-              <p className="text-text-secondary mb-4">
-                Never lose another solution. Document errors, steps taken, and final fixes. 
-                Your future self will thank you.
-              </p>
-              <div className="text-sm font-mono text-text-secondary/70">
-                [[WebSocket Issues Dec 2024]] → [[WebSocket Best Practices]]
-              </div>
-            </div>
-
-            <div className="bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary/50">
-              <h4 className="text-xl font-semibold mb-3 text-accent-green">Project Documentation</h4>
-              <p className="text-text-secondary mb-4">
-                Living documentation that evolves with your project. Architecture decisions, 
-                code examples, and design patterns all interconnected.
-              </p>
-              <div className="text-sm font-mono text-text-secondary/70">
-                [[E-Commerce Architecture]] → [[API Design]] → [[Database Schema]]
-              </div>
-            </div>
-
-            <div className="bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary/50">
-              <h4 className="text-xl font-semibold mb-3 text-accent-green">Knowledge Building</h4>
-              <p className="text-text-secondary mb-4">
-                Your personal wiki emerges naturally. Tag concepts, link ideas, and watch 
-                your knowledge compound over time.
-              </p>
-              <div className="text-sm font-mono text-text-secondary/70">
-                #performance[memoization] #gotcha[async behavior] #pattern[singleton]
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Trust Elements */}
       <section className="py-16 px-6 bg-dark-secondary/20">

@@ -1,24 +1,34 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Dark background -->
-  <rect width="32" height="32" rx="6" fill="#0a1628"/>
-  
-  <!-- Terminal prompt symbol -->
-  <g transform="translate(4, 8)">
-    <!-- Chevron -->
+  <!-- DevLog favicon - D with connected nodes -->
+  <rect width="32" height="32" rx="6" fill="#0a0a0a"/>
+  <g>
+    <!-- Main D shape with gradient -->
+    <defs>
+      <linearGradient id="favicon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#10b981" />
+        <stop offset="100%" stop-color="#059669" />
+      </linearGradient>
+    </defs>
+    
+    <!-- D letter shape -->
     <path
-      d="M6 6L12 12L6 18"
-      stroke="#10b981"
-      stroke-width="3"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      d="M8 6h6c5.523 0 10 4.477 10 10s-4.477 10-10 10H8V6z"
+      stroke="url(#favicon-gradient)"
+      stroke-width="2.5"
+      fill="none"
     />
     
-    <!-- Underscore -->
+    <!-- Connected nodes representing linked documents -->
+    <circle cx="13" cy="11" r="2" fill="#10b981" />
+    <circle cx="19" cy="16" r="2" fill="#10b981" opacity="0.8" />
+    <circle cx="13" cy="21" r="2" fill="#10b981" opacity="0.6" />
+    
+    <!-- Connection lines -->
     <path
-      d="M15 16L20 16"
+      d="M13 13v6M14.5 12.5l3.5 3.5"
       stroke="#10b981"
-      stroke-width="3"
-      stroke-linecap="round"
+      stroke-width="1.5"
+      opacity="0.4"
     />
   </g>
 </svg>

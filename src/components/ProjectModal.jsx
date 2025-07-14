@@ -236,10 +236,10 @@ export default function ProjectModal({
                       onClick={() => setFormData({ ...formData, color })}
                       className={`
                         h-10 w-10 rounded-lg border-2 transition-all duration-150
-                        hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2
+                        focus:outline-none focus:ring-2 focus:ring-offset-2
                         focus:ring-offset-[#161b22] active:scale-95
                         ${formData.color === color 
-                          ? 'border-white scale-110 shadow-lg' 
+                          ? 'border-white shadow-lg' 
                           : 'border-transparent hover:border-white/20'
                         }
                       `}

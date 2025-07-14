@@ -54,10 +54,10 @@ export default function EntryCard({ entry, onExpand, isSelected = false, onSelec
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       className={`bg-card-gradient rounded-lg p-6 cursor-pointer 
-                 transition-all duration-300 hover:scale-105 hover:shadow-xl
+                 transition-all duration-300 hover:shadow-xl
                  flex flex-col h-full relative group
                  ${isDragging ? 'z-50 shadow-2xl' : ''}
-                 ${isSelected ? 'ring-2 ring-accent-green shadow-lg shadow-accent-green/10 scale-[1.02]' : ''}`}
+                 ${isSelected ? 'ring-2 ring-accent-green shadow-lg shadow-accent-green/10' : ''}`}
     >
       {/* Drag Handle */}
       <div

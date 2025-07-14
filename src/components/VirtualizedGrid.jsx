@@ -201,7 +201,7 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
     <div 
       onClick={() => onExpand(entry)}
       className="w-full h-full bg-card-gradient rounded p-3 cursor-pointer 
-                 transition-all duration-200 hover:scale-102 hover:shadow-lg
+                 transition-all duration-200 hover:shadow-lg
                  flex flex-col group"
     >
       {/* Compact header */}

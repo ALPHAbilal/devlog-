@@ -686,7 +686,7 @@ export default function Dashboard() {
     }
     
     // Move documents
-    await moveDocuments(documentsToMove, targetProjectId, (count) => {
+    await moveDocuments(documentsToMove, targetProjectId, async (count) => {
       toast.success(`Moved ${count} ${count === 1 ? 'document' : 'documents'}`, 3000);
       
       // Update local state immediately for responsive UI

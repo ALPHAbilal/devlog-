@@ -120,7 +120,7 @@ class OptimizedSupabaseClient {
         Date.now() - this.sessionCacheTime < this.sessionCacheDuration) {
       try {
         const cached = JSON.parse(this.sessionCache);
-        if (cached && cached.expires_at * 1000 > Date.now()) {
+        if (cached && cached.expires_at > Date.now()) {
           return { data: { session: cached }, error: null };
         }
       } catch (e) {

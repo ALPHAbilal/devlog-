@@ -9,7 +9,7 @@ import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
 import ProjectSidebar from '../components/ProjectSidebar';
 import ProjectModal from '../components/ProjectModal';
-import { Plus, User, Settings, LogOut, Grid3X3 } from 'lucide-react';
+import { Plus, User, Settings, LogOut, Grid3X3, Menu } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
@@ -37,6 +37,7 @@ export default function Dashboard() {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [viewMode, setViewMode] = useState('documents'); // 'documents' or 'projects'
+  const [showSidebar, setShowSidebar] = useState(true);
   
   // Initialize auto-save functionality
   const { performAutoSave } = useAutoSave();
@@ -521,6 +522,10 @@ export default function Dashboard() {
   const handleProjectSelect = useCallback((projectId) => {
     setSelectedProjectId(projectId);
     setViewMode('documents');
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 1024) {
+      setShowSidebar(false);
+    }
   }, []);
 
   // Filter entries based on search, selected tags, and project
@@ -605,7 +610,7 @@ export default function Dashboard() {
           {/* Top Navigation Bar */}
           <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
             {/* Logo and Brand */}
-            <div className="flex items-center gap-2.5 ml-72">
+            <div className="flex items-center gap-2.5 ml-56">
               <LogoMinimal size={32} />
               <div className="h-7 w-16 bg-gray-800/50 rounded animate-pulse" />
             </div>
@@ -621,7 +626,7 @@ export default function Dashboard() {
           </div>
 
           {/* Search and Actions Bar */}
-          <div className="px-6 py-3 ml-72">
+          <div className="px-6 py-3 ml-56">
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-10 bg-gray-800/30 rounded animate-pulse" />
@@ -632,7 +637,7 @@ export default function Dashboard() {
         </div>
         
         {/* Content Skeleton with margin for tags */}
-        <div className="flex-grow overflow-hidden px-6 ml-72">
+        <div className="flex-grow overflow-hidden px-6 ml-56">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <div key={i} className="group">
@@ -676,8 +681,21 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full relative">
+      {/* Mobile overlay */}
+      {showSidebar && (
+        <div
+          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+      
       {/* Project Sidebar */}
-      <div className="absolute left-3 top-24 bottom-6 z-30 w-64">
+      <div className={`
+        fixed lg:absolute left-3 top-24 bottom-6 z-30 w-52
+        ${showSidebar ? 'block' : 'hidden'}
+        lg:block
+        bg-dark-primary lg:bg-transparent rounded-lg lg:rounded-none
+      `}>
         <ProjectSidebar
           projects={projects}
           selectedProjectId={selectedProjectId}
@@ -685,6 +703,10 @@ export default function Dashboard() {
           onCreateProject={() => {
             setEditingProject(null);
             setShowProjectModal(true);
+            // Close sidebar on mobile
+            if (window.innerWidth < 1024) {
+              setShowSidebar(false);
+            }
           }}
           totalDocuments={entries.length}
           uncategorizedCount={uncategorizedCount}
@@ -694,9 +716,16 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
-        <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
+        <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-dark-secondary/20">
           {/* Logo and Brand - Professional Design */}
-          <div className="flex items-center gap-2.5 ml-72">
+          <div className="flex items-center gap-2.5 lg:ml-56">
+            {/* Mobile menu button */}
+            <button
+              onClick={() => setShowSidebar(!showSidebar)}
+              className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden"
+            >
+              <Menu size={20} className="text-text-primary" />
+            </button>
             <LogoMinimal size={32} />
             <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
           </div>
@@ -704,7 +733,7 @@ export default function Dashboard() {
           {/* Stats and Profile - Compact and Functional */}
           <div className="flex items-center gap-4 mr-8">
             {/* Document Stats - Inline and Minimal */}
-            <div className="flex items-center gap-3 text-xs">
+            <div className="hidden sm:flex items-center gap-3 text-xs">
               <span className="text-text-secondary/70">
                 <span className="text-text-primary font-medium">{entries.length}</span> docs
               </span>
@@ -777,7 +806,7 @@ export default function Dashboard() {
         </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
-        <div className="px-6 py-3 ml-72">
+        <div className="px-4 md:px-6 py-3 lg:ml-56">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-2">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
@@ -824,7 +853,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content - Projects or Documents */}
-      <div className="flex-grow overflow-hidden px-6 ml-72">
+      <div className="flex-grow overflow-hidden px-4 md:px-6 lg:ml-56">
         {viewMode === 'projects' ? (
           // Projects Grid
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">

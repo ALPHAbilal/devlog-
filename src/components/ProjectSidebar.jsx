@@ -32,36 +32,36 @@ export default function ProjectSidebar({
   const categorizedCount = projects.reduce((sum, project) => sum + project.document_count, 0);
 
   return (
-    <div className="bg-dark-primary/50 rounded-lg p-4 h-full flex flex-col">
+    <div className="bg-dark-primary/50 rounded-lg p-3 h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
           className="flex items-center space-x-2 text-text-primary hover:text-accent-green transition-colors"
         >
-          {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-          <h3 className="font-semibold">Projects</h3>
+          {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          <h3 className="font-semibold text-sm">Projects</h3>
         </button>
         <button
           onClick={onCreateProject}
           className="p-1 hover:bg-dark-secondary/50 rounded transition-colors"
           title="Create new project"
         >
-          <Plus size={16} className="text-accent-green" />
+          <Plus size={14} className="text-accent-green" />
         </button>
       </div>
 
       {isExpanded && (
         <>
           {/* Search bar */}
-          <div className="relative mb-4">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
+          <div className="relative mb-3">
+            <Search size={14} className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search projects..."
-              className="w-full pl-9 pr-8 py-2 bg-dark-secondary/50 border border-dark-secondary rounded-lg 
+              className="w-full pl-8 pr-8 py-1.5 bg-dark-secondary/50 border border-dark-secondary rounded-lg 
                        text-sm text-text-primary placeholder-text-secondary/50 focus:border-accent-green/50 
                        focus:outline-none transition-colors"
             />
@@ -84,16 +84,16 @@ export default function ProjectSidebar({
               onMouseEnter={() => setHoveredProjectId('all')}
               onMouseLeave={() => setHoveredProjectId(null)}
               className={`
-                w-full flex items-center justify-between p-3 rounded-lg transition-all
+                w-full flex items-center justify-between p-2 rounded-lg transition-all
                 ${selectedProjectId === null 
                   ? 'bg-accent-green/20 text-accent-green' 
                   : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
                 }
               `}
             >
-              <div className="flex items-center space-x-3">
-                <Grid3X3 size={18} />
-                <span className="font-medium">All Documents</span>
+              <div className="flex items-center space-x-2">
+                <Grid3X3 size={16} />
+                <span className="text-sm font-medium">All Documents</span>
               </div>
               <span className="text-sm bg-dark-primary/50 px-2 py-0.5 rounded text-text-secondary">
                 {totalDocuments}
@@ -107,16 +107,16 @@ export default function ProjectSidebar({
                 onMouseEnter={() => setHoveredProjectId('uncategorized')}
                 onMouseLeave={() => setHoveredProjectId(null)}
                 className={`
-                  w-full flex items-center justify-between p-3 rounded-lg transition-all
+                  w-full flex items-center justify-between p-2 rounded-lg transition-all
                   ${selectedProjectId === 'uncategorized' 
                     ? 'bg-accent-green/20 text-accent-green' 
                     : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
                   }
                 `}
               >
-                <div className="flex items-center space-x-3">
-                  <FileText size={18} />
-                  <span className="font-medium">Uncategorized</span>
+                <div className="flex items-center space-x-2">
+                  <FileText size={16} />
+                  <span className="text-sm font-medium">Uncategorized</span>
                 </div>
                 <span className="text-sm bg-dark-primary/50 px-2 py-1 rounded">
                   {uncategorizedCount}
@@ -142,20 +142,20 @@ export default function ProjectSidebar({
                   onMouseEnter={() => setHoveredProjectId(project.id)}
                   onMouseLeave={() => setHoveredProjectId(null)}
                   className={`
-                    w-full flex items-center justify-between p-3 rounded-lg transition-all
+                    w-full flex items-center justify-between p-2 rounded-lg transition-all
                     ${isSelected 
                       ? 'bg-accent-green/20 text-accent-green' 
                       : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
                     }
                   `}
                 >
-                  <div className="flex items-center space-x-3 min-w-0">
+                  <div className="flex items-center space-x-2 min-w-0">
                     <FolderIcon 
-                      size={18} 
+                      size={16} 
                       style={{ color: isSelected ? undefined : project.color }}
                       className={isSelected ? '' : 'transition-transform'}
                     />
-                    <span className="font-medium truncate">{project.title}</span>
+                    <span className="text-sm font-medium truncate">{project.title}</span>
                   </div>
                   <span className="text-sm bg-dark-primary/50 px-2 py-1 rounded ml-2 flex-shrink-0">
                     {project.document_count}

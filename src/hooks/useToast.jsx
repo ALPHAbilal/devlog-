@@ -119,5 +119,16 @@ export function useToast() {
   if (!context) {
     throw new Error('useToast must be used within ToastProvider');
   }
-  return context;
+  
+  const { showToast, dismissToast } = context;
+  
+  // Return an object with convenience methods
+  return {
+    showToast,
+    dismissToast,
+    success: (message, duration) => showToast(message, 'success', duration),
+    error: (message, duration) => showToast(message, 'error', duration),
+    warning: (message, duration) => showToast(message, 'warning', duration),
+    info: (message, duration) => showToast(message, 'info', duration),
+  };
 }

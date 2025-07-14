@@ -23,7 +23,7 @@ class OptimizedSupabaseClient {
     this.authSubscribers = new Set();
     this.initialized = false;
     this.refreshAttempts = new Map(); // Track refresh attempts to detect loops
-    this.refreshTimeout = null; // For manual refresh scheduling
+    this.isRefreshing = false; // Prevent concurrent refresh attempts
   }
 
   /**
@@ -31,17 +31,38 @@ class OptimizedSupabaseClient {
    */
   getClient() {
     if (!this.client) {
+      // Check for emergency override in localStorage
+      const disableRefresh = localStorage.getItem('SUPABASE_DISABLE_REFRESH') === 'true';
+      
       this.client = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-          autoRefreshToken: false, // Disabled to prevent refresh loop
-          persistSession: false,   // CRITICAL: This stops automatic session recovery
-          detectSessionInUrl: false, // Disabled as PKCE forces URL detection anyway
+          autoRefreshToken: disableRefresh ? false : false, // Always false, emergency override exists
+          persistSession: true,    // Keep enabled for normal session management
+          detectSessionInUrl: true,
           flowType: 'pkce',
-          // Use simple synchronous storage to eliminate race conditions
           storage: {
-            getItem: (key) => localStorage.getItem(key),
-            setItem: (key, value) => localStorage.setItem(key, value),
-            removeItem: (key) => localStorage.removeItem(key)
+            getItem: (key) => {
+              try {
+                return localStorage.getItem(key);
+              } catch (e) {
+                console.error('Storage getItem error:', e);
+                return null;
+              }
+            },
+            setItem: (key, value) => {
+              try {
+                localStorage.setItem(key, value);
+              } catch (e) {
+                console.error('Storage setItem error:', e);
+              }
+            },
+            removeItem: (key) => {
+              try {
+                localStorage.removeItem(key);
+              } catch (e) {
+                console.error('Storage removeItem error:', e);
+              }
+            }
           }
         },
         realtime: {
@@ -76,49 +97,42 @@ class OptimizedSupabaseClient {
    * Initialize auth state and listeners
    */
   async initializeAuth() {
-    // Load persisted session manually since persistSession is false
-    const storedSession = localStorage.getItem(STORAGE_KEY);
-    if (storedSession) {
-      try {
-        const sessionData = JSON.parse(storedSession);
-        if (sessionData && sessionData.expires_at > Date.now() / 1000) {
-          // Set the session without triggering refresh
-          await this.client.auth.setSession({
-            access_token: sessionData.access_token,
-            refresh_token: sessionData.refresh_token
-          });
-        } else {
-          // Clear expired session
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      } catch (e) {
-        console.error('Failed to restore session:', e);
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-
+    // Add refresh loop prevention
+    let lastRefreshTime = 0;
+    const MIN_REFRESH_INTERVAL = 5000; // 5 seconds minimum between refreshes
+    
     const { data: { subscription } } = this.client.auth.onAuthStateChange((event, session) => {
       console.log(`[Supabase] Auth event: ${event}`);
       
-      // Detect and prevent refresh loops
+      // Prevent rapid TOKEN_REFRESHED events
       if (event === 'TOKEN_REFRESHED') {
-        const sessionId = session?.user?.id;
-        if (sessionId && !this.preventRefreshLoop(sessionId)) {
-          console.error('[Supabase] Refresh loop detected, preventing further refreshes');
+        const now = Date.now();
+        if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) {
+          console.warn('[Supabase] Ignoring rapid token refresh attempt');
           return;
+        }
+        lastRefreshTime = now;
+        
+        // Track refresh attempts for circuit breaker
+        const sessionId = session?.user?.id;
+        if (sessionId) {
+          const attempts = this.refreshAttempts.get(sessionId) || 0;
+          if (attempts > 10) {
+            console.error('[Supabase] Too many refresh attempts, circuit breaker activated');
+            // Clear the session to stop the loop
+            this.client.auth.signOut();
+            return;
+          }
+          this.refreshAttempts.set(sessionId, attempts + 1);
+          // Reset counter after 5 minutes
+          setTimeout(() => this.refreshAttempts.delete(sessionId), 300000);
         }
       }
       
-      // Manually persist session since persistSession is false
-      if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-        this.scheduleManualRefresh(session);
-      } else if (event === 'SIGNED_OUT') {
-        localStorage.removeItem(STORAGE_KEY);
-        if (this.refreshTimeout) {
-          clearTimeout(this.refreshTimeout);
-          this.refreshTimeout = null;
-        }
+      // Clear refresh attempts on sign out
+      if (event === 'SIGNED_OUT') {
+        this.refreshAttempts.clear();
+        lastRefreshTime = 0;
       }
       
       // Notify all subscribers
@@ -138,75 +152,20 @@ class OptimizedSupabaseClient {
   }
 
   /**
-   * Get session with caching (no automatic refresh)
+   * Get session with caching
    */
   async getSession() {
-    // Since autoRefreshToken and persistSession are false, we need to check manually
-    const storedSession = localStorage.getItem(STORAGE_KEY);
-    if (storedSession) {
+    // Prevent concurrent getSession calls
+    const key = 'getSession';
+    return this.deduplicateRequest(key, async () => {
       try {
-        const session = JSON.parse(storedSession);
-        // Check if session is still valid
-        if (session && session.expires_at > Date.now() / 1000) {
-          return { data: { session }, error: null };
-        }
-      } catch (e) {
-        console.error('Invalid stored session:', e);
+        const result = await this.getClient().auth.getSession();
+        return result;
+      } catch (error) {
+        console.error('[Supabase] getSession error:', error);
+        return { data: { session: null }, error };
       }
-    }
-    
-    // Get current session without triggering refresh
-    return this.getClient().auth.getSession();
-  }
-
-  /**
-   * Prevent refresh loops by tracking attempts
-   */
-  preventRefreshLoop(sessionId) {
-    const attempts = this.refreshAttempts.get(sessionId) || 0;
-    if (attempts > 3) {
-      return false; // Prevent further attempts
-    }
-    this.refreshAttempts.set(sessionId, attempts + 1);
-    // Clear attempts after 60 seconds
-    setTimeout(() => this.refreshAttempts.delete(sessionId), 60000);
-    return true;
-  }
-
-  /**
-   * Schedule manual refresh before token expires
-   */
-  scheduleManualRefresh(session) {
-    if (!session || !session.expires_at) return;
-    
-    // Clear any existing timeout
-    if (this.refreshTimeout) {
-      clearTimeout(this.refreshTimeout);
-    }
-    
-    const expiresAt = new Date(session.expires_at * 1000).getTime();
-    const now = Date.now();
-    const timeUntilExpiry = expiresAt - now;
-    
-    // Schedule refresh 1 minute before expiry
-    const refreshTime = timeUntilExpiry - 60000;
-    
-    if (refreshTime > 0) {
-      this.refreshTimeout = setTimeout(async () => {
-        console.log('[Supabase] Manually refreshing token');
-        try {
-          const { data, error } = await this.client.auth.refreshSession();
-          if (error) {
-            console.error('[Supabase] Manual refresh failed:', error);
-          } else if (data.session) {
-            // Session will be persisted by onAuthStateChange
-            console.log('[Supabase] Manual refresh successful');
-          }
-        } catch (e) {
-          console.error('[Supabase] Manual refresh error:', e);
-        }
-      }, refreshTime);
-    }
+    });
   }
 
   /**
@@ -260,3 +219,17 @@ export { optimizedSupabase };
 export const getSession = () => optimizedSupabase.getSession();
 export const onAuthStateChange = (callback) => optimizedSupabase.onAuthStateChange(callback);
 export const deduplicateRequest = (key, fn) => optimizedSupabase.deduplicateRequest(key, fn);
+
+// Emergency helper to clear auth issues
+export const clearAuthIssues = () => {
+  console.log('[Supabase] Clearing auth issues...');
+  // Clear all auth-related storage
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('SUPABASE_DISABLE_REFRESH');
+  // Clear caches
+  optimizedSupabase.sessionCache = null;
+  optimizedSupabase.sessionCacheTime = 0;
+  optimizedSupabase.refreshAttempts.clear();
+  // Sign out
+  optimizedSupabase.getClient().auth.signOut();
+};

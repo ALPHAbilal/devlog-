@@ -6,12 +6,16 @@ import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
-import { Plus, User, Settings, LogOut } from 'lucide-react';
+import ProjectCard from '../components/ProjectCard';
+import ProjectSidebar from '../components/ProjectSidebar';
+import ProjectModal from '../components/ProjectModal';
+import { Plus, User, Settings, LogOut, Grid3X3 } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
+import { useToast } from '../hooks/useToast';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -27,8 +31,16 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
   
+  // Project state
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [editingProject, setEditingProject] = useState(null);
+  const [viewMode, setViewMode] = useState('documents'); // 'documents' or 'projects'
+  
   // Initialize auto-save functionality
   const { performAutoSave } = useAutoSave();
+  const toast = useToast();
   
   // Handle document expansion with lazy block loading
   const handleDocumentExpand = useCallback((document) => {
@@ -261,6 +273,17 @@ export default function Dashboard() {
         if (isMounted) {
           await updateStorageInfo();
         }
+        
+        // Load projects if using Supabase
+        if (storageWrapper.isSupabase && isMounted) {
+          try {
+            const projectList = await storageWrapper.getProjects();
+            console.log(`Dashboard: Loaded ${projectList?.length || 0} projects`);
+            setProjects(projectList || []);
+          } catch (error) {
+            console.error('Error loading projects:', error);
+          }
+        }
       } catch (error) {
         console.error('Error loading entries:', error);
       } finally {
@@ -449,21 +472,80 @@ export default function Dashboard() {
     });
     return Array.from(tagSet).sort();
   };
+  
+  // Project CRUD handlers
+  const handleCreateProject = useCallback(async (projectData) => {
+    try {
+      const newProject = await storageWrapper.createProject(projectData);
+      setProjects([...projects, newProject]);
+      toast.success('Project created successfully');
+      setShowProjectModal(false);
+      setEditingProject(null);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast.error('Failed to create project');
+    }
+  }, [projects, toast]);
+  
+  const handleUpdateProject = useCallback(async (projectId, updates) => {
+    try {
+      const updatedProject = await storageWrapper.updateProject(projectId, updates);
+      setProjects(projects.map(p => p.id === projectId ? updatedProject : p));
+      toast.success('Project updated successfully');
+      setShowProjectModal(false);
+      setEditingProject(null);
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast.error('Failed to update project');
+    }
+  }, [projects, toast]);
+  
+  const handleDeleteProject = useCallback(async (project) => {
+    if (!confirm(`Are you sure you want to delete "${project.title}"? Documents will be moved to uncategorized.`)) {
+      return;
+    }
+    
+    try {
+      await storageWrapper.deleteProject(project.id);
+      setProjects(projects.filter(p => p.id !== project.id));
+      if (selectedProjectId === project.id) {
+        setSelectedProjectId(null);
+      }
+      toast.success('Project deleted successfully');
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast.error('Failed to delete project');
+    }
+  }, [projects, selectedProjectId, toast]);
+  
+  const handleProjectSelect = useCallback((projectId) => {
+    setSelectedProjectId(projectId);
+    setViewMode('documents');
+  }, []);
 
-  // Filter entries based on search and selected tags
+  // Filter entries based on search, selected tags, and project
   const filteredEntries = entries.filter(entry => {
-    // First filter by search term
+    // First filter by project
+    const matchesProject = 
+      selectedProjectId === null || // Show all
+      (selectedProjectId === 'uncategorized' && !entry.project_id) || // Uncategorized
+      entry.project_id === selectedProjectId; // Specific project
+    
+    // Then filter by search term
     const matchesSearch = searchTerm === '' || 
       entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       entry.preview.toLowerCase().includes(searchTerm.toLowerCase()) ||
       entry.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    // Then filter by selected tags (if any)
+    // Finally filter by selected tags (if any)
     const matchesTags = selectedTags.length === 0 ||
       selectedTags.every(tag => entry.tags?.includes(tag));
     
-    return matchesSearch && matchesTags;
+    return matchesProject && matchesSearch && matchesTags;
   });
+  
+  // Count uncategorized documents
+  const uncategorizedCount = entries.filter(entry => !entry.project_id).length;
 
   // Toggle tag selection
   const toggleTag = (tag) => {
@@ -523,7 +605,7 @@ export default function Dashboard() {
           {/* Top Navigation Bar */}
           <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
             {/* Logo and Brand */}
-            <div className="flex items-center gap-2.5 ml-8">
+            <div className="flex items-center gap-2.5 ml-72">
               <LogoMinimal size={32} />
               <div className="h-7 w-16 bg-gray-800/50 rounded animate-pulse" />
             </div>
@@ -539,7 +621,7 @@ export default function Dashboard() {
           </div>
 
           {/* Search and Actions Bar */}
-          <div className="px-6 py-3 ml-40">
+          <div className="px-6 py-3 ml-72">
             <div className="max-w-5xl mx-auto">
               <div className="flex items-center gap-2">
                 <div className="flex-1 h-10 bg-gray-800/30 rounded animate-pulse" />
@@ -550,7 +632,7 @@ export default function Dashboard() {
         </div>
         
         {/* Content Skeleton with margin for tags */}
-        <div className="flex-grow overflow-hidden px-6 ml-40">
+        <div className="flex-grow overflow-hidden px-6 ml-72">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
               <div key={i} className="group">
@@ -594,40 +676,19 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col h-full relative">
-      {/* Floating Tags */}
-      <div className="absolute left-3 top-24 bottom-6 z-30 max-w-[160px]">
-        <div className="h-full flex flex-col">
-          {selectedTags.length > 0 && (
-            <button
-              onClick={() => setSelectedTags([])}
-              className="self-start text-xs text-text-secondary/50 hover:text-accent-green 
-                         transition-colors mb-2"
-            >
-              Clear filters
-            </button>
-          )}
-          <div className="flex-1 overflow-y-auto pr-2 minimal-scrollbar">
-            <div className="flex flex-col gap-2">
-              {getAllTags().map(tag => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`
-                    text-left px-3 py-2 text-sm
-                    border border-dashed rounded
-                    transition-all duration-200
-                    ${selectedTags.includes(tag)
-                      ? 'border-accent-green text-accent-green bg-accent-green/5'
-                      : 'border-dark-secondary/40 text-text-secondary/70 hover:text-text-primary hover:border-text-secondary/50'
-                    }
-                  `}
-                >
-                  <span className="block truncate">{tag}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Project Sidebar */}
+      <div className="absolute left-3 top-24 bottom-6 z-30 w-64">
+        <ProjectSidebar
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onProjectSelect={handleProjectSelect}
+          onCreateProject={() => {
+            setEditingProject(null);
+            setShowProjectModal(true);
+          }}
+          totalDocuments={entries.length}
+          uncategorizedCount={uncategorizedCount}
+        />
       </div>
 
       {/* Header */}
@@ -635,7 +696,7 @@ export default function Dashboard() {
         {/* Top Navigation Bar - Compact and Efficient */}
         <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
           {/* Logo and Brand - Professional Design */}
-          <div className="flex items-center gap-2.5 ml-8">
+          <div className="flex items-center gap-2.5 ml-72">
             <LogoMinimal size={32} />
             <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
           </div>
@@ -716,10 +777,29 @@ export default function Dashboard() {
         </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
-        <div className="px-6 py-3 ml-40">
+        <div className="px-6 py-3 ml-72">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-2">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
+              
+              {/* View Mode Toggle */}
+              {storageWrapper.isSupabase && projects.length > 0 && (
+                <button
+                  onClick={() => setViewMode(viewMode === 'documents' ? 'projects' : 'documents')}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2
+                           bg-dark-secondary/40 hover:bg-dark-secondary/60
+                           text-text-primary rounded transition-all
+                           border border-dark-secondary/50 hover:border-accent-green/40
+                           text-sm"
+                  title={`View ${viewMode === 'documents' ? 'projects' : 'documents'}`}
+                >
+                  <Grid3X3 size={16} />
+                  <span className="font-medium">
+                    {viewMode === 'documents' ? 'View Projects' : 'View Documents'}
+                  </span>
+                </button>
+              )}
+              
               <button
                 onClick={createNewEntry}
                 className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 
@@ -743,13 +823,47 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Virtualized Grid - Maximized Space */}
-      <div className="flex-grow overflow-hidden px-6 ml-40">
-        <VirtualizedGrid 
-          entries={filteredEntries}
-          onExpand={handleDocumentExpand}
-          searchTerm={searchTerm}
-        />
+      {/* Main Content - Projects or Documents */}
+      <div className="flex-grow overflow-hidden px-6 ml-72">
+        {viewMode === 'projects' ? (
+          // Projects Grid
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
+            {projects.map(project => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                isSelected={selectedProjectId === project.id}
+                onClick={() => handleProjectSelect(project.id)}
+                onEdit={(project) => {
+                  setEditingProject(project);
+                  setShowProjectModal(true);
+                }}
+                onDelete={handleDeleteProject}
+              />
+            ))}
+            {/* Add New Project Card */}
+            <div
+              onClick={() => {
+                setEditingProject(null);
+                setShowProjectModal(true);
+              }}
+              className="bg-card-gradient rounded-lg p-6 border border-dashed border-accent-green/30 
+                         hover:border-accent-green/50 cursor-pointer transition-all duration-300 
+                         flex flex-col items-center justify-center min-h-[200px]
+                         hover:scale-105 hover:shadow-xl"
+            >
+              <Plus size={48} className="text-accent-green/50 mb-2" />
+              <span className="text-accent-green/70 font-medium">Create New Project</span>
+            </div>
+          </div>
+        ) : (
+          // Documents Grid
+          <VirtualizedGrid 
+            entries={filteredEntries}
+            onExpand={handleDocumentExpand}
+            searchTerm={searchTerm}
+          />
+        )}
       </div>
 
       {/* Empty State */}
@@ -809,6 +923,26 @@ export default function Dashboard() {
         }}
         entries={entries}
       />
+      
+      {/* Project Modal */}
+      {showProjectModal && (
+        <ProjectModal
+          isOpen={showProjectModal}
+          onClose={() => {
+            setShowProjectModal(false);
+            setEditingProject(null);
+          }}
+          onSave={async (projectData) => {
+            if (editingProject) {
+              await handleUpdateProject(editingProject.id, projectData);
+            } else {
+              await handleCreateProject(projectData);
+            }
+          }}
+          project={editingProject}
+          title={editingProject ? 'Edit Project' : 'Create New Project'}
+        />
+      )}
     </div>
   );
 }

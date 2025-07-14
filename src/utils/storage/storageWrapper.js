@@ -86,7 +86,23 @@ function createSupabaseWrapper(adapter) {
       }
     },
     // Expose the underlying adapter for direct access if needed
-    supabaseAdapter: adapter
+    supabaseAdapter: adapter,
+    // Project management methods
+    async getProjects() {
+      return await adapter.getProjects();
+    },
+    async createProject(projectData) {
+      return await adapter.createProject(projectData);
+    },
+    async updateProject(projectId, updates) {
+      return await adapter.updateProject(projectId, updates);
+    },
+    async deleteProject(projectId) {
+      return await adapter.deleteProject(projectId);
+    },
+    async assignDocumentToProject(documentId, projectId) {
+      return await adapter.assignDocumentToProject(documentId, projectId);
+    }
   };
 }
 
@@ -266,6 +282,43 @@ export const storageWrapper = {
   get isSupabase() {
     // Check if we're using the Supabase wrapper
     return adapter && adapter.loadEntries && adapter.loadEntries.toString().includes('getDocuments');
+  },
+  // Project management methods
+  async getProjects() {
+    if (!adapter) await init();
+    if (!adapter.getProjects) {
+      console.warn('Projects not supported with current storage adapter');
+      return [];
+    }
+    return await adapter.getProjects();
+  },
+  async createProject(projectData) {
+    if (!adapter) await init();
+    if (!adapter.createProject) {
+      throw new Error('Projects not supported with current storage adapter');
+    }
+    return await adapter.createProject(projectData);
+  },
+  async updateProject(projectId, updates) {
+    if (!adapter) await init();
+    if (!adapter.updateProject) {
+      throw new Error('Projects not supported with current storage adapter');
+    }
+    return await adapter.updateProject(projectId, updates);
+  },
+  async deleteProject(projectId) {
+    if (!adapter) await init();
+    if (!adapter.deleteProject) {
+      throw new Error('Projects not supported with current storage adapter');
+    }
+    return await adapter.deleteProject(projectId);
+  },
+  async assignDocumentToProject(documentId, projectId) {
+    if (!adapter) await init();
+    if (!adapter.assignDocumentToProject) {
+      throw new Error('Projects not supported with current storage adapter');
+    }
+    return await adapter.assignDocumentToProject(documentId, projectId);
   }
 };
 

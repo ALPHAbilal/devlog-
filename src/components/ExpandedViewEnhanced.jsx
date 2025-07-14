@@ -14,6 +14,7 @@ import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogEnhanced } from './ShareDialogEnhanced';
 import SaveIndicator from './SaveIndicator';
+import ProjectSelector from './ProjectSelector';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -76,14 +77,33 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [isDeleting, setIsDeleting] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(entry.project_id || null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
   const saveStatusTimeoutRef = useRef(null);
 
-  // Update title and tags when entry changes (e.g., when navigating via document links)
+  // Update title, tags, and project when entry changes (e.g., when navigating via document links)
   useEffect(() => {
     setTitle(entry.title);
     setTags(entry.tags || []);
+    setSelectedProjectId(entry.project_id || null);
   }, [entry.id]);
+  
+  // Load projects if using Supabase
+  useEffect(() => {
+    const loadProjects = async () => {
+      if (storageWrapper.isSupabase) {
+        try {
+          const projectList = await storageWrapper.getProjects();
+          setProjects(projectList || []);
+        } catch (error) {
+          console.error('Failed to load projects:', error);
+        }
+      }
+    };
+    loadProjects();
+  }, []);
   
   // Cleanup save status timeout on unmount
   useEffect(() => {
@@ -613,6 +633,21 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       await saveWithStatus({ tags: updatedTags }, 'tags');
     }
   };
+  
+  const handleProjectChange = async (projectId) => {
+    setSelectedProjectId(projectId);
+    if (onUpdate) {
+      await saveWithStatus({ project_id: projectId }, 'project');
+      // Also update in storage wrapper for immediate effect
+      if (storageWrapper.isSupabase && entry.id) {
+        try {
+          await storageWrapper.assignDocumentToProject(entry.id, projectId);
+        } catch (error) {
+          console.error('Failed to assign document to project:', error);
+        }
+      }
+    }
+  };
 
   // Clear focus when clicking outside any block
   const handleBackgroundClick = (e) => {
@@ -995,6 +1030,20 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               onClose={() => setShowBlockSelector(false)}
             />
           </div>
+        </div>
+      )}
+
+      {/* Project Selector */}
+      {storageWrapper.isSupabase && projects.length > 0 && (
+        <div className="mb-6">
+          <label className="block text-sm text-text-secondary mb-2">Project</label>
+          <ProjectSelector
+            projects={projects}
+            selectedProjectId={selectedProjectId}
+            onProjectSelect={handleProjectChange}
+            onCreateProject={() => setShowProjectModal(true)}
+            className="max-w-sm"
+          />
         </div>
       )}
 

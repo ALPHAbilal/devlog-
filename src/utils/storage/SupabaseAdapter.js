@@ -928,4 +928,140 @@ export class SupabaseAdapter {
   getName() {
     return 'Supabase';
   }
+
+  // Project CRUD operations
+  async getProjects() {
+    if (!this.initialized) await this.init();
+    
+    console.log('SupabaseAdapter: Getting projects...');
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('get_projects_with_stats', { p_user_id: this.userId });
+      
+      if (error) {
+        console.error('SupabaseAdapter: Error getting projects:', error);
+        throw error;
+      }
+      
+      console.log(`SupabaseAdapter: Found ${data?.length || 0} projects`);
+      return data || [];
+    } catch (error) {
+      console.error('SupabaseAdapter: Failed to get projects:', error);
+      return [];
+    }
+  }
+
+  async createProject(projectData) {
+    if (!this.initialized) await this.init();
+    
+    console.log('SupabaseAdapter: Creating project:', projectData);
+    
+    const { data, error } = await supabase
+      .from('projects')
+      .insert({
+        user_id: this.userId,
+        title: projectData.title,
+        description: projectData.description || null,
+        color: projectData.color || '#10b981',
+        icon: projectData.icon || 'folder'
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('SupabaseAdapter: Error creating project:', error);
+      throw error;
+    }
+    
+    console.log('SupabaseAdapter: Project created:', data);
+    return data;
+  }
+
+  async updateProject(projectId, updates) {
+    if (!this.initialized) await this.init();
+    
+    console.log('SupabaseAdapter: Updating project:', projectId, updates);
+    
+    const { data, error } = await supabase
+      .from('projects')
+      .update({
+        title: updates.title,
+        description: updates.description,
+        color: updates.color,
+        icon: updates.icon,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', projectId)
+      .eq('user_id', this.userId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('SupabaseAdapter: Error updating project:', error);
+      throw error;
+    }
+    
+    console.log('SupabaseAdapter: Project updated:', data);
+    return data;
+  }
+
+  async deleteProject(projectId) {
+    if (!this.initialized) await this.init();
+    
+    console.log('SupabaseAdapter: Deleting project:', projectId);
+    
+    // First, unassign all documents from this project
+    const { error: unassignError } = await supabase
+      .from('documents')
+      .update({ project_id: null })
+      .eq('project_id', projectId)
+      .eq('user_id', this.userId);
+    
+    if (unassignError) {
+      console.error('SupabaseAdapter: Error unassigning documents:', unassignError);
+      throw unassignError;
+    }
+    
+    // Then delete the project
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId)
+      .eq('user_id', this.userId);
+    
+    if (error) {
+      console.error('SupabaseAdapter: Error deleting project:', error);
+      throw error;
+    }
+    
+    console.log('SupabaseAdapter: Project deleted successfully');
+    return true;
+  }
+
+  async assignDocumentToProject(documentId, projectId) {
+    if (!this.initialized) await this.init();
+    
+    console.log('SupabaseAdapter: Assigning document to project:', { documentId, projectId });
+    
+    const { error } = await supabase
+      .from('documents')
+      .update({ 
+        project_id: projectId,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', documentId)
+      .eq('user_id', this.userId);
+    
+    if (error) {
+      console.error('SupabaseAdapter: Error assigning document:', error);
+      throw error;
+    }
+    
+    // Invalidate cache to reflect the change
+    this.invalidateCache();
+    
+    console.log('SupabaseAdapter: Document assigned successfully');
+    return true;
+  }
 }

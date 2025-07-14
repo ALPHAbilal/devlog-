@@ -98,8 +98,8 @@ export default function ProjectCard({
         rounded-lg cursor-pointer 
         transition-all duration-300 ease-out
         hover:shadow-xl hover:shadow-black/20
-        hover:-translate-y-1
         border border-transparent hover:border-surface-3
+        h-48 w-full
         ${isSelected 
           ? 'ring-2 ring-accent-green/50 bg-surface-2 shadow-lg shadow-accent-green/10' 
           : ''
@@ -159,7 +159,6 @@ export default function ProjectCard({
               px-2.5 py-1 rounded-full text-xs font-medium flex items-center space-x-1.5
               ${activityColors[activityLevel]}
               transition-all duration-300
-              ${isHovered ? 'scale-105' : ''}
             `}>
               <ActivityIcon size={12} className="animate-pulse" />
               <span>{formatRelativeDate(project.last_document_date)}</span>

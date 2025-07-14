@@ -1078,27 +1078,6 @@ export default function Dashboard() {
                 />
               );
             })}
-            {/* Add New Project Card */}
-            <div
-              onClick={() => {
-                setEditingProject(null);
-                setShowProjectModal(true);
-              }}
-              className="relative group bg-surface-1 hover:bg-surface-2 rounded-lg p-5 
-                         border-2 border-dashed border-surface-3 hover:border-accent-green/50 
-                         cursor-pointer transition-all duration-300 
-                         flex flex-col justify-center items-center min-h-[200px]
-                         hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5"
-            >
-              <Plus size={24} className="text-accent-green/60 group-hover:text-accent-green mb-3 
-                                         group-hover:rotate-90 transition-all duration-300" />
-              <span className="text-text-secondary group-hover:text-text-primary text-base font-medium">
-                Create New Project
-              </span>
-              <span className="text-text-secondary/60 text-sm mt-1">
-                Organize your documents
-              </span>
-            </div>
           </div>
         ) : (
           // Documents Grid

@@ -37,7 +37,7 @@ export default function ProjectSidebar({
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center space-x-2 text-primary hover:text-accent-green transition-colors"
+          className="flex items-center space-x-2 text-text-primary hover:text-accent-green transition-colors"
         >
           {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
           <h3 className="font-semibold">Projects</h3>
@@ -55,14 +55,14 @@ export default function ProjectSidebar({
         <>
           {/* Search bar */}
           <div className="relative mb-4">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search projects..."
-              className="w-full pl-9 pr-8 py-2 bg-dark-secondary/50 border border-gray-700 rounded-lg 
-                       text-sm text-primary placeholder-gray-500 focus:border-accent-green/50 
+              className="w-full pl-9 pr-8 py-2 bg-dark-secondary/50 border border-dark-secondary rounded-lg 
+                       text-sm text-text-primary placeholder-text-secondary/50 focus:border-accent-green/50 
                        focus:outline-none transition-colors"
             />
             {searchTerm && (
@@ -71,7 +71,7 @@ export default function ProjectSidebar({
                 className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 
                          hover:bg-dark-secondary rounded transition-colors"
               >
-                <X size={14} className="text-gray-400" />
+                <X size={14} className="text-text-secondary" />
               </button>
             )}
           </div>
@@ -87,7 +87,7 @@ export default function ProjectSidebar({
                 w-full flex items-center justify-between p-3 rounded-lg transition-all
                 ${selectedProjectId === null 
                   ? 'bg-accent-green/20 text-accent-green' 
-                  : 'hover:bg-dark-secondary/50 text-gray-300 hover:text-primary'
+                  : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
                 }
               `}
             >
@@ -95,7 +95,7 @@ export default function ProjectSidebar({
                 <Grid3X3 size={18} />
                 <span className="font-medium">All Documents</span>
               </div>
-              <span className="text-sm bg-dark-primary/50 px-2 py-1 rounded">
+              <span className="text-sm bg-dark-primary/50 px-2 py-0.5 rounded text-text-secondary">
                 {totalDocuments}
               </span>
             </button>
@@ -110,7 +110,7 @@ export default function ProjectSidebar({
                   w-full flex items-center justify-between p-3 rounded-lg transition-all
                   ${selectedProjectId === 'uncategorized' 
                     ? 'bg-accent-green/20 text-accent-green' 
-                    : 'hover:bg-dark-secondary/50 text-gray-300 hover:text-primary'
+                    : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
                   }
                 `}
               >
@@ -126,7 +126,7 @@ export default function ProjectSidebar({
 
             {/* Divider */}
             {(uncategorizedCount > 0 || filteredProjects.length > 0) && (
-              <div className="my-2 border-t border-gray-700/50" />
+              <div className="my-2 border-t border-dark-secondary/50" />
             )}
 
             {/* Projects */}
@@ -145,7 +145,7 @@ export default function ProjectSidebar({
                     w-full flex items-center justify-between p-3 rounded-lg transition-all
                     ${isSelected 
                       ? 'bg-accent-green/20 text-accent-green' 
-                      : 'hover:bg-dark-secondary/50 text-gray-300 hover:text-primary'
+                      : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
                     }
                   `}
                 >
@@ -166,15 +166,15 @@ export default function ProjectSidebar({
 
             {/* Empty state */}
             {filteredProjects.length === 0 && searchTerm && (
-              <div className="text-center py-8 text-gray-500 text-sm">
+              <div className="text-center py-8 text-text-secondary text-sm">
                 No projects found matching "{searchTerm}"
               </div>
             )}
 
             {filteredProjects.length === 0 && !searchTerm && (
               <div className="text-center py-8">
-                <Folder size={32} className="text-gray-600 mx-auto mb-2" />
-                <p className="text-gray-500 text-sm mb-3">No projects yet</p>
+                <Folder size={32} className="text-text-secondary/60 mx-auto mb-2" />
+                <p className="text-text-secondary text-sm mb-3">No projects yet</p>
                 <button
                   onClick={onCreateProject}
                   className="text-accent-green hover:text-accent-green/80 text-sm font-medium"
@@ -186,7 +186,7 @@ export default function ProjectSidebar({
           </div>
 
           {/* Footer stats */}
-          <div className="mt-4 pt-4 border-t border-gray-700/50 text-xs text-gray-500">
+          <div className="mt-4 pt-4 border-t border-dark-secondary/50 text-xs text-text-secondary">
             <div className="flex justify-between mb-1">
               <span>Total projects:</span>
               <span>{projects.length}</span>

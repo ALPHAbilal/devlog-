@@ -847,13 +847,13 @@ export default function Dashboard() {
                 setEditingProject(null);
                 setShowProjectModal(true);
               }}
-              className="bg-card-gradient rounded-lg p-6 border border-dashed border-accent-green/30 
+              className="bg-card-gradient rounded-lg p-4 border border-dashed border-text-secondary/30 
                          hover:border-accent-green/50 cursor-pointer transition-all duration-300 
-                         flex flex-col items-center justify-center min-h-[200px]
+                         flex flex-col h-full justify-center items-center
                          hover:scale-105 hover:shadow-xl"
             >
-              <Plus size={48} className="text-accent-green/50 mb-2" />
-              <span className="text-accent-green/70 font-medium">Create New Project</span>
+              <Plus size={20} className="text-accent-green/60 mb-2" />
+              <span className="text-text-secondary text-sm">New Project</span>
             </div>
           </div>
         ) : (

@@ -1,357 +1,223 @@
-# Implementing secure document sharing in Supabase applications with Row Level Security
+# Supabase v2.46.2 infinite token refresh loop causing 429 errors and automatic logout
 
-When implementing document sharing in a Supabase application, the fundamental challenge is that Row Level Security (RLS) policies designed to protect documents can inadvertently block legitimate shared access. Based on comprehensive research of implementation patterns, security considerations, and real-world examples, this report provides actionable solutions for your specific use case.
+The infinite TOKEN_REFRESHED event loop in Supabase v2.46.2 is a documented issue affecting multiple users, with browser-specific behaviors and configuration complexities that can trigger continuous authentication attempts. Based on extensive research across GitHub issues, Stack Overflow discussions, and technical documentation, this problem stems from several interconnected factors including ignored configuration settings, race conditions in custom storage implementations, and PKCE flow conflicts.
 
-## The core problem: RLS blocking valid shares
+## The core problem: autoRefreshToken configuration is not fully respected
 
-Your current RLS policy restricts document access to owners only:
+The most significant finding is that `autoRefreshToken: false` doesn't completely disable token refresh behavior in Supabase v2. According to **GitHub Discussion #17788**, this configuration only prevents timer-based automatic refresh but still triggers refresh on session initialization and `getSession()` calls. When combined with custom storage implementations and PKCE flow, this creates a perfect storm for infinite refresh loops.
 
-```sql
--- Current restrictive policy
-ON documents FOR SELECT USING (user_id = auth.uid() AND deleted_at IS NULL)
-```
+The issue manifests through a specific sequence: successful SIGNED_IN event → immediate TOKEN_REFRESHED events every few milliseconds → HTTP 429 rate limit errors after 50+ attempts → automatic SIGNED_OUT. This pattern indicates that the client is attempting to refresh an already-valid token repeatedly, likely due to session validation logic conflicts.
 
-This creates a conflict where `checkShareAccess` validates the share successfully, but `getSharedDocument` fails because RLS blocks the subsequent document query. The solution requires modifying your security architecture to accommodate both ownership and sharing patterns while maintaining robust security.
+## Why Supabase v2.46.2 ignores autoRefreshToken settings
 
-## Three proven implementation approaches
+Research reveals that `autoRefreshToken: false` is only partially implemented in the Supabase client. The setting prevents scheduled timer-based refreshes but doesn't stop refresh attempts during:
 
-### Approach 1: Modified RLS policies with share validation
+- Initial client creation with `persistSession: true`
+- Every `getSession()` call when tokens appear expired
+- Session recovery from storage
+- Auth state change callbacks containing async operations
 
-The most straightforward solution involves updating your RLS policies to check both ownership and valid shares. This approach maintains security within the database layer while enabling shared access.
+**GitHub Issue #762** documents a critical deadlock bug where async Supabase calls within `onAuthStateChange` callbacks cause subsequent calls to hang. This creates symptoms similar to infinite loops, especially when TOKEN_REFRESHED events trigger database operations. The locking mechanism introduced to prevent refresh token reuse inadvertently creates deadlocks under certain conditions.
 
-```sql
--- Enhanced RLS policy that checks both ownership and shares
-CREATE POLICY "documents_access_policy" ON documents
-  FOR SELECT TO authenticated
-  USING (
-    -- Owner access
-    user_id = auth.uid() AND deleted_at IS NULL
-    OR
-    -- Shared access (authenticated users)
-    id IN (
-      SELECT document_id 
-      FROM document_shares 
-      WHERE share_code = current_setting('app.share_code', true)
-        AND (expires_at IS NULL OR expires_at > now())
-        AND is_active = true
-    )
-  );
+## Browser-specific authentication behaviors and extension interference
 
--- Anonymous access policy
-CREATE POLICY "anonymous_shared_documents" ON documents
-  FOR SELECT TO anon
-  USING (
-    id IN (
-      SELECT document_id 
-      FROM document_shares 
-      WHERE share_code = current_setting('app.share_code', true)
-        AND allow_anonymous = true
-        AND (expires_at IS NULL OR expires_at > now())
-        AND is_active = true
-    )
-  );
-```
+The browser-specific nature of this issue points to several potential causes:
 
-To use this approach, your client code needs to set the share code in the session:
+**Storage Context Conflicts**: Browser extensions maintain separate localStorage namespaces that can interfere with Supabase's session management. Extensions using Chrome Identity API or monitoring tab events can disrupt OAuth flows and token handling.
+
+**Race Conditions in Custom Storage**: Your custom localStorage wrapper with caching may introduce timing issues. Asynchronous storage operations can create race conditions during rapid token refresh cycles, especially when multiple browser tabs attempt simultaneous refresh.
+
+**Production Environment Differences**: Vercel deployments introduce additional complexity through edge runtime limitations, environment variable handling, and cold start behaviors that differ from local development.
+
+## PKCE flow and detectSessionInUrl interaction bugs
+
+**GitHub Issue #931** confirms that `detectSessionInUrl: false` is ignored when using PKCE flow. The code logic shows:
 
 ```javascript
-// Set share code before querying
-const { data: document } = await supabase
-  .rpc('set_config', { key: 'app.share_code', value: shareCode })
-  .then(() => supabase
-    .from('documents')
-    .select('*')
-    .eq('id', documentId)
-    .single()
-  );
+if (isPKCEFlow || (this.detectSessionInUrl && this._isImplicitGrantFlow())) {
+  const { data, error } = await this._getSessionFromURL(isPKCEFlow)
+}
 ```
 
-**Pros**: Simple implementation, leverages existing RLS infrastructure, good performance with proper indexes
-**Cons**: Requires session variable management, complex policies can impact query performance
-**Security**: High - maintains database-level security
-**Performance**: Good with proper indexing
+This means PKCE always attempts to detect sessions from URLs, potentially causing unwanted session recovery attempts that trigger refresh loops.
 
-### Approach 2: SECURITY DEFINER functions for controlled access
+## Custom storage implementation causing token refresh issues
 
-A more sophisticated approach uses PostgreSQL's SECURITY DEFINER functions to bypass RLS in a controlled manner. This provides fine-grained control over access logic while maintaining security.
+Your custom storage wrapper with caching is a likely culprit. Common problematic patterns include:
 
-```sql
-CREATE OR REPLACE FUNCTION get_shared_document(
-  p_share_code TEXT,
-  p_password TEXT DEFAULT NULL
+- **Async/Sync Mismatch**: localStorage is synchronous, but custom wrappers often make it asynchronous
+- **Write Conflicts**: Caching layers can cause stale token reads during rapid refresh cycles
+- **Incomplete Implementation**: Missing error handling or race condition prevention
+
+The storage key `'sb-zqcjipwiznesnbgbocnu-auth-token'` suggests a production Supabase instance. Multiple tabs or contexts accessing this key simultaneously can corrupt the authentication state.
+
+## Solutions for completely disabling automatic token refresh
+
+To completely disable automatic token refresh, implement this configuration:
+
+```typescript
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.VITE_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false, // Critical: prevents session recovery
+      detectSessionInUrl: false,
+      flowType: 'pkce'
+    }
+  }
 )
-RETURNS JSON
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public, pg_catalog
-AS $$
-DECLARE
-  share_record RECORD;
-  document_data JSON;
-BEGIN
-  -- Validate share code format
-  IF p_share_code IS NULL OR LENGTH(p_share_code) < 10 THEN
-    RAISE EXCEPTION 'Invalid share code';
-  END IF;
-  
-  -- Get share details with document
-  SELECT ds.*, d.id, d.title, d.content, d.user_id, d.created_at
-  INTO share_record
-  FROM document_shares ds
-  JOIN documents d ON ds.document_id = d.id
-  WHERE ds.share_code = p_share_code
-    AND ds.is_active = true
-    AND (ds.expires_at IS NULL OR ds.expires_at > NOW())
-    AND d.deleted_at IS NULL;
-  
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Share not found or expired';
-  END IF;
-  
-  -- Check password if required
-  IF share_record.password_hash IS NOT NULL THEN
-    IF p_password IS NULL OR NOT verify_password(p_password, share_record.password_hash) THEN
-      RAISE EXCEPTION 'Invalid password';
-    END IF;
-  END IF;
-  
-  -- Check permissions
-  IF auth.uid() IS NULL AND NOT share_record.allow_anonymous THEN
-    RAISE EXCEPTION 'Authentication required';
-  END IF;
-  
-  -- Log access for analytics
-  INSERT INTO share_analytics (document_id, share_code, accessed_at, accessed_by)
-  VALUES (share_record.id, p_share_code, NOW(), auth.uid());
-  
-  -- Return document data based on permissions
-  document_data := json_build_object(
-    'id', share_record.id,
-    'title', share_record.title,
-    'created_at', share_record.created_at,
-    'permissions', share_record.permissions
-  );
-  
-  -- Include content for view permissions and above
-  IF share_record.permissions IN ('view', 'comment', 'edit') THEN
-    document_data := document_data || json_build_object('content', share_record.content);
-  END IF;
-  
-  RETURN document_data;
-END;
-$$;
-
--- Restrict function execution
-REVOKE EXECUTE ON FUNCTION get_shared_document FROM PUBLIC;
-GRANT EXECUTE ON FUNCTION get_shared_document TO authenticated, anon;
 ```
 
-Client implementation:
-```javascript
-const { data, error } = await supabase
-  .rpc('get_shared_document', { 
-    p_share_code: shareCode,
-    p_password: password 
-  });
-```
+Note that setting `persistSession: false` is crucial - this prevents the client from attempting to recover and refresh sessions from storage on initialization.
 
-**Pros**: Fine-grained access control, supports complex business logic, built-in audit trail
-**Cons**: Requires careful security implementation, function maintenance overhead
-**Security**: Excellent when properly implemented
-**Performance**: Good, but adds function call overhead
+## Manual token management strategies
 
-### Approach 3: Hybrid approach with share access tables
+Implement a custom token manager that gives you complete control:
 
-This approach uses a materialized share access pattern that maintains a dedicated table for users who have access to documents, simplifying RLS policies while maintaining performance.
-
-```sql
--- Share access tracking table
-CREATE TABLE user_document_access (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id),
-  document_id UUID REFERENCES documents(id),
-  access_level TEXT CHECK (access_level IN ('view', 'comment', 'edit')),
-  granted_via TEXT, -- 'owner', 'share', 'team'
-  expires_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Simplified RLS policy
-CREATE POLICY "document_access_via_access_table" ON documents
-  FOR SELECT TO authenticated
-  USING (
-    deleted_at IS NULL AND
-    id IN (
-      SELECT document_id 
-      FROM user_document_access 
-      WHERE user_id = auth.uid()
-        AND (expires_at IS NULL OR expires_at > NOW())
-    )
-  );
-
--- Function to grant access via share
-CREATE OR REPLACE FUNCTION grant_share_access(
-  p_share_code TEXT,
-  p_user_id UUID DEFAULT NULL
-)
-RETURNS BOOLEAN AS $$
-DECLARE
-  share_record RECORD;
-BEGIN
-  -- Validate share
-  SELECT * INTO share_record
-  FROM document_shares
-  WHERE share_code = p_share_code
-    AND is_active = true
-    AND (expires_at IS NULL OR expires_at > NOW());
+```typescript
+class TokenManager {
+  private refreshTimeout: NodeJS.Timeout | null = null
+  private isRefreshing = false
+  
+  async manualRefresh(client: SupabaseClient) {
+    if (this.isRefreshing) return
     
-  IF NOT FOUND THEN
-    RETURN FALSE;
-  END IF;
+    this.isRefreshing = true
+    try {
+      const { data, error } = await client.auth.refreshSession()
+      if (!error && data.session) {
+        this.scheduleNextRefresh(data.session.expires_at)
+      }
+    } finally {
+      this.isRefreshing = false
+    }
+  }
   
-  -- Grant access
-  INSERT INTO user_document_access (
-    user_id, 
-    document_id, 
-    access_level, 
-    granted_via,
-    expires_at
-  ) VALUES (
-    COALESCE(p_user_id, auth.uid()),
-    share_record.document_id,
-    share_record.permissions,
-    'share',
-    share_record.expires_at
-  ) ON CONFLICT (user_id, document_id) 
-  DO UPDATE SET 
-    access_level = EXCLUDED.access_level,
-    expires_at = EXCLUDED.expires_at;
+  private scheduleNextRefresh(expiresAt?: string) {
+    if (!expiresAt) return
     
-  RETURN TRUE;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-**Pros**: Excellent read performance, simple RLS policies, supports complex permission hierarchies
-**Cons**: Requires maintaining access records, potential for stale data
-**Security**: Good with proper maintenance
-**Performance**: Excellent for reads
-
-## Security considerations for anonymous access
-
-Supporting anonymous users requires additional security measures:
-
-1. **Token Security**: Generate cryptographically secure share codes with at least 256 bits of entropy:
-```sql
-CREATE OR REPLACE FUNCTION generate_secure_share_code()
-RETURNS TEXT AS $$
-BEGIN
-  RETURN encode(gen_random_bytes(32), 'base64url');
-END;
-$$ LANGUAGE plpgsql;
-```
-
-2. **Rate Limiting**: Implement rate limiting to prevent share enumeration:
-```sql
-CREATE OR REPLACE FUNCTION check_share_rate_limit(p_share_code TEXT)
-RETURNS BOOLEAN AS $$
-DECLARE
-  request_count INTEGER;
-BEGIN
-  SELECT COUNT(*) INTO request_count
-  FROM share_access_log 
-  WHERE share_code = p_share_code
-    AND client_ip = inet_client_addr()
-    AND created_at > NOW() - INTERVAL '1 hour';
+    const msUntilExpiry = new Date(expiresAt).getTime() - Date.now()
+    const refreshTime = msUntilExpiry - 60000 // 1 minute before expiry
     
-  RETURN request_count < 100; -- 100 requests per hour limit
-END;
-$$ LANGUAGE plpgsql;
+    if (refreshTime > 0) {
+      this.refreshTimeout = setTimeout(() => {
+        this.manualRefresh(supabase)
+      }, refreshTime)
+    }
+  }
+}
 ```
 
-3. **Access Logging**: Maintain comprehensive audit logs for security monitoring:
-```sql
-CREATE TABLE share_analytics (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  document_id UUID REFERENCES documents(id),
-  share_code TEXT,
-  client_ip INET,
-  user_agent TEXT,
-  accessed_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
+## Storage key conflicts and session validation fixes
 
-## Performance optimization strategies
+To prevent storage conflicts:
 
-Regardless of the approach chosen, performance optimization is crucial:
+1. **Implement storage locks** to prevent concurrent access
+2. **Use session versioning** to detect stale tokens
+3. **Add browser tab coordination** using BroadcastChannel API
+4. **Validate sessions without triggering refresh**:
 
-1. **Critical Indexes**:
-```sql
-CREATE INDEX idx_document_shares_lookup ON document_shares(share_code, is_active, expires_at);
-CREATE INDEX idx_user_document_access_lookup ON user_document_access(user_id, document_id, expires_at);
-CREATE INDEX idx_documents_owner ON documents(user_id) WHERE deleted_at IS NULL;
-```
-
-2. **Query Optimization**: Use EXISTS instead of IN for better performance in RLS policies:
-```sql
--- More efficient
-EXISTS (SELECT 1 FROM document_shares WHERE ...)
--- Less efficient
-id IN (SELECT document_id FROM document_shares WHERE ...)
-```
-
-3. **Connection Pooling**: For high-traffic applications, implement connection pooling to manage database connections efficiently.
-
-## Handling different share permissions
-
-Implement a hierarchical permission system that scales with your needs:
-
-```sql
-CREATE TYPE permission_level AS ENUM ('view', 'comment', 'edit', 'admin');
-
--- Permission checking function
-CREATE OR REPLACE FUNCTION has_document_permission(
-  p_document_id UUID,
-  p_required_level permission_level
-)
-RETURNS BOOLEAN AS $$
-DECLARE
-  user_level permission_level;
-BEGIN
-  -- Get user's permission level
-  SELECT GREATEST(
-    CASE WHEN d.user_id = auth.uid() THEN 'admin'::permission_level END,
-    MAX(ds.permissions::permission_level)
-  ) INTO user_level
-  FROM documents d
-  LEFT JOIN document_shares ds ON d.id = ds.document_id 
-    AND ds.user_id = auth.uid()
-    AND ds.is_active = true
-  WHERE d.id = p_document_id;
+```typescript
+async function validateSessionWithoutRefresh() {
+  const stored = localStorage.getItem('sb-zqcjipwiznesnbgbocnu-auth-token')
+  if (!stored) return null
   
-  RETURN user_level >= p_required_level;
-END;
-$$ LANGUAGE plpgsql;
+  const { session } = JSON.parse(stored)
+  const expiresAt = new Date(session.expires_at).getTime()
+  const isValid = expiresAt > Date.now()
+  
+  return isValid ? session : null
+}
 ```
 
-## Common pitfalls to avoid
+## Rate limiting patterns and 429 error prevention
 
-1. **Insufficient RLS Coverage**: Always create policies for all operations (SELECT, INSERT, UPDATE, DELETE)
-2. **Predictable Share Codes**: Never use sequential or predictable patterns
-3. **Missing Expiration Checks**: Always validate expiration timestamps in policies
-4. **Ignoring Anonymous Access**: Design policies specifically for the anon role
-5. **Poor Error Handling**: Use generic error messages to prevent information leakage
+Supabase enforces a rate limit of **1800 requests per hour** for token refresh endpoints, with a burst allowance of 30 requests. To handle 429 errors:
 
-## Recommended implementation for your use case
+```typescript
+async function refreshWithBackoff(attempt = 0): Promise<Session | null> {
+  try {
+    const { data, error } = await supabase.auth.refreshSession()
+    if (error) throw error
+    return data.session
+  } catch (error: any) {
+    if (error.status === 429 && attempt < 5) {
+      const delay = Math.min(1000 * Math.pow(2, attempt), 60000)
+      await new Promise(resolve => setTimeout(resolve, delay))
+      return refreshWithBackoff(attempt + 1)
+    }
+    throw error
+  }
+}
+```
 
-Given your specific requirements (React + Supabase, client-only, existing share validation logic), I recommend **Approach 2: SECURITY DEFINER functions** for the following reasons:
+## Immediate fixes for your specific setup
 
-1. **Minimal changes to existing code**: Your `checkShareAccess` logic can be incorporated into the function
-2. **Supports all requirements**: Handles authenticated/anonymous users, different permissions, and password protection
-3. **Best security**: Centralized validation logic with proper error handling
-4. **Good performance**: Single database round-trip for document access
-5. **Future flexibility**: Easy to add new features like analytics or rate limiting
+For your React 19 + Vite production environment on Vercel:
 
-The implementation would involve creating the SECURITY DEFINER function as shown above, then updating your client code to use the function instead of direct table queries. This approach maintains your existing share validation logic while solving the RLS blocking issue.
+1. **Disable all automatic refresh mechanisms**:
+```typescript
+const supabase = createClient(url, key, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false,
+    detectSessionInUrl: false
+  }
+})
+```
 
-By implementing these patterns with proper security measures, indexing, and monitoring, you can create a robust document sharing system that balances security, performance, and user experience while working seamlessly with Supabase's Row Level Security model.
+2. **Implement synchronous storage** to eliminate race conditions:
+```typescript
+const storage = {
+  getItem: (key: string) => localStorage.getItem(key),
+  setItem: (key: string, value: string) => localStorage.setItem(key, value),
+  removeItem: (key: string) => localStorage.removeItem(key)
+}
+```
+
+3. **Add auth event debouncing**:
+```typescript
+let authChangeTimeout: NodeJS.Timeout
+supabase.auth.onAuthStateChange((event, session) => {
+  clearTimeout(authChangeTimeout)
+  authChangeTimeout = setTimeout(() => {
+    if (event === 'TOKEN_REFRESHED') {
+      // Handle refresh with debounce
+    }
+  }, 100)
+})
+```
+
+4. **Monitor and prevent refresh loops**:
+```typescript
+const refreshAttempts = new Map<string, number>()
+
+function preventRefreshLoop(sessionId: string): boolean {
+  const attempts = refreshAttempts.get(sessionId) || 0
+  if (attempts > 3) {
+    console.error('Refresh loop detected')
+    return false
+  }
+  refreshAttempts.set(sessionId, attempts + 1)
+  setTimeout(() => refreshAttempts.delete(sessionId), 60000)
+  return true
+}
+```
+
+## Long-term recommendations
+
+**Version Migration**: Consider upgrading beyond v2.46.2 once you've stabilized the current implementation. Later versions include improvements to the auth flow, though core issues with `autoRefreshToken` persist.
+
+**Architecture Changes**: For production applications experiencing these issues, consider:
+- Server-side session management with HTTP-only cookies
+- Proxy authentication through your backend
+- Implementing a custom auth provider that wraps Supabase
+
+**Monitoring**: Implement comprehensive logging for auth events to detect patterns:
+- Track TOKEN_REFRESHED frequency
+- Monitor 429 error rates
+- Alert on refresh loops exceeding thresholds
+
+The Supabase team has acknowledged several of these issues but hasn't provided comprehensive fixes in v2.46.2. The combination of workarounds presented here should resolve the infinite refresh loop while maintaining secure authentication in your production environment.

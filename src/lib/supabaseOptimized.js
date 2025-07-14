@@ -22,6 +22,8 @@ class OptimizedSupabaseClient {
     this.pendingRequests = new Map();
     this.authSubscribers = new Set();
     this.initialized = false;
+    this.refreshAttempts = new Map(); // Track refresh attempts to detect loops
+    this.refreshTimeout = null; // For manual refresh scheduling
   }
 
   /**
@@ -31,38 +33,15 @@ class OptimizedSupabaseClient {
     if (!this.client) {
       this.client = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-          autoRefreshToken: false, // Disabled to prevent infinite refresh loop
-          persistSession: true,
-          detectSessionInUrl: true,
-          flowType: 'pkce', // Enhanced security for OAuth
+          autoRefreshToken: false, // Disabled to prevent refresh loop
+          persistSession: false,   // CRITICAL: This stops automatic session recovery
+          detectSessionInUrl: false, // Disabled as PKCE forces URL detection anyway
+          flowType: 'pkce',
+          // Use simple synchronous storage to eliminate race conditions
           storage: {
-            getItem: (key) => {
-              // Use a simple cache to reduce localStorage access
-              if (key === STORAGE_KEY && this.sessionCache && 
-                  Date.now() - this.sessionCacheTime < 1000) {
-                return this.sessionCache;
-              }
-              const value = localStorage.getItem(key);
-              if (key === STORAGE_KEY) {
-                this.sessionCache = value;
-                this.sessionCacheTime = Date.now();
-              }
-              return value;
-            },
-            setItem: (key, value) => {
-              localStorage.setItem(key, value);
-              if (key === STORAGE_KEY) {
-                this.sessionCache = value;
-                this.sessionCacheTime = Date.now();
-              }
-            },
-            removeItem: (key) => {
-              localStorage.removeItem(key);
-              if (key === STORAGE_KEY) {
-                this.sessionCache = null;
-                this.sessionCacheTime = 0;
-              }
-            }
+            getItem: (key) => localStorage.getItem(key),
+            setItem: (key, value) => localStorage.setItem(key, value),
+            removeItem: (key) => localStorage.removeItem(key)
           }
         },
         realtime: {
@@ -97,7 +76,51 @@ class OptimizedSupabaseClient {
    * Initialize auth state and listeners
    */
   async initializeAuth() {
+    // Load persisted session manually since persistSession is false
+    const storedSession = localStorage.getItem(STORAGE_KEY);
+    if (storedSession) {
+      try {
+        const sessionData = JSON.parse(storedSession);
+        if (sessionData && sessionData.expires_at > Date.now() / 1000) {
+          // Set the session without triggering refresh
+          await this.client.auth.setSession({
+            access_token: sessionData.access_token,
+            refresh_token: sessionData.refresh_token
+          });
+        } else {
+          // Clear expired session
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch (e) {
+        console.error('Failed to restore session:', e);
+        localStorage.removeItem(STORAGE_KEY);
+      }
+    }
+
     const { data: { subscription } } = this.client.auth.onAuthStateChange((event, session) => {
+      console.log(`[Supabase] Auth event: ${event}`);
+      
+      // Detect and prevent refresh loops
+      if (event === 'TOKEN_REFRESHED') {
+        const sessionId = session?.user?.id;
+        if (sessionId && !this.preventRefreshLoop(sessionId)) {
+          console.error('[Supabase] Refresh loop detected, preventing further refreshes');
+          return;
+        }
+      }
+      
+      // Manually persist session since persistSession is false
+      if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+        this.scheduleManualRefresh(session);
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem(STORAGE_KEY);
+        if (this.refreshTimeout) {
+          clearTimeout(this.refreshTimeout);
+          this.refreshTimeout = null;
+        }
+      }
+      
       // Notify all subscribers
       this.authSubscribers.forEach(callback => callback(event, session));
     });
@@ -115,29 +138,75 @@ class OptimizedSupabaseClient {
   }
 
   /**
-   * Get session with caching
+   * Get session with caching (no automatic refresh)
    */
   async getSession() {
-    // Return cached session if valid
-    if (this.sessionCache && this.sessionCacheTime && 
-        Date.now() - this.sessionCacheTime < this.sessionCacheDuration) {
+    // Since autoRefreshToken and persistSession are false, we need to check manually
+    const storedSession = localStorage.getItem(STORAGE_KEY);
+    if (storedSession) {
       try {
-        const cached = JSON.parse(this.sessionCache);
-        if (cached && cached.expires_at > Date.now()) {
-          return { data: { session: cached }, error: null };
+        const session = JSON.parse(storedSession);
+        // Check if session is still valid
+        if (session && session.expires_at > Date.now() / 1000) {
+          return { data: { session }, error: null };
         }
       } catch (e) {
-        // Invalid cache, continue to fetch
+        console.error('Invalid stored session:', e);
       }
     }
+    
+    // Get current session without triggering refresh
+    return this.getClient().auth.getSession();
+  }
 
-    // Fetch new session
-    const result = await this.getClient().auth.getSession();
-    if (result.data.session) {
-      this.sessionCache = JSON.stringify(result.data.session);
-      this.sessionCacheTime = Date.now();
+  /**
+   * Prevent refresh loops by tracking attempts
+   */
+  preventRefreshLoop(sessionId) {
+    const attempts = this.refreshAttempts.get(sessionId) || 0;
+    if (attempts > 3) {
+      return false; // Prevent further attempts
     }
-    return result;
+    this.refreshAttempts.set(sessionId, attempts + 1);
+    // Clear attempts after 60 seconds
+    setTimeout(() => this.refreshAttempts.delete(sessionId), 60000);
+    return true;
+  }
+
+  /**
+   * Schedule manual refresh before token expires
+   */
+  scheduleManualRefresh(session) {
+    if (!session || !session.expires_at) return;
+    
+    // Clear any existing timeout
+    if (this.refreshTimeout) {
+      clearTimeout(this.refreshTimeout);
+    }
+    
+    const expiresAt = new Date(session.expires_at * 1000).getTime();
+    const now = Date.now();
+    const timeUntilExpiry = expiresAt - now;
+    
+    // Schedule refresh 1 minute before expiry
+    const refreshTime = timeUntilExpiry - 60000;
+    
+    if (refreshTime > 0) {
+      this.refreshTimeout = setTimeout(async () => {
+        console.log('[Supabase] Manually refreshing token');
+        try {
+          const { data, error } = await this.client.auth.refreshSession();
+          if (error) {
+            console.error('[Supabase] Manual refresh failed:', error);
+          } else if (data.session) {
+            // Session will be persisted by onAuthStateChange
+            console.log('[Supabase] Manual refresh successful');
+          }
+        } catch (e) {
+          console.error('[Supabase] Manual refresh error:', e);
+        }
+      }, refreshTime);
+    }
   }
 
   /**

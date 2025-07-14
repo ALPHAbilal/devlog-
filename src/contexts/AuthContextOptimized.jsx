@@ -101,22 +101,41 @@ export function AuthProviderOptimized({ children }) {
 
     initializeAuth();
 
-    // Subscribe to auth changes
+    // Subscribe to auth changes with debouncing for TOKEN_REFRESHED
+    let authChangeTimeout;
     const unsubscribe = onAuthStateChange((event, session) => {
       if (mounted) {
-        console.log('Auth event:', event);
-        setUser(session?.user ?? null);
-        setError(null);
+        console.log('[AuthContext] Auth state change received:', event, {
+          mounted,
+          hasSession: !!session,
+          userId: session?.user?.id
+        });
         
-        // Clear error on successful auth events
-        if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        // Debounce TOKEN_REFRESHED events to prevent UI flicker
+        if (event === 'TOKEN_REFRESHED') {
+          clearTimeout(authChangeTimeout);
+          authChangeTimeout = setTimeout(() => {
+            if (mounted) {
+              setUser(session?.user ?? null);
+              setError(null);
+            }
+          }, 100);
+        } else {
+          // Handle other events immediately
+          setUser(session?.user ?? null);
           setError(null);
+          
+          // Clear error on successful auth events
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+            setError(null);
+          }
         }
       }
     });
 
     return () => {
       mounted = false;
+      clearTimeout(authChangeTimeout);
       unsubscribe();
     };
   }, []);

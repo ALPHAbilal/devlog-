@@ -1,6 +1,27 @@
 import { optimizedBlockLoader } from '../utils/optimizedBlockLoader';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical } from 'lucide-react';
 
-export default function EntryCard({ entry, onExpand }) {
+export default function EntryCard({ entry, onExpand, isSelected = false }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({
+    id: entry.id,
+    data: {
+      type: 'document',
+      entry
+    }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  };
   // Preload blocks on hover
   const handleMouseEnter = () => {
     optimizedBlockLoader.preloadDocuments([entry.id]);
@@ -16,12 +37,25 @@ export default function EntryCard({ entry, onExpand }) {
 
   return (
     <div 
+      ref={setNodeRef}
+      style={style}
       onClick={() => onExpand(entry)}
       onMouseEnter={handleMouseEnter}
-      className="bg-card-gradient rounded-lg p-6 cursor-pointer 
+      className={`bg-card-gradient rounded-lg p-6 cursor-pointer 
                  transition-all duration-300 hover:scale-105 hover:shadow-xl
-                 flex flex-col h-full"
+                 flex flex-col h-full relative group
+                 ${isDragging ? 'z-50 shadow-2xl' : ''}
+                 ${isSelected ? 'ring-2 ring-accent-green/50 shadow-lg shadow-accent-green/10' : ''}`}
     >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical size={16} className="text-text-secondary" />
+      </div>
       {/* Header with date */}
       <div className="flex justify-between items-start mb-3">
         <div className="text-text-secondary text-sm">

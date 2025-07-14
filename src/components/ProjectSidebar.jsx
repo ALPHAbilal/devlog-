@@ -13,6 +13,7 @@ import {
   Clock,
   Archive
 } from 'lucide-react';
+import { useDroppable } from '@dnd-kit/core';
 
 export default function ProjectSidebar({ 
   projects = [], 
@@ -56,44 +57,85 @@ export default function ProjectSidebar({
   // Calculate total documents in projects
   const categorizedCount = projects.reduce((sum, project) => sum + project.document_count, 0);
 
-  // Helper function to render project item
-  const renderProjectItem = (project) => {
-    const isHovered = hoveredProjectId === project.id;
-    const isSelected = selectedProjectId === project.id;
-    const FolderIcon = isHovered || isSelected ? FolderOpen : Folder;
+  // Droppable Project Item Component
+  const DroppableProjectItem = ({ project, isButton = true }) => {
+    const dropId = project ? `project-${project.id}` : isButton ? null : 'project-uncategorized';
+    const { isOver, setNodeRef } = useDroppable({
+      id: dropId,
+      disabled: !dropId
+    });
+
+    const isHovered = hoveredProjectId === (project?.id || (isButton ? null : 'uncategorized'));
+    const isSelected = selectedProjectId === (project?.id || (!project && !isButton && selectedProjectId === 'uncategorized'));
+    const FolderIcon = isHovered || isSelected || isOver ? FolderOpen : Folder;
+
+    const content = (
+      <>
+        <div className="flex items-center space-x-2 min-w-0">
+          <div className="relative">
+            {isButton ? (
+              <Grid3X3 size={16} />
+            ) : (
+              <>
+                <FolderIcon 
+                  size={16} 
+                  style={{ color: isSelected ? undefined : project?.color }}
+                  className={`${isSelected ? '' : 'transition-transform'} ${isOver ? 'scale-110' : ''}`}
+                />
+                {project?.is_favorite && (
+                  <Star size={8} className="absolute -top-0.5 -right-0.5 text-yellow-400 fill-yellow-400" />
+                )}
+              </>
+            )}
+          </div>
+          <span className="text-sm font-medium truncate">
+            {isButton ? 'All Documents' : (project?.title || 'Uncategorized')}
+          </span>
+        </div>
+        <span className="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
+          {isButton ? totalDocuments : (project?.document_count || uncategorizedCount)}
+        </span>
+      </>
+    );
+
+    const className = `
+      w-full flex items-center justify-between p-2 rounded-lg transition-all
+      ${isSelected 
+        ? 'bg-accent-green/20 text-accent-green' 
+        : 'hover:bg-surface-2 text-text-secondary hover:text-text-primary'
+      }
+      ${isOver ? 'ring-2 ring-accent-green/50 bg-accent-green/10' : ''}
+    `;
+
+    if (isButton) {
+      return (
+        <button
+          onClick={() => onProjectSelect(null)}
+          onMouseEnter={() => setHoveredProjectId('all')}
+          onMouseLeave={() => setHoveredProjectId(null)}
+          className={className}
+        >
+          {content}
+        </button>
+      );
+    }
 
     return (
       <button
-        key={project.id}
-        onClick={() => onProjectSelect(project.id)}
-        onMouseEnter={() => setHoveredProjectId(project.id)}
+        ref={setNodeRef}
+        onClick={() => onProjectSelect(project?.id || 'uncategorized')}
+        onMouseEnter={() => setHoveredProjectId(project?.id || 'uncategorized')}
         onMouseLeave={() => setHoveredProjectId(null)}
-        className={`
-          w-full flex items-center justify-between p-2 rounded-lg transition-all
-          ${isSelected 
-            ? 'bg-accent-green/20 text-accent-green' 
-            : 'hover:bg-surface-2 text-text-secondary hover:text-text-primary'
-          }
-        `}
+        className={className}
       >
-        <div className="flex items-center space-x-2 min-w-0">
-          <div className="relative">
-            <FolderIcon 
-              size={16} 
-              style={{ color: isSelected ? undefined : project.color }}
-              className={isSelected ? '' : 'transition-transform'}
-            />
-            {project.is_favorite && (
-              <Star size={8} className="absolute -top-0.5 -right-0.5 text-yellow-400 fill-yellow-400" />
-            )}
-          </div>
-          <span className="text-sm font-medium truncate">{project.title}</span>
-        </div>
-        <span className="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-          {project.document_count}
-        </span>
+        {content}
       </button>
     );
+  };
+
+  // Helper function to render project item
+  const renderProjectItem = (project) => {
+    return <DroppableProjectItem key={project.id} project={project} isButton={false} />;
   };
 
   return (
@@ -144,49 +186,11 @@ export default function ProjectSidebar({
           {/* Project list */}
           <div className="flex-1 overflow-y-auto space-y-1">
             {/* All Documents */}
-            <button
-              onClick={() => onProjectSelect(null)}
-              onMouseEnter={() => setHoveredProjectId('all')}
-              onMouseLeave={() => setHoveredProjectId(null)}
-              className={`
-                w-full flex items-center justify-between p-2 rounded-lg transition-all
-                ${selectedProjectId === null 
-                  ? 'bg-accent-green/20 text-accent-green' 
-                  : 'hover:bg-surface-2 text-text-secondary hover:text-text-primary'
-                }
-              `}
-            >
-              <div className="flex items-center space-x-2">
-                <Grid3X3 size={16} />
-                <span className="text-sm font-medium">All Documents</span>
-              </div>
-              <span className="text-sm bg-surface-0 px-2 py-0.5 rounded text-text-secondary">
-                {totalDocuments}
-              </span>
-            </button>
+            <DroppableProjectItem project={null} isButton={true} />
 
             {/* Uncategorized */}
             {uncategorizedCount > 0 && (
-              <button
-                onClick={() => onProjectSelect('uncategorized')}
-                onMouseEnter={() => setHoveredProjectId('uncategorized')}
-                onMouseLeave={() => setHoveredProjectId(null)}
-                className={`
-                  w-full flex items-center justify-between p-2 rounded-lg transition-all
-                  ${selectedProjectId === 'uncategorized' 
-                    ? 'bg-accent-green/20 text-accent-green' 
-                    : 'hover:bg-surface-2 text-text-secondary hover:text-text-primary'
-                  }
-                `}
-              >
-                <div className="flex items-center space-x-2">
-                  <FileText size={16} />
-                  <span className="text-sm font-medium">Uncategorized</span>
-                </div>
-                <span className="text-sm bg-surface-0 px-2 py-1 rounded">
-                  {uncategorizedCount}
-                </span>
-              </button>
+              <DroppableProjectItem project={null} isButton={false} />
             )}
 
             {/* Favorites Section */}

@@ -319,6 +319,24 @@ export const storageWrapper = {
       throw new Error('Projects not supported with current storage adapter');
     }
     return await adapter.assignDocumentToProject(documentId, projectId);
+  },
+  async updateDocument(documentId, updates) {
+    if (!adapter) await init();
+    
+    // If only updating project_id, use the optimized method
+    if (updates.project_id !== undefined && Object.keys(updates).length === 1) {
+      return await storageWrapper.assignDocumentToProject(documentId, updates.project_id);
+    }
+    
+    // Otherwise, load the document, update it, and save
+    const docs = await adapter.loadEntries();
+    const doc = docs.find(d => d.id === documentId);
+    if (!doc) {
+      throw new Error(`Document ${documentId} not found`);
+    }
+    
+    const updatedDoc = { ...doc, ...updates, updatedAt: new Date().toISOString() };
+    return await storageWrapper.saveDocument(updatedDoc);
   }
 };
 

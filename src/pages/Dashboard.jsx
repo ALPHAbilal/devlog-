@@ -16,6 +16,17 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useToast } from '../hooks/useToast';
+import useDocumentOrganization from '../hooks/useDocumentOrganization';
+import { 
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay
+} from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -42,6 +53,30 @@ export default function Dashboard() {
   // Initialize auto-save functionality
   const { performAutoSave } = useAutoSave();
   const toast = useToast();
+  
+  // Document organization state
+  const {
+    selectedDocuments,
+    isDragging,
+    draggedDocuments,
+    startDrag,
+    endDrag,
+    moveDocuments,
+    clearSelection
+  } = useDocumentOrganization();
+  
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor)
+  );
+  
+  // Currently dragged item
+  const [activeId, setActiveId] = useState(null);
   
   // Handle document expansion with lazy block loading
   const handleDocumentExpand = useCallback((document) => {
@@ -551,6 +586,69 @@ export default function Dashboard() {
   
   // Count uncategorized documents
   const uncategorizedCount = entries.filter(entry => !entry.project_id).length;
+  
+  // Drag and drop handlers
+  const handleDragStart = useCallback((event) => {
+    const { active } = event;
+    setActiveId(active.id);
+    
+    // Check if this document is part of a selection
+    if (selectedDocuments.has(active.id)) {
+      // Drag all selected documents
+      const selectedDocs = entries.filter(e => selectedDocuments.has(e.id));
+      startDrag(selectedDocs);
+    } else {
+      // Drag only this document
+      const doc = entries.find(e => e.id === active.id);
+      if (doc) {
+        startDrag([doc]);
+      }
+    }
+  }, [entries, selectedDocuments, startDrag]);
+
+  const handleDragEnd = useCallback(async (event) => {
+    const { active, over } = event;
+    setActiveId(null);
+    
+    if (!over || !over.id.startsWith('project-')) {
+      endDrag();
+      return;
+    }
+    
+    // Extract project ID from drop zone ID
+    const targetProjectId = over.id === 'project-uncategorized' 
+      ? null 
+      : over.id.replace('project-', '');
+    
+    // Get documents to move
+    let documentsToMove = [];
+    if (selectedDocuments.has(active.id)) {
+      documentsToMove = Array.from(selectedDocuments);
+    } else {
+      documentsToMove = [active.id];
+    }
+    
+    // Move documents
+    await moveDocuments(documentsToMove, targetProjectId, (count) => {
+      toast.success(`Moved ${count} ${count === 1 ? 'document' : 'documents'}`, 3000);
+      
+      // Update local state immediately for responsive UI
+      const updatedEntries = entries.map(entry => {
+        if (documentsToMove.includes(entry.id)) {
+          return { ...entry, project_id: targetProjectId };
+        }
+        return entry;
+      });
+      setEntries(updatedEntries);
+    });
+    
+    endDrag();
+  }, [selectedDocuments, entries, moveDocuments, endDrag, toast]);
+
+  const handleDragCancel = useCallback(() => {
+    setActiveId(null);
+    endDrag();
+  }, [endDrag]);
 
   // Toggle tag selection
   const toggleTag = (tag) => {
@@ -680,7 +778,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col h-full relative">
+    <DndContext 
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragCancel={handleDragCancel}
+    >
+      <div className="flex flex-col h-full relative">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -979,6 +1084,28 @@ export default function Dashboard() {
           title={editingProject ? 'Edit Project' : 'Create New Project'}
         />
       )}
+      
+      {/* Drag Overlay */}
+      <DragOverlay 
+        dropAnimation={{
+          duration: 500,
+          easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+        }}
+      >
+        {activeId && (
+          <div className="bg-surface-2 rounded-lg p-4 shadow-2xl opacity-90 min-w-[200px]">
+            <div className="flex items-center space-x-2">
+              <div className="text-text-primary font-medium">
+                {selectedDocuments.has(activeId) && selectedDocuments.size > 1
+                  ? `${selectedDocuments.size} documents`
+                  : entries.find(e => e.id === activeId)?.title || 'Document'
+                }
+              </div>
+            </div>
+          </div>
+        )}
+      </DragOverlay>
     </div>
+    </DndContext>
   );
 }

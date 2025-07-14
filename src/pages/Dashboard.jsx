@@ -30,6 +30,7 @@ import {
   DragOverlay
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
+import { restrictToWindowEdges } from '@dnd-kit/modifiers';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -845,6 +846,7 @@ export default function Dashboard() {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
+      modifiers={[restrictToWindowEdges]}
     >
       <div className="flex flex-col h-full relative">
       {/* Mobile overlay */}

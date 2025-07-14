@@ -56,17 +56,22 @@ export default function EntryCard({ entry, onExpand, isSelected = false, onSelec
       className={`bg-card-gradient rounded-lg p-6 cursor-pointer 
                  transition-all duration-300 hover:shadow-xl
                  flex flex-col h-full relative group
-                 ${isDragging ? 'z-50 shadow-2xl' : ''}
+                 ${isDragging ? 'z-50 shadow-2xl opacity-30' : ''}
                  ${isSelected ? 'ring-2 ring-accent-green shadow-lg shadow-accent-green/10' : ''}`}
     >
       {/* Drag Handle */}
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+        className="absolute -left-8 top-1/2 -translate-y-1/2 p-2 
+                   bg-surface-1/50 hover:bg-surface-2 
+                   rounded-l-lg transition-all duration-200
+                   cursor-grab active:cursor-grabbing
+                   opacity-0 group-hover:opacity-100
+                   hover:shadow-md"
         onClick={(e) => e.stopPropagation()}
       >
-        <GripVertical size={16} className="text-text-secondary" />
+        <GripVertical size={20} className="text-text-secondary hover:text-text-primary transition-colors" />
       </div>
 
       {/* Selection Indicator */}

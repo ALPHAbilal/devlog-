@@ -691,7 +691,7 @@ export default function Dashboard() {
       
       {/* Project Sidebar */}
       <div className={`
-        fixed lg:absolute left-3 top-24 bottom-6 z-30 w-52
+        fixed lg:absolute left-3 top-24 bottom-6 z-30 w-56
         ${showSidebar ? 'block' : 'hidden'}
         lg:block
         bg-dark-primary lg:bg-transparent rounded-lg lg:rounded-none
@@ -718,7 +718,7 @@ export default function Dashboard() {
         {/* Top Navigation Bar - Compact and Efficient */}
         <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-dark-secondary/20">
           {/* Logo and Brand - Professional Design */}
-          <div className="flex items-center gap-2.5 lg:ml-56">
+          <div className="flex items-center gap-2.5 lg:ml-60">
             {/* Mobile menu button */}
             <button
               onClick={() => setShowSidebar(!showSidebar)}
@@ -806,7 +806,7 @@ export default function Dashboard() {
         </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
-        <div className="px-4 md:px-6 py-3 lg:ml-56">
+        <div className="px-4 md:px-6 py-3 lg:ml-60">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center gap-2">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
@@ -853,7 +853,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content - Projects or Documents */}
-      <div className="flex-grow overflow-hidden px-4 md:px-6 lg:ml-56">
+      <div className="flex-grow overflow-hidden px-4 md:px-6 lg:ml-60">
         {viewMode === 'projects' ? (
           // Projects Grid
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
@@ -876,13 +876,20 @@ export default function Dashboard() {
                 setEditingProject(null);
                 setShowProjectModal(true);
               }}
-              className="bg-card-gradient rounded-lg p-4 border border-dashed border-text-secondary/30 
-                         hover:border-accent-green/50 cursor-pointer transition-all duration-300 
-                         flex flex-col h-full justify-center items-center
-                         hover:scale-105 hover:shadow-xl"
+              className="relative group bg-surface-1 hover:bg-surface-2 rounded-lg p-5 
+                         border-2 border-dashed border-surface-3 hover:border-accent-green/50 
+                         cursor-pointer transition-all duration-300 
+                         flex flex-col justify-center items-center min-h-[200px]
+                         hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5"
             >
-              <Plus size={20} className="text-accent-green/60 mb-2" />
-              <span className="text-text-secondary text-sm">New Project</span>
+              <Plus size={24} className="text-accent-green/60 group-hover:text-accent-green mb-3 
+                                         group-hover:rotate-90 transition-all duration-300" />
+              <span className="text-text-secondary group-hover:text-text-primary text-base font-medium">
+                Create New Project
+              </span>
+              <span className="text-text-secondary/60 text-sm mt-1">
+                Organize your documents
+              </span>
             </div>
           </div>
         ) : (

@@ -1,223 +1,56 @@
-# Supabase v2.46.2 infinite token refresh loop causing 429 errors and automatic logout
+# Modern folder/project systems for developer productivity tools
 
-The infinite TOKEN_REFRESHED event loop in Supabase v2.46.2 is a documented issue affecting multiple users, with browser-specific behaviors and configuration complexities that can trigger continuous authentication attempts. Based on extensive research across GitHub issues, Stack Overflow discussions, and technical documentation, this problem stems from several interconnected factors including ignored configuration settings, race conditions in custom storage implementations, and PKCE flow conflicts.
+The research reveals a sophisticated ecosystem of design patterns and technical implementations that enable premium developer tools to handle complex hierarchical data at scale. From analyzing industry leaders like Notion, Linear, VS Code, and GitHub, clear patterns emerge for building performant, accessible, and delightful folder/project systems.
 
-## The core problem: autoRefreshToken configuration is not fully respected
+## Architecture decisions shape everything
 
-The most significant finding is that `autoRefreshToken: false` doesn't completely disable token refresh behavior in Supabase v2. According to **GitHub Discussion #17788**, this configuration only prevents timer-based automatic refresh but still triggers refresh on session initialization and `getSession()` calls. When combined with custom storage implementations and PKCE flow, this creates a perfect storm for infinite refresh loops.
+The choice between depth-first and breadth-first information architecture fundamentally impacts your entire implementation. **Notion's three-tier structure** (Workspace → Teams → Pages) with collapsible sections and 224px optimal sidebar width provides the gold standard for balancing information density with usability. Their 8px grid system and 30px mobile touch targets demonstrate how consistent spacing creates visual harmony.
 
-The issue manifests through a specific sequence: successful SIGNED_IN event → immediate TOKEN_REFRESHED events every few milliseconds → HTTP 429 rate limit errors after 50+ attempts → automatic SIGNED_OUT. This pattern indicates that the client is attempting to refresh an already-valid token repeatedly, likely due to session validation logic conflicts.
+For technical implementation, **@dnd-kit/sortable has emerged as the modern leader** for drag-and-drop functionality, offering superior performance (10kb bundle), built-in accessibility, and React 18 compatibility. While hello-pangea/dnd maintains the beloved react-beautiful-dnd API, @dnd-kit's modular architecture and zero dependencies make it the forward-looking choice. Paired with @tanstack/react-virtual for virtualization, you can smoothly render thousands of items with minimal performance impact.
 
-## Why Supabase v2.46.2 ignores autoRefreshToken settings
+State management patterns reveal interesting trade-offs. **Zustand with immer middleware** provides the cleanest API for managing hierarchical folder structures, while the materialized path database model offers the best balance of query performance and update simplicity. This combination handles complex operations like bulk moves and permission inheritance elegantly.
 
-Research reveals that `autoRefreshToken: false` is only partially implemented in the Supabase client. The setting prevents scheduled timer-based refreshes but doesn't stop refresh attempts during:
+## Premium interactions require thoughtful orchestration
 
-- Initial client creation with `persistSession: true`
-- Every `getSession()` call when tokens appear expired
-- Session recovery from storage
-- Auth state change callbacks containing async operations
+Modern developer tools distinguish themselves through micro-interactions that feel instantaneous yet meaningful. **Framer Motion's layout animations** provide the smoothest folder expand/collapse effects, using transforms rather than height calculations for optimal performance. The key insight: group related animations with LayoutGroup and use staggered delays (0.1s between items) to create visual hierarchy during state changes.
 
-**GitHub Issue #762** documents a critical deadlock bug where async Supabase calls within `onAuthStateChange` callbacks cause subsequent calls to hang. This creates symptoms similar to infinite loops, especially when TOKEN_REFRESHED events trigger database operations. The locking mechanism introduced to prevent refresh token reuse inadvertently creates deadlocks under certain conditions.
+Keyboard navigation separates power tools from casual applications. Implementing **vim-style navigation** (j/k for up/down, h/l for collapse/expand) alongside a VS Code-style command palette (Cmd+K) creates an environment where experienced users can navigate entirely without a mouse. The implementation requires careful focus management and ARIA patterns, but the productivity gains justify the complexity.
 
-## Browser-specific authentication behaviors and extension interference
+Mobile responsiveness demands more than responsive breakpoints. **Progressive disclosure through bottom sheets** works better than side panels for project actions on mobile. Swipe gestures for quick actions (archive, delete) combined with haptic feedback create native-feeling interactions. The pattern of using 44px minimum touch targets and implementing swipe-to-reveal actions has become standard across premium tools.
 
-The browser-specific nature of this issue points to several potential causes:
+## Performance optimization enables scale
 
-**Storage Context Conflicts**: Browser extensions maintain separate localStorage namespaces that can interfere with Supabase's session management. Extensions using Chrome Identity API or monitoring tab events can disrupt OAuth flows and token handling.
+Virtual scrolling becomes mandatory beyond 100 items, but the implementation details matter. **React.memo provides 37% faster re-renders for 1000 items**, though at the cost of 183% slower initial renders. The sweet spot: use memo for expensive list items but avoid it for simple components. Combined with intersection observers for lazy loading previews, this approach handles tens of thousands of documents smoothly.
 
-**Race Conditions in Custom Storage**: Your custom localStorage wrapper with caching may introduce timing issues. Asynchronous storage operations can create race conditions during rapid token refresh cycles, especially when multiple browser tabs attempt simultaneous refresh.
+Search performance requires multi-pronged optimization. **Fuse.js excels for fuzzy searching** with its 0.3 threshold providing good matches without false positives. For larger datasets, FlexSearch's reverse tokenization offers superior performance. The key is implementing debounced search (300ms delay) and client-side result caching to minimize server load while maintaining perceived speed.
 
-**Production Environment Differences**: Vercel deployments introduce additional complexity through edge runtime limitations, environment variable handling, and cold start behaviors that differ from local development.
+Database design significantly impacts feature possibilities. The **materialized path model** (`/1/2/3`) enables efficient ancestor/descendant queries with simple LIKE operations, while supporting real-time collaboration through Supabase's built-in change detection. This approach scales to millions of items while maintaining sub-100ms query times for common operations.
 
-## PKCE flow and detectSessionInUrl interaction bugs
+## Dark themes demand meticulous attention
 
-**GitHub Issue #931** confirms that `detectSessionInUrl: false` is ignored when using PKCE flow. The code logic shows:
+Creating professional dark themes extends beyond inverting colors. **GitHub's Primer design system** demonstrates the importance of slightly blue-tinted backgrounds (#0d1117) over pure black, with 4-5 elevation levels using progressively lighter surfaces. Their 87/60/38% opacity system for text hierarchy ensures readability without harshness.
 
-```javascript
-if (isPKCEFlow || (this.detectSessionInUrl && this._isImplicitGrantFlow())) {
-  const { data, error } = await this._getSessionFromURL(isPKCEFlow)
-}
-```
+The implementation requires careful color temperature management. Warm grays work better than cool grays for dark themes, while semantic colors must maintain meaning across theme switches. **Linear's LCH color space approach** enables perceptually uniform color generation, crucial for maintaining visual consistency as users switch between light and dark modes.
 
-This means PKCE always attempts to detect sessions from URLs, potentially causing unwanted session recovery attempts that trigger refresh loops.
+For Tailwind CSS implementations, extending the color palette with theme-specific tokens provides the flexibility needed for sophisticated dark themes while maintaining the utility-first approach. The pattern of using CSS custom properties for theme colors enables runtime theme switching without recompilation.
 
-## Custom storage implementation causing token refresh issues
+## Integration patterns unlock developer workflows
 
-Your custom storage wrapper with caching is a likely culprit. Common problematic patterns include:
+Modern developer tools excel through deep workflow integration. **Git status indicators** using consistent colors (modified: #e2c08d, added: #73c991, deleted: #f85149) provide immediate visual feedback. Combined with gutter decorations and branch indicators, developers can understand repository state at a glance.
 
-- **Async/Sync Mismatch**: localStorage is synchronous, but custom wrappers often make it asynchronous
-- **Write Conflicts**: Caching layers can cause stale token reads during rapid refresh cycles
-- **Incomplete Implementation**: Missing error handling or race condition prevention
+File type categorization through **icon systems and syntax highlighting** helps developers quickly identify content types. The pattern of mapping file extensions to SVG icons with light/dark variants has become standard, with popular icon libraries providing 160+ language definitions out of the box.
 
-The storage key `'sb-zqcjipwiznesnbgbocnu-auth-token'` suggests a production Supabase instance. Multiple tabs or contexts accessing this key simultaneously can corrupt the authentication state.
+Real-time collaboration features distinguish modern tools from legacy alternatives. **Supabase's real-time subscriptions** enable live activity feeds and collaborative editing with minimal implementation overhead. The pattern of using presence indicators, activity feeds, and optimistic updates creates the responsive feel users expect from premium tools.
 
-## Solutions for completely disabling automatic token refresh
+## Implementation roadmap
 
-To completely disable automatic token refresh, implement this configuration:
+Building a production-ready folder/project system requires careful sequencing:
 
-```typescript
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
-  process.env.VITE_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false, // Critical: prevents session recovery
-      detectSessionInUrl: false,
-      flowType: 'pkce'
-    }
-  }
-)
-```
+1. **Foundation** (Week 1-2): Database schema, basic CRUD operations, simple drag-and-drop
+2. **Core features** (Week 3-4): Virtual scrolling, search, keyboard navigation
+3. **Polish** (Week 5-6): Animations, dark theme, accessibility
+4. **Advanced** (Week 7-8): Real-time collaboration, templates, bulk operations
 
-Note that setting `persistSession: false` is crucial - this prevents the client from attempting to recover and refresh sessions from storage on initialization.
+The key is maintaining performance budgets throughout: <100ms for user interactions, <1s for initial load, <50ms for drag feedback. Regular performance profiling using React DevTools and Lighthouse ensures the application remains snappy as features accumulate.
 
-## Manual token management strategies
-
-Implement a custom token manager that gives you complete control:
-
-```typescript
-class TokenManager {
-  private refreshTimeout: NodeJS.Timeout | null = null
-  private isRefreshing = false
-  
-  async manualRefresh(client: SupabaseClient) {
-    if (this.isRefreshing) return
-    
-    this.isRefreshing = true
-    try {
-      const { data, error } = await client.auth.refreshSession()
-      if (!error && data.session) {
-        this.scheduleNextRefresh(data.session.expires_at)
-      }
-    } finally {
-      this.isRefreshing = false
-    }
-  }
-  
-  private scheduleNextRefresh(expiresAt?: string) {
-    if (!expiresAt) return
-    
-    const msUntilExpiry = new Date(expiresAt).getTime() - Date.now()
-    const refreshTime = msUntilExpiry - 60000 // 1 minute before expiry
-    
-    if (refreshTime > 0) {
-      this.refreshTimeout = setTimeout(() => {
-        this.manualRefresh(supabase)
-      }, refreshTime)
-    }
-  }
-}
-```
-
-## Storage key conflicts and session validation fixes
-
-To prevent storage conflicts:
-
-1. **Implement storage locks** to prevent concurrent access
-2. **Use session versioning** to detect stale tokens
-3. **Add browser tab coordination** using BroadcastChannel API
-4. **Validate sessions without triggering refresh**:
-
-```typescript
-async function validateSessionWithoutRefresh() {
-  const stored = localStorage.getItem('sb-zqcjipwiznesnbgbocnu-auth-token')
-  if (!stored) return null
-  
-  const { session } = JSON.parse(stored)
-  const expiresAt = new Date(session.expires_at).getTime()
-  const isValid = expiresAt > Date.now()
-  
-  return isValid ? session : null
-}
-```
-
-## Rate limiting patterns and 429 error prevention
-
-Supabase enforces a rate limit of **1800 requests per hour** for token refresh endpoints, with a burst allowance of 30 requests. To handle 429 errors:
-
-```typescript
-async function refreshWithBackoff(attempt = 0): Promise<Session | null> {
-  try {
-    const { data, error } = await supabase.auth.refreshSession()
-    if (error) throw error
-    return data.session
-  } catch (error: any) {
-    if (error.status === 429 && attempt < 5) {
-      const delay = Math.min(1000 * Math.pow(2, attempt), 60000)
-      await new Promise(resolve => setTimeout(resolve, delay))
-      return refreshWithBackoff(attempt + 1)
-    }
-    throw error
-  }
-}
-```
-
-## Immediate fixes for your specific setup
-
-For your React 19 + Vite production environment on Vercel:
-
-1. **Disable all automatic refresh mechanisms**:
-```typescript
-const supabase = createClient(url, key, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-    detectSessionInUrl: false
-  }
-})
-```
-
-2. **Implement synchronous storage** to eliminate race conditions:
-```typescript
-const storage = {
-  getItem: (key: string) => localStorage.getItem(key),
-  setItem: (key: string, value: string) => localStorage.setItem(key, value),
-  removeItem: (key: string) => localStorage.removeItem(key)
-}
-```
-
-3. **Add auth event debouncing**:
-```typescript
-let authChangeTimeout: NodeJS.Timeout
-supabase.auth.onAuthStateChange((event, session) => {
-  clearTimeout(authChangeTimeout)
-  authChangeTimeout = setTimeout(() => {
-    if (event === 'TOKEN_REFRESHED') {
-      // Handle refresh with debounce
-    }
-  }, 100)
-})
-```
-
-4. **Monitor and prevent refresh loops**:
-```typescript
-const refreshAttempts = new Map<string, number>()
-
-function preventRefreshLoop(sessionId: string): boolean {
-  const attempts = refreshAttempts.get(sessionId) || 0
-  if (attempts > 3) {
-    console.error('Refresh loop detected')
-    return false
-  }
-  refreshAttempts.set(sessionId, attempts + 1)
-  setTimeout(() => refreshAttempts.delete(sessionId), 60000)
-  return true
-}
-```
-
-## Long-term recommendations
-
-**Version Migration**: Consider upgrading beyond v2.46.2 once you've stabilized the current implementation. Later versions include improvements to the auth flow, though core issues with `autoRefreshToken` persist.
-
-**Architecture Changes**: For production applications experiencing these issues, consider:
-- Server-side session management with HTTP-only cookies
-- Proxy authentication through your backend
-- Implementing a custom auth provider that wraps Supabase
-
-**Monitoring**: Implement comprehensive logging for auth events to detect patterns:
-- Track TOKEN_REFRESHED frequency
-- Monitor 429 error rates
-- Alert on refresh loops exceeding thresholds
-
-The Supabase team has acknowledged several of these issues but hasn't provided comprehensive fixes in v2.46.2. The combination of workarounds presented here should resolve the infinite refresh loop while maintaining secure authentication in your production environment.
+This architectural foundation, combined with meticulous attention to interaction design and performance optimization, creates the sophisticated folder/project systems that define modern developer tools. The patterns and implementations detailed here provide a complete blueprint for building productivity tools that developers will genuinely enjoy using.

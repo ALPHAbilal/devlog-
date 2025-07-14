@@ -186,12 +186,13 @@ function FileContentEditor({ file, onSave, onClose }) {
 }
 
 // Visual tree node component
-function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onEditContent, allNodes, isNew = false }) {
+function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onEditContent, allNodes, isNew = false, parentId = null, position = 0 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isEditing, setIsEditing] = useState(isNew);
   const [editName, setEditName] = useState(node.name);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [dragOverPosition, setDragOverPosition] = useState(null); // 'before', 'after', or 'inside'
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -212,6 +213,7 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
     setIsDragging(true);
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('nodeId', node.id);
+    e.dataTransfer.setData('parentId', parentId || 'root');
   };
 
   const handleDragEnd = () => {
@@ -221,21 +223,46 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
   const handleDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const height = rect.height;
+    
+    // Determine drop position based on cursor position
+    if (node.isFolder && y > height * 0.25 && y < height * 0.75) {
+      setDragOverPosition('inside');
+    } else if (y < height * 0.5) {
+      setDragOverPosition('before');
+    } else {
+      setDragOverPosition('after');
+    }
+    
     setDragOver(true);
   };
 
-  const handleDragLeave = () => {
-    setDragOver(false);
+  const handleDragLeave = (e) => {
+    // Only clear if we're actually leaving the element
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setDragOver(false);
+      setDragOverPosition(null);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setDragOver(false);
+    setDragOverPosition(null);
+    
     const draggedNodeId = e.dataTransfer.getData('nodeId');
-    if (draggedNodeId !== node.id && node.isFolder) {
-      onMove(draggedNodeId, node.id);
-    }
+    if (draggedNodeId === node.id) return; // Can't drop on itself
+    
+    onMove(draggedNodeId, {
+      targetId: node.id,
+      targetParentId: parentId,
+      position: dragOverPosition,
+      targetPosition: position
+    });
   };
 
   const isFolder = node.isFolder || node.children;
@@ -247,21 +274,27 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
   );
 
   return (
-    <div>
+    <div className="relative">
+      {/* Drop indicator line */}
+      {dragOver && dragOverPosition === 'before' && (
+        <div className="absolute left-0 right-0 top-0 h-0.5 bg-accent-green z-10" 
+             style={{ marginLeft: `${level * 20 + 8}px` }} />
+      )}
+      
       <div
         className={`
           flex items-center gap-2 py-1.5 px-2 rounded-lg group
-          transition-all duration-200
-          ${dragOver ? 'bg-accent-green/20' : 'hover:bg-dark-secondary/30'}
+          transition-all duration-200 relative
+          ${dragOver && dragOverPosition === 'inside' ? 'bg-accent-green/20 ring-2 ring-accent-green/40' : 'hover:bg-dark-secondary/30'}
           ${isDragging ? 'opacity-50' : ''}
         `}
         style={{ paddingLeft: `${level * 20 + 8}px` }}
         draggable={!isEditing}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
-        onDragOver={isFolder ? handleDragOver : undefined}
-        onDragLeave={isFolder ? handleDragLeave : undefined}
-        onDrop={isFolder ? handleDrop : undefined}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         {/* Drag handle */}
         <Grip 
@@ -377,7 +410,7 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
       {/* Children */}
       {isFolder && isExpanded && node.children && (
         <div>
-          {node.children.map(child => (
+          {node.children.map((child, index) => (
             <TreeNode
               key={child.id}
               node={child}
@@ -388,9 +421,17 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
               onMove={onMove}
               onEditContent={onEditContent}
               allNodes={node.children}
+              parentId={node.id}
+              position={index}
             />
           ))}
         </div>
+      )}
+      
+      {/* Drop indicator line after */}
+      {dragOver && dragOverPosition === 'after' && (
+        <div className="absolute left-0 right-0 bottom-0 h-0.5 bg-accent-green z-10" 
+             style={{ marginLeft: `${level * 20 + 8}px` }} />
       )}
     </div>
   );
@@ -401,6 +442,8 @@ export default function FileTreeBlock({ block, onUpdate }) {
     { id: '1', name: 'src', isFolder: true, children: [] }
   ]);
   const [editingFile, setEditingFile] = useState(null);
+  const [rootDragOver, setRootDragOver] = useState(false);
+  const [rootDropPosition, setRootDropPosition] = useState(null);
 
   // Generate unique ID
   const generateId = () => crypto.randomUUID();
@@ -429,45 +472,111 @@ export default function FileTreeBlock({ block, onUpdate }) {
     updateNode(nodeId, { content });
   };
 
+  // Check if nodeId is a descendant of ancestorId
+  const isDescendant = (nodeId, ancestorId) => {
+    const checkDescendant = (nodes) => {
+      for (const node of nodes) {
+        if (node.id === ancestorId) {
+          return findNode(nodeId, node.children || []) !== null;
+        }
+        if (node.children && checkDescendant(node.children)) {
+          return true;
+        }
+      }
+      return false;
+    };
+    return checkDescendant(treeData);
+  };
+
   // Move node (for drag and drop)
-  const moveNode = (draggedNodeId, targetNodeId) => {
-    // First, find and store the dragged node
+  const moveNode = (draggedNodeId, dropInfo) => {
+    const { targetId, targetParentId, position, targetPosition } = dropInfo;
+    
+    // Prevent dropping a folder into itself or its descendants
+    if (draggedNodeId === targetId || isDescendant(targetId, draggedNodeId)) {
+      return;
+    }
+
+    // Find and store the dragged node
     const draggedNode = findNode(draggedNodeId, treeData);
     if (!draggedNode) return;
 
     // Remove the node from its current location
     let newTree = removeNodeFromTree(treeData, draggedNodeId);
 
-    // Add the node to the target location
-    const addToTarget = (nodes) => {
-      return nodes.map(node => {
-        if (node.id === targetNodeId && node.isFolder) {
-          return {
-            ...node,
-            children: [...(node.children || []), draggedNode]
-          };
+    // Add the node to the new location based on position
+    if (position === 'inside' && findNode(targetId, newTree)?.isFolder) {
+      // Drop inside a folder
+      const addToFolder = (nodes) => {
+        return nodes.map(node => {
+          if (node.id === targetId) {
+            return {
+              ...node,
+              children: [...(node.children || []), draggedNode]
+            };
+          }
+          if (node.children) {
+            return { ...node, children: addToFolder(node.children) };
+          }
+          return node;
+        });
+      };
+      newTree = addToFolder(newTree);
+    } else {
+      // Drop before or after a node
+      const insertAtPosition = (nodes, parentId, position) => {
+        if (parentId === null || parentId === 'root') {
+          // Insert at root level
+          const insertIndex = position === 'before' ? targetPosition : targetPosition + 1;
+          return [
+            ...nodes.slice(0, insertIndex),
+            draggedNode,
+            ...nodes.slice(insertIndex)
+          ];
         }
-        if (node.children) {
-          return { ...node, children: addToTarget(node.children) };
-        }
-        return node;
-      });
-    };
+        
+        // Insert within a parent's children
+        return nodes.map(node => {
+          if (node.id === parentId && node.children) {
+            const insertIndex = position === 'before' ? targetPosition : targetPosition + 1;
+            return {
+              ...node,
+              children: [
+                ...node.children.slice(0, insertIndex),
+                draggedNode,
+                ...node.children.slice(insertIndex)
+              ]
+            };
+          }
+          if (node.children) {
+            return { ...node, children: insertAtPosition(node.children, parentId, position) };
+          }
+          return node;
+        });
+      };
+      
+      newTree = insertAtPosition(newTree, targetParentId, position);
+    }
 
-    newTree = addToTarget(newTree);
     setTreeData(newTree);
     onUpdate(block.id, { treeData: newTree });
   };
 
   // Remove node from tree (returns new tree without the node)
   const removeNodeFromTree = (nodes, nodeId) => {
-    return nodes.filter(node => {
-      if (node.id === nodeId) return false;
-      if (node.children) {
-        node.children = removeNodeFromTree(node.children, nodeId);
+    return nodes.reduce((acc, node) => {
+      if (node.id === nodeId) {
+        return acc; // Skip this node
       }
-      return true;
-    });
+      if (node.children) {
+        // Create a new node with filtered children
+        return [...acc, {
+          ...node,
+          children: removeNodeFromTree(node.children, nodeId)
+        }];
+      }
+      return [...acc, node];
+    }, []);
   };
 
   // Find node by ID
@@ -525,6 +634,53 @@ export default function FileTreeBlock({ block, onUpdate }) {
     onUpdate(block.id, { treeData: newTree });
   };
 
+  // Root level drag handlers
+  const handleRootDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    // Find which position in the root we're hovering over
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    
+    // Calculate position based on existing items
+    let position = treeData.length;
+    const items = e.currentTarget.querySelectorAll('[data-root-item]');
+    
+    for (let i = 0; i < items.length; i++) {
+      const itemRect = items[i].getBoundingClientRect();
+      if (y < itemRect.top + itemRect.height / 2 - rect.top) {
+        position = i;
+        break;
+      }
+    }
+    
+    setRootDragOver(true);
+    setRootDropPosition(position);
+  };
+
+  const handleRootDragLeave = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setRootDragOver(false);
+      setRootDropPosition(null);
+    }
+  };
+
+  const handleRootDrop = (e) => {
+    e.preventDefault();
+    const draggedNodeId = e.dataTransfer.getData('nodeId');
+    
+    setRootDragOver(false);
+    setRootDropPosition(null);
+    
+    moveNode(draggedNodeId, {
+      targetId: null,
+      targetParentId: 'root',
+      position: 'before',
+      targetPosition: rootDropPosition
+    });
+  };
+
   return (
     <div className="bg-dark-secondary/20 rounded-lg p-4">
       {/* Header with actions */}
@@ -554,21 +710,37 @@ export default function FileTreeBlock({ block, onUpdate }) {
       </div>
 
       {/* Tree view */}
-      <div className="space-y-1">
+      <div 
+        className="space-y-1 min-h-[100px] relative"
+        onDragOver={handleRootDragOver}
+        onDragLeave={handleRootDragLeave}
+        onDrop={handleRootDrop}
+      >
+        {/* Root drop indicator */}
+        {rootDragOver && rootDropPosition === 0 && (
+          <div className="h-0.5 bg-accent-green mb-1" />
+        )}
+        
         {treeData.length > 0 ? (
-          treeData.map(node => (
-            <TreeNode
-              key={node.id}
-              node={node}
-              level={0}
-              onUpdate={updateNode}
-              onDelete={removeNode}
-              onAddChild={addChild}
-              onMove={moveNode}
-              onEditContent={setEditingFile}
-              allNodes={treeData}
-              data-node-id={node.id}
-            />
+          treeData.map((node, index) => (
+            <div key={node.id} data-root-item>
+              <TreeNode
+                node={node}
+                level={0}
+                onUpdate={updateNode}
+                onDelete={removeNode}
+                onAddChild={addChild}
+                onMove={moveNode}
+                onEditContent={setEditingFile}
+                allNodes={treeData}
+                parentId={null}
+                position={index}
+              />
+              {/* Drop indicator between root items */}
+              {rootDragOver && rootDropPosition === index + 1 && (
+                <div className="h-0.5 bg-accent-green mt-1 mb-1" />
+              )}
+            </div>
           ))
         ) : (
           <div className="text-center py-12 text-text-secondary/50">

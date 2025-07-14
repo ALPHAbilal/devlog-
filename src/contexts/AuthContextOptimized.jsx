@@ -74,15 +74,22 @@ export function AuthProviderOptimized({ children }) {
     const timerId = performanceMonitor.startTimer('auth:initialize');
 
     const initializeAuth = async () => {
+      console.log('[AuthContext] Initializing auth');
       try {
         // Get initial session with caching
         const { data: { session }, error } = await getSession();
+        console.log('[AuthContext] Initial session check:', {
+          hasSession: !!session,
+          hasError: !!error,
+          error: error?.message
+        });
         
         if (mounted) {
           if (error) {
-            console.error('Session error:', error);
+            console.error('[AuthContext] Session error:', error);
             setError(error.message);
           } else {
+            console.log('[AuthContext] Setting user:', session?.user?.id);
             setUser(session?.user ?? null);
           }
           setLoading(false);
@@ -90,7 +97,7 @@ export function AuthProviderOptimized({ children }) {
         }
       } catch (err) {
         if (mounted) {
-          console.error('Auth initialization error:', err);
+          console.error('[AuthContext] Auth initialization error:', err);
           setError(err.message);
           setLoading(false);
           performanceMonitor.endTimer(timerId, false);
@@ -102,8 +109,12 @@ export function AuthProviderOptimized({ children }) {
 
     // Subscribe to auth changes
     const unsubscribe = onAuthStateChange((event, session) => {
+      console.log('[AuthContext] Auth state change received:', event, {
+        mounted,
+        hasSession: !!session,
+        userId: session?.user?.id
+      });
       if (mounted) {
-        console.log('Auth event:', event);
         setUser(session?.user ?? null);
         setError(null);
         

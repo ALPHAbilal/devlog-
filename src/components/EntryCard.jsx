@@ -20,7 +20,6 @@ export default function EntryCard({ entry, onExpand, isSelected = false, onSelec
 
   const style = {
     transform: CSS.Translate.toString(transform),
-    opacity: isDragging ? 0.5 : 1,
   };
   // Preload blocks on hover
   const handleMouseEnter = () => {
@@ -56,7 +55,7 @@ export default function EntryCard({ entry, onExpand, isSelected = false, onSelec
       className={`bg-card-gradient rounded-lg p-6 cursor-pointer 
                  transition-all duration-300 hover:shadow-xl
                  flex flex-col h-full relative group
-                 ${isDragging ? 'z-50 shadow-2xl opacity-30' : ''}
+                 ${isDragging ? 'z-50 shadow-2xl opacity-40' : ''}
                  ${isSelected ? 'ring-2 ring-accent-green shadow-lg shadow-accent-green/10' : ''}`}
     >
       {/* Drag Handle */}

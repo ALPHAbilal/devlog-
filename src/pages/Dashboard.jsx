@@ -30,7 +30,7 @@ import {
   DragOverlay
 } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -74,7 +74,7 @@ export default function Dashboard() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 8, // Prevent accidental drags
       },
     }),
     useSensor(KeyboardSensor)
@@ -1193,10 +1193,12 @@ export default function Dashboard() {
       
       {/* Drag Overlay */}
       <DragOverlay 
+        modifiers={[snapCenterToCursor, restrictToWindowEdges]}
         dropAnimation={{
-          duration: 500,
+          duration: 200,
           easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
         }}
+        style={{ cursor: 'grabbing' }}
       >
         {activeId && (
           <CustomDragOverlay 

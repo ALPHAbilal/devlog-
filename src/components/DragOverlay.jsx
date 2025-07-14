@@ -9,10 +9,13 @@ export default function CustomDragOverlay({ documents = [] }) {
     <div className="relative pointer-events-none">
       {/* Main drag preview card */}
       <div className={`
-        bg-surface-2 rounded-lg shadow-2xl border border-accent-green/50
-        p-4 transform rotate-3 transition-all duration-200
+        bg-surface-2 rounded-lg border border-accent-green/50
+        p-4 transform rotate-2 transition-all duration-200
         ${isMultiple ? 'scale-95' : ''}
-      `}>
+      `}
+      style={{
+        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',
+      }}>
         <div className="flex items-center space-x-3">
           <div className="relative">
             {isMultiple ? (

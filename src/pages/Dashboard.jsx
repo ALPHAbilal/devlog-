@@ -11,7 +11,8 @@ import ProjectSidebar from '../components/ProjectSidebar';
 import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
-import { Plus, User, Settings, LogOut, Grid3X3, Menu } from 'lucide-react';
+import Breadcrumb from '../components/Breadcrumb';
+import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
@@ -696,6 +697,10 @@ export default function Dashboard() {
         return entry;
       });
       setEntries(updatedEntries);
+      
+      // Refresh projects to update counts
+      const refreshedProjects = await storageWrapper.getProjects();
+      setProjects(refreshedProjects);
     });
     
     endDrag();
@@ -969,25 +974,50 @@ export default function Dashboard() {
         {/* Search and Actions Bar - Compact and Efficient */}
         <div className="px-4 md:px-6 py-3 lg:ml-60">
           <div className="max-w-5xl mx-auto">
+            {/* Breadcrumb Navigation */}
+            <div className="mb-3">
+              <Breadcrumb
+                viewMode={viewMode}
+                selectedProject={selectedProjectId ? projects.find(p => p.id === selectedProjectId) : null}
+                documentTitle={expandedEntry?.title}
+                totalDocuments={entries.length}
+                onNavigateHome={() => {
+                  setSelectedProjectId(null);
+                  setViewMode('documents');
+                }}
+                onNavigateProjects={() => setViewMode('projects')}
+              />
+            </div>
+            
             <div className="flex items-center gap-2">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
               
-              {/* View Mode Toggle */}
+              {/* View Mode Switcher */}
               {storageWrapper.isSupabase && projects.length > 0 && (
-                <button
-                  onClick={() => setViewMode(viewMode === 'documents' ? 'projects' : 'documents')}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2
-                           bg-dark-secondary/40 hover:bg-dark-secondary/60
-                           text-text-primary rounded transition-all
-                           border border-dark-secondary/50 hover:border-accent-green/40
-                           text-sm"
-                  title={`View ${viewMode === 'documents' ? 'projects' : 'documents'}`}
-                >
-                  <Grid3X3 size={16} />
-                  <span className="font-medium">
-                    {viewMode === 'documents' ? 'View Projects' : 'View Documents'}
-                  </span>
-                </button>
+                <div className="flex items-center bg-surface-1 rounded-lg p-1">
+                  <button
+                    onClick={() => setViewMode('documents')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-all ${
+                      viewMode === 'documents'
+                        ? 'bg-accent-green text-dark-primary'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
+                    }`}
+                  >
+                    <FileText size={14} />
+                    <span>Documents</span>
+                  </button>
+                  <button
+                    onClick={() => setViewMode('projects')}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-all ${
+                      viewMode === 'projects'
+                        ? 'bg-accent-green text-dark-primary'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
+                    }`}
+                  >
+                    <Folder size={14} />
+                    <span>Projects</span>
+                  </button>
+                </div>
               )}
               
               <button

@@ -17,11 +17,11 @@ export default function VirtualizedGrid({
   const [containerWidth, setContainerWidth] = useState(0);
   const [scrollProgress, setScrollProgress] = useState({ top: 0, bottom: 1 });
   
-  // Configuration for compact cards - maximize content density
-  const CARD_WIDTH = 260; // Compact width
-  const CARD_HEIGHT = 160; // Compact height  
-  const GAP = 16; // Tighter gap between cards
-  const MAX_COLUMNS = 5; // More columns on wide screens
+  // Configuration for cards - balanced for readability
+  const CARD_WIDTH = 320; // Proper width for content
+  const CARD_HEIGHT = 200; // Proper height for preview  
+  const GAP = 20; // Good spacing between cards
+  const MAX_COLUMNS = 4; // Optimal columns for readability
   const BUFFER_ROWS = 2; // Extra rows to render for smooth scrolling
 
   // Calculate columns based on container width

@@ -1,39 +1,52 @@
-[20:20:28.342] Running build in Washington, D.C., USA (East) – iad1
-[20:20:28.343] Build machine configuration: 2 cores, 8 GB
-[20:20:28.395] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: ca4e117)
-[20:20:28.983] Cloning completed: 588.000ms
-[20:20:29.189] Restored build cache from previous deployment (ELLqJ4P8kXswv1AGSEFPsU1ciFki)
-[20:20:31.328] Running "vercel build"
-[20:20:31.803] Vercel CLI 44.3.0
-[20:20:32.389] Installing dependencies...
-[20:20:34.093] 
-[20:20:34.094] added 5 packages in 1s
-[20:20:34.094] 
-[20:20:34.094] 70 packages are looking for funding
-[20:20:34.095]   run `npm fund` for details
-[20:20:34.232] 
-[20:20:34.232] > journey-log-compass@0.0.0 build
-[20:20:34.233] > vite build
-[20:20:34.233] 
-[20:20:34.549] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
-[20:20:34.940] transforming...
-[20:20:35.837] [32m✓[39m 61 modules transformed.
-[20:20:35.843] [31m✗[39m Build failed in 1.07s
-[20:20:35.843] [31merror during build:
-[20:20:35.843] [31m[vite]: Rollup failed to resolve import "zustand" from "/vercel/path0/src/hooks/useDocumentOrganization.js".
-[20:20:35.844] This is most likely unintended because it can break your application at runtime.
-[20:20:35.844] If you do want to externalize this module explicitly add it to
-[20:20:35.844] `build.rollupOptions.external`[31m
-[20:20:35.844]     at viteLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
-[20:20:35.844]     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46403:18
-[20:20:35.845]     at onwarn (file:///vercel/path0/node_modules/@vitejs/plugin-react/dist/index.mjs:104:9)
-[20:20:35.845]     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46401:7
-[20:20:35.845]     at onRollupLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46393:5)
-[20:20:35.845]     at onLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
-[20:20:35.846]     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:20803:32
-[20:20:35.846]     at Object.logger [as onLog] (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:22683:9)
-[20:20:35.846]     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21429:26)
-[20:20:35.846]     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21387:26[39m
-[20:20:35.886] Error: Command "npm run build" exited with 1
-[20:20:36.185] 
-[20:20:39.072] Exiting build container
+index-XVXi2rnN.js:83 Using optimized Supabase client
+index-XVXi2rnN.js:83 Global auto-save manager initialized with defensive wrappers
+index-XVXi2rnN.js:925 IndexedDB initialized successfully
+index-XVXi2rnN.js:83 Starting auto-save with interval: 1 seconds
+index-XVXi2rnN.js:83 SW registered: ServiceWorkerRegistration
+index-XVXi2rnN.js:83 [Supabase] Auth event: SIGNED_IN
+index-XVXi2rnN.js:83 [AuthContext] Auth state change received: SIGNED_IN Object
+index-XVXi2rnN.js:83 [Supabase] Auth event: SIGNED_IN
+index-XVXi2rnN.js:83 [AuthContext] Auth state change received: SIGNED_IN Object
+index-XVXi2rnN.js:83 [Supabase] Auth event: INITIAL_SESSION
+index-XVXi2rnN.js:83 [AuthContext] Auth state change received: INITIAL_SESSION Object
+index-XVXi2rnN.js:83 Starting auto-save with interval: 1 seconds
+index-XVXi2rnN.js:1155 Dashboard: Starting to load entries...
+index-XVXi2rnN.js:925 Using Supabase for storage
+index-XVXi2rnN.js:925 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-XVXi2rnN.js:1155 Dashboard: Storage initialized (1221ms)
+index-XVXi2rnN.js:925 SupabaseAdapter: getDocuments called
+index-XVXi2rnN.js:925 SupabaseAdapter: Documents query completed in 1666ms
+hook.js:608 Error getting documents: Object
+overrideMethod @ hook.js:608
+index-XVXi2rnN.js:1155 Dashboard: Loaded 0 entries (1668ms)
+index-XVXi2rnN.js:1155 Dashboard: Total load time: 2890ms
+index-XVXi2rnN.js:925 SupabaseAdapter: updateAllDocuments called with 1 documents
+index-XVXi2rnN.js:925 SupabaseAdapter: Saving document bb2d24b0-0866-4605-a1fa-7bef39544437 with 4 blocks
+index-XVXi2rnN.js:925 SupabaseAdapter: saveDocument called for bb2d24b0-0866-4605-a1fa-7bef39544437 with 4 blocks
+index-XVXi2rnN.js:925 SupabaseAdapter: Using userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b for save
+index-XVXi2rnN.js:925 SupabaseAdapter: Saving document to Supabase: Object
+index-XVXi2rnN.js:925 SupabaseAdapter: Document saved successfully: Object
+index-XVXi2rnN.js:925 SupabaseAdapter: Getting projects...
+index-XVXi2rnN.js:925 SupabaseAdapter: Found 4 projects
+index-XVXi2rnN.js:1164 Dashboard: Loaded 4 projects
+index-XVXi2rnN.js:1164 Dashboard: Setting isLoading to false
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+index-XVXi2rnN.js:925 SupabaseAdapter: Assigning document to project: Object
+index-XVXi2rnN.js:925 SupabaseAdapter: Document assigned successfully
+index-XVXi2rnN.js:925 SupabaseAdapter: Assigning document to project: Object
+index-XVXi2rnN.js:925 SupabaseAdapter: Document assigned successfully
+index-XVXi2rnN.js:925 SupabaseAdapter: Getting projects...
+index-XVXi2rnN.js:925 SupabaseAdapter: Found 4 projects
+index-XVXi2rnN.js:925 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document bb2d24b0-0866-4605-a1fa-7bef39544437
+index-XVXi2rnN.js:925 PaginatedBlockLoader: Loaded 4 blocks for page 0 of document bb2d24b0-0866-4605-a1fa-7bef39544437

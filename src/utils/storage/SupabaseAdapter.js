@@ -208,41 +208,18 @@ export class SupabaseAdapter {
     let documents = null;
     let docError = null;
     
-    try {
-      // Try the optimized get_documents_with_stats function
-      const { data, error } = await supabase.rpc('get_documents_with_stats', {
-        p_user_id: this.userId,
-        p_limit: 20,
-        p_offset: 0
-      });
-      
-      if (!error && data) {
-        console.log('SupabaseAdapter: Using optimized document query');
-        documents = data;
-      } else if (error?.message?.includes('function') && error?.message?.includes('does not exist')) {
-        console.log('SupabaseAdapter: Optimized function not available');
-      } else {
-        docError = error;
-      }
-    } catch (e) {
-      // Fallback to regular query
-    }
+    // Use direct query - don't try RPC function that doesn't exist
+    console.log(`SupabaseAdapter: Querying documents for user ${this.userId}`);
     
-    // Fallback to regular query if optimized not available
-    if (!documents && !docError) {
-      console.log(`SupabaseAdapter: Querying documents for user ${this.userId}`);
-      
-      const { data, error } = await supabase
-        .from('documents')
-        .select('id, title, tags, created_at, updated_at, metadata, is_template')
-        .eq('user_id', this.userId)
-        .is('deleted_at', null)
-        .order('updated_at', { ascending: false })
-        .limit(20);
-      
-      documents = data;
-      docError = error;
-    }
+    const { data, error } = await supabase
+      .from('documents')
+      .select('id, title, tags, created_at, updated_at, metadata, is_template, project_id')
+      .eq('user_id', this.userId)
+      .is('deleted_at', null)
+      .order('updated_at', { ascending: false });
+    
+    documents = data;
+    docError = error;
     
     const queryTime = performance.now() - queryStart;
     console.log(`SupabaseAdapter: Documents query completed in ${Math.round(queryTime)}ms`);
@@ -307,7 +284,8 @@ export class SupabaseAdapter {
       tags: doc.tags || [],
       metadata: doc.metadata || {},
       blocks: [], // Don't load blocks on document list - let ExpandedView handle it
-      blockCount: doc.metadata?.blockCount || doc.block_count || doc.blockCount || 0
+      blockCount: doc.metadata?.blockCount || doc.block_count || doc.blockCount || 0,
+      project_id: doc.project_id || null // Include project_id for filtering
     }));
     
     // Transform to legacy format
@@ -936,16 +914,38 @@ export class SupabaseAdapter {
     console.log('SupabaseAdapter: Getting projects...');
     
     try {
-      const { data, error } = await supabase
-        .rpc('get_projects_with_stats', { p_user_id: this.userId });
+      // Get projects
+      const { data: projects, error: projectsError } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('user_id', this.userId)
+        .order('created_at', { ascending: false });
       
-      if (error) {
-        console.error('SupabaseAdapter: Error getting projects:', error);
-        throw error;
+      if (projectsError) {
+        console.error('SupabaseAdapter: Error getting projects:', projectsError);
+        return [];
       }
       
-      console.log(`SupabaseAdapter: Found ${data?.length || 0} projects`);
-      return data || [];
+      // Get document counts for each project
+      const projectsWithCounts = await Promise.all(projects.map(async (project) => {
+        const { count, error: countError } = await supabase
+          .from('documents')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', this.userId)
+          .eq('project_id', project.id);
+        
+        if (countError) {
+          console.error(`Error getting count for project ${project.id}:`, countError);
+        }
+        
+        return {
+          ...project,
+          document_count: count || 0
+        };
+      }));
+      
+      console.log(`SupabaseAdapter: Found ${projectsWithCounts.length} projects`);
+      return projectsWithCounts;
     } catch (error) {
       console.error('SupabaseAdapter: Failed to get projects:', error);
       return [];

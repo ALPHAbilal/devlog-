@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Correct storage key for Supabase v2
+const STORAGE_KEY = 'sb-zqcjipwiznesnbgbocnu-auth-token';
+
 /**
  * Optimized Supabase Client with:
  * - Session persistence
@@ -35,12 +38,12 @@ class OptimizedSupabaseClient {
           storage: {
             getItem: (key) => {
               // Use a simple cache to reduce localStorage access
-              if (key === 'journey-log-auth' && this.sessionCache && 
+              if (key === STORAGE_KEY && this.sessionCache && 
                   Date.now() - this.sessionCacheTime < 1000) {
                 return this.sessionCache;
               }
               const value = localStorage.getItem(key);
-              if (key === 'journey-log-auth') {
+              if (key === STORAGE_KEY) {
                 this.sessionCache = value;
                 this.sessionCacheTime = Date.now();
               }
@@ -48,14 +51,14 @@ class OptimizedSupabaseClient {
             },
             setItem: (key, value) => {
               localStorage.setItem(key, value);
-              if (key === 'journey-log-auth') {
+              if (key === STORAGE_KEY) {
                 this.sessionCache = value;
                 this.sessionCacheTime = Date.now();
               }
             },
             removeItem: (key) => {
               localStorage.removeItem(key);
-              if (key === 'journey-log-auth') {
+              if (key === STORAGE_KEY) {
                 this.sessionCache = null;
                 this.sessionCacheTime = 0;
               }
@@ -94,12 +97,7 @@ class OptimizedSupabaseClient {
    * Initialize auth state and listeners
    */
   async initializeAuth() {
-    console.log('[initializeAuth] Setting up auth state listener');
     const { data: { subscription } } = this.client.auth.onAuthStateChange((event, session) => {
-      console.log('[initializeAuth] Auth state changed:', event, {
-        hasSession: !!session,
-        userId: session?.user?.id
-      });
       // Notify all subscribers
       this.authSubscribers.forEach(callback => callback(event, session));
     });
@@ -120,35 +118,21 @@ class OptimizedSupabaseClient {
    * Get session with caching
    */
   async getSession() {
-    console.log('[getSession] Called');
-    
     // Return cached session if valid
     if (this.sessionCache && this.sessionCacheTime && 
         Date.now() - this.sessionCacheTime < this.sessionCacheDuration) {
       try {
         const cached = JSON.parse(this.sessionCache);
-        console.log('[getSession] Checking cached session:', {
-          expires_at: cached?.expires_at,
-          now: Date.now(),
-          isValid: cached && cached.expires_at > Date.now()
-        });
         if (cached && cached.expires_at > Date.now()) {
-          console.log('[getSession] Returning cached session');
           return { data: { session: cached }, error: null };
         }
       } catch (e) {
-        console.log('[getSession] Cache parse error:', e);
+        // Invalid cache, continue to fetch
       }
     }
 
-    console.log('[getSession] Fetching new session from Supabase');
     // Fetch new session
     const result = await this.getClient().auth.getSession();
-    console.log('[getSession] Supabase response:', {
-      hasSession: !!result.data.session,
-      error: result.error
-    });
-    
     if (result.data.session) {
       this.sessionCache = JSON.stringify(result.data.session);
       this.sessionCacheTime = Date.now();

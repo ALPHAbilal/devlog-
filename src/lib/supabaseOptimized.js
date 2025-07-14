@@ -31,7 +31,7 @@ class OptimizedSupabaseClient {
     if (!this.client) {
       this.client = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-          autoRefreshToken: true,
+          autoRefreshToken: false, // Disabled to prevent infinite refresh loop
           persistSession: true,
           detectSessionInUrl: true,
           flowType: 'pkce', // Enhanced security for OAuth

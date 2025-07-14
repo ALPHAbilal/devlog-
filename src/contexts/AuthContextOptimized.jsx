@@ -73,6 +73,7 @@ export function AuthProviderOptimized({ children }) {
     let mounted = true;
     const timerId = performanceMonitor.startTimer('auth:initialize');
 
+
     const initializeAuth = async () => {
       try {
         // Get initial session with caching

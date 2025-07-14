@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Folder, Palette, Type } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Folder, Palette, Type, Loader2 } from 'lucide-react';
 
 const PROJECT_COLORS = [
   '#10b981', // accent-green (default)
@@ -95,133 +95,206 @@ export default function ProjectModal({
 
   if (!isOpen) return null;
 
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
+    }
+  }, [isOpen, onClose]);
+
+  // Focus trap ref
+  const modalRef = useRef(null);
+  const firstInputRef = useRef(null);
+
+  // Focus first input on open
+  useEffect(() => {
+    if (isOpen && firstInputRef.current) {
+      firstInputRef.current.focus();
+    }
+  }, [isOpen]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop with improved blur */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-200"
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="relative bg-dark-secondary rounded-xl shadow-2xl max-w-md w-full">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-700">
-          <h2 className="text-xl font-semibold text-primary flex items-center space-x-2">
-            <Folder size={24} style={{ color: formData.color }} />
-            <span>{title}</span>
-          </h2>
+      {/* Modal wrapper - positioned slightly above center */}
+      <div className="flex min-h-full items-start justify-center p-4 pt-16">
+        {/* Modal panel with enhanced styling */}
+        <div 
+          ref={modalRef}
+          className="relative w-full max-w-lg transform overflow-hidden rounded-xl 
+                     bg-[#161b22] shadow-2xl transition-all duration-200
+                     animate-in fade-in-0 zoom-in-95 
+                     data-[state=closed]:animate-out data-[state=closed]:fade-out-0 
+                     data-[state=closed]:zoom-out-95"
+          data-state={isOpen ? "open" : "closed"}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          style={{
+            boxShadow: `
+              0 4px 6px -1px rgba(0, 0, 0, 0.3),
+              0 10px 15px -3px rgba(0, 0, 0, 0.2),
+              0 20px 25px -5px rgba(0, 0, 0, 0.1)
+            `
+          }}
+        >
+          {/* Close button - positioned absolutely */}
           <button
             onClick={onClose}
-            className="p-1 hover:bg-dark-primary/50 rounded-lg transition-colors"
+            className="absolute right-4 top-4 rounded-lg p-2 text-[#94a3b8] 
+                     transition-colors hover:bg-[#1f2428] hover:text-[#e0e7ff]"
+            aria-label="Close modal"
           >
-            <X size={20} className="text-gray-400" />
+            <X className="h-5 w-5" />
           </button>
-        </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Project Name */}
-          <div>
-            <label className="flex items-center space-x-2 text-sm font-medium text-gray-300 mb-2">
-              <Type size={16} />
-              <span>Project Name</span>
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g., E-commerce Platform"
-              className={`
-                w-full px-4 py-2 bg-dark-primary border rounded-lg
-                text-primary placeholder-gray-500
-                focus:outline-none focus:ring-2 focus:ring-accent-green/50
-                ${errors.title ? 'border-red-500' : 'border-gray-700'}
-              `}
-              autoFocus
-            />
-            {errors.title && (
-              <p className="mt-1 text-sm text-red-400">{errors.title}</p>
-            )}
-          </div>
+          {/* Content */}
+          <div className="px-6 pb-6 pt-6">
+            {/* Header */}
+            <h2 id="modal-title" className="mb-6 text-xl font-medium text-[#e0e7ff]">
+              {title}
+            </h2>
 
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Description (optional)
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Brief description of your project..."
-              rows={3}
-              className={`
-                w-full px-4 py-2 bg-dark-primary border rounded-lg
-                text-primary placeholder-gray-500 resize-none
-                focus:outline-none focus:ring-2 focus:ring-accent-green/50
-                ${errors.description ? 'border-red-500' : 'border-gray-700'}
-              `}
-            />
-            {errors.description && (
-              <p className="mt-1 text-sm text-red-400">{errors.description}</p>
-            )}
-          </div>
-
-          {/* Color Picker */}
-          <div>
-            <label className="flex items-center space-x-2 text-sm font-medium text-gray-300 mb-3">
-              <Palette size={16} />
-              <span>Project Color</span>
-            </label>
-            <div className="flex space-x-2">
-              {PROJECT_COLORS.map(color => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, color })}
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Project Name */}
+              <div>
+                <label htmlFor="project-name" className="mb-2 block text-sm font-medium text-[#94a3b8]">
+                  Project Name <span className="text-[#10b981]">*</span>
+                </label>
+                <input
+                  ref={firstInputRef}
+                  id="project-name"
+                  type="text"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="e.g., E-commerce Platform"
                   className={`
-                    w-10 h-10 rounded-lg border-2 transition-all
-                    ${formData.color === color 
-                      ? 'border-white scale-110' 
-                      : 'border-transparent hover:scale-105'
-                    }
+                    w-full rounded-lg border bg-[#1f2428] px-4 py-3 text-[#e0e7ff] 
+                    transition-colors placeholder:text-[#6b7280] 
+                    hover:border-[#5a5a5a] focus:border-[#10b981] focus:outline-none 
+                    focus:ring-2 focus:ring-[#10b981]/20
+                    ${errors.title ? 'border-[#ef4444]' : 'border-[#44494d]'}
                   `}
-                  style={{ backgroundColor: color }}
-                  title={color}
+                  aria-invalid={errors.title ? 'true' : 'false'}
+                  aria-describedby={errors.title ? 'name-error' : undefined}
                 />
-              ))}
-            </div>
+                {errors.title && (
+                  <p id="name-error" className="mt-2 text-sm text-[#ef4444]">{errors.title}</p>
+                )}
+              </div>
+
+              {/* Description */}
+              <div>
+                <label htmlFor="project-description" className="mb-2 block text-sm font-medium text-[#94a3b8]">
+                  Description
+                  <span className="ml-2 text-xs text-[#6b7280]">(optional)</span>
+                </label>
+                <textarea
+                  id="project-description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Brief description of your project..."
+                  rows={3}
+                  className={`
+                    w-full rounded-lg border bg-[#1f2428] px-4 py-3 text-[#e0e7ff] 
+                    transition-colors placeholder:text-[#6b7280] resize-none
+                    hover:border-[#5a5a5a] focus:border-[#10b981] focus:outline-none 
+                    focus:ring-2 focus:ring-[#10b981]/20
+                    ${errors.description ? 'border-[#ef4444]' : 'border-[#44494d]'}
+                  `}
+                  aria-invalid={errors.description ? 'true' : 'false'}
+                  aria-describedby={errors.description ? 'desc-error' : undefined}
+                />
+                {errors.description && (
+                  <p id="desc-error" className="mt-2 text-sm text-[#ef4444]">{errors.description}</p>
+                )}
+              </div>
+
+              {/* Color Picker */}
+              <div>
+                <label className="mb-3 block text-sm font-medium text-[#94a3b8]">
+                  Project Color
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {PROJECT_COLORS.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, color })}
+                      className={`
+                        h-10 w-10 rounded-lg border-2 transition-all duration-150
+                        hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2
+                        focus:ring-offset-[#161b22] active:scale-95
+                        ${formData.color === color 
+                          ? 'border-white scale-110 shadow-lg' 
+                          : 'border-transparent hover:border-white/20'
+                        }
+                      `}
+                      style={{ 
+                        backgroundColor: color,
+                        focusRingColor: color 
+                      }}
+                      aria-label={`Select color ${color}`}
+                      aria-pressed={formData.color === color}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Error message */}
+              {errors.submit && (
+                <div className="rounded-lg bg-[#2d1b1b] border border-[#ef4444]/20 p-3">
+                  <p className="text-sm text-[#ef4444]">{errors.submit}</p>
+                </div>
+              )}
+            </form>
           </div>
 
-          {/* Error message */}
-          {errors.submit && (
-            <div className="p-3 bg-red-900/20 border border-red-900/50 rounded-lg">
-              <p className="text-sm text-red-400">{errors.submit}</p>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex space-x-3 pt-4">
+          {/* Footer with actions */}
+          <div className="flex justify-end gap-3 border-t border-[#2d333b] bg-[#0d1117] px-6 py-4">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-dark-primary hover:bg-dark-primary/80 
-                       text-gray-300 rounded-lg transition-colors"
+              className="rounded-lg px-4 py-2 text-sm font-medium text-[#94a3b8] 
+                       transition-all hover:bg-[#1f2428] hover:text-[#e0e7ff]
+                       focus:outline-none focus:ring-2 focus:ring-[#10b981]/20"
               disabled={loading}
             >
               Cancel
             </button>
             <button
-              type="submit"
-              className="flex-1 px-4 py-2 bg-accent-green hover:bg-accent-green/80 
-                       text-white font-medium rounded-lg transition-colors
-                       disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleSubmit}
+              className="rounded-lg bg-[#10b981] px-4 py-2 text-sm font-medium text-white 
+                       transition-all hover:bg-[#0ea570] active:scale-[0.98]
+                       disabled:opacity-50 disabled:cursor-not-allowed 
+                       focus:outline-none focus:ring-2 focus:ring-[#10b981]/20
+                       flex items-center gap-2"
               disabled={loading}
             >
-              {loading ? 'Saving...' : (project ? 'Update Project' : 'Create Project')}
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <span>{project ? 'Update Project' : 'Create Project'}</span>
+              )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

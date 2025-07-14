@@ -9,6 +9,8 @@ import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
 import ProjectSidebar from '../components/ProjectSidebar';
 import ProjectModal from '../components/ProjectModal';
+import CustomDragOverlay from '../components/DragOverlay';
+import NavigationCommandPalette from '../components/NavigationCommandPalette';
 import { Plus, User, Settings, LogOut, Grid3X3, Menu } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
@@ -49,6 +51,7 @@ export default function Dashboard() {
   const [editingProject, setEditingProject] = useState(null);
   const [viewMode, setViewMode] = useState('documents'); // 'documents' or 'projects'
   const [showSidebar, setShowSidebar] = useState(true);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
   
   // Initialize auto-save functionality
   const { performAutoSave } = useAutoSave();
@@ -174,10 +177,10 @@ export default function Dashboard() {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Cmd/Ctrl + K - Focus search
+      // Cmd/Ctrl + K - Open command palette
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        document.querySelector('input[type="text"]')?.focus();
+        setShowCommandPalette(true);
       }
       // Cmd/Ctrl + N - Create new document
       else if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
@@ -553,6 +556,23 @@ export default function Dashboard() {
       toast.error('Failed to delete project');
     }
   }, [projects, selectedProjectId, toast]);
+
+  const handleToggleFavorite = useCallback(async (project) => {
+    try {
+      const updatedProject = {
+        ...project,
+        is_favorite: !project.is_favorite
+      };
+      
+      await storageWrapper.updateProject(project.id, { is_favorite: updatedProject.is_favorite });
+      setProjects(projects.map(p => p.id === project.id ? updatedProject : p));
+      
+      toast.success(updatedProject.is_favorite ? 'Added to favorites' : 'Removed from favorites', 2000);
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Failed to update favorite status');
+    }
+  }, [projects, toast]);
   
   const handleProjectSelect = useCallback((projectId) => {
     setSelectedProjectId(projectId);
@@ -561,6 +581,42 @@ export default function Dashboard() {
     if (window.innerWidth < 1024) {
       setShowSidebar(false);
     }
+  }, []);
+
+  // Handle document selection for multi-select
+  const handleDocumentSelect = useCallback((docId, event) => {
+    const { toggleSelection, selectRange } = useDocumentOrganization.getState();
+    
+    if (event.shiftKey && useDocumentOrganization.getState().lastSelectedId) {
+      // Range selection
+      selectRange(useDocumentOrganization.getState().lastSelectedId, docId, entries);
+    } else {
+      // Toggle selection
+      toggleSelection(docId);
+    }
+  }, [entries]);
+
+  // Command palette navigation handlers
+  const handleCommandPaletteNavigate = useCallback((type, item) => {
+    setShowCommandPalette(false);
+    
+    if (type === 'document') {
+      handleDocumentExpand(item);
+    } else if (type === 'project') {
+      setSelectedProjectId(item.id);
+      setViewMode('documents');
+    }
+  }, [handleDocumentExpand]);
+
+  const handleCommandPaletteCreateDocument = useCallback(() => {
+    setShowCommandPalette(false);
+    createNewEntry();
+  }, [createNewEntry]);
+
+  const handleCommandPaletteCreateProject = useCallback(() => {
+    setShowCommandPalette(false);
+    setEditingProject(null);
+    setShowProjectModal(true);
   }, []);
 
   // Filter entries based on search, selected tags, and project
@@ -962,19 +1018,34 @@ export default function Dashboard() {
         {viewMode === 'projects' ? (
           // Projects Grid
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
-            {projects.map(project => (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                isSelected={selectedProjectId === project.id}
-                onClick={() => handleProjectSelect(project.id)}
-                onEdit={(project) => {
-                  setEditingProject(project);
-                  setShowProjectModal(true);
-                }}
-                onDelete={handleDeleteProject}
-              />
-            ))}
+            {projects.map(project => {
+              // Get recent documents for this project
+              const projectDocs = entries.filter(entry => entry.project_id === project.id)
+                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                .slice(0, 3)
+                .map(doc => ({
+                  id: doc.id,
+                  title: doc.title,
+                  updatedAt: doc.updatedAt,
+                  preview: doc.preview
+                }));
+              
+              return (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  isSelected={selectedProjectId === project.id}
+                  onClick={() => handleProjectSelect(project.id)}
+                  onEdit={(project) => {
+                    setEditingProject(project);
+                    setShowProjectModal(true);
+                  }}
+                  onDelete={handleDeleteProject}
+                  onToggleFavorite={handleToggleFavorite}
+                  recentDocuments={projectDocs}
+                />
+              );
+            })}
             {/* Add New Project Card */}
             <div
               onClick={() => {
@@ -1003,6 +1074,9 @@ export default function Dashboard() {
             entries={filteredEntries}
             onExpand={handleDocumentExpand}
             searchTerm={searchTerm}
+            selectedDocuments={selectedDocuments}
+            onSelectDocument={handleDocumentSelect}
+            selectionMode={selectedDocuments.size > 0}
           />
         )}
       </div>
@@ -1093,18 +1167,26 @@ export default function Dashboard() {
         }}
       >
         {activeId && (
-          <div className="bg-surface-2 rounded-lg p-4 shadow-2xl opacity-90 min-w-[200px]">
-            <div className="flex items-center space-x-2">
-              <div className="text-text-primary font-medium">
-                {selectedDocuments.has(activeId) && selectedDocuments.size > 1
-                  ? `${selectedDocuments.size} documents`
-                  : entries.find(e => e.id === activeId)?.title || 'Document'
-                }
-              </div>
-            </div>
-          </div>
+          <CustomDragOverlay 
+            documents={
+              selectedDocuments.has(activeId) && selectedDocuments.size > 1
+                ? entries.filter(e => selectedDocuments.has(e.id))
+                : entries.filter(e => e.id === activeId)
+            }
+          />
         )}
       </DragOverlay>
+
+      {/* Navigation Command Palette */}
+      <NavigationCommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        documents={entries}
+        projects={projects}
+        onNavigate={handleCommandPaletteNavigate}
+        onCreateDocument={handleCommandPaletteCreateDocument}
+        onCreateProject={handleCommandPaletteCreateProject}
+      />
     </div>
     </DndContext>
   );

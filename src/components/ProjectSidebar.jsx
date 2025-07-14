@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { 
   Folder, 
   FolderOpen, 
@@ -29,6 +29,12 @@ export default function ProjectSidebar({
   const [showFavorites, setShowFavorites] = useState(true);
   const [showRecent, setShowRecent] = useState(true);
   const [showAll, setShowAll] = useState(true);
+  
+  // Virtual scrolling state
+  const scrollContainerRef = useRef(null);
+  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
+  const ITEM_HEIGHT = 36; // Height of each project item in pixels
+  const BUFFER_ITEMS = 5; // Extra items to render for smooth scrolling
 
   // Filter projects based on search
   const filteredProjects = projects.filter(project =>
@@ -56,6 +62,31 @@ export default function ProjectSidebar({
 
   // Calculate total documents in projects
   const categorizedCount = projects.reduce((sum, project) => sum + project.document_count, 0);
+
+  // Handle scroll for virtual scrolling
+  const handleScroll = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    
+    const { scrollTop, clientHeight } = scrollContainerRef.current;
+    const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER_ITEMS);
+    const endIndex = Math.min(
+      otherProjects.length,
+      Math.ceil((scrollTop + clientHeight) / ITEM_HEIGHT) + BUFFER_ITEMS
+    );
+    
+    setVisibleRange({ start: startIndex, end: endIndex });
+  }, [otherProjects.length]);
+
+  // Set up scroll listener
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    
+    container.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial calculation
+    
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
 
   // Droppable Project Item Component
   const DroppableProjectItem = ({ project, isButton = true }) => {
@@ -184,7 +215,10 @@ export default function ProjectSidebar({
           </div>
 
           {/* Project list */}
-          <div className="flex-1 overflow-y-auto space-y-1">
+          <div 
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto space-y-1"
+          >
             {/* All Documents */}
             <DroppableProjectItem project={null} isButton={true} />
 
@@ -252,8 +286,29 @@ export default function ProjectSidebar({
                   <span className="text-xs text-text-secondary/60">{otherProjects.length}</span>
                 </div>
                 {showAll && (
-                  <div className="space-y-1">
-                    {otherProjects.map(project => renderProjectItem(project))}
+                  <div className="relative" style={{ height: otherProjects.length * ITEM_HEIGHT }}>
+                    {/* Virtual scrolling for large project lists */}
+                    {otherProjects.length > 50 ? (
+                      <>
+                        {/* Spacer for proper scrolling */}
+                        <div style={{ height: visibleRange.start * ITEM_HEIGHT }} />
+                        
+                        {/* Render only visible items */}
+                        <div className="space-y-1">
+                          {otherProjects
+                            .slice(visibleRange.start, visibleRange.end)
+                            .map(project => renderProjectItem(project))}
+                        </div>
+                        
+                        {/* Spacer for items below viewport */}
+                        <div style={{ height: (otherProjects.length - visibleRange.end) * ITEM_HEIGHT }} />
+                      </>
+                    ) : (
+                      // Regular rendering for small lists
+                      <div className="space-y-1">
+                        {otherProjects.map(project => renderProjectItem(project))}
+                      </div>
+                    )}
                   </div>
                 )}
               </>

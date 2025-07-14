@@ -1,9 +1,9 @@
 import { optimizedBlockLoader } from '../utils/optimizedBlockLoader';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Check } from 'lucide-react';
 
-export default function EntryCard({ entry, onExpand, isSelected = false }) {
+export default function EntryCard({ entry, onExpand, isSelected = false, onSelect, selectionMode = false }) {
   const {
     attributes,
     listeners,
@@ -35,17 +35,29 @@ export default function EntryCard({ entry, onExpand, isSelected = false }) {
     });
   };
 
+  const handleClick = (e) => {
+    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      onSelect?.(entry.id, e);
+    } else if (selectionMode) {
+      e.preventDefault();
+      onSelect?.(entry.id, e);
+    } else {
+      onExpand(entry);
+    }
+  };
+
   return (
     <div 
       ref={setNodeRef}
       style={style}
-      onClick={() => onExpand(entry)}
+      onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       className={`bg-card-gradient rounded-lg p-6 cursor-pointer 
                  transition-all duration-300 hover:scale-105 hover:shadow-xl
                  flex flex-col h-full relative group
                  ${isDragging ? 'z-50 shadow-2xl' : ''}
-                 ${isSelected ? 'ring-2 ring-accent-green/50 shadow-lg shadow-accent-green/10' : ''}`}
+                 ${isSelected ? 'ring-2 ring-accent-green shadow-lg shadow-accent-green/10 scale-[1.02]' : ''}`}
     >
       {/* Drag Handle */}
       <div
@@ -56,6 +68,13 @@ export default function EntryCard({ entry, onExpand, isSelected = false }) {
       >
         <GripVertical size={16} className="text-text-secondary" />
       </div>
+
+      {/* Selection Indicator */}
+      {isSelected && (
+        <div className="absolute top-3 right-3 bg-accent-green rounded-full p-1.5 shadow-lg animate-in fade-in zoom-in duration-200">
+          <Check size={14} className="text-dark-primary" strokeWidth={3} />
+        </div>
+      )}
       {/* Header with date */}
       <div className="flex justify-between items-start mb-3">
         <div className="text-text-secondary text-sm">

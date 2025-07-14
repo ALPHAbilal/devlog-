@@ -7,7 +7,10 @@ import './VirtualizedGrid.css';
 export default function VirtualizedGrid({ 
   entries, 
   onExpand,
-  searchTerm 
+  searchTerm,
+  selectedDocuments = new Set(),
+  onSelectDocument,
+  selectionMode = false
 }) {
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
@@ -138,10 +141,12 @@ export default function VirtualizedGrid({
           
           return (
             <div key={item.id} style={getItemStyle(actualIndex)}>
-              <CompactEntryCard 
+              <EntryCard 
                 entry={item} 
                 onExpand={onExpand}
-                searchTerm={searchTerm}
+                isSelected={selectedDocuments.has(item.id)}
+                onSelect={onSelectDocument}
+                selectionMode={selectionMode}
               />
             </div>
           );
@@ -153,7 +158,7 @@ export default function VirtualizedGrid({
 }
 
 // Compact version of EntryCard
-function CompactEntryCard({ entry, onExpand, searchTerm }) {
+function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onSelect, selectionMode = false }) {
   // Generate activity data for the sparkline
   const activityData = useMemo(() => generateActivityData(entry), [entry]);
   

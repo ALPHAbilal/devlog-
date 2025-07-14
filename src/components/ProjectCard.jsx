@@ -1,6 +1,19 @@
 import React from 'react';
 import { Folder, FolderOpen, FileText, Calendar, TrendingUp } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+
+// Simple relative date formatter to avoid adding date-fns dependency
+function formatRelativeDate(date) {
+  const now = new Date();
+  const past = new Date(date);
+  const diffInSeconds = Math.floor((now - past) / 1000);
+  
+  if (diffInSeconds < 60) return 'just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  if (diffInSeconds < 31536000) return `${Math.floor(diffInSeconds / 2592000)} months ago`;
+  return `${Math.floor(diffInSeconds / 31536000)} years ago`;
+}
 
 export default function ProjectCard({ 
   project, 
@@ -14,7 +27,7 @@ export default function ProjectCard({
   
   // Format the last activity date
   const lastActivity = project.last_document_date 
-    ? formatDistanceToNow(new Date(project.last_document_date), { addSuffix: true })
+    ? formatRelativeDate(project.last_document_date)
     : 'No documents yet';
 
   // Get appropriate folder icon
@@ -84,7 +97,7 @@ export default function ProjectCard({
       <div className="flex items-center justify-between text-xs text-gray-500">
         <div className="flex items-center space-x-1">
           <Calendar size={12} />
-          <span>Created {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}</span>
+          <span>Created {formatRelativeDate(project.created_at)}</span>
         </div>
         <div className="flex items-center space-x-1">
           <TrendingUp size={12} />

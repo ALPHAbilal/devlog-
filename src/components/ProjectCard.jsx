@@ -42,13 +42,10 @@ export default function ProjectCard({
       <div className="flex flex-col p-6 h-full">
         {/* Header with project indicator and actions */}
         <div className="flex justify-between items-start mb-3">
-          <div className="flex items-center gap-2">
-            <div 
-              className="w-3 h-3 rounded-full" 
-              style={{ backgroundColor: project.color || '#10b981' }}
-            />
-            <div className="text-text-secondary text-sm">Project</div>
-          </div>
+          <div 
+            className="w-3 h-3 rounded-full" 
+            style={{ backgroundColor: project.color || '#10b981' }}
+          />
           
           {/* Actions Menu */}
           <div className="relative">

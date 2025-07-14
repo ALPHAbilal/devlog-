@@ -1036,7 +1036,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       {/* Project Selector */}
       {storageWrapper.isSupabase && projects.length > 0 && (
         <div className="mb-6">
-          <label className="block text-sm text-text-secondary mb-2">Project</label>
           <ProjectSelector
             projects={projects}
             selectedProjectId={selectedProjectId}

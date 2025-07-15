@@ -41,7 +41,6 @@ import {
 import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 // Droppable folder component
@@ -588,12 +587,7 @@ export default function ProjectExplorer({
 
         {/* File tree */}
         <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
-          <SortableContext
-            items={sortableItems}
-            strategy={verticalListSortingStrategy}
-          >
-            {renderTreeItem(folderStructure)}
-          </SortableContext>
+          {renderTreeItem(folderStructure)}
         </div>
 
         {/* Drag overlay */}

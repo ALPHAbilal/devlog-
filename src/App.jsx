@@ -16,7 +16,11 @@ import Terms from './pages/Terms';
 import SharedDocument from './pages/SharedDocument';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './hooks/useToast';
-import { useEffect, Suspense } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
+
+// Lazy load SEO pages
+const AIConversationSaver = lazy(() => import('./pages/features/AIConversationSaver'));
+const NotionAlternative = lazy(() => import('./pages/compare/NotionAlternative'));
 
 // Initialize monitoring
 initMonitoring();
@@ -98,6 +102,25 @@ function AppContent() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/shared/:shareCode" element={<SharedDocument />} />
+        
+        {/* SEO Landing Pages */}
+        <Route path="/features/ai-conversation-saver" element={
+          <Suspense fallback={<div className="min-h-screen bg-dark-primary flex items-center justify-center">
+            <div className="text-gray-400">Loading...</div>
+          </div>}>
+            <AIConversationSaver />
+          </Suspense>
+        } />
+        
+        {/* Comparison Pages */}
+        <Route path="/compare/notion-alternative" element={
+          <Suspense fallback={<div className="min-h-screen bg-dark-primary flex items-center justify-center">
+            <div className="text-gray-400">Loading...</div>
+          </div>}>
+            <NotionAlternative />
+          </Suspense>
+        } />
+        
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );

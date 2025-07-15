@@ -16,16 +16,16 @@ export default function HeroSectionV3() {
       <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center">
         {/* Main content - single column, centered */}
         <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight">
-          6 months from now,
+          The Developer Knowledge Base
           <br />
-          you'll still know
+          That Remembers
           <br />
-          <span className="text-accent-green">why this works</span>.
+          <span className="text-accent-green">Why Your Code Works</span>
         </h1>
         
         <p className="text-xl md:text-2xl text-text-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
-          DevLog captures your solutions with full context. 
-          Because that brilliant fix at 2am shouldn't disappear into the void.
+          Build your personal developer documentation with code snippet management, 
+          AI conversation preservation, and offline-first architecture. Never lose a solution again.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">

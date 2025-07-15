@@ -12,8 +12,6 @@ export default function VirtualizedGrid({
   onSelectDocument,
   selectionMode = false
 }) {
-  console.log('VirtualizedGrid render:', { entriesCount: entries?.length });
-  
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
   const [containerWidth, setContainerWidth] = useState(0);
@@ -40,38 +38,39 @@ export default function VirtualizedGrid({
   const allItems = entries;
   const rows = Math.ceil(allItems.length / columns) || 1; // At least 1 row for empty state
 
-  // Update container width on resize
+  // Update container width on resize with debouncing
   useEffect(() => {
+    let resizeTimeout;
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
+        const newWidth = containerRef.current.offsetWidth;
+        // Only update if width changed significantly (more than 10px)
+        setContainerWidth(current => {
+          if (Math.abs(current - newWidth) > 10) {
+            return newWidth;
+          }
+          return current;
+        });
       }
     };
 
+    // Initial width
     updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+    
+    // Debounced resize handler
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateWidth, 150);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+    };
   }, []);
   
-  // Debug logging on mount
-  useEffect(() => {
-    if (containerRef.current) {
-      const containerHeight = containerRef.current.clientHeight;
-      const parentHeight = containerRef.current.parentElement?.clientHeight;
-      const totalHeight = rows * (CARD_HEIGHT + GAP) - GAP;
-      
-      console.log('VirtualizedGrid mounted:',
-        `containerWidth: ${containerWidth}`,
-        `containerHeight: ${containerHeight}`,
-        `parentHeight: ${parentHeight}`,
-        `itemCount: ${allItems.length}`,
-        `rows: ${rows}`,
-        `columns: ${columns}`,
-        `totalHeight: ${totalHeight}`,
-        `needsScroll: ${totalHeight > containerHeight}`
-      );
-    }
-  }, [containerWidth, allItems.length, rows, columns]);
+  // Remove debug logging to prevent console spam
 
   // Handle scroll to update visible range and fade effects
   const handleScroll = useCallback(() => {
@@ -99,17 +98,6 @@ export default function VirtualizedGrid({
     const bottomFade = Math.min(1, (scrollHeight - scrollTop - containerHeight) / fadeDistance);
     
     setScrollProgress({ top: topFade, bottom: bottomFade });
-    
-    // Debug logging
-    console.log('VirtualizedGrid scroll:', 
-      `scrollTop: ${scrollTop}`,
-      `containerHeight: ${containerHeight}`,
-      `scrollHeight: ${scrollHeight}`,
-      `canScroll: ${scrollHeight > containerHeight}`,
-      `visibleRange: ${start}-${end}`,
-      `rows: ${rows}`,
-      `columns: ${columns}`
-    );
   }, [columns, rows, allItems.length]);
 
   useEffect(() => {
@@ -137,7 +125,7 @@ export default function VirtualizedGrid({
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full flex flex-col">
       {/* Top fade effect - only visible when scrolled */}
       <div 
         className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-dark-primary to-transparent z-10 pointer-events-none transition-opacity duration-300"
@@ -158,7 +146,8 @@ export default function VirtualizedGrid({
           paddingTop: 20,
           paddingBottom: 20,
           scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+          scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent',
+          maxHeight: '100%'
         }}
       >
         {/* Virtual spacer to maintain scrollbar */}

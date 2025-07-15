@@ -29,10 +29,8 @@ initMonitoring();
 registerServiceWorker();
 
 // Preload critical resources
-preloadResources([
-  '/fonts/inter-var.woff2',
-  '/icons/sprite.svg'
-]);
+// Removed preload for fonts and icons to avoid warnings
+// These resources will be loaded on-demand
 
 // Component to handle global auto-save
 function AutoSaveProvider() {

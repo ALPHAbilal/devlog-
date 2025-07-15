@@ -1055,13 +1055,13 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col">
           {console.log('Dashboard rendering VirtualizedGrid:', { 
             filteredEntriesCount: filteredEntries.length,
             isLoading,
             expandedEntry: !!expandedEntry 
           })}
-          <div className="h-full">
+          <div className="flex-1 min-h-0 px-4 md:px-6 pb-4">
             <VirtualizedGrid 
               entries={filteredEntries}
               onExpand={handleDocumentExpand}

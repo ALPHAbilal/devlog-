@@ -7,7 +7,7 @@ import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
-import ProjectSidebar from '../components/ProjectSidebar';
+import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
 import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
@@ -876,20 +876,17 @@ export default function Dashboard() {
         lg:block
         bg-dark-primary lg:bg-transparent rounded-lg lg:rounded-none
       `}>
-        <ProjectSidebar
-          projects={projects}
-          selectedProjectId={selectedProjectId}
-          onProjectSelect={handleProjectSelect}
-          onCreateProject={() => {
-            setEditingProject(null);
-            setShowProjectModal(true);
-            // Close sidebar on mobile
-            if (window.innerWidth < 1024) {
-              setShowSidebar(false);
+        <ProjectExplorer
+          onDocumentSelect={(docId) => {
+            if (docId) {
+              const doc = entries.find(e => e.id === docId);
+              if (doc) {
+                handleDocumentExpand(doc);
+              }
             }
           }}
-          totalDocuments={entries.length}
-          uncategorizedCount={uncategorizedCount}
+          selectedDocumentId={expandedEntry?.id}
+          height="h-full"
         />
       </div>
 

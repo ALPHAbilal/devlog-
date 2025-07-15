@@ -22,6 +22,30 @@ export default {
       },
       backgroundImage: {
         'card-gradient': 'linear-gradient(135deg, #1e3a5f 0%, #0a1628 100%)',
+      },
+      animation: {
+        'in': 'in 0.2s ease-out',
+        'fade-in': 'fade-in 0.2s ease-out',
+        'slide-in-from-top-1': 'slide-in-from-top-1 0.2s ease-out',
+        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      keyframes: {
+        'in': {
+          '0%': { opacity: '0', transform: 'translateY(-2px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        'slide-in-from-top-1': {
+          '0%': { transform: 'translateY(-4px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+      },
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
       }
     },
   },

@@ -4,7 +4,7 @@ export default function Layout({ children }) {
       {/* Subtle green accent line */}
       <div className="h-0.5 bg-accent-green/80 flex-shrink-0"></div>
       
-      <div className="flex-grow overflow-hidden">
+      <div className="flex-grow min-h-0">
         {children}
       </div>
     </div>

@@ -1,10 +1,9 @@
-index-DEqUoB4m.js:83 Using optimized Supabase client
-index-DEqUoB4m.js:83 Global auto-save manager initialized with defensive wrappers
-index-DEqUoB4m.js:83 Starting auto-save with interval: 1 seconds
-index-DEqUoB4m.js:83 [Supabase] Auth event: SIGNED_IN
-index-DEqUoB4m.js:83 [AuthContext] Auth state change received: SIGNED_IN {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-DEqUoB4m.js:905 IndexedDB initialized successfully
-index-DEqUoB4m.js:83 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-DxTeUza2.js:83 Using optimized Supabase client
+index-DxTeUza2.js:83 Global auto-save manager initialized with defensive wrappers
+index-DxTeUza2.js:83 Starting auto-save with interval: 1 seconds
+index-DxTeUza2.js:83 [Supabase] Auth event: SIGNED_IN
+index-DxTeUza2.js:83 [AuthContext] Auth state change received: SIGNED_IN Object
+index-DxTeUza2.js:905 IndexedDB initialized successfully
 inspector.b9415ea5.js:1 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
     at lX (inspector.b9415ea5.js:1:127164)
     at l (inspector.b9415ea5.js:1:68514)
@@ -17,15 +16,6 @@ inspector.b9415ea5.js:1 Error: Minified React error #130; visit https://reactjs.
     at lw (inspector.b9415ea5.js:1:105378)
     at C (inspector.b9415ea5.js:1:141367)
 s7 @ inspector.b9415ea5.js:1
-r.callback @ inspector.b9415ea5.js:1
-nW @ inspector.b9415ea5.js:1
-oX @ inspector.b9415ea5.js:1
-e @ inspector.b9415ea5.js:1
-(anonymous) @ inspector.b9415ea5.js:1
-lR @ inspector.b9415ea5.js:1
-lw @ inspector.b9415ea5.js:1
-C @ inspector.b9415ea5.js:1
-T @ inspector.b9415ea5.js:1
 inspector.b9415ea5.js:1 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
     at lX (inspector.b9415ea5.js:1:127164)
     at l (inspector.b9415ea5.js:1:68514)
@@ -37,40 +27,26 @@ inspector.b9415ea5.js:1 Uncaught Error: Minified React error #130; visit https:/
     at lC (inspector.b9415ea5.js:1:106823)
     at lw (inspector.b9415ea5.js:1:105378)
     at C (inspector.b9415ea5.js:1:141367)
-lX @ inspector.b9415ea5.js:1
-l @ inspector.b9415ea5.js:1
-ol @ inspector.b9415ea5.js:1
-i @ inspector.b9415ea5.js:1
-lM @ inspector.b9415ea5.js:1
-(anonymous) @ inspector.b9415ea5.js:1
-lO @ inspector.b9415ea5.js:1
-lC @ inspector.b9415ea5.js:1
-lw @ inspector.b9415ea5.js:1
-C @ inspector.b9415ea5.js:1
-T @ inspector.b9415ea5.js:1
-index-DEqUoB4m.js:83 [Supabase] Auth event: INITIAL_SESSION
-index-DEqUoB4m.js:83 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-DEqUoB4m.js:83 Starting auto-save with interval: 1 seconds
-index-DEqUoB4m.js:1160 Dashboard: Starting to load entries...
-index-DEqUoB4m.js:905 Using Supabase for storage
-index-DEqUoB4m.js:905 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-DEqUoB4m.js:1160 Dashboard: Storage initialized (536ms)
-index-DEqUoB4m.js:905 SupabaseAdapter: getDocuments called
-index-DEqUoB4m.js:905 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-DEqUoB4m.js:905 SupabaseAdapter: Documents query completed in 371ms
-index-DEqUoB4m.js:905 SupabaseAdapter: Found 60 documents
-index-DEqUoB4m.js:905 SupabaseAdapter: Found 2 unsynced documents in IndexedDB
-index-DEqUoB4m.js:905 SupabaseAdapter: Total documents after merge: 60
-index-DEqUoB4m.js:905 SupabaseAdapter: Returning 60 documents
-index-DEqUoB4m.js:1160 Dashboard: Loaded 60 entries (373ms)
-index-DEqUoB4m.js:1160 Dashboard: Total load time: 910ms
-index-DEqUoB4m.js:905 SupabaseAdapter: Getting projects...
-index-DEqUoB4m.js:905 SupabaseAdapter: Found 3 projects
-index-DEqUoB4m.js:1169 Dashboard: Loaded 3 projects
-index-DEqUoB4m.js:1169 Dashboard: Setting isLoading to false
-index-DEqUoB4m.js:1194 Dashboard rendering VirtualizedGrid: {filteredEntriesCount: 60, isLoading: false, expandedEntry: false}
-index-DEqUoB4m.js:83 [Supabase] Auth event: SIGNED_IN
-index-DEqUoB4m.js:83 [AuthContext] Auth state change received: SIGNED_IN {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-DEqUoB4m.js:1194 Dashboard rendering VirtualizedGrid: {filteredEntriesCount: 60, isLoading: false, expandedEntry: false}
-index-DEqUoB4m.js:1194 Dashboard rendering VirtualizedGrid: {filteredEntriesCount: 60, isLoading: false, expandedEntry: false}
-index-DEqUoB4m.js:1194 Dashboard rendering VirtualizedGrid: {filteredEntriesCount: 60, isLoading: false, expandedEntry: false}
+index-DxTeUza2.js:83 SW registered: ServiceWorkerRegistration
+index-DxTeUza2.js:83 [Supabase] Auth event: INITIAL_SESSION
+index-DxTeUza2.js:83 [AuthContext] Auth state change received: INITIAL_SESSION Object
+index-DxTeUza2.js:83 Starting auto-save with interval: 1 seconds
+index-DxTeUza2.js:1160 Dashboard: Starting to load entries...
+index-DxTeUza2.js:905 Using Supabase for storage
+index-DxTeUza2.js:905 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DxTeUza2.js:1160 Dashboard: Storage initialized (575ms)
+index-DxTeUza2.js:905 SupabaseAdapter: getDocuments called
+index-DxTeUza2.js:905 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DxTeUza2.js:905 SupabaseAdapter: Documents query completed in 387ms
+index-DxTeUza2.js:905 SupabaseAdapter: Found 60 documents
+index-DxTeUza2.js:905 SupabaseAdapter: Found 2 unsynced documents in IndexedDB
+index-DxTeUza2.js:905 SupabaseAdapter: Total documents after merge: 60
+index-DxTeUza2.js:905 SupabaseAdapter: Returning 60 documents
+index-DxTeUza2.js:1160 Dashboard: Loaded 60 entries (388ms)
+index-DxTeUza2.js:1160 Dashboard: Total load time: 963ms
+index-DxTeUza2.js:905 SupabaseAdapter: Getting projects...
+index-DxTeUza2.js:905 SupabaseAdapter: Found 3 projects
+index-DxTeUza2.js:1169 Dashboard: Loaded 3 projects
+index-DxTeUza2.js:1169 Dashboard: Setting isLoading to false
+index-DxTeUza2.js:1194 Dashboard rendering VirtualizedGrid: Object
+index-DxTeUza2.js:1194 Dashboard rendering VirtualizedGrid: {filteredEntriesCount: 60, isLoading: false, expandedEntry: false}

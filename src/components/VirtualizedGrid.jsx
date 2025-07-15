@@ -125,7 +125,14 @@ export default function VirtualizedGrid({
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col">
+    <div 
+      ref={containerRef}
+      className="relative w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thin grid-container"
+      style={{ 
+        scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+      }}
+    >
       {/* Top fade effect - only visible when scrolled */}
       <div 
         className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-dark-primary to-transparent z-10 pointer-events-none transition-opacity duration-300"
@@ -138,25 +145,15 @@ export default function VirtualizedGrid({
         style={{ opacity: scrollProgress.bottom * 0.9 }}
       />
       
-      {/* Scrollable container */}
+      {/* Virtual spacer to maintain scrollbar */}
       <div 
-        ref={containerRef}
-        className="relative w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thin grid-container"
         style={{ 
+          height: rows * (CARD_HEIGHT + GAP) - GAP,
+          position: 'relative',
           paddingTop: 20,
-          paddingBottom: 20,
-          scrollbarWidth: 'thin',
-          scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent',
-          maxHeight: '100%'
+          paddingBottom: 20
         }}
       >
-        {/* Virtual spacer to maintain scrollbar */}
-        <div 
-          style={{ 
-            height: rows * (CARD_HEIGHT + GAP) - GAP,
-            position: 'relative'
-          }}
-        >
         {/* Render only visible items */}
         {allItems.slice(visibleRange.start, visibleRange.end).map((item, index) => {
           const actualIndex = visibleRange.start + index;
@@ -175,7 +172,6 @@ export default function VirtualizedGrid({
           );
         })}
       </div>
-    </div>
     </div>
   );
 }

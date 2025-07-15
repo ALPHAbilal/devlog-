@@ -17,20 +17,6 @@ export default function VirtualizedGrid({
   const [containerWidth, setContainerWidth] = useState(0);
   const [scrollProgress, setScrollProgress] = useState({ top: 0, bottom: 1 });
   
-  // Debug: Check if component mounts
-  useEffect(() => {
-    console.log('VirtualizedGrid mounted with entries:', entries?.length);
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
-      console.log('Container dimensions:', {
-        width: rect.width,
-        height: rect.height,
-        scrollHeight: containerRef.current.scrollHeight,
-        clientHeight: containerRef.current.clientHeight,
-        canScroll: containerRef.current.scrollHeight > containerRef.current.clientHeight
-      });
-    }
-  }, [entries]);
   
   // Configuration for cards - balanced for readability
   const CARD_WIDTH = 320; // Proper width for content
@@ -145,15 +131,7 @@ export default function VirtualizedGrid({
       className="relative w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thin grid-container"
       style={{ 
         scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent',
-        border: '2px solid red' // Temporary visual indicator
-      }}
-      onScroll={(e) => {
-        console.log('VirtualizedGrid scrolling!', {
-          scrollTop: e.target.scrollTop,
-          scrollHeight: e.target.scrollHeight,
-          clientHeight: e.target.clientHeight
-        });
+        scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
       }}
     >
       {/* Top fade effect - only visible when scrolled */}

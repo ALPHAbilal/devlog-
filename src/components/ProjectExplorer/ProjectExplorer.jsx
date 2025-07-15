@@ -599,14 +599,15 @@ export default function ProjectExplorer({
             touchAction: 'pan-y'
           }}
           onWheel={(e) => {
-            // Prevent scroll propagation to parent
-            console.log('ProjectExplorer wheel event captured', {
-              deltaY: e.deltaY,
-              scrollTop: e.currentTarget.scrollTop,
-              scrollHeight: e.currentTarget.scrollHeight,
-              clientHeight: e.currentTarget.clientHeight
-            });
-            e.stopPropagation();
+            const container = e.currentTarget;
+            const canScroll = container.scrollHeight > container.clientHeight;
+            const atTop = container.scrollTop === 0;
+            const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight;
+            
+            // Only stop propagation if we can handle the scroll
+            if (canScroll && !((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom))) {
+              e.stopPropagation();
+            }
           }}
         >
           <div className="min-h-full">

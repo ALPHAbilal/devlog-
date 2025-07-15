@@ -230,26 +230,15 @@ export default function ProjectExplorer({
   }, []);
 
   // Complete renaming
-  const completeRenaming = useCallback(() => {
+  const completeRenaming = useCallback(async () => {
     if (!renamingId || !renamingValue.trim()) {
       setRenamingId(null);
       return;
     }
     
-    const renameInStructure = (node) => {
-      if (node.id === renamingId) {
-        return { ...node, name: renamingValue.trim() };
-      }
-      if (node.children) {
-        return { ...node, children: node.children.map(renameInStructure) };
-      }
-      return node;
-    };
-    
-    setFolderStructure(renameInStructure(folderStructure));
+    await updateFolder(renamingId, { name: renamingValue.trim() });
     setRenamingId(null);
-    showToast.success('Renamed successfully');
-  }, [renamingId, renamingValue, folderStructure, showToast]);
+  }, [renamingId, renamingValue, updateFolder]);
 
   // Delete item
   const deleteItem = useCallback((item, parentId) => {
@@ -271,11 +260,29 @@ export default function ProjectExplorer({
   // Handle drag start
   const handleDragStart = useCallback((event) => {
     const { active } = event;
-    setDraggedItem(active.id);
-  }, []);
+    
+    // Find the item being dragged to get its name
+    const findItem = (node, id) => {
+      if (node.id === id) return node;
+      if (node.documents) {
+        const doc = node.documents.find(d => d.id === id);
+        if (doc) return doc;
+      }
+      if (node.children) {
+        for (const child of node.children) {
+          const result = findItem(child, id);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    
+    const item = findItem(folderStructure, active.id);
+    setDraggedItem(item);
+  }, [folderStructure]);
 
   // Handle drag end
-  const handleDragEnd = useCallback((event) => {
+  const handleDragEnd = useCallback(async (event) => {
     const { active, over } = event;
     
     if (!over || active.id === over.id) {
@@ -283,10 +290,46 @@ export default function ProjectExplorer({
       return;
     }
     
-    // Here you would implement the logic to move items
-    showToast.success(`Moved ${active.id} to ${over.id}`);
+    // Find the dragged item and target
+    const findItem = (node, id) => {
+      if (node.id === id) return node;
+      if (node.documents) {
+        const doc = node.documents.find(d => d.id === id);
+        if (doc) return doc;
+      }
+      if (node.children) {
+        for (const child of node.children) {
+          const result = findItem(child, id);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    
+    const draggedItem = findItem(folderStructure, active.id);
+    const targetItem = findItem(folderStructure, over.id);
+    
+    if (!draggedItem || !targetItem) {
+      setDraggedItem(null);
+      return;
+    }
+    
+    // Handle document to folder drop
+    if (draggedItem.type === 'document' && (targetItem.type === 'folder' || targetItem.type === 'root')) {
+      const targetFolderId = targetItem.type === 'root' ? null : targetItem.id;
+      await moveDocumentToFolder(draggedItem.id, targetFolderId);
+      if (onDocumentMove) {
+        onDocumentMove(draggedItem.id, targetFolderId);
+      }
+    }
+    // Handle folder to folder drop
+    else if (draggedItem.type === 'folder' && (targetItem.type === 'folder' || targetItem.type === 'root')) {
+      const targetFolderId = targetItem.type === 'root' ? null : targetItem.id;
+      await moveFolder(draggedItem.id, targetFolderId);
+    }
+    
     setDraggedItem(null);
-  }, [showToast]);
+  }, [folderStructure, moveDocumentToFolder, moveFolder, onDocumentMove]);
   
   // Create new document in folder
   const createNewDocument = useCallback((folderId) => {
@@ -332,7 +375,7 @@ export default function ProjectExplorer({
           if (item.type === 'folder' || item.type === 'root') {
             toggleExpanded(item.id);
           } else if (item.type === 'document') {
-            onDocumentSelect?.(item.id);
+            onDocumentSelect?.(item.data);
           }
           setSelectedItemId(item.id);
         }}
@@ -531,8 +574,13 @@ export default function ProjectExplorer({
         {/* Drag overlay */}
         <DragOverlay>
           {draggedItem ? (
-            <div className="bg-dark-secondary/90 text-text-primary px-2 py-1 rounded shadow-lg">
-              {draggedItem}
+            <div className="bg-dark-secondary/90 text-text-primary px-2 py-1 rounded shadow-lg flex items-center gap-2">
+              {draggedItem.type === 'folder' ? (
+                <Folder size={14} className="text-accent-green" />
+              ) : (
+                <FileText size={14} className="text-text-secondary" />
+              )}
+              <span className="text-sm">{draggedItem.name || 'Moving...'}</span>
             </div>
           ) : null}
         </DragOverlay>

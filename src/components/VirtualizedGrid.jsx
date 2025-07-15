@@ -56,16 +56,20 @@ export default function VirtualizedGrid({
   // Debug logging on mount
   useEffect(() => {
     if (containerRef.current) {
-      console.log('VirtualizedGrid mounted:', {
-        containerWidth,
-        containerHeight: containerRef.current.clientHeight,
-        parentHeight: containerRef.current.parentElement?.clientHeight,
-        itemCount: allItems.length,
-        rows,
-        columns,
-        totalHeight: rows * (CARD_HEIGHT + GAP) - GAP,
-        cardDimensions: { width: CARD_WIDTH, height: CARD_HEIGHT }
-      });
+      const containerHeight = containerRef.current.clientHeight;
+      const parentHeight = containerRef.current.parentElement?.clientHeight;
+      const totalHeight = rows * (CARD_HEIGHT + GAP) - GAP;
+      
+      console.log('VirtualizedGrid mounted:',
+        `containerWidth: ${containerWidth}`,
+        `containerHeight: ${containerHeight}`,
+        `parentHeight: ${parentHeight}`,
+        `itemCount: ${allItems.length}`,
+        `rows: ${rows}`,
+        `columns: ${columns}`,
+        `totalHeight: ${totalHeight}`,
+        `needsScroll: ${totalHeight > containerHeight}`
+      );
     }
   }, [containerWidth, allItems.length, rows, columns]);
 
@@ -97,16 +101,15 @@ export default function VirtualizedGrid({
     setScrollProgress({ top: topFade, bottom: bottomFade });
     
     // Debug logging
-    console.log('VirtualizedGrid scroll:', {
-      scrollTop,
-      containerHeight,
-      scrollHeight,
-      visibleRange: { start, end },
-      canScroll: scrollHeight > containerHeight,
-      rows,
-      columns,
-      totalItems: allItems.length
-    });
+    console.log('VirtualizedGrid scroll:', 
+      `scrollTop: ${scrollTop}`,
+      `containerHeight: ${containerHeight}`,
+      `scrollHeight: ${scrollHeight}`,
+      `canScroll: ${scrollHeight > containerHeight}`,
+      `visibleRange: ${start}-${end}`,
+      `rows: ${rows}`,
+      `columns: ${columns}`
+    );
   }, [columns, rows, allItems.length]);
 
   useEffect(() => {

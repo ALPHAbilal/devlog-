@@ -472,8 +472,17 @@ export const storageWrapper = {
       const { data, error } = await supabase
         .from('documents')
         .insert([{
-          ...newDoc,
-          user_id: adapter.supabaseAdapter.userId
+          id: newDoc.id,
+          title: newDoc.title,
+          tags: newDoc.tags,
+          folder_id: newDoc.folder_id,
+          position: newDoc.position,
+          created_at: newDoc.createdAt,
+          updated_at: newDoc.updatedAt,
+          user_id: adapter.supabaseAdapter.userId,
+          metadata: {
+            preview: ''
+          }
         }])
         .select()
         .single();

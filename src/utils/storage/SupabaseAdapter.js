@@ -164,7 +164,7 @@ export class SupabaseAdapter {
     const queryStart = performance.now();
     const { data: documents, error } = await supabase
       .from('documents')
-      .select('id, title, tags, created_at, updated_at, is_template, metadata')
+      .select('id, title, tags, created_at, updated_at, is_template, metadata, folder_id, position')
       .eq('user_id', this.userId)
       .order('updated_at', { ascending: false });
     
@@ -186,7 +186,9 @@ export class SupabaseAdapter {
       tags: doc.tags || [],
       metadata: doc.metadata || {},
       blocks: [], // Empty blocks array for list view
-      blockCount: doc.metadata?.blockCount || 0 // Include block count
+      blockCount: doc.metadata?.blockCount || 0, // Include block count
+      folder_id: doc.folder_id || null,
+      position: doc.position || 0
     }));
   }
 
@@ -213,7 +215,7 @@ export class SupabaseAdapter {
     
     const { data, error } = await supabase
       .from('documents')
-      .select('id, title, tags, created_at, updated_at, metadata, is_template, project_id')
+      .select('id, title, tags, created_at, updated_at, metadata, is_template, project_id, folder_id, position')
       .eq('user_id', this.userId)
       .is('deleted_at', null)
       .order('updated_at', { ascending: false });
@@ -285,7 +287,9 @@ export class SupabaseAdapter {
       metadata: doc.metadata || {},
       blocks: [], // Don't load blocks on document list - let ExpandedView handle it
       blockCount: doc.metadata?.blockCount || doc.block_count || doc.blockCount || 0,
-      project_id: doc.project_id || null // Include project_id for filtering
+      project_id: doc.project_id || null, // Include project_id for filtering
+      folder_id: doc.folder_id || null,
+      position: doc.position || 0
     }));
     
     // Transform to legacy format
@@ -459,7 +463,9 @@ export class SupabaseAdapter {
         lastSyncedAt: new Date().toISOString()
       },
       created_at: docData.createdAt || new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      folder_id: docData.folder_id || null,
+      position: docData.position || 0
     };
     
     console.log('SupabaseAdapter: Saving document to Supabase:', {

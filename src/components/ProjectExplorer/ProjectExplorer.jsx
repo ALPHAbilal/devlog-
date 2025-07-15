@@ -547,7 +547,7 @@ export default function ProjectExplorer({
     >
       <div 
         ref={containerRef}
-        className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30`}
+        className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-dark-secondary/20">
@@ -590,13 +590,15 @@ export default function ProjectExplorer({
 
         {/* File tree */}
         <div 
-          className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-thin"
+          className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-thin min-h-0"
           style={{ 
             scrollbarWidth: 'thin',
             scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
           }}
         >
-          {renderTreeItem(folderStructure)}
+          <div className="min-h-full">
+            {renderTreeItem(folderStructure)}
+          </div>
         </div>
 
         {/* Drag overlay */}

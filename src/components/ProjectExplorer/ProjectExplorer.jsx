@@ -398,10 +398,12 @@ export default function ProjectExplorer({
                   setRenamingValue('');
                 }
               }}
-              className="flex-1 bg-dark-secondary/60 text-text-primary text-sm px-1 rounded
-                       border border-accent-green/50 focus:outline-none focus:border-accent-green"
+              className="flex-1 max-w-[200px] bg-dark-primary text-text-primary text-sm px-1 py-0 rounded
+                       border border-accent-green/50 focus:outline-none focus:border-accent-green
+                       focus:ring-0 focus:bg-dark-primary"
               autoFocus
               onClick={(e) => e.stopPropagation()}
+              onFocus={(e) => e.target.select()}
             />
           ) : (
             <span className={`

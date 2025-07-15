@@ -870,11 +870,12 @@ export default function Dashboard() {
       
       {/* Project Sidebar */}
       <div className={`
-        fixed lg:relative inset-y-0 left-0 z-30 w-64 lg:w-72
+        fixed lg:relative inset-y-0 left-0 z-30 w-64 lg:w-72 h-screen lg:h-full
         transform transition-transform duration-300 ease-in-out
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:block
         bg-dark-primary lg:bg-transparent
+        flex flex-col
       `}>
         <ProjectExplorer
           onDocumentSelect={(data) => {

@@ -1021,9 +1021,8 @@ export default function Dashboard() {
                 totalDocuments={entries.length}
                 onNavigateHome={() => {
                   setSelectedProjectId(null);
-                  setViewMode('documents');
                 }}
-                onNavigateProjects={() => setViewMode('projects')}
+                onNavigateProjects={() => {}}
               />
             </div>
             

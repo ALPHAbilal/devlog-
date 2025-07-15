@@ -328,6 +328,11 @@ export const storageWrapper = {
       return await storageWrapper.assignDocumentToProject(documentId, updates.project_id);
     }
     
+    // If adapter has direct updateDocument method, use it
+    if (adapter.supabaseAdapter && adapter.supabaseAdapter.updateDocument) {
+      return await adapter.supabaseAdapter.updateDocument(documentId, updates);
+    }
+    
     // Otherwise, load the document, update it, and save
     const docs = await adapter.loadEntries();
     const doc = docs.find(d => d.id === documentId);
@@ -337,6 +342,223 @@ export const storageWrapper = {
     
     const updatedDoc = { ...doc, ...updates, updatedAt: new Date().toISOString() };
     return await storageWrapper.saveDocument(updatedDoc);
+  },
+  
+  // Folder management methods
+  async getFolderTree() {
+    if (!adapter) await init();
+    if (!adapter.supabaseAdapter) {
+      console.warn('Folders not supported with current storage adapter');
+      return [];
+    }
+    
+    const { data, error } = await supabase.rpc('get_folder_tree', {
+      p_user_id: adapter.supabaseAdapter.userId
+    });
+    
+    if (error) throw error;
+    return data || [];
+  },
+  
+  async createFolder(folderData) {
+    if (!adapter) await init();
+    if (!adapter.supabaseAdapter) {
+      throw new Error('Folders not supported with current storage adapter');
+    }
+    
+    const { data, error } = await supabase
+      .from('folders')
+      .insert([{
+        user_id: adapter.supabaseAdapter.userId,
+        name: folderData.name || 'New Folder',
+        parent_id: folderData.parent_id || null,
+        color: folderData.color || '#6B7280',
+        icon: folderData.icon || 'folder',
+        position: folderData.position || 0
+      }])
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+  
+  async updateFolder(folderId, updates) {
+    if (!adapter) await init();
+    if (!adapter.supabaseAdapter) {
+      throw new Error('Folders not supported with current storage adapter');
+    }
+    
+    const { data, error } = await supabase
+      .from('folders')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', folderId)
+      .eq('user_id', adapter.supabaseAdapter.userId)
+      .select()
+      .single();
+    
+    if (error) throw error;
+    return data;
+  },
+  
+  async deleteFolder(folderId) {
+    if (!adapter) await init();
+    if (!adapter.supabaseAdapter) {
+      throw new Error('Folders not supported with current storage adapter');
+    }
+    
+    const { error } = await supabase
+      .from('folders')
+      .delete()
+      .eq('id', folderId)
+      .eq('user_id', adapter.supabaseAdapter.userId);
+    
+    if (error) throw error;
+    return true;
+  },
+  
+  async moveFolder(folderId, newParentId, newPosition) {
+    if (!adapter) await init();
+    if (!adapter.supabaseAdapter) {
+      throw new Error('Folders not supported with current storage adapter');
+    }
+    
+    const { data, error } = await supabase.rpc('move_folder', {
+      p_folder_id: folderId,
+      p_new_parent_id: newParentId,
+      p_new_position: newPosition
+    });
+    
+    if (error) throw error;
+    return data;
+  },
+  
+  async getDocumentsInFolder(folderId, recursive = false) {
+    if (!adapter) await init();
+    if (!adapter.supabaseAdapter) {
+      throw new Error('Folders not supported with current storage adapter');
+    }
+    
+    const { data, error } = await supabase.rpc('get_documents_in_folder', {
+      p_folder_id: folderId,
+      p_recursive: recursive
+    });
+    
+    if (error) throw error;
+    return data || [];
+  },
+  
+  async createDocument(documentData) {
+    if (!adapter) await init();
+    
+    const newDoc = {
+      id: crypto.randomUUID(),
+      title: documentData.title || 'Untitled',
+      preview: '',
+      tags: documentData.tags || [],
+      folder_id: documentData.folder_id || null,
+      position: documentData.position || 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    if (adapter.supabaseAdapter) {
+      const { data, error } = await supabase
+        .from('documents')
+        .insert([{
+          ...newDoc,
+          user_id: adapter.supabaseAdapter.userId
+        }])
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    }
+    
+    // Fallback for IndexedDB
+    await storageWrapper.saveDocument(newDoc);
+    return newDoc;
+  },
+  
+  async getDocument(documentId) {
+    if (!adapter) await init();
+    
+    if (adapter.getDocument) {
+      return await adapter.getDocument(documentId);
+    }
+    
+    // Fallback: find in all documents
+    const docs = await adapter.loadEntries();
+    const doc = docs.find(d => d.id === documentId);
+    if (!doc) {
+      throw new Error(`Document ${documentId} not found`);
+    }
+    return doc;
+  },
+  
+  async getBlocks(documentId) {
+    if (!adapter) await init();
+    
+    if (adapter.supabaseAdapter && adapter.supabaseAdapter.getBlocks) {
+      return await adapter.supabaseAdapter.getBlocks(documentId);
+    }
+    
+    // Fallback for IndexedDB - blocks are stored within documents
+    const doc = await storageWrapper.getDocument(documentId);
+    return doc.blocks || [];
+  },
+  
+  async duplicateDocument(documentId, targetFolderId) {
+    if (!adapter) await init();
+    
+    const originalDoc = await storageWrapper.getDocument(documentId);
+    const blocks = await storageWrapper.getBlocks(documentId);
+    
+    const newDoc = await storageWrapper.createDocument({
+      title: `${originalDoc.title} (Copy)`,
+      tags: originalDoc.tags,
+      folder_id: targetFolderId || originalDoc.folder_id
+    });
+    
+    // Copy blocks if using Supabase
+    if (adapter.supabaseAdapter && blocks.length > 0) {
+      const newBlocks = blocks.map(block => ({
+        ...block,
+        id: crypto.randomUUID(),
+        document_id: newDoc.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+      
+      const { error } = await supabase
+        .from('blocks')
+        .insert(newBlocks);
+      
+      if (error) throw error;
+    }
+    
+    return newDoc;
+  },
+  
+  async deleteDocument(documentId) {
+    return await deleteEntry(documentId);
+  },
+  
+  async getDocuments(limit = 1000, offset = 0) {
+    if (!adapter) await init();
+    
+    if (adapter.supabaseAdapter) {
+      // Use the optimized getDocuments method
+      return await adapter.supabaseAdapter.getDocuments(limit, offset);
+    }
+    
+    // Fallback for IndexedDB
+    const allDocs = await adapter.loadEntries();
+    return allDocs.slice(offset, offset + limit);
   }
 };
 

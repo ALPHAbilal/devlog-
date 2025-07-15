@@ -7,6 +7,7 @@ import { register as registerServiceWorker } from './utils/serviceWorker';
 import { preloadResources } from './utils/performance';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
+import DashboardVSCode from './pages/DashboardVSCode';
 import Settings from './pages/Settings';
 import AuthComponent from './components/Auth';
 import AuthCallback from './pages/auth/callback';
@@ -107,7 +108,7 @@ function AppContent() {
     <Layout>
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard" element={<DashboardVSCode />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/shared/:shareCode" element={<SharedDocument />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />

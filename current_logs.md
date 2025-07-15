@@ -1,23 +1,54 @@
-<div class="bg-surface-1 rounded-lg p-4 h-full flex flex-col"><div class="flex items-center justify-between mb-4"><button class="flex items-center space-x-2 text-text-primary hover:text-accent-green transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg><h3 class="font-semibold text-sm">Projects</h3></button><button class="p-1 hover:bg-surface-2 rounded transition-colors" title="Create new project"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus text-accent-green" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg></button></div><div class="relative mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search absolute left-2.5 top-1/2 transform -translate-y-1/2 text-text-secondary" aria-hidden="true"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg><input placeholder="Search projects..." class="w-full pl-8 pr-8 py-1.5 bg-surface-2 border border-surface-2 rounded-lg 
-                       text-sm text-text-primary placeholder-text-secondary/50 focus:border-accent-green/50 
-                       focus:outline-none transition-colors" type="text" value=""></div><div class="flex-1 overflow-y-auto space-y-1"><button class="
-      w-full flex items-center justify-between p-2 rounded-lg transition-all
-      hover:bg-surface-2 text-text-secondary hover:text-text-primary
-      
-    "><div class="flex items-center space-x-2 min-w-0"><div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-grid3x3 lucide-grid-3x3" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M3 15h18"></path><path d="M9 3v18"></path><path d="M15 3v18"></path></svg></div><span class="text-sm font-medium truncate">All Documents</span></div><span class="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">58</span></button><button class="
-      w-full flex items-center justify-between p-2 rounded-lg transition-all
-      hover:bg-surface-2 text-text-secondary hover:text-text-primary
-      
-    "><div class="flex items-center space-x-2 min-w-0"><div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder transition-transform" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg></div><span class="text-sm font-medium truncate">Uncategorized</span></div><span class="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">50</span></button><div class="flex items-center justify-between mt-4 mb-2"><button class="flex items-center space-x-1.5 text-xs font-semibold text-text-secondary/80 hover:text-text-primary uppercase tracking-wider"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-archive" aria-hidden="true"><rect width="20" height="5" x="2" y="3" rx="1"></rect><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"></path><path d="M10 12h4"></path></svg><span>All Projects</span></button><span class="text-xs text-text-secondary/60">3</span></div><div class="relative" style="height: 108px;"><div class="space-y-1"><button class="
-      w-full flex items-center justify-between p-2 rounded-lg transition-all
-      hover:bg-surface-2 text-text-secondary hover:text-text-primary
-      
-    "><div class="flex items-center space-x-2 min-w-0"><div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder transition-transform" aria-hidden="true" style="color: rgb(132, 204, 22);"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg></div><span class="text-sm font-medium truncate">documentation</span></div><span class="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">3</span></button><button class="
-      w-full flex items-center justify-between p-2 rounded-lg transition-all
-      hover:bg-surface-2 text-text-secondary hover:text-text-primary
-      
-    "><div class="flex items-center space-x-2 min-w-0"><div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder transition-transform" aria-hidden="true" style="color: rgb(239, 68, 68);"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg></div><span class="text-sm font-medium truncate">documentation</span></div><span class="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">2</span></button><button class="
-      w-full flex items-center justify-between p-2 rounded-lg transition-all
-      hover:bg-surface-2 text-text-secondary hover:text-text-primary
-      
-    "><div class="flex items-center space-x-2 min-w-0"><div class="relative"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder transition-transform" aria-hidden="true" style="color: rgb(236, 72, 153);"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"></path></svg></div><span class="text-sm font-medium truncate">docuùentation</span></div><span class="text-xs bg-surface-0 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">3</span></button></div></div></div></div>
+[11:58:50.145] Running build in Washington, D.C., USA (East) – iad1
+[11:58:50.146] Build machine configuration: 2 cores, 8 GB
+[11:58:50.222] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 4baed1a)
+[11:58:51.121] Cloning completed: 899.000ms
+[11:58:51.312] Restored build cache from previous deployment (BrpAgCHwxgp48p7QpDLfwyb4Dq2u)
+[11:58:54.530] Running "vercel build"
+[11:58:55.444] Vercel CLI 44.3.0
+[11:58:56.513] Installing dependencies...
+[11:58:59.820] 
+[11:58:59.820] changed 8 packages in 3s
+[11:58:59.822] 
+[11:58:59.822] 70 packages are looking for funding
+[11:58:59.823]   run `npm fund` for details
+[11:59:00.036] 
+[11:59:00.037] > journey-log-compass@0.0.0 build
+[11:59:00.037] > vite build
+[11:59:00.038] 
+[11:59:00.533] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[11:59:01.080] transforming...
+[11:59:01.624] [32m✓[39m 31 modules transformed.
+[11:59:01.626] [31m✗[39m Build failed in 1.05s
+[11:59:01.627] [31merror during build:
+[11:59:01.628] [31m[vite:esbuild] Transform failed with 2 errors:
+[11:59:01.628] /vercel/path0/src/pages/Dashboard.jsx:1231:6: ERROR: Unexpected closing "DndContext" tag does not match opening "div" tag
+[11:59:01.628] /vercel/path0/src/pages/Dashboard.jsx:1233:1: ERROR: Unexpected end of file before a closing "DndContext" tag[31m
+[11:59:01.628] file: [36m/vercel/path0/src/pages/Dashboard.jsx:1231:6[31m
+[11:59:01.629] [33m
+[11:59:01.629] [33mUnexpected closing "DndContext" tag does not match opening "div" tag[33m
+[11:59:01.629] 1229|        />
+[11:59:01.629] 1230|      </div>
+[11:59:01.630] 1231|      </DndContext>
+[11:59:01.630]    |        ^
+[11:59:01.630] 1232|    );
+[11:59:01.631] 1233|  }
+[11:59:01.631] 
+[11:59:01.631] [33mUnexpected end of file before a closing "DndContext" tag[33m
+[11:59:01.631] 1231|      </DndContext>
+[11:59:01.632] 1232|    );
+[11:59:01.632] 1233|  }
+[11:59:01.632]    |   ^
+[11:59:01.632] [31m
+[11:59:01.632]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
+[11:59:01.633]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
+[11:59:01.633]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
+[11:59:01.633]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
+[11:59:01.633]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
+[11:59:01.634]     at Socket.emit (node:events:518:28)
+[11:59:01.634]     at addChunk (node:internal/streams/readable:561:12)
+[11:59:01.634]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[11:59:01.635]     at Readable.push (node:internal/streams/readable:392:5)
+[11:59:01.635]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
+[11:59:01.704] Error: Command "npm run build" exited with 1
+[11:59:02.102] 
+[11:59:05.653] Exiting build container

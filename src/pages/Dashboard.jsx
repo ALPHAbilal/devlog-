@@ -1196,6 +1196,7 @@ export default function Dashboard() {
         />
       )}
       </div>
+      </div>
       
       {/* Drag Overlay */}
       <DragOverlay 
@@ -1227,7 +1228,6 @@ export default function Dashboard() {
         onCreateDocument={handleCommandPaletteCreateDocument}
         onCreateProject={handleCommandPaletteCreateProject}
       />
-    </div>
     </DndContext>
   );
 }

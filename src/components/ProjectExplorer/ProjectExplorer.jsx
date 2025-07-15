@@ -197,31 +197,17 @@ export default function ProjectExplorer({
   }, []);
 
   // Create new folder
-  const createNewFolder = useCallback((parentId) => {
-    const newFolder = {
-      id: `folder-${Date.now()}`,
-      name: 'New Folder',
-      type: 'folder',
-      children: []
-    };
+  const createNewFolder = useCallback(async (parentId) => {
+    const folderName = 'New Folder';
+    const actualParentId = parentId === 'root' ? null : parentId;
     
-    // Add folder to structure
-    const addToParent = (node) => {
-      if (node.id === parentId) {
-        return { ...node, children: [...(node.children || []), newFolder] };
-      }
-      if (node.children) {
-        return { ...node, children: node.children.map(addToParent) };
-      }
-      return node;
-    };
-    
-    setFolderStructure(addToParent(folderStructure));
-    setExpandedItems(prev => new Set([...prev, parentId]));
-    setRenamingId(newFolder.id);
-    setRenamingValue('New Folder');
-    showToast.success('Folder created');
-  }, [folderStructure, showToast]);
+    const newFolder = await createFolderInDB(folderName, actualParentId);
+    if (newFolder) {
+      setExpandedItems(prev => new Set([...prev, parentId]));
+      setRenamingId(newFolder.id);
+      setRenamingValue(folderName);
+    }
+  }, [createFolderInDB]);
 
   // Start renaming
   const startRenaming = useCallback((item) => {
@@ -241,21 +227,12 @@ export default function ProjectExplorer({
   }, [renamingId, renamingValue, updateFolder]);
 
   // Delete item
-  const deleteItem = useCallback((item, parentId) => {
-    const removeFromParent = (node) => {
-      if (node.children) {
-        const filteredChildren = node.children.filter(child => child.id !== item.id);
-        if (filteredChildren.length !== node.children.length) {
-          return { ...node, children: filteredChildren };
-        }
-        return { ...node, children: node.children.map(removeFromParent) };
-      }
-      return node;
-    };
-    
-    setFolderStructure(removeFromParent(folderStructure));
-    showToast.success('Deleted successfully');
-  }, [folderStructure, showToast]);
+  const deleteItem = useCallback(async (item, parentId) => {
+    if (item.type === 'folder') {
+      await deleteFolderFromDB(item.id);
+    }
+    // For documents, we'll need to add a delete document function
+  }, [deleteFolderFromDB]);
 
   // Handle drag start
   const handleDragStart = useCallback((event) => {

@@ -1,56 +1,69 @@
-[13:02:30.041] Running build in Washington, D.C., USA (East) – iad1
-[13:02:30.041] Build machine configuration: 2 cores, 8 GB
-[13:02:30.058] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 64e297f)
-[13:02:30.691] Cloning completed: 632.000ms
-[13:02:30.839] Restored build cache from previous deployment (6KhBLxrxkbULHVRZGBubpPMmFyw9)
-[13:02:32.855] Running "vercel build"
-[13:02:33.384] Vercel CLI 44.3.0
-[13:02:34.039] Installing dependencies...
-[13:02:36.267] 
-[13:02:36.267] changed 8 packages in 2s
-[13:02:36.268] 
-[13:02:36.268] 70 packages are looking for funding
-[13:02:36.268]   run `npm fund` for details
-[13:02:36.422] 
-[13:02:36.422] > journey-log-compass@0.0.0 build
-[13:02:36.422] > vite build
-[13:02:36.422] 
-[13:02:36.753] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
-[13:02:37.138] transforming...
-[13:02:37.472] [32m✓[39m 26 modules transformed.
-[13:02:37.474] [31m✗[39m Build failed in 375ms
-[13:02:37.474] [31merror during build:
-[13:02:37.475] [31m[vite:esbuild] Transform failed with 2 errors:
-[13:02:37.475] /vercel/path0/src/pages/Dashboard.jsx:1232:6: ERROR: Unexpected closing "DndContext" tag does not match opening "div" tag
-[13:02:37.476] /vercel/path0/src/pages/Dashboard.jsx:1233:6: ERROR: Unexpected closing "div" tag does not match opening "DndContext" tag[31m
-[13:02:37.476] file: [36m/vercel/path0/src/pages/Dashboard.jsx:1232:6[31m
-[13:02:37.476] [33m
-[13:02:37.476] [33mUnexpected closing "DndContext" tag does not match opening "div" tag[33m
-[13:02:37.477] 1230|          onCreateProject={handleCommandPaletteCreateProject}
-[13:02:37.477] 1231|        />
-[13:02:37.477] 1232|      </DndContext>
-[13:02:37.478]    |        ^
-[13:02:37.478] 1233|      </div>
-[13:02:37.478] 1234|    );
-[13:02:37.479] 
-[13:02:37.479] [33mUnexpected closing "div" tag does not match opening "DndContext" tag[33m
-[13:02:37.479] 1231|        />
-[13:02:37.479] 1232|      </DndContext>
-[13:02:37.480] 1233|      </div>
-[13:02:37.480]    |        ^
-[13:02:37.480] 1234|    );
-[13:02:37.480] 1235|  }
-[13:02:37.481] [31m
-[13:02:37.481]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
-[13:02:37.481]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
-[13:02:37.482]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
-[13:02:37.482]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
-[13:02:37.482]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
-[13:02:37.483]     at Socket.emit (node:events:518:28)
-[13:02:37.483]     at addChunk (node:internal/streams/readable:561:12)
-[13:02:37.483]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-[13:02:37.484]     at Readable.push (node:internal/streams/readable:392:5)
-[13:02:37.484]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
-[13:02:37.520] Error: Command "npm run build" exited with 1
-[13:02:37.693] 
-[13:02:40.534] Exiting build container
+index-BUWG_9ST.js:83 Using optimized Supabase client
+index-BUWG_9ST.js:83 Global auto-save manager initialized with defensive wrappers
+index-BUWG_9ST.js:915 IndexedDB initialized successfully
+index-BUWG_9ST.js:83 Starting auto-save with interval: 1 seconds
+index-BUWG_9ST.js:83 [Supabase] Auth event: SIGNED_IN
+index-BUWG_9ST.js:83 [AuthContext] Auth state change received: SIGNED_IN Object
+inspector.b9415ea5.js:1 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at lX (inspector.b9415ea5.js:1:127164)
+    at l (inspector.b9415ea5.js:1:68514)
+    at ol (inspector.b9415ea5.js:1:82233)
+    at i (inspector.b9415ea5.js:1:132348)
+    at lM (inspector.b9415ea5.js:1:110198)
+    at inspector.b9415ea5.js:1:110064
+    at lO (inspector.b9415ea5.js:1:110072)
+    at lC (inspector.b9415ea5.js:1:106823)
+    at lw (inspector.b9415ea5.js:1:105378)
+    at C (inspector.b9415ea5.js:1:141367)
+s7 @ inspector.b9415ea5.js:1
+inspector.b9415ea5.js:1 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
+    at lX (inspector.b9415ea5.js:1:127164)
+    at l (inspector.b9415ea5.js:1:68514)
+    at ol (inspector.b9415ea5.js:1:82233)
+    at i (inspector.b9415ea5.js:1:132348)
+    at lM (inspector.b9415ea5.js:1:110198)
+    at inspector.b9415ea5.js:1:110064
+    at lO (inspector.b9415ea5.js:1:110072)
+    at lC (inspector.b9415ea5.js:1:106823)
+    at lw (inspector.b9415ea5.js:1:105378)
+    at C (inspector.b9415ea5.js:1:141367)
+index-BUWG_9ST.js:83 SW registered: ServiceWorkerRegistration
+index-BUWG_9ST.js:83 [Supabase] Auth event: INITIAL_SESSION
+index-BUWG_9ST.js:83 [AuthContext] Auth state change received: INITIAL_SESSION Object
+index-BUWG_9ST.js:83 Starting auto-save with interval: 1 seconds
+index-BUWG_9ST.js:1177 Dashboard: Starting to load entries...
+index-BUWG_9ST.js:915 Using Supabase for storage
+index-BUWG_9ST.js:915 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-BUWG_9ST.js:1177 Dashboard: Storage initialized (746ms)
+index-BUWG_9ST.js:915 SupabaseAdapter: getDocuments called
+index-BUWG_9ST.js:915 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-BUWG_9ST.js:915 SupabaseAdapter: Documents query completed in 306ms
+index-BUWG_9ST.js:915 SupabaseAdapter: Found 58 documents
+index-BUWG_9ST.js:915 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
+index-BUWG_9ST.js:915 SupabaseAdapter: Total documents after merge: 58
+index-BUWG_9ST.js:915 SupabaseAdapter: Returning 58 documents
+index-BUWG_9ST.js:1177 Dashboard: Loaded 58 entries (307ms)
+index-BUWG_9ST.js:1177 Dashboard: Total load time: 1053ms
+index-BUWG_9ST.js:915 SupabaseAdapter: Getting projects...
+index-BUWG_9ST.js:915 SupabaseAdapter: Found 3 projects
+index-BUWG_9ST.js:1186 Dashboard: Loaded 3 projects
+index-BUWG_9ST.js:1186 Dashboard: Setting isLoading to false
+index-BUWG_9ST.js:1083 Uncaught (in promise) TypeError: U.success is not a function
+    at index-BUWG_9ST.js:1083:12330
+    at index-BUWG_9ST.js:88:30526
+    at Xb.on.unstable_batchedUpdates (index-BUWG_9ST.js:33:3165)
+    at index-BUWG_9ST.js:88:30331
+    at Nc.handleEnd (index-BUWG_9ST.js:88:14856)
+dashboard:1 The resource https://www.devlog.design/icons/sprite.svg was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+dashboard:1 The resource https://www.devlog.design/fonts/inter-var.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+index-BUWG_9ST.js:1083 Uncaught ReferenceError: setFolderStructure is not defined
+    at index-BUWG_9ST.js:1083:11526
+    at onClick (index-BUWG_9ST.js:1097:269)
+    at vm (index-BUWG_9ST.js:48:117896)
+    at index-BUWG_9ST.js:48:123161
+    at Nh (index-BUWG_9ST.js:48:9040)
+    at jd (index-BUWG_9ST.js:48:119132)
+    at Ld (index-BUWG_9ST.js:49:26818)
+    at Mb (index-BUWG_9ST.js:49:26640)
+dashboard:1 The resource https://www.devlog.design/icons/sprite.svg was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+dashboard:1 The resource https://www.devlog.design/fonts/inter-var.woff2 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.

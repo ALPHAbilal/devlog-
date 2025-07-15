@@ -35,14 +35,34 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
+  useDroppable,
+  rectIntersection,
 } from '@dnd-kit/core';
 import {
-  SortableContext,
   sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
+// Droppable folder component
+function DroppableFolder({ id, children, isActive }) {
+  const { isOver, setNodeRef } = useDroppable({
+    id: id,
+    data: { type: 'folder' }
+  });
+  
+  return (
+    <div 
+      ref={setNodeRef}
+      className={`
+        ${isOver ? 'ring-2 ring-accent-green/50 bg-accent-green/10 rounded-md' : ''}
+        transition-all duration-200
+      `}
+    >
+      {children}
+    </div>
+  );
+}
 
 // Sortable item component
 function SortableItem({ id, type, data, depth = 0, onExpand, isExpanded, children, isRenaming }) {
@@ -463,20 +483,43 @@ export default function ProjectExplorer({
       </div>
     );
 
+    // Wrap the content based on type
+    let wrappedContent;
+    if (item.type === 'root' || item.type === 'folder') {
+      // Folders are droppable
+      wrappedContent = (
+        <DroppableFolder id={item.id}>
+          {item.type === 'root' ? (
+            itemContent
+          ) : (
+            <SortableItem 
+              id={item.id} 
+              type={item.type} 
+              data={item}
+              isRenaming={isRenaming}
+            >
+              {itemContent}
+            </SortableItem>
+          )}
+        </DroppableFolder>
+      );
+    } else {
+      // Documents are just sortable
+      wrappedContent = (
+        <SortableItem 
+          id={item.id} 
+          type={item.type} 
+          data={item}
+          isRenaming={isRenaming}
+        >
+          {itemContent}
+        </SortableItem>
+      );
+    }
+
     return (
       <div key={item.id}>
-        {item.type === 'root' ? (
-          itemContent
-        ) : (
-          <SortableItem 
-            id={item.id} 
-            type={item.type} 
-            data={item}
-            isRenaming={isRenaming}
-          >
-            {itemContent}
-          </SortableItem>
-        )}
+        {wrappedContent}
         
         {/* Render children */}
         {isExpanded && hasChildren && (
@@ -491,28 +534,12 @@ export default function ProjectExplorer({
     );
   };
 
-  // Flatten items for sortable context
-  const flattenItems = (items, result = []) => {
-    items.forEach(item => {
-      if (item.id !== 'root') {
-        result.push(item.id);
-      }
-      if (item.children) {
-        flattenItems(item.children, result);
-      }
-    });
-    return result;
-  };
-
-  const sortableItems = useMemo(() => 
-    flattenItems([folderStructure]), 
-    [folderStructure]
-  );
+  // Removed flattened items - no longer needed for hierarchical drag and drop
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={rectIntersection}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >

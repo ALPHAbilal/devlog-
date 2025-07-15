@@ -7,7 +7,7 @@ export function useFolders() {
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { showToast } = useToast();
+  const toast = useToast();
 
   // Load folders
   const loadFolders = useCallback(async () => {
@@ -50,11 +50,11 @@ export function useFolders() {
       setFolders(rootFolders);
     } catch (error) {
       console.error('Error loading folders:', error);
-      showToast.error('Failed to load folders');
+      toast.error('Failed to load folders');
     } finally {
       setLoading(false);
     }
-  }, [user?.id, showToast]);
+  }, [user?.id, toast]);
 
   // Create folder
   const createFolder = useCallback(async (name, parentId = null) => {
@@ -90,14 +90,14 @@ export function useFolders() {
       if (error) throw error;
 
       await loadFolders();
-      showToast.success('Folder created');
+      toast.success('Folder created');
       return data;
     } catch (error) {
       console.error('Error creating folder:', error);
-      showToast.error('Failed to create folder');
+      toast.error('Failed to create folder');
       return null;
     }
-  }, [user?.id, loadFolders, showToast]);
+  }, [user?.id, loadFolders, toast]);
 
   // Update folder
   const updateFolder = useCallback(async (folderId, updates) => {
@@ -114,12 +114,12 @@ export function useFolders() {
       if (error) throw error;
 
       await loadFolders();
-      showToast.success('Folder updated');
+      toast.success('Folder updated');
     } catch (error) {
       console.error('Error updating folder:', error);
-      showToast.error('Failed to update folder');
+      toast.error('Failed to update folder');
     }
-  }, [user?.id, loadFolders, showToast]);
+  }, [user?.id, loadFolders, toast]);
 
   // Delete folder
   const deleteFolder = useCallback(async (folderId) => {
@@ -131,7 +131,7 @@ export function useFolders() {
         .eq('parent_id', folderId);
 
       if (children && children.length > 0) {
-        showToast.error('Cannot delete folder with subfolders');
+        toast.error('Cannot delete folder with subfolders');
         return false;
       }
 
@@ -142,7 +142,7 @@ export function useFolders() {
         .eq('folder_id', folderId);
 
       if (documents && documents.length > 0) {
-        showToast.error('Cannot delete folder with documents');
+        toast.error('Cannot delete folder with documents');
         return false;
       }
 
@@ -155,21 +155,21 @@ export function useFolders() {
       if (error) throw error;
 
       await loadFolders();
-      showToast.success('Folder deleted');
+      toast.success('Folder deleted');
       return true;
     } catch (error) {
       console.error('Error deleting folder:', error);
-      showToast.error('Failed to delete folder');
+      toast.error('Failed to delete folder');
       return false;
     }
-  }, [user?.id, loadFolders, showToast]);
+  }, [user?.id, loadFolders, toast]);
 
   // Move folder
   const moveFolder = useCallback(async (folderId, newParentId) => {
     try {
       // Prevent moving to self or descendants
       if (folderId === newParentId) {
-        showToast.error('Cannot move folder to itself');
+        toast.error('Cannot move folder to itself');
         return false;
       }
 
@@ -187,14 +187,14 @@ export function useFolders() {
       if (error) throw error;
 
       await loadFolders();
-      showToast.success('Folder moved');
+      toast.success('Folder moved');
       return true;
     } catch (error) {
       console.error('Error moving folder:', error);
-      showToast.error('Failed to move folder');
+      toast.error('Failed to move folder');
       return false;
     }
-  }, [user?.id, loadFolders, showToast]);
+  }, [user?.id, loadFolders, toast]);
 
   // Move document to folder
   const moveDocumentToFolder = useCallback(async (documentId, folderId) => {
@@ -210,14 +210,14 @@ export function useFolders() {
 
       if (error) throw error;
 
-      showToast.success('Document moved');
+      toast.success('Document moved');
       return true;
     } catch (error) {
       console.error('Error moving document:', error);
-      showToast.error('Failed to move document');
+      toast.error('Failed to move document');
       return false;
     }
-  }, [user?.id, showToast]);
+  }, [user?.id, toast]);
 
   // Load folders on mount
   useEffect(() => {

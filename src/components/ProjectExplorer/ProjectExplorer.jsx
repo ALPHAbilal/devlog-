@@ -27,6 +27,7 @@ import SearchBar from './SearchBar';
 import ContextMenu from './ContextMenu';
 import { useToast } from '../../hooks/useToast';
 import { useFolders } from '../../hooks/useFolders';
+import '../VirtualizedGrid.css';
 import {
   DndContext,
   closestCenter,
@@ -588,7 +589,13 @@ export default function ProjectExplorer({
         </div>
 
         {/* File tree */}
-        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+        <div 
+          className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-thin"
+          style={{ 
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+          }}
+        >
           {renderTreeItem(folderStructure)}
         </div>
 

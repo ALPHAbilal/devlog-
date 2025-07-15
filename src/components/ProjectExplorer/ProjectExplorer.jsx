@@ -14,16 +14,58 @@ import {
   Search,
   X,
   Plus,
-  Star,
-  StarOff,
-  Clock,
-  Archive,
+  FolderPlus,
+  FilePlus,
   MoreVertical,
-  Grid3X3
+  Edit2,
+  Trash2,
+  Copy,
+  Download,
+  Upload
 } from 'lucide-react';
 import SearchBar from './SearchBar';
 import ContextMenu from './ContextMenu';
 import { useToast } from '../../hooks/useToast';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// Sortable item component
+function SortableItem({ id, type, data, depth = 0, onExpand, isExpanded, children }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
 
 export default function ProjectExplorer({ 
   onDocumentSelect,
@@ -43,98 +85,204 @@ export default function ProjectExplorer({
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showFavorites, setShowFavorites] = useState(true);
-  const [showRecent, setShowRecent] = useState(true);
-  const [showAll, setShowAll] = useState(true);
   const [contextMenu, setContextMenu] = useState(null);
-  const [hoveredProjectId, setHoveredProjectId] = useState(null);
-  const [expandedProjects, setExpandedProjects] = useState(new Set(['all', 'uncategorized']));
+  const [expandedItems, setExpandedItems] = useState(new Set(['root']));
+  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [renamingId, setRenamingId] = useState(null);
+  const [renamingValue, setRenamingValue] = useState('');
+  const [draggedItem, setDraggedItem] = useState(null);
+  
+  // Mock folder structure - in real app, this would come from database
+  const [folderStructure, setFolderStructure] = useState({
+    id: 'root',
+    name: 'FOLDERS',
+    type: 'root',
+    children: [
+      {
+        id: 'folder-1',
+        name: 'Frontend',
+        type: 'folder',
+        children: [
+          { id: 'folder-11', name: 'React', type: 'folder', children: [] },
+          { id: 'folder-12', name: 'Vue', type: 'folder', children: [] },
+          { id: 'folder-13', name: 'Angular', type: 'folder', children: [] },
+        ]
+      },
+      {
+        id: 'folder-2',
+        name: 'Backend',
+        type: 'folder',
+        children: [
+          { id: 'folder-21', name: 'Node.js', type: 'folder', children: [] },
+          { id: 'folder-22', name: 'Express', type: 'folder', children: [] },
+          { id: 'folder-23', name: 'MongoDB', type: 'folder', children: [] },
+        ]
+      },
+      {
+        id: 'folder-3',
+        name: 'DevOps',
+        type: 'folder',
+        children: [
+          { id: 'folder-31', name: 'Docker', type: 'folder', children: [] },
+          { id: 'folder-32', name: 'Kubernetes', type: 'folder', children: [] },
+          { id: 'folder-33', name: 'CI/CD', type: 'folder', children: [] },
+        ]
+      },
+    ]
+  });
   
   const containerRef = useRef(null);
   const { showToast } = useToast();
   
-  // Filter projects based on search
-  const filteredProjects = projects.filter(project =>
-    project.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
   );
 
-  // Filter documents based on search
-  const filteredDocuments = documents.filter(doc =>
-    doc.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Get documents for a specific project
-  const getProjectDocuments = useCallback((projectId) => {
-    if (projectId === 'all') {
-      return filteredDocuments;
-    } else if (projectId === 'uncategorized') {
-      return filteredDocuments.filter(doc => !doc.project_id);
-    } else {
-      return filteredDocuments.filter(doc => doc.project_id === projectId);
-    }
-  }, [filteredDocuments]);
-
-  // Categorize projects
-  const favoriteProjects = useMemo(() => 
-    filteredProjects.filter(p => p.is_favorite).sort((a, b) => a.title.localeCompare(b.title))
-  , [filteredProjects]);
-
-  const recentProjects = useMemo(() => {
-    return filteredProjects
-      .filter(p => !p.is_favorite && p.last_document_date)
-      .sort((a, b) => new Date(b.last_document_date) - new Date(a.last_document_date))
-      .slice(0, 3);
-  }, [filteredProjects]);
-
-  const otherProjects = useMemo(() => {
-    const recentIds = new Set(recentProjects.map(p => p.id));
-    return filteredProjects
-      .filter(p => !p.is_favorite && !recentIds.has(p.id))
-      .sort((a, b) => a.title.localeCompare(b.title));
-  }, [filteredProjects, recentProjects]);
-
-  const handleProjectClick = useCallback((projectId) => {
-    // Toggle expansion
-    setExpandedProjects(prev => {
+  // Toggle item expansion
+  const toggleExpanded = useCallback((itemId) => {
+    setExpandedItems(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(projectId || 'all')) {
-        newSet.delete(projectId || 'all');
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
       } else {
-        newSet.add(projectId || 'all');
+        newSet.add(itemId);
       }
       return newSet;
     });
-    onProjectSelect?.(projectId);
-  }, [onProjectSelect]);
+  }, []);
 
-  // Handle context menu for projects
-  const handleProjectContextMenu = useCallback((e, project) => {
+  // Handle context menu
+  const handleContextMenu = useCallback((e, item, parentId = null) => {
     e.preventDefault();
     e.stopPropagation();
     
-    const menuItems = [
-      { label: 'Edit', icon: MoreVertical, onClick: () => onUpdateProject?.(project) },
-      { label: 'Delete', icon: X, onClick: () => onDeleteProject?.(project), danger: true },
-      { divider: true },
-      { 
-        label: project.is_favorite ? 'Remove from Favorites' : 'Add to Favorites', 
-        icon: project.is_favorite ? StarOff : Star,
-        onClick: () => onToggleFavorite?.(project)
-      }
-    ];
+    const menuItems = [];
+    
+    if (item.type === 'folder' || item.type === 'root') {
+      menuItems.push(
+        { label: 'New Folder', icon: FolderPlus, onClick: () => createNewFolder(item.id) },
+        { label: 'New File', icon: FilePlus, onClick: () => createNewDocument(item.id) },
+        { divider: true }
+      );
+    }
+    
+    if (item.type !== 'root') {
+      menuItems.push(
+        { label: 'Rename', icon: Edit2, onClick: () => startRenaming(item) },
+        { label: 'Delete', icon: Trash2, onClick: () => deleteItem(item, parentId), danger: true }
+      );
+    }
     
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
       items: menuItems
     });
-  }, [onUpdateProject, onDeleteProject, onToggleFavorite]);
+  }, []);
 
-  // Get icon for document based on its blocks
+  // Create new folder
+  const createNewFolder = useCallback((parentId) => {
+    const newFolder = {
+      id: `folder-${Date.now()}`,
+      name: 'New Folder',
+      type: 'folder',
+      children: []
+    };
+    
+    // Add folder to structure
+    const addToParent = (node) => {
+      if (node.id === parentId) {
+        return { ...node, children: [...(node.children || []), newFolder] };
+      }
+      if (node.children) {
+        return { ...node, children: node.children.map(addToParent) };
+      }
+      return node;
+    };
+    
+    setFolderStructure(addToParent(folderStructure));
+    setExpandedItems(prev => new Set([...prev, parentId]));
+    setRenamingId(newFolder.id);
+    setRenamingValue('New Folder');
+    showToast.success('Folder created');
+  }, [folderStructure, showToast]);
+
+  // Start renaming
+  const startRenaming = useCallback((item) => {
+    setRenamingId(item.id);
+    setRenamingValue(item.name);
+  }, []);
+
+  // Complete renaming
+  const completeRenaming = useCallback(() => {
+    if (!renamingId || !renamingValue.trim()) {
+      setRenamingId(null);
+      return;
+    }
+    
+    const renameInStructure = (node) => {
+      if (node.id === renamingId) {
+        return { ...node, name: renamingValue.trim() };
+      }
+      if (node.children) {
+        return { ...node, children: node.children.map(renameInStructure) };
+      }
+      return node;
+    };
+    
+    setFolderStructure(renameInStructure(folderStructure));
+    setRenamingId(null);
+    showToast.success('Renamed successfully');
+  }, [renamingId, renamingValue, folderStructure, showToast]);
+
+  // Delete item
+  const deleteItem = useCallback((item, parentId) => {
+    const removeFromParent = (node) => {
+      if (node.children) {
+        const filteredChildren = node.children.filter(child => child.id !== item.id);
+        if (filteredChildren.length !== node.children.length) {
+          return { ...node, children: filteredChildren };
+        }
+        return { ...node, children: node.children.map(removeFromParent) };
+      }
+      return node;
+    };
+    
+    setFolderStructure(removeFromParent(folderStructure));
+    showToast.success('Deleted successfully');
+  }, [folderStructure, showToast]);
+
+  // Handle drag start
+  const handleDragStart = useCallback((event) => {
+    const { active } = event;
+    setDraggedItem(active.id);
+  }, []);
+
+  // Handle drag end
+  const handleDragEnd = useCallback((event) => {
+    const { active, over } = event;
+    
+    if (!over || active.id === over.id) {
+      setDraggedItem(null);
+      return;
+    }
+    
+    // Here you would implement the logic to move items
+    showToast.success(`Moved ${active.id} to ${over.id}`);
+    setDraggedItem(null);
+  }, [showToast]);
+
+  // Get icon for document
   const getDocumentIcon = (doc) => {
     if (!doc.blocks || doc.blocks.length === 0) return FileText;
     
-    // Check block types in the document
     const blockTypes = doc.blocks.map(b => b.type);
     
     if (blockTypes.includes('code')) return Code;
@@ -146,243 +294,229 @@ export default function ProjectExplorer({
     return FileText;
   };
 
-  // Render document item
-  const renderDocumentItem = (doc, indentLevel = 1) => {
-    const isSelected = selectedDocumentId === doc.id;
-    const DocumentIcon = getDocumentIcon(doc);
+  // Render tree item
+  const renderTreeItem = (item, depth = 0, parentId = null) => {
+    const isExpanded = expandedItems.has(item.id);
+    const isSelected = selectedItemId === item.id;
+    const isRenaming = renamingId === item.id;
+    const hasChildren = item.children && item.children.length > 0;
+    const isRoot = item.type === 'root';
     
-    return (
-      <button
-        key={doc.id}
-        onClick={() => onDocumentSelect?.(doc.id)}
+    const itemContent = (
+      <div
         className={`
-          w-full flex items-center justify-between p-1.5 rounded transition-all text-sm
-          ${isSelected 
-            ? 'bg-accent-green/20 text-accent-green' 
-            : 'hover:bg-dark-secondary/20 text-text-secondary hover:text-text-primary'
-          }
+          group flex items-center justify-between py-1 px-2 cursor-pointer
+          rounded-md transition-all duration-150
+          ${isSelected ? 'bg-dark-secondary/40' : 'hover:bg-dark-secondary/20'}
+          ${depth === 0 && !isRoot ? 'mt-0.5' : ''}
         `}
-        style={{ paddingLeft: `${indentLevel * 1.5}rem` }}
+        style={{ paddingLeft: `${(depth * 16) + 8}px` }}
+        onClick={() => {
+          if (item.type === 'folder' || item.type === 'root') {
+            toggleExpanded(item.id);
+          } else if (item.type === 'document') {
+            onDocumentSelect?.(item.id);
+          }
+          setSelectedItemId(item.id);
+        }}
+        onContextMenu={(e) => handleContextMenu(e, item, parentId)}
       >
-        <div className="flex items-center space-x-2 min-w-0">
-          <DocumentIcon size={14} className="flex-shrink-0" />
-          <span className="truncate">{doc.title}</span>
+        <div className="flex items-center gap-1 min-w-0">
+          {/* Chevron for expandable items */}
+          {(hasChildren || item.type === 'folder' || item.type === 'root') && (
+            <ChevronRight 
+              size={12} 
+              className={`
+                text-text-secondary/60 transition-transform duration-200
+                ${isExpanded ? 'rotate-90' : ''}
+              `}
+            />
+          )}
+          {!hasChildren && item.type !== 'folder' && item.type !== 'root' && (
+            <div className="w-3" />
+          )}
+          
+          {/* Icon */}
+          {item.type === 'folder' || item.type === 'root' ? (
+            isExpanded ? (
+              <FolderOpen size={14} className="text-accent-green flex-shrink-0" />
+            ) : (
+              <Folder size={14} className="text-text-secondary flex-shrink-0" />
+            )
+          ) : (
+            <FileText size={14} className="text-text-secondary flex-shrink-0" />
+          )}
+          
+          {/* Name */}
+          {isRenaming ? (
+            <input
+              type="text"
+              value={renamingValue}
+              onChange={(e) => setRenamingValue(e.target.value)}
+              onBlur={completeRenaming}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') completeRenaming();
+                if (e.key === 'Escape') {
+                  setRenamingId(null);
+                  setRenamingValue('');
+                }
+              }}
+              className="flex-1 bg-dark-secondary/60 text-text-primary text-sm px-1 rounded
+                       border border-accent-green/50 focus:outline-none focus:border-accent-green"
+              autoFocus
+              onClick={(e) => e.stopPropagation()}
+            />
+          ) : (
+            <span className={`
+              text-sm truncate flex-1
+              ${isRoot ? 'font-semibold text-text-secondary/80 uppercase tracking-wider text-xs' : ''}
+              ${isSelected ? 'text-text-primary' : 'text-text-secondary'}
+              group-hover:text-text-primary
+            `}>
+              {item.name}
+            </span>
+          )}
         </div>
-        {doc.updated_at && (
-          <span className="text-xs text-text-secondary/50 flex-shrink-0 ml-1">
-            {new Date(doc.updated_at).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            })}
-          </span>
+        
+        {/* Action buttons */}
+        {!isRoot && (
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {(item.type === 'folder' || item.type === 'root') && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    createNewFolder(item.id);
+                  }}
+                  className="p-0.5 hover:bg-dark-secondary/40 rounded"
+                  title="New folder"
+                >
+                  <FolderPlus size={12} className="text-text-secondary" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleContextMenu(e, item, parentId);
+                  }}
+                  className="p-0.5 hover:bg-dark-secondary/40 rounded"
+                  title="More options"
+                >
+                  <MoreVertical size={12} className="text-text-secondary" />
+                </button>
+              </>
+            )}
+          </div>
         )}
-      </button>
+      </div>
     );
-  };
-
-  // Render project item with documents
-  const renderProjectItem = (project, projectId = null) => {
-    const id = projectId || project?.id;
-    const isSelected = selectedProjectId === id;
-    const isHovered = hoveredProjectId === id;
-    const isExpanded = expandedProjects.has(id);
-    const projectDocs = getProjectDocuments(id);
-    const hasDocuments = projectDocs.length > 0;
-    
-    const FolderIcon = (isHovered || isSelected || isExpanded) ? FolderOpen : Folder;
 
     return (
-      <div key={id}>
-        <button
-          onClick={() => handleProjectClick(id)}
-          onContextMenu={(e) => project && handleProjectContextMenu(e, project)}
-          onMouseEnter={() => setHoveredProjectId(id)}
-          onMouseLeave={() => setHoveredProjectId(null)}
-          className={`
-            w-full flex items-center justify-between p-2 rounded-lg transition-all
-            ${isSelected 
-              ? 'bg-accent-green/20 text-accent-green' 
-              : 'hover:bg-dark-secondary/30 text-text-secondary hover:text-text-primary'
-            }
-          `}
-        >
-          <div className="flex items-center space-x-2 min-w-0">
-            <div className="flex items-center">
-              {hasDocuments && (
-                <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
-                  <ChevronRight size={12} />
-                </div>
-              )}
-              {!hasDocuments && <div className="w-3" />}
-            </div>
-            <div className="relative">
-              <FolderIcon 
-                size={16} 
-                style={{ color: isSelected ? undefined : project?.color }}
-                className={isSelected ? '' : 'transition-transform'}
-              />
-              {project?.is_favorite && (
-                <Star size={8} className="absolute -top-0.5 -right-0.5 text-yellow-400 fill-yellow-400" />
-              )}
-            </div>
-            <span className="text-sm font-medium truncate">
-              {project?.title || (id === 'all' ? 'All Documents' : 'Uncategorized')}
-            </span>
-          </div>
-          <span className="text-xs bg-dark-secondary/50 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-            {projectDocs.length}
-          </span>
-        </button>
+      <div key={item.id}>
+        {item.type === 'root' ? (
+          itemContent
+        ) : (
+          <SortableItem id={item.id} type={item.type} data={item}>
+            {itemContent}
+          </SortableItem>
+        )}
         
-        {/* Render documents */}
-        {isExpanded && hasDocuments && (
-          <div className="mt-0.5">
-            {projectDocs.map(doc => renderDocumentItem(doc))}
+        {/* Render children */}
+        {isExpanded && hasChildren && (
+          <div>
+            {item.children.map(child => renderTreeItem(child, depth + 1, item.id))}
           </div>
         )}
       </div>
     );
   };
+
+  // Flatten items for sortable context
+  const flattenItems = (items, result = []) => {
+    items.forEach(item => {
+      if (item.id !== 'root') {
+        result.push(item.id);
+      }
+      if (item.children) {
+        flattenItems(item.children, result);
+      }
+    });
+    return result;
+  };
+
+  const sortableItems = useMemo(() => 
+    flattenItems([folderStructure]), 
+    [folderStructure]
+  );
 
   return (
-    <div 
-      ref={containerRef}
-      className={`bg-dark-secondary/20 rounded-lg p-4 ${height} flex flex-col ${className}`}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center space-x-2 text-text-primary hover:text-accent-green transition-colors group"
-        >
-          <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}>
-            <ChevronDown size={14} />
+      <div 
+        ref={containerRef}
+        className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30`}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 border-b border-dark-secondary/20">
+          <h3 className="text-xs font-semibold text-text-secondary/80 uppercase tracking-wider">
+            Explorer
+          </h3>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => createNewFolder('root')}
+              className="p-1 hover:bg-dark-secondary/30 rounded transition-all"
+              title="New folder"
+            >
+              <FolderPlus size={14} className="text-text-secondary" />
+            </button>
+            <button
+              onClick={() => setExpandedItems(new Set(['root']))}
+              className="p-1 hover:bg-dark-secondary/30 rounded transition-all"
+              title="Collapse all"
+            >
+              <ChevronDown size={14} className="text-text-secondary" />
+            </button>
           </div>
-          <h3 className="font-semibold text-sm">Explorer</h3>
-        </button>
-        <button
-          onClick={onCreateProject}
-          className="p-1 hover:bg-dark-secondary/30 rounded transition-all duration-200 hover:scale-110"
-          title="Create new project"
-        >
-          <Plus size={14} className="text-accent-green" />
-        </button>
+        </div>
+
+        {/* Search */}
+        <div className="p-2 border-b border-dark-secondary/20">
+          <div className="relative">
+            <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-secondary/60" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search files..."
+              className="w-full pl-7 pr-2 py-1 bg-dark-secondary/20 text-text-primary text-sm
+                       rounded border border-dark-secondary/30 focus:border-accent-green/50
+                       focus:outline-none placeholder-text-secondary/40"
+            />
+          </div>
+        </div>
+
+        {/* File tree */}
+        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+          <SortableContext
+            items={sortableItems}
+            strategy={verticalListSortingStrategy}
+          >
+            {renderTreeItem(folderStructure)}
+          </SortableContext>
+        </div>
+
+        {/* Drag overlay */}
+        <DragOverlay>
+          {draggedItem ? (
+            <div className="bg-dark-secondary/90 text-text-primary px-2 py-1 rounded shadow-lg">
+              {draggedItem}
+            </div>
+          ) : null}
+        </DragOverlay>
       </div>
-
-      {isExpanded && (
-        <>
-          {/* Search */}
-          <SearchBar
-            value={searchTerm}
-            onChange={setSearchTerm}
-            placeholder="Search files..."
-            className="mb-4"
-          />
-
-          {/* File tree */}
-          <div className="flex-1 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-dark-secondary scrollbar-track-transparent">
-            {/* All Documents */}
-            {renderProjectItem(null, 'all')}
-
-            {/* Uncategorized */}
-            {uncategorizedCount > 0 && renderProjectItem(null, 'uncategorized')}
-
-            {/* Favorites Section */}
-            {favoriteProjects.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-4 mb-2">
-                  <button
-                    onClick={() => setShowFavorites(!showFavorites)}
-                    className="flex items-center space-x-1.5 text-xs font-semibold text-text-secondary/80 hover:text-text-primary uppercase tracking-wider transition-colors"
-                  >
-                    <div className={`transform transition-transform duration-200 ${showFavorites ? 'rotate-0' : '-rotate-90'}`}>
-                      <ChevronDown size={12} />
-                    </div>
-                    <Star size={12} />
-                    <span>Favorites</span>
-                  </button>
-                  <span className="text-xs text-text-secondary/60">{favoriteProjects.length}</span>
-                </div>
-                {showFavorites && (
-                  <div className="space-y-0.5 mb-4">
-                    {favoriteProjects.map(project => renderProjectItem(project))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Recent Section */}
-            {recentProjects.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-4 mb-2">
-                  <button
-                    onClick={() => setShowRecent(!showRecent)}
-                    className="flex items-center space-x-1.5 text-xs font-semibold text-text-secondary/80 hover:text-text-primary uppercase tracking-wider transition-colors"
-                  >
-                    <div className={`transform transition-transform duration-200 ${showRecent ? 'rotate-0' : '-rotate-90'}`}>
-                      <ChevronDown size={12} />
-                    </div>
-                    <Clock size={12} />
-                    <span>Recent</span>
-                  </button>
-                  <span className="text-xs text-text-secondary/60">{recentProjects.length}</span>
-                </div>
-                {showRecent && (
-                  <div className="space-y-0.5 mb-4">
-                    {recentProjects.map(project => renderProjectItem(project))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* All Projects Section */}
-            {otherProjects.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-4 mb-2">
-                  <button
-                    onClick={() => setShowAll(!showAll)}
-                    className="flex items-center space-x-1.5 text-xs font-semibold text-text-secondary/80 hover:text-text-primary uppercase tracking-wider transition-colors"
-                  >
-                    <div className={`transform transition-transform duration-200 ${showAll ? 'rotate-0' : '-rotate-90'}`}>
-                      <ChevronDown size={12} />
-                    </div>
-                    <Archive size={12} />
-                    <span>All Projects</span>
-                  </button>
-                  <span className="text-xs text-text-secondary/60">{otherProjects.length}</span>
-                </div>
-                {showAll && (
-                  <div className="space-y-0.5">
-                    {otherProjects.map(project => renderProjectItem(project))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Empty state */}
-            {filteredProjects.length === 0 && filteredDocuments.length === 0 && searchTerm && (
-              <div className="text-center py-12">
-                <p className="text-text-secondary text-sm">
-                  No results found for "{searchTerm}"
-                </p>
-              </div>
-            )}
-
-            {projects.length === 0 && documents.length === 0 && !searchTerm && (
-              <div className="text-center py-12">
-                <Folder size={32} className="text-text-secondary/30 mx-auto mb-2" />
-                <p className="text-text-secondary text-sm mb-3">No projects yet</p>
-                <button
-                  onClick={onCreateProject}
-                  className="text-accent-green hover:text-accent-green/80 text-sm font-medium transition-colors"
-                >
-                  Create your first project
-                </button>
-              </div>
-            )}
-          </div>
-        </>
-      )}
 
       {/* Context Menu */}
       {contextMenu && (
@@ -393,6 +527,22 @@ export default function ProjectExplorer({
           onClose={() => setContextMenu(null)}
         />
       )}
-    </div>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.02);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.15);
+        }
+      `}</style>
+    </DndContext>
   );
 }

@@ -45,7 +45,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 // Sortable item component
-function SortableItem({ id, type, data, depth = 0, onExpand, isExpanded, children }) {
+function SortableItem({ id, type, data, depth = 0, onExpand, isExpanded, children, isRenaming }) {
   const {
     attributes,
     listeners,
@@ -62,7 +62,13 @@ function SortableItem({ id, type, data, depth = 0, onExpand, isExpanded, childre
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...(!isRenaming ? listeners : {})}
+      tabIndex={-1}
+    >
       {children}
     </div>
   );
@@ -462,7 +468,12 @@ export default function ProjectExplorer({
         {item.type === 'root' ? (
           itemContent
         ) : (
-          <SortableItem id={item.id} type={item.type} data={item}>
+          <SortableItem 
+            id={item.id} 
+            type={item.type} 
+            data={item}
+            isRenaming={isRenaming}
+          >
             {itemContent}
           </SortableItem>
         )}

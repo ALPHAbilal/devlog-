@@ -51,7 +51,6 @@ export default function Dashboard() {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const [viewMode, setViewMode] = useState('documents'); // 'documents' or 'projects'
   const [showSidebar, setShowSidebar] = useState(true);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   
@@ -1031,33 +1030,6 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <SearchBar value={searchTerm} onChange={setSearchTerm} />
               
-              {/* View Mode Switcher */}
-              {storageWrapper.isSupabase && projects.length > 0 && (
-                <div className="flex items-center bg-surface-1 rounded-lg p-1">
-                  <button
-                    onClick={() => setViewMode('documents')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-all ${
-                      viewMode === 'documents'
-                        ? 'bg-accent-green text-dark-primary'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
-                    }`}
-                  >
-                    <FileText size={14} />
-                    <span>Documents</span>
-                  </button>
-                  <button
-                    onClick={() => setViewMode('projects')}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium transition-all ${
-                      viewMode === 'projects'
-                        ? 'bg-accent-green text-dark-primary'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
-                    }`}
-                  >
-                    <Folder size={14} />
-                    <span>Projects</span>
-                  </button>
-                </div>
-              )}
               
               <button
                 onClick={createNewEntry}
@@ -1081,42 +1053,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Main Content - Projects or Documents */}
+        {/* Main Content - Documents Grid */}
         <div className="flex-grow overflow-hidden px-4 md:px-6">
-        {viewMode === 'projects' ? (
-          // Projects Grid
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
-            {projects.map(project => {
-              // Get recent documents for this project
-              const projectDocs = entries.filter(entry => entry.project_id === project.id)
-                .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                .slice(0, 3)
-                .map(doc => ({
-                  id: doc.id,
-                  title: doc.title,
-                  updatedAt: doc.updatedAt,
-                  preview: doc.preview
-                }));
-              
-              return (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  isSelected={selectedProjectId === project.id}
-                  onClick={() => handleProjectSelect(project.id)}
-                  onEdit={(project) => {
-                    setEditingProject(project);
-                    setShowProjectModal(true);
-                  }}
-                  onDelete={handleDeleteProject}
-                  onToggleFavorite={handleToggleFavorite}
-                  recentDocuments={projectDocs}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          // Documents Grid
           <VirtualizedGrid 
             entries={filteredEntries}
             onExpand={handleDocumentExpand}
@@ -1125,8 +1063,7 @@ export default function Dashboard() {
             onSelectDocument={handleDocumentSelect}
             selectionMode={selectedDocuments.size > 0}
           />
-        )}
-      </div>
+        </div>
 
       {/* Empty State */}
       {filteredEntries.length === 0 && searchTerm && (

@@ -141,9 +141,10 @@ export default function VirtualizedGrid({
           
           return (
             <div key={item.id} style={getItemStyle(actualIndex)}>
-              <EntryCard 
+              <CompactEntryCard 
                 entry={item} 
                 onExpand={onExpand}
+                searchTerm={searchTerm}
                 isSelected={selectedDocuments.has(item.id)}
                 onSelect={onSelectDocument}
                 selectionMode={selectionMode}

@@ -860,7 +860,7 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="flex flex-col h-full relative">
+      <div className="flex h-full relative">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -871,10 +871,11 @@ export default function Dashboard() {
       
       {/* Project Sidebar */}
       <div className={`
-        fixed lg:absolute left-3 top-24 bottom-6 z-30 w-56
-        ${showSidebar ? 'block' : 'hidden'}
-        lg:block
-        bg-dark-primary lg:bg-transparent rounded-lg lg:rounded-none
+        fixed lg:relative inset-y-0 left-0 z-30 w-64 lg:w-72
+        transform transition-transform duration-300 ease-in-out
+        ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0 lg:block
+        bg-dark-primary lg:bg-transparent
       `}>
         <ProjectExplorer
           onDocumentSelect={(docId) => {
@@ -887,15 +888,32 @@ export default function Dashboard() {
           }}
           selectedDocumentId={expandedEntry?.id}
           height="h-full"
+          projects={projects}
+          selectedProjectId={selectedProjectId}
+          onProjectSelect={handleProjectSelect}
+          onCreateProject={() => {
+            setEditingProject(null);
+            setShowProjectModal(true);
+          }}
+          onUpdateProject={(project) => {
+            setEditingProject(project);
+            setShowProjectModal(true);
+          }}
+          onDeleteProject={handleDeleteProject}
+          onToggleFavorite={handleToggleFavorite}
+          totalDocuments={entries.length}
+          uncategorizedCount={entries.filter(e => !e.project_id).length}
         />
       </div>
 
-      {/* Header */}
-      <div className="flex-shrink-0">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
         <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-dark-secondary/20">
           {/* Logo and Brand - Professional Design */}
-          <div className="flex items-center gap-2.5 lg:ml-60">
+          <div className="flex items-center gap-2.5 lg:ml-4">
             {/* Mobile menu button */}
             <button
               onClick={() => setShowSidebar(!showSidebar)}
@@ -1052,10 +1070,9 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content - Projects or Documents */}
-      <div className="flex-grow overflow-hidden px-4 md:px-6 lg:ml-60">
+        {/* Main Content - Projects or Documents */}
+        <div className="flex-grow overflow-hidden px-4 md:px-6">
         {viewMode === 'projects' ? (
           // Projects Grid
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
@@ -1178,6 +1195,7 @@ export default function Dashboard() {
           title={editingProject ? 'Edit Project' : 'Create New Project'}
         />
       )}
+      </div>
       
       {/* Drag Overlay */}
       <DragOverlay 

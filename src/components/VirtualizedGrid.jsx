@@ -12,6 +12,8 @@ export default function VirtualizedGrid({
   onSelectDocument,
   selectionMode = false
 }) {
+  console.log('VirtualizedGrid render:', { entriesCount: entries?.length });
+  
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
   const [containerWidth, setContainerWidth] = useState(0);

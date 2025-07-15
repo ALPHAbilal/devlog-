@@ -838,6 +838,7 @@ export default function Dashboard() {
   }
 
   if (expandedEntry) {
+    console.log('Dashboard: Showing ExpandedView instead of grid');
     return (
       <div className="h-full flex flex-col">
         <ExpandedView 
@@ -1055,6 +1056,11 @@ export default function Dashboard() {
 
         {/* Main Content - Documents Grid */}
         <div className="flex-grow px-4 md:px-6" style={{ minHeight: 0 }}>
+          {console.log('Dashboard rendering VirtualizedGrid:', { 
+            filteredEntriesCount: filteredEntries.length,
+            isLoading,
+            expandedEntry: !!expandedEntry 
+          })}
           <VirtualizedGrid 
             entries={filteredEntries}
             onExpand={handleDocumentExpand}

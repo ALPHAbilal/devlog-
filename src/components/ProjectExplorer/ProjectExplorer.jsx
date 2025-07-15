@@ -6,7 +6,9 @@ import {
   Code,
   MessageSquare,
   Hash,
-  CheckSquare,
+  Table,
+  Image,
+  ListTodo,
   ChevronRight,
   ChevronDown,
   Search,
@@ -29,6 +31,7 @@ export default function ProjectExplorer({
   className = '',
   height = 'h-full',
   projects = [],
+  documents = [],
   selectedProjectId,
   onProjectSelect,
   onCreateProject,
@@ -44,8 +47,8 @@ export default function ProjectExplorer({
   const [showRecent, setShowRecent] = useState(true);
   const [showAll, setShowAll] = useState(true);
   const [contextMenu, setContextMenu] = useState(null);
-  const [selectedId, setSelectedId] = useState(selectedDocumentId);
   const [hoveredProjectId, setHoveredProjectId] = useState(null);
+  const [expandedProjects, setExpandedProjects] = useState(new Set(['all', 'uncategorized']));
   
   const containerRef = useRef(null);
   const { showToast } = useToast();
@@ -54,6 +57,22 @@ export default function ProjectExplorer({
   const filteredProjects = projects.filter(project =>
     project.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Filter documents based on search
+  const filteredDocuments = documents.filter(doc =>
+    doc.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Get documents for a specific project
+  const getProjectDocuments = useCallback((projectId) => {
+    if (projectId === 'all') {
+      return filteredDocuments;
+    } else if (projectId === 'uncategorized') {
+      return filteredDocuments.filter(doc => !doc.project_id);
+    } else {
+      return filteredDocuments.filter(doc => doc.project_id === projectId);
+    }
+  }, [filteredDocuments]);
 
   // Categorize projects
   const favoriteProjects = useMemo(() => 
@@ -75,7 +94,16 @@ export default function ProjectExplorer({
   }, [filteredProjects, recentProjects]);
 
   const handleProjectClick = useCallback((projectId) => {
-    setSelectedId(projectId || 'all');
+    // Toggle expansion
+    setExpandedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId || 'all')) {
+        newSet.delete(projectId || 'all');
+      } else {
+        newSet.add(projectId || 'all');
+      }
+      return newSet;
+    });
     onProjectSelect?.(projectId);
   }, [onProjectSelect]);
 
@@ -102,46 +130,117 @@ export default function ProjectExplorer({
     });
   }, [onUpdateProject, onDeleteProject, onToggleFavorite]);
 
-  // Render project item
-  const renderProjectItem = (project) => {
-    const isSelected = selectedProjectId === project.id;
-    const isHovered = hoveredProjectId === project.id;
-    const FolderIcon = isHovered || isSelected ? FolderOpen : Folder;
+  // Get icon for document based on its blocks
+  const getDocumentIcon = (doc) => {
+    if (!doc.blocks || doc.blocks.length === 0) return FileText;
+    
+    // Check block types in the document
+    const blockTypes = doc.blocks.map(b => b.type);
+    
+    if (blockTypes.includes('code')) return Code;
+    if (blockTypes.includes('ai_conversation')) return MessageSquare;
+    if (blockTypes.includes('table')) return Table;
+    if (blockTypes.includes('image')) return Image;
+    if (blockTypes.includes('todo')) return ListTodo;
+    
+    return FileText;
+  };
 
+  // Render document item
+  const renderDocumentItem = (doc, indentLevel = 1) => {
+    const isSelected = selectedDocumentId === doc.id;
+    const DocumentIcon = getDocumentIcon(doc);
+    
     return (
       <button
-        key={project.id}
-        onClick={() => handleProjectClick(project.id)}
-        onContextMenu={(e) => handleProjectContextMenu(e, project)}
-        onMouseEnter={() => setHoveredProjectId(project.id)}
-        onMouseLeave={() => setHoveredProjectId(null)}
+        key={doc.id}
+        onClick={() => onDocumentSelect?.(doc.id)}
         className={`
-          w-full flex items-center justify-between p-2 rounded-lg transition-all
+          w-full flex items-center justify-between p-1.5 rounded transition-all text-sm
           ${isSelected 
             ? 'bg-accent-green/20 text-accent-green' 
-            : 'hover:bg-dark-secondary/30 text-text-secondary hover:text-text-primary'
+            : 'hover:bg-dark-secondary/20 text-text-secondary hover:text-text-primary'
           }
         `}
+        style={{ paddingLeft: `${indentLevel * 1.5}rem` }}
       >
         <div className="flex items-center space-x-2 min-w-0">
-          <div className="relative">
-            <FolderIcon 
-              size={16} 
-              style={{ color: isSelected ? undefined : project.color }}
-              className={isSelected ? '' : 'transition-transform'}
-            />
-            {project.is_favorite && (
-              <Star size={8} className="absolute -top-0.5 -right-0.5 text-yellow-400 fill-yellow-400" />
-            )}
-          </div>
-          <span className="text-sm font-medium truncate">
-            {project.title}
-          </span>
+          <DocumentIcon size={14} className="flex-shrink-0" />
+          <span className="truncate">{doc.title}</span>
         </div>
-        <span className="text-xs bg-dark-secondary/50 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-          {project.document_count || 0}
-        </span>
+        {doc.updated_at && (
+          <span className="text-xs text-text-secondary/50 flex-shrink-0 ml-1">
+            {new Date(doc.updated_at).toLocaleDateString('en-US', { 
+              month: 'short', 
+              day: 'numeric' 
+            })}
+          </span>
+        )}
       </button>
+    );
+  };
+
+  // Render project item with documents
+  const renderProjectItem = (project, projectId = null) => {
+    const id = projectId || project?.id;
+    const isSelected = selectedProjectId === id;
+    const isHovered = hoveredProjectId === id;
+    const isExpanded = expandedProjects.has(id);
+    const projectDocs = getProjectDocuments(id);
+    const hasDocuments = projectDocs.length > 0;
+    
+    const FolderIcon = (isHovered || isSelected || isExpanded) ? FolderOpen : Folder;
+
+    return (
+      <div key={id}>
+        <button
+          onClick={() => handleProjectClick(id)}
+          onContextMenu={(e) => project && handleProjectContextMenu(e, project)}
+          onMouseEnter={() => setHoveredProjectId(id)}
+          onMouseLeave={() => setHoveredProjectId(null)}
+          className={`
+            w-full flex items-center justify-between p-2 rounded-lg transition-all
+            ${isSelected 
+              ? 'bg-accent-green/20 text-accent-green' 
+              : 'hover:bg-dark-secondary/30 text-text-secondary hover:text-text-primary'
+            }
+          `}
+        >
+          <div className="flex items-center space-x-2 min-w-0">
+            <div className="flex items-center">
+              {hasDocuments && (
+                <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}>
+                  <ChevronRight size={12} />
+                </div>
+              )}
+              {!hasDocuments && <div className="w-3" />}
+            </div>
+            <div className="relative">
+              <FolderIcon 
+                size={16} 
+                style={{ color: isSelected ? undefined : project?.color }}
+                className={isSelected ? '' : 'transition-transform'}
+              />
+              {project?.is_favorite && (
+                <Star size={8} className="absolute -top-0.5 -right-0.5 text-yellow-400 fill-yellow-400" />
+              )}
+            </div>
+            <span className="text-sm font-medium truncate">
+              {project?.title || (id === 'all' ? 'All Documents' : 'Uncategorized')}
+            </span>
+          </div>
+          <span className="text-xs bg-dark-secondary/50 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
+            {projectDocs.length}
+          </span>
+        </button>
+        
+        {/* Render documents */}
+        {isExpanded && hasDocuments && (
+          <div className="mt-0.5">
+            {projectDocs.map(doc => renderDocumentItem(doc))}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -159,7 +258,7 @@ export default function ProjectExplorer({
           <div className={`transform transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}>
             <ChevronDown size={14} />
           </div>
-          <h3 className="font-semibold text-sm">Projects</h3>
+          <h3 className="font-semibold text-sm">Explorer</h3>
         </button>
         <button
           onClick={onCreateProject}
@@ -176,53 +275,17 @@ export default function ProjectExplorer({
           <SearchBar
             value={searchTerm}
             onChange={setSearchTerm}
-            placeholder="Search projects..."
+            placeholder="Search files..."
             className="mb-4"
           />
 
-          {/* Project list */}
-          <div className="flex-1 overflow-y-auto space-y-1 scrollbar-thin scrollbar-thumb-dark-secondary scrollbar-track-transparent">
+          {/* File tree */}
+          <div className="flex-1 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-dark-secondary scrollbar-track-transparent">
             {/* All Documents */}
-            <button
-              onClick={() => handleProjectClick(null)}
-              className={`
-                w-full flex items-center justify-between p-2 rounded-lg transition-all duration-200
-                ${selectedProjectId === null 
-                  ? 'bg-accent-green/20 text-accent-green' 
-                  : 'hover:bg-dark-secondary/30 text-text-secondary hover:text-text-primary'
-                }
-              `}
-            >
-              <div className="flex items-center space-x-2 min-w-0">
-                <Grid3X3 size={16} className="flex-shrink-0" />
-                <span className="text-sm font-medium truncate">All Documents</span>
-              </div>
-              <span className="text-xs bg-dark-secondary/50 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-                {totalDocuments}
-              </span>
-            </button>
+            {renderProjectItem(null, 'all')}
 
             {/* Uncategorized */}
-            {uncategorizedCount > 0 && (
-              <button
-                onClick={() => handleProjectClick('uncategorized')}
-                className={`
-                  w-full flex items-center justify-between p-2 rounded-lg transition-all duration-200
-                  ${selectedProjectId === 'uncategorized' 
-                    ? 'bg-accent-green/20 text-accent-green' 
-                    : 'hover:bg-dark-secondary/30 text-text-secondary hover:text-text-primary'
-                  }
-                `}
-              >
-                <div className="flex items-center space-x-2 min-w-0">
-                  <Folder size={16} className="flex-shrink-0" />
-                  <span className="text-sm font-medium truncate">Uncategorized</span>
-                </div>
-                <span className="text-xs bg-dark-secondary/50 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-                  {uncategorizedCount}
-                </span>
-              </button>
-            )}
+            {uncategorizedCount > 0 && renderProjectItem(null, 'uncategorized')}
 
             {/* Favorites Section */}
             {favoriteProjects.length > 0 && (
@@ -241,7 +304,7 @@ export default function ProjectExplorer({
                   <span className="text-xs text-text-secondary/60">{favoriteProjects.length}</span>
                 </div>
                 {showFavorites && (
-                  <div className="space-y-1 mb-4">
+                  <div className="space-y-0.5 mb-4">
                     {favoriteProjects.map(project => renderProjectItem(project))}
                   </div>
                 )}
@@ -265,7 +328,7 @@ export default function ProjectExplorer({
                   <span className="text-xs text-text-secondary/60">{recentProjects.length}</span>
                 </div>
                 {showRecent && (
-                  <div className="space-y-1 mb-4">
+                  <div className="space-y-0.5 mb-4">
                     {recentProjects.map(project => renderProjectItem(project))}
                   </div>
                 )}
@@ -289,7 +352,7 @@ export default function ProjectExplorer({
                   <span className="text-xs text-text-secondary/60">{otherProjects.length}</span>
                 </div>
                 {showAll && (
-                  <div className="space-y-1">
+                  <div className="space-y-0.5">
                     {otherProjects.map(project => renderProjectItem(project))}
                   </div>
                 )}
@@ -297,15 +360,15 @@ export default function ProjectExplorer({
             )}
 
             {/* Empty state */}
-            {filteredProjects.length === 0 && searchTerm && (
+            {filteredProjects.length === 0 && filteredDocuments.length === 0 && searchTerm && (
               <div className="text-center py-12">
                 <p className="text-text-secondary text-sm">
-                  No projects found matching "{searchTerm}"
+                  No results found for "{searchTerm}"
                 </p>
               </div>
             )}
 
-            {filteredProjects.length === 0 && !searchTerm && (
+            {projects.length === 0 && documents.length === 0 && !searchTerm && (
               <div className="text-center py-12">
                 <Folder size={32} className="text-text-secondary/30 mx-auto mb-2" />
                 <p className="text-text-secondary text-sm mb-3">No projects yet</p>

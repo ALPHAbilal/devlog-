@@ -889,6 +889,7 @@ export default function Dashboard() {
           selectedDocumentId={expandedEntry?.id}
           height="h-full"
           projects={projects}
+          documents={entries}
           selectedProjectId={selectedProjectId}
           onProjectSelect={handleProjectSelect}
           onCreateProject={() => {

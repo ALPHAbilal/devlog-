@@ -1054,7 +1054,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-grow overflow-hidden px-4 md:px-6">
+        <div className="flex-grow px-4 md:px-6" style={{ minHeight: 0 }}>
           <VirtualizedGrid 
             entries={filteredEntries}
             onExpand={handleDocumentExpand}

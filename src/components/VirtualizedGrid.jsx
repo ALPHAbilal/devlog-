@@ -50,6 +50,22 @@ export default function VirtualizedGrid({
     window.addEventListener('resize', updateWidth);
     return () => window.removeEventListener('resize', updateWidth);
   }, []);
+  
+  // Debug logging on mount
+  useEffect(() => {
+    if (containerRef.current) {
+      console.log('VirtualizedGrid mounted:', {
+        containerWidth,
+        containerHeight: containerRef.current.clientHeight,
+        parentHeight: containerRef.current.parentElement?.clientHeight,
+        itemCount: allItems.length,
+        rows,
+        columns,
+        totalHeight: rows * (CARD_HEIGHT + GAP) - GAP,
+        cardDimensions: { width: CARD_WIDTH, height: CARD_HEIGHT }
+      });
+    }
+  }, [containerWidth, allItems.length, rows, columns]);
 
   // Handle scroll to update visible range and fade effects
   const handleScroll = useCallback(() => {
@@ -77,6 +93,18 @@ export default function VirtualizedGrid({
     const bottomFade = Math.min(1, (scrollHeight - scrollTop - containerHeight) / fadeDistance);
     
     setScrollProgress({ top: topFade, bottom: bottomFade });
+    
+    // Debug logging
+    console.log('VirtualizedGrid scroll:', {
+      scrollTop,
+      containerHeight,
+      scrollHeight,
+      visibleRange: { start, end },
+      canScroll: scrollHeight > containerHeight,
+      rows,
+      columns,
+      totalItems: allItems.length
+    });
   }, [columns, rows, allItems.length]);
 
   useEffect(() => {

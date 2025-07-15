@@ -600,6 +600,12 @@ export default function ProjectExplorer({
           }}
           onWheel={(e) => {
             // Prevent scroll propagation to parent
+            console.log('ProjectExplorer wheel event captured', {
+              deltaY: e.deltaY,
+              scrollTop: e.currentTarget.scrollTop,
+              scrollHeight: e.currentTarget.scrollHeight,
+              clientHeight: e.currentTarget.clientHeight
+            });
             e.stopPropagation();
           }}
         >

@@ -1015,7 +1015,7 @@ export default function Dashboard() {
             {/* Breadcrumb Navigation */}
             <div className="mb-3">
               <Breadcrumb
-                viewMode={viewMode}
+                viewMode="documents"
                 selectedProject={selectedProjectId ? projects.find(p => p.id === selectedProjectId) : null}
                 documentTitle={expandedEntry?.title}
                 totalDocuments={entries.length}

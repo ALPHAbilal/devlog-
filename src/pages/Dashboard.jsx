@@ -860,7 +860,7 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="flex h-full relative">
+      <div className="flex h-full relative overflow-hidden">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -918,7 +918,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}

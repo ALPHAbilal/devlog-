@@ -1061,7 +1061,7 @@ export default function Dashboard() {
             isLoading,
             expandedEntry: !!expandedEntry 
           })}
-          <div className="flex-1 min-h-0 px-4 md:px-6 pb-4">
+          <div className="flex-1 min-h-0 px-4 md:px-6 pb-4" style={{ height: 'calc(100vh - 200px)' }}>
             <VirtualizedGrid 
               entries={filteredEntries}
               onExpand={handleDocumentExpand}

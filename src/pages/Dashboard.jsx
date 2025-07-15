@@ -686,8 +686,20 @@ export default function Dashboard() {
       documentsToMove = [active.id];
     }
     
+    // Filter out documents that are already in the target project
+    const documentsToActuallyMove = documentsToMove.filter(docId => {
+      const doc = entries.find(e => e.id === docId);
+      return doc && doc.project_id !== targetProjectId;
+    });
+    
+    // If no documents need to be moved, just end the drag
+    if (documentsToActuallyMove.length === 0) {
+      endDrag();
+      return;
+    }
+    
     // Move documents
-    await moveDocuments(documentsToMove, targetProjectId, async (count) => {
+    await moveDocuments(documentsToActuallyMove, targetProjectId, async (count) => {
       toast.success(`Moved ${count} ${count === 1 ? 'document' : 'documents'}`, 3000);
       
       // Update local state immediately for responsive UI

@@ -1,17 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { useToast } from './useToast';
 
+// Cache folders across component unmounts
+let foldersCache = null;
+let lastFetchTime = null;
+const CACHE_DURATION = 30000; // 30 seconds
+
 export function useFolders() {
-  const [folders, setFolders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [folders, setFolders] = useState(foldersCache || []);
+  const [loading, setLoading] = useState(!foldersCache);
   const { user } = useAuth();
   const toast = useToast();
+  const isMounted = useRef(true);
 
   // Load folders
-  const loadFolders = useCallback(async () => {
+  const loadFolders = useCallback(async (forceRefresh = false) => {
     if (!user?.id) return;
+
+    // Use cache if available and fresh
+    if (!forceRefresh && foldersCache && lastFetchTime && 
+        (Date.now() - lastFetchTime < CACHE_DURATION)) {
+      setFolders(foldersCache);
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -47,12 +61,20 @@ export function useFolders() {
         }
       });
 
-      setFolders(rootFolders);
+      // Update cache
+      foldersCache = rootFolders;
+      lastFetchTime = Date.now();
+      
+      if (isMounted.current) {
+        setFolders(rootFolders);
+      }
     } catch (error) {
       console.error('Error loading folders:', error);
       toast.error('Failed to load folders');
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   }, [user?.id, toast]);
 
@@ -89,8 +111,33 @@ export function useFolders() {
 
       if (error) throw error;
 
-      await loadFolders();
+      // Optimistic update
+      const optimisticFolder = { ...data, children: [] };
+      if (parentId) {
+        // Add to parent's children
+        const updateParent = (folders) => {
+          return folders.map(folder => {
+            if (folder.id === parentId) {
+              return { ...folder, children: [...(folder.children || []), optimisticFolder] };
+            }
+            if (folder.children) {
+              return { ...folder, children: updateParent(folder.children) };
+            }
+            return folder;
+          });
+        };
+        setFolders(prev => updateParent(prev));
+      } else {
+        setFolders(prev => [...prev, optimisticFolder]);
+      }
+      
+      // Update cache
+      foldersCache = folders;
+      
       toast.success('Folder created');
+      
+      // Refresh in background
+      loadFolders(true);
       return data;
     } catch (error) {
       console.error('Error creating folder:', error);
@@ -113,8 +160,26 @@ export function useFolders() {
 
       if (error) throw error;
 
-      await loadFolders();
+      // Optimistic update
+      const updateFolderInTree = (folders) => {
+        return folders.map(folder => {
+          if (folder.id === folderId) {
+            return { ...folder, ...updates };
+          }
+          if (folder.children) {
+            return { ...folder, children: updateFolderInTree(folder.children) };
+          }
+          return folder;
+        });
+      };
+      
+      setFolders(prev => updateFolderInTree(prev));
+      foldersCache = folders;
+      
       toast.success('Folder updated');
+      
+      // Refresh in background
+      loadFolders(true);
     } catch (error) {
       console.error('Error updating folder:', error);
       toast.error('Failed to update folder');
@@ -154,8 +219,24 @@ export function useFolders() {
 
       if (error) throw error;
 
-      await loadFolders();
+      // Optimistic update
+      const removeFolderFromTree = (folders) => {
+        return folders.filter(folder => folder.id !== folderId)
+          .map(folder => {
+            if (folder.children) {
+              return { ...folder, children: removeFolderFromTree(folder.children) };
+            }
+            return folder;
+          });
+      };
+      
+      setFolders(prev => removeFolderFromTree(prev));
+      foldersCache = folders;
+      
       toast.success('Folder deleted');
+      
+      // Refresh in background
+      loadFolders(true);
       return true;
     } catch (error) {
       console.error('Error deleting folder:', error);
@@ -186,8 +267,10 @@ export function useFolders() {
 
       if (error) throw error;
 
-      await loadFolders();
       toast.success('Folder moved');
+      
+      // Force refresh for move operations
+      await loadFolders(true);
       return true;
     } catch (error) {
       console.error('Error moving folder:', error);
@@ -221,7 +304,12 @@ export function useFolders() {
 
   // Load folders on mount
   useEffect(() => {
+    isMounted.current = true;
     loadFolders();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, [loadFolders]);
 
   return {

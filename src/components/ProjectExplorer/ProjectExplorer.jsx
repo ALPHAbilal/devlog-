@@ -93,6 +93,7 @@ export default function ProjectExplorer({
   const [renamingId, setRenamingId] = useState(null);
   const [renamingValue, setRenamingValue] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
+  const [isRenaming, setIsRenaming] = useState(false);
   
   // Use the folders hook
   const { 
@@ -217,14 +218,20 @@ export default function ProjectExplorer({
 
   // Complete renaming
   const completeRenaming = useCallback(async () => {
-    if (!renamingId || !renamingValue.trim()) {
+    if (!renamingId || !renamingValue.trim() || isRenaming) {
       setRenamingId(null);
       return;
     }
     
-    await updateFolder(renamingId, { name: renamingValue.trim() });
-    setRenamingId(null);
-  }, [renamingId, renamingValue, updateFolder]);
+    setIsRenaming(true);
+    try {
+      await updateFolder(renamingId, { name: renamingValue.trim() });
+    } finally {
+      setIsRenaming(false);
+      setRenamingId(null);
+      setSelectedItemId(null); // Clear selection after rename
+    }
+  }, [renamingId, renamingValue, updateFolder, isRenaming]);
 
   // Delete item
   const deleteItem = useCallback(async (item, parentId) => {
@@ -342,10 +349,11 @@ export default function ProjectExplorer({
     const itemContent = (
       <div
         className={`
-          group flex items-center justify-between py-1 px-2 cursor-pointer
+          group flex items-center justify-between py-1 px-2
           rounded-md transition-all duration-150
           ${isSelected ? 'bg-dark-secondary/40' : 'hover:bg-dark-secondary/20'}
           ${depth === 0 && !isRoot ? 'mt-0.5' : ''}
+          ${isRenaming && isRenaming ? 'pointer-events-none' : 'cursor-pointer'}
         `}
         style={{ paddingLeft: `${(depth * 16) + 8}px` }}
         onClick={() => {

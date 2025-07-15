@@ -366,16 +366,19 @@ export const storageWrapper = {
       throw new Error('Folders not supported with current storage adapter');
     }
     
+    // Ensure parent_id is explicitly null (not undefined) for root folders
+    const folderToCreate = {
+      user_id: adapter.supabaseAdapter.userId,
+      name: folderData.name || 'New Folder',
+      parent_id: folderData.parent_id === undefined ? null : folderData.parent_id,
+      color: folderData.color || '#6B7280',
+      icon: folderData.icon || 'folder',
+      position: folderData.position || 0
+    };
+    
     const { data, error } = await supabase
       .from('folders')
-      .insert([{
-        user_id: adapter.supabaseAdapter.userId,
-        name: folderData.name || 'New Folder',
-        parent_id: folderData.parent_id || null,
-        color: folderData.color || '#6B7280',
-        icon: folderData.icon || 'folder',
-        position: folderData.position || 0
-      }])
+      .insert([folderToCreate])
       .select()
       .single();
     

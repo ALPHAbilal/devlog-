@@ -136,7 +136,7 @@ export function useFileTree() {
     try {
       const newFolder = await storageWrapper.createFolder({
         name: 'New Folder',
-        parent_id: parentId
+        parent_id: parentId || null  // Ensure null instead of undefined
       });
       
       showToast('Folder created', 'success');
@@ -152,7 +152,7 @@ export function useFileTree() {
       return newFolder;
     } catch (error) {
       console.error('Failed to create folder:', error);
-      showToast('Failed to create folder', 'error');
+      showToast(`Failed to create folder: ${error.message}`, 'error');
     }
   }, [loadTreeData, showToast]);
   

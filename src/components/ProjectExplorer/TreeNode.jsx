@@ -13,7 +13,8 @@ import {
   ChevronDown,
   Star,
   MoreVertical,
-  Edit2
+  Edit2,
+  GripVertical
 } from 'lucide-react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -150,7 +151,6 @@ export default function TreeNode({
         onContextMenu={(e) => onContextMenu(e, node)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        {...listeners}
       >
         {/* Indent guide lines */}
         {level > 0 && (
@@ -159,6 +159,22 @@ export default function TreeNode({
             style={{ left: `${indentWidth - 12}px` }}
           >
             <div className="w-px h-full bg-surface-3/30" />
+          </div>
+        )}
+        
+        {/* Drag handle - only this is draggable */}
+        {!node.isSpecial && (
+          <div
+            className={`
+              flex-shrink-0 cursor-grab active:cursor-grabbing
+              opacity-0 group-hover:opacity-100 transition-opacity duration-200
+              hover:text-text-primary text-text-secondary/50
+              p-1 -ml-1 hover:bg-surface-3/30 rounded
+            `}
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical size={12} />
           </div>
         )}
         

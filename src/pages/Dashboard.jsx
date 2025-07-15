@@ -878,12 +878,17 @@ export default function Dashboard() {
         bg-dark-primary lg:bg-transparent
       `}>
         <ProjectExplorer
-          onDocumentSelect={(docId) => {
-            if (docId) {
-              const doc = entries.find(e => e.id === docId);
+          onDocumentSelect={(data) => {
+            if (data?.action === 'create') {
+              createNewEntry(data.folderId);
+            } else if (data?.id) {
+              const doc = entries.find(e => e.id === data.id);
               if (doc) {
                 handleDocumentExpand(doc);
               }
+            } else if (data) {
+              // Direct document object passed
+              handleDocumentExpand(data);
             }
           }}
           selectedDocumentId={expandedEntry?.id}
@@ -892,6 +897,10 @@ export default function Dashboard() {
           documents={entries}
           selectedProjectId={selectedProjectId}
           onProjectSelect={handleProjectSelect}
+          onDocumentMove={async (docId, folderId) => {
+            // Update the document's folder_id
+            await updateEntry(docId, { folder_id: folderId });
+          }}
           onCreateProject={() => {
             setEditingProject(null);
             setShowProjectModal(true);

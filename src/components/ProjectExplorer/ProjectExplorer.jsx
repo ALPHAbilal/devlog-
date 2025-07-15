@@ -26,6 +26,7 @@ import {
 import SearchBar from './SearchBar';
 import ContextMenu from './ContextMenu';
 import { useToast } from '../../hooks/useToast';
+import { useFolders } from '../../hooks/useFolders';
 import {
   DndContext,
   closestCenter,
@@ -81,7 +82,8 @@ export default function ProjectExplorer({
   onDeleteProject,
   onToggleFavorite,
   totalDocuments = 0,
-  uncategorizedCount = 0
+  uncategorizedCount = 0,
+  onDocumentMove
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -92,44 +94,51 @@ export default function ProjectExplorer({
   const [renamingValue, setRenamingValue] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
   
-  // Mock folder structure - in real app, this would come from database
-  const [folderStructure, setFolderStructure] = useState({
-    id: 'root',
-    name: 'FOLDERS',
-    type: 'root',
-    children: [
-      {
-        id: 'folder-1',
-        name: 'Frontend',
+  // Use the folders hook
+  const { 
+    folders, 
+    loading: foldersLoading, 
+    createFolder: createFolderInDB,
+    updateFolder,
+    deleteFolder: deleteFolderFromDB,
+    moveFolder,
+    moveDocumentToFolder
+  } = useFolders();
+  
+  // Build folder structure with documents
+  const folderStructure = useMemo(() => {
+    // Helper to add documents to folders
+    const addDocumentsToFolder = (folder) => {
+      const folderDocuments = documents.filter(doc => doc.folder_id === folder.id);
+      return {
+        ...folder,
         type: 'folder',
-        children: [
-          { id: 'folder-11', name: 'React', type: 'folder', children: [] },
-          { id: 'folder-12', name: 'Vue', type: 'folder', children: [] },
-          { id: 'folder-13', name: 'Angular', type: 'folder', children: [] },
-        ]
-      },
-      {
-        id: 'folder-2',
-        name: 'Backend',
-        type: 'folder',
-        children: [
-          { id: 'folder-21', name: 'Node.js', type: 'folder', children: [] },
-          { id: 'folder-22', name: 'Express', type: 'folder', children: [] },
-          { id: 'folder-23', name: 'MongoDB', type: 'folder', children: [] },
-        ]
-      },
-      {
-        id: 'folder-3',
-        name: 'DevOps',
-        type: 'folder',
-        children: [
-          { id: 'folder-31', name: 'Docker', type: 'folder', children: [] },
-          { id: 'folder-32', name: 'Kubernetes', type: 'folder', children: [] },
-          { id: 'folder-33', name: 'CI/CD', type: 'folder', children: [] },
-        ]
-      },
-    ]
-  });
+        documents: folderDocuments.map(doc => ({
+          id: doc.id,
+          name: doc.title || 'Untitled',
+          type: 'document',
+          data: doc
+        })),
+        children: folder.children ? folder.children.map(addDocumentsToFolder) : []
+      };
+    };
+    
+    // Root folder structure
+    const rootStructure = {
+      id: 'root',
+      name: 'FOLDERS',
+      type: 'root',
+      children: folders.map(addDocumentsToFolder),
+      documents: documents.filter(doc => !doc.folder_id).map(doc => ({
+        id: doc.id,
+        name: doc.title || 'Untitled',
+        type: 'document',
+        data: doc
+      }))
+    };
+    
+    return rootStructure;
+  }, [folders, documents]);
   
   const containerRef = useRef(null);
   const { showToast } = useToast();
@@ -278,6 +287,14 @@ export default function ProjectExplorer({
     showToast.success(`Moved ${active.id} to ${over.id}`);
     setDraggedItem(null);
   }, [showToast]);
+  
+  // Create new document in folder
+  const createNewDocument = useCallback((folderId) => {
+    const actualFolderId = folderId === 'root' ? null : folderId;
+    if (onDocumentSelect) {
+      onDocumentSelect({ action: 'create', folderId: actualFolderId });
+    }
+  }, [onDocumentSelect]);
 
   // Get icon for document
   const getDocumentIcon = (doc) => {
@@ -299,7 +316,7 @@ export default function ProjectExplorer({
     const isExpanded = expandedItems.has(item.id);
     const isSelected = selectedItemId === item.id;
     const isRenaming = renamingId === item.id;
-    const hasChildren = item.children && item.children.length > 0;
+    const hasChildren = (item.children && item.children.length > 0) || (item.documents && item.documents.length > 0);
     const isRoot = item.type === 'root';
     
     const itemContent = (
@@ -423,7 +440,10 @@ export default function ProjectExplorer({
         {/* Render children */}
         {isExpanded && hasChildren && (
           <div>
-            {item.children.map(child => renderTreeItem(child, depth + 1, item.id))}
+            {/* Render documents first */}
+            {item.documents && item.documents.map(doc => renderTreeItem(doc, depth + 1, item.id))}
+            {/* Then render subfolders */}
+            {item.children && item.children.map(child => renderTreeItem(child, depth + 1, item.id))}
           </div>
         )}
       </div>

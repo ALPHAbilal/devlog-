@@ -36,6 +36,7 @@ import {
   useSensors,
   DragOverlay,
   useDroppable,
+  useDraggable,
   rectIntersection,
 } from '@dnd-kit/core';
 import {
@@ -63,20 +64,21 @@ function DroppableFolder({ id, children, isActive }) {
   );
 }
 
-// Sortable item component
-function SortableItem({ id, type, data, depth = 0, onExpand, isExpanded, children, isRenaming }) {
+// Draggable item component for documents and folders
+function DraggableItem({ id, type, data, children, isRenaming }) {
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
-    transition,
     isDragging,
-  } = useSortable({ id });
+  } = useDraggable({ 
+    id,
+    data: { type, data }
+  });
 
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
   };
 
@@ -491,28 +493,28 @@ export default function ProjectExplorer({
           {item.type === 'root' ? (
             itemContent
           ) : (
-            <SortableItem 
+            <DraggableItem 
               id={item.id} 
               type={item.type} 
               data={item}
               isRenaming={isRenaming}
             >
               {itemContent}
-            </SortableItem>
+            </DraggableItem>
           )}
         </DroppableFolder>
       );
     } else {
       // Documents are just sortable
       wrappedContent = (
-        <SortableItem 
+        <DraggableItem 
           id={item.id} 
           type={item.type} 
           data={item}
           isRenaming={isRenaming}
         >
           {itemContent}
-        </SortableItem>
+        </DraggableItem>
       );
     }
 

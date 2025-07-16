@@ -860,7 +860,7 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="flex h-full relative overflow-hidden">
+      <div className="h-screen flex relative overflow-hidden">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -1055,24 +1055,20 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 overflow-hidden px-4 md:px-6 pb-4">
           {console.log('Dashboard rendering VirtualizedGrid:', { 
             filteredEntriesCount: filteredEntries.length,
             isLoading,
             expandedEntry: !!expandedEntry 
           })}
-          <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 overflow-hidden">
-            <div className="h-full">
-              <VirtualizedGrid 
-                entries={filteredEntries}
-                onExpand={handleDocumentExpand}
-                searchTerm={searchTerm}
-                selectedDocuments={selectedDocuments}
-                onSelectDocument={handleDocumentSelect}
-                selectionMode={selectedDocuments.size > 0}
-              />
-            </div>
-          </div>
+          <VirtualizedGrid 
+            entries={filteredEntries}
+            onExpand={handleDocumentExpand}
+            searchTerm={searchTerm}
+            selectedDocuments={selectedDocuments}
+            onSelectDocument={handleDocumentSelect}
+            selectionMode={selectedDocuments.size > 0}
+          />
         </div>
 
       {/* Empty State */}

@@ -1,110 +1,74 @@
-index-2s_oxm9V.js:83 Using optimized Supabase client
-index-2s_oxm9V.js:83 Global auto-save manager initialized with defensive wrappers
-index-2s_oxm9V.js:905 IndexedDB initialized successfully
-index-2s_oxm9V.js:83 Starting auto-save with interval: 1 seconds
-index-2s_oxm9V.js:83 [Supabase] Auth event: SIGNED_IN
-index-2s_oxm9V.js:83 [AuthContext] Auth state change received: SIGNED_IN Object
-inspector.b9415ea5.js:1 Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
-    at lX (inspector.b9415ea5.js:1:127164)
-    at l (inspector.b9415ea5.js:1:68514)
-    at ol (inspector.b9415ea5.js:1:82233)
-    at i (inspector.b9415ea5.js:1:132348)
-    at lM (inspector.b9415ea5.js:1:110198)
-    at inspector.b9415ea5.js:1:110064
-    at lO (inspector.b9415ea5.js:1:110072)
-    at lC (inspector.b9415ea5.js:1:106823)
-    at lw (inspector.b9415ea5.js:1:105378)
-    at C (inspector.b9415ea5.js:1:141367)
-s7 @ inspector.b9415ea5.js:1
-inspector.b9415ea5.js:1 Uncaught Error: Minified React error #130; visit https://reactjs.org/docs/error-decoder.html?invariant=130&args[]=object&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.
-    at lX (inspector.b9415ea5.js:1:127164)
-    at l (inspector.b9415ea5.js:1:68514)
-    at ol (inspector.b9415ea5.js:1:82233)
-    at i (inspector.b9415ea5.js:1:132348)
-    at lM (inspector.b9415ea5.js:1:110198)
-    at inspector.b9415ea5.js:1:110064
-    at lO (inspector.b9415ea5.js:1:110072)
-    at lC (inspector.b9415ea5.js:1:106823)
-    at lw (inspector.b9415ea5.js:1:105378)
-    at C (inspector.b9415ea5.js:1:141367)
-index-2s_oxm9V.js:83 SW registered: ServiceWorkerRegistration
-index-2s_oxm9V.js:83 [Supabase] Auth event: INITIAL_SESSION
-index-2s_oxm9V.js:83 [AuthContext] Auth state change received: INITIAL_SESSION Object
-index-2s_oxm9V.js:83 Starting auto-save with interval: 1 seconds
-index-2s_oxm9V.js:1165 Dashboard: Starting to load entries...
-dashboard:1 Error in event handler: TypeError: Cannot read properties of null (reading 'excerpt')
-    at Object.article (chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:153:39)
-    at Object.article (chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:198:23)
-    at Object.init (chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:570:19)
-    at chrome-extension://llimhhconnjiflfimocjggfjdlmlhblm/content-script.js:514:23
-index-2s_oxm9V.js:905 Using Supabase for storage
-index-2s_oxm9V.js:905 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-2s_oxm9V.js:1165 Dashboard: Storage initialized (179ms)
-index-2s_oxm9V.js:905 SupabaseAdapter: getDocuments called
-index-2s_oxm9V.js:905 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-2s_oxm9V.js:905 SupabaseAdapter: Documents query completed in 689ms
-index-2s_oxm9V.js:905 SupabaseAdapter: Found 60 documents
-index-2s_oxm9V.js:905 SupabaseAdapter: Found 2 unsynced documents in IndexedDB
-index-2s_oxm9V.js:905 SupabaseAdapter: Total documents after merge: 60
-index-2s_oxm9V.js:905 SupabaseAdapter: Returning 60 documents
-index-2s_oxm9V.js:1165 Dashboard: Loaded 60 entries (691ms)
-index-2s_oxm9V.js:1165 Dashboard: Total load time: 870ms
-index-2s_oxm9V.js:905 SupabaseAdapter: Getting projects...
-index-2s_oxm9V.js:905 SupabaseAdapter: Found 3 projects
-index-2s_oxm9V.js:1174 Dashboard: Loaded 3 projects
-index-2s_oxm9V.js:1174 Dashboard: Setting isLoading to false
-index-2s_oxm9V.js:48 ReferenceError: ChevronRight is not defined
-    at ZE (index-2s_oxm9V.js:1186:86)
-    at ku (index-2s_oxm9V.js:48:34206)
-    at qu (index-2s_oxm9V.js:48:62499)
-    at Ng (index-2s_oxm9V.js:48:73065)
-    at em (index-2s_oxm9V.js:48:107198)
-    at H1 (index-2s_oxm9V.js:48:106257)
-    at hd (index-2s_oxm9V.js:48:106087)
-    at Xg (index-2s_oxm9V.js:48:103178)
-    at fm (index-2s_oxm9V.js:48:114680)
-    at MessagePort.Y (index-2s_oxm9V.js:25:1572)
-ug @ index-2s_oxm9V.js:48
-index-2s_oxm9V.js:1309 ErrorBoundary caught: ReferenceError: ChevronRight is not defined
-    at ZE (index-2s_oxm9V.js:1186:86)
-    at ku (index-2s_oxm9V.js:48:34206)
-    at qu (index-2s_oxm9V.js:48:62499)
-    at Ng (index-2s_oxm9V.js:48:73065)
-    at em (index-2s_oxm9V.js:48:107198)
-    at H1 (index-2s_oxm9V.js:48:106257)
-    at hd (index-2s_oxm9V.js:48:106087)
-    at Xg (index-2s_oxm9V.js:48:103178)
-    at fm (index-2s_oxm9V.js:48:114680)
-    at MessagePort.Y (index-2s_oxm9V.js:25:1572) Object
-componentDidCatch @ index-2s_oxm9V.js:1309
-index-2s_oxm9V.js:1309 Error Report
-index-2s_oxm9V.js:1309 Error: ReferenceError: ChevronRight is not defined
-    at ZE (index-2s_oxm9V.js:1186:86)
-    at ku (index-2s_oxm9V.js:48:34206)
-    at qu (index-2s_oxm9V.js:48:62499)
-    at Ng (index-2s_oxm9V.js:48:73065)
-    at em (index-2s_oxm9V.js:48:107198)
-    at H1 (index-2s_oxm9V.js:48:106257)
-    at hd (index-2s_oxm9V.js:48:106087)
-    at Xg (index-2s_oxm9V.js:48:103178)
-    at fm (index-2s_oxm9V.js:48:114680)
-    at MessagePort.Y (index-2s_oxm9V.js:25:1572)
-reportError @ index-2s_oxm9V.js:1309
-index-2s_oxm9V.js:1309 Component Stack: 
-    at ZE (https://www.devlog.design/assets/index-2s_oxm9V.js:1165:3500)
-    at A2 (https://www.devlog.design/assets/index-2s_oxm9V.js:67:3437)
-    at u0 (https://www.devlog.design/assets/index-2s_oxm9V.js:67:7379)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at nj (https://www.devlog.design/assets/index-2s_oxm9V.js:83:47954)
-    at AC (https://www.devlog.design/assets/index-2s_oxm9V.js:1318:633)
-    at iE (https://www.devlog.design/assets/index-2s_oxm9V.js:914:2588)
-    at WS (https://www.devlog.design/assets/index-2s_oxm9V.js:83:38885)
-    at ZS (https://www.devlog.design/assets/index-2s_oxm9V.js:83:36805)
-    at $2 (https://www.devlog.design/assets/index-2s_oxm9V.js:67:6763)
-    at P2 (https://www.devlog.design/assets/index-2s_oxm9V.js:76:124)
-    at _C (https://www.devlog.design/assets/index-2s_oxm9V.js:1309:121)
-    at DC (<anonymous>)
-reportError @ index-2s_oxm9V.js:1309
-index-2s_oxm9V.js:1309 Props: Object
-reportError @ index-2s_oxm9V.js:1309
+[12:46:07.093] Running build in Washington, D.C., USA (East) – iad1
+[12:46:07.093] Build machine configuration: 2 cores, 8 GB
+[12:46:07.145] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: d6c3fe7)
+[12:46:07.794] Cloning completed: 648.000ms
+[12:46:08.245] Restored build cache from previous deployment (DPnEUBZxeJjUmNg5VDtzNPtZP4sA)
+[12:46:11.267] Running "vercel build"
+[12:46:12.903] Vercel CLI 44.3.0
+[12:46:13.732] Installing dependencies...
+[12:46:15.483] 
+[12:46:15.483] up to date in 1s
+[12:46:15.483] 
+[12:46:15.484] 70 packages are looking for funding
+[12:46:15.484]   run `npm fund` for details
+[12:46:15.690] 
+[12:46:15.691] > journey-log-compass@0.0.0 build
+[12:46:15.691] > vite build
+[12:46:15.692] 
+[12:46:16.168] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[12:46:16.736] transforming...
+[12:46:17.152] [32m✓[39m 24 modules transformed.
+[12:46:17.155] [31m✗[39m Build failed in 941ms
+[12:46:17.155] [31merror during build:
+[12:46:17.156] [31m[vite:esbuild] Transform failed with 4 errors:
+[12:46:17.156] /vercel/path0/src/pages/Dashboard.jsx:1143:8: ERROR: Unexpected closing "main" tag does not match opening "div" tag
+[12:46:17.157] /vercel/path0/src/pages/Dashboard.jsx:1222:8: ERROR: Unexpected closing "div" tag does not match opening "main" tag
+[12:46:17.157] /vercel/path0/src/pages/Dashboard.jsx:1255:6: ERROR: Unexpected closing "div" tag does not match opening "DndContext" tag
+[12:46:17.157] /vercel/path0/src/pages/Dashboard.jsx:1256:17: ERROR: Unterminated regular expression[31m
+[12:46:17.158] file: [36m/vercel/path0/src/pages/Dashboard.jsx:1143:8[31m
+[12:46:17.158] [33m
+[12:46:17.158] [33mUnexpected closing "main" tag does not match opening "div" tag[33m
+[12:46:17.159] 1141|            />
+[12:46:17.159] 1142|          </div>
+[12:46:17.159] 1143|        </main>
+[12:46:17.159]    |          ^
+[12:46:17.160] 1144|  
+[12:46:17.160] 1145|        {/* Empty State */}
+[12:46:17.160] 
+[12:46:17.161] [33mUnexpected closing "div" tag does not match opening "main" tag[33m
+[12:46:17.161] 1220|          />
+[12:46:17.161] 1221|        )}
+[12:46:17.162] 1222|        </div>
+[12:46:17.162]    |          ^
+[12:46:17.162] 1223|        </div>
+[12:46:17.163] 1224|        
+[12:46:17.163] 
+[12:46:17.163] [33mUnexpected closing "div" tag does not match opening "DndContext" tag[33m
+[12:46:17.164] 1253|          onCreateProject={handleCommandPaletteCreateProject}
+[12:46:17.164] 1254|        />
+[12:46:17.164] 1255|      </div>
+[12:46:17.165]    |        ^
+[12:46:17.165] 1256|      </DndContext>
+[12:46:17.166] 1257|    );
+[12:46:17.166] 
+[12:46:17.166] [33mUnterminated regular expression[33m
+[12:46:17.166] 1254|        />
+[12:46:17.167] 1255|      </div>
+[12:46:17.167] 1256|      </DndContext>
+[12:46:17.167]    |                   ^
+[12:46:17.168] 1257|    );
+[12:46:17.168] 1258|  }
+[12:46:17.168] [31m
+[12:46:17.169]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
+[12:46:17.169]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
+[12:46:17.169]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
+[12:46:17.171]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
+[12:46:17.171]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
+[12:46:17.172]     at Socket.emit (node:events:518:28)
+[12:46:17.172]     at addChunk (node:internal/streams/readable:561:12)
+[12:46:17.172]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[12:46:17.172]     at Readable.push (node:internal/streams/readable:392:5)
+[12:46:17.173]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
+[12:46:17.243] Error: Command "npm run build" exited with 1
+[12:46:17.576] 
+[12:46:20.357] Exiting build container

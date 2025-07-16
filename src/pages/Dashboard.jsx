@@ -1124,6 +1124,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+        </div>
 
         {/* Main Content - Documents Grid */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
@@ -1219,8 +1220,6 @@ export default function Dashboard() {
           title={editingProject ? 'Edit Project' : 'Create New Project'}
         />
       )}
-      </div>
-      </div>
       
       {/* Drag Overlay */}
       <DragOverlay 

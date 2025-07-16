@@ -890,17 +890,18 @@ export default function Dashboard() {
         flex flex-col
         ${isSidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'}
       `}>
-        {/* Collapse Toggle Button */}
+        {/* Collapse Toggle Button - More Visible */}
         <button
           onClick={toggleSidebarCollapse}
-          className="absolute -right-3 top-20 z-40 w-6 h-6 bg-dark-secondary rounded-full
-                     border border-gray-700 hover:border-accent-green/50
+          className="absolute -right-4 top-20 z-40 w-8 h-8 bg-accent-green rounded-full
+                     border-2 border-dark-primary shadow-lg
                      flex items-center justify-center transition-all duration-200
-                     hover:bg-dark-secondary/80 group hidden lg:flex"
+                     hover:bg-accent-green/80 hover:scale-110 group lg:flex"
+          title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <ChevronRight 
-            size={14} 
-            className={`text-text-secondary group-hover:text-accent-green transition-all duration-200
+            size={16} 
+            className={`text-dark-primary transition-all duration-200
                        ${isSidebarCollapsed ? '' : 'rotate-180'}`}
           />
         </button>

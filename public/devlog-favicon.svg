@@ -1,24 +1,89 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- DevLog Favicon - D Letter -->
+  <!-- DevLog Favicon - Connected Blocks forming D -->
   <rect width="32" height="32" rx="6" fill="#0a1628"/>
   
-  <!-- D Letter with gradient -->
   <defs>
     <linearGradient id="favicon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#10b981" />
       <stop offset="100%" stop-color="#0a7d57" />
     </linearGradient>
+    <linearGradient id="favicon-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0a7d57" stop-opacity="0.8" />
+    </linearGradient>
   </defs>
   
-  <!-- D shape -->
-  <path
-    d="M 8 6 L 13 6 C 18 6 22 10 22 16 C 22 22 18 26 13 26 L 8 26 L 8 6 Z"
+  <!-- Connection lines -->
+  <g stroke-width="1.5" stroke="url(#favicon-gradient-light)" stroke-linecap="round">
+    <!-- Top to right connections -->
+    <line x1="11" y1="9" x2="18" y2="9" opacity="0.6" />
+    <line x1="21" y1="9" x2="21" y2="16" opacity="0.6" />
+    
+    <!-- Bottom connection -->
+    <line x1="11" y1="23" x2="18" y2="23" opacity="0.6" />
+    
+    <!-- Vertical connections -->
+    <line x1="11" y1="12" x2="11" y2="20" opacity="0.6" />
+  </g>
+  
+  <!-- Main blocks forming 'D' shape -->
+  <!-- Top-left block -->
+  <rect
+    x="8"
+    y="6"
+    width="6"
+    height="6"
+    rx="1.5"
     fill="url(#favicon-gradient)"
   />
   
-  <!-- Inner cutout -->
-  <path
-    d="M 11 9 L 13 9 C 16 9 19 12 19 16 C 19 20 16 23 13 23 L 11 23 L 11 9 Z"
-    fill="#0a1628"
+  <!-- Top-right block -->
+  <rect
+    x="18"
+    y="6"
+    width="6"
+    height="6"
+    rx="1.5"
+    fill="url(#favicon-gradient)"
   />
+  
+  <!-- Bottom-left block -->
+  <rect
+    x="8"
+    y="20"
+    width="6"
+    height="6"
+    rx="1.5"
+    fill="url(#favicon-gradient)"
+  />
+  
+  <!-- Bottom-right block -->
+  <rect
+    x="18"
+    y="20"
+    width="6"
+    height="6"
+    rx="1.5"
+    fill="url(#favicon-gradient)"
+  />
+  
+  <!-- Middle-right block (completing the D curve) -->
+  <rect
+    x="21"
+    y="13"
+    width="6"
+    height="6"
+    rx="1.5"
+    fill="url(#favicon-gradient)"
+    transform="rotate(45 24 16)"
+  />
+  
+  <!-- Connection dots -->
+  <g fill="#10b981">
+    <circle cx="11" cy="9" r="1" />
+    <circle cx="21" cy="9" r="1" />
+    <circle cx="11" cy="23" r="1" />
+    <circle cx="21" cy="23" r="1" />
+    <circle cx="24" cy="16" r="1" />
+  </g>
 </svg>

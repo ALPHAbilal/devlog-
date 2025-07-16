@@ -13,28 +13,92 @@ export default function LogoMinimal({ size = 32 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* DevLog - D Letter with gradient */}
+        {/* DevLog - Connected Knowledge Blocks forming 'D' */}
         <g transform={`scale(${scale})`}>
           <defs>
             <linearGradient id="devlog-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#10b981" />
               <stop offset="100%" stopColor="#0a7d57" />
             </linearGradient>
+            <linearGradient id="devlog-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#0a7d57" stopOpacity="0.8" />
+            </linearGradient>
           </defs>
           
-          {/* D Letter Shape */}
-          <path
-            d="M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z"
+          {/* Connection lines */}
+          <g strokeWidth="1.5" stroke="url(#devlog-gradient-light)" strokeLinecap="round">
+            {/* Top to right connections */}
+            <line x1="11" y1="9" x2="18" y2="9" opacity="0.6" />
+            <line x1="21" y1="9" x2="21" y2="16" opacity="0.6" />
+            
+            {/* Bottom connection */}
+            <line x1="11" y1="23" x2="18" y2="23" opacity="0.6" />
+            
+            {/* Vertical connections */}
+            <line x1="11" y1="12" x2="11" y2="20" opacity="0.6" />
+          </g>
+          
+          {/* Main blocks forming 'D' shape */}
+          {/* Top-left block */}
+          <rect
+            x="8"
+            y="6"
+            width="6"
+            height="6"
+            rx="1.5"
             fill="url(#devlog-gradient)"
-            fillRule="evenodd"
           />
           
-          {/* Inner cutout for D */}
-          <path
-            d="M 11 7 L 14 7 C 18 7 21 10 21 16 C 21 22 18 25 14 25 L 11 25 L 11 7 Z"
-            fill="#0a1628"
-            fillRule="evenodd"
+          {/* Top-right block */}
+          <rect
+            x="18"
+            y="6"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
           />
+          
+          {/* Bottom-left block */}
+          <rect
+            x="8"
+            y="20"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
+          />
+          
+          {/* Bottom-right block */}
+          <rect
+            x="18"
+            y="20"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
+          />
+          
+          {/* Middle-right block (completing the D curve) */}
+          <rect
+            x="21"
+            y="13"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
+            transform="rotate(45 24 16)"
+          />
+          
+          {/* Connection dots */}
+          <g fill="#10b981">
+            <circle cx="11" cy="9" r="1" />
+            <circle cx="21" cy="9" r="1" />
+            <circle cx="11" cy="23" r="1" />
+            <circle cx="21" cy="23" r="1" />
+            <circle cx="24" cy="16" r="1" />
+          </g>
         </g>
       </svg>
     </div>
@@ -57,18 +121,26 @@ export function LogoIcon({ size = 32 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Simplified D for small sizes */}
+        {/* Simplified D shape with dots for small sizes */}
         <g transform={`scale(${scale})`}>
-          <path
-            d="M 6 3 L 10 3 C 15 3 18 6 18 12 C 18 18 15 21 10 21 L 6 21 L 6 3 Z"
-            fill="#10b981"
-            fillRule="evenodd"
-          />
-          <path
-            d="M 9 6 L 10 6 C 13 6 15 8 15 12 C 15 16 13 18 10 18 L 9 18 L 9 6 Z"
-            fill="#0a1628"
-            fillRule="evenodd"
-          />
+          {/* Dots forming D shape */}
+          <circle cx="8" cy="6" r="2" fill="#10b981" />
+          <circle cx="8" cy="12" r="2" fill="#10b981" />
+          <circle cx="8" cy="18" r="2" fill="#10b981" />
+          
+          <circle cx="14" cy="6" r="2" fill="#10b981" />
+          <circle cx="14" cy="18" r="2" fill="#10b981" />
+          
+          <circle cx="18" cy="9" r="2" fill="#10b981" />
+          <circle cx="18" cy="15" r="2" fill="#10b981" />
+          
+          {/* Subtle connections */}
+          <g stroke="#10b981" strokeWidth="1" opacity="0.3">
+            <line x1="10" y1="6" x2="12" y2="6" />
+            <line x1="10" y1="18" x2="12" y2="18" />
+            <line x1="16" y1="9" x2="18" y2="12" />
+            <line x1="18" y1="12" x2="16" y2="15" />
+          </g>
         </g>
       </svg>
     </div>
@@ -106,7 +178,7 @@ export function LogoAnimated({ size = 48 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* DevLog - Animated D */}
+        {/* DevLog - Animated connected blocks */}
         <g>
           <defs>
             <linearGradient id="devlog-gradient-anim" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -129,28 +201,142 @@ export function LogoAnimated({ size = 48 }) {
             </linearGradient>
           </defs>
           
-          {/* Animated D Letter */}
-          <path
-            d="M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z"
-            fill="url(#devlog-gradient-anim)"
-            fillRule="evenodd"
-          >
-            <animate
-              attributeName="d"
-              values="M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z;
-                      M 8 4 L 14 4 C 20 4 24 9 24 16 C 24 23 20 28 14 28 L 8 28 L 8 4 Z;
-                      M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z"
-              dur="3s"
-              repeatCount="indefinite"
-            />
-          </path>
+          {/* Animated connection lines */}
+          <g strokeWidth="1.5" stroke="url(#devlog-gradient-anim)" strokeLinecap="round">
+            <line x1="11" y1="9" x2="18" y2="9">
+              <animate
+                attributeName="opacity"
+                values="0;0.6;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+            <line x1="21" y1="9" x2="21" y2="16">
+              <animate
+                attributeName="opacity"
+                values="0;0;0.6;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+            <line x1="11" y1="23" x2="18" y2="23">
+              <animate
+                attributeName="opacity"
+                values="0;0;0;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+            <line x1="11" y1="12" x2="11" y2="20">
+              <animate
+                attributeName="opacity"
+                values="0;0.6;0.6;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+          </g>
           
-          {/* Inner cutout */}
-          <path
-            d="M 11 7 L 14 7 C 18 7 21 10 21 16 C 21 22 18 25 14 25 L 11 25 L 11 7 Z"
-            fill="#0a1628"
-            fillRule="evenodd"
-          />
+          {/* Animated blocks */}
+          <g fill="url(#devlog-gradient-anim)">
+            {/* Top-left block */}
+            <rect x="8" y="6" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;1;1;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </rect>
+            
+            {/* Top-right block */}
+            <rect x="18" y="6" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;0.3;1;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+                begin="0.5s"
+              />
+            </rect>
+            
+            {/* Bottom-left block */}
+            <rect x="8" y="20" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;1;1;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+                begin="0.3s"
+              />
+            </rect>
+            
+            {/* Bottom-right block */}
+            <rect x="18" y="20" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;0.3;0.3;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+                begin="1s"
+              />
+            </rect>
+            
+            {/* Middle-right block */}
+            <rect x="21" y="13" width="6" height="6" rx="1.5" transform="rotate(45 24 16)">
+              <animate
+                attributeName="opacity"
+                values="0.3;0.3;1;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+                begin="0.7s"
+              />
+            </rect>
+          </g>
+          
+          {/* Animated connection dots */}
+          <g fill="#10b981">
+            <circle cx="11" cy="9" r="1">
+              <animate
+                attributeName="r"
+                values="0;1;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="21" cy="9" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;1;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="11" cy="23" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;0;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="21" cy="23" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;0;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="24" cy="16" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;1;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+          </g>
         </g>
       </svg>
     </div>

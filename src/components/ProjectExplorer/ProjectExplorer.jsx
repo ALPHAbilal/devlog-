@@ -125,6 +125,7 @@ export default function ProjectExplorer({
   const [renamingValue, setRenamingValue] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
   const [isRenaming, setIsRenaming] = useState(false);
+  const scrollContainerRef = useRef(null);
   
   // Use the folders hook
   const { 
@@ -137,7 +138,7 @@ export default function ProjectExplorer({
     moveDocumentToFolder
   } = useFolders();
   
-  // Auto-expand folders to show the selected document
+  // Auto-expand folders to show the selected document and scroll to it
   useEffect(() => {
     if (!selectedDocumentId || !documents.length) return;
     
@@ -181,6 +182,35 @@ export default function ProjectExplorer({
         return newExpanded;
       });
     }
+    
+    // Scroll to the document after folders have expanded
+    setTimeout(() => {
+      if (!scrollContainerRef.current) return;
+      
+      const documentElement = scrollContainerRef.current.querySelector(
+        `[data-document-id="${selectedDocumentId}"]`
+      );
+      
+      if (documentElement) {
+        // Check if element is already visible
+        const container = scrollContainerRef.current;
+        const elementRect = documentElement.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        const isVisible = 
+          elementRect.top >= containerRect.top &&
+          elementRect.bottom <= containerRect.bottom;
+        
+        // Only scroll if not already visible
+        if (!isVisible) {
+          documentElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }
+    }, 400); // Wait for folder expansion animations
   }, [selectedDocumentId, documents, folders]);
   
   // Build folder structure with documents
@@ -426,6 +456,7 @@ export default function ProjectExplorer({
     
     const itemContent = (
       <div
+        data-document-id={item.type === 'document' ? item.id : undefined}
         className={`
           group flex items-center justify-between py-1 px-2
           rounded-md transition-all duration-150
@@ -684,6 +715,7 @@ export default function ProjectExplorer({
 
         {/* File tree */}
         <div 
+          ref={scrollContainerRef}
           className="flex-1 overflow-y-auto overflow-x-hidden p-2 scrollbar-thin min-h-0"
           style={{ 
             scrollbarWidth: 'thin',

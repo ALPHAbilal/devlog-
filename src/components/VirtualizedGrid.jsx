@@ -79,6 +79,24 @@ export default function VirtualizedGrid({
       }
     });
     
+    // Also watch for class changes on the main dashboard container
+    const dashboardContainer = containerRef.current.closest('.grid');
+    const mutationObserver = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          // Immediately update width when grid container style changes
+          updateWidth();
+        }
+      }
+    });
+    
+    if (dashboardContainer) {
+      mutationObserver.observe(dashboardContainer, {
+        attributes: true,
+        attributeFilter: ['style']
+      });
+    }
+    
     // Also listen to window resize as a fallback
     const handleWindowResize = () => {
       clearTimeout(resizeTimeout);
@@ -90,6 +108,7 @@ export default function VirtualizedGrid({
     
     return () => {
       resizeObserver.disconnect();
+      mutationObserver.disconnect();
       window.removeEventListener('resize', handleWindowResize);
       clearTimeout(resizeTimeout);
     };
@@ -99,35 +118,39 @@ export default function VirtualizedGrid({
   useEffect(() => {
     if (!containerRef.current) return;
     
-    // Calculate the expected width based on sidebar state
-    // This allows us to update immediately without waiting for CSS
-    const parentElement = containerRef.current.parentElement;
-    if (!parentElement) return;
+    // Get the main grid container (parent of parent)
+    const scrollContainer = containerRef.current.parentElement;
+    const mainContainer = scrollContainer?.parentElement;
+    if (!mainContainer) return;
     
-    // Get current parent width and calculate expected width after transition
-    const parentRect = parentElement.getBoundingClientRect();
+    // Calculate the exact final width based on sidebar state
+    const viewportWidth = window.innerWidth;
     const sidebarWidth = sidebarCollapsed ? 80 : 280;
-    const expectedWidth = parentRect.width;
+    const finalContainerWidth = viewportWidth - sidebarWidth;
     
-    // Update immediately with expected dimensions
-    requestAnimationFrame(() => {
-      setContainerWidth(expectedWidth);
-    });
+    // Apply the final width immediately
+    setContainerWidth(finalContainerWidth - 48); // Subtract padding (24px each side)
     
-    // Multiple updates during transition for smooth animation
-    const intervals = [50, 100, 150, 200, 250, 300, 350];
-    const timeouts = intervals.map(delay => 
-      setTimeout(() => {
-        if (containerRef.current) {
-          requestAnimationFrame(() => {
-            const currentWidth = containerRef.current.offsetWidth;
-            setContainerWidth(currentWidth);
-          });
-        }
-      }, delay)
-    );
+    // Use a single RAF loop for smooth updates during transition
+    let startTime = null;
+    const duration = 300; // Match CSS transition duration
     
-    return () => timeouts.forEach(clearTimeout);
+    const updateWidth = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      if (containerRef.current) {
+        const currentWidth = containerRef.current.offsetWidth;
+        setContainerWidth(currentWidth);
+      }
+      
+      if (progress < 1) {
+        requestAnimationFrame(updateWidth);
+      }
+    };
+    
+    requestAnimationFrame(updateWidth);
   }, [sidebarCollapsed]);
   
   // Remove debug logging to prevent console spam
@@ -172,14 +195,14 @@ export default function VirtualizedGrid({
     
     return {
       position: 'absolute',
-      top: row * (CARD_HEIGHT + GAP),
-      left: centerOffset + col * (CARD_WIDTH + GAP),
+      top: 0,
+      left: 0,
       width: CARD_WIDTH,
       height: CARD_HEIGHT,
-      transition: 'left 300ms cubic-bezier(0.4, 0, 0.2, 1), top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-      willChange: 'left, top',
-      // Force GPU acceleration for smoother transitions
-      transform: 'translateZ(0)'
+      transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+      willChange: 'transform',
+      // Use transform for positioning - better performance than left/top
+      transform: `translate3d(${centerOffset + col * (CARD_WIDTH + GAP)}px, ${row * (CARD_HEIGHT + GAP)}px, 0)`
     };
   };
 
@@ -259,7 +282,7 @@ export default function VirtualizedGrid({
   return (
     <div 
       ref={containerRef}
-      className="relative w-full"
+      className="relative w-full virtualized-grid-container"
       style={{ 
         height: totalHeight,
         minHeight: totalHeight,
@@ -272,7 +295,7 @@ export default function VirtualizedGrid({
         const actualIndex = visibleRange.start + index;
         
         return (
-          <div key={item.id} style={getItemStyle(actualIndex)}>
+          <div key={item.id} className="virtualized-grid-item" style={getItemStyle(actualIndex)}>
             <CompactEntryCard 
               entry={item} 
               onExpand={onExpand}

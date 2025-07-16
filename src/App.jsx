@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
 import { SettingsProvider } from './contexts/SettingsContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 import { useGlobalAutoSave } from './hooks/useAutoSave';
 import { initMonitoring, setUserContext } from './utils/monitoring';
 import { register as registerServiceWorker } from './utils/serviceWorker';
@@ -143,10 +144,12 @@ function App() {
       <BrowserRouter>
         <AuthProvider>
           <SettingsProvider>
-            <ToastProvider>
-              <AutoSaveProvider />
-              <AppContent />
-            </ToastProvider>
+            <SidebarProvider>
+              <ToastProvider>
+                <AutoSaveProvider />
+                <AppContent />
+              </ToastProvider>
+            </SidebarProvider>
           </SettingsProvider>
         </AuthProvider>
       </BrowserRouter>

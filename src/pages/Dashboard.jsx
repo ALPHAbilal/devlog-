@@ -12,13 +12,14 @@ import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
 import Breadcrumb from '../components/Breadcrumb';
-import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight } from 'lucide-react';
+import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useToast } from '../hooks/useToast';
+import { useSidebar } from '../contexts/SidebarContext';
 import useDocumentOrganization from '../hooks/useDocumentOrganization';
 import { 
   DndContext, 
@@ -51,11 +52,7 @@ export default function Dashboard() {
   const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
-  const [showSidebar, setShowSidebar] = useState(true);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
-    // Load collapsed state from localStorage
-    return localStorage.getItem('sidebarCollapsed') === 'true';
-  });
+  const { isCollapsed: isSidebarCollapsed, toggleCollapsed: toggleSidebarCollapse, showMobileSidebar: showSidebar, toggleMobileSidebar, closeMobileSidebar } = useSidebar();
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   
   // Initialize auto-save functionality
@@ -346,6 +343,7 @@ export default function Dashboard() {
       isMounted = false;
     };
   }, [updateStorageInfo]);
+  
 
 
   // Update entry
@@ -584,7 +582,7 @@ export default function Dashboard() {
     setViewMode('documents');
     // Close sidebar on mobile after selection
     if (window.innerWidth < 1024) {
-      setShowSidebar(false);
+      closeMobileSidebar();
     }
   }, []);
 
@@ -736,12 +734,6 @@ export default function Dashboard() {
     );
   };
 
-  // Toggle sidebar collapse
-  const toggleSidebarCollapse = () => {
-    const newState = !isSidebarCollapsed;
-    setIsSidebarCollapsed(newState);
-    localStorage.setItem('sidebarCollapsed', newState.toString());
-  };
 
   // Format bytes for display
   const formatBytes = (bytes) => {
@@ -851,13 +843,78 @@ export default function Dashboard() {
   if (expandedEntry) {
     console.log('Dashboard: Showing ExpandedView instead of grid');
     return (
-      <div className="h-full flex flex-col">
-        <ExpandedView 
-          entry={expandedEntry} 
-          onClose={() => setExpandedEntry(null)}
-          onUpdate={updateEntry}
-          allEntries={entries}
-        />
+      <div className="h-full flex relative overflow-hidden">
+        {/* Mobile overlay */}
+        {showSidebar && (
+          <div
+            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+            onClick={() => closeMobileSidebar()}
+          />
+        )}
+        
+        {/* Project Sidebar */}
+        <div className={`
+          fixed lg:relative inset-y-0 left-0 z-30 h-screen lg:h-full
+          transform transition-all duration-300 ease-cubic
+          ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
+          lg:translate-x-0 lg:block
+          bg-dark-primary lg:bg-transparent
+          flex flex-col
+          ${isSidebarCollapsed ? 'w-16' : 'w-[280px]'}
+          py-7
+        `}>
+          {/* Sidebar Content with proper spacing */}
+          <ProjectExplorer
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+            className="flex-1 min-h-0"
+            height="h-full"
+            onDocumentSelect={(data) => {
+              if (data?.action === 'create') {
+                createNewEntry(data.folderId);
+              } else if (data?.id) {
+                const doc = entries.find(e => e.id === data.id);
+                if (doc) {
+                  handleDocumentExpand(doc);
+                }
+              } else if (data) {
+                // Direct document object passed
+                handleDocumentExpand(data);
+              }
+            }}
+            selectedDocumentId={expandedEntry?.id}
+            projects={projects}
+            documents={entries}
+            selectedProjectId={selectedProjectId}
+            onProjectSelect={handleProjectSelect}
+            onDocumentMove={async (docId, folderId) => {
+              // Update the document's folder_id
+              await updateEntry(docId, { folder_id: folderId });
+            }}
+            onCreateProject={() => {
+              setEditingProject(null);
+              setShowProjectModal(true);
+            }}
+            onUpdateProject={(project) => {
+              setEditingProject(project);
+              setShowProjectModal(true);
+            }}
+            onDeleteProject={handleDeleteProject}
+            onToggleFavorite={handleToggleFavorite}
+            totalDocuments={entries.length}
+            uncategorizedCount={entries.filter(e => !e.project_id).length}
+          />
+        </div>
+        
+        {/* Expanded View Content */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <ExpandedView 
+            entry={expandedEntry} 
+            onClose={() => setExpandedEntry(null)}
+            onUpdate={updateEntry}
+            allEntries={entries}
+          />
+        </div>
       </div>
     );
   }
@@ -883,33 +940,19 @@ export default function Dashboard() {
       {/* Project Sidebar */}
       <div className={`
         fixed lg:relative inset-y-0 left-0 z-30 h-screen lg:h-full
-        transform transition-all duration-300 ease-in-out
+        transform transition-all duration-300 ease-cubic
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:block
         bg-dark-primary lg:bg-transparent
         flex flex-col
-        ${isSidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'}
+        ${isSidebarCollapsed ? 'w-16' : 'w-[280px]'}
+        py-7
       `}>
-        {/* Collapse Toggle Button - More Visible */}
-        <button
-          onClick={toggleSidebarCollapse}
-          className="absolute -right-4 top-20 z-40 w-8 h-8 bg-accent-green rounded-full
-                     border-2 border-dark-primary shadow-lg
-                     flex items-center justify-center transition-all duration-200
-                     hover:bg-accent-green/80 hover:scale-110 group lg:flex"
-          title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronRight 
-            size={16} 
-            className={`text-dark-primary transition-all duration-200
-                       ${isSidebarCollapsed ? '' : 'rotate-180'}`}
-          />
-        </button>
-
-        {/* Sidebar Content - padding moved to ProjectExplorer */}
+        {/* Sidebar Content with proper spacing */}
         <ProjectExplorer
           isCollapsed={isSidebarCollapsed}
-          className="flex-1"
+          onToggleCollapse={toggleSidebarCollapse}
+          className="flex-1 min-h-0"
           height="h-full"
           onDocumentSelect={(data) => {
             if (data?.action === 'create') {
@@ -959,7 +1002,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2.5 lg:ml-4">
             {/* Mobile menu button */}
             <button
-              onClick={() => setShowSidebar(!showSidebar)}
+              onClick={() => toggleMobileSidebar()}
               className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden"
             >
               <Menu size={20} className="text-text-primary" />

@@ -10,6 +10,7 @@ import {
   Image,
   ListTodo,
   ChevronRight,
+  ChevronLeft,
   ChevronDown,
   Search,
   X,
@@ -112,7 +113,8 @@ export default function ProjectExplorer({
   totalDocuments = 0,
   uncategorizedCount = 0,
   onDocumentMove,
-  isCollapsed = false
+  isCollapsed = false,
+  onToggleCollapse
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -542,11 +544,20 @@ export default function ProjectExplorer({
   // Collapsed view
   if (isCollapsed) {
     return (
-      <div className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden my-8`}>
-        <div className="flex flex-col items-center py-4 gap-4">
-          <Folder size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
-          <FileText size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
-          <Search size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
+      <div className={`bg-[#1e1e1e] ${height} flex flex-col ${className} border-r border-dark-secondary/30 overflow-hidden`}>
+        <div className="p-4">
+          <button
+            onClick={onToggleCollapse}
+            className="w-full p-2 hover:bg-gray-800/50 rounded transition-colors"
+            title="Expand sidebar (Ctrl+B)"
+          >
+            <ChevronRight size={20} className="text-text-secondary mx-auto" />
+          </button>
+        </div>
+        <div className="flex flex-col items-center py-2 gap-4">
+          <Folder size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" title="Files" />
+          <FileText size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" title="Documents" />
+          <Search size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" title="Search" />
         </div>
       </div>
     );
@@ -561,16 +572,23 @@ export default function ProjectExplorer({
     >
       <div 
         ref={containerRef}
-        className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden relative my-8`}
+        className={`bg-[#1e1e1e] ${height} flex flex-col ${className} border-r border-dark-secondary/30 overflow-hidden relative`}
         style={{ isolation: 'isolate' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-dark-secondary/20">
-          {!isCollapsed && (
+        <div className="flex items-center justify-between px-4 py-3 border-b border-dark-secondary/20">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onToggleCollapse}
+              className="p-1 hover:bg-gray-800/50 rounded transition-colors group"
+              title="Collapse sidebar (Ctrl+B)"
+            >
+              <ChevronLeft size={16} className="text-text-secondary group-hover:text-text-primary" />
+            </button>
             <h3 className="text-xs font-semibold text-text-secondary/80 uppercase tracking-wider">
               Explorer
             </h3>
-          )}
+          </div>
           <div className="flex items-center gap-1">
             <button
               onClick={() => createNewFolder('root')}

@@ -126,11 +126,22 @@ export default function VirtualizedGrid({
   useEffect(() => {
     const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
     if (scrollContainer) {
-      console.log('VirtualizedGrid - scroll container:', {
+      const info = {
         totalHeight,
         containerHeight: scrollContainer.clientHeight,
-        hasOverflow: totalHeight > scrollContainer.clientHeight
-      });
+        hasOverflow: totalHeight > scrollContainer.clientHeight,
+        parentIsCardsContainer: scrollContainer.classList.contains('custom-scrollbar')
+      };
+      console.log('VirtualizedGrid - scroll container:', JSON.stringify(info));
+      
+      // Also check what the actual parent element is
+      const directParent = containerRef.current?.parentElement;
+      if (directParent && directParent !== scrollContainer) {
+        console.log('Direct parent is different:', {
+          className: directParent.className,
+          height: directParent.clientHeight
+        });
+      }
     }
   }, [totalHeight]);
 

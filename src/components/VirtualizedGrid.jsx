@@ -10,7 +10,8 @@ export default function VirtualizedGrid({
   searchTerm,
   selectedDocuments = new Set(),
   onSelectDocument,
-  selectionMode = false
+  selectionMode = false,
+  sidebarCollapsed = false
 }) {
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
@@ -21,8 +22,19 @@ export default function VirtualizedGrid({
   const CARD_WIDTH = 280; // Compact width
   const CARD_HEIGHT = 160; // Reduced height for more cards  
   const GAP = 16; // Tighter spacing
-  const MAX_COLUMNS = 5; // More columns for compact view
   const BUFFER_ROWS = 2; // Extra rows to render for smooth scrolling
+  
+  // Dynamic max columns based on screen size for enterprise-grade responsiveness
+  const calculateMaxColumns = useCallback(() => {
+    if (containerWidth < 640) return 1; // Mobile
+    if (containerWidth < 768) return 2; // Small tablet
+    if (containerWidth < 1024) return 3; // Tablet
+    if (containerWidth < 1280) return 4; // Small desktop
+    if (containerWidth < 1536) return 5; // Desktop
+    return 6; // Large desktop/4K
+  }, [containerWidth]);
+  
+  const MAX_COLUMNS = calculateMaxColumns();
 
   // Calculate columns based on container width
   const columns = Math.min(
@@ -38,37 +50,58 @@ export default function VirtualizedGrid({
   const allItems = entries;
   const rows = Math.ceil(allItems.length / columns) || 1; // At least 1 row for empty state
 
-  // Update container width on resize with debouncing
+  // Update container width using ResizeObserver for better performance
   useEffect(() => {
+    if (!containerRef.current) return;
+    
     let resizeTimeout;
     const updateWidth = () => {
       if (containerRef.current) {
         const newWidth = containerRef.current.offsetWidth;
-        // Only update if width changed significantly (more than 10px)
-        setContainerWidth(current => {
-          if (Math.abs(current - newWidth) > 10) {
-            return newWidth;
-          }
-          return current;
-        });
+        setContainerWidth(newWidth);
       }
     };
 
     // Initial width
     updateWidth();
     
-    // Debounced resize handler
-    const handleResize = () => {
+    // Use ResizeObserver for container size changes
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Clear any pending timeout
+      clearTimeout(resizeTimeout);
+      
+      // For smooth transitions, update immediately
+      for (const entry of entries) {
+        if (entry.target === containerRef.current) {
+          const newWidth = entry.contentRect.width;
+          setContainerWidth(newWidth);
+        }
+      }
+    });
+    
+    // Also listen to window resize as a fallback
+    const handleWindowResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(updateWidth, 150);
     };
 
-    window.addEventListener('resize', handleResize);
+    resizeObserver.observe(containerRef.current);
+    window.addEventListener('resize', handleWindowResize);
+    
     return () => {
-      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', handleWindowResize);
       clearTimeout(resizeTimeout);
     };
   }, []);
+  
+  // Force recalculation when sidebar state changes
+  useEffect(() => {
+    if (containerRef.current) {
+      const newWidth = containerRef.current.offsetWidth;
+      setContainerWidth(newWidth);
+    }
+  }, [sidebarCollapsed]);
   
   // Remove debug logging to prevent console spam
 
@@ -105,7 +138,7 @@ export default function VirtualizedGrid({
     return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Get position for each item
+  // Get position for each item with smooth transitions
   const getItemStyle = (index) => {
     const row = Math.floor(index / columns);
     const col = index % columns;
@@ -116,6 +149,8 @@ export default function VirtualizedGrid({
       left: centerOffset + col * (CARD_WIDTH + GAP),
       width: CARD_WIDTH,
       height: CARD_HEIGHT,
+      transition: 'left 300ms cubic-bezier(0.4, 0, 0.2, 1), top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+      willChange: 'left, top'
     };
   };
 

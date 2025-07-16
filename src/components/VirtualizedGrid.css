@@ -28,6 +28,19 @@
   position: relative;
 }
 
+/* Smooth card transitions */
+.virtualized-grid-item {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1), 
+              left 300ms cubic-bezier(0.4, 0, 0.2, 1),
+              top 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, left, top;
+}
+
+/* Prevent layout shift during transitions */
+.virtualized-grid-container {
+  contain: layout style;
+}
+
 /* Stable scrollbar - prevents position reset */
 .scrollbar-stable {
   /* Preserve scroll position when focus changes */

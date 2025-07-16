@@ -848,7 +848,8 @@ export default function Dashboard() {
         style={{
           display: 'grid',
           gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
-          gridTemplateRows: '1fr'
+          gridTemplateRows: '1fr',
+          transition: 'grid-template-columns 300ms cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       >
         {/* Mobile overlay */}
@@ -864,7 +865,7 @@ export default function Dashboard() {
           className={`
             bg-dark-primary lg:bg-transparent
             flex flex-col
-            transition-all duration-300 ease-cubic
+            transition-all duration-300 ease-out
             h-full overflow-hidden
             ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
@@ -941,7 +942,8 @@ export default function Dashboard() {
         style={{
           display: 'grid',
           gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
-          gridTemplateRows: '1fr'
+          gridTemplateRows: '1fr',
+          transition: 'grid-template-columns 300ms cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       >
       {/* Mobile overlay */}
@@ -1009,7 +1011,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex flex-col min-w-0 overflow-hidden" style={{ gridColumn: '2' }}>
+      <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out" style={{ gridColumn: '2' }}>
         {/* Header */}
         <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
@@ -1147,7 +1149,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar transition-all duration-300 ease-out"
              style={{ 
                scrollbarWidth: 'thin',
                scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
@@ -1159,6 +1161,7 @@ export default function Dashboard() {
             selectedDocuments={selectedDocuments}
             onSelectDocument={handleDocumentSelect}
             selectionMode={selectedDocuments.size > 0}
+            sidebarCollapsed={isSidebarCollapsed}
           />
         </div>
       </main>

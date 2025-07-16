@@ -871,7 +871,7 @@ export default function Dashboard() {
           style={{ gridColumn: '1' }}
         >
           {/* Sidebar Content wrapper for spacing */}
-          <div className="flex-1 min-h-0 pt-12 pb-7 flex flex-col">
+          <div className="flex-1 min-h-0 pt-20 pb-7 flex flex-col">
             <ProjectExplorer
               isCollapsed={isSidebarCollapsed}
               onToggleCollapse={toggleSidebarCollapse}
@@ -964,7 +964,7 @@ export default function Dashboard() {
         style={{ gridColumn: '1' }}
       >
         {/* Sidebar Content wrapper for spacing */}
-        <div className="flex-1 min-h-0 pt-12 pb-7 flex flex-col">
+        <div className="flex-1 min-h-0 pt-20 pb-7 flex flex-col">
           <ProjectExplorer
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}

@@ -843,7 +843,7 @@ export default function Dashboard() {
   if (expandedEntry) {
     console.log('Dashboard: Showing ExpandedView instead of grid');
     return (
-      <div className="h-full flex relative overflow-hidden">
+      <div className="h-screen grid grid-cols-[auto_1fr] overflow-hidden">
         {/* Mobile overlay */}
         {showSidebar && (
           <div
@@ -854,14 +854,12 @@ export default function Dashboard() {
         
         {/* Project Sidebar */}
         <div className={`
-          fixed lg:relative inset-y-0 left-0 z-30 h-screen lg:h-full
-          transform transition-all duration-300 ease-cubic
-          ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0 lg:block
+          ${showSidebar ? 'block' : 'hidden'} lg:block
           bg-dark-primary lg:bg-transparent
           flex flex-col
+          transition-all duration-300 ease-cubic
           ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}
-          pt-12 pb-7
+          pt-12 pb-7 h-full
         `}>
           {/* Sidebar Content with proper spacing */}
           <ProjectExplorer
@@ -907,14 +905,14 @@ export default function Dashboard() {
         </div>
         
         {/* Expanded View Content */}
-        <div className="flex-1 flex flex-col min-h-0">
+        <main className="flex flex-col min-w-0 overflow-hidden">
           <ExpandedView 
             entry={expandedEntry} 
             onClose={() => setExpandedEntry(null)}
             onUpdate={updateEntry}
             allEntries={entries}
           />
-        </div>
+        </main>
       </div>
     );
   }
@@ -928,7 +926,7 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="h-full flex relative overflow-hidden dashboard-container">
+      <div className="h-screen grid grid-cols-[auto_1fr] overflow-hidden dashboard-container">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -939,14 +937,12 @@ export default function Dashboard() {
       
       {/* Project Sidebar */}
       <div className={`
-        fixed lg:relative inset-y-0 left-0 z-30 h-screen lg:h-full
-        transform transition-all duration-300 ease-cubic
-        ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:block
+        ${showSidebar ? 'block' : 'hidden'} lg:block
         bg-dark-primary lg:bg-transparent
         flex flex-col
+        transition-all duration-300 ease-cubic
         ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}
-        pt-12 pb-7
+        pt-12 pb-7 h-full
       `}>
         {/* Sidebar Content with proper spacing */}
         <ProjectExplorer
@@ -993,7 +989,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-0 h-0">
+      <main className="flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
@@ -1087,7 +1083,7 @@ export default function Dashboard() {
         </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
-        <div className={`px-4 md:px-6 py-3 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'} transition-all duration-300`}>
+        <div className="px-4 md:px-6 py-3">
           <div className="max-w-5xl mx-auto">
             {/* Breadcrumb Navigation */}
             <div className="mb-3">
@@ -1130,11 +1126,10 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className={`flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'} transition-all duration-300`}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
              style={{ 
                scrollbarWidth: 'thin',
-               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)',
-               maxHeight: 'calc(100vh - 200px)' // Force a max height constraint
+               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
              }}>
           <VirtualizedGrid 
             entries={filteredEntries}
@@ -1145,6 +1140,7 @@ export default function Dashboard() {
             selectionMode={selectedDocuments.size > 0}
           />
         </div>
+      </main>
 
       {/* Empty State */}
       {filteredEntries.length === 0 && searchTerm && (

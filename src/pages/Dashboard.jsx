@@ -918,7 +918,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Header */}
         <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
@@ -1055,7 +1055,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 scrollbar-thin custom-scrollbar"
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 scrollbar-thin custom-scrollbar min-h-0 overscroll-behavior-contain"
              style={{ 
                scrollbarWidth: 'thin',
                scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'

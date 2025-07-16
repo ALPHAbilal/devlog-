@@ -13,7 +13,7 @@ export default function LogoMinimal({ size = 32 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* DevLog - 4 dots in grid pattern */}
+        {/* DevLog - D Letter with gradient */}
         <g transform={`scale(${scale})`}>
           <defs>
             <linearGradient id="devlog-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -22,37 +22,18 @@ export default function LogoMinimal({ size = 32 }) {
             </linearGradient>
           </defs>
           
-          {/* 4 dots in 2x2 grid */}
-          {/* Top-left dot */}
-          <circle
-            cx="11"
-            cy="11"
-            r="4"
+          {/* D Letter Shape */}
+          <path
+            d="M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z"
             fill="url(#devlog-gradient)"
+            fillRule="evenodd"
           />
           
-          {/* Top-right dot */}
-          <circle
-            cx="21"
-            cy="11"
-            r="4"
-            fill="url(#devlog-gradient)"
-          />
-          
-          {/* Bottom-left dot */}
-          <circle
-            cx="11"
-            cy="21"
-            r="4"
-            fill="url(#devlog-gradient)"
-          />
-          
-          {/* Bottom-right dot */}
-          <circle
-            cx="21"
-            cy="21"
-            r="4"
-            fill="url(#devlog-gradient)"
+          {/* Inner cutout for D */}
+          <path
+            d="M 11 7 L 14 7 C 18 7 21 10 21 16 C 21 22 18 25 14 25 L 11 25 L 11 7 Z"
+            fill="#0a1628"
+            fillRule="evenodd"
           />
         </g>
       </svg>
@@ -76,13 +57,18 @@ export function LogoIcon({ size = 32 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Simplified 4 dots for small sizes */}
+        {/* Simplified D for small sizes */}
         <g transform={`scale(${scale})`}>
-          {/* 4 dots with solid color for better visibility at small sizes */}
-          <circle cx="8" cy="8" r="3" fill="#10b981" />
-          <circle cx="16" cy="8" r="3" fill="#10b981" />
-          <circle cx="8" cy="16" r="3" fill="#10b981" />
-          <circle cx="16" cy="16" r="3" fill="#10b981" />
+          <path
+            d="M 6 3 L 10 3 C 15 3 18 6 18 12 C 18 18 15 21 10 21 L 6 21 L 6 3 Z"
+            fill="#10b981"
+            fillRule="evenodd"
+          />
+          <path
+            d="M 9 6 L 10 6 C 13 6 15 8 15 12 C 15 16 13 18 10 18 L 9 18 L 9 6 Z"
+            fill="#0a1628"
+            fillRule="evenodd"
+          />
         </g>
       </svg>
     </div>
@@ -94,8 +80,13 @@ export function LogoWithText({ size = 32 }) {
   return (
     <div className="flex items-center gap-2.5">
       <LogoMinimal size={size} />
-      <span className="font-semibold text-xl tracking-tight text-text-primary">
-        Devlog
+      <span className="font-semibold text-xl tracking-tight">
+        <span className="bg-gradient-to-r from-[#10b981] to-[#0a7d57] bg-clip-text text-transparent">
+          Dev
+        </span>
+        <span className="text-text-primary">
+          log
+        </span>
       </span>
     </div>
   );
@@ -115,105 +106,51 @@ export function LogoAnimated({ size = 48 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* DevLog - Animated 4 dots */}
+        {/* DevLog - Animated D */}
         <g>
           <defs>
             <linearGradient id="devlog-gradient-anim" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#0a7d57" />
+              <stop offset="0%" stopColor="#10b981">
+                <animate
+                  attributeName="stop-color"
+                  values="#10b981;#0a7d57;#10b981"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </stop>
+              <stop offset="100%" stopColor="#0a7d57">
+                <animate
+                  attributeName="stop-color"
+                  values="#0a7d57;#10b981;#0a7d57"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </stop>
             </linearGradient>
           </defs>
           
-          {/* Animated dots with pulse effect */}
-          {/* Top-left dot */}
-          <circle
-            cx="11"
-            cy="11"
-            r="4"
+          {/* Animated D Letter */}
+          <path
+            d="M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z"
             fill="url(#devlog-gradient-anim)"
+            fillRule="evenodd"
           >
             <animate
-              attributeName="r"
-              values="4;5;4"
-              dur="2s"
+              attributeName="d"
+              values="M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z;
+                      M 8 4 L 14 4 C 20 4 24 9 24 16 C 24 23 20 28 14 28 L 8 28 L 8 4 Z;
+                      M 8 4 L 14 4 C 20 4 24 8 24 16 C 24 24 20 28 14 28 L 8 28 L 8 4 Z"
+              dur="3s"
               repeatCount="indefinite"
             />
-            <animate
-              attributeName="opacity"
-              values="0.8;1;0.8"
-              dur="2s"
-              repeatCount="indefinite"
-            />
-          </circle>
+          </path>
           
-          {/* Top-right dot */}
-          <circle
-            cx="21"
-            cy="11"
-            r="4"
-            fill="url(#devlog-gradient-anim)"
-          >
-            <animate
-              attributeName="r"
-              values="4;5;4"
-              dur="2s"
-              repeatCount="indefinite"
-              begin="0.5s"
-            />
-            <animate
-              attributeName="opacity"
-              values="0.8;1;0.8"
-              dur="2s"
-              repeatCount="indefinite"
-              begin="0.5s"
-            />
-          </circle>
-          
-          {/* Bottom-left dot */}
-          <circle
-            cx="11"
-            cy="21"
-            r="4"
-            fill="url(#devlog-gradient-anim)"
-          >
-            <animate
-              attributeName="r"
-              values="4;5;4"
-              dur="2s"
-              repeatCount="indefinite"
-              begin="1s"
-            />
-            <animate
-              attributeName="opacity"
-              values="0.8;1;0.8"
-              dur="2s"
-              repeatCount="indefinite"
-              begin="1s"
-            />
-          </circle>
-          
-          {/* Bottom-right dot */}
-          <circle
-            cx="21"
-            cy="21"
-            r="4"
-            fill="url(#devlog-gradient-anim)"
-          >
-            <animate
-              attributeName="r"
-              values="4;5;4"
-              dur="2s"
-              repeatCount="indefinite"
-              begin="1.5s"
-            />
-            <animate
-              attributeName="opacity"
-              values="0.8;1;0.8"
-              dur="2s"
-              repeatCount="indefinite"
-              begin="1.5s"
-            />
-          </circle>
+          {/* Inner cutout */}
+          <path
+            d="M 11 7 L 14 7 C 18 7 21 10 21 16 C 21 22 18 25 14 25 L 11 25 L 11 7 Z"
+            fill="#0a1628"
+            fillRule="evenodd"
+          />
         </g>
       </svg>
     </div>

@@ -4,7 +4,7 @@ import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
 import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
-import VirtualizedGrid from '../components/VirtualizedGrid';
+import SimpleVirtualizedGrid from '../components/SimpleVirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
 import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
@@ -1061,17 +1061,15 @@ export default function Dashboard() {
             isLoading,
             expandedEntry: !!expandedEntry 
           })}
-          <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 overflow-hidden">
-            <div className="h-full">
-              <VirtualizedGrid 
-                entries={filteredEntries}
-                onExpand={handleDocumentExpand}
-                searchTerm={searchTerm}
-                selectedDocuments={selectedDocuments}
-                onSelectDocument={handleDocumentSelect}
-                selectionMode={selectedDocuments.size > 0}
-              />
-            </div>
+          <div className="flex-1 min-h-0 px-4 md:px-6 pb-4">
+            <SimpleVirtualizedGrid 
+              entries={filteredEntries}
+              onExpand={handleDocumentExpand}
+              searchTerm={searchTerm}
+              selectedDocuments={selectedDocuments}
+              onSelectDocument={handleDocumentSelect}
+              selectionMode={selectedDocuments.size > 0}
+            />
           </div>
         </div>
 

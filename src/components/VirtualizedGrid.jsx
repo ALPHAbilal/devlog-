@@ -120,7 +120,7 @@ export default function VirtualizedGrid({
   };
 
   // Calculate total height including padding
-  const totalHeight = rows * (CARD_HEIGHT + GAP) - GAP + 40; // 40px for padding
+  const totalHeight = rows * (CARD_HEIGHT + GAP) - GAP; // Removed padding from calculation
   
   // Debug logging
   useEffect(() => {

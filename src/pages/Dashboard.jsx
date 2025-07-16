@@ -1058,7 +1058,8 @@ export default function Dashboard() {
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
              style={{ 
                scrollbarWidth: 'thin',
-               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
+               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)',
+               maxHeight: 'calc(100vh - 200px)' // Force a max height constraint
              }}>
           <VirtualizedGrid 
             entries={filteredEntries}

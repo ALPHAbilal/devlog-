@@ -1055,16 +1055,32 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-scroll overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 overscroll-behavior-contain debug-scrollbar"
+        <div className="flex-1 overflow-visible px-4 md:px-6 pb-4 min-h-0"
              style={{ 
-               scrollbarWidth: 'auto',
-               scrollbarColor: '#ff0000 #00ff00'
+               backgroundColor: 'rgba(0,255,0,0.1)' // Green tint to see parent container
              }}>
-          {console.log('Dashboard rendering VirtualizedGrid:', { 
-            filteredEntriesCount: filteredEntries.length,
-            isLoading,
-            expandedEntry: !!expandedEntry 
-          })}
+          {(() => {
+            // Debug: Check container dimensions
+            const container = document.querySelector('.debug-scrollbar');
+            if (container) {
+              console.log('Cards container found:', {
+                clientHeight: container.clientHeight,
+                scrollHeight: container.scrollHeight,
+                offsetHeight: container.offsetHeight,
+                computedStyle: {
+                  height: window.getComputedStyle(container).height,
+                  maxHeight: window.getComputedStyle(container).maxHeight,
+                  overflow: window.getComputedStyle(container).overflowY
+                }
+              });
+            }
+            console.log('Dashboard rendering VirtualizedGrid:', { 
+              filteredEntriesCount: filteredEntries.length,
+              isLoading,
+              expandedEntry: !!expandedEntry 
+            });
+            return null;
+          })()}
           <VirtualizedGrid 
             entries={filteredEntries}
             onExpand={handleDocumentExpand}

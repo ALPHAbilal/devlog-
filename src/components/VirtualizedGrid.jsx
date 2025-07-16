@@ -124,19 +124,82 @@ export default function VirtualizedGrid({
   
   // Debug logging
   useEffect(() => {
-    const scrollContainer = containerRef.current?.closest('.overflow-y-scroll');
+    const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
+    console.log('VirtualizedGrid Debug - Container found:', !!scrollContainer);
+    
     if (scrollContainer) {
-      console.log('VirtualizedGrid Debug:', {
+      const debugInfo = {
         totalHeight,
         containerHeight: scrollContainer.clientHeight,
+        containerScrollHeight: scrollContainer.scrollHeight,
         hasOverflow: totalHeight > scrollContainer.clientHeight,
         itemCount: allItems.length,
         rows,
-        columns
-      });
+        columns,
+        containerClasses: scrollContainer.className,
+        computedOverflow: window.getComputedStyle(scrollContainer).overflowY
+      };
+      console.log('VirtualizedGrid Debug - Details:', JSON.stringify(debugInfo, null, 2));
+    } else {
+      console.log('VirtualizedGrid Debug - No scroll container found!');
+      // Try to find the parent and log its info
+      const parent = containerRef.current?.parentElement;
+      if (parent) {
+        console.log('Parent element:', {
+          className: parent.className,
+          overflow: window.getComputedStyle(parent).overflowY,
+          height: parent.clientHeight
+        });
+      }
     }
   }, [totalHeight, allItems.length, rows, columns]);
 
+  // TEMPORARY: Make VirtualizedGrid itself scrollable to test
+  const TEST_SELF_SCROLL = true;
+  
+  if (TEST_SELF_SCROLL) {
+    return (
+      <div 
+        ref={containerRef}
+        className="relative w-full h-full overflow-y-scroll"
+        style={{ 
+          backgroundColor: 'rgba(255,0,0,0.1)', // Red tint to see container
+          border: '2px solid lime' // Green border to see edges
+        }}
+        onScroll={(e) => {
+          console.log('VirtualizedGrid scrolling:', e.target.scrollTop);
+          handleScroll();
+        }}
+      >
+        <div 
+          style={{ 
+            height: totalHeight,
+            minHeight: totalHeight,
+            paddingTop: 20,
+            paddingBottom: 20,
+            position: 'relative'
+          }}
+        >
+          {/* Render ALL items to test if content exists */}
+          {allItems.map((item, index) => {
+            return (
+              <div key={item.id} style={getItemStyle(index)}>
+                <CompactEntryCard 
+                  entry={item} 
+                  onExpand={onExpand}
+                  searchTerm={searchTerm}
+                  isSelected={selectedDocuments.has(item.id)}
+                  onSelect={onSelectDocument}
+                  selectionMode={selectionMode}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div 
       ref={containerRef}

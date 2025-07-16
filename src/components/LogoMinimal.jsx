@@ -13,77 +13,92 @@ export default function LogoMinimal({ size = 32 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* DevLog Octo-D - GitHub-inspired logo with D head */}
+        {/* DevLog - Connected Knowledge Blocks forming 'D' */}
         <g transform={`scale(${scale})`}>
           <defs>
             <linearGradient id="devlog-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#10b981" />
               <stop offset="100%" stopColor="#0a7d57" />
             </linearGradient>
+            <linearGradient id="devlog-gradient-light" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
+              <stop offset="100%" stopColor="#0a7d57" stopOpacity="0.8" />
+            </linearGradient>
           </defs>
           
-          {/* D Letter Head */}
-          <path
-            d="M 10 4 L 14 4 C 19 4 22 8 22 12 C 22 16 19 20 14 20 L 10 20 L 10 4 Z"
+          {/* Connection lines */}
+          <g strokeWidth="1.5" stroke="url(#devlog-gradient-light)" strokeLinecap="round">
+            {/* Top to right connections */}
+            <line x1="11" y1="9" x2="18" y2="9" opacity="0.6" />
+            <line x1="21" y1="9" x2="21" y2="16" opacity="0.6" />
+            
+            {/* Bottom connection */}
+            <line x1="11" y1="23" x2="18" y2="23" opacity="0.6" />
+            
+            {/* Vertical connections */}
+            <line x1="11" y1="12" x2="11" y2="20" opacity="0.6" />
+          </g>
+          
+          {/* Main blocks forming 'D' shape */}
+          {/* Top-left block */}
+          <rect
+            x="8"
+            y="6"
+            width="6"
+            height="6"
+            rx="1.5"
             fill="url(#devlog-gradient)"
-            stroke="none"
           />
           
-          {/* Inner cutout for D */}
-          <path
-            d="M 13 8 L 14 8 C 16.5 8 18 9.5 18 12 C 18 14.5 16.5 16 14 16 L 13 16 L 13 8 Z"
-            fill="#050d1a"
-            stroke="none"
+          {/* Top-right block */}
+          <rect
+            x="18"
+            y="6"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
           />
           
-          {/* Tentacles */}
-          <path
-            d="M 11 18 Q 11 23 9 25 Q 7 27 6 26 Q 5 25 6 23 Q 7 21 8 19"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
+          {/* Bottom-left block */}
+          <rect
+            x="8"
+            y="20"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
           />
           
-          <path
-            d="M 14 19 Q 14 24 14 26 Q 14 28 13 27.5 Q 12 27 12 25 Q 12 23 12.5 21"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
+          {/* Bottom-right block */}
+          <rect
+            x="18"
+            y="20"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
           />
           
-          <path
-            d="M 17 19 Q 17 24 17 26 Q 17 28 18 27.5 Q 19 27 19 25 Q 19 23 18.5 21"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
+          {/* Middle-right block (completing the D curve) */}
+          <rect
+            x="21"
+            y="13"
+            width="6"
+            height="6"
+            rx="1.5"
+            fill="url(#devlog-gradient)"
+            transform="rotate(45 24 16)"
           />
           
-          <path
-            d="M 20 18 Q 20 23 22 25 Q 24 27 25 26 Q 26 25 25 23 Q 24 21 23 19"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
-          
-          <path
-            d="M 8.5 17 Q 8 21 6 22 Q 4 23 3.5 22 Q 3 21 4 20 Q 5 19 6 18"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
-          
-          <path
-            d="M 22.5 17 Q 23 21 25 22 Q 27 23 27.5 22 Q 28 21 27 20 Q 26 19 25 18"
-            stroke="#10b981"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
+          {/* Connection dots */}
+          <g fill="#10b981">
+            <circle cx="11" cy="9" r="1" />
+            <circle cx="21" cy="9" r="1" />
+            <circle cx="11" cy="23" r="1" />
+            <circle cx="21" cy="23" r="1" />
+            <circle cx="24" cy="16" r="1" />
+          </g>
         </g>
       </svg>
     </div>
@@ -106,30 +121,24 @@ export function LogoIcon({ size = 32 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Simplified version for small sizes */}
+        {/* Simplified D shape for small sizes */}
         <g transform={`scale(${scale})`}>
-          {/* D Letter Head */}
           <path
-            d="M 7 3 L 10 3 C 14 3 17 6 17 10 C 17 14 14 17 10 17 L 7 17 L 7 3 Z"
+            d="M 6 4 L 6 20 L 10 20 C 16 20 20 16 20 12 C 20 8 16 4 10 4 L 6 4 Z"
             fill="#10b981"
-            stroke="none"
+            fillRule="evenodd"
           />
-          
-          {/* Inner cutout for D */}
           <path
-            d="M 10 6 L 10.5 6 C 12.5 6 14 7.5 14 10 C 14 12.5 12.5 14 10.5 14 L 10 14 L 10 6 Z"
-            fill="#050d1a"
-            stroke="none"
+            d="M 9 7 L 10 7 C 14 7 17 10 17 12 C 17 14 14 17 10 17 L 9 17 L 9 7 Z"
+            fill="#0a1628"
+            fillRule="evenodd"
           />
-          
-          {/* Simplified tentacles */}
-          <path
-            d="M 8 15 Q 8 18 7 19 M 11 16 Q 11 19 11 20 M 14 16 Q 14 19 14 20 M 16 15 Q 16 18 17 19"
-            stroke="#10b981"
-            strokeWidth="1.5"
-            fill="none"
-            strokeLinecap="round"
-          />
+          {/* Small connection dots */}
+          <g fill="#10b981" opacity="0.8">
+            <circle cx="11" cy="9" r="0.8" />
+            <circle cx="11" cy="12" r="0.8" />
+            <circle cx="11" cy="15" r="0.8" />
+          </g>
         </g>
       </svg>
     </div>
@@ -139,10 +148,15 @@ export function LogoIcon({ size = 32 }) {
 // Logo with text for navbar/header
 export function LogoWithText({ size = 32 }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <LogoMinimal size={size} />
-      <span className="font-semibold text-xl bg-gradient-to-r from-[#10b981] to-[#0a7d57] bg-clip-text text-transparent">
-        DevLog
+      <span className="font-semibold text-xl tracking-tight">
+        <span className="bg-gradient-to-r from-[#10b981] to-[#0a7d57] bg-clip-text text-transparent">
+          Dev
+        </span>
+        <span className="text-text-primary">
+          Log
+        </span>
       </span>
     </div>
   );
@@ -162,101 +176,164 @@ export function LogoAnimated({ size = 48 }) {
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* DevLog Octo-D with animated tentacles */}
+        {/* DevLog - Animated connected blocks */}
         <g>
           <defs>
             <linearGradient id="devlog-gradient-anim" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="100%" stopColor="#0a7d57" />
+              <stop offset="0%" stopColor="#10b981">
+                <animate
+                  attributeName="stop-color"
+                  values="#10b981;#0a7d57;#10b981"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </stop>
+              <stop offset="100%" stopColor="#0a7d57">
+                <animate
+                  attributeName="stop-color"
+                  values="#0a7d57;#10b981;#0a7d57"
+                  dur="3s"
+                  repeatCount="indefinite"
+                />
+              </stop>
             </linearGradient>
           </defs>
           
-          {/* D Letter Head */}
-          <path
-            d="M 10 4 L 14 4 C 19 4 22 8 22 12 C 22 16 19 20 14 20 L 10 20 L 10 4 Z"
-            fill="url(#devlog-gradient-anim)"
-            stroke="none"
-          />
-          
-          {/* Inner cutout for D */}
-          <path
-            d="M 13 8 L 14 8 C 16.5 8 18 9.5 18 12 C 18 14.5 16.5 16 14 16 L 13 16 L 13 8 Z"
-            fill="#050d1a"
-            stroke="none"
-          />
-          
-          {/* Animated tentacles */}
-          <g className="tentacles">
-            <path
-              d="M 11 18 Q 11 23 9 25 Q 7 27 6 26 Q 5 25 6 23 Q 7 21 8 19"
-              stroke="#10b981"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-            >
+          {/* Animated connection lines */}
+          <g strokeWidth="1.5" stroke="url(#devlog-gradient-anim)" strokeLinecap="round">
+            <line x1="11" y1="9" x2="18" y2="9">
               <animate
-                attributeName="d"
-                values="M 11 18 Q 11 23 9 25 Q 7 27 6 26 Q 5 25 6 23 Q 7 21 8 19;
-                        M 11 18 Q 10 23 8 24 Q 6 26 5 25 Q 4 24 5 22 Q 6 20 8 19;
-                        M 11 18 Q 11 23 9 25 Q 7 27 6 26 Q 5 25 6 23 Q 7 21 8 19"
+                attributeName="opacity"
+                values="0;0.6;0.6;0"
                 dur="3s"
                 repeatCount="indefinite"
               />
-            </path>
-            
-            <path
-              d="M 14 19 Q 14 24 14 26 Q 14 28 13 27.5 Q 12 27 12 25 Q 12 23 12.5 21"
-              stroke="#10b981"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-            >
+            </line>
+            <line x1="21" y1="9" x2="21" y2="16">
               <animate
-                attributeName="d"
-                values="M 14 19 Q 14 24 14 26 Q 14 28 13 27.5 Q 12 27 12 25 Q 12 23 12.5 21;
-                        M 14 19 Q 13 24 13 26 Q 13 28 12 27 Q 11 26 11 24 Q 11 22 12.5 21;
-                        M 14 19 Q 14 24 14 26 Q 14 28 13 27.5 Q 12 27 12 25 Q 12 23 12.5 21"
+                attributeName="opacity"
+                values="0;0;0.6;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+            <line x1="11" y1="23" x2="18" y2="23">
+              <animate
+                attributeName="opacity"
+                values="0;0;0;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+            <line x1="11" y1="12" x2="11" y2="20">
+              <animate
+                attributeName="opacity"
+                values="0;0.6;0.6;0.6;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </line>
+          </g>
+          
+          {/* Animated blocks */}
+          <g fill="url(#devlog-gradient-anim)">
+            {/* Top-left block */}
+            <rect x="8" y="6" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;1;1;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </rect>
+            
+            {/* Top-right block */}
+            <rect x="18" y="6" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;0.3;1;1;0.3"
                 dur="3s"
                 repeatCount="indefinite"
                 begin="0.5s"
               />
-            </path>
+            </rect>
             
-            <path
-              d="M 17 19 Q 17 24 17 26 Q 17 28 18 27.5 Q 19 27 19 25 Q 19 23 18.5 21"
-              stroke="#10b981"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-            >
+            {/* Bottom-left block */}
+            <rect x="8" y="20" width="6" height="6" rx="1.5">
               <animate
-                attributeName="d"
-                values="M 17 19 Q 17 24 17 26 Q 17 28 18 27.5 Q 19 27 19 25 Q 19 23 18.5 21;
-                        M 17 19 Q 18 24 18 26 Q 18 28 19 27 Q 20 26 20 24 Q 20 22 18.5 21;
-                        M 17 19 Q 17 24 17 26 Q 17 28 18 27.5 Q 19 27 19 25 Q 19 23 18.5 21"
+                attributeName="opacity"
+                values="0.3;1;1;1;0.3"
+                dur="3s"
+                repeatCount="indefinite"
+                begin="0.3s"
+              />
+            </rect>
+            
+            {/* Bottom-right block */}
+            <rect x="18" y="20" width="6" height="6" rx="1.5">
+              <animate
+                attributeName="opacity"
+                values="0.3;0.3;0.3;1;0.3"
                 dur="3s"
                 repeatCount="indefinite"
                 begin="1s"
               />
-            </path>
+            </rect>
             
-            <path
-              d="M 20 18 Q 20 23 22 25 Q 24 27 25 26 Q 26 25 25 23 Q 24 21 23 19"
-              stroke="#10b981"
-              strokeWidth="2"
-              fill="none"
-              strokeLinecap="round"
-            >
+            {/* Middle-right block */}
+            <rect x="21" y="13" width="6" height="6" rx="1.5" transform="rotate(45 24 16)">
               <animate
-                attributeName="d"
-                values="M 20 18 Q 20 23 22 25 Q 24 27 25 26 Q 26 25 25 23 Q 24 21 23 19;
-                        M 20 18 Q 21 23 23 24 Q 25 26 26 25 Q 27 24 26 22 Q 25 20 23 19;
-                        M 20 18 Q 20 23 22 25 Q 24 27 25 26 Q 26 25 25 23 Q 24 21 23 19"
+                attributeName="opacity"
+                values="0.3;0.3;1;1;0.3"
                 dur="3s"
                 repeatCount="indefinite"
-                begin="1.5s"
+                begin="0.7s"
               />
-            </path>
+            </rect>
+          </g>
+          
+          {/* Animated connection dots */}
+          <g fill="#10b981">
+            <circle cx="11" cy="9" r="1">
+              <animate
+                attributeName="r"
+                values="0;1;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="21" cy="9" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;1;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="11" cy="23" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;0;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="21" cy="23" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;0;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
+            <circle cx="24" cy="16" r="1">
+              <animate
+                attributeName="r"
+                values="0;0;1;1;0"
+                dur="3s"
+                repeatCount="indefinite"
+              />
+            </circle>
           </g>
         </g>
       </svg>

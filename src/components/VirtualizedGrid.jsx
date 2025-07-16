@@ -15,7 +15,6 @@ export default function VirtualizedGrid({
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
   const [containerWidth, setContainerWidth] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState({ top: 0, bottom: 1 });
   
   
   // Configuration for cards - balanced for readability
@@ -73,15 +72,16 @@ export default function VirtualizedGrid({
   
   // Remove debug logging to prevent console spam
 
-  // Handle scroll to update visible range and fade effects
+  // Handle scroll to update visible range
   const handleScroll = useCallback(() => {
-    if (!containerRef.current) return;
+    // Find the parent scrollable container (the cards container in Dashboard)
+    const scrollContainer = containerRef.current?.closest('.overflow-y-auto');
+    if (!scrollContainer) return;
 
-    const scrollTop = containerRef.current.scrollTop;
-    const containerHeight = containerRef.current.clientHeight;
-    const scrollHeight = containerRef.current.scrollHeight;
+    const scrollTop = scrollContainer.scrollTop;
+    const containerHeight = scrollContainer.clientHeight;
     
-    // Calculate visible range
+    // Calculate visible range based on parent's scroll position
     const startRow = Math.max(0, Math.floor(scrollTop / (CARD_HEIGHT + GAP)) - BUFFER_ROWS);
     const endRow = Math.min(
       rows,
@@ -92,23 +92,17 @@ export default function VirtualizedGrid({
     const end = Math.min(allItems.length, endRow * columns);
     
     setVisibleRange({ start, end });
-    
-    // Calculate fade intensities
-    const fadeDistance = 100; // pixels to fade over
-    const topFade = Math.min(1, scrollTop / fadeDistance);
-    const bottomFade = Math.min(1, (scrollHeight - scrollTop - containerHeight) / fadeDistance);
-    
-    setScrollProgress({ top: topFade, bottom: bottomFade });
   }, [columns, rows, allItems.length]);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    // Find the parent scrollable container
+    const scrollContainer = containerRef.current?.closest('.overflow-y-auto');
+    if (!scrollContainer) return;
 
-    container.addEventListener('scroll', handleScroll);
+    scrollContainer.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial calculation
     
-    return () => container.removeEventListener('scroll', handleScroll);
+    return () => scrollContainer.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
   // Get position for each item
@@ -128,25 +122,9 @@ export default function VirtualizedGrid({
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-full overflow-y-auto overflow-x-hidden scrollbar-thin grid-container"
-      style={{ 
-        scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
-      }}
+      className="relative w-full"
     >
-      {/* Top fade effect - only visible when scrolled */}
-      <div 
-        className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-dark-primary to-transparent z-10 pointer-events-none transition-opacity duration-300"
-        style={{ opacity: scrollProgress.top * 0.9 }}
-      />
-      
-      {/* Bottom fade effect - only visible when not at bottom */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-dark-primary to-transparent z-10 pointer-events-none transition-opacity duration-300"
-        style={{ opacity: scrollProgress.bottom * 0.9 }}
-      />
-      
-      {/* Virtual spacer to maintain scrollbar */}
+      {/* Virtual spacer to maintain proper height for parent scrolling */}
       <div 
         style={{ 
           height: rows * (CARD_HEIGHT + GAP) - GAP,

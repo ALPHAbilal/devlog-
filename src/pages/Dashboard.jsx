@@ -905,11 +905,12 @@ export default function Dashboard() {
           />
         </button>
 
-        {/* Sidebar Content with padding */}
-        <div className="flex-1 py-8 overflow-hidden">
-          <ProjectExplorer
-            isCollapsed={isSidebarCollapsed}
-            onDocumentSelect={(data) => {
+        {/* Sidebar Content - padding moved to ProjectExplorer */}
+        <ProjectExplorer
+          isCollapsed={isSidebarCollapsed}
+          className="flex-1"
+          height="h-full"
+          onDocumentSelect={(data) => {
             if (data?.action === 'create') {
               createNewEntry(data.folderId);
             } else if (data?.id) {
@@ -945,7 +946,6 @@ export default function Dashboard() {
           totalDocuments={entries.length}
           uncategorizedCount={entries.filter(e => !e.project_id).length}
         />
-        </div>
       </div>
 
       {/* Main Content Area */}

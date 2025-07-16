@@ -542,7 +542,7 @@ export default function ProjectExplorer({
   // Collapsed view
   if (isCollapsed) {
     return (
-      <div className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden`}>
+      <div className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden my-8`}>
         <div className="flex flex-col items-center py-4 gap-4">
           <Folder size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
           <FileText size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
@@ -561,7 +561,7 @@ export default function ProjectExplorer({
     >
       <div 
         ref={containerRef}
-        className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden relative`}
+        className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden relative my-8`}
         style={{ isolation: 'isolate' }}
       >
         {/* Header */}

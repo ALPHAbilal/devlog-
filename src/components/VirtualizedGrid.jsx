@@ -97,10 +97,37 @@ export default function VirtualizedGrid({
   
   // Force recalculation when sidebar state changes
   useEffect(() => {
-    if (containerRef.current) {
-      const newWidth = containerRef.current.offsetWidth;
-      setContainerWidth(newWidth);
-    }
+    if (!containerRef.current) return;
+    
+    // Calculate the expected width based on sidebar state
+    // This allows us to update immediately without waiting for CSS
+    const parentElement = containerRef.current.parentElement;
+    if (!parentElement) return;
+    
+    // Get current parent width and calculate expected width after transition
+    const parentRect = parentElement.getBoundingClientRect();
+    const sidebarWidth = sidebarCollapsed ? 80 : 280;
+    const expectedWidth = parentRect.width;
+    
+    // Update immediately with expected dimensions
+    requestAnimationFrame(() => {
+      setContainerWidth(expectedWidth);
+    });
+    
+    // Multiple updates during transition for smooth animation
+    const intervals = [50, 100, 150, 200, 250, 300, 350];
+    const timeouts = intervals.map(delay => 
+      setTimeout(() => {
+        if (containerRef.current) {
+          requestAnimationFrame(() => {
+            const currentWidth = containerRef.current.offsetWidth;
+            setContainerWidth(currentWidth);
+          });
+        }
+      }, delay)
+    );
+    
+    return () => timeouts.forEach(clearTimeout);
   }, [sidebarCollapsed]);
   
   // Remove debug logging to prevent console spam
@@ -150,7 +177,9 @@ export default function VirtualizedGrid({
       width: CARD_WIDTH,
       height: CARD_HEIGHT,
       transition: 'left 300ms cubic-bezier(0.4, 0, 0.2, 1), top 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-      willChange: 'left, top'
+      willChange: 'left, top',
+      // Force GPU acceleration for smoother transitions
+      transform: 'translateZ(0)'
     };
   };
 

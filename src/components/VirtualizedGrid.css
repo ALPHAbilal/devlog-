@@ -33,11 +33,10 @@
 
 /* Smooth card transitions */
 .virtualized-grid-item {
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
-  /* Force GPU layer */
-  transform: translateZ(0);
-  backface-visibility: hidden;
+  transition: left 300ms cubic-bezier(0.4, 0, 0.2, 1), top 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: left, top;
+  /* Optimize rendering */
+  contain: layout style paint;
 }
 
 /* Prevent layout shift during transitions */

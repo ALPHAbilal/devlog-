@@ -79,22 +79,15 @@ export default function VirtualizedGrid({
       }
     });
     
-    // Also watch for class changes on the main dashboard container
-    const dashboardContainer = containerRef.current.closest('.grid');
-    const mutationObserver = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
-          // Immediately update width when grid container style changes
-          updateWidth();
-        }
-      }
+    // Watch for any size changes in our container
+    const containerObserver = new ResizeObserver(() => {
+      updateWidth();
     });
     
-    if (dashboardContainer) {
-      mutationObserver.observe(dashboardContainer, {
-        attributes: true,
-        attributeFilter: ['style']
-      });
+    // Observe parent container as well for better responsiveness
+    const parentContainer = containerRef.current.parentElement;
+    if (parentContainer) {
+      containerObserver.observe(parentContainer);
     }
     
     // Also listen to window resize as a fallback
@@ -108,49 +101,31 @@ export default function VirtualizedGrid({
     
     return () => {
       resizeObserver.disconnect();
-      mutationObserver.disconnect();
+      containerObserver.disconnect();
       window.removeEventListener('resize', handleWindowResize);
       clearTimeout(resizeTimeout);
     };
   }, []);
   
-  // Force recalculation when sidebar state changes
+  // Trigger immediate recalculation when sidebar state changes
   useEffect(() => {
     if (!containerRef.current) return;
     
-    // Get the main grid container (parent of parent)
-    const scrollContainer = containerRef.current.parentElement;
-    const mainContainer = scrollContainer?.parentElement;
-    if (!mainContainer) return;
-    
-    // Calculate the exact final width based on sidebar state
-    const viewportWidth = window.innerWidth;
-    const sidebarWidth = sidebarCollapsed ? 80 : 280;
-    const finalContainerWidth = viewportWidth - sidebarWidth;
-    
-    // Apply the final width immediately
-    setContainerWidth(finalContainerWidth - 48); // Subtract padding (24px each side)
-    
-    // Use a single RAF loop for smooth updates during transition
-    let startTime = null;
-    const duration = 300; // Match CSS transition duration
-    
-    const updateWidth = (timestamp) => {
-      if (!startTime) startTime = timestamp;
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      
+    // Force an immediate width measurement
+    const measureWidth = () => {
       if (containerRef.current) {
-        const currentWidth = containerRef.current.offsetWidth;
-        setContainerWidth(currentWidth);
-      }
-      
-      if (progress < 1) {
-        requestAnimationFrame(updateWidth);
+        const rect = containerRef.current.getBoundingClientRect();
+        setContainerWidth(rect.width);
       }
     };
     
-    requestAnimationFrame(updateWidth);
+    // Measure immediately
+    measureWidth();
+    
+    // Also measure after the CSS transition completes
+    const timeoutId = setTimeout(measureWidth, 350);
+    
+    return () => clearTimeout(timeoutId);
   }, [sidebarCollapsed]);
   
   // Remove debug logging to prevent console spam
@@ -195,14 +170,12 @@ export default function VirtualizedGrid({
     
     return {
       position: 'absolute',
-      top: 0,
-      left: 0,
+      top: row * (CARD_HEIGHT + GAP),
+      left: centerOffset + col * (CARD_WIDTH + GAP),
       width: CARD_WIDTH,
       height: CARD_HEIGHT,
-      transition: 'transform 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-      willChange: 'transform',
-      // Use transform for positioning - better performance than left/top
-      transform: `translate3d(${centerOffset + col * (CARD_WIDTH + GAP)}px, ${row * (CARD_HEIGHT + GAP)}px, 0)`
+      transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+      willChange: 'left, top'
     };
   };
 

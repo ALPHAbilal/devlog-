@@ -1149,7 +1149,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar transition-all duration-300 ease-out"
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
              style={{ 
                scrollbarWidth: 'thin',
                scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'

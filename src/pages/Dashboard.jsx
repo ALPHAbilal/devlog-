@@ -121,13 +121,14 @@ export default function Dashboard() {
   }, [updateStorageInfo]);
 
   // Create new entry function (moved up for keyboard shortcut access)
-  const createNewEntry = useCallback(async () => {
+  const createNewEntry = useCallback(async (folderId = null) => {
     const newEntry = {
       id: crypto.randomUUID(),
       title: 'Untitled Document',
       preview: 'Click to start writing...',
       blocks: [],
       tags: [],
+      folder_id: folderId, // Add folder_id to the document
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       metadata: {
@@ -901,6 +902,15 @@ export default function Dashboard() {
               // Update the document's folder_id
               await updateEntry(docId, { folder_id: folderId });
             }}
+            onDocumentDelete={async (document) => {
+              const docId = document.id || document;
+              if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+                await deleteEntry(docId);
+                // Refresh the entries list
+                await loadEntries();
+                toast.success('Document deleted successfully');
+              }
+            }}
             onCreateProject={() => {
               setEditingProject(null);
               setShowProjectModal(true);
@@ -997,6 +1007,15 @@ export default function Dashboard() {
           onDocumentMove={async (docId, folderId) => {
             // Update the document's folder_id
             await updateEntry(docId, { folder_id: folderId });
+          }}
+          onDocumentDelete={async (document) => {
+            const docId = document.id || document;
+            if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+              await deleteEntry(docId);
+              // Refresh the entries list
+              await loadEntries();
+              toast.success('Document deleted successfully');
+            }
           }}
           onCreateProject={() => {
             setEditingProject(null);

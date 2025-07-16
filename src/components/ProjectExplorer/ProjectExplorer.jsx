@@ -113,6 +113,7 @@ export default function ProjectExplorer({
   totalDocuments = 0,
   uncategorizedCount = 0,
   onDocumentMove,
+  onDocumentDelete,
   isCollapsed = false,
   onToggleCollapse
 }) {
@@ -344,9 +345,11 @@ export default function ProjectExplorer({
   const deleteItem = useCallback(async (item, parentId) => {
     if (item.type === 'folder') {
       await deleteFolderFromDB(item.id);
+    } else if (item.type === 'document' && onDocumentDelete) {
+      // Delete the document
+      await onDocumentDelete(item.data || item);
     }
-    // For documents, we'll need to add a delete document function
-  }, [deleteFolderFromDB]);
+  }, [deleteFolderFromDB, onDocumentDelete]);
 
   // Handle drag start
   const handleDragStart = useCallback((event) => {

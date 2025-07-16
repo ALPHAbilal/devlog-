@@ -854,7 +854,7 @@ export default function Dashboard() {
         
         {/* Project Sidebar */}
         <div className={`
-          ${showSidebar ? 'block' : 'hidden lg:block'}
+          ${showSidebar ? 'block' : 'hidden'} lg:block
           bg-dark-primary lg:bg-transparent
           flex flex-col
           transition-all duration-300 ease-cubic
@@ -936,7 +936,7 @@ export default function Dashboard() {
       
       {/* Project Sidebar */}
       <div className={`
-        ${showSidebar ? 'block' : 'hidden lg:block'}
+        ${showSidebar ? 'block' : 'hidden'} lg:block
         bg-dark-primary lg:bg-transparent
         flex flex-col
         transition-all duration-300 ease-cubic

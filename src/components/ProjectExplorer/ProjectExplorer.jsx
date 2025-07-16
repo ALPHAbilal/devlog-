@@ -628,7 +628,7 @@ export default function ProjectExplorer({
   if (isCollapsed) {
     return (
       <div className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} ml-2 mr-2 rounded-2xl shadow-2xl overflow-hidden`}>
-        <div className="p-4 pt-12">
+        <div className="px-4 py-3">
           <button
             onClick={onToggleCollapse}
             className="w-full p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-300 hover:scale-105 group"
@@ -636,17 +636,6 @@ export default function ProjectExplorer({
           >
             <ChevronRight size={20} className="text-text-secondary mx-auto" />
           </button>
-        </div>
-        <div className="flex flex-col items-center py-2 gap-3">
-          <div className="p-3 rounded-xl hover:bg-surface-1/50 transition-all duration-300 hover:scale-105 cursor-pointer group">
-            <Folder size={20} className="text-text-secondary group-hover:text-accent-green transition-colors duration-300" title="Files" />
-          </div>
-          <div className="p-3 rounded-xl hover:bg-surface-1/50 transition-all duration-300 hover:scale-105 cursor-pointer group">
-            <FileText size={20} className="text-text-secondary group-hover:text-accent-green transition-colors duration-300" title="Documents" />
-          </div>
-          <div className="p-3 rounded-xl hover:bg-surface-1/50 transition-all duration-300 hover:scale-105 cursor-pointer group">
-            <Search size={20} className="text-text-secondary group-hover:text-accent-green transition-colors duration-300" title="Search" />
-          </div>
         </div>
       </div>
     );
@@ -669,10 +658,10 @@ export default function ProjectExplorer({
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleCollapse}
-              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-300 hover:scale-105 group"
+              className="p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-300 hover:scale-105 group"
               title="Collapse sidebar (Ctrl+B)"
             >
-              <ChevronLeft size={16} className="text-text-secondary group-hover:text-text-primary" />
+              <ChevronLeft size={20} className="text-text-secondary group-hover:text-text-primary" />
             </button>
             <h3 className="text-xs font-semibold text-text-secondary/80 uppercase tracking-wider">
               Explorer
@@ -696,22 +685,6 @@ export default function ProjectExplorer({
           </div>
         </div>
 
-        {/* Search */}
-        <div className="p-2 bg-surface-0/30">
-          <div className="relative">
-            <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-secondary/60" />
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search files..."
-              className="w-full pl-7 pr-2 py-1 bg-surface-1/30 text-text-primary text-sm
-                       rounded-lg border border-transparent focus:border-accent-green/30
-                       focus:outline-none focus:ring-1 focus:ring-accent-green/20 placeholder-text-secondary/40
-                       transition-all duration-300"
-            />
-          </div>
-        </div>
 
         {/* File tree */}
         <div 

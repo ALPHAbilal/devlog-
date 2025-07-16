@@ -544,7 +544,7 @@ export default function ProjectExplorer({
   // Collapsed view
   if (isCollapsed) {
     return (
-      <div className={`bg-gradient-to-br from-dark-primary to-dark-lighter ${height} flex flex-col ${className} ml-2 mr-2 rounded-2xl shadow-2xl overflow-hidden`}>
+      <div className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} ml-2 mr-2 rounded-2xl shadow-2xl overflow-hidden`}>
         <div className="p-4 pt-12">
           <button
             onClick={onToggleCollapse}
@@ -578,7 +578,7 @@ export default function ProjectExplorer({
     >
       <div 
         ref={containerRef}
-        className={`bg-gradient-to-br from-dark-primary to-dark-lighter ${height} flex flex-col ${className} overflow-hidden relative shadow-2xl`}
+        className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} overflow-hidden relative shadow-2xl`}
         style={{ isolation: 'isolate' }}
       >
         {/* Header */}

@@ -865,16 +865,17 @@ export default function Dashboard() {
             bg-dark-primary lg:bg-transparent
             flex flex-col
             transition-all duration-300 ease-cubic
-            pt-12 pb-7 h-full
+            h-full overflow-hidden
             ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
           style={{ gridColumn: '1' }}
         >
-          {/* Sidebar Content with proper spacing */}
-          <ProjectExplorer
-            isCollapsed={isSidebarCollapsed}
-            onToggleCollapse={toggleSidebarCollapse}
-            className="flex-1 min-h-0"
+          {/* Sidebar Content wrapper for spacing */}
+          <div className="flex-1 min-h-0 pt-12 pb-7 flex flex-col">
+            <ProjectExplorer
+              isCollapsed={isSidebarCollapsed}
+              onToggleCollapse={toggleSidebarCollapse}
+              className="flex-1 min-h-0"
             onDocumentSelect={(data) => {
               if (data?.action === 'create') {
                 createNewEntry(data.folderId);
@@ -910,6 +911,7 @@ export default function Dashboard() {
             totalDocuments={entries.length}
             uncategorizedCount={entries.filter(e => !e.project_id).length}
           />
+          </div>
         </div>
         
         {/* Expanded View Content */}
@@ -956,16 +958,17 @@ export default function Dashboard() {
           bg-dark-primary lg:bg-transparent
           flex flex-col
           transition-all duration-300 ease-cubic
-          pt-12 pb-7 h-full
+          h-full overflow-hidden
           ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
         style={{ gridColumn: '1' }}
       >
-        {/* Sidebar Content with proper spacing */}
-        <ProjectExplorer
-          isCollapsed={isSidebarCollapsed}
-          onToggleCollapse={toggleSidebarCollapse}
-          className="flex-1 min-h-0"
+        {/* Sidebar Content wrapper for spacing */}
+        <div className="flex-1 min-h-0 pt-12 pb-7 flex flex-col">
+          <ProjectExplorer
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+            className="flex-1 min-h-0"
           onDocumentSelect={(data) => {
             if (data?.action === 'create') {
               createNewEntry(data.folderId);
@@ -1002,6 +1005,7 @@ export default function Dashboard() {
           totalDocuments={entries.length}
           uncategorizedCount={entries.filter(e => !e.project_id).length}
         />
+        </div>
       </div>
 
       {/* Main Content Area */}

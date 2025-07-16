@@ -843,7 +843,14 @@ export default function Dashboard() {
   if (expandedEntry) {
     console.log('Dashboard: Showing ExpandedView instead of grid');
     return (
-      <div className="h-screen grid grid-cols-[auto_1fr] overflow-hidden">
+      <div 
+        className="h-screen overflow-hidden"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
+          gridTemplateRows: '1fr'
+        }}
+      >
         {/* Mobile overlay */}
         {showSidebar && (
           <div
@@ -853,14 +860,16 @@ export default function Dashboard() {
         )}
         
         {/* Project Sidebar */}
-        <div className={`
-          ${showSidebar ? 'block' : 'hidden'} lg:block
-          bg-dark-primary lg:bg-transparent
-          flex flex-col
-          transition-all duration-300 ease-cubic
-          ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}
-          pt-12 pb-7 h-full
-        `}>
+        <div 
+          className={`
+            bg-dark-primary lg:bg-transparent
+            flex flex-col
+            transition-all duration-300 ease-cubic
+            pt-12 pb-7 h-full
+            ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          `}
+          style={{ gridColumn: '1' }}
+        >
           {/* Sidebar Content with proper spacing */}
           <ProjectExplorer
             isCollapsed={isSidebarCollapsed}
@@ -904,7 +913,7 @@ export default function Dashboard() {
         </div>
         
         {/* Expanded View Content */}
-        <main className="flex flex-col min-w-0 overflow-hidden">
+        <main className="flex flex-col min-w-0 overflow-hidden" style={{ gridColumn: '2' }}>
           <ExpandedView 
             entry={expandedEntry} 
             onClose={() => setExpandedEntry(null)}
@@ -925,7 +934,14 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="h-screen grid grid-cols-[auto_1fr] overflow-hidden dashboard-container">
+      <div 
+        className="h-screen overflow-hidden dashboard-container"
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
+          gridTemplateRows: '1fr'
+        }}
+      >
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -935,14 +951,16 @@ export default function Dashboard() {
       )}
       
       {/* Project Sidebar */}
-      <div className={`
-        ${showSidebar ? 'block' : 'hidden'} lg:block
-        bg-dark-primary lg:bg-transparent
-        flex flex-col
-        transition-all duration-300 ease-cubic
-        ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}
-        pt-12 pb-7 h-full
-      `}>
+      <div 
+        className={`
+          bg-dark-primary lg:bg-transparent
+          flex flex-col
+          transition-all duration-300 ease-cubic
+          pt-12 pb-7 h-full
+          ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+        style={{ gridColumn: '1' }}
+      >
         {/* Sidebar Content with proper spacing */}
         <ProjectExplorer
           isCollapsed={isSidebarCollapsed}
@@ -987,7 +1005,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex flex-col min-w-0 overflow-hidden">
+      <main className="flex flex-col min-w-0 overflow-hidden" style={{ gridColumn: '2' }}>
         {/* Header */}
         <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}

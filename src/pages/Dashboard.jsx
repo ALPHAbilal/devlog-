@@ -860,7 +860,7 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="h-screen flex relative overflow-hidden">
+      <div className="h-full flex relative overflow-hidden">
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -1055,10 +1055,10 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 scrollbar-thin"
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 scrollbar-thin custom-scrollbar"
              style={{ 
                scrollbarWidth: 'thin',
-               scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
              }}>
           {console.log('Dashboard rendering VirtualizedGrid:', { 
             filteredEntriesCount: filteredEntries.length,

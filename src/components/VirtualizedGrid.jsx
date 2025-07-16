@@ -75,7 +75,7 @@ export default function VirtualizedGrid({
   // Handle scroll to update visible range
   const handleScroll = useCallback(() => {
     // Find the parent scrollable container (the cards container in Dashboard)
-    const scrollContainer = containerRef.current?.closest('.overflow-y-auto');
+    const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
     if (!scrollContainer) return;
 
     const scrollTop = scrollContainer.scrollTop;
@@ -96,7 +96,7 @@ export default function VirtualizedGrid({
 
   useEffect(() => {
     // Find the parent scrollable container
-    const scrollContainer = containerRef.current?.closest('.overflow-y-auto');
+    const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
     if (!scrollContainer) return;
 
     scrollContainer.addEventListener('scroll', handleScroll);
@@ -119,38 +119,52 @@ export default function VirtualizedGrid({
     };
   };
 
+  // Calculate total height including padding
+  const totalHeight = rows * (CARD_HEIGHT + GAP) - GAP + 40; // 40px for padding
+  
+  // Debug logging
+  useEffect(() => {
+    const scrollContainer = containerRef.current?.closest('.overflow-y-scroll');
+    if (scrollContainer) {
+      console.log('VirtualizedGrid Debug:', {
+        totalHeight,
+        containerHeight: scrollContainer.clientHeight,
+        hasOverflow: totalHeight > scrollContainer.clientHeight,
+        itemCount: allItems.length,
+        rows,
+        columns
+      });
+    }
+  }, [totalHeight, allItems.length, rows, columns]);
+
   return (
     <div 
       ref={containerRef}
       className="relative w-full"
+      style={{ 
+        height: totalHeight,
+        minHeight: totalHeight,
+        paddingTop: 20,
+        paddingBottom: 20
+      }}
     >
-      {/* Virtual spacer to maintain proper height for parent scrolling */}
-      <div 
-        style={{ 
-          height: rows * (CARD_HEIGHT + GAP) - GAP,
-          position: 'relative',
-          paddingTop: 20,
-          paddingBottom: 20
-        }}
-      >
-        {/* Render only visible items */}
-        {allItems.slice(visibleRange.start, visibleRange.end).map((item, index) => {
-          const actualIndex = visibleRange.start + index;
-          
-          return (
-            <div key={item.id} style={getItemStyle(actualIndex)}>
-              <CompactEntryCard 
-                entry={item} 
-                onExpand={onExpand}
-                searchTerm={searchTerm}
-                isSelected={selectedDocuments.has(item.id)}
-                onSelect={onSelectDocument}
-                selectionMode={selectionMode}
-              />
-            </div>
-          );
-        })}
-      </div>
+      {/* Render only visible items - no wrapper div */}
+      {allItems.slice(visibleRange.start, visibleRange.end).map((item, index) => {
+        const actualIndex = visibleRange.start + index;
+        
+        return (
+          <div key={item.id} style={getItemStyle(actualIndex)}>
+            <CompactEntryCard 
+              entry={item} 
+              onExpand={onExpand}
+              searchTerm={searchTerm}
+              isSelected={selectedDocuments.has(item.id)}
+              onSelect={onSelectDocument}
+              selectionMode={selectionMode}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }

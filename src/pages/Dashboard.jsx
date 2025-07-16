@@ -1055,10 +1055,10 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 scrollbar-thin custom-scrollbar min-h-0 overscroll-behavior-contain"
+        <div className="flex-1 overflow-y-scroll overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 overscroll-behavior-contain debug-scrollbar"
              style={{ 
-               scrollbarWidth: 'thin',
-               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
+               scrollbarWidth: 'auto',
+               scrollbarColor: '#ff0000 #00ff00'
              }}>
           {console.log('Dashboard rendering VirtualizedGrid:', { 
             filteredEntriesCount: filteredEntries.length,

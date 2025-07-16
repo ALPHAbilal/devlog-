@@ -370,6 +370,19 @@ select option {
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* DEBUG: Bright scrollbar for testing */
+.debug-scrollbar::-webkit-scrollbar {
+  width: 20px !important;
+  height: 20px !important;
+}
+.debug-scrollbar::-webkit-scrollbar-track {
+  background: #ff0000 !important;
+}
+.debug-scrollbar::-webkit-scrollbar-thumb {
+  background: #00ff00 !important;
+  border: 2px solid #0000ff !important;
+}
+
 /* Prevent text selection on drag */
 .no-select {
   user-select: none;

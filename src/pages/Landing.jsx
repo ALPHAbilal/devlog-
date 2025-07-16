@@ -58,7 +58,7 @@ function LandingContent() {
           </div>
           
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:!flex items-center gap-4">
             <a
               href="#pricing"
               className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"

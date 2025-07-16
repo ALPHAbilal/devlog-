@@ -4,6 +4,12 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  safelist: [
+    'hidden',
+    'md:flex',
+    'md:hidden',
+    'md:block',
+  ],
   theme: {
     extend: {
       colors: {

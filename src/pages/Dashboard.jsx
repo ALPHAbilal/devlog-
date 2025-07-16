@@ -849,7 +849,9 @@ export default function Dashboard() {
           display: 'grid',
           gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
           gridTemplateRows: '1fr',
-          transition: 'grid-template-columns 300ms cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'grid-template-columns',
+          contain: 'layout style'
         }}
       >
         {/* Mobile overlay */}
@@ -865,7 +867,7 @@ export default function Dashboard() {
           className={`
             bg-dark-primary lg:bg-transparent
             flex flex-col
-            transition-all duration-300 ease-out
+            transition-all duration-200 ease-out
             h-full overflow-hidden
             ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
           `}
@@ -943,7 +945,9 @@ export default function Dashboard() {
           display: 'grid',
           gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
           gridTemplateRows: '1fr',
-          transition: 'grid-template-columns 300ms cubic-bezier(0.4, 0, 0.2, 1)'
+          transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+          willChange: 'grid-template-columns',
+          contain: 'layout style'
         }}
       >
       {/* Mobile overlay */}

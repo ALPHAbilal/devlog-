@@ -58,7 +58,7 @@ function DroppableFolder({ id, children, isActive }) {
       ref={setNodeRef}
       className={`
         ${isOver ? 'ring-2 ring-accent-green/50 bg-accent-green/10 rounded-md' : ''}
-        transition-all duration-200
+        transition-colors duration-200
       `}
     >
       {children}
@@ -459,7 +459,7 @@ export default function ProjectExplorer({
         data-document-id={item.type === 'document' ? item.id : undefined}
         className={`
           group flex items-center justify-between py-1 px-2
-          rounded-md transition-all duration-150
+          rounded-md transition-colors duration-200
           ${isActiveDocument 
             ? 'bg-accent-green/20 border-l-2 border-accent-green shadow-sm' 
             : isSelected 
@@ -469,7 +469,11 @@ export default function ProjectExplorer({
           ${isRenaming && isRenaming ? 'pointer-events-none' : 'cursor-pointer'}
           ${isActiveDocument ? 'ml-[-2px]' : ''}
         `}
-        style={{ paddingLeft: `${(depth * 16) + 8}px` }}
+        style={{ 
+          paddingLeft: `${(depth * 16) + 8}px`,
+          willChange: isActiveDocument ? 'background-color, border-color' : 'auto',
+          contain: 'layout style paint'
+        }}
         onClick={() => {
           if (item.type === 'folder' || item.type === 'root') {
             toggleExpanded(item.id);
@@ -549,7 +553,7 @@ export default function ProjectExplorer({
                     e.stopPropagation();
                     createNewFolder(item.id);
                   }}
-                  className="p-0.5 hover:bg-surface-1/50 rounded-lg transition-all duration-300"
+                  className="p-0.5 hover:bg-surface-1/50 rounded-lg transition-colors duration-200"
                   title="New folder"
                 >
                   <FolderPlus size={12} className="text-text-secondary" />
@@ -559,7 +563,7 @@ export default function ProjectExplorer({
                     e.stopPropagation();
                     handleContextMenu(e, item, parentId);
                   }}
-                  className="p-0.5 hover:bg-surface-1/50 rounded-lg transition-all duration-300"
+                  className="p-0.5 hover:bg-surface-1/50 rounded-lg transition-colors duration-200"
                   title="More options"
                 >
                   <MoreVertical size={12} className="text-text-secondary" />
@@ -631,7 +635,7 @@ export default function ProjectExplorer({
         <div className="px-4 py-3">
           <button
             onClick={onToggleCollapse}
-            className="w-full p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-300 hover:scale-105 group"
+            className="w-full p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-200 hover:scale-105 group"
             title="Expand sidebar (Ctrl+B)"
           >
             <ChevronRight size={20} className="text-text-secondary mx-auto" />
@@ -658,7 +662,7 @@ export default function ProjectExplorer({
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleCollapse}
-              className="p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-300 hover:scale-105 group"
+              className="p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-200 hover:scale-105 group"
               title="Collapse sidebar (Ctrl+B)"
             >
               <ChevronLeft size={20} className="text-text-secondary group-hover:text-text-primary" />
@@ -670,14 +674,14 @@ export default function ProjectExplorer({
           <div className="flex items-center gap-1">
             <button
               onClick={() => createNewFolder('root')}
-              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-300 hover:scale-105"
+              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-200 hover:scale-105"
               title="New folder"
             >
               <FolderPlus size={14} className="text-text-secondary" />
             </button>
             <button
               onClick={() => setExpandedItems(new Set(['root']))}
-              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-300 hover:scale-105"
+              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-200 hover:scale-105"
               title="Collapse all"
             >
               <ChevronDown size={14} className="text-text-secondary" />

@@ -708,6 +708,269 @@ npm run typecheck   # Check TypeScript types (if applicable)
 
 If these commands are not available, ask the user for the correct commands and update this file.
 
+## 🚨 CRITICAL: PRODUCTION DEPLOYMENT SAFETY
+
+This section documents critical deployment mistakes that can severely impact user experience and how to prevent them. Every issue here was learned from real production incidents.
+
+### 1. CSS Build Issues (The Hidden Navigation Incident)
+
+**What Happened**: Sign In button disappeared on desktop after deployment
+**Root Cause**: Tailwind CSS purged responsive utilities in production build
+**Impact**: Users couldn't access the app on desktop
+
+**Prevention**:
+```javascript
+// tailwind.config.js - Always safelist critical utilities
+export default {
+  safelist: [
+    'hidden', 'block', 'flex', 'inline-flex',
+    'md:hidden', 'md:block', 'md:flex', 'md:inline-flex',
+    'lg:hidden', 'lg:block', 'lg:flex', 'lg:inline-flex',
+  ]
+}
+```
+
+**Testing**:
+```bash
+# ALWAYS test production build locally before deploying
+npm run build
+npm run preview
+# Check responsive breakpoints at 768px, 1024px
+```
+
+### 2. Environment Variable Disasters
+
+**Common Mistakes That Break Production**:
+```bash
+# ❌ Using dev database in production
+VITE_SUPABASE_URL=http://localhost:54321  # DISASTER!
+
+# ❌ Exposing service role key (full admin access)
+VITE_SUPABASE_SERVICE_KEY=eyJ...  # SECURITY BREACH!
+
+# ❌ Wrong environment keys
+VITE_SUPABASE_ANON_KEY=<dev_key>  # Features won't work!
+```
+
+**Safe Practice**:
+```bash
+# Vercel environment setup
+vercel env pull .env.production  # Get prod vars
+vercel env add VITE_SUPABASE_URL  # Add safely
+
+# Always verify before deploy
+grep "localhost" .env*  # Should return nothing
+```
+
+### 3. Database Migration Catastrophes
+
+**The Horror Story**: Running migrations can DELETE ALL USER DATA
+```sql
+-- ❌ NEVER run this in production
+TRUNCATE TABLE blocks;  -- All content gone!
+DROP TABLE documents CASCADE;  -- Everything deleted!
+
+-- ❌ Dangerous RPC function
+CREATE FUNCTION save_blocks(blocks_array jsonb[])
+BEGIN
+  DELETE FROM blocks WHERE document_id = $1;  -- Deletes first!
+  -- If insert fails, data is gone forever
+END;
+```
+
+**Safe Migration Process**:
+```sql
+-- 1. ALWAYS backup first
+CREATE TABLE blocks_backup_$(date +%Y%m%d) AS SELECT * FROM blocks;
+
+-- 2. Use transactions
+BEGIN;
+  -- Your migration
+  ALTER TABLE blocks ADD COLUMN new_field TEXT;
+  -- Verify data intact
+  SELECT COUNT(*) FROM blocks;
+ROLLBACK;  -- If count wrong
+
+-- 3. Use Supabase branching
+-- Test on branch first, then merge
+```
+
+### 4. Breaking API/Route Changes
+
+**What Breaks Users**:
+```javascript
+// ❌ Changing routes without redirects
+// Old: /dashboard
+// New: /app/dashboard  
+// Result: All bookmarks broken!
+
+// ✅ Safe approach
+// Add redirects in vercel.json
+{
+  "redirects": [
+    { "source": "/dashboard", "destination": "/app/dashboard", "permanent": false }
+  ]
+}
+```
+
+### 5. Performance Degradation
+
+**Hidden Performance Killers**:
+```javascript
+// ❌ Loading everything eagerly
+import HeavyComponent from './HeavyComponent';
+import AnotherBigComponent from './AnotherBig';
+
+// ✅ Lazy load non-critical components
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+```
+
+### 6. Authentication State Loss
+
+**Common Mistake**: Changing auth storage keys
+```javascript
+// ❌ DON'T change storage keys without migration
+// Old: localStorage.setItem('auth-token', token)
+// New: localStorage.setItem('journey-log-auth', token)
+// Result: All users logged out!
+
+// ✅ Migration approach
+const oldAuth = localStorage.getItem('auth-token');
+if (oldAuth && !localStorage.getItem('journey-log-auth')) {
+  localStorage.setItem('journey-log-auth', oldAuth);
+}
+```
+
+### Pre-Deployment Safety Checklist
+
+```bash
+# 1. Build & Test Locally
+npm run build
+npm run preview
+# Test all critical user flows
+
+# 2. Check for Breaking Changes
+git diff main -- '*.jsx' '*.js' | grep -E "(route|path|localStorage|api/)"
+
+# 3. Verify Environment Variables
+# Never commit .env files
+git status  # Should NOT show .env files
+
+# 4. Database Safety
+# - Backup production database
+# - Test migrations on Supabase branch
+# - Have rollback SQL ready
+
+# 5. CSS/Style Verification
+# Open browser DevTools
+# Test at: 375px (mobile), 768px (tablet), 1024px (desktop)
+
+# 6. API Compatibility
+# Keep old endpoints working
+# Version new endpoints (/api/v2/)
+```
+
+### Deployment Monitoring
+
+**Set Up Immediately After Deploy**:
+1. **Error Tracking** (Sentry/LogRocket)
+   ```javascript
+   window.addEventListener('error', (e) => {
+     // Log to monitoring service
+     console.error('Production Error:', e);
+   });
+   ```
+
+2. **User Flow Monitoring**
+   - Sign up success rate
+   - Document save success rate
+   - Page load times
+
+3. **Real User Feedback Loop**
+   ```javascript
+   // Add feedback widget
+   if (window.location.hostname === 'devlog.design') {
+     // Show "Report Issue" button
+   }
+   ```
+
+### Emergency Rollback Procedures
+
+**When Things Go Wrong**:
+```bash
+# 1. Vercel - Instant Rollback
+vercel rollback  # Returns to previous deployment
+
+# 2. Database - Point in Time Recovery
+# Supabase Dashboard > Database > Backups > Restore
+
+# 3. Feature Flags - Disable without deploy
+const FEATURES = {
+  BROKEN_FEATURE: false,  // Turn off immediately
+};
+```
+
+### Safe Iteration Patterns
+
+**Deploy Features Gradually**:
+```javascript
+// 1. Percentage Rollout
+const showNewFeature = Math.random() < 0.1; // 10% of users
+
+// 2. User Whitelist
+const betaUsers = ['user-id-1', 'user-id-2'];
+const showNewFeature = betaUsers.includes(user.id);
+
+// 3. Time-Based Rollout
+const rolloutDate = new Date('2025-02-01');
+const showNewFeature = new Date() > rolloutDate;
+```
+
+### Critical Files to Review Before Deploy
+
+1. **package.json** - Dependency changes can break builds
+2. **tailwind.config.js** - CSS generation changes
+3. **vite.config.js** - Build process changes
+4. **.env.example** - Document new env vars
+5. **vercel.json** - Routing and build settings
+6. **supabase/migrations/** - Database changes
+
+### Lessons from Production Incidents
+
+1. **"It works locally" ≠ "It works in production"**
+   - Dev and prod builds are different
+   - Always test production builds
+
+2. **Users don't report obvious bugs**
+   - They just leave
+   - Monitor everything
+
+3. **Database migrations are the #1 cause of data loss**
+   - Always backup
+   - Always use transactions
+   - Test on staging/branch first
+
+4. **CSS issues are silent killers**
+   - Purged utilities
+   - Media query conflicts
+   - Missing responsive designs
+
+5. **Performance degradation is gradual**
+   - Monitor bundle sizes
+   - Track Core Web Vitals
+   - Lazy load everything possible
+
+### The Golden Rules
+
+1. **Never deploy on Friday** (or before holidays)
+2. **Always have a rollback plan**
+3. **Test the exact production build locally**
+4. **Monitor everything after deploy**
+5. **Keep old APIs working** (deprecate slowly)
+6. **Document every production incident**
+
+Remember: **Every production incident is a learning opportunity**. Update this guide when new issues are discovered.
+
 ## Future Actions & Roadmap
 
 ### Recently Completed ✅

@@ -379,3 +379,21 @@ select option {
   -ms-user-select: none;
 }
 
+/* Optimize sidebar and focus indicator performance */
+.sidebar-container {
+  will-change: width;
+  contain: layout style;
+}
+
+.focus-indicator {
+  will-change: background-color, border-color, transform;
+  transform: translateZ(0); /* Force GPU acceleration */
+  backface-visibility: hidden; /* Prevent flickering */
+}
+
+/* Prevent layout shifts during transitions */
+.project-explorer-item {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+

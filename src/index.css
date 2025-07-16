@@ -6,14 +6,13 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Prevent outer scrollbars and ensure full height */
-html, body {
+/* Ensure full height for the app */
+html, body, #root {
   height: 100%;
-  overflow: hidden;
 }
 
-#root {
-  height: 100%;
+/* Only prevent scrolling on dashboard - other pages can scroll */
+body:has(.dashboard-container) {
   overflow: hidden;
 }
 

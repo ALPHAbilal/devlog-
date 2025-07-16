@@ -860,7 +860,7 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="h-full flex relative overflow-hidden">
+      <div className="h-full flex relative overflow-hidden dashboard-container">
       {/* Mobile overlay */}
       {showSidebar && (
         <div

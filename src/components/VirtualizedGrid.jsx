@@ -17,11 +17,11 @@ export default function VirtualizedGrid({
   const [containerWidth, setContainerWidth] = useState(0);
   
   
-  // Configuration for cards - balanced for readability
-  const CARD_WIDTH = 320; // Proper width for content
-  const CARD_HEIGHT = 200; // Proper height for preview  
-  const GAP = 20; // Good spacing between cards
-  const MAX_COLUMNS = 4; // Optimal columns for readability
+  // Configuration for cards - more compact and modern
+  const CARD_WIDTH = 280; // Compact width
+  const CARD_HEIGHT = 160; // Reduced height for more cards  
+  const GAP = 16; // Tighter spacing
+  const MAX_COLUMNS = 5; // More columns for compact view
   const BUFFER_ROWS = 2; // Extra rows to render for smooth scrolling
 
   // Calculate columns based on container width
@@ -267,67 +267,77 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
   return (
     <div 
       onClick={() => onExpand(entry)}
-      className="w-full h-full bg-card-gradient rounded p-3 cursor-pointer 
-                 transition-all duration-200 hover:shadow-lg
-                 flex flex-col group"
+      className="w-full h-full bg-gradient-to-br from-dark-secondary/90 to-dark-secondary/70 
+                 rounded-lg p-3 cursor-pointer 
+                 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]
+                 flex flex-col group relative overflow-hidden
+                 border border-gray-800/50 hover:border-accent-green/30"
     >
+      {/* Subtle gradient overlay for depth */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 
+                      group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      
+      {/* Accent glow on hover */}
+      <div className="absolute -inset-px bg-gradient-to-r from-accent-green/0 via-accent-green/20 to-accent-green/0 
+                      opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg pointer-events-none" />
       {/* Compact header */}
-      <div className="flex justify-between items-start mb-1">
-        <div className="flex items-center gap-1.5 text-xs text-text-secondary/60">
+      <div className="flex justify-between items-start mb-1 relative z-10">
+        <div className="flex items-center gap-1 text-xs text-text-secondary/60">
           {blockTypes.code > 0 && (
-            <span className="flex items-center gap-0.5">
-              <span className="w-1 h-1 bg-blue-500/70 rounded-full"></span>
-              <span className="text-[10px]">{blockTypes.code}</span>
+            <span className="flex items-center gap-0.5 px-1 py-0.5 bg-blue-500/10 rounded-full">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span>
+              <span className="text-[9px] text-blue-400">{blockTypes.code}</span>
             </span>
           )}
           {blockTypes.ai > 0 && (
-            <span className="flex items-center gap-0.5">
-              <span className="w-1 h-1 bg-purple-500/70 rounded-full"></span>
-              <span className="text-[10px]">{blockTypes.ai}</span>
+            <span className="flex items-center gap-0.5 px-1 py-0.5 bg-purple-500/10 rounded-full">
+              <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse"></span>
+              <span className="text-[9px] text-purple-400">{blockTypes.ai}</span>
             </span>
           )}
         </div>
         {entry.updatedAt && (
-          <div className="text-text-secondary/50 text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="text-text-secondary/40 text-[9px] opacity-0 group-hover:opacity-100 transition-all duration-300">
             {formatDate(entry.updatedAt)}
           </div>
         )}
       </div>
       
       {/* Title */}
-      <h3 className="text-text-primary text-sm font-medium mb-1.5 line-clamp-1 leading-tight">
+      <h3 className="text-text-primary text-[13px] font-medium mb-1 line-clamp-1 leading-tight">
         {highlightText(entry.title, searchTerm)}
       </h3>
       
-      {/* Activity Sparkline - 6 months of weekly data */}
-      <div className="mb-1.5">
+      {/* Activity Sparkline - smaller for compact cards */}
+      <div className="mb-1">
         <Sparkline 
           data={activityData} 
-          width={230} 
-          height={24}
-          className="opacity-60 group-hover:opacity-100 transition-opacity duration-200"
+          width={200} 
+          height={20}
+          className="opacity-50 group-hover:opacity-90 transition-opacity duration-300"
         />
       </div>
       
       {/* Preview - ultra compact */}
-      <p className="text-text-secondary/70 text-xs line-clamp-2 flex-grow leading-snug">
+      <p className="text-text-secondary/60 text-[11px] line-clamp-2 flex-grow leading-relaxed">
         {highlightText(entry.preview, searchTerm)}
       </p>
 
       {/* Minimal tags */}
       {entry.tags && entry.tags.length > 0 && (
-        <div className="mt-1.5 flex gap-1 overflow-hidden">
+        <div className="mt-1 flex gap-1 overflow-hidden">
           {entry.tags.slice(0, 2).map((tag, index) => (
             <span 
               key={index}
-              className="text-[10px] px-1.5 py-0.5 bg-dark-secondary/40 rounded 
-                         text-text-secondary/60 truncate max-w-[60px]"
+              className="text-[9px] px-1 py-0.5 bg-accent-green/10 rounded-full 
+                         text-accent-green/70 truncate max-w-[50px]
+                         border border-accent-green/20"
             >
               {tag}
             </span>
           ))}
           {entry.tags.length > 2 && (
-            <span className="text-[10px] text-text-secondary/50">
+            <span className="text-[9px] text-text-secondary/50">
               +{entry.tags.length - 2}
             </span>
           )}

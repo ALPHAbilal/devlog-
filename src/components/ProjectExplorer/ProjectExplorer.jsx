@@ -382,7 +382,7 @@ export default function ProjectExplorer({
         className={`
           group flex items-center justify-between py-1 px-2
           rounded-md transition-all duration-150
-          ${isSelected ? 'bg-dark-secondary/40' : 'hover:bg-dark-secondary/20'}
+          ${isSelected ? 'bg-surface-1/50' : 'hover:bg-surface-1/30'}
           ${depth === 0 && !isRoot ? 'mt-0.5' : ''}
           ${isRenaming && isRenaming ? 'pointer-events-none' : 'cursor-pointer'}
         `}
@@ -466,7 +466,7 @@ export default function ProjectExplorer({
                     e.stopPropagation();
                     createNewFolder(item.id);
                   }}
-                  className="p-0.5 hover:bg-dark-secondary/40 rounded"
+                  className="p-0.5 hover:bg-surface-1/50 rounded-lg transition-all duration-300"
                   title="New folder"
                 >
                   <FolderPlus size={12} className="text-text-secondary" />
@@ -476,7 +476,7 @@ export default function ProjectExplorer({
                     e.stopPropagation();
                     handleContextMenu(e, item, parentId);
                   }}
-                  className="p-0.5 hover:bg-dark-secondary/40 rounded"
+                  className="p-0.5 hover:bg-surface-1/50 rounded-lg transition-all duration-300"
                   title="More options"
                 >
                   <MoreVertical size={12} className="text-text-secondary" />
@@ -544,20 +544,26 @@ export default function ProjectExplorer({
   // Collapsed view
   if (isCollapsed) {
     return (
-      <div className={`bg-[#1e1e1e] ${height} flex flex-col ${className} border-r border-dark-secondary/30 overflow-hidden`}>
-        <div className="p-4">
+      <div className={`bg-gradient-to-br from-dark-primary to-dark-lighter ${height} flex flex-col ${className} ml-2 mr-2 rounded-2xl shadow-2xl overflow-hidden`}>
+        <div className="p-4 pt-12">
           <button
             onClick={onToggleCollapse}
-            className="w-full p-2 hover:bg-gray-800/50 rounded transition-colors"
+            className="w-full p-2 hover:bg-surface-1/50 rounded-xl transition-all duration-300 hover:scale-105 group"
             title="Expand sidebar (Ctrl+B)"
           >
             <ChevronRight size={20} className="text-text-secondary mx-auto" />
           </button>
         </div>
-        <div className="flex flex-col items-center py-2 gap-4">
-          <Folder size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" title="Files" />
-          <FileText size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" title="Documents" />
-          <Search size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" title="Search" />
+        <div className="flex flex-col items-center py-2 gap-3">
+          <div className="p-3 rounded-xl hover:bg-surface-1/50 transition-all duration-300 hover:scale-105 cursor-pointer group">
+            <Folder size={20} className="text-text-secondary group-hover:text-accent-green transition-colors duration-300" title="Files" />
+          </div>
+          <div className="p-3 rounded-xl hover:bg-surface-1/50 transition-all duration-300 hover:scale-105 cursor-pointer group">
+            <FileText size={20} className="text-text-secondary group-hover:text-accent-green transition-colors duration-300" title="Documents" />
+          </div>
+          <div className="p-3 rounded-xl hover:bg-surface-1/50 transition-all duration-300 hover:scale-105 cursor-pointer group">
+            <Search size={20} className="text-text-secondary group-hover:text-accent-green transition-colors duration-300" title="Search" />
+          </div>
         </div>
       </div>
     );
@@ -572,15 +578,15 @@ export default function ProjectExplorer({
     >
       <div 
         ref={containerRef}
-        className={`bg-[#1e1e1e] ${height} flex flex-col ${className} border-r border-dark-secondary/30 overflow-hidden relative`}
+        className={`bg-gradient-to-br from-dark-primary to-dark-lighter ${height} flex flex-col ${className} overflow-hidden relative shadow-2xl`}
         style={{ isolation: 'isolate' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-dark-secondary/20">
+        <div className="flex items-center justify-between px-4 py-3 bg-surface-1/30 backdrop-blur-sm">
           <div className="flex items-center gap-2">
             <button
               onClick={onToggleCollapse}
-              className="p-1 hover:bg-gray-800/50 rounded transition-colors group"
+              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-300 hover:scale-105 group"
               title="Collapse sidebar (Ctrl+B)"
             >
               <ChevronLeft size={16} className="text-text-secondary group-hover:text-text-primary" />
@@ -592,14 +598,14 @@ export default function ProjectExplorer({
           <div className="flex items-center gap-1">
             <button
               onClick={() => createNewFolder('root')}
-              className="p-1 hover:bg-dark-secondary/30 rounded transition-all"
+              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-300 hover:scale-105"
               title="New folder"
             >
               <FolderPlus size={14} className="text-text-secondary" />
             </button>
             <button
               onClick={() => setExpandedItems(new Set(['root']))}
-              className="p-1 hover:bg-dark-secondary/30 rounded transition-all"
+              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-300 hover:scale-105"
               title="Collapse all"
             >
               <ChevronDown size={14} className="text-text-secondary" />
@@ -608,7 +614,7 @@ export default function ProjectExplorer({
         </div>
 
         {/* Search */}
-        <div className="p-2 border-b border-dark-secondary/20">
+        <div className="p-2 bg-surface-0/30">
           <div className="relative">
             <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-text-secondary/60" />
             <input
@@ -616,9 +622,10 @@ export default function ProjectExplorer({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search files..."
-              className="w-full pl-7 pr-2 py-1 bg-dark-secondary/20 text-text-primary text-sm
-                       rounded border border-dark-secondary/30 focus:border-accent-green/50
-                       focus:outline-none placeholder-text-secondary/40"
+              className="w-full pl-7 pr-2 py-1 bg-surface-1/30 text-text-primary text-sm
+                       rounded-lg border border-transparent focus:border-accent-green/30
+                       focus:outline-none focus:ring-1 focus:ring-accent-green/20 placeholder-text-secondary/40
+                       transition-all duration-300"
             />
           </div>
         </div>
@@ -652,7 +659,7 @@ export default function ProjectExplorer({
         {/* Drag overlay */}
         <DragOverlay>
           {draggedItem ? (
-            <div className="bg-dark-secondary/90 text-text-primary px-2 py-1 rounded shadow-lg flex items-center gap-2">
+            <div className="bg-gradient-to-br from-dark-primary to-dark-lighter text-text-primary px-3 py-2 rounded-lg shadow-2xl flex items-center gap-2 border border-accent-green/20">
               {draggedItem.type === 'folder' ? (
                 <Folder size={14} className="text-accent-green" />
               ) : (

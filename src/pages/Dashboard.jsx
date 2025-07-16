@@ -860,7 +860,7 @@ export default function Dashboard() {
           lg:translate-x-0 lg:block
           bg-dark-primary lg:bg-transparent
           flex flex-col
-          ${isSidebarCollapsed ? 'w-16' : 'w-[280px]'}
+          ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}
           pt-12 pb-7
         `}>
           {/* Sidebar Content with proper spacing */}
@@ -945,7 +945,7 @@ export default function Dashboard() {
         lg:translate-x-0 lg:block
         bg-dark-primary lg:bg-transparent
         flex flex-col
-        ${isSidebarCollapsed ? 'w-16' : 'w-[280px]'}
+        ${isSidebarCollapsed ? 'w-20' : 'w-[280px]'}
         pt-12 pb-7
       `}>
         {/* Sidebar Content with proper spacing */}

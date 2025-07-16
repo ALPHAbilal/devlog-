@@ -866,7 +866,6 @@ export default function Dashboard() {
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
             className="flex-1 min-h-0"
-            height="h-full"
             onDocumentSelect={(data) => {
               if (data?.action === 'create') {
                 createNewEntry(data.folderId);

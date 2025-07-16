@@ -28,6 +28,7 @@ export default {
         'fade-in': 'fade-in 0.2s ease-out',
         'slide-in-from-top-1': 'slide-in-from-top-1 0.2s ease-out',
         'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'spin-slow': 'spin 3s linear infinite',
       },
       keyframes: {
         'in': {

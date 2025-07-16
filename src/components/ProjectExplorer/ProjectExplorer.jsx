@@ -137,6 +137,52 @@ export default function ProjectExplorer({
     moveDocumentToFolder
   } = useFolders();
   
+  // Auto-expand folders to show the selected document
+  useEffect(() => {
+    if (!selectedDocumentId || !documents.length) return;
+    
+    // Find the selected document
+    const selectedDoc = documents.find(doc => doc.id === selectedDocumentId);
+    if (!selectedDoc) return;
+    
+    // Set the selected item to the document
+    setSelectedItemId(selectedDocumentId);
+    
+    // If document is in a folder, expand the path to it
+    if (selectedDoc.folder_id) {
+      // Build path to document by traversing up the folder tree
+      const getFolderPath = (folderId, path = []) => {
+        const folder = folders.find(f => f.id === folderId);
+        if (!folder) return path;
+        
+        path.unshift(folder.id);
+        if (folder.parent_id) {
+          return getFolderPath(folder.parent_id, path);
+        }
+        return path;
+      };
+      
+      const folderPath = getFolderPath(selectedDoc.folder_id);
+      
+      // Expand all folders in the path
+      if (folderPath.length > 0) {
+        setExpandedItems(prev => {
+          const newExpanded = new Set(prev);
+          folderPath.forEach(folderId => newExpanded.add(folderId));
+          newExpanded.add('root'); // Always expand root
+          return newExpanded;
+        });
+      }
+    } else {
+      // Document is at root level, just expand root
+      setExpandedItems(prev => {
+        const newExpanded = new Set(prev);
+        newExpanded.add('root');
+        return newExpanded;
+      });
+    }
+  }, [selectedDocumentId, documents, folders]);
+  
   // Build folder structure with documents
   const folderStructure = useMemo(() => {
     // Helper to add documents to folders
@@ -376,15 +422,21 @@ export default function ProjectExplorer({
     const isRenaming = renamingId === item.id;
     const hasChildren = (item.children && item.children.length > 0) || (item.documents && item.documents.length > 0);
     const isRoot = item.type === 'root';
+    const isActiveDocument = item.type === 'document' && item.id === selectedDocumentId;
     
     const itemContent = (
       <div
         className={`
           group flex items-center justify-between py-1 px-2
           rounded-md transition-all duration-150
-          ${isSelected ? 'bg-surface-1/50' : 'hover:bg-surface-1/30'}
+          ${isActiveDocument 
+            ? 'bg-accent-green/20 border-l-2 border-accent-green shadow-sm' 
+            : isSelected 
+              ? 'bg-surface-1/50' 
+              : 'hover:bg-surface-1/30'}
           ${depth === 0 && !isRoot ? 'mt-0.5' : ''}
           ${isRenaming && isRenaming ? 'pointer-events-none' : 'cursor-pointer'}
+          ${isActiveDocument ? 'ml-[-2px]' : ''}
         `}
         style={{ paddingLeft: `${(depth * 16) + 8}px` }}
         onClick={() => {
@@ -420,7 +472,7 @@ export default function ProjectExplorer({
               <Folder size={14} className="text-text-secondary flex-shrink-0" />
             )
           ) : (
-            <FileText size={14} className="text-text-secondary flex-shrink-0" />
+            <FileText size={14} className={`${isActiveDocument ? 'text-accent-green' : 'text-text-secondary'} flex-shrink-0`} />
           )}
           
           {/* Name */}
@@ -448,8 +500,8 @@ export default function ProjectExplorer({
             <span className={`
               text-sm truncate flex-1
               ${isRoot ? 'font-semibold text-text-secondary/80 uppercase tracking-wider text-xs' : ''}
-              ${isSelected ? 'text-text-primary' : 'text-text-secondary'}
-              group-hover:text-text-primary
+              ${isActiveDocument ? 'text-accent-green font-medium' : isSelected ? 'text-text-primary' : 'text-text-secondary'}
+              ${!isActiveDocument ? 'group-hover:text-text-primary' : ''}
             `}>
               {item.name}
             </span>

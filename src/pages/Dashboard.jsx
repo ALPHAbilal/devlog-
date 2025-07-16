@@ -1087,7 +1087,7 @@ export default function Dashboard() {
         </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
-        <div className="px-4 md:px-6 py-3 lg:ml-60">
+        <div className={`px-4 md:px-6 py-3 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'} transition-all duration-300`}>
           <div className="max-w-5xl mx-auto">
             {/* Breadcrumb Navigation */}
             <div className="mb-3">
@@ -1130,7 +1130,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
+        <div className={`flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-[280px]'} transition-all duration-300`}
              style={{ 
                scrollbarWidth: 'thin',
                scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)',

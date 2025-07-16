@@ -269,7 +269,7 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
       onClick={() => onExpand(entry)}
       className="w-full h-full bg-gradient-to-br from-dark-secondary/90 to-dark-secondary/70 
                  rounded-lg p-3 cursor-pointer 
-                 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]
+                 transition-all duration-300 hover:shadow-2xl
                  flex flex-col group relative overflow-hidden
                  border border-gray-800/50 hover:border-accent-green/30"
     >

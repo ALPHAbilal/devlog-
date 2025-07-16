@@ -52,6 +52,10 @@ export default function Dashboard() {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const [showSidebar, setShowSidebar] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+    // Load collapsed state from localStorage
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   
   // Initialize auto-save functionality
@@ -732,6 +736,13 @@ export default function Dashboard() {
     );
   };
 
+  // Toggle sidebar collapse
+  const toggleSidebarCollapse = () => {
+    const newState = !isSidebarCollapsed;
+    setIsSidebarCollapsed(newState);
+    localStorage.setItem('sidebarCollapsed', newState.toString());
+  };
+
   // Format bytes for display
   const formatBytes = (bytes) => {
     if (!bytes) return '0 B';
@@ -871,15 +882,34 @@ export default function Dashboard() {
       
       {/* Project Sidebar */}
       <div className={`
-        fixed lg:relative inset-y-0 left-0 z-30 w-64 lg:w-72 h-screen lg:h-full
-        transform transition-transform duration-300 ease-in-out
+        fixed lg:relative inset-y-0 left-0 z-30 h-screen lg:h-full
+        transform transition-all duration-300 ease-in-out
         ${showSidebar ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:block
         bg-dark-primary lg:bg-transparent
         flex flex-col
+        ${isSidebarCollapsed ? 'w-16' : 'w-64 lg:w-72'}
       `}>
-        <ProjectExplorer
-          onDocumentSelect={(data) => {
+        {/* Collapse Toggle Button */}
+        <button
+          onClick={toggleSidebarCollapse}
+          className="absolute -right-3 top-20 z-40 w-6 h-6 bg-dark-secondary rounded-full
+                     border border-gray-700 hover:border-accent-green/50
+                     flex items-center justify-center transition-all duration-200
+                     hover:bg-dark-secondary/80 group hidden lg:flex"
+        >
+          <ChevronRight 
+            size={14} 
+            className={`text-text-secondary group-hover:text-accent-green transition-all duration-200
+                       ${isSidebarCollapsed ? '' : 'rotate-180'}`}
+          />
+        </button>
+
+        {/* Sidebar Content with padding */}
+        <div className="flex-1 py-8 overflow-hidden">
+          <ProjectExplorer
+            isCollapsed={isSidebarCollapsed}
+            onDocumentSelect={(data) => {
             if (data?.action === 'create') {
               createNewEntry(data.folderId);
             } else if (data?.id) {
@@ -915,6 +945,7 @@ export default function Dashboard() {
           totalDocuments={entries.length}
           uncategorizedCount={entries.filter(e => !e.project_id).length}
         />
+        </div>
       </div>
 
       {/* Main Content Area */}

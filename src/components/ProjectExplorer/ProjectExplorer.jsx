@@ -111,7 +111,8 @@ export default function ProjectExplorer({
   onToggleFavorite,
   totalDocuments = 0,
   uncategorizedCount = 0,
-  onDocumentMove
+  onDocumentMove,
+  isCollapsed = false
 }) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -538,6 +539,19 @@ export default function ProjectExplorer({
 
   // Removed flattened items - no longer needed for hierarchical drag and drop
 
+  // Collapsed view
+  if (isCollapsed) {
+    return (
+      <div className={`bg-[#1e1e1e] rounded-lg ${height} flex flex-col ${className} border border-dark-secondary/30 overflow-hidden`}>
+        <div className="flex flex-col items-center py-4 gap-4">
+          <Folder size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
+          <FileText size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
+          <Search size={20} className="text-text-secondary hover:text-accent-green cursor-pointer" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -552,9 +566,11 @@ export default function ProjectExplorer({
       >
         {/* Header */}
         <div className="flex items-center justify-between p-3 border-b border-dark-secondary/20">
-          <h3 className="text-xs font-semibold text-text-secondary/80 uppercase tracking-wider">
-            Explorer
-          </h3>
+          {!isCollapsed && (
+            <h3 className="text-xs font-semibold text-text-secondary/80 uppercase tracking-wider">
+              Explorer
+            </h3>
+          )}
           <div className="flex items-center gap-1">
             <button
               onClick={() => createNewFolder('root')}

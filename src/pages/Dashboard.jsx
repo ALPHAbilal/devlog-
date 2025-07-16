@@ -1055,32 +1055,11 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-visible px-4 md:px-6 pb-4 min-h-0"
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
              style={{ 
-               backgroundColor: 'rgba(0,255,0,0.1)' // Green tint to see parent container
+               scrollbarWidth: 'thin',
+               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
              }}>
-          {(() => {
-            // Debug: Check container dimensions
-            const container = document.querySelector('.debug-scrollbar');
-            if (container) {
-              console.log('Cards container found:', {
-                clientHeight: container.clientHeight,
-                scrollHeight: container.scrollHeight,
-                offsetHeight: container.offsetHeight,
-                computedStyle: {
-                  height: window.getComputedStyle(container).height,
-                  maxHeight: window.getComputedStyle(container).maxHeight,
-                  overflow: window.getComputedStyle(container).overflowY
-                }
-              });
-            }
-            console.log('Dashboard rendering VirtualizedGrid:', { 
-              filteredEntriesCount: filteredEntries.length,
-              isLoading,
-              expandedEntry: !!expandedEntry 
-            });
-            return null;
-          })()}
           <VirtualizedGrid 
             entries={filteredEntries}
             onExpand={handleDocumentExpand}

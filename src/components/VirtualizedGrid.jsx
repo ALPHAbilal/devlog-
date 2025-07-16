@@ -125,44 +125,25 @@ export default function VirtualizedGrid({
   // Debug logging
   useEffect(() => {
     const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
-    console.log('VirtualizedGrid Debug - Container found:', !!scrollContainer);
-    
     if (scrollContainer) {
-      const debugInfo = {
+      console.log('VirtualizedGrid - scroll container:', {
         totalHeight,
         containerHeight: scrollContainer.clientHeight,
-        containerScrollHeight: scrollContainer.scrollHeight,
-        hasOverflow: totalHeight > scrollContainer.clientHeight,
-        itemCount: allItems.length,
-        rows,
-        columns,
-        containerClasses: scrollContainer.className,
-        computedOverflow: window.getComputedStyle(scrollContainer).overflowY
-      };
-      console.log('VirtualizedGrid Debug - Details:', JSON.stringify(debugInfo, null, 2));
-    } else {
-      console.log('VirtualizedGrid Debug - No scroll container found!');
-      // Try to find the parent and log its info
-      const parent = containerRef.current?.parentElement;
-      if (parent) {
-        console.log('Parent element:', {
-          className: parent.className,
-          overflow: window.getComputedStyle(parent).overflowY,
-          height: parent.clientHeight
-        });
-      }
+        hasOverflow: totalHeight > scrollContainer.clientHeight
+      });
     }
-  }, [totalHeight, allItems.length, rows, columns]);
+  }, [totalHeight]);
 
   // TEMPORARY: Make VirtualizedGrid itself scrollable to test
-  const TEST_SELF_SCROLL = true;
+  const TEST_SELF_SCROLL = false;
   
   if (TEST_SELF_SCROLL) {
     return (
       <div 
         ref={containerRef}
-        className="relative w-full h-full overflow-y-scroll"
+        className="relative w-full overflow-y-scroll"
         style={{ 
+          maxHeight: '600px', // Force a max height to create overflow
           backgroundColor: 'rgba(255,0,0,0.1)', // Red tint to see container
           border: '2px solid lime' // Green border to see edges
         }}

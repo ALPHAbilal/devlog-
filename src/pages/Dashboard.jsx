@@ -12,7 +12,7 @@ import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
 import Breadcrumb from '../components/Breadcrumb';
-import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder } from 'lucide-react';
+import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';

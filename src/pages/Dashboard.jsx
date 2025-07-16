@@ -861,7 +861,7 @@ export default function Dashboard() {
           bg-dark-primary lg:bg-transparent
           flex flex-col
           ${isSidebarCollapsed ? 'w-16' : 'w-[280px]'}
-          py-7
+          pt-12 pb-7
         `}>
           {/* Sidebar Content with proper spacing */}
           <ProjectExplorer
@@ -946,7 +946,7 @@ export default function Dashboard() {
         bg-dark-primary lg:bg-transparent
         flex flex-col
         ${isSidebarCollapsed ? 'w-16' : 'w-[280px]'}
-        py-7
+        pt-12 pb-7
       `}>
         {/* Sidebar Content with proper spacing */}
         <ProjectExplorer

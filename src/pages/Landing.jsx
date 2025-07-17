@@ -7,7 +7,9 @@ import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fadeInUp, staggerContainer, staggerItem, iconBounce, buttonHover } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover } from '../utils/animations';
+import MagneticCursor from '../components/MagneticCursor';
+import NoiseOverlay from '../components/NoiseOverlay';
 
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
@@ -64,14 +66,18 @@ function LandingContent() {
 
   return (
     <div className="min-h-screen bg-dark-primary text-text-primary overflow-x-hidden">
+      {/* Subtle noise texture overlay */}
+      <NoiseOverlay />
       {/* Navigation */}
       <motion.nav 
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled ? 'glassmorphism-nav' : ''
+        }`}
         style={{
-          backgroundColor: isScrolled ? 'rgba(10, 22, 40, 0.95)' : 'rgba(10, 22, 40, 0.8)',
-          backdropFilter: isScrolled ? 'blur(20px)' : 'blur(12px)',
-          borderBottom: '1px solid rgba(30, 41, 59, 0.2)',
-          boxShadow: isScrolled ? '0 4px 20px rgba(0, 0, 0, 0.3)' : 'none'
+          backgroundColor: !isScrolled ? 'rgba(10, 22, 40, 0.8)' : undefined,
+          backdropFilter: !isScrolled ? 'blur(12px)' : undefined,
+          borderBottom: !isScrolled ? '1px solid rgba(30, 41, 59, 0.2)' : undefined,
+          boxShadow: !isScrolled ? 'none' : undefined
         }}
       >
         <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
@@ -104,23 +110,25 @@ function LandingContent() {
             >
               Sign In
             </button>
-            <motion.button
-              onClick={() => navigate('/auth')}
-              className="px-4 py-2 bg-accent-green text-dark-primary rounded font-medium 
-                         relative overflow-hidden"
-              variants={buttonHover}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
-            >
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
-              <span className="relative z-10">Start Free Trial</span>
-            </motion.button>
+            <MagneticCursor strength={0.3}>
+              <motion.button
+                onClick={() => navigate('/auth')}
+                className="px-4 py-2 bg-accent-green text-dark-primary rounded font-medium 
+                           relative overflow-hidden"
+                variants={buttonHover}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
+              >
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.6 }}
+                />
+                <span className="relative z-10">Start Free Trial</span>
+              </motion.button>
+            </MagneticCursor>
           </div>
           
           {/* Mobile Menu Button */}
@@ -214,8 +222,7 @@ function LandingContent() {
             {features.map((feature, i) => (
               <motion.div 
                 key={i}
-                className="bg-dark-secondary/30 border border-dark-secondary/50 rounded-lg p-6
-                           hover:border-accent-green/30 hover:bg-dark-secondary/40 transition-all
+                className="glassmorphism-card glassmorphism-hover rounded-lg p-6
                            relative overflow-hidden group"
                 variants={staggerItem}
                 whileHover={{ 
@@ -230,7 +237,7 @@ function LandingContent() {
                 
                 <motion.div 
                   className="mb-4 relative z-10"
-                  variants={iconBounce}
+                  variants={iconLift}
                   initial="rest"
                   whileHover="hover"
                 >
@@ -264,12 +271,7 @@ function LandingContent() {
             viewport={{ once: true }}
             whileHover={{ scale: 1.05 }}
           >
-            <motion.div
-              animate={{ rotate: [0, 15, -15, 0] }}
-              transition={{ repeat: Infinity, duration: 2, delay: 1 }}
-            >
-              <Zap size={16} />
-            </motion.div>
+            <Zap size={16} />
             Limited Time: Get 30% off annual plans
           </motion.div>
           
@@ -298,31 +300,27 @@ function LandingContent() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <motion.button
-              onClick={() => navigate('/auth')}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
-                         rounded-lg font-medium text-lg shadow-lg shadow-accent-green/20
-                         relative overflow-hidden group"
-              variants={buttonHover}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
-            >
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6 }}
-              />
-              <span className="relative z-10">Claim Your 14-Day Free Trial</span>
-              <motion.div
-                className="relative z-10"
-                animate={{ x: [0, 3, 0] }}
-                transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            <MagneticCursor strength={0.4}>
+              <motion.button
+                onClick={() => navigate('/auth')}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
+                           rounded-lg font-medium text-lg shadow-lg shadow-accent-green/20
+                           relative overflow-hidden group"
+                variants={buttonHover}
+                initial="rest"
+                whileHover="hover"
+                whileTap="tap"
               >
-                <ArrowRight size={24} />
-              </motion.div>
-            </motion.button>
+                <motion.span
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.6 }}
+                />
+                <span className="relative z-10">Claim Your 14-Day Free Trial</span>
+                <ArrowRight size={24} className="relative z-10" />
+              </motion.button>
+            </MagneticCursor>
             <p className="text-sm text-text-secondary/70">
               No credit card • Setup in 2 minutes • Cancel anytime
             </p>

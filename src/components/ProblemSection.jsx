@@ -1,7 +1,7 @@
 import { MessageSquare, Search, BookOpen, Brain } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fadeInUp, staggerContainer, staggerItem, iconBounce } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem, iconLift } from '../utils/animations';
 
 const problems = [
   {
@@ -79,7 +79,7 @@ export default function ProblemSection() {
               <div className="flex items-start gap-4 relative z-10">
                 <motion.div 
                   className="p-2 bg-dark-primary rounded-lg"
-                  variants={iconBounce}
+                  variants={iconLift}
                   initial="rest"
                   whileHover="hover"
                 >
@@ -110,12 +110,7 @@ export default function ProblemSection() {
                           text-accent-green rounded-full text-sm font-medium mb-6"
             whileHover={{ scale: 1.05 }}
           >
-            <motion.span 
-              animate={{ opacity: [1, 0.3, 1] }}
-              transition={{ repeat: Infinity, duration: 2 }}
-            >
-              ●
-            </motion.span>
+            <span className="text-accent-green">●</span>
             There's a better way
           </motion.div>
           

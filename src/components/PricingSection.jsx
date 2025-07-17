@@ -178,18 +178,9 @@ export default function PricingSection() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <motion.div 
-                    className="bg-accent-green text-dark-primary text-sm font-medium px-3 py-1 rounded relative overflow-hidden"
-                    animate={{ scale: [1, 1.05, 1] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                  >
-                    <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                      animate={{ x: [-100, 100] }}
-                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-                    />
-                    <span className="relative z-10">Most Popular</span>
-                  </motion.div>
+                  <div className="bg-accent-green text-dark-primary text-sm font-medium px-3 py-1 rounded">
+                    Most Popular
+                  </div>
                 </motion.div>
               )}
 

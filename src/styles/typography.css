@@ -1,0 +1,167 @@
+/* Fluid Typography System - Based on Utopia.fyi approach */
+
+:root {
+  /* Viewport widths for calculations */
+  --min-width: 320; /* Mobile min */
+  --max-width: 1200; /* Desktop max */
+  
+  /* Type scale steps using clamp() for fluid sizing */
+  /* Formula: clamp(MinSize[rem], yIntersection[rem] + Slope * 100vw, MaxSize[rem]) */
+  
+  /* Base font size (16px to 18px) */
+  --step-0: clamp(1rem, 0.956rem + 0.217vw, 1.125rem);
+  
+  /* Heading sizes */
+  --step-1: clamp(1.2rem, 1.127rem + 0.362vw, 1.414rem);
+  --step-2: clamp(1.44rem, 1.325rem + 0.576vw, 1.777rem);
+  --step-3: clamp(1.728rem, 1.553rem + 0.874vw, 2.233rem);
+  --step-4: clamp(2.074rem, 1.815rem + 1.294vw, 2.809rem);
+  --step-5: clamp(2.488rem, 2.113rem + 1.878vw, 3.534rem);
+  --step-6: clamp(2.986rem, 2.451rem + 2.677vw, 4.446rem);
+  
+  /* Small text */
+  --step--1: clamp(0.833rem, 0.818rem + 0.072vw, 0.877rem);
+  --step--2: clamp(0.694rem, 0.686rem + 0.041vw, 0.721rem);
+  
+  /* Line heights based on golden ratio */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.58; /* Medium's ratio */
+  --line-height-loose: 1.8;
+  
+  /* Letter spacing refinements */
+  --letter-spacing-tight: -0.003em; /* Medium's approach for headings */
+  --letter-spacing-normal: 0;
+  --letter-spacing-wide: 0.025em;
+  
+  /* 8pt baseline grid */
+  --baseline: 0.5rem; /* 8px */
+  --space-1: calc(var(--baseline) * 1); /* 8px */
+  --space-2: calc(var(--baseline) * 2); /* 16px */
+  --space-3: calc(var(--baseline) * 3); /* 24px */
+  --space-4: calc(var(--baseline) * 4); /* 32px */
+  --space-5: calc(var(--baseline) * 5); /* 40px */
+  --space-6: calc(var(--baseline) * 6); /* 48px */
+  --space-8: calc(var(--baseline) * 8); /* 64px */
+  --space-10: calc(var(--baseline) * 10); /* 80px */
+  --space-12: calc(var(--baseline) * 12); /* 96px */
+}
+
+/* Apply fluid typography to base elements */
+body {
+  font-size: var(--step-0);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Headings with refined spacing */
+h1, .h1 {
+  font-size: var(--step-6);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+}
+
+h2, .h2 {
+  font-size: var(--step-5);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-3);
+}
+
+h3, .h3 {
+  font-size: var(--step-4);
+  line-height: calc(var(--line-height-tight) + 0.1);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-2);
+}
+
+h4, .h4 {
+  font-size: var(--step-3);
+  line-height: calc(var(--line-height-tight) + 0.2);
+  letter-spacing: var(--letter-spacing-tight);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+h5, .h5 {
+  font-size: var(--step-2);
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+h6, .h6 {
+  font-size: var(--step-1);
+  line-height: var(--line-height-normal);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-1);
+}
+
+/* Paragraph spacing aligned to baseline grid */
+p {
+  margin-top: 0;
+  margin-bottom: var(--space-3);
+}
+
+/* Lead text for hero sections */
+.lead {
+  font-size: var(--step-1);
+  line-height: var(--line-height-loose);
+  letter-spacing: var(--letter-spacing-normal);
+}
+
+/* Small text */
+.small, small {
+  font-size: var(--step--1);
+  line-height: var(--line-height-normal);
+}
+
+/* Extra small text */
+.text-xs {
+  font-size: var(--step--2);
+  line-height: var(--line-height-normal);
+}
+
+/* Button text - slightly larger for better legibility */
+.btn, button {
+  font-size: var(--step-0);
+  line-height: var(--line-height-tight);
+  letter-spacing: 0.01em;
+}
+
+/* Variable font weight based on viewport for subtle enhancement */
+@supports (font-variation-settings: normal) {
+  body {
+    font-variation-settings: 'wght' calc(400 + (450 - 400) * ((100vw - 320px) / (1200 - 320)));
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-variation-settings: 'wght' calc(600 + (700 - 600) * ((100vw - 320px) / (1200 - 320)));
+  }
+}
+
+/* Vertical rhythm utilities */
+.mt-baseline-1 { margin-top: var(--space-1); }
+.mt-baseline-2 { margin-top: var(--space-2); }
+.mt-baseline-3 { margin-top: var(--space-3); }
+.mt-baseline-4 { margin-top: var(--space-4); }
+.mt-baseline-5 { margin-top: var(--space-5); }
+.mt-baseline-6 { margin-top: var(--space-6); }
+
+.mb-baseline-1 { margin-bottom: var(--space-1); }
+.mb-baseline-2 { margin-bottom: var(--space-2); }
+.mb-baseline-3 { margin-bottom: var(--space-3); }
+.mb-baseline-4 { margin-bottom: var(--space-4); }
+.mb-baseline-5 { margin-bottom: var(--space-5); }
+.mb-baseline-6 { margin-bottom: var(--space-6); }
+
+/* Ensure proper text rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
+}

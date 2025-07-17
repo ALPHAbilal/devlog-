@@ -1,0 +1,81 @@
+/* Glassmorphism effects - Enterprise level */
+
+/* Base glassmorphism class */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Stronger glassmorphism for cards */
+.glassmorphism-card {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 2px 2px rgba(255, 255, 255, 0.1);
+}
+
+/* Subtle glassmorphism for navigation */
+.glassmorphism-nav {
+  background: rgba(10, 22, 40, 0.85);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Glassmorphism with color tint */
+.glassmorphism-accent {
+  background: rgba(16, 185, 129, 0.08);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  box-shadow: 
+    0 8px 32px rgba(16, 185, 129, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Hover states for glassmorphism */
+.glassmorphism-hover {
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.glassmorphism-hover:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    inset 0 2px 2px rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Firefox fallback */
+@supports not (backdrop-filter: blur(20px)) {
+  .glassmorphism,
+  .glassmorphism-card,
+  .glassmorphism-nav,
+  .glassmorphism-accent {
+    background: rgba(30, 41, 59, 0.95);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Performance optimization */
+.glassmorphism,
+.glassmorphism-card,
+.glassmorphism-nav,
+.glassmorphism-accent {
+  will-change: transform;
+  transform: translateZ(0);
+}

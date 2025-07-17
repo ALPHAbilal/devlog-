@@ -1,5 +1,7 @@
-/* Import custom animations - must be before @tailwind */
+/* Import custom styles - must be before @tailwind */
 @import './styles/animations.css';
+@import './styles/typography.css';
+@import './styles/glassmorphism.css';
 @import './styles/demo.css';
 
 @tailwind base;

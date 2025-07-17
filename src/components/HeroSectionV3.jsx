@@ -1,7 +1,8 @@
 import { ArrowRight, ChevronDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { textReveal, buttonHover, staggerContainer, staggerItem, gradientShift } from '../utils/animations';
+import { textReveal, buttonHover, staggerContainer, staggerItem, gradientStatic } from '../utils/animations';
+import MagneticCursor from './MagneticCursor';
 
 export default function HeroSectionV3() {
   const navigate = useNavigate();
@@ -15,14 +16,13 @@ export default function HeroSectionV3() {
 
   return (
     <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
-      {/* Animated gradient background */}
-      <motion.div 
+      {/* Static gradient background */}
+      <div 
         className="absolute inset-0 opacity-30"
         style={{
           background: "radial-gradient(circle at 20% 50%, #10b98120 0%, transparent 50%), radial-gradient(circle at 80% 80%, #10b98115 0%, transparent 50%)",
           backgroundSize: "100% 100%",
         }}
-        animate={gradientShift.animate}
       />
       
       <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10">
@@ -71,25 +71,27 @@ export default function HeroSectionV3() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
         >
-          <motion.button
-            onClick={() => navigate('/auth')}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 
-                     bg-accent-green text-dark-primary rounded-lg font-medium text-lg
-                     shadow-lg shadow-accent-green/20 relative overflow-hidden"
-            variants={buttonHover}
-            initial="rest"
-            whileHover="hover"
-            whileTap="tap"
-          >
-            <motion.span
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              initial={{ x: "-100%" }}
-              whileHover={{ x: "100%" }}
-              transition={{ duration: 0.6, ease: "linear" }}
-            />
-            <span className="relative z-10">Start Documenting Today</span>
-            <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
-          </motion.button>
+          <MagneticCursor strength={0.4}>
+            <motion.button
+              onClick={() => navigate('/auth')}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 
+                       bg-accent-green text-dark-primary rounded-lg font-medium text-lg
+                       shadow-lg shadow-accent-green/20 relative overflow-hidden"
+              variants={buttonHover}
+              initial="rest"
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <motion.span
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "100%" }}
+                transition={{ duration: 0.6, ease: "linear" }}
+              />
+              <span className="relative z-10">Start Documenting Today</span>
+              <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+          </MagneticCursor>
           
           <motion.button
             onClick={scrollToDemo}
@@ -101,12 +103,7 @@ export default function HeroSectionV3() {
             transition={{ type: "spring", stiffness: 300 }}
           >
             <span>See How It Works</span>
-            <motion.div
-              animate={{ y: [0, 3, 0] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            >
-              <ChevronDown size={20} />
-            </motion.div>
+            <ChevronDown size={20} />
           </motion.button>
         </motion.div>
 

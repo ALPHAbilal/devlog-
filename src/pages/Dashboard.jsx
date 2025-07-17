@@ -740,23 +740,58 @@ export default function Dashboard() {
     const matchesSearch = searchTerm === '' || (() => {
       const lowerSearchTerm = searchTerm.toLowerCase();
       
+      // Log search start
+      if (searchTerm && searchTerm.length > 0) {
+        console.log(`\n📄 Checking document: "${entry.title}"`);
+      }
+      
       // Check title
-      if (entry.title.toLowerCase().includes(lowerSearchTerm)) return true;
+      const titleMatch = entry.title.toLowerCase().includes(lowerSearchTerm);
+      if (searchTerm) {
+        console.log(`  ✓ Title match: ${titleMatch ? '✅' : '❌'} (title: "${entry.title}")`);
+      }
+      if (titleMatch) return true;
       
       // Check preview
-      if (entry.preview && entry.preview.toLowerCase().includes(lowerSearchTerm)) return true;
+      const previewMatch = entry.preview && entry.preview.toLowerCase().includes(lowerSearchTerm);
+      if (searchTerm) {
+        const previewSnippet = entry.preview ? entry.preview.substring(0, 50) + '...' : 'No preview';
+        console.log(`  ✓ Preview match: ${previewMatch ? '✅' : '❌'} (preview: "${previewSnippet}")`);
+      }
+      if (previewMatch) return true;
       
       // Check tags
-      if (entry.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm))) return true;
+      const tagsMatch = entry.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm));
+      if (searchTerm) {
+        console.log(`  ✓ Tags match: ${tagsMatch ? '✅' : '❌'} (tags: [${entry.tags?.join(', ') || 'none'}])`);
+      }
+      if (tagsMatch) return true;
       
       // Check full content of all blocks (only if blocks are loaded)
       // If blocks are not loaded (undefined), we can't search their content
+      let contentMatch = false;
       if (entry.blocks !== undefined) {
+        const blocksLoaded = true;
         const fullContent = getFullTextContent(entry);
-        if (fullContent && fullContent.includes(lowerSearchTerm)) return true;
+        contentMatch = fullContent && fullContent.includes(lowerSearchTerm);
+        if (searchTerm) {
+          console.log(`  ✓ Blocks loaded: ✅ (${entry.blocks.length} blocks)`);
+          const contentSnippet = fullContent ? fullContent.substring(0, 100) + '...' : 'No content';
+          console.log(`  ✓ Content match: ${contentMatch ? '✅' : '❌'} (content: "${contentSnippet}")`);
+        }
+      } else {
+        if (searchTerm) {
+          console.log(`  ✓ Blocks loaded: ❌ (blocks not loaded for performance)`);
+          console.log(`  ✓ Content match: ⏭️  (skipped - blocks not loaded)`);
+        }
       }
       
-      return false;
+      const matched = titleMatch || previewMatch || tagsMatch || contentMatch;
+      if (searchTerm) {
+        console.log(`  ➡️  Result: ${matched ? '✅ MATCHED' : '❌ NOT MATCHED'}`);
+      }
+      
+      return matched;
     })();
     
     // Finally filter by selected tags (if any)
@@ -765,6 +800,17 @@ export default function Dashboard() {
     
     return matchesProject && matchesSearch && matchesTags;
   });
+  
+  // Log search summary
+  useEffect(() => {
+    if (searchTerm && searchTerm.length > 0) {
+      console.log(`\n🔍 Search Results for: "${searchTerm}"`);
+      console.log(`📊 Summary: ${entries.length} documents searched, ${filteredEntries.length} matched`);
+      if (filteredEntries.length === 0) {
+        console.log(`💡 Tip: Try opening documents to load their full content for deeper search`);
+      }
+    }
+  }, [searchTerm, filteredEntries.length, entries.length]);
   
   // Count uncategorized documents
   const uncategorizedCount = entries.filter(entry => !entry.project_id).length;

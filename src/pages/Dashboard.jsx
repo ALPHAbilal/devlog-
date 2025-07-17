@@ -984,17 +984,68 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div 
-        className="h-screen overflow-hidden dashboard-container"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
-          gridTemplateRows: '1fr',
-          transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'grid-template-columns',
-          contain: 'layout style'
-        }}
-      >
+      <div className="h-screen overflow-hidden dashboard-container flex flex-col">
+        {/* Fixed Header - Outside Grid */}
+        <header className="flex-shrink-0 border-b border-dark-secondary/20 bg-dark-primary z-30">
+          {/* Top Navigation Bar - Compact and Efficient */}
+          <div className="flex items-center justify-between px-4 md:px-6 py-2">
+            {/* Logo and Brand - Fixed Position */}
+            <div className="flex items-center gap-2.5" style={{ marginLeft: '288px' }}>
+              {/* Mobile menu button */}
+              <button
+                onClick={() => toggleMobileSidebar()}
+                className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden absolute left-4"
+              >
+                <Menu size={20} className="text-text-primary" />
+              </button>
+              <LogoMinimal size={32} />
+              <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
+            </div>
+
+            {/* Stats and Profile - Moved from main content */}
+            <div className="flex items-center gap-4 mr-8">
+              {/* Document Stats - Inline and Minimal */}
+              <div className="hidden sm:flex items-center gap-3 text-xs">
+                <span className="text-text-secondary/70">
+                  <span className="text-text-primary font-medium">{entries.length}</span> docs
+                </span>
+                <span className="text-text-secondary/40">•</span>
+                <span className="text-text-secondary/70">
+                  <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || e.blockCount || 0), 0)}</span> blocks
+                </span>
+              </div>
+              
+              {/* Profile/User section - Simplified */}
+              <div className="flex items-center gap-2">
+                <Settings 
+                  className="w-4 h-4 text-text-secondary/60 hover:text-text-primary cursor-pointer transition-colors" 
+                  onClick={() => navigate('/settings')}
+                />
+                <div 
+                  className="w-7 h-7 rounded-full bg-gradient-to-br from-accent-green/20 to-accent-green/10 
+                            flex items-center justify-center text-xs font-medium text-accent-green
+                            ring-1 ring-accent-green/20 cursor-pointer hover:ring-accent-green/40 transition-all"
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                >
+                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Grid Container - Below Header */}
+        <div 
+          className="flex-1 overflow-hidden"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
+            gridTemplateRows: '1fr',
+            transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+            willChange: 'grid-template-columns',
+            contain: 'layout style'
+          }}
+        >
       {/* Mobile overlay */}
       {showSidebar && (
         <div
@@ -1015,7 +1066,7 @@ export default function Dashboard() {
         style={{ gridColumn: '1' }}
       >
         {/* Sidebar Content wrapper for spacing */}
-        <div className="flex-1 min-h-0 pt-20 pb-7 flex flex-col">
+        <div className="flex-1 min-h-0 pb-7 flex flex-col">
           <ProjectExplorer
             isCollapsed={isSidebarCollapsed}
             onToggleCollapse={toggleSidebarCollapse}
@@ -1070,25 +1121,10 @@ export default function Dashboard() {
 
       {/* Main Content Area */}
       <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out" style={{ gridColumn: '2' }}>
-        {/* Header */}
+        {/* Content Header - Search and Actions Only */}
         <div className="flex-shrink-0">
-        {/* Top Navigation Bar - Compact and Efficient */}
-        <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-dark-secondary/20">
-          {/* Logo and Brand - Fixed Position */}
-          <div className="flex items-center gap-2.5" style={{ paddingLeft: '24px' }}>
-            {/* Mobile menu button */}
-            <button
-              onClick={() => toggleMobileSidebar()}
-              className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden"
-            >
-              <Menu size={20} className="text-text-primary" />
-            </button>
-            <LogoMinimal size={32} />
-            <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
-          </div>
-
-          {/* Stats and Profile - Compact and Functional */}
-          <div className="flex items-center gap-4 mr-8">
+        <div className="px-4 md:px-6 py-4">
+          <div className="flex items-center justify-between">
             {/* Document Stats - Inline and Minimal */}
             <div className="hidden sm:flex items-center gap-3 text-xs">
               <span className="text-text-secondary/70">
@@ -1223,6 +1259,9 @@ export default function Dashboard() {
           />
         </div>
       </main>
+
+        </div>
+      </div>
 
       {/* Empty State */}
       {filteredEntries.length === 0 && searchTerm && (

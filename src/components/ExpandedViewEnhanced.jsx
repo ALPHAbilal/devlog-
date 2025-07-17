@@ -1186,8 +1186,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           onClose={() => setShowShareDialog(false)}
         />
       )}
-      
-      </div>
     </div>
   );
 }

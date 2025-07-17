@@ -1,18 +1,14 @@
-console.log('ScrollToTop component file loaded');
-
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ArrowUp } from 'lucide-react';
 
 export default function ScrollToTop({ scrollContainerRef }) {
-  console.log('ScrollToTop component function called');
   const [isVisible, setIsVisible] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
 
   useEffect(() => {
-    console.log('ScrollToTop mounted, scrollContainerRef:', scrollContainerRef);
     const scrollElement = scrollContainerRef?.current;
     if (!scrollElement) {
-      console.log('ScrollToTop: No scroll element found');
       return;
     }
 
@@ -21,9 +17,7 @@ export default function ScrollToTop({ scrollContainerRef }) {
       const scrollHeight = scrollElement.scrollHeight;
       const clientHeight = scrollElement.clientHeight;
       
-      console.log('ScrollToTop - Scroll position:', scrollTop, 'Height:', scrollHeight);
-      
-      // Show button when scrolled down more than 100px (lowered from 300)
+      // Show button when scrolled down more than 100px
       const shouldShow = scrollTop > 100;
       setIsVisible(shouldShow);
       
@@ -48,14 +42,15 @@ export default function ScrollToTop({ scrollContainerRef }) {
     });
   };
 
-  // Always render for debugging
-  console.log('ScrollToTop render, isVisible:', isVisible);
+  // Get the portal root element
+  const portalRoot = document.getElementById('portal-root');
+  if (!portalRoot) return null;
 
-  return (
+  return createPortal(
     <button
       onClick={scrollToTop}
       className={`
-        fixed z-50
+        fixed z-[9999]
         w-12 h-12 rounded-xl
         bg-accent-green backdrop-blur-xl
         border-2 border-accent-green
@@ -66,10 +61,10 @@ export default function ScrollToTop({ scrollContainerRef }) {
         transition-all duration-300 ease-out
         shadow-lg shadow-accent-green/20
         group
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-4'}
+        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
         ${isAtBottom ? 'bottom-24' : 'bottom-8'}
+        right-8
       `}
-      style={{ right: '2rem' }}
       title="Back to top"
       aria-label="Scroll to top"
     >
@@ -83,6 +78,7 @@ export default function ScrollToTop({ scrollContainerRef }) {
         className="relative z-10 transition-all duration-300 
                    group-hover:text-accent-green group-hover:-translate-y-0.5"
       />
-    </button>
+    </button>,
+    portalRoot
   );
 }

@@ -369,8 +369,12 @@ export class SupabaseAdapter {
     // CRITICAL: Prevent data loss - check if we're trying to save 0 blocks for a document that has blocks
     const blocks = document.blocks || [];
     const documentId = document.id;
+    const isNewDocument = document.metadata?.isNewDocument === true || 
+                         document.metadata?.createdLocally === true ||
+                         !document.createdAt;
     
-    if (blocks.length === 0 && documentId && documentId !== 'new') {
+    // Only perform the safety check for existing documents, not brand new ones
+    if (blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument) {
       // Check if this document already has blocks
       const { data: existingBlocks, error: checkError } = await supabase
         .from('blocks')
@@ -470,7 +474,8 @@ export class SupabaseAdapter {
           preview: preview,
           blockCount: documentBlocks?.length || 0,
           syncStatus: 'synced',
-          lastSyncedAt: new Date().toISOString()
+          lastSyncedAt: new Date().toISOString(),
+          isNewDocument: false // Clear the flag after first save
         },
         p_is_template: docData.isTemplate || false,
         p_position: docData.position || 0
@@ -491,7 +496,8 @@ export class SupabaseAdapter {
           preview: preview,
           blockCount: documentBlocks?.length || 0,
           syncStatus: 'synced', // Mark as synced when saved to Supabase
-          lastSyncedAt: new Date().toISOString()
+          lastSyncedAt: new Date().toISOString(),
+          isNewDocument: false // Clear the flag after first save
         },
         created_at: docData.createdAt || new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -503,17 +509,42 @@ export class SupabaseAdapter {
         id: documentToSave.id,
         title: documentToSave.title,
         blockCount: documentBlocks?.length || 0,
-        userId: this.userId
+        userId: this.userId,
+        isNew: isNewDocument
       });
       
-      const { data, error } = await supabase
-        .from('documents')
-        .upsert(documentToSave)
-        .select()
-        .single();
-      
-      savedDoc = data;
-      docError = error;
+      if (isNewDocument) {
+        // For new documents, use insert to avoid conflicts with soft-deleted documents
+        const { data, error } = await supabase
+          .from('documents')
+          .insert(documentToSave)
+          .select()
+          .single();
+        
+        savedDoc = data;
+        docError = error;
+      } else {
+        // For existing documents, use update to respect RLS policies
+        const { data, error } = await supabase
+          .from('documents')
+          .update({
+            title: documentToSave.title,
+            is_template: documentToSave.is_template,
+            tags: documentToSave.tags,
+            metadata: documentToSave.metadata,
+            updated_at: documentToSave.updated_at,
+            folder_id: documentToSave.folder_id,
+            position: documentToSave.position
+          })
+          .eq('id', documentToSave.id)
+          .eq('user_id', this.userId)
+          .is('deleted_at', null) // Only update non-deleted documents
+          .select()
+          .single();
+        
+        savedDoc = data;
+        docError = error;
+      }
     }
     
     if (docError) {
@@ -919,6 +950,14 @@ export class SupabaseAdapter {
       // CRITICAL: Skip documents without loaded blocks to prevent data loss
       if (doc.blocks === undefined) {
         console.log(`SupabaseAdapter: Skipping save for document ${doc.id} - blocks not loaded`);
+        continue;
+      }
+      
+      // CRITICAL: Skip documents with empty blocks array that came from getDocuments()
+      // These documents have blocks: [] because getDocuments() doesn't load blocks for performance
+      // We can identify them by checking if they have blockCount metadata but 0 blocks
+      if (doc.blocks.length === 0 && doc.blockCount > 0) {
+        console.log(`SupabaseAdapter: Skipping save for document ${doc.id} - has ${doc.blockCount} blocks but blocks not loaded`);
         continue;
       }
       

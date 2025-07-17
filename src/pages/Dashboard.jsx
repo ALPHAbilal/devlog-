@@ -122,18 +122,27 @@ export default function Dashboard() {
 
   // Create new entry function (moved up for keyboard shortcut access)
   const createNewEntry = useCallback(async (folderId = null) => {
+    // Create a default text block for new documents
+    const defaultBlock = {
+      id: crypto.randomUUID(),
+      type: 'text',
+      content: '',
+      position: 0
+    };
+    
     const newEntry = {
       id: crypto.randomUUID(),
       title: 'Untitled Document',
       preview: 'Click to start writing...',
-      blocks: [],
+      blocks: [defaultBlock], // Always start with at least one block
       tags: [],
       folder_id: folderId, // Add folder_id to the document
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       metadata: {
         syncStatus: 'pending', // Track sync status
-        createdLocally: true
+        createdLocally: true,
+        isNewDocument: true // Flag to indicate this is a brand new document
       }
     };
     
@@ -158,8 +167,17 @@ export default function Dashboard() {
       console.warn('Could not invalidate cache:', error);
     }
     
+    // Save the new document directly to avoid triggering updateAllDocuments
+    try {
+      await storageWrapper.saveDocument(newEntry);
+      console.log('New document saved successfully');
+    } catch (error) {
+      console.error('Error saving new document:', error);
+    }
+    
+    // Update local state
     const updatedEntries = [newEntry, ...entries];
-    saveEntries(updatedEntries);
+    setEntries(updatedEntries);
     setExpandedEntry(newEntry);
   }, [entries, saveEntries]);
 

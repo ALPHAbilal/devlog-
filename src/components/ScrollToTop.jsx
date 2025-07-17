@@ -55,22 +55,25 @@ export default function ScrollToTop({ scrollContainerRef }) {
         bottom: isAtBottom ? '96px' : '32px',
         left: 'auto',
         top: 'auto',
-        width: '48px',
-        height: '48px',
+        width: '40px',
+        height: '40px',
         zIndex: 9999,
         opacity: isVisible ? 1 : 0,
         pointerEvents: isVisible ? 'auto' : 'none',
-        transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
-        transition: 'all 300ms ease-out'
+        transform: isVisible ? 'translateY(0)' : 'translateY(8px)',
+        transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)'
       }}
-      className="rounded-xl bg-accent-green border-2 border-accent-green flex items-center justify-center text-dark-primary hover:bg-accent-green/90 hover:scale-110 shadow-lg shadow-accent-green/20 group"
+      className="rounded-xl bg-dark-secondary/60 backdrop-blur-xl border border-dark-secondary/30 flex items-center justify-center hover:bg-dark-secondary/80 hover:border-accent-green/30 hover:shadow-lg hover:shadow-accent-green/5 group"
       title="Back to top"
       aria-label="Scroll to top"
     >
+      {/* Subtle gradient overlay on hover */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-green/0 to-accent-green/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      
       {/* Arrow icon */}
       <ArrowUp 
-        size={20} 
-        className="transition-transform duration-300 group-hover:-translate-y-0.5"
+        size={18} 
+        className="relative z-10 text-text-secondary/70 group-hover:text-accent-green transition-all duration-300 group-hover:-translate-y-0.5"
       />
     </button>,
     portalRoot

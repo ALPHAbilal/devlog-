@@ -78,7 +78,7 @@ export default function AddBlockRow({ onSelect, onClose, show }) {
                              ? 'bg-dark-primary/80 text-text-primary' 
                              : 'text-text-secondary hover:text-text-primary'}`}
               >
-                <Icon size={14} className={isHovered ? 'text-accent-green' : ''} />
+                <Icon size={14} />
                 <span>{blockType.label}</span>
               </button>
             );

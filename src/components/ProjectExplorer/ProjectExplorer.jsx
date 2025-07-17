@@ -307,8 +307,41 @@ export default function ProjectExplorer({
 
   // Create new folder
   const createNewFolder = useCallback(async (parentId) => {
-    const folderName = 'New Folder';
     const actualParentId = parentId === 'root' ? null : parentId;
+    
+    // Get all folders at the same level
+    const getSiblingFolders = (folders, targetParentId) => {
+      if (!targetParentId || targetParentId === 'root') {
+        return folders; // Root level folders
+      }
+      
+      const findSiblings = (folderList) => {
+        for (const folder of folderList) {
+          if (folder.id === targetParentId) {
+            return folder.children || [];
+          }
+          if (folder.children) {
+            const found = findSiblings(folder.children);
+            if (found) return found;
+          }
+        }
+        return [];
+      };
+      
+      return findSiblings(folders);
+    };
+    
+    const siblings = getSiblingFolders(folders, actualParentId);
+    
+    // Generate unique folder name
+    let baseName = 'New Folder';
+    let folderName = baseName;
+    let counter = 2;
+    
+    while (siblings.some(folder => folder.name === folderName)) {
+      folderName = `${baseName} (${counter})`;
+      counter++;
+    }
     
     const newFolder = await createFolderInDB(folderName, actualParentId);
     if (newFolder) {
@@ -316,7 +349,7 @@ export default function ProjectExplorer({
       setRenamingId(newFolder.id);
       setRenamingValue(folderName);
     }
-  }, [createFolderInDB]);
+  }, [createFolderInDB, folders]);
 
   // Start renaming
   const startRenaming = useCallback((item) => {
@@ -331,15 +364,51 @@ export default function ProjectExplorer({
       return;
     }
     
+    // Find the folder being renamed and its siblings
+    const findFolderAndSiblings = (folderList, targetId, parentFolders = []) => {
+      for (const folder of folderList) {
+        if (folder.id === targetId) {
+          return { folder, siblings: parentFolders };
+        }
+        if (folder.children) {
+          const result = findFolderAndSiblings(folder.children, targetId, folder.children);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    
+    const result = findFolderAndSiblings(folders, renamingId, folders);
+    if (result) {
+      const { folder, siblings } = result;
+      
+      // Check for duplicate names among siblings
+      const isDuplicate = siblings.some(sibling => 
+        sibling.id !== renamingId && 
+        sibling.name === renamingValue.trim()
+      );
+      
+      if (isDuplicate) {
+        alert(`A folder named "${renamingValue.trim()}" already exists at this level.`);
+        setRenamingValue(folder.name); // Restore original name
+        return;
+      }
+    }
+    
     setIsRenaming(true);
     try {
       await updateFolder(renamingId, { name: renamingValue.trim() });
+    } catch (error) {
+      // Handle database constraint error
+      if (error.message?.includes('unique_folder_name_per_parent')) {
+        alert('A folder with this name already exists at this level.');
+      }
     } finally {
       setIsRenaming(false);
       setRenamingId(null);
       setSelectedItemId(null); // Clear selection after rename
     }
-  }, [renamingId, renamingValue, updateFolder, isRenaming]);
+  }, [renamingId, renamingValue, updateFolder, isRenaming, folders]);
 
   // Delete item
   const deleteItem = useCallback(async (item, parentId) => {

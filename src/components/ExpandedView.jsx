@@ -140,6 +140,23 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   };
 
   const handleTitleSave = () => {
+    // Check for duplicate names in the same folder
+    const documentsInSameLevel = allEntries.filter(doc => 
+      doc.folder_id === entry.folder_id && 
+      doc.id !== entry.id &&
+      !doc.deleted_at
+    );
+    
+    const isDuplicate = documentsInSameLevel.some(doc => doc.title === title);
+    
+    if (isDuplicate) {
+      alert(`A document named "${title}" already exists in this ${entry.folder_id ? 'folder' : 'location'}.`);
+      // Restore original title
+      setTitle(entry.title);
+      setIsEditingTitle(false);
+      return;
+    }
+    
     if (onUpdate) {
       onUpdate(entry.id, { title });
     }

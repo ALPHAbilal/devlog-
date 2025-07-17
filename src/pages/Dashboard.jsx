@@ -130,9 +130,26 @@ export default function Dashboard() {
       position: 0
     };
     
+    // Check for duplicate names and generate unique title
+    let baseTitle = 'Untitled Document';
+    let title = baseTitle;
+    let counter = 2;
+    
+    // Get all documents in the same folder (or root if no folder)
+    const documentsInSameLevel = entries.filter(doc => 
+      doc.folder_id === folderId && 
+      !doc.deleted_at
+    );
+    
+    // Keep checking until we find a unique name
+    while (documentsInSameLevel.some(doc => doc.title === title)) {
+      title = `${baseTitle} (${counter})`;
+      counter++;
+    }
+    
     const newEntry = {
       id: crypto.randomUUID(),
-      title: 'Untitled Document',
+      title: title,
       preview: 'Click to start writing...',
       blocks: [defaultBlock], // Always start with at least one block
       tags: [],

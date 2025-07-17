@@ -141,7 +141,13 @@ export function useFolders() {
       return data;
     } catch (error) {
       console.error('Error creating folder:', error);
-      toast.error('Failed to create folder');
+      
+      // Handle specific database constraint errors
+      if (error.code === '23505' || error.message?.includes('unique_folder_name_per_parent')) {
+        toast.error('A folder with this name already exists at this level');
+      } else {
+        toast.error('Failed to create folder');
+      }
       return null;
     }
   }, [user?.id, loadFolders, toast]);
@@ -182,7 +188,14 @@ export function useFolders() {
       loadFolders(true);
     } catch (error) {
       console.error('Error updating folder:', error);
-      toast.error('Failed to update folder');
+      
+      // Handle specific database constraint errors
+      if (error.code === '23505' || error.message?.includes('unique_folder_name_per_parent')) {
+        toast.error('A folder with this name already exists at this level');
+        throw error; // Re-throw so ProjectExplorer can handle it
+      } else {
+        toast.error('Failed to update folder');
+      }
     }
   }, [user?.id, loadFolders, toast]);
 

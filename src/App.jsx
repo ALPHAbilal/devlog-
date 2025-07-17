@@ -129,15 +129,21 @@ function AppContent() {
   }
 
   return (
-    <Layout>
-      <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<SettingsClaude />} />
-        <Route path="/shared/:shareCode" element={<SharedDocument />} />
-        <Route path="*" element={<Navigate to="/dashboard" />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      <Route path="/" element={<Navigate to="/dashboard" />} />
+      <Route path="/dashboard" element={
+        <Layout>
+          <Dashboard />
+        </Layout>
+      } />
+      <Route path="/settings" element={<SettingsClaude />} />
+      <Route path="/shared/:shareCode" element={
+        <Layout>
+          <SharedDocument />
+        </Layout>
+      } />
+      <Route path="*" element={<Navigate to="/dashboard" />} />
+    </Routes>
   );
 }
 

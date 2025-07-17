@@ -661,7 +661,12 @@ export default function Dashboard() {
 
   // Helper function to extract all searchable text content from blocks
   const getFullTextContent = useCallback((entry) => {
-    if (!entry.blocks || entry.blocks.length === 0) return '';
+    // If blocks are not loaded (undefined), return empty string
+    // This handles the case where documents are loaded without blocks for performance
+    if (!entry.blocks) return '';
+    
+    // If blocks is an empty array, that's valid - the document just has no blocks
+    if (entry.blocks.length === 0) return '';
     
     const textParts = [];
     
@@ -744,9 +749,12 @@ export default function Dashboard() {
       // Check tags
       if (entry.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm))) return true;
       
-      // Check full content of all blocks
-      const fullContent = getFullTextContent(entry);
-      if (fullContent.includes(lowerSearchTerm)) return true;
+      // Check full content of all blocks (only if blocks are loaded)
+      // If blocks are not loaded (undefined), we can't search their content
+      if (entry.blocks !== undefined) {
+        const fullContent = getFullTextContent(entry);
+        if (fullContent && fullContent.includes(lowerSearchTerm)) return true;
+      }
       
       return false;
     })();
@@ -1306,9 +1314,13 @@ export default function Dashboard() {
       {/* Empty State */}
       {filteredEntries.length === 0 && searchTerm && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
+          <div className="text-center max-w-md">
             <p className="text-text-secondary text-lg mb-2">
               No documents found matching "{searchTerm}"
+            </p>
+            <p className="text-text-secondary/70 text-sm mb-4">
+              Search includes document titles, preview text, and tags. 
+              Full document content search requires opening the document first.
             </p>
             <button
               onClick={() => setSearchTerm('')}

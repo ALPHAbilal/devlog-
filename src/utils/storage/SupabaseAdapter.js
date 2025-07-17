@@ -448,38 +448,73 @@ export class SupabaseAdapter {
                 'Click to start writing...';
     }
     
-    // 2. Save/update document metadata using UPSERT
-    const documentToSave = {
-      id: docData.id,
-      user_id: this.userId,
-      title: docData.title,
-      is_template: docData.isTemplate || false,
-      tags: docData.tags || [],
-      metadata: {
-        ...(docData.metadata || {}),
-        preview: preview,
+    // Check if this is a new document with a folder_id
+    const isNewDocument = !docData.createdAt;
+    const hasFolderId = docData.folder_id && docData.folder_id !== null;
+    
+    let savedDoc;
+    let docError;
+    
+    if (isNewDocument && hasFolderId) {
+      // Use the security definer function for new documents with folders
+      console.log('SupabaseAdapter: Using security definer function for document creation with folder');
+      
+      const { data, error } = await supabase.rpc('create_document_with_folder_check', {
+        p_id: docData.id,
+        p_title: docData.title,
+        p_folder_id: docData.folder_id,
+        p_preview: preview,
+        p_tags: docData.tags || [],
+        p_metadata: {
+          ...(docData.metadata || {}),
+          preview: preview,
+          blockCount: documentBlocks?.length || 0,
+          syncStatus: 'synced',
+          lastSyncedAt: new Date().toISOString()
+        },
+        p_is_template: docData.isTemplate || false,
+        p_position: docData.position || 0
+      });
+      
+      savedDoc = data;
+      docError = error;
+    } else {
+      // Use regular upsert for updates or documents without folders
+      const documentToSave = {
+        id: docData.id,
+        user_id: this.userId,
+        title: docData.title,
+        is_template: docData.isTemplate || false,
+        tags: docData.tags || [],
+        metadata: {
+          ...(docData.metadata || {}),
+          preview: preview,
+          blockCount: documentBlocks?.length || 0,
+          syncStatus: 'synced', // Mark as synced when saved to Supabase
+          lastSyncedAt: new Date().toISOString()
+        },
+        created_at: docData.createdAt || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        folder_id: docData.folder_id || null,
+        position: docData.position || 0
+      };
+      
+      console.log('SupabaseAdapter: Saving document to Supabase:', {
+        id: documentToSave.id,
+        title: documentToSave.title,
         blockCount: documentBlocks?.length || 0,
-        syncStatus: 'synced', // Mark as synced when saved to Supabase
-        lastSyncedAt: new Date().toISOString()
-      },
-      created_at: docData.createdAt || new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      folder_id: docData.folder_id || null,
-      position: docData.position || 0
-    };
-    
-    console.log('SupabaseAdapter: Saving document to Supabase:', {
-      id: documentToSave.id,
-      title: documentToSave.title,
-      blockCount: documentBlocks?.length || 0,
-      userId: this.userId
-    });
-    
-    const { data: savedDoc, error: docError } = await supabase
-      .from('documents')
-      .upsert(documentToSave)
-      .select()
-      .single();
+        userId: this.userId
+      });
+      
+      const { data, error } = await supabase
+        .from('documents')
+        .upsert(documentToSave)
+        .select()
+        .single();
+      
+      savedDoc = data;
+      docError = error;
+    }
     
     if (docError) {
       console.error('Error saving document:', docError);

@@ -19,6 +19,8 @@ export function parseMarkdown(text) {
     docLink: /\[\[([^\]]+)\]\]/g,
     // Links: [text](url)
     link: /\[([^\]]+)\]\(([^)]+)\)/g,
+    // Raw URLs: http://, https://, or www.
+    rawUrl: /(https?:\/\/[^\s<]+[^<.,:;"')\]\s])|(www\.[^\s<]+[^<.,:;"')\]\s])/g,
     // Images: ![alt](url)
     image: /!\[([^\]]*)\]\(([^)]+)\)/g,
     // Tags: #tagname[text] - we'll extract but not display the tag syntax
@@ -179,8 +181,45 @@ export function parseMarkdown(text) {
       });
     }
 
+    // Process markdown links
+    const linkRegex = new RegExp(patterns.link);
+    const linkMatches = [];
+    while ((match = linkRegex.exec(processedText)) !== null) {
+      linkMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        text: match[1],
+        url: match[2],
+        type: 'link'
+      });
+    }
+
+    // Process raw URLs
+    const rawUrlRegex = new RegExp(patterns.rawUrl);
+    const rawUrlMatches = [];
+    while ((match = rawUrlRegex.exec(processedText)) !== null) {
+      const url = match[0];
+      // Check if this URL is already part of a markdown link
+      let isInsideLink = false;
+      for (const linkMatch of linkMatches) {
+        if (match.index >= linkMatch.start && match.index <= linkMatch.end) {
+          isInsideLink = true;
+          break;
+        }
+      }
+      if (!isInsideLink) {
+        rawUrlMatches.push({
+          start: match.index,
+          end: match.index + match[0].length,
+          url: url.startsWith('www.') ? `https://${url}` : url,
+          displayUrl: url,
+          type: 'rawUrl'
+        });
+      }
+    }
+
     // Combine and sort all matches
-    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches, ...tagMatches, ...imageMatches].sort((a, b) => a.start - b.start);
+    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches, ...tagMatches, ...imageMatches, ...linkMatches, ...rawUrlMatches].sort((a, b) => a.start - b.start);
 
     // Build elements
     allMatches.forEach((match, matchIndex) => {
@@ -240,6 +279,42 @@ export function parseMarkdown(text) {
             alt={match.alt}
             className="mx-1"
           />
+        );
+      } else if (match.type === 'link') {
+        elements.push(
+          <a
+            key={`link-${segmentIndex}-${matchIndex}`}
+            href={match.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-green hover:text-accent-green/80 underline decoration-1 
+                       underline-offset-2 transition-colors inline-flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {match.text}
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        );
+      } else if (match.type === 'rawUrl') {
+        elements.push(
+          <a
+            key={`rawurl-${segmentIndex}-${matchIndex}`}
+            href={match.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent-green hover:text-accent-green/80 underline decoration-1 
+                       underline-offset-2 transition-colors inline-flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {match.displayUrl}
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
         );
       }
 

@@ -15,8 +15,9 @@ export function parseMarkdown(text) {
     inlineCode: /`([^`]+)`/g,
     // Strikethrough: ~~text~~
     strikethrough: /~~(.*?)~~/g,
-    // Document mentions: @Document Name (ending with space, punctuation, or end of string)
-    mention: /@([^\s@]+(?:\s+[^\s@]+)*?)(?=\s|[.,!?;:]|$)/g,
+    // Document mentions: @Document Name (more flexible - allows letters, numbers, spaces, hyphens, underscores)
+    // Stops at: double space, newline, punctuation, or another @
+    mention: /@([a-zA-Z0-9_-]+(?:\s+[a-zA-Z0-9_-]+)*?)(?=\s\s|[\n.,!?;:@]|$)/g,
     // Document links: [[Document Name]]
     docLink: /\[\[([^\]]+)\]\]/g,
     // Links: [text](url)

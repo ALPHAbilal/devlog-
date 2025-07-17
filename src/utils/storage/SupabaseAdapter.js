@@ -453,7 +453,9 @@ export class SupabaseAdapter {
     }
     
     // Check if this is a new document with a folder_id
-    const isNewDocumentForSave = !docData.createdAt;
+    const isNewDocumentForSave = !docData.createdAt || 
+                                 docData.metadata?.createdLocally === true ||
+                                 docData.metadata?.isNewDocument === true;
     const hasFolderId = docData.folder_id && docData.folder_id !== null;
     
     let savedDoc;
@@ -475,7 +477,8 @@ export class SupabaseAdapter {
           blockCount: documentBlocks?.length || 0,
           syncStatus: 'synced',
           lastSyncedAt: new Date().toISOString(),
-          isNewDocument: false // Clear the flag after first save
+          isNewDocument: false, // Clear the flag after first save
+          createdLocally: false // Clear this flag too
         },
         p_is_template: docData.isTemplate || false,
         p_position: docData.position || 0
@@ -497,7 +500,8 @@ export class SupabaseAdapter {
           blockCount: documentBlocks?.length || 0,
           syncStatus: 'synced', // Mark as synced when saved to Supabase
           lastSyncedAt: new Date().toISOString(),
-          isNewDocument: false // Clear the flag after first save
+          isNewDocument: false, // Clear the flag after first save
+          createdLocally: false // Clear this flag too
         },
         created_at: docData.createdAt || new Date().toISOString(),
         updated_at: new Date().toISOString(),

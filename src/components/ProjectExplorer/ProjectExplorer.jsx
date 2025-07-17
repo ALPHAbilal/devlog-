@@ -619,10 +619,10 @@ export default function ProjectExplorer({
         {/* Render children */}
         {isExpanded && hasChildren && (
           <div>
-            {/* Render documents first */}
-            {item.documents && item.documents.map(doc => renderTreeItem(doc, depth + 1, item.id))}
-            {/* Then render subfolders */}
+            {/* Render subfolders first */}
             {item.children && item.children.map(child => renderTreeItem(child, depth + 1, item.id))}
+            {/* Then render documents */}
+            {item.documents && item.documents.map(doc => renderTreeItem(doc, depth + 1, item.id))}
           </div>
         )}
       </div>

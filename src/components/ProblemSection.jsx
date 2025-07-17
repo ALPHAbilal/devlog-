@@ -1,5 +1,7 @@
 import { MessageSquare, Search, BookOpen, Brain } from 'lucide-react';
-import { useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { fadeInUp, staggerContainer, staggerItem, iconBounce } from '../utils/animations';
 
 const problems = [
   {
@@ -29,29 +31,17 @@ const problems = [
 ];
 
 export default function ProblemSection() {
-  // Add CSS animation on mount
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => style.remove();
-  }, []);
+  const { ref, isInView } = useScrollAnimation();
 
   return (
-    <section id="problem-section" className="py-20 px-4 md:px-6 bg-dark-secondary/20">
+    <section id="problem-section" className="py-20 px-4 md:px-6 bg-dark-secondary/20" ref={ref}>
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
+        <motion.div 
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+        >
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             The documentation problem
           </h2>
@@ -59,22 +49,42 @@ export default function ProblemSection() {
             You're too busy coding to document properly. And when you do, 
             it's scattered across tools that weren't built for developers.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-16">
+        <motion.div 
+          className="grid md:grid-cols-2 gap-6 mb-16"
+          variants={staggerContainer}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        >
           {problems.map((problem, index) => (
-            <div
+            <motion.div
               key={index}
-              className="bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary 
-                         hover:border-red-400/30 transition-all duration-300 group"
-              style={{
-                animation: `fadeInUp 0.6s ease-out ${problem.delay} both`
+              className="relative bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary 
+                         hover:border-red-400/30 transition-all duration-300 group overflow-hidden"
+              variants={staggerItem}
+              whileHover={{ 
+                scale: 1.02,
+                transition: { duration: 0.2 }
               }}
             >
-              <div className="flex items-start gap-4">
-                <div className="p-2 bg-dark-primary rounded-lg group-hover:scale-110 transition-transform">
+              {/* Gradient border glow on hover */}
+              <motion.div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{
+                  background: "radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(239, 68, 68, 0.1), transparent 40%)",
+                }}
+              />
+              
+              <div className="flex items-start gap-4 relative z-10">
+                <motion.div 
+                  className="p-2 bg-dark-primary rounded-lg"
+                  variants={iconBounce}
+                  initial="rest"
+                  whileHover="hover"
+                >
                   {problem.icon}
-                </div>
+                </motion.div>
                 <div>
                   <h3 className="text-lg font-semibold text-text-primary mb-2">
                     {problem.title}
@@ -84,28 +94,48 @@ export default function ProblemSection() {
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* The shift to solution */}
-        <div className="text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
-                          text-accent-green rounded-full text-sm font-medium mb-6">
-            <span className="animate-pulse">●</span>
+        <motion.div 
+          className="text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+        >
+          <motion.div 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
+                          text-accent-green rounded-full text-sm font-medium mb-6"
+            whileHover={{ scale: 1.05 }}
+          >
+            <motion.span 
+              animate={{ opacity: [1, 0.3, 1] }}
+              transition={{ repeat: Infinity, duration: 2 }}
+            >
+              ●
+            </motion.span>
             There's a better way
-          </div>
+          </motion.div>
           
           <h3 className="text-3xl font-bold mb-4">
             Documentation that 
-            <span className="text-accent-green"> actually works</span>
+            <motion.span 
+              className="text-accent-green inline-block"
+              initial={{ opacity: 0, x: -20 }}
+              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+              transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+            >
+              actually works
+            </motion.span>
           </h3>
           
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
             DevLog makes documenting as natural as coding. Capture solutions in context, 
             connect related concepts, and build a searchable knowledge base that grows with you.
           </p>
-        </div>
+        </motion.div>
       </div>
 
     </section>

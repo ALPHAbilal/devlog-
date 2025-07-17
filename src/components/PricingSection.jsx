@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { Check, X, Zap, Users, Building2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { fadeInUp, staggerContainer, staggerItem, buttonHover } from '../utils/animations';
 
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
+  const { ref, isInView } = useScrollAnimation();
 
   const plans = [
     {
@@ -90,9 +94,14 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-20 px-6 bg-dark-secondary/20">
+    <section id="pricing" className="py-20 px-6 bg-dark-secondary/20" ref={ref}>
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
+        <motion.div 
+          className="text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.6 }}
+        >
           <h3 className="text-3xl font-bold mb-4">
             Simple Pricing, Powerful Features
           </h3>
@@ -101,12 +110,21 @@ export default function PricingSection() {
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1 bg-dark-secondary rounded-lg">
+          <div className="inline-flex items-center gap-4 p-1 bg-dark-secondary rounded-lg relative">
+            <motion.div
+              className="absolute inset-0 bg-accent-green rounded-lg"
+              initial={false}
+              animate={{ 
+                x: billingPeriod === 'monthly' ? 0 : '100%',
+                width: billingPeriod === 'monthly' ? '50%' : '50%'
+              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            />
             <button
               onClick={() => setBillingPeriod('monthly')}
-              className={`px-4 py-2 rounded transition-all ${
+              className={`px-4 py-2 rounded transition-all relative z-10 ${
                 billingPeriod === 'monthly'
-                  ? 'bg-accent-green text-dark-primary font-medium'
+                  ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
@@ -114,37 +132,65 @@ export default function PricingSection() {
             </button>
             <button
               onClick={() => setBillingPeriod('annual')}
-              className={`px-4 py-2 rounded transition-all ${
+              className={`px-4 py-2 rounded transition-all relative z-10 ${
                 billingPeriod === 'annual'
-                  ? 'bg-accent-green text-dark-primary font-medium'
+                  ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               Annual
-              <span className="ml-2 text-xs bg-accent-green/20 text-accent-green px-2 py-0.5 rounded">
+              <motion.span 
+                className="ml-2 text-xs bg-accent-green/20 text-accent-green px-2 py-0.5 rounded"
+                animate={{ scale: billingPeriod === 'annual' ? [1, 1.1, 1] : 1 }}
+                transition={{ duration: 0.3 }}
+              >
                 Save up to 22%
-              </span>
+              </motion.span>
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
-          {plans.map((plan) => (
-            <div
+        <motion.div 
+          className="grid md:grid-cols-3 gap-6 mb-12"
+          variants={staggerContainer}
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+        >
+          {plans.map((plan, index) => (
+            <motion.div
               key={plan.name}
               className={`relative bg-dark-secondary rounded-lg border transition-all hover:border-accent-green/30 ${
                 plan.popular
                   ? 'border-accent-green shadow-lg shadow-accent-green/10'
                   : 'border-dark-secondary/50'
               }`}
+              variants={staggerItem}
+              whileHover={{ 
+                y: -8,
+                transition: { duration: 0.3 }
+              }}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="bg-accent-green text-dark-primary text-sm font-medium px-3 py-1 rounded">
-                    Most Popular
-                  </div>
-                </div>
+                <motion.div 
+                  className="absolute -top-4 left-1/2 -translate-x-1/2 z-10"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <motion.div 
+                    className="bg-accent-green text-dark-primary text-sm font-medium px-3 py-1 rounded relative overflow-hidden"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      animate={{ x: [-100, 100] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    />
+                    <span className="relative z-10">Most Popular</span>
+                  </motion.div>
+                </motion.div>
               )}
 
               <div className="p-6">
@@ -156,28 +202,59 @@ export default function PricingSection() {
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">
-                      ${plan.price[billingPeriod]}
-                    </span>
+                    <AnimatePresence mode="wait">
+                      <motion.span 
+                        key={billingPeriod}
+                        className="text-4xl font-bold"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        ${plan.price[billingPeriod]}
+                      </motion.span>
+                    </AnimatePresence>
                     <span className="text-text-secondary">
                       {plan.perUser ? '/user' : ''}/month
                     </span>
                   </div>
-                  {billingPeriod === 'annual' && plan.savingText && (
-                    <div className="text-accent-green text-sm mt-1">{plan.savingText}</div>
-                  )}
+                  <AnimatePresence>
+                    {billingPeriod === 'annual' && plan.savingText && (
+                      <motion.div 
+                        className="text-accent-green text-sm mt-1"
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {plan.savingText}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
-                <button
+                <motion.button
                   onClick={() => handlePlanClick(plan.name, plan.cta)}
-                  className={`w-full py-3 rounded font-medium transition-all ${
+                  className={`w-full py-3 rounded font-medium relative overflow-hidden ${
                     plan.ctaVariant === 'primary'
-                      ? 'bg-accent-green text-dark-primary hover:bg-accent-green/80'
+                      ? 'bg-accent-green text-dark-primary'
                       : 'bg-dark-primary text-text-primary border border-dark-primary hover:border-accent-green/50'
                   }`}
+                  variants={buttonHover}
+                  initial="rest"
+                  whileHover="hover"
+                  whileTap="tap"
                 >
-                  {plan.cta}
-                </button>
+                  {plan.ctaVariant === 'primary' && (
+                    <motion.span
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      initial={{ x: "-100%" }}
+                      whileHover={{ x: "100%" }}
+                      transition={{ duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{plan.cta}</span>
+                </motion.button>
 
                 <div className="mt-6 space-y-3">
                   {plan.features.map((feature, i) => (
@@ -198,9 +275,9 @@ export default function PricingSection() {
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* FAQ or Additional Info */}
         <div className="text-center">

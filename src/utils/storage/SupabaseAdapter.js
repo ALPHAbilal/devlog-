@@ -453,13 +453,13 @@ export class SupabaseAdapter {
     }
     
     // Check if this is a new document with a folder_id
-    const isNewDocument = !docData.createdAt;
+    const isNewDocumentForSave = !docData.createdAt;
     const hasFolderId = docData.folder_id && docData.folder_id !== null;
     
     let savedDoc;
     let docError;
     
-    if (isNewDocument && hasFolderId) {
+    if (isNewDocumentForSave && hasFolderId) {
       // Use the security definer function for new documents with folders
       console.log('SupabaseAdapter: Using security definer function for document creation with folder');
       
@@ -510,10 +510,10 @@ export class SupabaseAdapter {
         title: documentToSave.title,
         blockCount: documentBlocks?.length || 0,
         userId: this.userId,
-        isNew: isNewDocument
+        isNew: isNewDocumentForSave
       });
       
-      if (isNewDocument) {
+      if (isNewDocumentForSave) {
         // For new documents, use insert to avoid conflicts with soft-deleted documents
         const { data, error } = await supabase
           .from('documents')

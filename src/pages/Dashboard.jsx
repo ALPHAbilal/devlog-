@@ -1074,8 +1074,8 @@ export default function Dashboard() {
         <div className="flex-shrink-0">
         {/* Top Navigation Bar - Compact and Efficient */}
         <div className="flex items-center justify-between px-4 md:px-6 py-2 border-b border-dark-secondary/20">
-          {/* Logo and Brand - Professional Design */}
-          <div className="flex items-center gap-2.5 lg:ml-4">
+          {/* Logo and Brand - Fixed Position */}
+          <div className="flex items-center gap-2.5" style={{ paddingLeft: '24px' }}>
             {/* Mobile menu button */}
             <button
               onClick={() => toggleMobileSidebar()}

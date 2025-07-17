@@ -979,7 +979,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                   onClick={loadMore}
                   className="w-full py-4 border border-dark-secondary/50 rounded-lg 
                              text-text-secondary hover:text-text-primary 
-                             hover:border-accent-green/50 transition-all
+                             hover:border-dark-secondary/50 transition-all
                              flex items-center justify-center gap-2 group"
                 >
                   <span>Load more blocks</span>
@@ -997,7 +997,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               onClick={handleAddAtEnd}
               className="w-full py-8 border-2 border-dashed border-dark-secondary/50
                          rounded-lg text-text-secondary hover:text-text-primary
-                         hover:border-accent-green/50 transition-all
+                         hover:border-dark-secondary/50 transition-all
                          flex items-center justify-center gap-2 group"
             >
               <Plus size={20} className="group-hover:scale-110 transition-transform" />
@@ -1130,7 +1130,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                 className="w-full text-left p-3 bg-dark-secondary/30 rounded-lg
                            hover:bg-dark-secondary/50 transition-colors group"
               >
-                <div className="text-text-primary font-medium group-hover:text-accent-green 
+                <div className="text-text-primary font-medium group-hover:text-text-primary 
                                 transition-colors">
                   {backlink.title}
                 </div>

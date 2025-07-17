@@ -138,9 +138,10 @@ button {
   font-family: inherit;
 }
 
+/* Removed global button hover to prevent green color on all buttons
 button:hover:not(:disabled) {
   background: #059669;
-}
+} */
 
 button:disabled {
   opacity: 0.5;

@@ -52,7 +52,7 @@ export default function AddBlockRow({ onSelect, onClose, show }) {
           {/* Plus button */}
           <button
             className="w-7 h-7 rounded-full flex items-center justify-center 
-                       text-accent-green hover:bg-accent-green/10 transition-all"
+                       text-text-secondary hover:bg-dark-secondary/50 transition-all"
             onClick={onClose}
             aria-label="Close menu"
           >

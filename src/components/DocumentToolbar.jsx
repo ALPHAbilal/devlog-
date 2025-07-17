@@ -142,7 +142,7 @@ export default function DocumentToolbar({
             {/* Action buttons */}
             <button
               onClick={onShare}
-              className="p-2 text-text-secondary hover:text-accent-green 
+              className="p-2 text-text-secondary hover:text-text-primary 
                        hover:bg-dark-secondary/50 rounded-lg transition-all duration-200"
               title="Share document"
             >

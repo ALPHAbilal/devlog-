@@ -62,9 +62,11 @@ export default function ScrollToTop({ scrollContainerRef }) {
         shadow-lg shadow-accent-green/20
         group
         ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
-        ${isAtBottom ? 'bottom-24' : 'bottom-8'}
-        right-8
       `}
+      style={{ 
+        right: '2rem',
+        bottom: isAtBottom ? '6rem' : '2rem'
+      }}
       title="Back to top"
       aria-label="Scroll to top"
     >
@@ -76,7 +78,7 @@ export default function ScrollToTop({ scrollContainerRef }) {
       <ArrowUp 
         size={16} 
         className="relative z-10 transition-all duration-300 
-                   group-hover:text-accent-green group-hover:-translate-y-0.5"
+                   group-hover:-translate-y-0.5"
       />
     </button>,
     portalRoot

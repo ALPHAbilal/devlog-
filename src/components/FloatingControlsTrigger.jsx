@@ -6,16 +6,27 @@ export default function FloatingControlsTrigger({
   onViewModeChange, 
   onShare, 
   onDelete,
-  scrollThreshold = 200 // Show after scrolling past this point
+  scrollThreshold = 100 // Show after scrolling past this point (lowered from 200)
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [justAppeared, setJustAppeared] = useState(false);
   const panelRef = useRef(null);
 
   // Handle scroll visibility
   useEffect(() => {
     const handleScroll = () => {
-      const shouldShow = window.scrollY > scrollThreshold;
+      const currentScrollY = window.scrollY;
+      const shouldShow = currentScrollY > scrollThreshold;
+      
+      // Add debug logging
+      console.log('Scroll position:', currentScrollY, 'Should show:', shouldShow);
+      
+      if (shouldShow && !isVisible) {
+        setJustAppeared(true);
+        setTimeout(() => setJustAppeared(false), 1000);
+      }
+      
       setIsVisible(shouldShow);
     };
 
@@ -23,7 +34,7 @@ export default function FloatingControlsTrigger({
     handleScroll(); // Check initial position
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrollThreshold]);
+  }, [scrollThreshold, isVisible]);
 
   // Handle click outside to close
   useEffect(() => {
@@ -41,27 +52,29 @@ export default function FloatingControlsTrigger({
   if (!isVisible) return null;
 
   return (
-    <div ref={panelRef} className="fixed top-4 right-4 z-40">
+    <div ref={panelRef} className="fixed top-4 right-4 z-50">
       {/* Trigger Arrow Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
           absolute top-0 right-0 
-          w-10 h-10 rounded-full
-          bg-dark-secondary/80 backdrop-blur-sm
-          border border-dark-secondary/50
+          w-12 h-12 rounded-full
+          bg-accent-green backdrop-blur-sm
+          border-2 border-accent-green
           flex items-center justify-center
-          text-text-secondary hover:text-text-primary
-          hover:bg-dark-secondary/90
+          text-dark-primary
+          hover:bg-accent-green/90
+          hover:scale-110
           transition-all duration-200
-          shadow-lg hover:shadow-xl
+          shadow-lg hover:shadow-xl shadow-accent-green/20
           ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+          ${justAppeared ? 'animate-pulse' : ''}
         `}
         title="Quick actions"
       >
         <ChevronLeft 
-          size={18} 
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          size={20} 
+          className={`transition-transform duration-200 font-bold ${isOpen ? 'rotate-180' : ''}`}
         />
       </button>
 

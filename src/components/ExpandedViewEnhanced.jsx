@@ -14,6 +14,7 @@ import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogEnhanced } from './ShareDialogEnhanced';
 import SaveIndicator from './SaveIndicator';
+import FloatingControlsTrigger from './FloatingControlsTrigger';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -675,6 +676,15 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
       onClick={handleBackgroundClick}
     >
+      {/* Floating Controls Trigger */}
+      <FloatingControlsTrigger
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        onShare={() => setShowShareDialog(true)}
+        onDelete={() => setShowDeleteConfirm(true)}
+        scrollThreshold={200}
+      />
+      
       <div className="max-w-4xl mx-auto fade-in px-8 py-8">
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">

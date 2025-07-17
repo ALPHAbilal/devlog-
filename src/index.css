@@ -3,6 +3,7 @@
 @import './styles/glassmorphism.css';
 @import './styles/demo.css';
 @import './styles/auth-enhanced.css';
+@import './styles/settings-minimal.css';
 
 @tailwind base;
 @tailwind components;

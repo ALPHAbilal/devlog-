@@ -683,9 +683,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         scrollContainerRef={scrollContainerRef}
       />
       
-      {/* Scroll to Top Button */}
-      <ScrollToTop scrollContainerRef={scrollContainerRef} />
-      
       <div 
         ref={scrollContainerRef}
         className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
@@ -1251,6 +1248,9 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       )}
 
       </div>
+      
+      {/* Scroll to Top Button - Rendered at the end */}
+      <ScrollToTop scrollContainerRef={scrollContainerRef} />
     </>
   );
 }

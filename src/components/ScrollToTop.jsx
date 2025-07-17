@@ -1,7 +1,10 @@
+console.log('ScrollToTop component file loaded');
+
 import React, { useState, useEffect } from 'react';
 import { ArrowUp } from 'lucide-react';
 
 export default function ScrollToTop({ scrollContainerRef }) {
+  console.log('ScrollToTop component function called');
   const [isVisible, setIsVisible] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
 

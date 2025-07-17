@@ -8,7 +8,6 @@ import ProblemSection from '../components/ProblemSection';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover } from '../utils/animations';
-import MagneticCursor from '../components/MagneticCursor';
 import NoiseOverlay from '../components/NoiseOverlay';
 
 // Lazy load heavy components
@@ -87,12 +86,9 @@ function LandingContent() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <motion.div
-              animate={{ scale: isScrolled ? 0.9 : 1 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div>
               <LogoMinimal size={32} />
-            </motion.div>
+            </div>
             <h1 className="text-xl font-semibold">Devlog</h1>
           </motion.div>
           
@@ -110,8 +106,7 @@ function LandingContent() {
             >
               Sign In
             </button>
-            <MagneticCursor strength={0.3}>
-              <motion.button
+            <motion.button
                 onClick={() => navigate('/auth')}
                 className="px-4 py-2 bg-accent-green text-dark-primary rounded font-medium 
                            relative overflow-hidden"
@@ -128,7 +123,6 @@ function LandingContent() {
                 />
                 <span className="relative z-10">Start Free Trial</span>
               </motion.button>
-            </MagneticCursor>
           </div>
           
           {/* Mobile Menu Button */}
@@ -225,10 +219,6 @@ function LandingContent() {
                 className="glassmorphism-card glassmorphism-hover rounded-lg p-6
                            relative overflow-hidden group"
                 variants={staggerItem}
-                whileHover={{ 
-                  y: -4,
-                  transition: { duration: 0.2 }
-                }}
               >
                 {/* Gradient overlay on hover */}
                 <motion.div
@@ -269,7 +259,6 @@ function LandingContent() {
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            whileHover={{ scale: 1.05 }}
           >
             <Zap size={16} />
             Limited Time: Get 30% off annual plans
@@ -300,8 +289,7 @@ function LandingContent() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <MagneticCursor strength={0.4}>
-              <motion.button
+            <motion.button
                 onClick={() => navigate('/auth')}
                 className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
                            rounded-lg font-medium text-lg shadow-lg shadow-accent-green/20
@@ -320,7 +308,6 @@ function LandingContent() {
                 <span className="relative z-10">Claim Your 14-Day Free Trial</span>
                 <ArrowRight size={24} className="relative z-10" />
               </motion.button>
-            </MagneticCursor>
             <p className="text-sm text-text-secondary/70">
               No credit card • Setup in 2 minutes • Cancel anytime
             </p>

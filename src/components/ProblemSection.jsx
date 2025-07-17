@@ -108,7 +108,7 @@ export default function ProblemSection() {
           <motion.div 
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
                           text-accent-green rounded-full text-sm font-medium mb-6"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1 }}
           >
             <span className="text-accent-green">●</span>
             There's a better way

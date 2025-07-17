@@ -141,7 +141,7 @@ export default function PricingSection() {
               Annual
               <motion.span 
                 className="ml-2 text-xs bg-accent-green/20 text-accent-green px-2 py-0.5 rounded"
-                animate={{ scale: billingPeriod === 'annual' ? [1, 1.1, 1] : 1 }}
+                animate={{ scale: 1 }}
                 transition={{ duration: 0.3 }}
               >
                 Save up to 22%
@@ -166,10 +166,6 @@ export default function PricingSection() {
                   : 'border-dark-secondary/50'
               }`}
               variants={staggerItem}
-              whileHover={{ 
-                y: -8,
-                transition: { duration: 0.3 }
-              }}
             >
               {plan.popular && (
                 <motion.div 

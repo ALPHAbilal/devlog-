@@ -2,7 +2,6 @@ import { ArrowRight, ChevronDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { textReveal, buttonHover, staggerContainer, staggerItem, gradientStatic } from '../utils/animations';
-import MagneticCursor from './MagneticCursor';
 
 export default function HeroSectionV3() {
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ export default function HeroSectionV3() {
             <motion.span 
               className="text-accent-green inline-block"
               variants={staggerItem}
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
               Why Your Code Works
@@ -71,8 +70,7 @@ export default function HeroSectionV3() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
         >
-          <MagneticCursor strength={0.4}>
-            <motion.button
+          <motion.button
               onClick={() => navigate('/auth')}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 
                        bg-accent-green text-dark-primary rounded-lg font-medium text-lg
@@ -91,14 +89,13 @@ export default function HeroSectionV3() {
               <span className="relative z-10">Start Documenting Today</span>
               <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
             </motion.button>
-          </MagneticCursor>
           
           <motion.button
             onClick={scrollToDemo}
             className="inline-flex items-center justify-center gap-2 px-8 py-4 
                      border border-dark-secondary text-text-primary rounded-lg text-lg
                      hover:border-accent-green/50 transition-all relative overflow-hidden"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
@@ -115,17 +112,17 @@ export default function HeroSectionV3() {
         >
           <motion.div 
             className="flex items-center gap-2"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1 }}
           >
             <Clock size={16} />
             <span>2-minute setup</span>
           </motion.div>
           <div>•</div>
-          <motion.div whileHover={{ scale: 1.05 }}>
+          <motion.div whileHover={{ scale: 1 }}>
             Free 14-day trial
           </motion.div>
           <div>•</div>
-          <motion.div whileHover={{ scale: 1.05 }}>
+          <motion.div whileHover={{ scale: 1 }}>
             No credit card required
           </motion.div>
         </motion.div>

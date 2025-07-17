@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 
-const MagneticCursor = ({ children, strength = 0.5, className = '' }) => {
+const MagneticCursor = ({ children, strength = 0.1, className = '' }) => {
   const ref = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
 

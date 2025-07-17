@@ -90,8 +90,7 @@ export const cardHover = {
     transition: { duration: 0.2, ease: appleEase.smooth }
   },
   hover: {
-    scale: 1.02,
-    y: -4,
+    scale: 1,
     boxShadow: "0 20px 30px rgba(0, 0, 0, 0.2)",
     transition: { duration: 0.2, ease: appleEase.smooth }
   }
@@ -109,8 +108,7 @@ export const buttonHover = {
     transition: { duration: 0.2, ease: appleEase.smooth }
   },
   hover: {
-    scale: 1.02,
-    y: -2,
+    scale: 1,
     boxShadow: `
       0 1px 3px rgba(16, 185, 129, 0.2),
       0 5px 10px rgba(16, 185, 129, 0.2),
@@ -120,7 +118,6 @@ export const buttonHover = {
   },
   tap: {
     scale: 0.98,
-    y: 0,
     transition: { duration: 0.1 }
   }
 };
@@ -139,7 +136,7 @@ export const magneticButton = {
 export const iconLift = {
   rest: { y: 0 },
   hover: {
-    y: -2,
+    y: 0,
     transition: {
       duration: 0.2,
       ease: appleEase.smooth

@@ -15,6 +15,8 @@ export function parseMarkdown(text) {
     inlineCode: /`([^`]+)`/g,
     // Strikethrough: ~~text~~
     strikethrough: /~~(.*?)~~/g,
+    // Document mentions: @Document Name (ending with space, punctuation, or end of string)
+    mention: /@([^\s@]+(?:\s+[^\s@]+)*?)(?=\s|[.,!?;:]|$)/g,
     // Document links: [[Document Name]]
     docLink: /\[\[([^\]]+)\]\]/g,
     // Links: [text](url)
@@ -138,6 +140,18 @@ export function parseMarkdown(text) {
       });
     }
 
+    // Process document mentions
+    const mentionRegex = new RegExp(patterns.mention);
+    const mentionMatches = [];
+    while ((match = mentionRegex.exec(processedText)) !== null) {
+      mentionMatches.push({
+        start: match.index,
+        end: match.index + match[0].length,
+        content: match[1], // Document name without @
+        type: 'mention'
+      });
+    }
+
     // Process document links
     const docLinkRegex = new RegExp(patterns.docLink);
     const docLinkMatches = [];
@@ -219,7 +233,7 @@ export function parseMarkdown(text) {
     }
 
     // Combine and sort all matches
-    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...docLinkMatches, ...tagMatches, ...imageMatches, ...linkMatches, ...rawUrlMatches].sort((a, b) => a.start - b.start);
+    const allMatches = [...boldMatches, ...italicMatches, ...strikethroughMatches, ...mentionMatches, ...docLinkMatches, ...tagMatches, ...imageMatches, ...linkMatches, ...rawUrlMatches].sort((a, b) => a.start - b.start);
 
     // Build elements
     allMatches.forEach((match, matchIndex) => {
@@ -246,6 +260,23 @@ export function parseMarkdown(text) {
           <del key={`strike-${segmentIndex}-${matchIndex}`} className="line-through opacity-60">
             {match.content}
           </del>
+        );
+      } else if (match.type === 'mention') {
+        elements.push(
+          <button
+            key={`mention-${segmentIndex}-${matchIndex}`}
+            className="text-blue-400 hover:text-blue-300 font-medium cursor-pointer transition-colors
+                       hover:bg-blue-400/10 px-1 rounded"
+            onClick={(e) => {
+              e.stopPropagation();
+              // This will be handled by the parent component - same as document links
+              if (window.handleDocumentLink) {
+                window.handleDocumentLink(match.content);
+              }
+            }}
+          >
+            @{match.content}
+          </button>
         );
       } else if (match.type === 'docLink') {
         elements.push(

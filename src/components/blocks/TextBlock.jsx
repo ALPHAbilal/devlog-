@@ -16,6 +16,10 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   const [toolbarPosition, setToolbarPosition] = useState(null);
   const [selectedText, setSelectedText] = useState('');
   const [isCollapsed, setIsCollapsed] = useState(block.metadata?.isCollapsed || false);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [mentionPosition, setMentionPosition] = useState(null);
+  const [mentionStartIndex, setMentionStartIndex] = useState(null);
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
   
@@ -54,6 +58,22 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       return Array.from(allTags);
     } catch (error) {
       console.error('Error getting tags:', error);
+      return [];
+    }
+  };
+
+  // Get all documents for mentions
+  const getAllDocuments = () => {
+    try {
+      const documents = JSON.parse(localStorage.getItem('journeyLoggerEntries') || '[]');
+      return documents.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        preview: doc.preview,
+        tags: doc.tags || []
+      }));
+    } catch (error) {
+      console.error('Error getting documents:', error);
       return [];
     }
   };
@@ -465,13 +485,72 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
       setSlashHintPosition(null);
     }
 
-    // Auto-complete document links
+    // Check for @ mentions
+    const cursorPosition = e.target.selectionStart;
+    const textBeforeCursor = newContent.substring(0, cursorPosition);
+    const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+    
+    if (mentionMatch) {
+      const mentionStart = cursorPosition - mentionMatch[0].length;
+      const searchTerm = mentionMatch[1] || '';
+      
+      setMentionSearch(searchTerm);
+      setMentionStartIndex(mentionStart);
+      setShowMentionDropdown(true);
+      
+      // Calculate dropdown position
+      if (textareaRef.current) {
+        const rect = textareaRef.current.getBoundingClientRect();
+        const lineHeight = 24;
+        const charWidth = 8;
+        
+        // Simple position calculation - can be improved
+        const lines = textBeforeCursor.split('\n');
+        const currentLineIndex = lines.length - 1;
+        const currentLineLength = lines[currentLineIndex].length;
+        
+        setMentionPosition({
+          top: rect.top + (currentLineIndex * lineHeight) + lineHeight + 5,
+          left: rect.left + (currentLineLength * charWidth)
+        });
+      }
+    } else {
+      setShowMentionDropdown(false);
+      setMentionSearch('');
+      setMentionStartIndex(null);
+    }
+
+    // Auto-complete document links (keeping backward compatibility)
     if (newContent.endsWith('[[')) {
       // Could show document search modal here in the future
     }
   };
 
   const handleKeyDown = (e) => {
+    // Handle mention dropdown navigation
+    if (showMentionDropdown && filteredDocuments.length > 0) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === 'Escape') {
+        e.preventDefault();
+        
+        if (e.key === 'Escape') {
+          setShowMentionDropdown(false);
+          setMentionSearch('');
+          setMentionStartIndex(null);
+          return;
+        }
+        
+        if (e.key === 'Enter' && filteredDocuments.length > 0) {
+          // Select first document or highlighted one (future enhancement)
+          selectMention(filteredDocuments[0]);
+          return;
+        }
+        
+        // Arrow navigation would require tracking selected index
+        // For now, just prevent default behavior
+        return;
+      }
+    }
+    
     // Keyboard shortcuts for formatting
     if ((e.metaKey || e.ctrlKey) && !e.shiftKey) {
       switch(e.key) {
@@ -563,6 +642,36 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     }
   };
 
+  // Handle mention selection
+  const selectMention = (document) => {
+    if (mentionStartIndex !== null) {
+      const beforeMention = content.substring(0, mentionStartIndex);
+      const afterMention = content.substring(mentionStartIndex + mentionSearch.length + 1); // +1 for @
+      const newContent = beforeMention + `@${document.title} ` + afterMention;
+      
+      setContent(newContent);
+      setShowMentionDropdown(false);
+      setMentionSearch('');
+      setMentionStartIndex(null);
+      
+      // Move cursor after the mention
+      setTimeout(() => {
+        if (textareaRef.current) {
+          const newCursorPos = mentionStartIndex + document.title.length + 2; // +2 for @ and space
+          textareaRef.current.selectionStart = newCursorPos;
+          textareaRef.current.selectionEnd = newCursorPos;
+          textareaRef.current.focus();
+        }
+      }, 0);
+    }
+  };
+
+  // Filter documents for mention dropdown
+  const filteredDocuments = showMentionDropdown ? 
+    getAllDocuments().filter(doc => 
+      doc.title.toLowerCase().includes(mentionSearch.toLowerCase())
+    ).slice(0, 5) : []; // Limit to 5 suggestions
+
   // Remove the old command select handler as we no longer need it
 
   if (isEditing) {
@@ -575,16 +684,21 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           onPaste={handlePaste}
           onFocus={() => onFocus && onFocus(block.id)}
           onBlur={(e) => {
-            // Don't blur if clicking on toolbar
+            // Don't blur if clicking on toolbar or mention dropdown
             const relatedTarget = e.relatedTarget;
-            if (relatedTarget && relatedTarget.closest('.floating-toolbar')) {
+            if (relatedTarget && (relatedTarget.closest('.floating-toolbar') || relatedTarget.closest('.mention-dropdown'))) {
               return;
             }
             
-            // Hide toolbar and save
-            setShowToolbar(false);
-            setSlashHint('');
-            handleSave();
+            // Small delay to allow click events on dropdown
+            setTimeout(() => {
+              if (!showMentionDropdown) {
+                // Hide toolbar and save
+                setShowToolbar(false);
+                setSlashHint('');
+                handleSave();
+              }
+            }, 200);
           }}
           onKeyDown={handleKeyDown}
           className="w-full bg-dark-secondary/50 text-text-primary p-4 rounded-lg
@@ -618,6 +732,39 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
             existingTags={getAllTags()}
             onTag={handleTag}
           />
+        )}
+        {/* Mention Dropdown */}
+        {showMentionDropdown && mentionPosition && filteredDocuments.length > 0 && (
+          <div 
+            className="mention-dropdown fixed z-50 bg-dark-secondary/95 backdrop-blur-sm border border-dark-secondary/50 
+                       rounded-lg shadow-xl py-2 max-w-sm max-h-48 overflow-y-auto"
+            style={{
+              top: mentionPosition.top + 'px',
+              left: mentionPosition.left + 'px'
+            }}
+          >
+            {filteredDocuments.map((doc, index) => (
+              <button
+                key={doc.id}
+                onClick={() => selectMention(doc)}
+                className="w-full px-3 py-2 text-left hover:bg-dark-primary/50 transition-colors
+                           flex flex-col gap-0.5"
+                onMouseDown={(e) => e.preventDefault()} // Prevent blur
+              >
+                <div className="text-text-primary text-sm font-medium truncate">
+                  @{doc.title}
+                </div>
+                {doc.preview && (
+                  <div className="text-text-secondary/70 text-xs truncate">
+                    {doc.preview.substring(0, 50)}...
+                  </div>
+                )}
+              </button>
+            ))}
+            <div className="px-3 py-1 text-xs text-text-secondary/50 border-t border-dark-secondary/30 mt-1">
+              Type to filter • Click to select
+            </div>
+          </div>
         )}
       </>
     );

@@ -1371,7 +1371,6 @@ export default function Dashboard() {
         onCreateDocument={handleCommandPaletteCreateDocument}
         onCreateProject={handleCommandPaletteCreateProject}
       />
-    </div>
     </DndContext>
   );
 }

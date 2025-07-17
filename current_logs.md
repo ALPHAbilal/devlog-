@@ -1,47 +1,56 @@
-[11:56:25.888] Running build in Washington, D.C., USA (East) – iad1
-[11:56:25.889] Build machine configuration: 2 cores, 8 GB
-[11:56:25.906] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 28e8e13)
-[11:56:26.474] Cloning completed: 568.000ms
-[11:56:26.658] Restored build cache from previous deployment (BKagjUSorkGvGURfUHSig4vL5sPz)
-[11:56:28.575] Running "vercel build"
-[11:56:29.084] Vercel CLI 44.4.3
-[11:56:29.684] Installing dependencies...
-[11:56:30.839] 
-[11:56:30.839] up to date in 936ms
-[11:56:30.840] 
-[11:56:30.840] 70 packages are looking for funding
-[11:56:30.840]   run `npm fund` for details
-[11:56:30.979] 
-[11:56:30.980] > journey-log-compass@0.0.0 build
-[11:56:30.980] > vite build
-[11:56:30.981] 
-[11:56:31.304] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
-[11:56:31.703] transforming...
-[11:56:32.324] [32m✓[39m 51 modules transformed.
-[11:56:32.328] [31m✗[39m Build failed in 679ms
-[11:56:32.332] [31merror during build:
-[11:56:32.333] [31m[vite:esbuild] Transform failed with 1 error:
-[11:56:32.333] /vercel/path0/src/components/ExpandedViewEnhanced.jsx:1191:10: ERROR: Unterminated regular expression[31m
-[11:56:32.333] file: [36m/vercel/path0/src/components/ExpandedViewEnhanced.jsx:1191:10[31m
-[11:56:32.333] [33m
-[11:56:32.334] [33mUnterminated regular expression[33m
-[11:56:32.335] 1189|        
-[11:56:32.335] 1190|        </div>
-[11:56:32.335] 1191|      </div>
-[11:56:32.335]    |            ^
-[11:56:32.335] 1192|    );
-[11:56:32.336] 1193|  }
-[11:56:32.336] [31m
-[11:56:32.336]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
-[11:56:32.336]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
-[11:56:32.336]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
-[11:56:32.337]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
-[11:56:32.337]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
-[11:56:32.337]     at Socket.emit (node:events:518:28)
-[11:56:32.337]     at addChunk (node:internal/streams/readable:561:12)
-[11:56:32.337]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
-[11:56:32.338]     at Readable.push (node:internal/streams/readable:392:5)
-[11:56:32.338]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
-[11:56:32.395] Error: Command "npm run build" exited with 1
-[11:56:32.656] 
-[11:56:36.083] Exiting build container
+[14:41:35.422] Running build in Washington, D.C., USA (East) – iad1
+[14:41:35.422] Build machine configuration: 2 cores, 8 GB
+[14:41:35.453] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 9944b94)
+[14:41:36.459] Cloning completed: 1.006s
+[14:41:36.588] Restored build cache from previous deployment (HHHT33STg3VtU8eVAiugEh9FWWc7)
+[14:41:38.478] Running "vercel build"
+[14:41:38.945] Vercel CLI 44.4.3
+[14:41:39.538] Installing dependencies...
+[14:41:40.718] 
+[14:41:40.719] up to date in 940ms
+[14:41:40.719] 
+[14:41:40.720] 70 packages are looking for funding
+[14:41:40.720]   run `npm fund` for details
+[14:41:40.857] 
+[14:41:40.858] > journey-log-compass@0.0.0 build
+[14:41:40.858] > vite build
+[14:41:40.859] 
+[14:41:41.224] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[14:41:41.623] transforming...
+[14:41:41.954] [32m✓[39m 22 modules transformed.
+[14:41:41.956] [31m✗[39m Build failed in 388ms
+[14:41:41.956] [31merror during build:
+[14:41:41.957] [31m[vite:esbuild] Transform failed with 2 errors:
+[14:41:41.957] /vercel/path0/src/pages/Dashboard.jsx:1374:6: ERROR: Unexpected closing "div" tag does not match opening "DndContext" tag
+[14:41:41.957] /vercel/path0/src/pages/Dashboard.jsx:1375:17: ERROR: Unterminated regular expression[31m
+[14:41:41.957] file: [36m/vercel/path0/src/pages/Dashboard.jsx:1374:6[31m
+[14:41:41.958] [33m
+[14:41:41.958] [33mUnexpected closing "div" tag does not match opening "DndContext" tag[33m
+[14:41:41.958] 1372|          onCreateProject={handleCommandPaletteCreateProject}
+[14:41:41.958] 1373|        />
+[14:41:41.958] 1374|      </div>
+[14:41:41.959]    |        ^
+[14:41:41.959] 1375|      </DndContext>
+[14:41:41.959] 1376|    );
+[14:41:41.959] 
+[14:41:41.959] [33mUnterminated regular expression[33m
+[14:41:41.960] 1373|        />
+[14:41:41.960] 1374|      </div>
+[14:41:41.960] 1375|      </DndContext>
+[14:41:41.960]    |                   ^
+[14:41:41.960] 1376|    );
+[14:41:41.972] 1377|  }
+[14:41:41.972] [31m
+[14:41:41.973]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
+[14:41:41.973]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
+[14:41:41.973]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
+[14:41:41.973]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
+[14:41:41.973]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
+[14:41:41.974]     at Socket.emit (node:events:518:28)
+[14:41:41.974]     at addChunk (node:internal/streams/readable:561:12)
+[14:41:41.974]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[14:41:41.975]     at Readable.push (node:internal/streams/readable:392:5)
+[14:41:41.975]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
+[14:41:42.028] Error: Command "npm run build" exited with 1
+[14:41:42.215] 
+[14:41:44.975] Exiting build container

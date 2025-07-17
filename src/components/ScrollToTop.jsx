@@ -6,16 +6,23 @@ export default function ScrollToTop({ scrollContainerRef }) {
   const [isAtBottom, setIsAtBottom] = useState(false);
 
   useEffect(() => {
+    console.log('ScrollToTop mounted, scrollContainerRef:', scrollContainerRef);
     const scrollElement = scrollContainerRef?.current;
-    if (!scrollElement) return;
+    if (!scrollElement) {
+      console.log('ScrollToTop: No scroll element found');
+      return;
+    }
 
     const handleScroll = () => {
       const scrollTop = scrollElement.scrollTop;
       const scrollHeight = scrollElement.scrollHeight;
       const clientHeight = scrollElement.clientHeight;
       
-      // Show button when scrolled down more than 300px
-      setIsVisible(scrollTop > 300);
+      console.log('ScrollToTop - Scroll position:', scrollTop, 'Height:', scrollHeight);
+      
+      // Show button when scrolled down more than 100px (lowered from 300)
+      const shouldShow = scrollTop > 100;
+      setIsVisible(shouldShow);
       
       // Check if near bottom (within 100px)
       setIsAtBottom(scrollHeight - (scrollTop + clientHeight) < 100);
@@ -38,25 +45,25 @@ export default function ScrollToTop({ scrollContainerRef }) {
     });
   };
 
-  if (!isVisible) return null;
+  // Always render for debugging
+  console.log('ScrollToTop render, isVisible:', isVisible);
 
   return (
     <button
       onClick={scrollToTop}
       className={`
-        fixed z-40
-        w-10 h-10 rounded-xl
-        bg-dark-secondary/40 backdrop-blur-xl
-        border border-dark-secondary/30
+        fixed z-50
+        w-12 h-12 rounded-xl
+        bg-accent-green backdrop-blur-xl
+        border-2 border-accent-green
         flex items-center justify-center
-        text-text-secondary/70
-        hover:text-text-primary
-        hover:bg-dark-secondary/60
-        hover:border-accent-green/30
-        hover:shadow-lg hover:shadow-accent-green/5
+        text-dark-primary
+        hover:bg-accent-green/90
+        hover:scale-110
         transition-all duration-300 ease-out
+        shadow-lg shadow-accent-green/20
         group
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
+        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-50 translate-y-4'}
         ${isAtBottom ? 'bottom-24' : 'bottom-8'}
       `}
       style={{ right: '2rem' }}

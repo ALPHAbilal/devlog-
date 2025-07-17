@@ -157,16 +157,16 @@ export default function AIBlock({ block, onUpdate }) {
       <div className={`ai-message-item flex gap-3 ${isUser ? 'flex-row-reverse' : ''}`}>
         {/* Avatar */}
         <div className={`
-          flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
+          flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
           ${isUser 
-            ? 'bg-dark-secondary border border-dark-secondary/50' 
-            : 'bg-gradient-to-br from-accent-green/20 to-accent-green/10 border border-accent-green/20'
+            ? 'bg-blue-500/20 border-2 border-blue-500/30' 
+            : 'bg-gradient-to-br from-accent-green/20 to-accent-green/10 border-2 border-accent-green/30'
           }
         `}>
           {isUser ? (
-            <User size={16} className="text-text-secondary" />
+            <User size={20} className="text-blue-400" />
           ) : (
-            <Sparkles size={16} className="text-accent-green" />
+            <Sparkles size={20} className="text-accent-green" />
           )}
         </div>
 
@@ -174,7 +174,7 @@ export default function AIBlock({ block, onUpdate }) {
         <div className={`flex-1 max-w-[85%] ${isUser ? 'items-end' : 'items-start'} flex flex-col`}>
           {/* Role Label */}
           <div className={`flex items-center gap-2 mb-1 ${isUser ? 'flex-row-reverse' : ''}`}>
-            <span className="text-xs text-text-secondary/70 font-medium">
+            <span className={`text-sm font-semibold ${isUser ? 'text-blue-400' : 'text-accent-green'}`}>
               {isUser ? 'You' : 'AI Assistant'}
             </span>
             
@@ -209,10 +209,10 @@ export default function AIBlock({ block, onUpdate }) {
 
           {/* Message Bubble */}
           <div className={`
-            relative rounded-lg px-4 py-3 w-full
+            relative rounded-lg px-4 py-3 w-full border-l-4
             ${isUser 
-              ? 'bg-dark-secondary/40 border border-dark-secondary/60' 
-              : 'bg-gradient-to-br from-dark-secondary/20 to-dark-secondary/10 border border-dark-secondary/30'
+              ? 'bg-dark-secondary/40 border border-dark-secondary/60 border-l-blue-500' 
+              : 'bg-gradient-to-br from-dark-secondary/20 to-dark-secondary/10 border border-dark-secondary/30 border-l-accent-green'
             }
           `}>
             {isEditing ? (
@@ -388,30 +388,36 @@ export default function AIBlock({ block, onUpdate }) {
       {/* Add Message Interface */}
       {!isBlockCollapsed && isAddingMessage && (
         <div className="space-y-3 p-4 bg-dark-secondary/20 rounded-lg border border-dark-secondary/30">
-          <div className="flex gap-2">
+          <div className="text-sm text-text-secondary mb-2 font-medium">
+            Choose who's speaking:
+          </div>
+          <div className="flex gap-3">
             <button
               onClick={() => {
                 const content = textareaRef.current?.value || '';
                 addMessage('user', content);
               }}
-              className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-                       bg-dark-secondary hover:bg-dark-secondary/80 text-text-primary"
+              className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
+                       bg-blue-500/20 hover:bg-blue-500/30 text-blue-400
+                       border-2 border-blue-500/30 hover:border-blue-500/50
+                       flex items-center justify-center gap-2"
             >
-              <User size={14} className="inline mr-1" />
-              User
+              <User size={18} />
+              <span>User Message</span>
             </button>
             <button
               onClick={() => {
                 const content = textareaRef.current?.value || '';
                 addMessage('ai', content);
               }}
-              className="px-3 py-1.5 rounded-md text-sm font-medium transition-colors
+              className="flex-1 px-4 py-2.5 rounded-lg text-sm font-medium transition-all
                        bg-gradient-to-r from-accent-green/20 to-accent-green/10 
                        hover:from-accent-green/30 hover:to-accent-green/20
-                       text-accent-green border border-accent-green/20"
+                       text-accent-green border-2 border-accent-green/30 hover:border-accent-green/50
+                       flex items-center justify-center gap-2"
             >
-              <Sparkles size={14} className="inline mr-1" />
-              AI
+              <Sparkles size={18} />
+              <span>AI Response</span>
             </button>
           </div>
           

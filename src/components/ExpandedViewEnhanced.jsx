@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowLeft, Plus, Link2 } from 'lucide-react';
+import { ArrowLeft, Plus, Link2, Trash2 } from 'lucide-react';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';

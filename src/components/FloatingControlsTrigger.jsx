@@ -62,87 +62,100 @@ export default function FloatingControlsTrigger({
   console.log('FloatingControlsTrigger is rendering, isVisible:', isVisible);
 
   return (
-    <div ref={panelRef} className="fixed top-4 right-4 z-50">
-      {/* Trigger Arrow Button */}
+    <div ref={panelRef} className="fixed top-6 right-6 z-50">
+      {/* Trigger Arrow Button - Sophisticated Design */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`
-          absolute top-0 right-0 
-          w-12 h-12 rounded-full
-          bg-accent-green backdrop-blur-sm
-          border-2 border-accent-green
+          relative 
+          w-10 h-10 rounded-xl
+          bg-dark-secondary/40 backdrop-blur-xl
+          border border-dark-secondary/30
           flex items-center justify-center
-          text-dark-primary
-          hover:bg-accent-green/90
-          hover:scale-110
-          transition-all duration-200
-          shadow-lg hover:shadow-xl shadow-accent-green/20
-          ${isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}
-          ${justAppeared ? 'animate-pulse' : ''}
+          text-text-secondary/70
+          hover:text-text-primary
+          hover:bg-dark-secondary/60
+          hover:border-accent-green/30
+          hover:shadow-lg hover:shadow-accent-green/5
+          transition-all duration-300 ease-out
+          group
+          ${isOpen ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'}
+          ${justAppeared ? 'animate-[fadeIn_0.5s_ease-out]' : ''}
         `}
         title="Quick actions"
       >
+        {/* Gradient overlay on hover */}
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-green/0 to-accent-green/10 
+                        opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+        {/* Icon */}
         <ChevronLeft 
-          size={20} 
-          className={`transition-transform duration-200 font-bold ${isOpen ? 'rotate-180' : ''}`}
+          size={16} 
+          className={`relative z-10 transition-all duration-300 
+                     group-hover:text-accent-green group-hover:-translate-x-0.5`}
         />
       </button>
 
-      {/* Controls Panel */}
+      {/* Controls Panel - Glassmorphism Design */}
       <div
         className={`
           absolute top-0 right-0
-          bg-dark-secondary/95 backdrop-blur-xl
-          border border-dark-secondary/50
-          rounded-2xl shadow-2xl
-          transition-all duration-300 ease-out
+          min-w-[200px]
+          bg-dark-primary/80 backdrop-blur-2xl
+          border border-dark-secondary/20
+          rounded-2xl shadow-2xl shadow-black/50
+          transition-all duration-300 cubic-bezier(0.25, 0.46, 0.45, 0.94)
           ${isOpen 
             ? 'opacity-100 translate-x-0 scale-100' 
-            : 'opacity-0 translate-x-full scale-95 pointer-events-none'
+            : 'opacity-0 translate-x-4 scale-95 pointer-events-none'
           }
         `}
       >
-        <div className="p-4">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+        
+        <div className="relative p-4">
           {/* Close button */}
           <button
             onClick={() => setIsOpen(false)}
-            className="absolute top-2 right-2 p-1.5 
-                     text-text-secondary hover:text-text-primary
-                     hover:bg-dark-primary/50 rounded-lg transition-colors"
+            className="absolute top-3 right-3 p-1.5 
+                     text-text-secondary/60 hover:text-text-primary
+                     hover:bg-dark-secondary/30 rounded-lg 
+                     transition-all duration-200"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={14} />
           </button>
 
           {/* Controls */}
           <div className="flex flex-col gap-3 pr-6">
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-1 bg-dark-primary/50 rounded-lg p-1">
+            <div className="flex items-center gap-0.5 bg-dark-secondary/30 rounded-lg p-0.5">
               <button
                 onClick={() => onViewModeChange('blocks')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-200 ${
                   viewMode === 'blocks'
-                    ? 'bg-accent-green text-dark-primary'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-dark-primary/30'
+                    ? 'bg-dark-primary text-accent-green shadow-sm'
+                    : 'text-text-secondary/70 hover:text-text-primary hover:bg-dark-secondary/20'
                 }`}
               >
-                <LayoutGrid size={16} />
-                <span className="text-sm">Blocks</span>
+                <LayoutGrid size={14} />
+                <span className="text-xs font-medium">Blocks</span>
               </button>
               <button
                 onClick={() => onViewModeChange('lines')}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-md transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-all duration-200 ${
                   viewMode === 'lines'
-                    ? 'bg-accent-green text-dark-primary'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-dark-primary/30'
+                    ? 'bg-dark-primary text-accent-green shadow-sm'
+                    : 'text-text-secondary/70 hover:text-text-primary hover:bg-dark-secondary/20'
                 }`}
               >
-                <LayoutList size={16} />
-                <span className="text-sm">Lines</span>
+                <LayoutList size={14} />
+                <span className="text-xs font-medium">Lines</span>
               </button>
             </div>
 
             {/* Divider */}
-            <div className="h-px bg-dark-secondary/50" />
+            <div className="h-px bg-gradient-to-r from-transparent via-dark-secondary/30 to-transparent" />
 
             {/* Action Buttons */}
             <button
@@ -151,11 +164,12 @@ export default function FloatingControlsTrigger({
                 setIsOpen(false);
               }}
               className="flex items-center gap-2 px-3 py-2
-                       text-text-secondary hover:text-blue-400
-                       hover:bg-blue-400/10 rounded-lg transition-all"
+                       text-text-secondary/70 hover:text-text-primary
+                       hover:bg-dark-secondary/20 rounded-lg 
+                       transition-all duration-200 group"
             >
-              <Share2 size={16} />
-              <span className="text-sm">Share</span>
+              <Share2 size={14} className="group-hover:text-blue-400/70 transition-colors" />
+              <span className="text-xs font-medium">Share</span>
             </button>
             
             <button
@@ -164,11 +178,12 @@ export default function FloatingControlsTrigger({
                 setIsOpen(false);
               }}
               className="flex items-center gap-2 px-3 py-2
-                       text-text-secondary hover:text-red-400
-                       hover:bg-red-400/10 rounded-lg transition-all"
+                       text-text-secondary/70 hover:text-text-primary
+                       hover:bg-dark-secondary/20 rounded-lg 
+                       transition-all duration-200 group"
             >
-              <Trash2 size={16} />
-              <span className="text-sm">Delete</span>
+              <Trash2 size={14} className="group-hover:text-red-400/70 transition-colors" />
+              <span className="text-xs font-medium">Delete</span>
             </button>
           </div>
         </div>

@@ -9,21 +9,19 @@ const AuthEnhanced = () => {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="min-h-screen bg-dark-primary">
-
-      <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="h-screen bg-dark-primary overflow-hidden flex items-center justify-center p-3 sm:p-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold text-gray-100 mb-2">
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-100 mb-1">
               Devlog
             </h1>
-            <p className="text-gray-400">
+            <p className="text-sm sm:text-base text-gray-400">
               Sign in to continue
             </p>
           </div>
 
           <div
-            className="bg-dark-secondary rounded-lg p-8 border border-gray-800/50"
+            className="bg-dark-secondary rounded-lg p-4 sm:p-6 border border-gray-800/50"
           >
 
             {/* Custom Auth UI override */}
@@ -56,10 +54,10 @@ const AuthEnhanced = () => {
                       color: '#e5e7eb',
                     },
                     container: {
-                      gap: '1.5rem',
+                      gap: '1rem',
                     },
                     divider: {
-                      margin: '2rem 0',
+                      margin: '1.25rem 0',
                       opacity: '0.1',
                     },
                     socialAuth: {
@@ -89,11 +87,11 @@ const AuthEnhanced = () => {
                         anchorTextHoverColor: '#059669',
                       },
                       space: {
-                        spaceSmall: '0.5rem',
-                        spaceMedium: '1rem',
-                        spaceLarge: '1.5rem',
-                        inputPadding: '1rem',
-                        buttonPadding: '1rem 1.5rem',
+                        spaceSmall: '0.375rem',
+                        spaceMedium: '0.75rem',
+                        spaceLarge: '1rem',
+                        inputPadding: '0.75rem 1rem',
+                        buttonPadding: '0.75rem 1.25rem',
                       },
                       fonts: {
                         bodyFontFamily: `'Inter', ui-sans-serif, system-ui, -apple-system`,
@@ -160,8 +158,6 @@ const AuthEnhanced = () => {
           </div>
 
         </div>
-      </div>
-
     </div>
   )
 }

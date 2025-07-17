@@ -1015,20 +1015,55 @@ export default function Dashboard() {
                 </span>
               </div>
               
-              {/* Profile/User section - Simplified */}
-              <div className="flex items-center gap-2">
-                <Settings 
-                  className="w-4 h-4 text-text-secondary/60 hover:text-text-primary cursor-pointer transition-colors" 
-                  onClick={() => navigate('/settings')}
-                />
-                <div 
-                  className="w-7 h-7 rounded-full bg-gradient-to-br from-accent-green/20 to-accent-green/10 
-                            flex items-center justify-center text-xs font-medium text-accent-green
-                            ring-1 ring-accent-green/20 cursor-pointer hover:ring-accent-green/40 transition-all"
+              {/* Profile Dropdown - Full Functionality */}
+              <div className="relative profile-menu-container">
+                <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-1.5 p-1.5 hover:bg-dark-secondary/40 
+                            rounded transition-colors group"
                 >
-                  {user?.email?.[0]?.toUpperCase() || 'U'}
-                </div>
+                  <div className="w-8 h-8 bg-gradient-to-br from-accent-green/20 to-accent-green/10 
+                                  rounded-full flex items-center justify-center border border-accent-green/20
+                                  group-hover:border-accent-green/40 transition-colors">
+                    <User size={16} className="text-accent-green" />
+                  </div>
+                  <div className="w-1.5 h-1.5 border-l border-b border-text-secondary/40 
+                                  transform rotate-[-45deg] transition-transform duration-200
+                                  group-hover:border-text-primary/60"
+                        style={{ transform: showProfileMenu ? 'rotate(135deg)' : 'rotate(-45deg)' }}
+                  />
+                </button>
+
+                {/* Profile Menu - Compact */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-1 w-48 bg-dark-secondary rounded 
+                                  shadow-xl border border-dark-primary/50 overflow-hidden z-50
+                                  animate-in fade-in slide-in-from-top-1 duration-150">
+                    <div className="p-3 border-b border-dark-primary/50">
+                      <p className="text-sm font-medium text-text-primary">Developer</p>
+                      <p className="text-xs text-text-secondary/70">{user?.email || 'developer@journey.log'}</p>
+                    </div>
+                    
+                    <div className="p-1">
+                      <button 
+                        onClick={() => navigate('/settings')}
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
+                                       text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
+                                       rounded transition-colors text-sm">
+                        <Settings size={14} />
+                        <span>Settings</span>
+                      </button>
+                      <button 
+                        onClick={() => signOut()}
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
+                                       text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
+                                       rounded transition-colors text-sm">
+                        <LogOut size={14} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -1123,80 +1158,6 @@ export default function Dashboard() {
       <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out" style={{ gridColumn: '2' }}>
         {/* Content Header - Search and Actions Only */}
         <div className="flex-shrink-0">
-        <div className="px-4 md:px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Document Stats - Inline and Minimal */}
-            <div className="hidden sm:flex items-center gap-3 text-xs">
-              <span className="text-text-secondary/70">
-                <span className="text-text-primary font-medium">{entries.length}</span> docs
-              </span>
-              <span className="text-text-secondary/40">•</span>
-              <span className="text-text-secondary/70">
-                <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || e.blockCount || 0), 0)}</span> blocks
-              </span>
-              {/* Subtle storage indicator - only show when concerning */}
-              {storageInfo && getStoragePercentage() > 70 && (
-                <>
-                  <span className="text-text-secondary/40">•</span>
-                  <span className={`${getStoragePercentage() > 80 ? 'text-yellow-500/70' : 'text-text-secondary/70'}`}>
-                    {Math.round(getStoragePercentage())}% storage
-                  </span>
-                </>
-              )}
-            </div>
-
-            {/* Profile Dropdown - Smaller but Accessible */}
-            <div className="relative profile-menu-container">
-              <button
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-1.5 p-1.5 hover:bg-dark-secondary/40 
-                          rounded transition-colors group"
-              >
-                <div className="w-8 h-8 bg-gradient-to-br from-accent-green/20 to-accent-green/10 
-                                rounded-full flex items-center justify-center border border-accent-green/20
-                                group-hover:border-accent-green/40 transition-colors">
-                  <User size={16} className="text-accent-green" />
-                </div>
-                <div className="w-1.5 h-1.5 border-l border-b border-text-secondary/40 
-                                transform rotate-[-45deg] transition-transform duration-200
-                                group-hover:border-text-primary/60"
-                      style={{ transform: showProfileMenu ? 'rotate(135deg)' : 'rotate(-45deg)' }}
-                />
-              </button>
-
-              {/* Profile Menu - Compact */}
-              {showProfileMenu && (
-                <div className="absolute right-0 mt-1 w-48 bg-dark-secondary rounded 
-                                shadow-xl border border-dark-primary/50 overflow-hidden z-50
-                                animate-in fade-in slide-in-from-top-1 duration-150">
-                  <div className="p-3 border-b border-dark-primary/50">
-                    <p className="text-sm font-medium text-text-primary">Developer</p>
-                    <p className="text-xs text-text-secondary/70">{user?.email || 'developer@journey.log'}</p>
-                  </div>
-                  
-                  <div className="p-1">
-                    <button 
-                      onClick={() => navigate('/settings')}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
-                                     text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
-                                     rounded transition-colors text-sm">
-                      <Settings size={14} />
-                      <span>Settings</span>
-                    </button>
-                    <button 
-                      onClick={() => signOut()}
-                      className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
-                                     text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
-                                     rounded transition-colors text-sm">
-                      <LogOut size={14} />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
 
         {/* Search and Actions Bar - Compact and Efficient */}
         <div className="px-4 md:px-6 py-3">

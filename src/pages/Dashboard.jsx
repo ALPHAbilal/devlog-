@@ -659,6 +659,70 @@ export default function Dashboard() {
     setShowProjectModal(true);
   }, []);
 
+  // Helper function to extract all searchable text content from blocks
+  const getFullTextContent = useCallback((entry) => {
+    if (!entry.blocks || entry.blocks.length === 0) return '';
+    
+    const textParts = [];
+    
+    entry.blocks.forEach(block => {
+      switch (block.type) {
+        case 'text':
+        case 'heading':
+          if (block.content) textParts.push(block.content);
+          break;
+        case 'code':
+          if (block.filePath) textParts.push(block.filePath);
+          if (block.content) textParts.push(block.content);
+          break;
+        case 'ai':
+          if (block.messages && Array.isArray(block.messages)) {
+            block.messages.forEach(msg => {
+              if (msg.content) textParts.push(msg.content);
+            });
+          }
+          break;
+        case 'table':
+          if (block.data?.rows) {
+            block.data.rows.forEach(row => {
+              if (Array.isArray(row)) {
+                textParts.push(row.join(' '));
+              }
+            });
+          }
+          if (block.data?.headers) {
+            textParts.push(block.data.headers.join(' '));
+          }
+          break;
+        case 'todo':
+          if (block.data?.todos && Array.isArray(block.data.todos)) {
+            block.data.todos.forEach(todo => {
+              if (todo.text) textParts.push(todo.text);
+            });
+          }
+          break;
+        case 'filetree':
+          if (block.treeData) {
+            const extractFileNames = (items) => {
+              items.forEach(item => {
+                if (item.name) textParts.push(item.name);
+                if (item.children) extractFileNames(item.children);
+              });
+            };
+            extractFileNames(block.treeData);
+          }
+          break;
+      }
+      
+      // Also check for tags in blocks
+      if (block.tags && Array.isArray(block.tags)) {
+        textParts.push(block.tags.join(' '));
+      }
+    });
+    
+    return textParts.join(' ').toLowerCase();
+  }, []);
+
   // Filter entries based on search, selected tags, and project
   const filteredEntries = entries.filter(entry => {
     // First filter by project
@@ -668,10 +732,24 @@ export default function Dashboard() {
       entry.project_id === selectedProjectId; // Specific project
     
     // Then filter by search term
-    const matchesSearch = searchTerm === '' || 
-      entry.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.preview.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesSearch = searchTerm === '' || (() => {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      
+      // Check title
+      if (entry.title.toLowerCase().includes(lowerSearchTerm)) return true;
+      
+      // Check preview
+      if (entry.preview && entry.preview.toLowerCase().includes(lowerSearchTerm)) return true;
+      
+      // Check tags
+      if (entry.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm))) return true;
+      
+      // Check full content of all blocks
+      const fullContent = getFullTextContent(entry);
+      if (fullContent.includes(lowerSearchTerm)) return true;
+      
+      return false;
+    })();
     
     // Finally filter by selected tags (if any)
     const matchesTags = selectedTags.length === 0 ||

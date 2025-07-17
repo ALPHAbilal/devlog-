@@ -49,36 +49,28 @@ export default function ScrollToTop({ scrollContainerRef }) {
   return createPortal(
     <button
       onClick={scrollToTop}
-      className={`
-        fixed z-[9999]
-        w-12 h-12 rounded-xl
-        bg-accent-green backdrop-blur-xl
-        border-2 border-accent-green
-        flex items-center justify-center
-        text-dark-primary
-        hover:bg-accent-green/90
-        hover:scale-110
-        transition-all duration-300 ease-out
-        shadow-lg shadow-accent-green/20
-        group
-        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
-      `}
       style={{ 
-        right: '2rem',
-        bottom: isAtBottom ? '6rem' : '2rem'
+        position: 'fixed',
+        right: '32px',
+        bottom: isAtBottom ? '96px' : '32px',
+        left: 'auto',
+        top: 'auto',
+        width: '48px',
+        height: '48px',
+        zIndex: 9999,
+        opacity: isVisible ? 1 : 0,
+        pointerEvents: isVisible ? 'auto' : 'none',
+        transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
+        transition: 'all 300ms ease-out'
       }}
+      className="rounded-xl bg-accent-green border-2 border-accent-green flex items-center justify-center text-dark-primary hover:bg-accent-green/90 hover:scale-110 shadow-lg shadow-accent-green/20 group"
       title="Back to top"
       aria-label="Scroll to top"
     >
-      {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-accent-green/0 to-accent-green/10 
-                      opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-      
       {/* Arrow icon */}
       <ArrowUp 
-        size={16} 
-        className="relative z-10 transition-all duration-300 
-                   group-hover:-translate-y-0.5"
+        size={20} 
+        className="transition-transform duration-300 group-hover:-translate-y-0.5"
       />
     </button>,
     portalRoot

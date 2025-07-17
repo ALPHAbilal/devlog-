@@ -774,7 +774,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             </div>
           </div>
           </div>
-          </div>
           {isEditingTitle ? (
             <input
               type="text"
@@ -1130,7 +1129,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           </div>
         </div>
       )}
-      
+      </div>
+
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
@@ -1233,6 +1233,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           onClose={() => setShowShareDialog(false)}
         />
       )}
+
     </div>
   );
 }

@@ -10,6 +10,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import SettingsMinimal from './pages/SettingsMinimal';
+import SettingsClaude from './pages/SettingsClaude';
 import AuthComponent from './components/Auth';
 import AuthEnhanced from './components/AuthEnhanced';
 import AuthCallback from './pages/auth/callback';
@@ -132,7 +133,7 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/settings" element={<SettingsMinimal />} />
+        <Route path="/settings" element={<SettingsClaude />} />
         <Route path="/shared/:shareCode" element={<SharedDocument />} />
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>

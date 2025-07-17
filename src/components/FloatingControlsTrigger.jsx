@@ -6,7 +6,8 @@ export default function FloatingControlsTrigger({
   onViewModeChange, 
   onShare, 
   onDelete,
-  scrollThreshold = 100 // Show after scrolling past this point (lowered from 200)
+  scrollThreshold = 100, // Show after scrolling past this point (lowered from 200)
+  scrollContainerRef // Reference to the scrollable container
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -15,12 +16,18 @@ export default function FloatingControlsTrigger({
 
   // Handle scroll visibility
   useEffect(() => {
+    const scrollElement = scrollContainerRef?.current;
+    if (!scrollElement) {
+      console.log('FloatingControlsTrigger: No scroll container ref provided');
+      return;
+    }
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
+      const currentScrollY = scrollElement.scrollTop;
       const shouldShow = currentScrollY > scrollThreshold;
       
       // Add debug logging
-      console.log('Scroll position:', currentScrollY, 'Should show:', shouldShow);
+      console.log('FloatingControlsTrigger - Container scroll position:', currentScrollY, 'Should show:', shouldShow);
       
       if (shouldShow && !isVisible) {
         setJustAppeared(true);
@@ -30,11 +37,11 @@ export default function FloatingControlsTrigger({
       setIsVisible(shouldShow);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll(); // Check initial position
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [scrollThreshold, isVisible]);
+    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  }, [scrollThreshold, isVisible, scrollContainerRef]);
 
   // Handle click outside to close
   useEffect(() => {
@@ -50,6 +57,9 @@ export default function FloatingControlsTrigger({
 
   // Don't render if not visible
   if (!isVisible) return null;
+
+  // Add temporary debug text
+  console.log('FloatingControlsTrigger is rendering, isVisible:', isVisible);
 
   return (
     <div ref={panelRef} className="fixed top-4 right-4 z-50">

@@ -671,21 +671,23 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   }, [shouldUsePagination, checkLoadMore])
 
   return (
-    <div 
-      ref={scrollContainerRef}
-      className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
-      onClick={handleBackgroundClick}
-    >
-      {/* Floating Controls Trigger */}
+    <>
+      {/* Floating Controls Trigger - Outside scrollable container */}
       <FloatingControlsTrigger
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         onShare={() => setShowShareDialog(true)}
         onDelete={() => setShowDeleteConfirm(true)}
-        scrollThreshold={200}
+        scrollThreshold={100}
+        scrollContainerRef={scrollContainerRef}
       />
       
-      <div className="max-w-4xl mx-auto fade-in px-8 py-8">
+      <div 
+        ref={scrollContainerRef}
+        className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
+        onClick={handleBackgroundClick}
+      >
+        <div className="max-w-4xl mx-auto fade-in px-8 py-8">
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <button 
@@ -1244,6 +1246,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         />
       )}
 
-    </div>
+      </div>
+    </>
   );
 }

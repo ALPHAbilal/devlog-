@@ -2,6 +2,7 @@
 @import './styles/typography.css';
 @import './styles/glassmorphism.css';
 @import './styles/demo.css';
+@import './styles/auth-enhanced.css';
 
 @tailwind base;
 @tailwind components;

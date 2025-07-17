@@ -10,6 +10,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import AuthComponent from './components/Auth';
+import AuthEnhanced from './components/AuthEnhanced';
 import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
@@ -96,7 +97,7 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<AuthComponent />} />
+        <Route path="/auth" element={<AuthEnhanced />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />

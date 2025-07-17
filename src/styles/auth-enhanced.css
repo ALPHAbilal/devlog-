@@ -1,0 +1,240 @@
+/* Enhanced Auth Styles - Fortune 500 Level */
+
+/* Social Auth Button Styles */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[title*="Google"] {
+  background: #ffffff !important;
+  color: #3c4043 !important;
+  border: 1px solid #dadce0 !important;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[title*="Google"]:hover {
+  background: #f8f9fa !important;
+  box-shadow: 0 1px 3px 1px rgba(66, 64, 67, 0.15), 0 1px 2px 0 rgba(60, 64, 67, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[title*="Google"] svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[title*="GitHub"] {
+  background: #24292e !important;
+  color: #ffffff !important;
+  border: 1px solid #24292e !important;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[title*="GitHub"]:hover {
+  background: #2b3137 !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Enhanced Input Styles with Floating Labels */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input-label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  color: #9ca3af;
+  font-size: 1rem;
+  background: transparent;
+  padding: 0 0.25rem;
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input:focus ~ .supabase-auth-ui_ui-input-label,
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input:not(:placeholder-shown) ~ .supabase-auth-ui_ui-input-label {
+  top: -0.5rem;
+  left: 0.75rem;
+  font-size: 0.75rem;
+  color: #10b981;
+  background: linear-gradient(to bottom, transparent 40%, rgba(10, 22, 40, 0.8) 40%, rgba(10, 22, 40, 0.8) 60%, transparent 60%);
+}
+
+/* Enhanced Button Hover Effects */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  z-index: -1;
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Loading State Animations */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[disabled] {
+  position: relative;
+  color: transparent !important;
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button[disabled]::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: auth-spinner 0.8s linear infinite;
+}
+
+@keyframes auth-spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Enhanced Error Messages */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-message {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: message-slide-in 0.3s ease-out;
+}
+
+@keyframes message-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-message-error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+/* Divider Styles */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(156, 163, 175, 0.2), transparent);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-divider span {
+  background: rgba(10, 22, 40, 0.8);
+  padding: 0 1rem;
+  position: relative;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Focus States with Glow */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input:focus,
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 0 20px rgba(16, 185, 129, 0.1);
+}
+
+/* Smooth Page Transitions */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+  animation: auth-fade-in 0.4s ease-out;
+}
+
+@keyframes auth-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    font-size: 1rem;
+    padding: 0.875rem 1.25rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 1rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+    gap: 1.25rem;
+  }
+}
+
+/* Premium Input Focus Animation */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+  background-image: linear-gradient(90deg, #10b981 0%, #10b981 100%);
+  background-size: 0% 2px;
+  background-repeat: no-repeat;
+  background-position: bottom;
+  transition: background-size 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input:focus {
+  background-size: 100% 2px;
+}
+
+/* Success Animation */
+@keyframes success-checkmark {
+  0% {
+    transform: scale(0) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(45deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(45deg);
+    opacity: 1;
+  }
+}
+
+.auth-success-indicator {
+  animation: success-checkmark 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}

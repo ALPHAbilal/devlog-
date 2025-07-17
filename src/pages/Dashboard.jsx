@@ -12,6 +12,7 @@ import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
 import Breadcrumb from '../components/Breadcrumb';
+import ScrollToTop from '../components/ScrollToTop';
 import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft } from 'lucide-react';
 import storageWrapper from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';

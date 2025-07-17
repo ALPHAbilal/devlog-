@@ -15,6 +15,7 @@ import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogEnhanced } from './ShareDialogEnhanced';
 import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
+import ScrollToTop from './ScrollToTop';
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -681,6 +682,9 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         scrollThreshold={100}
         scrollContainerRef={scrollContainerRef}
       />
+      
+      {/* Scroll to Top Button */}
+      <ScrollToTop scrollContainerRef={scrollContainerRef} />
       
       <div 
         ref={scrollContainerRef}

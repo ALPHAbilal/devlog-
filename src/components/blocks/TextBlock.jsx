@@ -591,6 +591,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
           className="w-full bg-dark-secondary/50 text-text-primary p-4 rounded-lg
                      resize-none focus:outline-none focus:ring-2 focus:ring-accent-green
                      transition-all duration-200"
+          style={{ fontSize: 'var(--step-0)', lineHeight: 'var(--line-height-normal)' }}
           placeholder="Type '/' for commands or start writing..."
         />
         {/* Inline hint display */}
@@ -670,6 +671,7 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
         className={`text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 
                    cursor-text transition-all duration-200 min-h-[50px]
                    ${isFocused === false ? 'opacity-40' : 'opacity-100'}
+        style={{ fontSize: 'var(--step-0)', lineHeight: 'var(--line-height-normal)' }}
                    ${isCollapsed ? 'border-l-4 border-accent-green/30 pl-3' : ''}`}
       >
         {block.content ? (

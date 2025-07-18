@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom';
+import MobileNavigation from './MobileNavigation';
 
 export default function Layout({ children }) {
   const location = useLocation();
@@ -9,9 +10,12 @@ export default function Layout({ children }) {
       {/* Subtle green accent line */}
       <div className="h-0.5 bg-accent-green/80 flex-shrink-0"></div>
       
-      <div className={`flex-1 min-h-0 ${isDashboard ? 'overflow-hidden' : 'overflow-auto'}`}>
+      <div className={`flex-1 min-h-0 ${isDashboard ? 'overflow-hidden' : 'overflow-auto'} pb-16 md:pb-0`}>
         {children}
       </div>
+      
+      {/* Mobile Navigation */}
+      <MobileNavigation />
     </div>
   );
 }

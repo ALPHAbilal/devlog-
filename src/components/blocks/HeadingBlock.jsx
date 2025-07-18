@@ -48,9 +48,16 @@ export default function HeadingBlock({ block, onUpdate }) {
   };
 
   const headingClasses = {
-    1: 'text-3xl font-bold',
-    2: 'text-2xl font-semibold',
-    3: 'text-xl font-medium',
+    1: 'font-bold',
+    2: 'font-semibold',
+    3: 'font-medium',
+  };
+  
+  // Use CSS custom properties for fluid typography
+  const headingStyles = {
+    1: { fontSize: 'var(--step-4)', lineHeight: 'var(--line-height-tight)' },
+    2: { fontSize: 'var(--step-3)', lineHeight: 'var(--line-height-tight)' },
+    3: { fontSize: 'var(--step-2)', lineHeight: 'var(--line-height-tight)' },
   };
 
   if (isEditing) {
@@ -84,6 +91,7 @@ export default function HeadingBlock({ block, onUpdate }) {
           onKeyDown={handleKeyDown}
           className={`flex-1 bg-transparent text-text-primary focus:outline-none 
                      focus:bg-dark-secondary/30 rounded px-2 py-1 ${headingClasses[level]}`}
+          style={headingStyles[level]}
           placeholder="Enter heading..."
         />
       </div>
@@ -101,6 +109,7 @@ export default function HeadingBlock({ block, onUpdate }) {
       }}
       className={`text-text-primary cursor-text hover:bg-dark-secondary/30 
                   rounded px-2 py-1 transition-colors ${headingClasses[level]}`}
+      style={headingStyles[level]}
     >
       {block.content || <span className="text-text-secondary">Click to add heading...</span>}
     </HeadingTag>

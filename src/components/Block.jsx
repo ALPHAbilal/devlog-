@@ -120,8 +120,12 @@ export default function Block({
           position: 'relative', 
           zIndex: isDragging ? 10 : 'auto',
           // Extend the drop zone to include the drag handle area
-          marginLeft: '-4rem',
-          paddingLeft: '4rem'
+          marginLeft: '-3rem',
+          paddingLeft: '3rem',
+          '@media (min-width: 768px)': {
+            marginLeft: '-4rem',
+            paddingLeft: '4rem'
+          }
         }}
         // Make the whole block draggable as fallback
         draggable={false}

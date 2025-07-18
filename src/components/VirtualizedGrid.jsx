@@ -18,15 +18,16 @@ export default function VirtualizedGrid({
   const [containerWidth, setContainerWidth] = useState(0);
   
   
-  // Configuration for cards - more compact and modern
-  const CARD_WIDTH = 280; // Compact width
-  const CARD_HEIGHT = 160; // Reduced height for more cards  
-  const GAP = 16; // Tighter spacing
+  // Configuration for cards - responsive sizes
+  const isMobile = containerWidth < 640;
+  const CARD_WIDTH = isMobile ? containerWidth - 32 : 280; // Full width on mobile minus padding
+  const CARD_HEIGHT = isMobile ? 140 : 160; // Slightly shorter on mobile
+  const GAP = isMobile ? 12 : 16; // Tighter spacing on mobile
   const BUFFER_ROWS = 2; // Extra rows to render for smooth scrolling
   
   // Dynamic max columns based on screen size for enterprise-grade responsiveness
   const calculateMaxColumns = useCallback(() => {
-    if (containerWidth < 640) return 1; // Mobile
+    if (containerWidth < 640) return 1; // Mobile - single column
     if (containerWidth < 768) return 2; // Small tablet
     if (containerWidth < 1024) return 3; // Tablet
     if (containerWidth < 1280) return 4; // Small desktop
@@ -37,7 +38,7 @@ export default function VirtualizedGrid({
   const MAX_COLUMNS = calculateMaxColumns();
 
   // Calculate columns based on container width
-  const columns = Math.min(
+  const columns = isMobile ? 1 : Math.min(
     Math.floor((containerWidth + GAP) / (CARD_WIDTH + GAP)) || 1,
     MAX_COLUMNS
   );

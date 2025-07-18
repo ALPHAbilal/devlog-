@@ -34,10 +34,10 @@ export default function SearchBar({ value, onChange }) {
         onChange={(e) => onChange(e.target.value)}
         placeholder="Search your journey..."
         className="w-full bg-dark-secondary/40 border border-dark-secondary/50 
-                   rounded py-2 pl-3 pr-3 text-text-primary text-sm
+                   rounded py-2.5 md:py-2 pl-3 pr-3 text-text-primary text-sm
                    placeholder-text-secondary/60 focus:outline-none 
                    focus:border-accent-green/50 focus:bg-dark-secondary/50 
-                   transition-all hover:bg-dark-secondary/50"
+                   transition-all hover:bg-dark-secondary/50 min-h-[44px] md:min-h-0"
       />
     </div>
   );

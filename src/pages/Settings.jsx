@@ -2,15 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { 
-  X, User, Database, Settings2, Download, Upload, Trash2, 
+  X, User, Database, Download, Upload, Trash2, 
   AlertCircle, HardDrive, Check, Lock, Shield, AlertTriangle,
   FileText, ChevronRight, FileJson
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { exportSupabaseData, importSupabaseData } from '../utils/supabaseDataExport';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
-import { useSettings } from '../contexts/SettingsContext';
-import storageWrapper from '../utils/storage/storageWrapper';
 import '../styles/settings.css';
 
 // Toggle Switch Component
@@ -165,7 +163,6 @@ export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { databaseSize, storageLimit, usagePercentage, isLoading: usageLoading, error: usageError, dataBreakdown, refresh: refreshUsage } = useSmartDatabaseUsage();
-  const { settings, updateSetting, isLoading: settingsLoading } = useSettings();
   
   const [activeTab, setActiveTab] = useState('account');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -177,14 +174,12 @@ export default function Settings() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ new: '', confirm: '' });
-  const [isClearingCache, setIsClearingCache] = useState(false);
   
   const fileInputRef = useRef(null);
 
   const tabs = [
     { id: 'account', label: 'Account', icon: User },
-    { id: 'data', label: 'Data Management', icon: Database },
-    { id: 'editor', label: 'Editor Preferences', icon: Settings2 }
+    { id: 'data', label: 'Data Management', icon: Database }
   ];
 
   // Handle password change
@@ -269,18 +264,6 @@ export default function Settings() {
     }
   };
 
-  // Clear local cache
-  const handleClearCache = async () => {
-    setIsClearingCache(true);
-    try {
-      await storageWrapper.clearLocalCache();
-      setMessage({ type: 'success', text: 'Local cache cleared successfully' });
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to clear cache' });
-    } finally {
-      setIsClearingCache(false);
-    }
-  };
 
   // Calculate storage usage
   const calculateStorageUsage = () => {
@@ -527,8 +510,7 @@ export default function Settings() {
                       color: '#f59e0b' 
                     }
                   ] : [
-                    { type: 'documents', label: 'Documents & Notes', size: calculateStorageUsage().used * 0.8, color: '#10b981' },
-                    { type: 'cache', label: 'Cache & Temp', size: calculateStorageUsage().used * 0.2, color: '#3b82f6' }
+                    { type: 'documents', label: 'Documents & Notes', size: calculateStorageUsage().used, color: '#10b981' }
                   ]}
                 />
               ) : null}
@@ -583,117 +565,9 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* Cache Management */}
-              <div className="settings-group">
-                <h3>Cache Management</h3>
-                
-                <div className="cache-actions">
-                  <div className="action-row">
-                    <div className="action-info">
-                      <h4>Clear Local Cache</h4>
-                      <p>Remove temporary files and cached data from your browser</p>
-                    </div>
-                    <button 
-                      className="btn-secondary"
-                      onClick={handleClearCache}
-                      disabled={isClearingCache}
-                    >
-                      {isClearingCache ? 'Clearing...' : 'Clear Cache'}
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
-          {/* Editor Preferences Tab */}
-          {activeTab === 'editor' && (
-            <div className="settings-section">
-              <div className="section-header">
-                <h2>Editor Preferences</h2>
-                <p>Customize your writing and coding experience</p>
-              </div>
-
-              {settingsLoading ? (
-                <div className="settings-loading">
-                  <div className="loading-spinner"></div>
-                  <p>Loading preferences...</p>
-                </div>
-              ) : (
-                <>
-                  {/* Code Highlighting */}
-                  <div className="settings-group">
-                    <h3>Code Highlighting</h3>
-                    
-                    <div className="form-row">
-                      <FormSelect
-                        id="default-language"
-                        label="Default Code Language"
-                        value={settings.defaultCodeLanguage || 'javascript'}
-                        onChange={(value) => updateSetting('defaultCodeLanguage', value)}
-                        options={[
-                          { value: 'javascript', label: 'JavaScript' },
-                          { value: 'typescript', label: 'TypeScript' },
-                          { value: 'python', label: 'Python' },
-                          { value: 'jsx', label: 'JSX' },
-                          { value: 'tsx', label: 'TSX' },
-                          { value: 'css', label: 'CSS' },
-                          { value: 'html', label: 'HTML' },
-                          { value: 'json', label: 'JSON' },
-                          { value: 'sql', label: 'SQL' },
-                          { value: 'bash', label: 'Bash' }
-                        ]}
-                        help="Language used for new code blocks"
-                      />
-                    </div>
-                    
-                    <ToggleSwitch
-                      id="line-numbers"
-                      label="Show Line Numbers"
-                      description="Display line numbers in code blocks"
-                      checked={settings.showLineNumbers !== false}
-                      onChange={(checked) => updateSetting('showLineNumbers', checked)}
-                    />
-                  </div>
-
-                  {/* Auto-Save & Backup */}
-                  <div className="settings-group">
-                    <h3>Auto-Save & Backup</h3>
-                    
-                    <div className="form-row">
-                      <FormSelect
-                        id="autosave-interval"
-                        label="Auto-save Interval"
-                        value={settings.autoSaveInterval || 1}
-                        onChange={(value) => updateSetting('autoSaveInterval', parseInt(value))}
-                        options={[
-                          { value: 1, label: 'Every second' },
-                          { value: 2, label: 'Every 2 seconds' },
-                          { value: 3, label: 'Every 3 seconds' },
-                          { value: 5, label: 'Every 5 seconds' },
-                          { value: 10, label: 'Every 10 seconds' }
-                        ]}
-                        help="How often to automatically save changes"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Editor Behavior */}
-                  <div className="settings-group">
-                    <h3>Editor Behavior</h3>
-                    
-                    <ToggleSwitch
-                      id="text-collapse"
-                      label="Enable Text Collapse"
-                      description="Allow collapsing long text blocks"
-                      checked={settings.enableTextCollapse !== false}
-                      onChange={(checked) => updateSetting('enableTextCollapse', checked)}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

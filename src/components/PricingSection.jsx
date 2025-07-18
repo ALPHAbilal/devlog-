@@ -10,23 +10,23 @@ export default function PricingSection() {
 
   const plans = [
     {
-      name: 'Starter',
+      name: 'Hobbyist',
       icon: <Zap size={24} />,
-      description: 'Perfect for individual developers',
+      description: 'Perfect for trying out Devlog',
       price: {
         monthly: 0,
         annual: 0
       },
       features: [
-        { text: 'Up to 100 documents', included: true },
-        { text: '5 MB per document', included: true },
-        { text: 'Basic search', included: true },
+        { text: 'Up to 10 documents', included: true },
+        { text: '500 MB total storage', included: true },
+        { text: 'Basic search & filters', included: true },
         { text: 'Export to Markdown', included: true },
-        { text: 'Local storage only', included: true },
+        { text: 'All block types', included: true },
         { text: 'Community support', included: true },
         { text: 'Cloud sync', included: false },
         { text: 'Version history', included: false },
-        { text: 'Advanced search', included: false },
+        { text: 'Priority support', included: false },
         { text: 'API access', included: false }
       ],
       cta: 'Start Free',
@@ -34,24 +34,24 @@ export default function PricingSection() {
       popular: false
     },
     {
-      name: 'Pro',
+      name: 'Personal',
       icon: <Users size={24} />,
-      description: 'For serious knowledge builders',
+      description: 'For individual developers',
       price: {
         monthly: 9,
         annual: 7
       },
       features: [
         { text: 'Unlimited documents', included: true },
-        { text: '50 MB per document', included: true },
+        { text: '2 GB total storage', included: true },
         { text: 'Advanced search & filters', included: true },
         { text: 'Export to multiple formats', included: true },
         { text: 'Cloud sync across devices', included: true },
         { text: '30-day version history', included: true },
-        { text: 'Priority email support', included: true },
-        { text: 'API access (1000 calls/month)', included: true },
+        { text: 'Email support', included: true },
+        { text: 'All premium features', included: true },
         { text: 'Custom themes', included: true },
-        { text: 'Webhooks', included: false }
+        { text: 'API access', included: false }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'primary',
@@ -59,29 +59,54 @@ export default function PricingSection() {
       savingText: 'Save 22%'
     },
     {
-      name: 'Team',
+      name: 'Professional',
       icon: <Building2 size={24} />,
-      description: 'Collaborative knowledge management',
+      description: 'For power users & freelancers',
       price: {
         monthly: 19,
         annual: 15
       },
-      perUser: true,
       features: [
-        { text: 'Everything in Pro', included: true },
-        { text: '100 MB per document', included: true },
+        { text: 'Everything in Personal', included: true },
+        { text: '10 GB total storage', included: true },
         { text: 'Unlimited version history', included: true },
+        { text: 'Priority support', included: true },
+        { text: 'API access (5k calls/month)', included: true },
+        { text: 'Advanced analytics', included: true },
+        { text: 'Custom integrations', included: true },
+        { text: 'Bulk export/import', included: true },
+        { text: 'Early access features', included: true },
+        { text: 'Team collaboration', included: false }
+      ],
+      cta: 'Start 14-Day Trial',
+      ctaVariant: 'secondary',
+      popular: false,
+      savingText: 'Save 21%'
+    },
+    {
+      name: 'Team',
+      icon: <Building2 size={24} />,
+      description: 'For small development teams',
+      price: {
+        monthly: 49,
+        annual: 39
+      },
+      features: [
+        { text: 'Everything in Professional', included: true },
+        { text: '50 GB total storage', included: true },
+        { text: 'Up to 10 team members', included: true },
         { text: 'Team workspaces', included: true },
         { text: 'Shared documents & templates', included: true },
         { text: 'Admin controls & permissions', included: true },
-        { text: 'SSO/SAML authentication', included: true },
-        { text: 'API access (10k calls/month)', included: true },
+        { text: 'API access (20k calls/month)', included: true },
         { text: 'Custom webhooks', included: true },
-        { text: 'Dedicated support', included: true }
+        { text: 'Dedicated support', included: true },
+        { text: 'SSO authentication', included: true }
       ],
       cta: 'Contact Sales',
       ctaVariant: 'secondary',
-      popular: false
+      popular: false,
+      savingText: 'Save 20%'
     }
   ];
 
@@ -152,7 +177,7 @@ export default function PricingSection() {
 
         {/* Pricing Cards */}
         <motion.div 
-          className="grid md:grid-cols-3 gap-6 mb-12"
+          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
           variants={staggerContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -202,7 +227,7 @@ export default function PricingSection() {
                       </motion.span>
                     </AnimatePresence>
                     <span className="text-text-secondary">
-                      {plan.perUser ? '/user' : ''}/month
+                      /month
                     </span>
                   </div>
                   <AnimatePresence>

@@ -91,15 +91,15 @@ export default function PricingSection() {
               className="absolute h-[calc(100%-8px)] bg-accent-green rounded-md"
               initial={false}
               animate={{ 
-                x: billingPeriod === 'monthly' ? '4px' : 'calc(50% + 4px)',
-                width: 'calc(50% - 4px)'
+                x: billingPeriod === 'monthly' ? '4px' : '88px',
+                width: billingPeriod === 'monthly' ? '80px' : '130px'
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               style={{ top: '4px' }}
             />
             <button
               onClick={() => setBillingPeriod('monthly')}
-              className={`px-4 py-2 rounded-md transition-all relative z-10 ${
+              className={`px-4 py-2 rounded-md transition-all relative z-10 w-20 ${
                 billingPeriod === 'monthly'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
@@ -109,7 +109,7 @@ export default function PricingSection() {
             </button>
             <button
               onClick={() => setBillingPeriod('annual')}
-              className={`px-4 py-2 rounded-md transition-all relative z-10 flex items-center ${
+              className={`px-4 py-2 rounded-md transition-all relative z-10 flex items-center justify-center w-[130px] ${
                 billingPeriod === 'annual'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'

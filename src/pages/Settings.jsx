@@ -48,26 +48,6 @@ const FormInput = ({ id, label, type = "text", value, onChange, disabled, placeh
   </div>
 );
 
-// Form Select Component
-const FormSelect = ({ id, label, value, onChange, options, help }) => (
-  <div className="form-field">
-    <label htmlFor={id}>{label}</label>
-    <select
-      id={id}
-      className="form-select"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {options.map(option => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </select>
-    {help && <span className="field-help">{help}</span>}
-  </div>
-);
-
 // Storage Usage Skeleton Component
 const StorageUsageSkeleton = () => (
   <div className="storage-usage skeleton">

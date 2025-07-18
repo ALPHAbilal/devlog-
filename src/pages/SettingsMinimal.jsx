@@ -215,68 +215,6 @@ export default function SettingsMinimal() {
               </button>
             </div>
           </section>
-
-          {/* Editor Preferences Section */}
-          <section className="settings-section">
-            <h2>Editor Preferences</h2>
-            
-            <div className="form-group">
-              <label htmlFor="default-language">Default Code Language</label>
-              <select
-                id="default-language"
-                value={settings.defaultCodeLanguage || 'javascript'}
-                onChange={(e) => updateSetting('defaultCodeLanguage', e.target.value)}
-              >
-                <option value="javascript">JavaScript</option>
-                <option value="typescript">TypeScript</option>
-                <option value="python">Python</option>
-                <option value="jsx">JSX</option>
-                <option value="tsx">TSX</option>
-                <option value="css">CSS</option>
-                <option value="html">HTML</option>
-                <option value="json">JSON</option>
-                <option value="sql">SQL</option>
-                <option value="bash">Bash</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={settings.showLineNumbers !== false}
-                  onChange={(e) => updateSetting('showLineNumbers', e.target.checked)}
-                />
-                Show line numbers in code blocks
-              </label>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="autosave-interval">Auto-save Interval</label>
-              <select
-                id="autosave-interval"
-                value={settings.autoSaveInterval || 1}
-                onChange={(e) => updateSetting('autoSaveInterval', parseInt(e.target.value))}
-              >
-                <option value="1">Every second</option>
-                <option value="2">Every 2 seconds</option>
-                <option value="3">Every 3 seconds</option>
-                <option value="5">Every 5 seconds</option>
-                <option value="10">Every 10 seconds</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={settings.enableTextCollapse !== false}
-                  onChange={(e) => updateSetting('enableTextCollapse', e.target.checked)}
-                />
-                Enable text collapse for long blocks
-              </label>
-            </div>
-          </section>
         </div>
       </div>
     </div>

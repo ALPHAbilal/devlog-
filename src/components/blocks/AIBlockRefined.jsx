@@ -668,7 +668,7 @@ export default function AIBlock({ block, onUpdate }) {
                 : 'bg-accent-green/5 border-accent-green/20 focus:ring-accent-green/50'
               }
             `}
-            placeholder={`Type or paste message content... (Ctrl+Enter to add as ${selectedRole})`}
+            placeholder={`Type or paste message content...`}
             style={{ 
               minHeight: '120px',
               maxHeight: '400px',
@@ -676,11 +676,10 @@ export default function AIBlock({ block, onUpdate }) {
             }}
           />
           
-          {/* Action buttons and help text */}
+          {/* Action buttons */}
           <div className="flex items-center justify-between">
-            <div className="text-xs text-text-secondary space-y-1">
-              <div>Paste multi-line text for auto-import • Ctrl+U for User • Ctrl+I for AI</div>
-              <div>Ctrl+Enter to add • Esc to cancel</div>
+            <div className="text-xs text-text-secondary">
+              Paste multi-line text for auto-import
             </div>
             <div className="flex gap-2">
               <button
@@ -714,47 +713,18 @@ export default function AIBlock({ block, onUpdate }) {
         </div>
       )}
 
-      {/* Add Buttons */}
+      {/* Add Button */}
       {!isBlockCollapsed && !isAddingMessage && (
-        <div className="flex gap-2">
-          <button
-            onClick={() => setIsAddingMessage(true)}
-            className="flex-1 py-3 border border-dashed border-dark-secondary/50
-                     rounded-lg text-text-secondary hover:text-text-primary
-                     hover:border-accent-green/50 hover:bg-dark-secondary/10
-                     transition-all flex items-center justify-center gap-2 group"
-          >
-            <Plus size={16} className="group-hover:rotate-90 transition-transform" />
-            <span className="text-sm">Add message</span>
-          </button>
-          <button
-            onClick={() => {
-              // Trigger paste event handler with example text
-              const exampleText = "Paste your conversation here...";
-              navigator.clipboard.readText().then(text => {
-                if (text && looksLikeConversation(text)) {
-                  const parsed = parseConversation(text);
-                  setParsedMessages(parsed);
-                  setShowImportPreview(true);
-                } else {
-                  // If no conversation in clipboard, show add message with hint
-                  setIsAddingMessage(true);
-                }
-              }).catch(() => {
-                // Fallback if clipboard access is denied
-                setIsAddingMessage(true);
-              });
-            }}
-            className="px-4 py-3 border border-dashed border-dark-secondary/50
-                     rounded-lg text-text-secondary hover:text-text-primary
-                     hover:border-accent-green/50 hover:bg-dark-secondary/10
-                     transition-all flex items-center justify-center gap-2 group"
-            title="Import conversation from clipboard"
-          >
-            <FileText size={16} />
-            <span className="text-sm">Import</span>
-          </button>
-        </div>
+        <button
+          onClick={() => setIsAddingMessage(true)}
+          className="w-full py-3 border border-dashed border-dark-secondary/50
+                   rounded-lg text-text-secondary hover:text-text-primary
+                   hover:border-accent-green/50 hover:bg-dark-secondary/10
+                   transition-all flex items-center justify-center gap-2 group"
+        >
+          <Plus size={16} className="group-hover:rotate-90 transition-transform" />
+          <span className="text-sm">Add message</span>
+        </button>
       )}
       
       {/* Import Preview Modal */}

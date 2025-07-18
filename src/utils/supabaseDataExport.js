@@ -48,7 +48,7 @@ export const exportSupabaseData = async () => {
         ...doc,
         blocks: blocksByDocument[doc.id] || []
       })),
-      settings: user.user_metadata?.settings || {}
+      settings: {} // Settings are now stored in profiles table, not exported here for security
     };
 
     // Create and download the file

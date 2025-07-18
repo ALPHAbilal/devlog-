@@ -27,7 +27,7 @@ export function SettingsProvider({ children }) {
     }
   }, []);
 
-  // Load settings from Supabase user metadata
+  // Load settings from profiles table
   useEffect(() => {
     if (!user) {
       setIsLoading(false);
@@ -36,17 +36,24 @@ export function SettingsProvider({ children }) {
 
     const loadSettings = async () => {
       try {
-        const { data: { user: userData } } = await supabase.auth.getUser();
+        // Load settings from profiles table
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('settings')
+          .eq('id', user.id)
+          .single();
         
-        if (userData?.user_metadata?.settings) {
-          const supabaseSettings = userData.user_metadata.settings;
-          setSettings(prev => ({ ...prev, ...supabaseSettings }));
+        if (error) {
+          console.error('Error loading profile settings:', error);
+        } else if (profile?.settings) {
+          const profileSettings = profile.settings;
+          setSettings(prev => ({ ...prev, ...profileSettings }));
           
           // Update local cache
-          localStorage.setItem('devlogSettings', JSON.stringify(supabaseSettings));
+          localStorage.setItem('devlogSettings', JSON.stringify(profileSettings));
         }
       } catch (err) {
-        console.error('Error loading settings from Supabase:', err);
+        console.error('Error loading settings from profiles:', err);
       } finally {
         setIsLoading(false);
       }
@@ -63,18 +70,19 @@ export function SettingsProvider({ children }) {
     // Save to localStorage immediately
     localStorage.setItem('devlogSettings', JSON.stringify(newSettings));
     
-    // Save to Supabase if user is authenticated
+    // Save to profiles table if user is authenticated
     if (user) {
       try {
-        const { error } = await supabase.auth.updateUser({
-          data: { settings: newSettings }
-        });
+        const { error } = await supabase
+          .from('profiles')
+          .update({ settings: newSettings })
+          .eq('id', user.id);
         
         if (error) {
-          console.error('Error saving settings to Supabase:', error);
+          console.error('Error saving settings to profiles:', error);
         }
       } catch (err) {
-        console.error('Error updating user settings:', err);
+        console.error('Error updating profile settings:', err);
       }
     }
   };
@@ -87,18 +95,19 @@ export function SettingsProvider({ children }) {
     // Save to localStorage immediately
     localStorage.setItem('devlogSettings', JSON.stringify(newSettings));
     
-    // Save to Supabase if user is authenticated
+    // Save to profiles table if user is authenticated
     if (user) {
       try {
-        const { error } = await supabase.auth.updateUser({
-          data: { settings: newSettings }
-        });
+        const { error } = await supabase
+          .from('profiles')
+          .update({ settings: newSettings })
+          .eq('id', user.id);
         
         if (error) {
-          console.error('Error saving settings to Supabase:', error);
+          console.error('Error saving settings to profiles:', error);
         }
       } catch (err) {
-        console.error('Error updating user settings:', err);
+        console.error('Error updating profile settings:', err);
       }
     }
   };

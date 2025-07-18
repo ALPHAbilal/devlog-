@@ -29,16 +29,13 @@ export function AuthProviderOptimized({ children }) {
     }
   }, []);
 
-  const signUp = useCallback(async (email, password, metadata = {}) => {
+  const signUp = useCallback(async (email, password) => {
     const timerId = performanceMonitor.startTimer('auth:signUp');
     try {
       setError(null);
       const { data, error } = await optimizedSupabase.getClient().auth.signUp({
         email,
-        password,
-        options: {
-          data: metadata
-        }
+        password
       });
       
       if (error) throw error;

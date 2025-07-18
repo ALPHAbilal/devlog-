@@ -66,8 +66,14 @@ export function useDatabaseUsage() {
           // Default to Free plan limits
           let limit = 500; // MB
           
-          // Check if user has custom metadata indicating plan
-          if (authData?.user?.user_metadata?.plan === 'pro') {
+          // Check user's subscription tier from profiles table
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('subscription_tier')
+            .eq('id', user.id)
+            .single();
+          
+          if (profile?.subscription_tier === 'pro') {
             limit = 8192; // 8 GB in MB
           }
           

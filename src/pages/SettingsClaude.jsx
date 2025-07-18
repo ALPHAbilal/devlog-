@@ -254,6 +254,37 @@ export default function SettingsClaude() {
               </SettingGroup>
 
               <SettingGroup title="Security">
+                <div className="setting-item">
+                  <div className="setting-content">
+                    <label className="setting-label" htmlFor="session-timeout">
+                      Session Timeout
+                    </label>
+                    <p className="setting-description">
+                      Automatically sign out after period of inactivity
+                    </p>
+                  </div>
+                  <select
+                    id="session-timeout"
+                    className="setting-select"
+                    value={settings.sessionTimeout || 30}
+                    onChange={(e) => {
+                      const minutes = parseInt(e.target.value);
+                      handleSettingChange('sessionTimeout', minutes);
+                      // Apply the timeout immediately
+                      import('../lib/supabaseOptimized').then(({ setInactivityTimeout }) => {
+                        setInactivityTimeout(minutes);
+                      });
+                    }}
+                  >
+                    <option value="15">15 minutes</option>
+                    <option value="30">30 minutes</option>
+                    <option value="60">1 hour</option>
+                    <option value="120">2 hours</option>
+                    <option value="240">4 hours</option>
+                    <option value="0">Never</option>
+                  </select>
+                </div>
+
                 <form onSubmit={handlePasswordChange} className="password-form">
                   <div className="form-field">
                     <label htmlFor="new-password">New Password</label>

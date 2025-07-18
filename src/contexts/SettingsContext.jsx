@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContextOptimized';
+import { setInactivityTimeout } from '../lib/supabaseOptimized';
 
 const SettingsContext = createContext({});
 
@@ -10,7 +11,8 @@ export function SettingsProvider({ children }) {
     defaultCodeLanguage: 'javascript',
     autoSaveInterval: 1,
     showLineNumbers: true,
-    enableTextCollapse: true
+    enableTextCollapse: true,
+    sessionTimeout: 30 // Default 30 minutes
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,6 +53,11 @@ export function SettingsProvider({ children }) {
           
           // Update local cache
           localStorage.setItem('devlogSettings', JSON.stringify(profileSettings));
+          
+          // Apply session timeout if set
+          if (profileSettings.sessionTimeout !== undefined) {
+            setInactivityTimeout(profileSettings.sessionTimeout);
+          }
         }
       } catch (err) {
         console.error('Error loading settings from profiles:', err);

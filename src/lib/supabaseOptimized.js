@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { secureStorage, sessionMonitor } from '../utils/secureStorage';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -8,8 +9,9 @@ const STORAGE_KEY = 'sb-zqcjipwiznesnbgbocnu-auth-token';
 
 /**
  * Optimized Supabase Client with:
- * - Session persistence
- * - Reduced auth checks
+ * - Secure token storage
+ * - Session monitoring
+ * - Smart refresh handling
  * - Connection pooling
  * - Request deduplication
  */
@@ -22,8 +24,10 @@ class OptimizedSupabaseClient {
     this.pendingRequests = new Map();
     this.authSubscribers = new Set();
     this.initialized = false;
-    this.refreshAttempts = new Map(); // Track refresh attempts to detect loops
-    this.isRefreshing = false; // Prevent concurrent refresh attempts
+    this.refreshPromise = null; // Track ongoing refresh
+    this.lastRefreshTime = 0;
+    this.sessionTimeout = null;
+    this.inactivityTimeout = 30 * 60 * 1000; // 30 minutes default
   }
 
   /**
@@ -31,18 +35,23 @@ class OptimizedSupabaseClient {
    */
   getClient() {
     if (!this.client) {
-      // Check for emergency override in localStorage
-      const disableRefresh = localStorage.getItem('SUPABASE_DISABLE_REFRESH') === 'true';
-      
       this.client = createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
-          autoRefreshToken: disableRefresh ? false : false, // Always false, emergency override exists
-          persistSession: true,    // Keep enabled for normal session management
+          autoRefreshToken: true,     // Enable auto-refresh for security
+          persistSession: true,
           detectSessionInUrl: true,
           flowType: 'pkce',
+          refreshThreshold: 300,      // Refresh 5 minutes before expiry
+          // Custom storage adapter using secure storage
           storage: {
             getItem: (key) => {
               try {
+                sessionMonitor.logActivity('storage_access', { action: 'get', key });
+                
+                // Use secure storage for auth token
+                if (key === STORAGE_KEY) {
+                  return secureStorage.getItem('auth_token');
+                }
                 return localStorage.getItem(key);
               } catch (e) {
                 console.error('Storage getItem error:', e);
@@ -51,14 +60,28 @@ class OptimizedSupabaseClient {
             },
             setItem: (key, value) => {
               try {
-                localStorage.setItem(key, value);
+                sessionMonitor.logActivity('storage_access', { action: 'set', key });
+                
+                // Use secure storage for auth token
+                if (key === STORAGE_KEY) {
+                  secureStorage.setItem('auth_token', value);
+                } else {
+                  localStorage.setItem(key, value);
+                }
               } catch (e) {
                 console.error('Storage setItem error:', e);
               }
             },
             removeItem: (key) => {
               try {
-                localStorage.removeItem(key);
+                sessionMonitor.logActivity('storage_access', { action: 'remove', key });
+                
+                // Use secure storage for auth token
+                if (key === STORAGE_KEY) {
+                  secureStorage.removeItem('auth_token');
+                } else {
+                  localStorage.removeItem(key);
+                }
               } catch (e) {
                 console.error('Storage removeItem error:', e);
               }
@@ -73,7 +96,7 @@ class OptimizedSupabaseClient {
         global: {
           headers: {
             'x-client-info': 'journey-log-compass',
-            'x-connection-pooling': 'session' // Enable session pooling
+            'x-connection-pooling': 'session'
           }
         },
         db: {
@@ -97,42 +120,48 @@ class OptimizedSupabaseClient {
    * Initialize auth state and listeners
    */
   async initializeAuth() {
-    // Add refresh loop prevention
-    let lastRefreshTime = 0;
-    const MIN_REFRESH_INTERVAL = 5000; // 5 seconds minimum between refreshes
-    
-    const { data: { subscription } } = this.client.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = this.client.auth.onAuthStateChange(async (event, session) => {
       console.log(`[Supabase] Auth event: ${event}`);
+      sessionMonitor.logActivity('auth_event', { event, hasSession: !!session });
       
-      // Prevent rapid TOKEN_REFRESHED events
-      if (event === 'TOKEN_REFRESHED') {
-        const now = Date.now();
-        if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) {
-          console.warn('[Supabase] Ignoring rapid token refresh attempt');
-          return;
-        }
-        lastRefreshTime = now;
-        
-        // Track refresh attempts for circuit breaker
-        const sessionId = session?.user?.id;
-        if (sessionId) {
-          const attempts = this.refreshAttempts.get(sessionId) || 0;
-          if (attempts > 10) {
-            console.error('[Supabase] Too many refresh attempts, circuit breaker activated');
-            // Clear the session to stop the loop
-            this.client.auth.signOut();
+      // Handle different auth events
+      switch (event) {
+        case 'SIGNED_IN':
+          this.startInactivityTimer();
+          sessionMonitor.reset();
+          break;
+          
+        case 'SIGNED_OUT':
+          this.stopInactivityTimer();
+          sessionMonitor.reset();
+          secureStorage.clear();
+          break;
+          
+        case 'TOKEN_REFRESHED':
+          // Implement smart refresh handling
+          const now = Date.now();
+          if (now - this.lastRefreshTime < 5000) {
+            console.warn('[Supabase] Ignoring rapid token refresh');
             return;
           }
-          this.refreshAttempts.set(sessionId, attempts + 1);
-          // Reset counter after 5 minutes
-          setTimeout(() => this.refreshAttempts.delete(sessionId), 300000);
-        }
-      }
-      
-      // Clear refresh attempts on sign out
-      if (event === 'SIGNED_OUT') {
-        this.refreshAttempts.clear();
-        lastRefreshTime = 0;
+          this.lastRefreshTime = now;
+          
+          sessionMonitor.logActivity('token_refresh', { timestamp: now });
+          
+          // Check for suspicious activity
+          const suspiciousActivity = sessionMonitor.isSuspicious();
+          if (suspiciousActivity) {
+            console.error('[Supabase] Suspicious activity detected, forcing re-authentication');
+            await this.client.auth.signOut();
+            return;
+          }
+          
+          this.resetInactivityTimer();
+          break;
+          
+        case 'USER_UPDATED':
+          this.resetInactivityTimer();
+          break;
       }
       
       // Notify all subscribers
@@ -141,6 +170,75 @@ class OptimizedSupabaseClient {
 
     // Store subscription for cleanup
     this.authSubscription = subscription;
+    
+    // Set up activity monitoring
+    this.setupActivityMonitoring();
+  }
+
+  /**
+   * Set up activity monitoring for session timeout
+   */
+  setupActivityMonitoring() {
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    
+    const handleActivity = () => {
+      this.resetInactivityTimer();
+    };
+
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleActivity, { passive: true });
+    });
+    
+    // Clean up on window unload
+    window.addEventListener('beforeunload', () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleActivity);
+      });
+    });
+  }
+
+  /**
+   * Start inactivity timer
+   */
+  startInactivityTimer() {
+    this.resetInactivityTimer();
+  }
+
+  /**
+   * Stop inactivity timer
+   */
+  stopInactivityTimer() {
+    if (this.sessionTimeout) {
+      clearTimeout(this.sessionTimeout);
+      this.sessionTimeout = null;
+    }
+  }
+
+  /**
+   * Reset inactivity timer
+   */
+  resetInactivityTimer() {
+    this.stopInactivityTimer();
+    
+    // Don't set timeout if it's disabled (0 means never timeout)
+    if (this.inactivityTimeout === 0) {
+      return;
+    }
+    
+    this.sessionTimeout = setTimeout(async () => {
+      console.log('[Supabase] Session timeout due to inactivity');
+      sessionMonitor.logActivity('session_timeout', { reason: 'inactivity' });
+      await this.client.auth.signOut();
+    }, this.inactivityTimeout);
+  }
+
+  /**
+   * Set custom inactivity timeout
+   */
+  setInactivityTimeout(minutes) {
+    // 0 means never timeout
+    this.inactivityTimeout = minutes === 0 ? 0 : minutes * 60 * 1000;
+    this.resetInactivityTimer();
   }
 
   /**
@@ -152,7 +250,7 @@ class OptimizedSupabaseClient {
   }
 
   /**
-   * Get session with caching
+   * Get session with secure caching and refresh
    */
   async getSession() {
     // Prevent concurrent getSession calls
@@ -160,12 +258,58 @@ class OptimizedSupabaseClient {
     return this.deduplicateRequest(key, async () => {
       try {
         const result = await this.getClient().auth.getSession();
+        
+        // Check if refresh is needed
+        if (result.data.session) {
+          const expiresAt = result.data.session.expires_at;
+          const now = Math.floor(Date.now() / 1000);
+          const timeUntilExpiry = expiresAt - now;
+          
+          // Refresh if less than 5 minutes until expiry
+          if (timeUntilExpiry < 300 && !this.refreshPromise) {
+            console.log('[Supabase] Proactively refreshing token');
+            this.refreshPromise = this.refreshSession();
+            const refreshResult = await this.refreshPromise;
+            this.refreshPromise = null;
+            return refreshResult || result;
+          }
+        }
+        
         return result;
       } catch (error) {
         console.error('[Supabase] getSession error:', error);
+        sessionMonitor.logActivity('session_error', { error: error.message });
         return { data: { session: null }, error };
       }
     });
+  }
+
+  /**
+   * Refresh session with error handling
+   */
+  async refreshSession() {
+    try {
+      sessionMonitor.logActivity('refresh_attempt', { timestamp: Date.now() });
+      
+      const { data, error } = await this.getClient().auth.refreshSession();
+      
+      if (error) {
+        sessionMonitor.logActivity('refresh_failed', { error: error.message });
+        throw error;
+      }
+      
+      sessionMonitor.logActivity('refresh_success', { timestamp: Date.now() });
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Supabase] Refresh session error:', error);
+      
+      // If refresh fails too many times, force re-authentication
+      if (sessionMonitor.suspiciousPatterns.failedRefreshes > 3) {
+        await this.client.auth.signOut();
+      }
+      
+      return { data: { session: null }, error };
+    }
   }
 
   /**
@@ -187,7 +331,7 @@ class OptimizedSupabaseClient {
   }
 
   /**
-   * Batch multiple operations
+   * Create batch operation helper
    */
   createBatchOperation() {
     const operations = [];
@@ -219,6 +363,7 @@ export { optimizedSupabase };
 export const getSession = () => optimizedSupabase.getSession();
 export const onAuthStateChange = (callback) => optimizedSupabase.onAuthStateChange(callback);
 export const deduplicateRequest = (key, fn) => optimizedSupabase.deduplicateRequest(key, fn);
+export const setInactivityTimeout = (minutes) => optimizedSupabase.setInactivityTimeout(minutes);
 
 // Emergency helper to clear auth issues
 export const clearAuthIssues = () => {
@@ -226,10 +371,11 @@ export const clearAuthIssues = () => {
   // Clear all auth-related storage
   localStorage.removeItem(STORAGE_KEY);
   localStorage.removeItem('SUPABASE_DISABLE_REFRESH');
+  secureStorage.clear();
   // Clear caches
   optimizedSupabase.sessionCache = null;
   optimizedSupabase.sessionCacheTime = 0;
-  optimizedSupabase.refreshAttempts.clear();
+  sessionMonitor.reset();
   // Sign out
   optimizedSupabase.getClient().auth.signOut();
 };

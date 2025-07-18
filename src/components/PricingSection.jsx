@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useLayoutEffect } from 'react';
 import { Check, X, Zap, Users, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
@@ -6,6 +6,9 @@ import { fadeInUp, staggerContainer, staggerItem, buttonHover } from '../utils/a
 
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');
+  const [dimensions, setDimensions] = useState({ monthly: 0, annual: 0 });
+  const monthlyRef = useRef(null);
+  const annualRef = useRef(null);
   const { ref, isInView } = useScrollAnimation();
 
   const plans = [
@@ -61,6 +64,27 @@ export default function PricingSection() {
     }
   ];
 
+  // Measure button dimensions on mount and when content changes
+  useLayoutEffect(() => {
+    const measureButtons = () => {
+      if (monthlyRef.current && annualRef.current) {
+        setDimensions({
+          monthly: monthlyRef.current.offsetWidth,
+          annual: annualRef.current.offsetWidth
+        });
+      }
+    };
+
+    measureButtons();
+    
+    // Set up ResizeObserver for dynamic content changes
+    const resizeObserver = new ResizeObserver(measureButtons);
+    if (monthlyRef.current) resizeObserver.observe(monthlyRef.current);
+    if (annualRef.current) resizeObserver.observe(annualRef.current);
+    
+    return () => resizeObserver.disconnect();
+  }, [billingPeriod]); // Re-measure when billing period changes
+
   const handlePlanClick = (planName, cta) => {
     if (cta === 'Contact Sales') {
       window.location.href = 'mailto:sales@devlog.app?subject=Team Plan Inquiry';
@@ -90,37 +114,49 @@ export default function PricingSection() {
             <motion.div
               className="absolute h-[calc(100%-8px)] bg-accent-green rounded-md"
               initial={false}
-              animate={{ 
-                x: billingPeriod === 'monthly' ? '4px' : 'calc(50% - 4px)',
-                width: billingPeriod === 'monthly' ? 'calc(50% - 4px)' : 'calc(50% + 4px)'
+              animate={{
+                x: billingPeriod === 'monthly' ? 4 : dimensions.monthly + 4,
+                width: billingPeriod === 'monthly' ? dimensions.monthly : dimensions.annual
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
               style={{ top: '4px' }}
             />
             <button
+              ref={monthlyRef}
               onClick={() => setBillingPeriod('monthly')}
               className={`px-4 py-2 rounded-md transition-all relative z-10 ${
                 billingPeriod === 'monthly'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
+              aria-pressed={billingPeriod === 'monthly'}
             >
               Monthly
             </button>
             <button
+              ref={annualRef}
               onClick={() => setBillingPeriod('annual')}
               className={`px-4 py-2 rounded-md transition-all relative z-10 flex items-center ${
                 billingPeriod === 'annual'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
+              aria-pressed={billingPeriod === 'annual'}
             >
               Annual
-              {billingPeriod === 'annual' && (
-                <span className="ml-2 text-xs bg-dark-primary/20 px-2 py-0.5 rounded">
-                  Save 22%
-                </span>
-              )}
+              <AnimatePresence mode="wait">
+                {billingPeriod === 'annual' && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.2 }}
+                    className="ml-2 text-xs bg-dark-primary/20 px-2 py-0.5 rounded"
+                  >
+                    Save 22%
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </motion.div>

@@ -1,381 +1,266 @@
-# Claude.ai Settings Page Design System Analysis
+# Best Practices for Pricing Toggle Buttons: Dynamic Content Handling & Modern Implementation
 
-## 1. Visual Design System
+## The dynamic content challenge and its solution
 
-### Design Tokens
-**Primary Color Palette:**
-- **Brand Orange:** `#da7756` (primary), `#bd5d3a` (interaction variant)
-- **Terra Cotta CTA:** `#b05730` (darker), `#cd6f47` (medium), `#f8ece7` (light)
-- **Background System:**
-  - Primary: `#f0eee5` (warm cream)
-  - Secondary: `#eeece2` (off-white)
-  - Surface: `#ffffff` (cards/modals)
-  - Darker variants: `#ddd9c5`, `#cbc4a4`
-- **Text Hierarchy:**
-  - Primary: `#3d3929` (dark brown)
-  - Secondary: 60% opacity of primary
-  - Disabled: 40% opacity
-- **Accent Purple:** `#6c5dac` (primary), `#e6e4f1` (light), `#41376c` (dark)
+Your pricing toggle's misalignment issue stems from a fundamental problem: percentage-based calculations don't account for actual DOM element dimensions. When the "Save 22%" badge appears, the Annual button's width changes, but your animation calculations remain static. Modern solutions leverage **ResizeObserver** and **LayoutGroup** to handle these dynamic changes automatically.
 
-### Spacing Scale
-Based on Tailwind CSS utility system:
-- Base unit: 4px
-- Scale: 0, 1, 2, 4, 8, 12, 16, 20, 24, 32, 40, 48, 56, 64
-- Common patterns:
-  - Section spacing: 32px (8 units)
-  - Component spacing: 16px (4 units)
-  - Element spacing: 8px (2 units)
+The industry has shifted from toggle switches to **segmented controls** (radio-style buttons) for pricing selectors. Companies like GitHub, Tailwind UI, and modern design systems favor this pattern because it better represents a choice between options rather than an on/off state. More importantly, segmented controls handle dynamic content more gracefully through proper layout measurement techniques.
 
-### Visual Hierarchy Without Decorative Elements
-- **Depth creation through color layering** - background shifts from `#f0eee5` to `#ffffff` for elevated surfaces
-- **Section separation via spacing** - 32px vertical gaps between major sections
-- **Subtle borders** - 1px solid with 10% opacity for light separation
-- **No drop shadows or glassmorphism** - relies purely on color and spacing
+## Modern implementation patterns from leading companies
 
-## 2. Component Architecture
+Leading tech companies in 2024-2025 have converged on several key patterns for pricing toggles. Rather than complex percentage calculations, they use **transform-based animations** with **absolute positioning** for highlight indicators. The most successful implementations measure actual DOM dimensions and update CSS custom properties dynamically.
 
-### Settings Structure
+**Radix UI** exemplifies the modern approach with their SegmentedControl component. They use ResizeObserver to track content changes and update the highlight position accordingly. **Tailwind UI** implements a similar pattern using CSS custom properties for runtime animation control. **Ant Design** provides a `transitionDuration` prop for customizing animation timing, while **Mantine** automatically recalculates widths with a 50ms debounce for performance.
+
+## Technical solution: Measuring and animating based on actual DOM sizes
+
+Here's a production-ready solution using **Framer Motion's LayoutGroup** to handle your dynamic content challenge:
+
 ```jsx
-// Settings Layout Pattern
-<div className="flex h-full">
-  {/* Sidebar Navigation */}
-  <nav className="w-64 bg-cream-100 p-4">
-    <SettingsSection title="Profile" />
-    <SettingsSection title="Preferences" />
-    <SettingsSection title="Custom Styles" />
-    <SettingsSection title="Billing" />
-  </nav>
-  
-  {/* Main Content Area */}
-  <main className="flex-1 p-8 bg-white">
-    <SettingsGroup />
-  </main>
-</div>
-```
+import { motion, LayoutGroup } from 'framer-motion';
+import { useState, useRef, useLayoutEffect } from 'react';
 
-### Form Components
-**Toggle Component Pattern:**
-```jsx
-// Immediate application toggle
-const ToggleSwitch = ({ label, description, value, onChange }) => (
-  <div className="flex items-center justify-between py-4">
-    <div className="flex-1">
-      <label className="text-base font-medium text-primary">
-        {label}
-      </label>
-      <p className="text-sm text-secondary mt-1">
-        {description}
-      </p>
-    </div>
-    <button
-      className="relative w-11 h-6 bg-gray-200 rounded-full 
-                 transition-colors focus:outline-none focus:ring-2"
-      onClick={() => onChange(!value)}
-    >
-      <span className={`absolute w-5 h-5 bg-white rounded-full 
-                       shadow-sm transition-transform
-                       ${value ? 'translate-x-6 bg-terra-cotta' : 'translate-x-0.5'}`} 
-      />
-    </button>
-  </div>
-);
-```
+function PricingToggle() {
+  const [billingPeriod, setBillingPeriod] = useState('monthly');
+  const [dimensions, setDimensions] = useState({ monthly: 0, annual: 0 });
+  const monthlyRef = useRef(null);
+  const annualRef = useRef(null);
 
-### State Management
-- **Immediate mode** for toggles - no save button required
-- **Optimistic updates** - UI updates before server confirmation
-- **Deferred mode** for complex settings requiring validation
+  // Measure button dimensions on mount and when content changes
+  useLayoutEffect(() => {
+    const measureButtons = () => {
+      if (monthlyRef.current && annualRef.current) {
+        setDimensions({
+          monthly: monthlyRef.current.offsetWidth,
+          annual: annualRef.current.offsetWidth
+        });
+      }
+    };
 
-## 3. Navigation Pattern
+    measureButtons();
+    
+    // Set up ResizeObserver for dynamic content changes
+    const resizeObserver = new ResizeObserver(measureButtons);
+    if (monthlyRef.current) resizeObserver.observe(monthlyRef.current);
+    if (annualRef.current) resizeObserver.observe(annualRef.current);
+    
+    return () => resizeObserver.disconnect();
+  }, [billingPeriod]); // Re-measure when billing period changes
 
-### Desktop Navigation
-- **Left sidebar** with persistent navigation (240px width)
-- **Single-page scroll** for settings content
-- **Progressive disclosure** for nested options
-- **No tabs or accordion** - simple vertical organization
-
-### Mobile Adaptation
-- Sidebar collapses to hamburger menu
-- Full-width settings panels
-- Touch targets minimum 44px height
-- Swipe gestures for navigation between sections
-
-### Deep-linking
-- URL structure: `/settings/[section]/[subsection]`
-- Smooth scroll to specific settings
-- Browser back button support
-
-## 4. Interaction Design
-
-### Toggle vs Checkbox Usage
-- **Toggles:** Binary on/off settings with immediate effect
-- **Checkboxes:** Multiple selections or bulk actions
-- **Radio buttons:** Mutually exclusive options
-
-### Feedback Patterns
-```jsx
-// Setting change feedback
-const handleSettingChange = async (setting, value) => {
-  // Optimistic update
-  updateUI(setting, value);
-  
-  try {
-    await api.updateSetting(setting, value);
-    // Silent success - no toast
-  } catch (error) {
-    // Revert and show inline error
-    revertUI(setting);
-    showInlineError(setting, error.message);
-  }
-};
-```
-
-### Dangerous Actions
-```jsx
-// Account deletion pattern
-const DeleteAccountFlow = () => (
-  <Modal>
-    <h2 className="text-xl font-semibold mb-4">Delete Account</h2>
-    <div className="space-y-4">
-      <Alert variant="danger">
-        This action cannot be undone. All your data will be permanently deleted.
-      </Alert>
-      <p>Your account will be deleted in 14 days. You can cancel anytime.</p>
-      <input 
-        type="text" 
-        placeholder="Type 'DELETE' to confirm"
-        className="w-full p-2 border rounded"
-      />
-      <div className="flex gap-3">
-        <Button variant="secondary">Cancel</Button>
-        <Button variant="danger" disabled={!confirmed}>
-          I Understand, Delete My Account
-        </Button>
-      </div>
-    </div>
-  </Modal>
-);
-```
-
-## 5. Typography and Spacing
-
-### Type Scale
-```css
-/* Typography System */
---font-heading-1: 2rem;      /* 32px */
---font-heading-2: 1.5rem;    /* 24px */
---font-heading-3: 1.25rem;   /* 20px */
---font-body: 1rem;           /* 16px */
---font-small: 0.875rem;      /* 14px */
---font-caption: 0.75rem;     /* 12px */
-
-/* Font Stack */
---font-primary: "__copernicus_669e4a", ui-serif, Georgia, serif;
---font-ui: system-ui, -apple-system, sans-serif;
-
-/* Line Heights */
---leading-tight: 1.25;
---leading-normal: 1.5;
---leading-relaxed: 1.75;
-```
-
-### Spacing System
-```css
-/* Section Spacing */
-.settings-section {
-  padding: 2rem 0;  /* 32px vertical */
-}
-
-.settings-group {
-  margin-bottom: 1.5rem;  /* 24px */
-}
-
-.setting-item {
-  padding: 1rem 0;  /* 16px vertical */
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Responsive spacing */
-@media (max-width: 768px) {
-  .settings-section { padding: 1.5rem 1rem; }
-  .setting-item { padding: 0.75rem 0; }
-}
-```
-
-## 6. Color Usage in Detail
-
-### Semantic Colors
-```css
-:root {
-  /* Status Colors */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-  --color-info: #3b82f6;
-  
-  /* Interactive States */
-  --color-hover: rgba(189, 93, 58, 0.1);
-  --color-focus: #3b82f6;
-  --color-disabled: rgba(61, 57, 41, 0.4);
-  
-  /* Backgrounds */
-  --bg-primary: #f0eee5;
-  --bg-secondary: #ffffff;
-  --bg-elevated: #ffffff;
-  --bg-overlay: rgba(0, 0, 0, 0.5);
-}
-```
-
-## 7. Specific UI Patterns
-
-### Toggle Switch Implementation
-```css
-/* Toggle Switch Styles */
-.toggle-switch {
-  width: 44px;
-  height: 24px;
-  background: #e5e7eb;
-  border-radius: 9999px;
-  position: relative;
-  transition: background-color 200ms;
-}
-
-.toggle-switch.active {
-  background: #bd5d3a;
-}
-
-.toggle-thumb {
-  width: 20px;
-  height: 20px;
-  background: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  transition: transform 200ms;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.toggle-switch.active .toggle-thumb {
-  transform: translateX(20px);
-}
-```
-
-### Button Hierarchy
-```jsx
-// Button component with variants
-const Button = ({ variant = 'primary', size = 'medium', ...props }) => {
-  const variants = {
-    primary: 'bg-terra-cotta text-white hover:bg-terra-cotta-dark',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
-    ghost: 'bg-transparent text-terra-cotta hover:bg-terra-cotta-light'
-  };
-  
-  const sizes = {
-    small: 'px-3 py-1.5 text-sm',
-    medium: 'px-4 py-2 text-base',
-    large: 'px-6 py-3 text-lg'
-  };
-  
   return (
-    <button 
-      className={`
-        ${variants[variant]}
-        ${sizes[size]}
-        rounded-md font-medium
-        transition-all duration-200
-        focus:outline-none focus:ring-2 focus:ring-offset-2
-        disabled:opacity-50 disabled:cursor-not-allowed
-      `}
-      {...props}
-    />
+    <LayoutGroup>
+      <div className="inline-flex items-center p-1 bg-dark-secondary rounded-lg relative">
+        {/* Highlight indicator with dynamic positioning */}
+        <motion.div
+          className="absolute h-[calc(100%-8px)] bg-accent-green rounded-md"
+          layoutId="highlight"
+          initial={false}
+          animate={{
+            x: billingPeriod === 'monthly' ? 4 : dimensions.monthly + 4,
+            width: billingPeriod === 'monthly' ? dimensions.monthly : dimensions.annual
+          }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          style={{ top: '4px' }}
+        />
+        
+        <button
+          ref={monthlyRef}
+          onClick={() => setBillingPeriod('monthly')}
+          className="px-4 py-2 rounded-md transition-all relative z-10"
+          aria-pressed={billingPeriod === 'monthly'}
+        >
+          Monthly
+        </button>
+        
+        <button
+          ref={annualRef}
+          onClick={() => setBillingPeriod('annual')}
+          className="px-4 py-2 rounded-md transition-all relative z-10 flex items-center"
+          aria-pressed={billingPeriod === 'annual'}
+        >
+          Annual
+          <AnimatePresence mode="wait">
+            {billingPeriod === 'annual' && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.2 }}
+                className="ml-2 text-xs bg-dark-primary/20 px-2 py-0.5 rounded"
+              >
+                Save 22%
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </button>
+      </div>
+    </LayoutGroup>
   );
-};
-```
-
-## 8. Code Structure
-
-### Tech Stack
-- **Framework:** React 18 with Next.js
-- **Styling:** Tailwind CSS (utility-first)
-- **Icons:** Lucide React v0.263.1
-- **Components:** Shadcn/ui patterns
-- **State:** React hooks (no Redux)
-- **Type Safety:** TypeScript throughout
-
-### Component Organization
-```typescript
-// Settings page structure
-interface SettingsLayout {
-  sidebar: {
-    width: '240px',
-    sections: SettingsSection[]
-  },
-  content: {
-    maxWidth: '800px',
-    padding: '32px'
-  }
 }
-
-// Settings persistence
-const persistSettings = async (settings: UserSettings) => {
-  // Optimistic update
-  updateLocalState(settings);
-  
-  // Server sync
-  await api.post('/settings', settings);
-  
-  // Update all instances
-  broadcastSettingsUpdate(settings);
-};
 ```
 
-### CSS Architecture
+## Alternative approach: CSS custom properties with layout measurement
+
+For teams preferring CSS-based animations, this approach uses CSS custom properties updated via JavaScript:
+
+```jsx
+function CSSPricingToggle() {
+  const [isAnnual, setIsAnnual] = useState(false);
+  const containerRef = useRef(null);
+
+  useLayoutEffect(() => {
+    if (!containerRef.current) return;
+    
+    const buttons = containerRef.current.querySelectorAll('button');
+    const monthlyButton = buttons[0];
+    const annualButton = buttons[1];
+    
+    const updateHighlight = () => {
+      const activeButton = isAnnual ? annualButton : monthlyButton;
+      const { offsetLeft, offsetWidth } = activeButton;
+      
+      containerRef.current.style.setProperty('--highlight-x', `${offsetLeft}px`);
+      containerRef.current.style.setProperty('--highlight-width', `${offsetWidth}px`);
+    };
+    
+    updateHighlight();
+    
+    // Update on window resize
+    window.addEventListener('resize', updateHighlight);
+    return () => window.removeEventListener('resize', updateHighlight);
+  }, [isAnnual]);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="pricing-toggle-container"
+      style={{
+        '--highlight-x': '4px',
+        '--highlight-width': '100px'
+      }}
+    >
+      <div className="highlight-indicator" />
+      <button 
+        onClick={() => setIsAnnual(false)}
+        aria-pressed={!isAnnual}
+      >
+        Monthly
+      </button>
+      <button 
+        onClick={() => setIsAnnual(true)}
+        aria-pressed={isAnnual}
+      >
+        Annual {isAnnual && <span className="badge">Save 22%</span>}
+      </button>
+    </div>
+  );
+}
+```
+
 ```css
-/* Utility-first with Tailwind, custom properties for design tokens */
-@layer base {
-  :root {
-    --radius: 0.5rem;
-    --transition: 200ms ease;
-  }
+.pricing-toggle-container {
+  display: inline-flex;
+  position: relative;
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 4px;
 }
 
-/* Component-specific styles */
-@layer components {
-  .settings-container {
-    @apply max-w-6xl mx-auto p-8;
+.highlight-indicator {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: var(--highlight-x);
+  width: var(--highlight-width);
+  background: #10b981;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.pricing-toggle-container button {
+  position: relative;
+  z-index: 1;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.badge {
+  margin-left: 8px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 12px;
+}
+```
+
+## Accessibility considerations for toggle animations
+
+Modern pricing toggles must meet **WCAG 2.2** standards. The key requirement is using `aria-pressed` to communicate toggle state rather than changing button labels. Screen readers announce "Monthly toggle button pressed" or "Annual toggle button not pressed," providing clear state information.
+
+Implement **prefers-reduced-motion** support to respect user preferences:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .highlight-indicator {
+    transition: none;
   }
   
-  .setting-card {
-    @apply bg-white rounded-lg p-6 mb-4;
-    @apply border border-gray-100;
+  .pricing-toggle-container button {
+    transition: none;
   }
 }
 ```
 
-## Specific Elements Analysis
+For keyboard navigation, ensure both **Space** and **Enter** keys activate the toggle. Focus indicators must meet the 3:1 contrast ratio requirement:
 
-### 1. Settings Categories
-- **Section headers:** 20px font size, 600 weight, 32px bottom margin
-- **Visual separation:** Color shift + 32px spacing
-- **No decorative elements** - pure typography and spacing
+```css
+.pricing-toggle-container button:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+```
 
-### 2. Individual Settings
-- **Label:** Left-aligned, 16px font, primary color
-- **Description:** 14px, secondary color, 4px top margin
-- **Control:** Right-aligned with 16px gap
-- **Hover state:** 4px padding, subtle background tint
+## Performance optimization strategies
 
-### 3. Complex Settings
-- **Nested structure** with 16px left indent
-- **Conditional visibility** via React state
-- **Progressive disclosure** pattern
+**Preventing layout shifts** is critical for Core Web Vitals. The key is animating only `transform` and `opacity` properties, which don't trigger reflow:
 
-### 4. Mobile Responsiveness
-- **Breakpoints:** 640px, 768px, 1024px
-- **Stack layout** below 768px
-- **Full-width controls** on mobile
-- **Increased touch targets** to 44px minimum
+```css
+.highlight-indicator {
+  transform: translateX(var(--highlight-x));
+  width: var(--highlight-width);
+  will-change: transform, width;
+}
 
-This design system achieves a professional, approachable interface through thoughtful use of warm colors, generous spacing, and minimal visual effects, prioritizing functionality and accessibility while maintaining brand personality.
+/* Clean up will-change after animation */
+.highlight-indicator:not(.animating) {
+  will-change: auto;
+}
+```
+
+For **React optimization**, memoize the toggle component and use callbacks efficiently:
+
+```jsx
+const PricingToggle = React.memo(({ onPeriodChange }) => {
+  const handleToggle = useCallback((period) => {
+    onPeriodChange(period);
+  }, [onPeriodChange]);
+  
+  // Component implementation
+});
+```
+
+## Modern design trends and implementation examples
+
+The shift toward **segmented controls** reflects a broader trend in UI design. Companies like Linear and Railway use minimal, clean interfaces with subtle animations. The typical animation duration is **200-300ms** with spring animations providing the most natural feel.
+
+For comprehensive examples, **Tailwind UI** offers multiple pricing toggle patterns. **Radix UI's** SegmentedControl provides a fully accessible implementation with built-in ResizeObserver support. **Headless UI** offers an unstyled foundation perfect for custom designs.
+
+## Conclusion
+
+The solution to your dynamic content challenge lies in measuring actual DOM dimensions rather than relying on percentage calculations. Modern approaches using ResizeObserver, LayoutGroup, or CSS custom properties provide smooth, professional animations that adapt to content changes automatically. By following accessibility guidelines and performance best practices, you'll create a pricing toggle that not only looks polished but provides an excellent user experience across all devices and assistive technologies.

@@ -1,11 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { supabase } from '../lib/supabase';
-import { exportSupabaseData, importSupabaseData } from '../utils/supabaseDataExport';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
 import { useSettings } from '../contexts/SettingsContext';
-import storageWrapper from '../utils/storage/storageWrapper';
 import { X, ChevronLeft } from 'lucide-react';
 import '../styles/settings-claude.css';
 
@@ -59,8 +57,6 @@ export default function SettingsClaude() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  
-  const fileInputRef = useRef(null);
 
   // Navigation sections
   const sections = [
@@ -116,38 +112,6 @@ export default function SettingsClaude() {
       navigate('/');
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
-    }
-  };
-
-  // Handle data export
-  const handleExport = async () => {
-    setIsLoading(true);
-    try {
-      await exportSupabaseData();
-      // Silent success
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to export data' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Handle data import
-  const handleImport = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    
-    setIsLoading(true);
-    try {
-      await importSupabaseData(file);
-      // Silent success
-    } catch (error) {
-      setMessage({ type: 'error', text: error.message });
-    } finally {
-      setIsLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
@@ -252,37 +216,6 @@ export default function SettingsClaude() {
               </SettingGroup>
 
               <SettingGroup title="Security">
-                <div className="setting-item">
-                  <div className="setting-content">
-                    <label className="setting-label" htmlFor="session-timeout">
-                      Session Timeout
-                    </label>
-                    <p className="setting-description">
-                      Automatically sign out after period of inactivity
-                    </p>
-                  </div>
-                  <select
-                    id="session-timeout"
-                    className="setting-select"
-                    value={settings.sessionTimeout || 30}
-                    onChange={(e) => {
-                      const minutes = parseInt(e.target.value);
-                      handleSettingChange('sessionTimeout', minutes);
-                      // Apply the timeout immediately
-                      import('../lib/supabaseOptimized').then(({ setInactivityTimeout }) => {
-                        setInactivityTimeout(minutes);
-                      });
-                    }}
-                  >
-                    <option value="15">15 minutes</option>
-                    <option value="30">30 minutes</option>
-                    <option value="60">1 hour</option>
-                    <option value="120">2 hours</option>
-                    <option value="240">4 hours</option>
-                    <option value="0">Never</option>
-                  </select>
-                </div>
-
                 <form onSubmit={handlePasswordChange} className="password-form">
                   <div className="form-field">
                     <label htmlFor="new-password">New Password</label>
@@ -349,80 +282,6 @@ export default function SettingsClaude() {
                   <p className="storage-description">
                     {Math.round(usagePercentage)}% of your storage is being used
                   </p>
-                </div>
-              </SettingGroup>
-
-              <SettingGroup title="Export Data">
-                <div className="setting-item">
-                  <div className="setting-content">
-                    <label className="setting-label">Download Your Data</label>
-                    <p className="setting-description">
-                      Export all your documents as a JSON file
-                    </p>
-                  </div>
-                  <Button onClick={handleExport} disabled={isLoading}>
-                    Export
-                  </Button>
-                </div>
-              </SettingGroup>
-
-              <SettingGroup title="Import Data">
-                <div className="setting-item">
-                  <div className="setting-content">
-                    <label className="setting-label">Upload Backup</label>
-                    <p className="setting-description">
-                      Restore documents from a JSON backup file
-                    </p>
-                  </div>
-                  <div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".json"
-                      onChange={handleImport}
-                      className="file-input"
-                      id="file-upload"
-                    />
-                    <label htmlFor="file-upload" className="file-label">
-                      Choose File
-                    </label>
-                  </div>
-                </div>
-              </SettingGroup>
-
-              <SettingGroup title="Privacy">
-                <ToggleSwitch
-                  label="Analytics"
-                  description="Help improve Devlog by sharing anonymous usage data"
-                  value={settings.analytics || false}
-                  onChange={(value) => handleSettingChange('analytics', value)}
-                />
-
-                <ToggleSwitch
-                  label="Crash Reports"
-                  description="Automatically send crash reports to help fix issues"
-                  value={settings.crashReports || false}
-                  onChange={(value) => handleSettingChange('crashReports', value)}
-                />
-              </SettingGroup>
-
-              <SettingGroup>
-                <div className="setting-item">
-                  <div className="setting-content">
-                    <label className="setting-label">Clear Cache</label>
-                    <p className="setting-description">
-                      Remove temporary files from your browser
-                    </p>
-                  </div>
-                  <Button 
-                    variant="secondary"
-                    onClick={() => {
-                      storageWrapper.clearLocalCache();
-                      // Silent success
-                    }}
-                  >
-                    Clear
-                  </Button>
                 </div>
               </SettingGroup>
             </div>

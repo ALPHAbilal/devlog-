@@ -115,7 +115,7 @@ export default function ProblemSection() {
           </motion.div>
           
           <h3 className="text-3xl font-bold mb-4">
-            Documentation that 
+            Documentation that{' '}
             <motion.span 
               className="text-accent-green inline-block"
               initial={{ opacity: 0, x: -20 }}

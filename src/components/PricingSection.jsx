@@ -10,30 +10,6 @@ export default function PricingSection() {
 
   const plans = [
     {
-      name: 'Hobbyist',
-      icon: <Zap size={24} />,
-      description: 'Perfect for trying out Devlog',
-      price: {
-        monthly: 0,
-        annual: 0
-      },
-      features: [
-        { text: 'Up to 10 documents', included: true },
-        { text: '500 MB total storage', included: true },
-        { text: 'Basic search & filters', included: true },
-        { text: 'Export to Markdown', included: true },
-        { text: 'All block types', included: true },
-        { text: 'Community support', included: true },
-        { text: 'Cloud sync', included: false },
-        { text: 'Version history', included: false },
-        { text: 'Priority support', included: false },
-        { text: 'API access', included: false }
-      ],
-      cta: 'Start Free',
-      ctaVariant: 'secondary',
-      popular: false
-    },
-    {
       name: 'Personal',
       icon: <Users size={24} />,
       description: 'For individual developers',
@@ -44,14 +20,14 @@ export default function PricingSection() {
       features: [
         { text: 'Unlimited documents', included: true },
         { text: '2 GB total storage', included: true },
-        { text: 'Advanced search & filters', included: true },
-        { text: 'Export to multiple formats', included: true },
-        { text: 'Cloud sync across devices', included: true },
+        { text: 'All 8 block types (Text, Code, Math, etc.)', included: true },
+        { text: 'Markdown editing with live preview', included: true },
+        { text: 'Document linking ([[links]] & @mentions)', included: true },
+        { text: 'Advanced search across all content', included: true },
+        { text: 'Export to JSON format', included: true },
+        { text: 'Cloud sync with Supabase', included: true },
         { text: '30-day version history', included: true },
-        { text: 'Email support', included: true },
-        { text: 'All premium features', included: true },
-        { text: 'Custom themes', included: true },
-        { text: 'API access', included: false }
+        { text: 'Email support', included: true }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'primary',
@@ -71,42 +47,17 @@ export default function PricingSection() {
         { text: '10 GB total storage', included: true },
         { text: 'Unlimited version history', included: true },
         { text: 'Priority support', included: true },
-        { text: 'API access (5k calls/month)', included: true },
-        { text: 'Advanced analytics', included: true },
-        { text: 'Custom integrations', included: true },
-        { text: 'Bulk export/import', included: true },
-        { text: 'Early access features', included: true },
-        { text: 'Team collaboration', included: false }
+        { text: 'Bulk import/export operations', included: true },
+        { text: 'Advanced AI conversation blocks', included: true },
+        { text: 'File tree visualization blocks', included: true },
+        { text: 'Custom tags and collections', included: true },
+        { text: 'Offline mode with sync', included: true },
+        { text: 'Early access to new features', included: true }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'secondary',
       popular: false,
       savingText: 'Save 21%'
-    },
-    {
-      name: 'Team',
-      icon: <Building2 size={24} />,
-      description: 'For small development teams',
-      price: {
-        monthly: 49,
-        annual: 39
-      },
-      features: [
-        { text: 'Everything in Professional', included: true },
-        { text: '50 GB total storage', included: true },
-        { text: 'Up to 10 team members', included: true },
-        { text: 'Team workspaces', included: true },
-        { text: 'Shared documents & templates', included: true },
-        { text: 'Admin controls & permissions', included: true },
-        { text: 'API access (20k calls/month)', included: true },
-        { text: 'Custom webhooks', included: true },
-        { text: 'Dedicated support', included: true },
-        { text: 'SSO authentication', included: true }
-      ],
-      cta: 'Contact Sales',
-      ctaVariant: 'secondary',
-      popular: false,
-      savingText: 'Save 20%'
     }
   ];
 
@@ -135,19 +86,20 @@ export default function PricingSection() {
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-4 p-1 bg-dark-secondary rounded-lg relative">
+          <div className="inline-flex items-center p-1 bg-dark-secondary rounded-lg relative">
             <motion.div
-              className="absolute inset-0 bg-accent-green rounded-lg"
+              className="absolute h-[calc(100%-8px)] bg-accent-green rounded-md"
               initial={false}
               animate={{ 
-                x: billingPeriod === 'monthly' ? 0 : '100%',
-                width: billingPeriod === 'monthly' ? '50%' : '50%'
+                x: billingPeriod === 'monthly' ? '4px' : 'calc(50% + 4px)',
+                width: 'calc(50% - 4px)'
               }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              style={{ top: '4px' }}
             />
             <button
               onClick={() => setBillingPeriod('monthly')}
-              className={`px-4 py-2 rounded transition-all relative z-10 ${
+              className={`px-4 py-2 rounded-md transition-all relative z-10 ${
                 billingPeriod === 'monthly'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
@@ -157,27 +109,25 @@ export default function PricingSection() {
             </button>
             <button
               onClick={() => setBillingPeriod('annual')}
-              className={`px-4 py-2 rounded transition-all relative z-10 ${
+              className={`px-4 py-2 rounded-md transition-all relative z-10 flex items-center ${
                 billingPeriod === 'annual'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               Annual
-              <motion.span 
-                className="ml-2 text-xs bg-accent-green/20 text-accent-green px-2 py-0.5 rounded"
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.3 }}
-              >
-                Save up to 22%
-              </motion.span>
+              {billingPeriod === 'annual' && (
+                <span className="ml-2 text-xs bg-dark-primary/20 px-2 py-0.5 rounded">
+                  Save 22%
+                </span>
+              )}
             </button>
           </div>
         </motion.div>
 
         {/* Pricing Cards */}
         <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12"
+          className="grid md:grid-cols-2 gap-8 mb-12 max-w-4xl mx-auto"
           variants={staggerContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}

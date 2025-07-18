@@ -110,7 +110,7 @@ export default function PricingSection() {
           </p>
 
           {/* Billing Toggle */}
-          <div className="inline-flex items-center p-1 bg-dark-secondary rounded-lg relative">
+          <div className="inline-flex items-center p-1 bg-dark-secondary rounded-lg relative text-sm md:text-base">
             <motion.div
               className="absolute h-[calc(100%-8px)] bg-accent-green rounded-md"
               initial={false}

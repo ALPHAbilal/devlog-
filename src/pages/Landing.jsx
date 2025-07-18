@@ -251,7 +251,7 @@ function LandingContent() {
 
 
       {/* CTA Section */}
-      <section className="py-20 px-6 relative">
+      <section className="py-16 md:py-20 px-4 md:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div 
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/20 text-accent-green 
@@ -265,7 +265,7 @@ function LandingContent() {
           </motion.div>
           
           <motion.h3 
-            className="text-4xl font-bold mb-6"
+            className="text-3xl md:text-4xl font-bold mb-4 md:mb-6"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -274,7 +274,7 @@ function LandingContent() {
             Ready to Build Your Second Brain?
           </motion.h3>
           <motion.p 
-            className="text-xl text-text-secondary mb-8"
+            className="text-lg md:text-xl text-text-secondary mb-6 md:mb-8 px-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -291,8 +291,8 @@ function LandingContent() {
           >
             <motion.button
                 onClick={() => navigate('/auth')}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-accent-green text-dark-primary 
-                           rounded-lg font-medium text-lg shadow-lg shadow-accent-green/20
+                className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-accent-green text-dark-primary 
+                           rounded-lg font-medium text-base md:text-lg shadow-lg shadow-accent-green/20
                            relative overflow-hidden group"
                 variants={buttonHover}
                 initial="rest"
@@ -317,13 +317,14 @@ function LandingContent() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-6 border-t border-dark-secondary/20">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <footer className="py-8 px-4 md:px-6 border-t border-dark-secondary/20">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <LogoMinimal size={24} />
-            <span className="text-sm text-text-secondary">© 2025 Devlog</span>
+            <LogoMinimal size={20} className="md:hidden" />
+            <LogoMinimal size={24} className="hidden md:block" />
+            <span className="text-xs md:text-sm text-text-secondary">© 2025 Devlog</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-text-secondary">
+          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm text-text-secondary">
             <a 
               href="https://github.com/devlog-app/devlog" 
               target="_blank" 

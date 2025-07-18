@@ -34,25 +34,25 @@ export default function ProblemSection() {
   const { ref, isInView } = useScrollAnimation();
 
   return (
-    <section id="problem-section" className="py-20 px-4 md:px-6 bg-dark-secondary/20" ref={ref}>
+    <section id="problem-section" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20" ref={ref}>
       <div className="max-w-6xl mx-auto">
         <motion.div 
-          className="text-center mb-16"
+          className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6">
             The documentation problem
           </h2>
-          <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-text-secondary max-w-3xl mx-auto px-2">
             You're too busy coding to document properly. And when you do, 
             it's scattered across tools that weren't built for developers.
           </p>
         </motion.div>
 
         <motion.div 
-          className="grid md:grid-cols-2 gap-6 mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12 md:mb-16"
           variants={staggerContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -60,7 +60,7 @@ export default function ProblemSection() {
           {problems.map((problem, index) => (
             <motion.div
               key={index}
-              className="relative bg-dark-secondary/50 rounded-lg p-6 border border-dark-secondary 
+              className="relative bg-dark-secondary/50 rounded-lg p-4 md:p-6 border border-dark-secondary 
                          hover:border-red-400/30 transition-all duration-300 group overflow-hidden"
               variants={staggerItem}
               whileHover={{ 
@@ -76,7 +76,7 @@ export default function ProblemSection() {
                 }}
               />
               
-              <div className="flex items-start gap-4 relative z-10">
+              <div className="flex items-start gap-3 md:gap-4 relative z-10">
                 <motion.div 
                   className="p-2 bg-dark-primary rounded-lg"
                   variants={iconLift}
@@ -86,10 +86,10 @@ export default function ProblemSection() {
                   {problem.icon}
                 </motion.div>
                 <div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-2">
+                  <h3 className="text-base md:text-lg font-semibold text-text-primary mb-1 md:mb-2">
                     {problem.title}
                   </h3>
-                  <p className="text-text-secondary">
+                  <p className="text-sm md:text-base text-text-secondary">
                     {problem.description}
                   </p>
                 </div>

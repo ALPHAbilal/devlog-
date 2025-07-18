@@ -14,7 +14,7 @@ export default function HeroSectionV3() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center py-20 overflow-hidden">
+    <section className="relative min-h-screen flex items-center py-16 md:py-20 overflow-hidden">
       {/* Static gradient background */}
       <div 
         className="absolute inset-0 opacity-30"
@@ -32,7 +32,7 @@ export default function HeroSectionV3() {
           variants={staggerContainer}
         >
           <motion.h1 
-            className="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 leading-tight"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8 leading-tight"
             variants={textReveal}
           >
             <motion.span variants={staggerItem}>
@@ -55,7 +55,7 @@ export default function HeroSectionV3() {
         </motion.div>
         
         <motion.p 
-          className="text-xl md:text-2xl text-text-secondary mb-12 max-w-3xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-text-secondary mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
@@ -72,9 +72,9 @@ export default function HeroSectionV3() {
         >
           <motion.button
               onClick={() => navigate('/auth')}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 
-                       bg-accent-green text-dark-primary rounded-lg font-medium text-lg
-                       shadow-lg shadow-accent-green/20 relative overflow-hidden"
+              className="inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 
+                       bg-accent-green text-dark-primary rounded-lg font-medium text-base md:text-lg
+                       shadow-lg shadow-accent-green/20 relative overflow-hidden w-full sm:w-auto"
               variants={buttonHover}
               initial="rest"
               whileHover="hover"
@@ -92,9 +92,9 @@ export default function HeroSectionV3() {
           
           <motion.button
             onClick={scrollToDemo}
-            className="inline-flex items-center justify-center gap-2 px-8 py-4 
-                     border border-dark-secondary text-text-primary rounded-lg text-lg
-                     hover:border-accent-green/50 transition-all relative overflow-hidden"
+            className="inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 
+                     border border-dark-secondary text-text-primary rounded-lg text-base md:text-lg
+                     hover:border-accent-green/50 transition-all relative overflow-hidden w-full sm:w-auto"
             whileHover={{ scale: 1 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -105,7 +105,7 @@ export default function HeroSectionV3() {
         </motion.div>
 
         <motion.div 
-          className="flex items-center justify-center gap-6 text-sm text-text-secondary"
+          className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-xs sm:text-sm text-text-secondary"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.6 }}
@@ -117,11 +117,11 @@ export default function HeroSectionV3() {
             <Clock size={16} />
             <span>2-minute setup</span>
           </motion.div>
-          <div>•</div>
+          <div className="hidden sm:block">•</div>
           <motion.div whileHover={{ scale: 1 }}>
             Free 14-day trial
           </motion.div>
-          <div>•</div>
+          <div className="hidden sm:block">•</div>
           <motion.div whileHover={{ scale: 1 }}>
             No credit card required
           </motion.div>

@@ -44,7 +44,7 @@ function LandingContent() {
     {
       icon: <Search className="text-accent-green" size={32} />,
       title: 'Find anything in 2 seconds',
-      description: 'Remember that fix from last year? It's one search away.'
+      description: 'Remember that fix from last year? It\'s one search away.'
     },
     {
       icon: <GitBranch className="text-accent-green" size={32} />,
@@ -59,7 +59,7 @@ function LandingContent() {
     {
       icon: <Shield className="text-accent-green" size={32} />,
       title: 'Your data, always',
-      description: 'Export anytime. No vendor lock-in. It's your knowledge.'
+      description: 'Export anytime. No vendor lock-in. It\'s your knowledge.'
     }
   ];
 

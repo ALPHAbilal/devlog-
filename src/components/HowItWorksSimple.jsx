@@ -7,7 +7,7 @@ const steps = [
     icon: <Zap className="text-accent-green" size={32} />,
     number: "01",
     title: "Capture in seconds",
-    description: "Paste that Stack Overflow answer. Save that ChatGPT explanation. It's instantly stored.",
+    description: "Paste that Stack Overflow answer. Save that ChatGPT explanation. It\'s instantly stored.",
     visual: "// Error: Cannot read property 'map' of undefined\n// Solution: Check if array exists first\nitems?.map(item => ...)"
   },
   {
@@ -104,7 +104,7 @@ export default function HowItWorksSimple() {
           transition={{ delay: 0.3, duration: 0.6 }}
         >
           <p className="text-lg text-text-secondary mb-2">
-            That's it. No complex workflows. No steep learning curve.
+            That\'s it. No complex workflows. No steep learning curve.
           </p>
           <p className="text-xl font-semibold text-accent-green">
             Just capture, connect, and find.

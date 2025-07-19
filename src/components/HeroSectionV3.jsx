@@ -25,6 +25,18 @@ export default function HeroSectionV3() {
       />
       
       <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10">
+        {/* Urgency Badge */}
+        <motion.div
+          className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/20 text-accent-green 
+                     rounded-full text-sm font-medium mb-6"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="inline-block w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
+          Launch Week: 50% off ends Friday
+        </motion.div>
+
         {/* Main content - single column, centered */}
         <motion.div
           initial="hidden"
@@ -36,20 +48,16 @@ export default function HeroSectionV3() {
             variants={textReveal}
           >
             <motion.span variants={staggerItem}>
-              The Developer Knowledge Base
-            </motion.span>
-            <br />
-            <motion.span variants={staggerItem}>
-              That Remembers
+              Never Google The Same
             </motion.span>
             <br />
             <motion.span 
               className="text-accent-green inline-block"
               variants={staggerItem}
-              whileHover={{ scale: 1 }}
+              whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
             >
-              Why Your Code Works
+              Error Twice
             </motion.span>
           </motion.h1>
         </motion.div>
@@ -60,8 +68,8 @@ export default function HeroSectionV3() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
         >
-          Build your personal developer documentation with code snippet management, 
-          AI conversation preservation, and offline-first architecture. Never lose a solution again.
+          That Stack Overflow answer you found at 2am? That ChatGPT explanation that finally made it click? 
+          Capture, connect, and find them instantly when you need them again.
         </motion.p>
 
         <motion.div 
@@ -86,7 +94,7 @@ export default function HeroSectionV3() {
                 whileHover={{ x: "100%" }}
                 transition={{ duration: 0.6, ease: "linear" }}
               />
-              <span className="relative z-10">Start Documenting Today</span>
+              <span className="relative z-10">Start Building</span>
               <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           
@@ -99,7 +107,7 @@ export default function HeroSectionV3() {
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <span>See How It Works</span>
+            <span>See It Work in 60 Seconds</span>
             <ChevronDown size={20} />
           </motion.button>
         </motion.div>
@@ -114,18 +122,28 @@ export default function HeroSectionV3() {
             className="flex items-center gap-2"
             whileHover={{ scale: 1 }}
           >
-            <Clock size={16} />
-            <span>2-minute setup</span>
+            <span className="text-accent-green">✓</span>
+            <span>14-day free trial</span>
           </motion.div>
           <div className="hidden sm:block">•</div>
           <motion.div whileHover={{ scale: 1 }}>
-            Free 14-day trial
+            <span className="text-accent-green">✓</span> Export anytime
           </motion.div>
           <div className="hidden sm:block">•</div>
           <motion.div whileHover={{ scale: 1 }}>
-            No credit card required
+            <span className="text-accent-green">✓</span> Works offline
           </motion.div>
         </motion.div>
+
+        {/* Trust Indicator */}
+        <motion.p 
+          className="mt-8 text-sm text-text-secondary/70"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.6 }}
+        >
+          Join 7,000+ developers building their second brain
+        </motion.p>
       </div>
     </section>
   );

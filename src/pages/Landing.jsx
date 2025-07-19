@@ -2,9 +2,10 @@ import { useState, lazy, Suspense, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
-import { Code2, Link2, Shield, Zap, GitBranch, FolderTree, ArrowRight, Menu, X } from 'lucide-react';
+import { Code2, Link2, Shield, Zap, GitBranch, Search, ArrowRight, Menu, X } from 'lucide-react';
 import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
+import HowItWorksSimple from '../components/HowItWorksSimple';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover } from '../utils/animations';
@@ -32,33 +33,33 @@ function LandingContent() {
   const features = [
     {
       icon: <Code2 className="text-accent-green" size={32} />,
-      title: 'Rich markdown editor built for code',
-      description: 'Syntax highlighting, slash commands, and keyboard shortcuts. Document as fast as you code.'
+      title: 'Document in 30 seconds',
+      description: 'Paste code, add context, done. No formatting needed.'
     },
     {
       icon: <Link2 className="text-accent-green" size={32} />,
-      title: 'Wiki-style linking between documents',
-      description: 'Create connections with [[links]]. Build your personal knowledge graph naturally.'
+      title: 'Everything connected',
+      description: 'Link solutions together. Your knowledge compounds over time.'
     },
     {
-      icon: <FolderTree className="text-accent-green" size={32} />,
-      title: 'Organize with tags and collections',
-      description: 'Structure by project, technology, or concept. Your documentation scales with your career.'
+      icon: <Search className="text-accent-green" size={32} />,
+      title: 'Find anything in 2 seconds',
+      description: 'Remember that fix from last year? It's one search away.'
     },
     {
       icon: <GitBranch className="text-accent-green" size={32} />,
-      title: 'Version history for every document',
-      description: 'Track how your solutions evolved. See what changed and why.'
+      title: 'Never lose context',
+      description: 'See how your code evolved and why you made those changes.'
     },
     {
       icon: <Zap className="text-accent-green" size={32} />,
-      title: 'Lightning-fast search when you need it',
-      description: 'Find any document, code block, or concept instantly. Search is the result of good documentation.'
+      title: 'Works offline',
+      description: 'Your knowledge is always accessible, even without internet.'
     },
     {
       icon: <Shield className="text-accent-green" size={32} />,
-      title: 'Private & Secure',
-      description: 'Your documentation is private by default. Only you have access to your knowledge base.'
+      title: 'Your data, always',
+      description: 'Export anytime. No vendor lock-in. It's your knowledge.'
     }
   ];
 
@@ -94,6 +95,10 @@ function LandingContent() {
           
           {/* Desktop Navigation */}
           <div className="hidden md:!flex items-center gap-4">
+            <span className="text-sm text-text-secondary/70">
+              Trusted by 7,000+ developers
+            </span>
+            <div className="w-px h-5 bg-dark-secondary/30"></div>
             <a
               href="#pricing"
               className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
@@ -191,7 +196,8 @@ function LandingContent() {
       {/* Problem Section */}
       <ProblemSection />
       
-
+      {/* How It Works - Proof of the Promise */}
+      <HowItWorksSimple />
 
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6">
@@ -254,14 +260,14 @@ function LandingContent() {
       <section className="py-16 md:py-20 px-4 md:px-6 relative">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/20 text-accent-green 
+            className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 
                           rounded-full text-sm font-medium mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <Zap size={16} />
-            Limited Time: Get 30% off annual plans
+            <span className="inline-block w-2 h-2 bg-red-400 rounded-full animate-pulse"></span>
+            Launch pricing ends Friday at midnight
           </motion.div>
           
           <motion.h3 
@@ -271,7 +277,7 @@ function LandingContent() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            Ready to Build Your Second Brain?
+            Stop Losing Solutions Forever
           </motion.h3>
           <motion.p 
             className="text-lg md:text-xl text-text-secondary mb-6 md:mb-8 px-4"
@@ -280,7 +286,7 @@ function LandingContent() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            Join thousands of developers who've transformed scattered notes into searchable knowledge.
+            7,000+ developers already building their second brain. Start today.
           </motion.p>
           <motion.div 
             className="flex flex-col items-center gap-4"
@@ -305,11 +311,11 @@ function LandingContent() {
                   whileHover={{ x: "100%" }}
                   transition={{ duration: 0.6 }}
                 />
-                <span className="relative z-10">Claim Your 14-Day Free Trial</span>
+                <span className="relative z-10">Start Building Now</span>
                 <ArrowRight size={24} className="relative z-10" />
               </motion.button>
             <p className="text-sm text-text-secondary/70">
-              No credit card • Setup in 2 minutes • Cancel anytime
+              14-day free trial • Cancel anytime • Export your data
             </p>
           </motion.div>
         </div>

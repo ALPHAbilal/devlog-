@@ -51,7 +51,7 @@ export default function TestimonialsSection() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+        <div className="fluid-grid-stats mb-16">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className="text-3xl font-bold text-accent-green mb-1">{stat.value}</div>
@@ -61,7 +61,7 @@ export default function TestimonialsSection() {
         </div>
 
         {/* Testimonials Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="fluid-grid-testimonials mb-12">
           {testimonials.map((testimonial) => (
             <div
               key={testimonial.name}

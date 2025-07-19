@@ -60,7 +60,7 @@ export default function HowItWorks() {
         </div>
 
         {/* Process steps */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        <div className="fluid-grid-features mb-16">
           {steps.map((step, index) => (
             <div 
               key={index}
@@ -109,7 +109,7 @@ export default function HowItWorks() {
             Why DevLog is Different
           </h3>
           
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="fluid-grid-features">
             <div className="text-center">
               <div className="text-5xl mb-4">⚡</div>
               <h4 className="text-lg font-semibold text-text-primary mb-2">

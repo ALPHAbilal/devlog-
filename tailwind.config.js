@@ -11,15 +11,39 @@ export default {
     'md:block',
   ],
   theme: {
-    screens: {
-      'xs': '320px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
-    },
     extend: {
+      screens: {
+        // Base breakpoints
+        'xs': '320px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+        
+        // Problematic ranges that need special attention
+        'tablet-portrait': '768px',
+        'tablet-landscape': '1024px',
+        'small-laptop': '1280px',
+        'ultra': '2560px',
+        
+        // Custom range queries for dead zones
+        'tablet-range': {'min': '768px', 'max': '1023px'},
+        'laptop-range': {'min': '1280px', 'max': '1439px'},
+        'tablet-landscape-range': {'min': '1024px', 'max': '1194px'},
+        
+        // Container query sizes for component-level responsiveness
+        '@container': true,
+        '@xs': '20rem',
+        '@sm': '24rem',
+        '@md': '28rem',
+        '@lg': '32rem',
+        '@xl': '36rem',
+        '@2xl': '42rem',
+        '@3xl': '48rem',
+        '@4xl': '56rem',
+        '@5xl': '64rem',
+      },
       colors: {
         'dark': '#050d1a',
         'dark-lighter': '#0f1f33',

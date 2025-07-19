@@ -1,27 +1,33 @@
-/* Fluid Typography System - Based on Utopia.fyi approach */
+/* Fluid Typography System - Enhanced for All Viewports */
 
 :root {
   /* Viewport widths for calculations */
   --min-width: 320; /* Mobile min */
-  --max-width: 1200; /* Desktop max */
+  --max-width: 2560; /* Ultra-wide max */
+  --tablet-min: 768;
+  --laptop-min: 1280;
   
-  /* Type scale steps using clamp() for fluid sizing */
-  /* Formula: clamp(MinSize[rem], yIntersection[rem] + Slope * 100vw, MaxSize[rem]) */
+  /* Enhanced fluid type scale with better intermediate viewport handling */
+  /* Using more granular scaling for problematic ranges */
   
-  /* Base font size (16px to 18px) */
-  --step-0: clamp(1rem, 0.956rem + 0.217vw, 1.125rem);
+  /* Base font size - smoother scaling across all viewports */
+  --step-0: clamp(
+    0.875rem,                    /* 14px minimum on mobile */
+    0.875rem + 0.5vw,           /* Fluid scaling */
+    1.125rem                     /* 18px maximum on ultra-wide */
+  );
   
-  /* Heading sizes */
-  --step-1: clamp(1.2rem, 1.127rem + 0.362vw, 1.414rem);
-  --step-2: clamp(1.44rem, 1.325rem + 0.576vw, 1.777rem);
-  --step-3: clamp(1.728rem, 1.553rem + 0.874vw, 2.233rem);
-  --step-4: clamp(2.074rem, 1.815rem + 1.294vw, 2.809rem);
-  --step-5: clamp(2.488rem, 2.113rem + 1.878vw, 3.534rem);
-  --step-6: clamp(2.986rem, 2.451rem + 2.677vw, 4.446rem);
+  /* Heading sizes with optimized scaling for tablet/laptop ranges */
+  --step-1: clamp(1.125rem, 1rem + 0.625vw, 1.5rem);
+  --step-2: clamp(1.25rem, 1.125rem + 1vw, 2rem);
+  --step-3: clamp(1.5rem, 1.25rem + 1.5vw, 2.5rem);
+  --step-4: clamp(1.875rem, 1.5rem + 2vw, 3rem);
+  --step-5: clamp(2.25rem, 1.75rem + 2.5vw, 4rem);
+  --step-6: clamp(3rem, 2rem + 3vw, 5rem);
   
-  /* Small text */
-  --step--1: clamp(0.833rem, 0.818rem + 0.072vw, 0.877rem);
-  --step--2: clamp(0.694rem, 0.686rem + 0.041vw, 0.721rem);
+  /* Small text with minimal scaling */
+  --step--1: clamp(0.75rem, 0.75rem + 0.125vw, 0.875rem);
+  --step--2: clamp(0.625rem, 0.625rem + 0.0625vw, 0.75rem);
   
   /* Line heights based on golden ratio */
   --line-height-tight: 1.2;
@@ -33,17 +39,24 @@
   --letter-spacing-normal: 0;
   --letter-spacing-wide: 0.025em;
   
-  /* 8pt baseline grid */
-  --baseline: 0.5rem; /* 8px */
-  --space-1: calc(var(--baseline) * 1); /* 8px */
-  --space-2: calc(var(--baseline) * 2); /* 16px */
-  --space-3: calc(var(--baseline) * 3); /* 24px */
-  --space-4: calc(var(--baseline) * 4); /* 32px */
-  --space-5: calc(var(--baseline) * 5); /* 40px */
-  --space-6: calc(var(--baseline) * 6); /* 48px */
-  --space-8: calc(var(--baseline) * 8); /* 64px */
-  --space-10: calc(var(--baseline) * 10); /* 80px */
-  --space-12: calc(var(--baseline) * 12); /* 96px */
+  /* Fluid spacing system that scales with viewport */
+  --fluid-space-unit: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem); /* Base unit */
+  
+  /* Fluid space scale */
+  --space-1: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+  --space-2: clamp(0.5rem, 0.4rem + 0.5vw, 1rem);
+  --space-3: clamp(0.75rem, 0.6rem + 0.75vw, 1.5rem);
+  --space-4: clamp(1rem, 0.8rem + 1vw, 2rem);
+  --space-5: clamp(1.5rem, 1.2rem + 1.5vw, 3rem);
+  --space-6: clamp(2rem, 1.6rem + 2vw, 4rem);
+  --space-8: clamp(3rem, 2.4rem + 3vw, 6rem);
+  --space-10: clamp(4rem, 3.2rem + 4vw, 8rem);
+  --space-12: clamp(6rem, 4.8rem + 6vw, 12rem);
+  
+  /* Component-specific fluid spacing */
+  --card-padding: clamp(1rem, 0.8rem + 1vw, 2rem);
+  --section-padding: clamp(2rem, 1.5rem + 2.5vw, 5rem);
+  --container-padding: clamp(1rem, 0.75rem + 1.25vw, 2.5rem);
 }
 
 /* Apply fluid typography to base elements */

@@ -1,0 +1,220 @@
+/* Fluid Grid System - Responsive Across All Viewports */
+
+/* Base fluid grid that adapts to container and content */
+.fluid-grid {
+  display: grid;
+  gap: var(--space-4); /* Using fluid spacing from typography.css */
+}
+
+/* Auto-fit grid with minimum item sizes */
+.fluid-grid-auto {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+/* Responsive card grid with fluid sizing */
+.fluid-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: clamp(1rem, 2vw, 2rem);
+}
+
+/* Feature grid - adapts smoothly between 1-3 columns */
+.fluid-grid-features {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(
+      clamp(280px, 30vw, 400px),
+      1fr
+    )
+  );
+  gap: var(--space-5);
+}
+
+/* Dashboard grid with better intermediate viewport handling */
+.fluid-grid-dashboard {
+  display: grid;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
+  
+  /* Single column on mobile */
+  grid-template-columns: 1fr;
+}
+
+/* Tablet portrait (768px - 834px) */
+@media (min-width: 768px) {
+  .fluid-grid-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet landscape and small laptops (1024px - 1440px) */
+@media (min-width: 1024px) {
+  .fluid-grid-dashboard {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        clamp(300px, 25vw, 380px),
+        1fr
+      )
+    );
+  }
+}
+
+/* Large screens */
+@media (min-width: 1440px) {
+  .fluid-grid-dashboard {
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(360px, 1fr)
+    );
+    max-width: 2000px;
+    margin: 0 auto;
+  }
+}
+
+/* Pricing grid with smooth scaling */
+.fluid-grid-pricing {
+  display: grid;
+  gap: clamp(1.5rem, 3vw, 2.5rem);
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  /* Stack on mobile and tablet portrait */
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 834px) {
+  .fluid-grid-pricing {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Stats/metrics grid */
+.fluid-grid-stats {
+  display: grid;
+  gap: var(--space-3);
+  
+  /* 2 columns on mobile */
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 768px) {
+  .fluid-grid-stats {
+    /* 4 columns on larger screens */
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Testimonials grid with better wrapping */
+.fluid-grid-testimonials {
+  display: grid;
+  gap: clamp(1.5rem, 2.5vw, 2rem);
+  
+  /* Progressive enhancement */
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .fluid-grid-testimonials {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .fluid-grid-testimonials {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Container query-based grids */
+@container (min-width: 400px) {
+  .container-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@container (min-width: 600px) {
+  .container-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@container (min-width: 800px) {
+  .container-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Utility classes for common patterns */
+
+/* Aspect ratio containers for consistent card heights */
+.aspect-card {
+  aspect-ratio: 4 / 3;
+}
+
+.aspect-square {
+  aspect-ratio: 1 / 1;
+}
+
+.aspect-wide {
+  aspect-ratio: 16 / 9;
+}
+
+/* Prevent grid blowout */
+.grid-safe {
+  min-width: 0; /* Prevent grid items from overflowing */
+}
+
+.grid-safe > * {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Fluid grid gaps */
+.gap-fluid-sm {
+  gap: var(--space-2);
+}
+
+.gap-fluid-md {
+  gap: var(--space-4);
+}
+
+.gap-fluid-lg {
+  gap: var(--space-6);
+}
+
+.gap-fluid-xl {
+  gap: var(--space-8);
+}
+
+/* Grid alignment utilities */
+.grid-center {
+  place-items: center;
+}
+
+.grid-start {
+  place-items: start;
+}
+
+.grid-stretch {
+  place-items: stretch;
+}
+
+/* Responsive grid utilities using custom breakpoints */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tablet-range\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1194px) {
+  .tablet-landscape-range\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1439px) {
+  .laptop-range\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

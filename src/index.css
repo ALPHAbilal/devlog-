@@ -1,5 +1,6 @@
 /* Import custom styles - must be before @tailwind */
 @import './styles/typography.css';
+@import './styles/fluid-grids.css';
 @import './styles/glassmorphism.css';
 @import './styles/demo.css';
 @import './styles/auth-enhanced.css';

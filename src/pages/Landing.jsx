@@ -207,7 +207,7 @@ function LandingContent() {
           </motion.h3>
 
           <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="fluid-grid-features"
             variants={staggerContainer}
             initial="hidden"
             whileInView="visible"

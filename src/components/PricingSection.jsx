@@ -173,7 +173,7 @@ export default function PricingSection() {
 
         {/* Pricing Cards */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12 max-w-4xl mx-auto"
+          className="fluid-grid-pricing mb-8 md:mb-12"
           variants={isMobile ? {} : staggerContainer}
           initial={isMobile ? { opacity: 1 } : "hidden"}
           whileInView={isMobile ? {} : "visible"}

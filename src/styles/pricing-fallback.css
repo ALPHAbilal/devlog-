@@ -1,0 +1,27 @@
+/* Fallback styles to ensure pricing section is always visible on mobile */
+
+/* Ensure pricing section is visible by default on mobile */
+@media (max-width: 768px) {
+  #pricing {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  #pricing > * {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Disable animations on mobile for better performance */
+  #pricing * {
+    animation-duration: 0s !important;
+    transition-duration: 0s !important;
+  }
+}
+
+/* Fallback for when JavaScript is disabled or fails */
+.no-js #pricing,
+.no-js #pricing * {
+  opacity: 1 !important;
+  transform: none !important;
+}

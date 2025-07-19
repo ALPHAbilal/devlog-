@@ -1,88 +1,225 @@
-# Mobile responsiveness transformation for developer documentation platforms
+# Debugging React Mobile Component Invisibility: Expert Solutions for Your Pricing Section
 
-Mobile developer tools demand a fundamental rethink of traditional desktop-first approaches. Based on comprehensive research across industry leaders and current best practices, **progressive enhancement with mobile-first design patterns offers the optimal path forward** for the Devlog platform. This approach maintains full desktop functionality while creating genuinely touch-friendly experiences that serve the 60% of developers who regularly access documentation on mobile devices.
+Your React pricing component being completely invisible on mobile while working perfectly on desktop is a critical issue that likely stems from a combination of Framer Motion viewport detection problems, Tailwind CSS responsive class conflicts, and React Suspense mobile rendering issues. Based on extensive research into similar cases, here's a comprehensive guide to diagnose and fix this specific problem.
 
-The research reveals three critical success factors: **strategic feature adaptation** rather than simple scaling, **touch-optimized interaction patterns** that respect the constraints of mobile interfaces, and **performance optimization** that acknowledges mobile network and hardware limitations. Leading platforms like Notion, GitHub, and Linear demonstrate that successful mobile documentation requires thoughtful reimagining of complex interactions, not just responsive breakpoints.
+## The most likely culprits causing complete invisibility
 
-## Progressive enhancement strategy balances functionality with mobile constraints
+**Framer Motion's useInView hook frequently fails on mobile browsers**, particularly iOS Safari. The pattern `animate={isInView ? "visible" : "hidden"}` is notorious for not triggering properly on mobile devices, causing components to remain in their hidden state permanently. This is compounded by mobile browsers' different handling of the Intersection Observer API and viewport calculations.
 
-The mobile-first approach with progressive enhancement emerges as the clear winner over graceful degradation for developer documentation platforms. **Start with a solid foundation that works on the smallest screens (320px), then layer enhancements based on device capabilities**. This philosophy ensures core documentation remains accessible regardless of device constraints while enabling rich interactions on capable devices.
+The combination of React Suspense with lazy loading and Framer Motion animations creates a perfect storm for mobile visibility issues. Safari specifically has known problems with Suspense boundaries not rendering fallback components, which can cause the entire component tree to remain invisible until fully loaded - and if animations fail to trigger, this never happens.
 
-Modern feature detection should rely on capability checking rather than device detection. CSS `@supports` queries and JavaScript feature tests enable intelligent enhancement without breaking baseline functionality. **Container queries, now with 93% browser support, revolutionize component-level responsiveness** by allowing elements to adapt based on their container size rather than viewport dimensions.
+## Immediate debugging steps with remote tools
 
-React 19's new features significantly enhance progressive enhancement capabilities. The `useActionState` and `useFormStatus` hooks simplify form handling across devices, while the `use()` API enables conditional resource loading based on device capabilities. Combined with Vite's code-splitting optimization, this creates bundles under 100KB for initial mobile loads while preserving full functionality through lazy loading.
+Start by setting up **Chrome Remote Debugging for Android** or **Safari Web Inspector for iOS** to inspect the actual mobile device:
 
-Touch event handling requires a unified approach that supports hybrid devices. **Pointer events provide the most consistent cross-device experience**, falling back to separate touch and mouse handlers only when necessary. The key is preventing accidental triggers through movement thresholds (typically 10 pixels) while maintaining immediate visual feedback within 100ms of interaction.
+For Chrome Android debugging, enable USB debugging on your device, connect it via USB, and navigate to `chrome://inspect#devices` on your desktop Chrome. This gives you full DevTools access to see if your PricingSection component exists in the DOM but is hidden by CSS, or if it's not rendering at all.
 
-## Component transformations require mobile-specific interaction patterns
+For iOS devices, enable Web Inspector in Settings > Safari > Advanced, then connect your device and access it through Safari's Develop menu on macOS. This is crucial because mobile Safari behaves differently from desktop Safari, especially with viewport detection.
 
-Each major component in the Devlog platform needs specific mobile adaptations that go beyond simple responsive scaling. The research identifies clear patterns for transforming complex desktop interactions into mobile-friendly alternatives.
+## Systematic diagnostic approach for your specific issue
 
-**Dashboard grids should adopt card-based layouts on mobile** with CSS Grid's `minmax(300px, 1fr)` for automatic responsive columns. Virtualized scrolling becomes critical on mobile devices - reduce the overscan count to 5-10 items and implement touch-friendly momentum scrolling. For the document grid, a hybrid approach works best: cards in portrait orientation for better visual hierarchy, switching to compact list views in landscape to maximize content visibility.
+First, **verify if the component exists in the DOM** by using the Elements inspector on your connected mobile device. If the component is present but invisible, check these computed styles:
+- Display property (might be `none`)
+- Opacity (could be 0)
+- Transform values (might be translated off-screen)
+- Height/width (could be 0)
+- Overflow on parent containers
 
-The block-based editor presents unique mobile challenges. **Replace drag-and-drop with a long-press reorder mode**, similar to iOS's native interaction pattern. Implement discrete up/down buttons for block movement and provide haptic feedback for state changes. Mobile keyboards require special handling - use `inputmode="text"` for better keyboard layouts and maintain a minimum 14px font size to prevent iOS auto-zoom.
+If the component isn't in the DOM at all, the issue is likely with React Suspense or conditional rendering logic that's failing on mobile.
 
-**Code blocks demand horizontal scrolling over line wrapping** to preserve formatting and indentation critical for developer comprehension. Implement syntax-aware scrolling with visual indicators showing more content is available. Touch gestures should include horizontal swipes for navigation and double-tap to select entire blocks. Performance optimization through lazy syntax highlighting becomes essential, using Web Workers to prevent UI blocking.
+## Framer Motion mobile-specific solutions
 
-Modal patterns vary by use case: **full-screen modals for complex content, bottom sheets for quick actions, and slide-out drawers for navigation**. Each pattern serves specific purposes - API documentation benefits from full-screen modals, while code snippet insertion works better with bottom sheets that maintain context visibility.
+Replace your current viewport detection with a more reliable approach:
 
-## Competitive analysis reveals consistent patterns across successful platforms
+```javascript
+// Instead of relying on useInView alone
+<motion.div
+  initial={{ opacity: 0, y: 20 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ 
+    once: true,
+    amount: 0.1, // Trigger when just 10% visible
+    margin: "0px 0px -10% 0px" // Trigger earlier
+  }}
+  transition={{ duration: 0.6 }}
+>
+```
 
-Analysis of eight leading developer platforms uncovers remarkably consistent approaches to mobile documentation. **Six of eight platforms use bottom navigation** as their primary mobile pattern, limiting items to 3-5 for optimal thumb reach. This pattern dominates because it keeps primary actions always accessible while maximizing content space.
+For maximum reliability, implement a fallback detection system:
 
-All platforms collapse to single-column layouts on mobile, typically at the 768px breakpoint. **No platform attempts to maintain multi-column layouts on small screens**, recognizing that content clarity trumps desktop parity. Code viewing universally employs horizontal scrolling rather than wrapping, maintaining the visual structure developers expect.
+```javascript
+import { useInView } from 'react-intersection-observer';
 
-Performance optimization strategies show clear consensus: conditional resource loading based on device type, lazy loading for images and heavy content, and separate mobile bundles. **GitHub and Notion lead in offline capabilities**, implementing service workers for documentation access without connectivity - a critical feature for mobile developers.
+const { ref, inView } = useInView({
+  threshold: 0.1,
+  fallbackInView: true, // Critical for mobile
+  rootMargin: '0px 0px -50px 0px'
+});
 
-The most successful platforms share three characteristics: they **strategically disable complex features** rather than poorly adapting them, they **implement native-feeling touch interactions** with appropriate gestures and feedback, and they **optimize for one-handed use** with bottom-heavy interaction zones.
+// Use both Framer Motion and intersection observer
+<motion.div
+  ref={ref}
+  animate={inView ? "visible" : "hidden"}
+  variants={{
+    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 50 }
+  }}
+>
+```
 
-## Technical implementation leverages modern React and CSS capabilities
+## React Suspense mobile compatibility fixes
 
-React 19 and modern CSS features enable sophisticated mobile experiences without complex polyfills. **Container queries eliminate the need for JavaScript-based responsive components**, allowing truly modular design systems. The CSS `clamp()` function creates fluid typography that scales smoothly between breakpoints: `font-size: clamp(16px, 4vw, 20px)` ensures readable text across all devices.
+Safari has specific issues with Suspense boundaries. Implement this workaround:
 
-Tailwind CSS's mobile-first utilities align perfectly with progressive enhancement. Custom breakpoints in the configuration should include device-specific queries: `'mobile': {'max': '767px'}` enables mobile-only styles. **Dark theme considerations require special attention on mobile** due to varying screen technologies - maintain higher contrast ratios and test on OLED displays.
+```javascript
+function SafariSuspenseWrapper({ children, fallback }) {
+  const [key, setKey] = useState(0);
+  
+  useEffect(() => {
+    // Force re-render on Safari
+    if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+      const timer = setTimeout(() => setKey(prev => prev + 1), 0);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  
+  return (
+    <Suspense key={key} fallback={fallback}>
+      {children}
+    </Suspense>
+  );
+}
+```
 
-Touch gesture libraries significantly simplify implementation. Framer Motion provides production-ready gesture handling with minimal configuration, while react-use-gesture offers more granular control. **The key is preventing default browser behaviors** through careful `touch-action` CSS properties while maintaining scrolling and zoom where appropriate.
+## Tailwind CSS mobile visibility checklist
 
-Performance monitoring should track five critical metrics: First Contentful Paint (target <1.8s), Largest Contentful Paint (<2.5s), Cumulative Layout Shift (<0.1), Time to Interactive (<3.8s), and initial bundle size (<100KB). These metrics directly correlate with mobile user satisfaction and should guide optimization efforts.
+**Check for hidden utility class conflicts**. The most common mistake is using `sm:hidden` thinking it hides on mobile - it actually hides on 640px and above. Your responsive classes should follow these patterns:
+- Hide on mobile only: `block md:hidden`
+- Show on mobile only: `md:hidden`
+- Never use: `sm:hidden` for mobile hiding
 
-## Implementation roadmap prioritizes high-impact improvements
+**Verify parent container issues**:
+- Check for `overflow-hidden` on any parent element
+- Ensure no parent has `h-0` or zero height
+- Look for `h-screen` which causes issues with mobile browser UI
 
-The transformation should proceed in three strategic phases, each building on the previous while delivering immediate value.
+**Inspect z-index stacking**:
+- Mobile browser UI can interfere with z-index layers
+- Check if your component has proper z-index relative to other elements
+- Transform properties create new stacking contexts
 
-**Phase 1 (Weeks 1-2): Critical mobile fixes**
-- Implement responsive breakpoints at 320px, 768px, and 1024px
-- Ensure all touch targets meet 44px minimum size
-- Add mobile navigation with bottom nav bar for primary actions
-- Fix viewport meta tag and prevent unwanted zooming
-- Create single-column layouts for all content
+## Performance considerations blocking render
 
-**Phase 2 (Weeks 3-4): Enhanced mobile experience**
-- Replace drag-and-drop with touch-friendly alternatives
-- Implement horizontal scrolling for code blocks
-- Add bottom sheets for quick actions and modals
-- Optimize images with lazy loading and responsive sizing
-- Introduce gesture support for common actions
+Mobile devices, especially older ones, may struggle with the combination of lazy loading, animations, and grid layouts. Consider implementing a mobile-specific performance mode:
 
-**Phase 3 (Weeks 5-6): Mobile-specific features**
-- Add offline support through service workers
-- Implement voice search for documentation
-- Create mobile-optimized command palette
-- Add haptic feedback for supported devices
-- Optimize performance for low-end devices
+```javascript
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-## Accessibility requirements shape inclusive mobile experiences
+// Simplified animations for mobile
+const mobileVariants = {
+  visible: { opacity: 1 },
+  hidden: { opacity: 0 }
+};
 
-Mobile accessibility extends beyond desktop requirements due to environmental factors and interaction methods. **Touch targets must maintain 44px minimum dimensions** with adequate spacing to prevent accidental activation. This exceeds WCAG 2.1 AA requirements but aligns with real-world usability needs.
+const desktopVariants = {
+  visible: { opacity: 1, y: 0, scale: 1 },
+  hidden: { opacity: 0, y: 50, scale: 0.95 }
+};
 
-Screen reader support requires semantic HTML structure with proper heading hierarchy and ARIA labels for custom controls. **Mobile screen readers navigate differently than desktop versions**, relying more heavily on rotor controls and gesture navigation. Test with both VoiceOver and TalkBack to ensure comprehensive support.
+<motion.div
+  variants={isMobile ? mobileVariants : desktopVariants}
+  transition={{ duration: isMobile ? 0.3 : 0.6 }}
+>
+```
 
-Color contrast requirements increase for mobile due to outdoor viewing conditions. While WCAG specifies 4.5:1 for normal text, **aim for 7:1 contrast ratios for critical content** to ensure readability in bright sunlight. Test with screen brightness at various levels and under different lighting conditions.
+## The nuclear debugging option
 
-Voice control compatibility demands that visible labels match programmatic names exactly. This seemingly simple requirement profoundly impacts component design - avoid icon-only buttons and ensure all interactive elements have clear, unique labels that users can speak naturally.
+If standard debugging doesn't reveal the issue, implement this comprehensive diagnostic wrapper:
+
+```javascript
+const DebugWrapper = ({ children, label }) => {
+  const [debugInfo, setDebugInfo] = useState({});
+  
+  useEffect(() => {
+    const element = document.querySelector(`.${label}`);
+    if (element) {
+      const rect = element.getBoundingClientRect();
+      const computed = window.getComputedStyle(element);
+      
+      setDebugInfo({
+        exists: true,
+        visible: computed.display !== 'none' && computed.visibility !== 'hidden',
+        dimensions: `${rect.width}x${rect.height}`,
+        position: `${rect.top}, ${rect.left}`,
+        opacity: computed.opacity,
+        zIndex: computed.zIndex
+      });
+    }
+  }, [label]);
+  
+  return (
+    <div className={label} style={{ border: '2px solid red' }}>
+      {children}
+      <pre style={{ fontSize: '10px', background: 'yellow' }}>
+        {JSON.stringify(debugInfo, null, 2)}
+      </pre>
+    </div>
+  );
+};
+```
+
+## Production-ready solution pattern
+
+After debugging, implement this robust pattern that handles all edge cases:
+
+```javascript
+const MobileOptimizedPricingSection = () => {
+  const [isClient, setIsClient] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  
+  useEffect(() => {
+    setIsClient(true);
+    // Check for animation support
+    const hasIntersectionObserver = 'IntersectionObserver' in window;
+    const isMobile = window.innerWidth <= 768;
+    setShouldAnimate(hasIntersectionObserver && !isMobile);
+  }, []);
+  
+  if (!isClient) {
+    return <div className="min-h-[400px]">Loading pricing...</div>;
+  }
+  
+  const content = (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-16 md:py-20 px-4 md:px-6">
+      {/* Your pricing content */}
+    </div>
+  );
+  
+  if (!shouldAnimate) {
+    return content;
+  }
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {content}
+    </motion.div>
+  );
+};
+```
+
+## Testing strategy to prevent recurrence
+
+1. **Test on real devices**, not just emulators - use BrowserStack or physical devices
+2. **Check multiple orientations** - portrait and landscape can trigger different breakpoints
+3. **Test with slow network throttling** to catch Suspense loading issues
+4. **Verify with mobile browser UI visible and hidden** (scrolling hides/shows browser chrome)
+5. **Test on iOS Safari specifically** - it has the most edge cases
 
 ## Conclusion
 
-Mobile responsiveness for developer documentation platforms demands more than responsive breakpoints - it requires fundamental rethinking of interaction patterns, performance strategies, and content presentation. The Devlog platform can achieve excellent mobile experiences by combining mobile-first design principles with progressive enhancement, learning from successful platforms while maintaining its unique value proposition.
-
-The path forward is clear: **start with mobile constraints, enhance thoughtfully for larger screens, and never compromise core functionality**. By following the phased implementation approach and maintaining focus on developer needs, the platform can serve its mobile users as effectively as desktop users. The investment in proper mobile support will pay dividends as mobile usage continues growing among developers worldwide.
+Your invisible pricing section is most likely caused by Framer Motion's viewport detection failing on mobile combined with potential Suspense rendering issues. Start with the remote debugging setup to identify whether the component exists in the DOM, then apply the appropriate fix based on whether it's a CSS visibility issue or a JavaScript rendering problem. The production-ready pattern above provides a bulletproof solution that gracefully handles all mobile edge cases while maintaining animation capabilities where supported.

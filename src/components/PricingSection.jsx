@@ -1,7 +1,7 @@
-import { useState, useRef, useLayoutEffect } from 'react';
+import { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import { Check, X, Zap, Users, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+// Removed useScrollAnimation - using whileInView instead
 import { fadeInUp, staggerContainer, staggerItem, buttonHover } from '../utils/animations';
 
 export default function PricingSection() {
@@ -9,7 +9,16 @@ export default function PricingSection() {
   const [dimensions, setDimensions] = useState({ monthly: 0, annual: 0 });
   const monthlyRef = useRef(null);
   const annualRef = useRef(null);
-  const { ref, isInView } = useScrollAnimation();
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const plans = [
     {
@@ -94,12 +103,13 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20" ref={ref}>
+    <section id="pricing" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20">
       <div className="max-w-6xl mx-auto">
         <motion.div 
           className="text-center mb-8 md:mb-12"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.6 }}
         >
           <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
@@ -164,9 +174,10 @@ export default function PricingSection() {
         {/* Pricing Cards */}
         <motion.div 
           className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12 max-w-4xl mx-auto"
-          variants={staggerContainer}
-          initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          variants={isMobile ? {} : staggerContainer}
+          initial={isMobile ? { opacity: 1 } : "hidden"}
+          whileInView={isMobile ? {} : "visible"}
+          viewport={{ once: true, amount: 0.1 }}
         >
           {plans.map((plan, index) => (
             <motion.div
@@ -176,7 +187,8 @@ export default function PricingSection() {
                   ? 'border-accent-green shadow-lg shadow-accent-green/10'
                   : 'border-dark-secondary/50'
               }`}
-              variants={staggerItem}
+              variants={isMobile ? {} : staggerItem}
+              style={isMobile ? { opacity: 1 } : {}}
             >
               {plan.popular && (
                 <motion.div 

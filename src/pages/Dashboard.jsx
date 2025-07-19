@@ -1013,11 +1013,9 @@ export default function Dashboard() {
     console.log('Dashboard: Showing ExpandedView instead of grid');
     return (
       <div 
-        className="h-screen overflow-hidden"
+        className="h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-[auto,1fr]"
         style={{
-          display: 'grid',
-          gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
-          gridTemplateRows: '1fr',
+          '--sidebar-width': isSidebarCollapsed ? '80px' : '280px',
           transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
           willChange: 'grid-template-columns',
           contain: 'layout style'
@@ -1034,13 +1032,14 @@ export default function Dashboard() {
         {/* Project Sidebar */}
         <div 
           className={`
+            fixed lg:relative inset-y-0 left-0 z-40 w-[280px] lg:w-auto
             bg-dark-primary lg:bg-transparent
             flex flex-col
             transition-all duration-200 ease-out
             h-full overflow-hidden
             ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            lg:col-start-1
           `}
-          style={{ gridColumn: '1' }}
         >
           {/* Sidebar Content wrapper for spacing */}
           <div className="flex-1 min-h-0 pt-20 pb-7 flex flex-col">
@@ -1096,7 +1095,7 @@ export default function Dashboard() {
         </div>
         
         {/* Expanded View Content */}
-        <main className="flex flex-col min-w-0 overflow-hidden" style={{ gridColumn: '2' }}>
+        <main className="flex flex-col min-w-0 overflow-hidden lg:col-start-2">
           <ExpandedView 
             entry={expandedEntry} 
             onClose={() => setExpandedEntry(null)}
@@ -1123,7 +1122,7 @@ export default function Dashboard() {
           {/* Top Navigation Bar - Compact and Efficient */}
           <div className="flex items-center justify-between px-4 md:px-6 py-2">
             {/* Logo and Brand - Fixed Position */}
-            <div className="flex items-center gap-2.5" style={{ marginLeft: '288px' }}>
+            <div className="flex items-center gap-2.5 ml-0 lg:ml-[288px]">
               {/* Mobile menu button */}
               <button
                 onClick={() => toggleMobileSidebar()}
@@ -1136,7 +1135,7 @@ export default function Dashboard() {
             </div>
 
             {/* Stats and Profile - Moved from main content */}
-            <div className="flex items-center gap-4 mr-8">
+            <div className="flex items-center gap-2 md:gap-4 mr-2 md:mr-8">
               {/* Document Stats - Inline and Minimal */}
               <div className="hidden sm:flex items-center gap-3 text-xs">
                 <span className="text-text-secondary/70">
@@ -1204,11 +1203,9 @@ export default function Dashboard() {
 
         {/* Grid Container - Below Header */}
         <div 
-          className="flex-1 overflow-hidden"
+          className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-[auto,1fr]"
           style={{
-            display: 'grid',
-            gridTemplateColumns: `${isSidebarCollapsed ? '80px' : '280px'} 1fr`,
-            gridTemplateRows: '1fr',
+            '--sidebar-width': isSidebarCollapsed ? '80px' : '280px',
             transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
             willChange: 'grid-template-columns',
             contain: 'layout style'
@@ -1225,13 +1222,14 @@ export default function Dashboard() {
       {/* Project Sidebar */}
       <div 
         className={`
+          fixed lg:relative inset-y-0 left-0 z-40 w-[280px] lg:w-auto
           bg-dark-primary lg:bg-transparent
           flex flex-col
           transition-all duration-300 ease-cubic
           h-full overflow-hidden
           ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          lg:col-start-1
         `}
-        style={{ gridColumn: '1' }}
       >
         {/* Sidebar Content wrapper for spacing */}
         <div className="flex-1 min-h-0 pb-7 flex flex-col">
@@ -1288,7 +1286,7 @@ export default function Dashboard() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out" style={{ gridColumn: '2' }}>
+      <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out lg:col-start-2">
         {/* Content Header - Search and Actions Only */}
         <div className="flex-shrink-0">
 

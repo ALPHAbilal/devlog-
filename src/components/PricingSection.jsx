@@ -94,18 +94,18 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-20 px-6 bg-dark-secondary/20" ref={ref}>
+    <section id="pricing" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20" ref={ref}>
       <div className="max-w-6xl mx-auto">
         <motion.div 
-          className="text-center mb-12"
+          className="text-center mb-8 md:mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <h3 className="text-3xl font-bold mb-4">
+          <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
             Simple Pricing, Powerful Features
           </h3>
-          <p className="text-text-secondary text-lg mb-8">
+          <p className="text-text-secondary text-base md:text-lg mb-6 md:mb-8">
             Start free and upgrade as you grow. No hidden fees.
           </p>
 
@@ -163,7 +163,7 @@ export default function PricingSection() {
 
         {/* Pricing Cards */}
         <motion.div 
-          className="grid md:grid-cols-2 gap-8 mb-12 max-w-4xl mx-auto"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-8 md:mb-12 max-w-4xl mx-auto"
           variants={staggerContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -191,19 +191,19 @@ export default function PricingSection() {
                 </motion.div>
               )}
 
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-3">
+              <div className="p-4 md:p-6">
+                <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
                   <div className="text-accent-green">{plan.icon}</div>
-                  <h4 className="text-xl font-semibold">{plan.name}</h4>
+                  <h4 className="text-lg md:text-xl font-semibold">{plan.name}</h4>
                 </div>
-                <p className="text-text-secondary text-sm mb-6">{plan.description}</p>
+                <p className="text-text-secondary text-xs md:text-sm mb-4 md:mb-6">{plan.description}</p>
 
-                <div className="mb-6">
+                <div className="mb-4 md:mb-6">
                   <div className="flex items-baseline gap-1">
                     <AnimatePresence mode="wait">
                       <motion.span 
                         key={billingPeriod}
-                        className="text-4xl font-bold"
+                        className="text-3xl md:text-4xl font-bold"
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 20 }}
@@ -233,7 +233,7 @@ export default function PricingSection() {
 
                 <motion.button
                   onClick={() => handlePlanClick(plan.name, plan.cta)}
-                  className={`w-full py-3 rounded font-medium relative overflow-hidden ${
+                  className={`w-full py-2.5 md:py-3 rounded font-medium relative overflow-hidden text-sm md:text-base ${
                     plan.ctaVariant === 'primary'
                       ? 'bg-accent-green text-dark-primary'
                       : 'bg-dark-primary text-text-primary border border-dark-primary hover:border-accent-green/50'
@@ -254,7 +254,7 @@ export default function PricingSection() {
                   <span className="relative z-10">{plan.cta}</span>
                 </motion.button>
 
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 md:mt-6 space-y-2 md:space-y-3">
                   {plan.features.map((feature, i) => (
                     <div key={i} className="flex items-start gap-3">
                       {feature.included ? (
@@ -263,7 +263,7 @@ export default function PricingSection() {
                         <X size={16} className="text-text-secondary/30 mt-0.5 flex-shrink-0" />
                       )}
                       <span
-                        className={`text-sm ${
+                        className={`text-xs md:text-sm ${
                           feature.included ? 'text-text-primary' : 'text-text-secondary/50'
                         }`}
                       >

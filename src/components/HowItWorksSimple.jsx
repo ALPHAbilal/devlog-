@@ -14,8 +14,8 @@ const steps = [
     icon: <Link2 className="text-accent-green" size={32} />,
     number: "02", 
     title: "Connect naturally",
-    description: "Link related solutions with [[brackets]]. Your knowledge becomes interconnected.",
-    visual: "Fixed auth bug → [[JWT Token Guide]]\nSee also: [[Session Management]]"
+    description: "Link related solutions with @mentions. Your knowledge becomes interconnected.",
+    visual: "Fixed auth bug → @JWT Token Guide\nSee also: @Session Management"
   },
   {
     icon: <Search className="text-accent-green" size={32} />,

@@ -39,7 +39,7 @@ function LandingContent() {
     {
       icon: <Link2 className="text-accent-green" size={32} />,
       title: 'Everything connected',
-      description: 'Link solutions together. Your knowledge compounds over time.'
+      description: 'Link solutions with @mentions. Your knowledge compounds.'
     },
     {
       icon: <Search className="text-accent-green" size={32} />,
@@ -52,14 +52,9 @@ function LandingContent() {
       description: 'See how your code evolved and why you made those changes.'
     },
     {
-      icon: <Zap className="text-accent-green" size={32} />,
-      title: 'Works offline',
-      description: 'Your knowledge is always accessible, even without internet.'
-    },
-    {
       icon: <Shield className="text-accent-green" size={32} />,
-      title: 'Your data, always',
-      description: 'Export anytime. No vendor lock-in. It\'s your knowledge.'
+      title: 'Zero data loss',
+      description: '6-layer protection system. Your knowledge is always safe.'
     }
   ];
 

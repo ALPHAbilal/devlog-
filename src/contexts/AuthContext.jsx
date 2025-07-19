@@ -16,13 +16,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [trialStatus, setTrialStatus] = useState(null)
 
   // Step 1: Only handle auth state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
+        
+        // Check trial status when user logs in
+        if (session?.user?.id) {
+          await checkTrialStatus(session.user.id)
+        } else {
+          setTrialStatus(null)
+        }
+        
         setLoading(false)
       }
     )
@@ -56,6 +65,11 @@ export const AuthProvider = ({ children }) => {
           } else {
             setSession(session)
             setUser(session?.user ?? null)
+            
+            // Check trial status for initial session
+            if (session?.user?.id) {
+              await checkTrialStatus(session.user.id)
+            }
           }
           setLoading(false)
         }
@@ -92,16 +106,44 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
+    if (!error) {
+      setTrialStatus(null)
+    }
     return { error }
+  }
+
+  const checkTrialStatus = async (userId) => {
+    if (!userId) {
+      setTrialStatus(null)
+      return null
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .rpc('check_trial_status', { p_user_id: userId })
+      
+      if (error) {
+        console.error('Error checking trial status:', error)
+        return null
+      }
+      
+      setTrialStatus(data)
+      return data
+    } catch (err) {
+      console.error('Failed to check trial status:', err)
+      return null
+    }
   }
 
   const value = {
     user,
     session,
     loading,
+    trialStatus,
     signIn,
     signUp,
-    signOut
+    signOut,
+    checkTrialStatus
   }
 
   return (

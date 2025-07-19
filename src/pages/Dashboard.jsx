@@ -21,6 +21,7 @@ import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useToast } from '../hooks/useToast';
 import { useSidebar } from '../contexts/SidebarContext';
+import TrialBanner from '../components/TrialBanner';
 import useDocumentOrganization from '../hooks/useDocumentOrganization';
 import { 
   DndContext, 
@@ -36,7 +37,7 @@ import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, trialStatus } = useAuth();
   const [entries, setEntries] = useState([]);
   const [expandedEntry, setExpandedEntry] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +48,16 @@ export default function Dashboard() {
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
+  
+  // Check for expired trial
+  useEffect(() => {
+    if (!user || !trialStatus) return;
+    
+    // If trial expired and no active subscription
+    if (trialStatus.is_trial && !trialStatus.is_active) {
+      navigate('/upgrade');
+    }
+  }, [user, trialStatus, navigate]);
   
   // Project state
   const [projects, setProjects] = useState([]);
@@ -1117,6 +1128,9 @@ export default function Dashboard() {
       modifiers={[restrictToWindowEdges]}
     >
       <div className="h-screen overflow-hidden dashboard-container flex flex-col">
+        {/* Trial Banner - Fixed at top */}
+        <TrialBanner trialStatus={trialStatus} />
+        
         {/* Fixed Header - Outside Grid */}
         <header className="flex-shrink-0 border-b border-dark-secondary/20 bg-dark-primary z-30">
           {/* Top Navigation Bar - Compact and Efficient */}

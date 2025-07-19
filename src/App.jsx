@@ -18,6 +18,7 @@ import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import SharedDocument from './pages/SharedDocument';
+import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './hooks/useToast';
 import { useEffect, Suspense, lazy } from 'react';
@@ -123,6 +124,8 @@ function AppContent() {
           </Suspense>
         } />
         
+        <Route path="/upgrade" element={<Upgrade />} />
+        
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );
@@ -142,6 +145,7 @@ function AppContent() {
           <SharedDocument />
         </Layout>
       } />
+      <Route path="/upgrade" element={<Upgrade />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
     </Routes>
   );

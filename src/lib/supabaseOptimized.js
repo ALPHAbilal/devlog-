@@ -104,7 +104,7 @@ class OptimizedSupabaseClient {
         },
         // Connection pooling configuration
         connectionTimeout: 10000, // 10 seconds
-        poolSize: 10 // Number of connections in the pool
+        poolSize: 50 // Increased for Reddit traffic surge
       });
 
       // Initialize auth state only once

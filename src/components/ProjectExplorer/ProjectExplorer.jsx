@@ -367,33 +367,59 @@ export default function ProjectExplorer({
       return;
     }
     
-    // Find the folder being renamed and its siblings
-    const findFolderAndSiblings = (folderList, targetId, parentFolders = []) => {
-      for (const folder of folderList) {
-        if (folder.id === targetId) {
-          return { folder, siblings: parentFolders };
+    // Find the item being renamed and get its siblings
+    const findItemAndSiblings = (items, targetId, parent = null) => {
+      for (const item of items) {
+        if (item.id === targetId) {
+          // For root level items
+          if (!parent) {
+            const siblings = [...folders.filter(f => !f.parent_id), ...documents.filter(d => !d.folder_id)];
+            return { item, siblings, isDocument: item.type === 'document' };
+          }
+          // For items inside folders
+          const siblings = [
+            ...(parent.children || []),
+            ...(parent.documents || [])
+          ];
+          return { item, siblings, isDocument: item.type === 'document' };
         }
-        if (folder.children) {
-          const result = findFolderAndSiblings(folder.children, targetId, folder.children);
+        
+        // Search in children folders
+        if (item.children) {
+          const result = findItemAndSiblings(item.children, targetId, item);
           if (result) return result;
+        }
+        
+        // Search in documents
+        if (item.documents) {
+          for (const doc of item.documents) {
+            if (doc.id === targetId) {
+              const siblings = [
+                ...(item.children || []),
+                ...(item.documents || [])
+              ];
+              return { item: doc, siblings, isDocument: true };
+            }
+          }
         }
       }
       return null;
     };
     
-    const result = findFolderAndSiblings(folders, renamingId, folders);
+    const result = findItemAndSiblings(folderStructure, renamingId);
     if (result) {
-      const { folder, siblings } = result;
+      const { item, siblings, isDocument } = result;
       
-      // Check for duplicate names among siblings
+      // Check for duplicate names among siblings of the same type
       const isDuplicate = siblings.some(sibling => 
         sibling.id !== renamingId && 
-        sibling.name === renamingValue.trim()
+        sibling.name === renamingValue.trim() &&
+        sibling.type === item.type
       );
       
       if (isDuplicate) {
-        alert(`A folder named "${renamingValue.trim()}" already exists at this level.`);
-        setRenamingValue(folder.name); // Restore original name
+        showToast('A folder with this name already exists at this level', 'error');
+        setRenamingValue(item.name); // Restore original name
         return;
       }
     }
@@ -404,14 +430,14 @@ export default function ProjectExplorer({
     } catch (error) {
       // Handle database constraint error
       if (error.message?.includes('unique_folder_name_per_parent')) {
-        alert('A folder with this name already exists at this level.');
+        showToast('A folder with this name already exists at this level', 'error');
       }
     } finally {
       setIsRenaming(false);
       setRenamingId(null);
       setSelectedItemId(null); // Clear selection after rename
     }
-  }, [renamingId, renamingValue, updateFolder, isRenaming, folders]);
+  }, [renamingId, renamingValue, updateFolder, isRenaming, folders, documents, folderStructure, showToast]);
 
   // Delete item
   const deleteItem = useCallback(async (item, parentId) => {

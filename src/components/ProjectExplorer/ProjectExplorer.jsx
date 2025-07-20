@@ -423,44 +423,29 @@ export default function ProjectExplorer({
     }
   }, [deleteFolderFromDB, onDocumentDelete]);
 
+  // Helper function to find an item in the folder structure
+  const findItemInStructure = useCallback((items, id) => {
+    for (const item of items) {
+      if (item.id === id) return item;
+      if (item.documents) {
+        const doc = item.documents.find(d => d.id === id);
+        if (doc) return doc;
+      }
+      if (item.children) {
+        const result = findItemInStructure(item.children, id);
+        if (result) return result;
+      }
+    }
+    return null;
+  }, []);
+
   // Handle drag start
   const handleDragStart = useCallback((event) => {
     const { active } = event;
     
-    // Find the item being dragged to get its name
-    const findItem = (node, id) => {
-      if (node.id === id) return node;
-      if (node.documents) {
-        const doc = node.documents.find(d => d.id === id);
-        if (doc) return doc;
-      }
-      if (node.children) {
-        for (const child of node.children) {
-          const result = findItem(child, id);
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-    
-    const findItem = (items, id) => {
-      for (const item of items) {
-        if (item.id === id) return item;
-        if (item.documents) {
-          const doc = item.documents.find(d => d.id === id);
-          if (doc) return doc;
-        }
-        if (item.children) {
-          const result = findItem(item.children, id);
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-    
-    const item = findItem(folderStructure, active.id);
+    const item = findItemInStructure(folderStructure, active.id);
     setDraggedItem(item);
-  }, [folderStructure]);
+  }, [folderStructure, findItemInStructure]);
 
   // Handle drag end
   const handleDragEnd = useCallback(async (event) => {
@@ -472,22 +457,7 @@ export default function ProjectExplorer({
     }
     
     // Find the dragged item
-    const findItem = (items, id) => {
-      for (const item of items) {
-        if (item.id === id) return item;
-        if (item.documents) {
-          const doc = item.documents.find(d => d.id === id);
-          if (doc) return doc;
-        }
-        if (item.children) {
-          const result = findItem(item.children, id);
-          if (result) return result;
-        }
-      }
-      return null;
-    };
-    
-    const draggedItem = findItem(folderStructure, active.id);
+    const draggedItem = findItemInStructure(folderStructure, active.id);
     if (!draggedItem) {
       setDraggedItem(null);
       return;
@@ -505,7 +475,7 @@ export default function ProjectExplorer({
       }
     } else {
       // Find target item
-      const targetItem = findItem(folderStructure, over.id);
+      const targetItem = findItemInStructure(folderStructure, over.id);
       if (!targetItem) {
         setDraggedItem(null);
         return;

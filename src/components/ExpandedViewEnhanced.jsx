@@ -897,7 +897,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           })}
           
           {blocks.filter(block => block !== null).map((block, index) => (
-            <div key={block.id} className="relative">
+            <div key={block.id} className="relative pl-8">
               {block.isLoading ? (
                 <OptimizedBlockSkeleton 
                   type={block.type} 

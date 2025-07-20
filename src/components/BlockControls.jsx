@@ -16,16 +16,9 @@ export default function BlockControls({
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <div className={`
-      absolute left-0 top-0 flex items-start gap-1
-      -translate-x-12 md:-translate-x-10
-      opacity-100 md:opacity-0 md:group-hover:opacity-100
-      scale-95 md:group-hover:scale-100
-      focus-within:opacity-100 focus-within:scale-100
-      transition-all duration-200 ease-out
-      transform-gpu will-change-transform
-    `}
-    style={{ zIndex: isVisible ? 20 : 1 }}>
+    <div 
+      className="absolute -left-2 top-1 flex items-start gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 scale-100 md:scale-95 md:group-hover:scale-100 focus-within:opacity-100 focus-within:scale-100 transition-all duration-200 ease-out"
+      style={{ zIndex: 20 }}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
         <div

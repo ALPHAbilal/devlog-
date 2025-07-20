@@ -30,30 +30,37 @@ Structure causing the issue:
 ```
 
 ## Solution
-Two-part solution implemented:
+Three-part solution implemented:
 
-1. **Removed pointer-events manipulation**: Eliminated the pointer-events paradox by removing `pointer-events-none` and `pointer-events-auto` classes entirely. This allows hover detection to work properly on desktop and clicks to work on mobile.
+1. **Repositioned controls inside content bounds**: Changed from `-translate-x-12` to `-left-2` positioning to keep controls within the overflow container's visible area.
 
-2. **Extended hover area with padding**: Added `pl-12 -ml-12` to the Block container to create an invisible extended hover zone. This ensures users can trigger the hover state even when controls are positioned outside the visible area.
+2. **Simplified CSS classes**: Converted multi-line template literal to single line to ensure Tailwind properly detects all classes during build.
 
-3. **Transform-based positioning**: Used `-translate-x-12` instead of negative left values for better performance and to avoid layout issues.
+3. **Added content padding**: Added `pl-8` to block containers in ExpandedViewEnhanced to create space for the controls.
+
+4. **Fixed mobile visibility**: Ensured controls are `opacity-100` by default (mobile) and only hidden on desktop with `md:opacity-0`.
 
 These changes ensure:
-- Desktop: Hover detection works properly
-- Mobile: Controls are always visible and clickable
-- Performance: GPU-accelerated transforms for smooth animations
+- Controls are no longer clipped by overflow-x-hidden
+- Hover detection works properly on desktop
+- Controls are always visible and clickable on mobile
+- Clean single-line classes for reliable Tailwind compilation
 
 ## Files Changed
 - `src/components/BlockControls.jsx`:
-  - Removed `pointer-events-none` and `pointer-events-auto` classes
-  - Kept transform positioning: `left-0 -translate-x-12 md:-translate-x-10`
-  - Maintained GPU acceleration: `transform-gpu will-change-transform`
-  - Mobile-first visibility: `opacity-100 md:opacity-0 md:group-hover:opacity-100`
-  - Keyboard support: `focus-within:opacity-100`
+  - Changed positioning from `-translate-x-12` to `-left-2` (inside content bounds)
+  - Simplified className to single line for proper Tailwind detection
+  - Fixed mobile visibility: `opacity-100 md:opacity-0 md:group-hover:opacity-100`
+  - Removed transform positioning in favor of simple left positioning
+  - Set fixed z-index: 20
 
 - `src/components/Block.jsx`:
-  - Added extended hover area: `pl-12 -ml-12` to the group container
-  - This creates invisible padding for better hover detection
+  - Removed `pl-12 -ml-12` padding/margin trick
+  - Kept clean group class without modifications
+
+- `src/components/ExpandedViewEnhanced.jsx`:
+  - Added `pl-8` to block container divs
+  - Creates space for controls to be visible
 
 ## Prevention
 1. **Use transforms for positioning**: When elements need to appear outside overflow containers, use CSS transforms instead of position offsets

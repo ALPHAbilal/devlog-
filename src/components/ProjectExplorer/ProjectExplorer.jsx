@@ -312,24 +312,21 @@ export default function ProjectExplorer({
     
     // Get all folders at the same level
     const getSiblingFolders = (folders, targetParentId) => {
-      if (!targetParentId) {
-        return folders.filter(f => !f.parent_id); // Root level folders
-      }
-      
-      const findSiblings = (folderList) => {
+      // First, flatten the folder tree to get all folders
+      const flattenFolders = (folderList, accumulator = []) => {
         for (const folder of folderList) {
-          if (folder.id === targetParentId) {
-            return folder.children || [];
-          }
-          if (folder.children) {
-            const found = findSiblings(folder.children);
-            if (found) return found;
+          accumulator.push(folder);
+          if (folder.children && folder.children.length > 0) {
+            flattenFolders(folder.children, accumulator);
           }
         }
-        return [];
+        return accumulator;
       };
       
-      return findSiblings(folders);
+      const allFolders = flattenFolders(folders);
+      
+      // Now filter to get only siblings (folders with the same parent_id)
+      return allFolders.filter(f => f.parent_id === targetParentId);
     };
     
     const siblings = getSiblingFolders(folders, actualParentId);

@@ -17,9 +17,14 @@ export default function BlockControls({
 
   return (
     <div className={`
-      absolute -left-12 md:-left-10 top-0 flex items-start gap-1 
+      absolute left-0 top-0 flex items-start gap-1
+      -translate-x-12 md:-translate-x-10
+      opacity-100 md:opacity-0 md:group-hover:opacity-100
+      scale-95 md:group-hover:scale-100
+      pointer-events-none md:group-hover:pointer-events-auto
+      focus-within:opacity-100 focus-within:scale-100 focus-within:pointer-events-auto
       transition-all duration-200 ease-out
-      opacity-0 group-hover:opacity-100
+      transform-gpu will-change-transform
     `}
     style={{ zIndex: isVisible ? 20 : 1 }}>
       {/* Drag Handle */}

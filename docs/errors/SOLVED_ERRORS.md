@@ -20,6 +20,10 @@ This directory contains documentation of all errors we've encountered and solved
 **Date**: 2025-01-20  
 **Summary**: Floating controls button not visible due to useEffect dependency issues and edge cases
 
+### 5. [BlockControls Not Visible on Hover](./block-controls-not-visible.md)
+**Date**: 2025-01-20  
+**Summary**: Block controls (dots menu) clipped by overflow container due to positioning outside padding area
+
 ## How to Use This Documentation
 
 1. **When you encounter an error**: Search this index for similar symptoms

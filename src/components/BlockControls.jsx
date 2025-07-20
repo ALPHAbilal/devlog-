@@ -21,8 +21,7 @@ export default function BlockControls({
       -translate-x-12 md:-translate-x-10
       opacity-100 md:opacity-0 md:group-hover:opacity-100
       scale-95 md:group-hover:scale-100
-      pointer-events-none md:group-hover:pointer-events-auto
-      focus-within:opacity-100 focus-within:scale-100 focus-within:pointer-events-auto
+      focus-within:opacity-100 focus-within:scale-100
       transition-all duration-200 ease-out
       transform-gpu will-change-transform
     `}

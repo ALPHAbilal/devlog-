@@ -110,7 +110,7 @@ export default function Block({
       )}
       
       <div 
-        className={`group relative transition-all duration-200 ${
+        className={`group relative transition-all duration-200 pl-12 -ml-12 ${
           isDragging ? 'opacity-30 scale-[0.98]' : ''
         } ${
           isDropTarget && !isDraggedBlock ? 'transform scale-[0.98]' : ''

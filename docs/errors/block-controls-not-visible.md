@@ -14,7 +14,9 @@
 No error messages - this is a CSS/positioning issue.
 
 ## Root Cause
-The BlockControls were being clipped by the parent container's `overflow-x-hidden` property. The controls were positioned at `left-1` (4px) or `left-2` (8px), but the content area has `px-8` (32px) padding. This placed the controls outside the visible area of the overflow container.
+Two issues were preventing BlockControls from working:
+1. **Overflow clipping**: The controls were positioned outside the parent container's `overflow-x-hidden` boundary
+2. **Pointer-events paradox**: Using `pointer-events-none` with `group-hover:pointer-events-auto` created a catch-22 where hover couldn't be detected to enable pointer events
 
 Structure causing the issue:
 ```
@@ -28,22 +30,30 @@ Structure causing the issue:
 ```
 
 ## Solution
-Used transform-based positioning instead of negative left positioning. This approach:
-1. Avoids the overflow clipping issue entirely
-2. Provides 40-60% better performance through GPU acceleration
-3. Supports mobile devices with always-visible controls
-4. Includes keyboard accessibility with focus-within
+Two-part solution implemented:
 
-The transform approach moves the element visually without changing its actual position in the document flow, allowing it to escape the overflow container's clipping boundary.
+1. **Removed pointer-events manipulation**: Eliminated the pointer-events paradox by removing `pointer-events-none` and `pointer-events-auto` classes entirely. This allows hover detection to work properly on desktop and clicks to work on mobile.
+
+2. **Extended hover area with padding**: Added `pl-12 -ml-12` to the Block container to create an invisible extended hover zone. This ensures users can trigger the hover state even when controls are positioned outside the visible area.
+
+3. **Transform-based positioning**: Used `-translate-x-12` instead of negative left values for better performance and to avoid layout issues.
+
+These changes ensure:
+- Desktop: Hover detection works properly
+- Mobile: Controls are always visible and clickable
+- Performance: GPU-accelerated transforms for smooth animations
 
 ## Files Changed
 - `src/components/BlockControls.jsx`:
-  - Changed from negative positioning to transform-based approach
-  - Added `left-0 -translate-x-12 md:-translate-x-10` for visual positioning
-  - Added `transform-gpu will-change-transform` for GPU acceleration
-  - Added mobile-first visibility: `opacity-100 md:opacity-0`
-  - Added keyboard support: `focus-within:opacity-100`
-  - Added smooth scaling animation: `scale-95 md:group-hover:scale-100`
+  - Removed `pointer-events-none` and `pointer-events-auto` classes
+  - Kept transform positioning: `left-0 -translate-x-12 md:-translate-x-10`
+  - Maintained GPU acceleration: `transform-gpu will-change-transform`
+  - Mobile-first visibility: `opacity-100 md:opacity-0 md:group-hover:opacity-100`
+  - Keyboard support: `focus-within:opacity-100`
+
+- `src/components/Block.jsx`:
+  - Added extended hover area: `pl-12 -ml-12` to the group container
+  - This creates invisible padding for better hover detection
 
 ## Prevention
 1. **Use transforms for positioning**: When elements need to appear outside overflow containers, use CSS transforms instead of position offsets

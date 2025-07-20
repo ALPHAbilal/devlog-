@@ -48,12 +48,12 @@ export default function HeadingBlock({ block, onUpdate }) {
   };
 
   const headingClasses = {
-    1: 'font-bold',
-    2: 'font-semibold',
-    3: 'font-medium',
+    1: 'text-3xl font-bold',
+    2: 'text-2xl font-semibold',
+    3: 'text-xl font-medium',
   };
   
-  // Use CSS custom properties for fluid typography
+  // Use CSS custom properties for fluid typography (display mode only)
   const headingStyles = {
     1: { fontSize: 'var(--step-4)', lineHeight: 'var(--line-height-tight)' },
     2: { fontSize: 'var(--step-3)', lineHeight: 'var(--line-height-tight)' },
@@ -62,7 +62,7 @@ export default function HeadingBlock({ block, onUpdate }) {
 
   if (isEditing) {
     return (
-      <div ref={containerRef} className="flex items-start gap-2">
+      <div ref={containerRef} className="flex items-center gap-2">
         <select
           value={level}
           onChange={(e) => {
@@ -73,7 +73,7 @@ export default function HeadingBlock({ block, onUpdate }) {
           }}
           className="bg-dark-secondary text-text-primary px-3 py-1.5 rounded text-sm
                      border border-dark-secondary/50 focus:outline-none
-                     focus:ring-1 focus:ring-accent-green/50 cursor-pointer flex-shrink-0"
+                     focus:ring-1 focus:ring-accent-green/50 cursor-pointer"
           style={{
             backgroundColor: 'rgb(10, 22, 40)',
             backgroundImage: 'none'
@@ -89,12 +89,8 @@ export default function HeadingBlock({ block, onUpdate }) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={`w-full bg-transparent text-text-primary focus:outline-none 
+          className={`flex-1 bg-transparent text-text-primary focus:outline-none 
                      focus:bg-dark-secondary/30 rounded px-2 py-1 ${headingClasses[level]}`}
-          style={{
-            ...headingStyles[level],
-            maxWidth: 'calc(100% - 100px)' // Account for select box and gap
-          }}
           placeholder="Enter heading..."
         />
       </div>
@@ -111,7 +107,7 @@ export default function HeadingBlock({ block, onUpdate }) {
         setIsEditing(true);
       }}
       className={`text-text-primary cursor-text hover:bg-dark-secondary/30 
-                  rounded px-2 py-1 transition-colors ${headingClasses[level]}`}
+                  rounded px-2 py-1 transition-colors ${headingClasses[level].split(' ').slice(-2).join(' ')}`}
       style={headingStyles[level]}
     >
       {block.content || <span className="text-text-secondary">Click to add heading...</span>}

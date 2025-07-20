@@ -120,7 +120,7 @@ export default function ProjectExplorer({
   const [isExpanded, setIsExpanded] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [contextMenu, setContextMenu] = useState(null);
-  const [expandedItems, setExpandedItems] = useState(new Set(['root']));
+  const [expandedItems, setExpandedItems] = useState(new Set());
   const [selectedItemId, setSelectedItemId] = useState(null);
   const [renamingId, setRenamingId] = useState(null);
   const [renamingValue, setRenamingValue] = useState('');
@@ -171,17 +171,11 @@ export default function ProjectExplorer({
         setExpandedItems(prev => {
           const newExpanded = new Set(prev);
           folderPath.forEach(folderId => newExpanded.add(folderId));
-          newExpanded.add('root'); // Always expand root
           return newExpanded;
         });
       }
     } else {
-      // Document is at root level, just expand root
-      setExpandedItems(prev => {
-        const newExpanded = new Set(prev);
-        newExpanded.add('root');
-        return newExpanded;
-      });
+      // Document is at root level, no folders to expand
     }
     
     // Scroll to the document after folders have expanded
@@ -232,21 +226,30 @@ export default function ProjectExplorer({
       };
     };
     
-    // Root folder structure
-    const rootStructure = {
-      id: 'root',
-      name: 'FOLDERS',
-      type: 'root',
-      children: folders.map(addDocumentsToFolder),
-      documents: documents.filter(doc => !doc.folder_id).map(doc => ({
-        id: doc.id,
-        name: doc.title || 'Untitled',
-        type: 'document',
-        data: doc
-      }))
-    };
+    // Get root level folders (those without parent_id)
+    // Filter out any folder named "FOLDERS" to fix the UI bug
+    const rootFolders = folders
+      .filter(folder => !folder.parent_id && folder.name !== 'FOLDERS')
+      .map(addDocumentsToFolder);
     
-    return rootStructure;
+    // Get root level documents (those without folder_id)
+    const rootDocuments = documents.filter(doc => !doc.folder_id).map(doc => ({
+      id: doc.id,
+      name: doc.title || 'Untitled',
+      type: 'document',
+      data: doc
+    }));
+    
+    // Combine and sort root items (folders first, then documents)
+    const rootItems = [...rootFolders, ...rootDocuments].sort((a, b) => {
+      // Folders come before documents
+      if (a.type === 'folder' && b.type !== 'folder') return -1;
+      if (a.type !== 'folder' && b.type === 'folder') return 1;
+      // Then sort by name
+      return (a.name || '').localeCompare(b.name || '');
+    });
+    
+    return rootItems;
   }, [folders, documents]);
   
   const containerRef = useRef(null);
@@ -283,7 +286,7 @@ export default function ProjectExplorer({
     
     const menuItems = [];
     
-    if (item.type === 'folder' || item.type === 'root') {
+    if (item.type === 'folder') {
       menuItems.push(
         { label: 'New Folder', icon: FolderPlus, onClick: () => createNewFolder(item.id) },
         { label: 'New File', icon: FilePlus, onClick: () => createNewDocument(item.id) },
@@ -291,12 +294,10 @@ export default function ProjectExplorer({
       );
     }
     
-    if (item.type !== 'root') {
-      menuItems.push(
-        { label: 'Rename', icon: Edit2, onClick: () => startRenaming(item) },
-        { label: 'Delete', icon: Trash2, onClick: () => deleteItem(item, parentId), danger: true }
-      );
-    }
+    menuItems.push(
+      { label: 'Rename', icon: Edit2, onClick: () => startRenaming(item) },
+      { label: 'Delete', icon: Trash2, onClick: () => deleteItem(item, parentId), danger: true }
+    );
     
     setContextMenu({
       x: e.clientX,
@@ -307,12 +308,12 @@ export default function ProjectExplorer({
 
   // Create new folder
   const createNewFolder = useCallback(async (parentId) => {
-    const actualParentId = parentId === 'root' ? null : parentId;
+    const actualParentId = parentId;
     
     // Get all folders at the same level
     const getSiblingFolders = (folders, targetParentId) => {
-      if (!targetParentId || targetParentId === 'root') {
-        return folders; // Root level folders
+      if (!targetParentId) {
+        return folders.filter(f => !f.parent_id); // Root level folders
       }
       
       const findSiblings = (folderList) => {
@@ -345,7 +346,9 @@ export default function ProjectExplorer({
     
     const newFolder = await createFolderInDB(folderName, actualParentId);
     if (newFolder) {
-      setExpandedItems(prev => new Set([...prev, parentId]));
+      if (parentId) {
+        setExpandedItems(prev => new Set([...prev, parentId]));
+      }
       setRenamingId(newFolder.id);
       setRenamingValue(folderName);
     }
@@ -440,6 +443,21 @@ export default function ProjectExplorer({
       return null;
     };
     
+    const findItem = (items, id) => {
+      for (const item of items) {
+        if (item.id === id) return item;
+        if (item.documents) {
+          const doc = item.documents.find(d => d.id === id);
+          if (doc) return doc;
+        }
+        if (item.children) {
+          const result = findItem(item.children, id);
+          if (result) return result;
+        }
+      }
+      return null;
+    };
+    
     const item = findItem(folderStructure, active.id);
     setDraggedItem(item);
   }, [folderStructure]);
@@ -453,16 +471,16 @@ export default function ProjectExplorer({
       return;
     }
     
-    // Find the dragged item and target
-    const findItem = (node, id) => {
-      if (node.id === id) return node;
-      if (node.documents) {
-        const doc = node.documents.find(d => d.id === id);
-        if (doc) return doc;
-      }
-      if (node.children) {
-        for (const child of node.children) {
-          const result = findItem(child, id);
+    // Find the dragged item
+    const findItem = (items, id) => {
+      for (const item of items) {
+        if (item.id === id) return item;
+        if (item.documents) {
+          const doc = item.documents.find(d => d.id === id);
+          if (doc) return doc;
+        }
+        if (item.children) {
+          const result = findItem(item.children, id);
           if (result) return result;
         }
       }
@@ -470,25 +488,40 @@ export default function ProjectExplorer({
     };
     
     const draggedItem = findItem(folderStructure, active.id);
-    const targetItem = findItem(folderStructure, over.id);
-    
-    if (!draggedItem || !targetItem) {
+    if (!draggedItem) {
       setDraggedItem(null);
       return;
     }
     
-    // Handle document to folder drop
-    if (draggedItem.type === 'document' && (targetItem.type === 'folder' || targetItem.type === 'root')) {
-      const targetFolderId = targetItem.type === 'root' ? null : targetItem.id;
-      await moveDocumentToFolder(draggedItem.id, targetFolderId);
-      if (onDocumentMove) {
-        onDocumentMove(draggedItem.id, targetFolderId);
+    // Handle drop on root
+    if (over.id === 'root') {
+      if (draggedItem.type === 'document') {
+        await moveDocumentToFolder(draggedItem.id, null);
+        if (onDocumentMove) {
+          onDocumentMove(draggedItem.id, null);
+        }
+      } else if (draggedItem.type === 'folder') {
+        await moveFolder(draggedItem.id, null);
       }
-    }
-    // Handle folder to folder drop
-    else if (draggedItem.type === 'folder' && (targetItem.type === 'folder' || targetItem.type === 'root')) {
-      const targetFolderId = targetItem.type === 'root' ? null : targetItem.id;
-      await moveFolder(draggedItem.id, targetFolderId);
+    } else {
+      // Find target item
+      const targetItem = findItem(folderStructure, over.id);
+      if (!targetItem) {
+        setDraggedItem(null);
+        return;
+      }
+      
+      // Handle document to folder drop
+      if (draggedItem.type === 'document' && targetItem.type === 'folder') {
+        await moveDocumentToFolder(draggedItem.id, targetItem.id);
+        if (onDocumentMove) {
+          onDocumentMove(draggedItem.id, targetItem.id);
+        }
+      }
+      // Handle folder to folder drop
+      else if (draggedItem.type === 'folder' && targetItem.type === 'folder') {
+        await moveFolder(draggedItem.id, targetItem.id);
+      }
     }
     
     setDraggedItem(null);
@@ -496,9 +529,8 @@ export default function ProjectExplorer({
   
   // Create new document in folder
   const createNewDocument = useCallback((folderId) => {
-    const actualFolderId = folderId === 'root' ? null : folderId;
     if (onDocumentSelect) {
-      onDocumentSelect({ action: 'create', folderId: actualFolderId });
+      onDocumentSelect({ action: 'create', folderId: folderId });
     }
   }, [onDocumentSelect]);
 
@@ -523,7 +555,6 @@ export default function ProjectExplorer({
     const isSelected = selectedItemId === item.id;
     const isRenaming = renamingId === item.id;
     const hasChildren = (item.children && item.children.length > 0) || (item.documents && item.documents.length > 0);
-    const isRoot = item.type === 'root';
     const isActiveDocument = item.type === 'document' && item.id === selectedDocumentId;
     
     const itemContent = (
@@ -537,7 +568,7 @@ export default function ProjectExplorer({
             : isSelected 
               ? 'bg-surface-1/50' 
               : 'hover:bg-surface-1/30'}
-          ${depth === 0 && !isRoot ? 'mt-0.5' : ''}
+          ${depth === 0 ? 'mt-0.5' : ''}
           ${isRenaming && isRenaming ? 'pointer-events-none' : 'cursor-pointer'}
           ${isActiveDocument ? 'ml-[-2px]' : ''}
         `}
@@ -547,7 +578,7 @@ export default function ProjectExplorer({
           contain: 'layout style paint'
         }}
         onClick={() => {
-          if (item.type === 'folder' || item.type === 'root') {
+          if (item.type === 'folder') {
             toggleExpanded(item.id);
           } else if (item.type === 'document') {
             onDocumentSelect?.(item.data);
@@ -558,7 +589,7 @@ export default function ProjectExplorer({
       >
         <div className="flex items-center gap-1 min-w-0">
           {/* Chevron for expandable items */}
-          {(hasChildren || item.type === 'folder' || item.type === 'root') && (
+          {(hasChildren || item.type === 'folder') && (
             <ChevronRight 
               size={12} 
               className={`
@@ -567,12 +598,12 @@ export default function ProjectExplorer({
               `}
             />
           )}
-          {!hasChildren && item.type !== 'folder' && item.type !== 'root' && (
+          {!hasChildren && item.type !== 'folder' && (
             <div className="w-3" />
           )}
           
           {/* Icon */}
-          {item.type === 'folder' || item.type === 'root' ? (
+          {item.type === 'folder' ? (
             isExpanded ? (
               <FolderOpen size={14} className="text-accent-green flex-shrink-0" />
             ) : (
@@ -606,7 +637,6 @@ export default function ProjectExplorer({
           ) : (
             <span className={`
               text-sm truncate flex-1
-              ${isRoot ? 'font-semibold text-text-secondary/80 uppercase tracking-wider text-xs' : ''}
               ${isActiveDocument ? 'text-accent-green font-medium' : isSelected ? 'text-text-primary' : 'text-text-secondary'}
               ${!isActiveDocument ? 'group-hover:text-text-primary' : ''}
             `}>
@@ -616,10 +646,9 @@ export default function ProjectExplorer({
         </div>
         
         {/* Action buttons */}
-        {!isRoot && (
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            {(item.type === 'folder' || item.type === 'root') && (
-              <>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {item.type === 'folder' && (
+            <>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
@@ -643,32 +672,27 @@ export default function ProjectExplorer({
               </>
             )}
           </div>
-        )}
       </div>
     );
 
     // Wrap the content based on type
     let wrappedContent;
-    if (item.type === 'root' || item.type === 'folder') {
+    if (item.type === 'folder') {
       // Folders are droppable
       wrappedContent = (
         <DroppableFolder id={item.id}>
-          {item.type === 'root' ? (
-            itemContent
-          ) : (
-            <DraggableItem 
-              id={item.id} 
-              type={item.type} 
-              data={item}
-              isRenaming={isRenaming}
-            >
-              {itemContent}
-            </DraggableItem>
-          )}
+          <DraggableItem 
+            id={item.id} 
+            type={item.type} 
+            data={item}
+            isRenaming={isRenaming}
+          >
+            {itemContent}
+          </DraggableItem>
         </DroppableFolder>
       );
     } else {
-      // Documents are just sortable
+      // Documents are just draggable
       wrappedContent = (
         <DraggableItem 
           id={item.id} 
@@ -745,14 +769,21 @@ export default function ProjectExplorer({
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => createNewFolder('root')}
+              onClick={() => createNewDocument(null)}
+              className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-200 hover:scale-105"
+              title="New document"
+            >
+              <FilePlus size={14} className="text-text-secondary" />
+            </button>
+            <button
+              onClick={() => createNewFolder(null)}
               className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-200 hover:scale-105"
               title="New folder"
             >
               <FolderPlus size={14} className="text-text-secondary" />
             </button>
             <button
-              onClick={() => setExpandedItems(new Set(['root']))}
+              onClick={() => setExpandedItems(new Set())}
               className="p-1 hover:bg-surface-1/50 rounded-lg transition-all duration-200 hover:scale-105"
               title="Collapse all"
             >
@@ -784,9 +815,29 @@ export default function ProjectExplorer({
             }
           }}
         >
-          <div className="min-h-full">
-            {renderTreeItem(folderStructure)}
-          </div>
+          {/* Root droppable area */}
+          <DroppableFolder id="root">
+            <div 
+              className="min-h-full"
+              onContextMenu={(e) => {
+                // Only trigger if clicking on empty space, not on items
+                if (e.target === e.currentTarget || e.target.closest('.min-h-full') === e.currentTarget) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setContextMenu({
+                    x: e.clientX,
+                    y: e.clientY,
+                    items: [
+                      { label: 'New Document', icon: FilePlus, onClick: () => createNewDocument(null) },
+                      { label: 'New Folder', icon: FolderPlus, onClick: () => createNewFolder(null) }
+                    ]
+                  });
+                }
+              }}
+            >
+              {folderStructure.map(item => renderTreeItem(item))}
+            </div>
+          </DroppableFolder>
         </div>
 
         {/* Drag overlay */}

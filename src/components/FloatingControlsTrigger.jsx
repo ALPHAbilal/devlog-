@@ -18,16 +18,12 @@ export default function FloatingControlsTrigger({
   useEffect(() => {
     const scrollElement = scrollContainerRef?.current;
     if (!scrollElement) {
-      console.log('FloatingControlsTrigger: No scroll container ref provided');
       return;
     }
 
     const handleScroll = () => {
       const currentScrollY = scrollElement.scrollTop;
       const shouldShow = currentScrollY > scrollThreshold;
-      
-      // Add debug logging
-      console.log('FloatingControlsTrigger - Container scroll position:', currentScrollY, 'Should show:', shouldShow);
       
       if (shouldShow && !isVisible) {
         setJustAppeared(true);
@@ -57,9 +53,6 @@ export default function FloatingControlsTrigger({
 
   // Don't render if not visible
   if (!isVisible) return null;
-
-  // Add temporary debug text
-  console.log('FloatingControlsTrigger is rendering, isVisible:', isVisible);
 
   return (
     <div ref={panelRef} className="fixed top-6 right-6 z-50">

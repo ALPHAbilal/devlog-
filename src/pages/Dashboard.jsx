@@ -201,7 +201,13 @@ export default function Dashboard() {
       await storageWrapper.saveDocument(newEntry);
       console.log('New document saved successfully');
     } catch (error) {
-      console.error('Error saving new document:', error);
+      console.error('Error saving new document:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        status: error.status
+      });
     }
     
     // Update local state
@@ -464,12 +470,24 @@ export default function Dashboard() {
         // Update storage info after save
         updateStorageInfo();
       } catch (error) {
-        console.error('Error saving document:', error);
+        console.error('Error saving document:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: error.status
+        });
         // If single document save fails, fall back to saving all
         try {
           await storageWrapper.saveEntries(updatedEntries);
         } catch (fallbackError) {
-          console.error('Fallback save also failed:', fallbackError);
+          console.error('Fallback save also failed:', {
+            message: fallbackError.message,
+            code: fallbackError.code,
+            details: fallbackError.details,
+            hint: fallbackError.hint,
+            status: fallbackError.status
+          });
         }
       }
     };

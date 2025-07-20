@@ -552,7 +552,14 @@ export class SupabaseAdapter {
     }
     
     if (docError) {
-      console.error('Error saving document:', docError);
+      console.error('Error saving document:', {
+        code: docError.code,
+        message: docError.message,
+        details: docError.details,
+        hint: docError.hint,
+        status: docError.status,
+        statusText: docError.statusText
+      });
       throw docError;
     }
     

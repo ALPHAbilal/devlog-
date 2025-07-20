@@ -452,10 +452,10 @@ export class SupabaseAdapter {
                 'Click to start writing...';
     }
     
-    // Check if this is a new document with a folder_id
-    const isNewDocumentForSave = !docData.createdAt || 
-                                 docData.metadata?.createdLocally === true ||
-                                 docData.metadata?.isNewDocument === true;
+    // Check if this is a new document
+    // Only consider it new if it has no createdAt (never saved to DB)
+    // The metadata flags alone don't mean it's new - they might just be stale
+    const isNewDocumentForSave = !docData.createdAt && !docData.created_at;
     const hasFolderId = docData.folder_id && docData.folder_id !== null;
     
     let savedDoc;
@@ -503,7 +503,7 @@ export class SupabaseAdapter {
           isNewDocument: false, // Clear the flag after first save
           createdLocally: false // Clear this flag too
         },
-        created_at: docData.createdAt || new Date().toISOString(),
+        created_at: docData.createdAt || docData.created_at || new Date().toISOString(),
         updated_at: new Date().toISOString(),
         folder_id: docData.folder_id || null,
         position: docData.position || 0

@@ -71,9 +71,9 @@ export default function HeadingBlock({ block, onUpdate }) {
             // Update immediately when level changes
             onUpdate(block.id, { content, level: newLevel });
           }}
-          className="bg-dark-secondary text-text-primary px-3 py-1.5 rounded text-sm
+          className="w-20 bg-dark-secondary text-text-primary px-3 py-1.5 rounded text-sm
                      border border-dark-secondary/50 focus:outline-none
-                     focus:ring-1 focus:ring-accent-green/50 cursor-pointer"
+                     focus:ring-1 focus:ring-accent-green/50 cursor-pointer flex-shrink-0"
           style={{
             backgroundColor: 'rgb(10, 22, 40)',
             backgroundImage: 'none'
@@ -89,7 +89,7 @@ export default function HeadingBlock({ block, onUpdate }) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={handleKeyDown}
-          className={`flex-1 bg-transparent text-text-primary focus:outline-none 
+          className={`flex-1 min-w-0 bg-transparent text-text-primary focus:outline-none 
                      focus:bg-dark-secondary/30 rounded px-2 py-1 ${headingClasses[level]}`}
           placeholder="Enter heading..."
         />

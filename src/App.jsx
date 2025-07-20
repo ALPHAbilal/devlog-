@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { SidebarProvider } from './contexts/SidebarContext';
@@ -22,6 +23,9 @@ import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ToastProvider } from './hooks/useToast';
 import { useEffect, Suspense, lazy } from 'react';
+
+// Create Sentry-enhanced routing component
+const SentryRoutes = Sentry.withSentryRouting(Routes);
 
 // Lazy load SEO pages
 const AIConversationSaver = lazy(() => import('./pages/features/AIConversationSaver'));
@@ -98,7 +102,7 @@ function AppContent() {
 
   if (!user) {
     return (
-      <Routes>
+      <SentryRoutes>
         <Route path="/" element={<Landing />} />
         <Route path="/auth" element={<AuthEnhanced />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
@@ -127,12 +131,12 @@ function AppContent() {
         <Route path="/upgrade" element={<Upgrade />} />
         
         <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      </SentryRoutes>
     );
   }
 
   return (
-    <Routes>
+    <SentryRoutes>
       <Route path="/" element={<Navigate to="/dashboard" />} />
       <Route path="/dashboard" element={
         <Layout>
@@ -147,7 +151,7 @@ function AppContent() {
       } />
       <Route path="/upgrade" element={<Upgrade />} />
       <Route path="*" element={<Navigate to="/dashboard" />} />
-    </Routes>
+    </SentryRoutes>
   );
 }
 

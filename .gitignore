@@ -27,3 +27,8 @@ dist-ssr
 
 .claude/logs/
 .claude/settings.local.json
+
+# Sentry
+.sentryclirc
+sentry.properties
+*.map

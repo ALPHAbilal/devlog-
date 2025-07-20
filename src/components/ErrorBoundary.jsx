@@ -1,5 +1,6 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Save, Home } from 'lucide-react';
+import * as Sentry from '@sentry/react';
 import storageWrapper from '../utils/storage/storageWrapper';
 
 /**
@@ -13,6 +14,7 @@ class ErrorBoundary extends React.Component {
       hasError: false,
       error: null,
       errorInfo: null,
+      errorId: null,
       isRecovering: false,
       lastSavedData: null,
       recoveryAttempts: 0
@@ -28,10 +30,36 @@ class ErrorBoundary extends React.Component {
     // Log error to console for debugging
     console.error('ErrorBoundary caught:', error, errorInfo);
     
+    // Capture error with Sentry and get error ID
+    const errorId = Sentry.captureException(error, {
+      contexts: {
+        react: {
+          componentStack: errorInfo.componentStack,
+          errorBoundary: this.props.name || "DevlogErrorBoundary"
+        },
+        devlog_app: {
+          feature: this.props.feature || 'unknown',
+          offline_mode: !navigator.onLine,
+          recovery_attempts: this.state.recoveryAttempts,
+          has_saved_data: !!this.getLastSavedData()
+        }
+      },
+      tags: {
+        component: this.props.name || 'global',
+        feature: this.props.feature || 'general',
+        error_boundary: true,
+        environment: import.meta.env.MODE
+      },
+      user: {
+        id: localStorage.getItem('userId') || 'anonymous'
+      }
+    });
+    
     // Save error details
     this.setState({
       error,
       errorInfo,
+      errorId,
       lastSavedData: this.getLastSavedData()
     });
     
@@ -184,6 +212,11 @@ class ErrorBoundary extends React.Component {
                 <p className="text-sm text-text-secondary mt-1">
                   Don't worry, we can help you recover your work
                 </p>
+                {this.state.errorId && (
+                  <p className="text-xs text-text-secondary mt-2">
+                    Error ID: {this.state.errorId}
+                  </p>
+                )}
               </div>
             </div>
 

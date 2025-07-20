@@ -11,9 +11,148 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fluid Typography System */
+@layer base {
+  :root {
+    /* Fluid font sizes using clamp() */
+    --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+    --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
+    --font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+    --font-size-lg: clamp(1.125rem, 1.05rem + 0.375vw, 1.25rem);
+    --font-size-xl: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+    --font-size-2xl: clamp(1.5rem, 1.35rem + 0.75vw, 1.875rem);
+    --font-size-3xl: clamp(1.875rem, 1.65rem + 1.125vw, 2.25rem);
+    --font-size-4xl: clamp(2.25rem, 1.95rem + 1.5vw, 3rem);
+    
+    /* Fluid spacing */
+    --spacing-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+    --spacing-sm: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+    --spacing-md: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+    --spacing-lg: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+    --spacing-xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+    --spacing-2xl: clamp(3rem, 2rem + 5vw, 5rem);
+    
+    /* Fluid line heights */
+    --line-height-tight: 1.25;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.75;
+    
+    /* Responsive container widths */
+    --container-xs: 100%;
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+    
+    /* Touch target sizes */
+    --touch-target: 44px;
+    --touch-target-small: 36px;
+  }
+  
+  /* Apply fluid typography to base elements */
+  body {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-normal);
+    /* Prevent iOS font size adjustment */
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  h1 {
+    font-size: var(--font-size-3xl);
+    line-height: var(--line-height-tight);
+  }
+  
+  h2 {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-tight);
+  }
+  
+  h3 {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-normal);
+  }
+  
+  h4 {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-normal);
+  }
+  
+  /* Ensure minimum font size for readability */
+  p, li, td, th {
+    font-size: max(var(--font-size-base), 16px);
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive-xs { font-size: var(--font-size-xs); }
+  .text-responsive-sm { font-size: var(--font-size-sm); }
+  .text-responsive-base { font-size: var(--font-size-base); }
+  .text-responsive-lg { font-size: var(--font-size-lg); }
+  .text-responsive-xl { font-size: var(--font-size-xl); }
+  .text-responsive-2xl { font-size: var(--font-size-2xl); }
+  .text-responsive-3xl { font-size: var(--font-size-3xl); }
+  .text-responsive-4xl { font-size: var(--font-size-4xl); }
+  
+  /* Responsive spacing utilities */
+  .space-responsive-xs { padding: var(--spacing-xs); }
+  .space-responsive-sm { padding: var(--spacing-sm); }
+  .space-responsive-md { padding: var(--spacing-md); }
+  .space-responsive-lg { padding: var(--spacing-lg); }
+  .space-responsive-xl { padding: var(--spacing-xl); }
+  .space-responsive-2xl { padding: var(--spacing-2xl); }
+}
+
+/* Responsive utilities */
+@layer utilities {
+  /* Touch-friendly tap targets */
+  .touch-target {
+    min-height: var(--touch-target);
+    min-width: var(--touch-target);
+  }
+  
+  .touch-target-small {
+    min-height: var(--touch-target-small);
+    min-width: var(--touch-target-small);
+  }
+  
+  /* Safe area padding for mobile devices */
+  .safe-padding {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Prevent text selection on interactive elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Smooth momentum scrolling on iOS */
+  .momentum-scroll {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Ensure full height for the app */
 html, body, #root {
   height: 100%;
+  /* Use dynamic viewport height for mobile */
+  height: 100dvh;
 }
 
 /* Subtle animations for floating controls */

@@ -373,8 +373,8 @@ export default function ProjectExplorer({
         if (item.id === targetId) {
           // For root level items
           if (!parent) {
-            const siblings = [...folders.filter(f => !f.parent_id), ...documents.filter(d => !d.folder_id)];
-            return { item, siblings, isDocument: item.type === 'document' };
+            // Use the folderStructure items as siblings (already filtered and processed)
+            return { item, siblings: items, isDocument: item.type === 'document' };
           }
           // For items inside folders
           const siblings = [
@@ -437,7 +437,7 @@ export default function ProjectExplorer({
       setRenamingId(null);
       setSelectedItemId(null); // Clear selection after rename
     }
-  }, [renamingId, renamingValue, updateFolder, isRenaming, folders, documents, folderStructure, showToast]);
+  }, [renamingId, renamingValue, updateFolder, isRenaming, folderStructure, showToast]);
 
   // Delete item
   const deleteItem = useCallback(async (item, parentId) => {

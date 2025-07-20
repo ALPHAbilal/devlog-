@@ -6,7 +6,7 @@ export default function FloatingControlsTrigger({
   onViewModeChange, 
   onShare, 
   onDelete,
-  scrollThreshold = 100, // Show after scrolling past this point (lowered from 200)
+  scrollThreshold = 200, // Show after scrolling past this point
   scrollContainerRef // Reference to the scrollable container
 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -25,12 +25,12 @@ export default function FloatingControlsTrigger({
       const currentScrollY = scrollElement.scrollTop;
       const shouldShow = currentScrollY > scrollThreshold;
       
+      setIsVisible(shouldShow);
+      
       if (shouldShow && !isVisible) {
         setJustAppeared(true);
         setTimeout(() => setJustAppeared(false), 1000);
       }
-      
-      setIsVisible(shouldShow);
     };
 
     scrollElement.addEventListener('scroll', handleScroll, { passive: true });
@@ -50,6 +50,7 @@ export default function FloatingControlsTrigger({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
+
 
   // Don't render if not visible
   if (!isVisible) return null;

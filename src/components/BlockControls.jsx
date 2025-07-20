@@ -17,7 +17,7 @@ export default function BlockControls({
 
   return (
     <div className={`
-      absolute left-1 md:left-2 top-0 flex items-start gap-1 
+      absolute -left-12 md:-left-10 top-0 flex items-start gap-1 
       transition-all duration-200 ease-out
       opacity-0 group-hover:opacity-100
     `}

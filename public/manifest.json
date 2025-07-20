@@ -4,7 +4,7 @@
   "description": "A powerful developer knowledge management system to organize your coding journey",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#00A86B",
+  "theme_color": "#10b981",
   "background_color": "#0A0A0A",
   "orientation": "any",
   "icons": [

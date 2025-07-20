@@ -1,4 +1,13 @@
-/* Minimal Auth Styles - Fortune 500 Approach */
+/* Modern Responsive Auth Styles - 2025 Standards */
+
+/* Container Query Setup */
+.auth-form-container {
+  container-type: inline-size;
+  container-name: auth-form;
+  /* Performance optimizations */
+  contain: layout style paint;
+  will-change: auto;
+}
 
 /* Root Auth Container Styles */
 .auth-enhanced-wrapper {
@@ -7,11 +16,11 @@
 
 /* Safe Area Padding for Modern Devices */
 @supports (padding: env(safe-area-inset-top)) {
-  .auth-enhanced-wrapper {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
+  .auth-form-container {
+    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
   }
 }
 
@@ -100,50 +109,43 @@
 }
 
 
-/* Mobile Optimizations */
-@media (max-width: 640px) {
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
-    font-size: 0.875rem;
-    padding: 0.75rem 1rem;
-    min-height: 44px;
-    width: 100%;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
-    font-size: 16px; /* Prevents zoom on iOS */
-    padding: 0.75rem 1rem;
-    min-height: 44px;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
-    gap: 0.75rem;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
-    margin: 1rem 0 !important;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-label {
-    font-size: 0.813rem;
-  }
+/* Container Query Based Responsive Styles */
+
+/* Base styles - mobile first approach */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+  font-size: clamp(0.875rem, 2vw, 1.125rem);
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.5rem);
+  min-height: 44px; /* WCAG 2.2 touch target */
+  width: 100%;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Tablet Optimizations */
-@media (min-width: 641px) and (max-width: 1024px) {
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+  font-size: max(16px, clamp(0.875rem, 2vw, 1.125rem)); /* Prevents iOS zoom */
+  padding: clamp(0.75rem, 2vw, 1rem) clamp(1rem, 3vw, 1.25rem);
+  min-height: 44px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+  gap: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-label {
+  font-size: clamp(0.813rem, 1.5vw, 1rem);
+  margin-bottom: clamp(0.375rem, 1vw, 0.625rem);
+}
+
+/* Container queries for component-level responsiveness */
+@container auth-form (min-width: 400px) {
   .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
-    font-size: 1rem;
     padding: 0.875rem 1.25rem;
     min-height: 48px;
   }
   
   .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
-    font-size: 1rem;
     padding: 0.875rem 1.125rem;
     min-height: 48px;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
-    gap: 1rem;
   }
   
   .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
@@ -151,16 +153,13 @@
   }
 }
 
-/* Desktop Optimizations */
-@media (min-width: 1025px) {
+@container auth-form (min-width: 600px) {
   .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
-    font-size: 1.125rem;
     padding: 1rem 1.5rem;
     min-height: 52px;
   }
   
   .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
-    font-size: 1.125rem;
     padding: 1rem 1.25rem;
     min-height: 52px;
   }
@@ -168,31 +167,50 @@
   .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
     gap: 1.25rem;
   }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-label {
-    font-size: 1rem;
-    margin-bottom: 0.625rem;
-  }
 }
 
-/* Landscape Mode Adjustments */
-@media (max-height: 600px) and (orientation: landscape) {
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
-    gap: 0.5rem;
+/* Landscape Mode Optimizations */
+@media (orientation: landscape) {
+  /* Mobile landscape (height < 500px) */
+  @media (max-height: 500px) {
+    .auth-form-container {
+      padding: clamp(0.5rem, 1.5vh, 1rem);
+      max-height: 100vh;
+      overflow-y: auto;
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+      gap: 0.5rem;
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+      padding: 0.5rem 1rem;
+      min-height: 36px;
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+      padding: 0.5rem 0.875rem;
+      min-height: 36px;
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
+      margin: 0.5rem 0 !important;
+    }
   }
   
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
-    padding: 0.625rem 1rem;
-    min-height: 40px;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
-    padding: 0.625rem 0.875rem;
-    min-height: 40px;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
-    margin: 0.75rem 0 !important;
+  /* Tablet landscape (height 500px - 800px) */
+  @media (min-height: 501px) and (max-height: 800px) {
+    .auth-form-container {
+      padding: clamp(0.75rem, 2vh, 1.5rem);
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+      min-height: 40px;
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+      min-height: 40px;
+    }
   }
 }
 
@@ -212,35 +230,73 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
-/* Form Container Responsive Adjustments */
-@media (max-width: 375px) {
-  /* Extra small devices like iPhone SE */
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
-    gap: 0.5rem;
+/* Viewport-based optimizations for specific device ranges */
+
+/* Ultra-small devices (iPhone SE, older phones) */
+@media (max-width: 360px) {
+  .auth-form-container {
+    padding: clamp(0.75rem, 2vw, 1rem);
   }
   
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
-    font-size: 0.813rem;
-    padding: 0.625rem 0.875rem;
-  }
-  
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
-    padding: 0.625rem 0.875rem;
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
+    margin: 0.75rem 0 !important;
   }
 }
 
-/* Ultra-wide Screens */
+/* Small phones (375px - 414px) */
+@media (min-width: 361px) and (max-width: 414px) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+    gap: 0.875rem;
+  }
+}
+
+/* Large phones and small tablets portrait (415px - 767px) */
+@media (min-width: 415px) and (max-width: 767px) {
+  .auth-form-container {
+    max-width: 28rem;
+    margin: 0 auto;
+  }
+}
+
+/* Tablets (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .auth-form-container {
+    max-width: 32rem;
+  }
+}
+
+/* Small laptops (1024px - 1439px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .auth-form-container {
+    max-width: 36rem;
+  }
+}
+
+/* Standard desktops (1440px - 1919px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
+  .auth-form-container {
+    max-width: 40rem;
+  }
+}
+
+/* Ultra-wide screens (1920px+) */
 @media (min-width: 1920px) {
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
-    font-size: 1.25rem;
-    padding: 1.125rem 1.75rem;
-    min-height: 56px;
+  .auth-form-container {
+    max-width: 42rem;
   }
   
-  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
-    font-size: 1.25rem;
-    padding: 1.125rem 1.5rem;
-    min-height: 56px;
+  @container auth-form (min-width: 800px) {
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+      font-size: 1.25rem;
+      padding: 1.125rem 1.75rem;
+      min-height: 56px;
+    }
+    
+    .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+      font-size: 1.25rem;
+      padding: 1.125rem 1.5rem;
+      min-height: 56px;
+    }
   }
 }
 
@@ -264,4 +320,40 @@
   }
 }
 
+/* Custom Scrollbar for Landscape Mode */
+.auth-form-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.3) transparent;
+}
+
+.auth-form-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.auth-form-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.auth-form-container::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 3px;
+}
+
+.auth-form-container::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.5);
+}
+
+/* Focus Visible for Better Accessibility */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button:focus-visible,
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Prevent layout shift during loading */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button,
+.auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+  min-width: 0;
+  flex-shrink: 0;
+}
 

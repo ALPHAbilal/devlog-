@@ -9,19 +9,19 @@ const AuthEnhanced = () => {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="min-h-screen bg-dark-primary flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
-        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
-          <div className="text-center mb-6 sm:mb-8 md:mb-10">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-100 mb-2">
+    <div className="min-h-[100dvh] bg-dark-primary flex items-center justify-center p-4">
+        <div className="w-full max-w-[min(90vw,28rem)]">
+          <div className="text-center mb-6">
+            <h1 className="text-[clamp(1.75rem,5vw,3rem)] font-semibold text-gray-100 mb-2">
               Devlog
             </h1>
-            <p className="text-sm sm:text-base md:text-lg text-gray-400">
+            <p className="text-[clamp(0.875rem,2.5vw,1.125rem)] text-gray-400">
               Sign in to continue
             </p>
           </div>
 
           <div
-            className="bg-dark-secondary rounded-lg p-4 sm:p-6 md:p-8 border border-gray-800/50 shadow-lg"
+            className="auth-form-container bg-dark-secondary rounded-lg p-[clamp(1rem,3vw,2rem)] border border-gray-800/50 shadow-lg"
           >
 
             {/* Custom Auth UI override */}

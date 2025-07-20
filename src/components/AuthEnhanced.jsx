@@ -9,19 +9,19 @@ const AuthEnhanced = () => {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
-    <div className="h-screen bg-dark-primary overflow-hidden flex items-center justify-center p-3 sm:p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-4 sm:mb-6">
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-100 mb-1">
+    <div className="min-h-screen bg-dark-primary flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12">
+        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold text-gray-100 mb-2">
               Devlog
             </h1>
-            <p className="text-sm sm:text-base text-gray-400">
+            <p className="text-sm sm:text-base md:text-lg text-gray-400">
               Sign in to continue
             </p>
           </div>
 
           <div
-            className="bg-dark-secondary rounded-lg p-4 sm:p-6 border border-gray-800/50"
+            className="bg-dark-secondary rounded-lg p-4 sm:p-6 md:p-8 border border-gray-800/50 shadow-lg"
           >
 
             {/* Custom Auth UI override */}
@@ -37,6 +37,7 @@ const AuthEnhanced = () => {
                       transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                       transform: 'translateY(0)',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06)',
+                      minHeight: '44px', // Ensure touch-friendly size
                     },
                     input: {
                       borderRadius: '0.75rem',
@@ -46,6 +47,7 @@ const AuthEnhanced = () => {
                       backdropFilter: 'blur(8px)',
                       border: '1px solid rgba(75, 85, 99, 0.3)',
                       transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                      minHeight: '44px', // Ensure touch-friendly size
                     },
                     label: {
                       fontSize: '0.875rem',

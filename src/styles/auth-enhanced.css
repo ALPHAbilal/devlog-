@@ -1,5 +1,20 @@
 /* Minimal Auth Styles - Fortune 500 Approach */
 
+/* Root Auth Container Styles */
+.auth-enhanced-wrapper {
+  width: 100%;
+}
+
+/* Safe Area Padding for Modern Devices */
+@supports (padding: env(safe-area-inset-top)) {
+  .auth-enhanced-wrapper {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
 /* Social Auth Button Styles */
 .auth-enhanced-wrapper .supabase-auth-ui_ui-button[title*="Google"] {
   background: #ffffff !important;
@@ -89,12 +104,15 @@
 @media (max-width: 640px) {
   .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
     font-size: 0.875rem;
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
+    width: 100%;
   }
   
   .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
     font-size: 16px; /* Prevents zoom on iOS */
-    padding: 0.625rem 0.875rem;
+    padding: 0.75rem 1rem;
+    min-height: 44px;
   }
   
   .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
@@ -103,6 +121,146 @@
   
   .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
     margin: 1rem 0 !important;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-label {
+    font-size: 0.813rem;
+  }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    font-size: 1rem;
+    padding: 0.875rem 1.25rem;
+    min-height: 48px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    font-size: 1rem;
+    padding: 0.875rem 1.125rem;
+    min-height: 48px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+    gap: 1rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
+    margin: 1.5rem 0 !important;
+  }
+}
+
+/* Desktop Optimizations */
+@media (min-width: 1025px) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    font-size: 1.125rem;
+    padding: 1rem 1.5rem;
+    min-height: 52px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    font-size: 1.125rem;
+    padding: 1rem 1.25rem;
+    min-height: 52px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+    gap: 1.25rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-label {
+    font-size: 1rem;
+    margin-bottom: 0.625rem;
+  }
+}
+
+/* Landscape Mode Adjustments */
+@media (max-height: 600px) and (orientation: landscape) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+    gap: 0.5rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    padding: 0.625rem 1rem;
+    min-height: 40px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    padding: 0.625rem 0.875rem;
+    min-height: 40px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-divider {
+    margin: 0.75rem 0 !important;
+  }
+}
+
+/* Smooth Animations */
+.auth-enhanced-wrapper * {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Improved Button Hover States */
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.auth-enhanced-wrapper .supabase-auth-ui_ui-button:active:not([disabled]) {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* Form Container Responsive Adjustments */
+@media (max-width: 375px) {
+  /* Extra small devices like iPhone SE */
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-container {
+    gap: 0.5rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    font-size: 0.813rem;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    padding: 0.625rem 0.875rem;
+  }
+}
+
+/* Ultra-wide Screens */
+@media (min-width: 1920px) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    font-size: 1.25rem;
+    padding: 1.125rem 1.75rem;
+    min-height: 56px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    font-size: 1.25rem;
+    padding: 1.125rem 1.5rem;
+    min-height: 56px;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .auth-enhanced-wrapper * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    border-width: 2px;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    border-width: 2px;
   }
 }
 

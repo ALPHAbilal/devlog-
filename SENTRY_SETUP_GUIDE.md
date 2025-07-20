@@ -6,7 +6,7 @@ Sentry has been integrated into Devlog to provide production-grade error monitor
 ## What's Been Implemented
 
 ### 1. Core Integration
-- **Sentry SDK** added to package.json (`@sentry/react` and `@sentry/vite-plugin`)
+- **Sentry SDK** added to package.json (`@sentry/react@^9.40.0` and `@sentry/vite-plugin@^3.5.0`)
 - **Early initialization** in `src/instrument.js` for capturing errors as soon as possible
 - **React 19 error hooks** integrated in `main.jsx` (onUncaughtError, onCaughtError, onRecoverableError)
 - **Source map uploads** configured in `vite.config.js` for readable stack traces

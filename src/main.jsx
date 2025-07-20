@@ -11,17 +11,9 @@ import './utils/globalAutoSave'
 const container = document.getElementById('root');
 const root = createRoot(container, {
   // React 19 Error Hooks Integration with Sentry
-  onUncaughtError: Sentry.reactErrorHandler((error, errorInfo) => {
-    console.error('Uncaught error in Devlog:', error, errorInfo.componentStack);
-  }),
-  
-  onCaughtError: Sentry.reactErrorHandler((error, errorInfo) => {
-    console.warn('Caught error in Devlog:', error, errorInfo.componentStack);
-  }),
-  
-  onRecoverableError: Sentry.reactErrorHandler((error, errorInfo) => {
-    console.warn('Recoverable error in Devlog:', error, errorInfo.componentStack);
-  }),
+  onUncaughtError: Sentry.reactErrorHandler(),
+  onCaughtError: Sentry.reactErrorHandler(),
+  onRecoverableError: Sentry.reactErrorHandler(),
 });
 
 root.render(

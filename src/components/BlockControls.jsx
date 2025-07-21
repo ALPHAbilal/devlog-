@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 export default function BlockControls({ 
   onDelete, 
@@ -15,6 +15,8 @@ export default function BlockControls({
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const hideTimeoutRef = useRef(null);
   
   // Update parent when menu state changes
   useEffect(() => {
@@ -22,6 +24,31 @@ export default function BlockControls({
       onMenuToggle(showMenu);
     }
   }, [showMenu, onMenuToggle]);
+  
+  // Handle mouse enter with timeout cleanup
+  const handleMouseEnter = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+      hideTimeoutRef.current = null;
+    }
+    setIsHovered(true);
+  }, []);
+  
+  // Handle mouse leave with delay to prevent flicker
+  const handleMouseLeave = useCallback(() => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 100);
+  }, []);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
   
   // Debug mode detection
   const isDebugMode = typeof window !== 'undefined' && 
@@ -73,33 +100,41 @@ export default function BlockControls({
     }
   }, [isDebugMode, blockId, isMobile, showMenu]);
 
-  // Detect if we're on mobile
+  // Detect if we're on mobile or touch device
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth < 768;
+      setIsMobile(isTouchDevice || isSmallScreen);
     };
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Don't render if not visible (unless on mobile or in debug mode)
-  if (!isVisible && !isMobile && !isDebugMode) {
-    return null;
-  }
+  // Determine if controls should be shown
+  const shouldShow = isVisible || isHovered || isMobile || isDebugMode || showMenu;
 
   return (
     <div 
-      className={`block-controls absolute -left-2 top-1 flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''}`}
+      className={`block-controls absolute flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''} ${shouldShow ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
       style={{ 
+        // Explicit positioning as fallback for Tailwind purging
+        position: 'absolute',
+        left: '-0.5rem',
+        top: '0.25rem',
         zIndex: 20,
         minHeight: '44px', // Ensure touch targets are large enough
-        opacity: isVisible || isMobile || isDebugMode ? 1 : 0,
-        pointerEvents: isVisible || isMobile || isDebugMode ? 'auto' : 'none',
-        transform: isVisible || isMobile || isDebugMode ? 'scale(1)' : 'scale(0.95)',
-        transition: 'opacity 200ms ease-out, transform 200ms ease-out',
+        // Inline styles for visibility control
+        visibility: shouldShow ? 'visible' : 'hidden',
+        opacity: shouldShow ? 1 : 0,
+        pointerEvents: shouldShow ? 'auto' : 'none',
+        transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
+        transition: 'opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out',
         ...(isDebugMode ? { border: '2px dashed blue', background: 'rgba(0,0,255,0.1)' } : {})
       }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onTouchStart={(e) => e.stopPropagation()}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">

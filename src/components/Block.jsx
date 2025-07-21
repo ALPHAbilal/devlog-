@@ -141,11 +141,25 @@ export default function Block({
           position: 'relative', 
           zIndex: isDragging ? 10 : 'auto'
         }}
-        // Mouse events for hover detection
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => {
+        // Mouse events for hover detection with better handling
+        onMouseEnter={() => {
+          if (isDebugMode) {
+            console.log('Block onMouseEnter:', block.id);
+          }
+          setIsHovered(true);
+        }}
+        onMouseLeave={(e) => {
+          // Check if mouse is moving to child element
+          const relatedTarget = e.relatedTarget;
+          if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+            return; // Don't hide if moving to child element
+          }
+          
           // Don't hide if menu is open
           if (!showMenu) {
+            if (isDebugMode) {
+              console.log('Block onMouseLeave:', block.id);
+            }
             setIsHovered(false);
           }
         }}

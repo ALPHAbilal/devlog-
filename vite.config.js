@@ -27,8 +27,8 @@ export default defineConfig({
   
   build: {
     sourcemap: true, // Enable source maps for Sentry
-    cssCodeSplit: false, // Prevent hover rules from being split into separate chunks
-    cssMinify: 'lightningcss', // Use lightningcss for safer CSS minification
+    cssMinify: 'esbuild', // Use esbuild for CSS minification (more reliable than lightningcss)
+    target: 'es2022', // Prevent ES2023 compatibility issues
   },
   
   server: {

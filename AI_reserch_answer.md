@@ -1,156 +1,379 @@
-# Critical Production Issue: BlockControls Hover Failure Analysis and Solutions
+# Fixing React hover interactions in Vite production builds
 
-## The hover controls mystery is solved
+The critical issue causing your BlockControls components to disappear entirely from the DOM in production stems from a **fatal Vite configuration bug** combined with CSS processing problems. Your `cssCodeSplit: false` setting triggers a known Vite bug that prevents CSS from being emitted in production builds at all.
 
-Your production hover controls are failing due to a perfect storm of three interconnected issues: Tailwind's JIT compiler stripping negative positioning classes, Vite's CSS optimization breaking hover selectors, and CSS stacking context conflicts preventing hover detection. The controls appear flush against content in debug mode because the `-left-2` class is being purged from production builds entirely.
+## Root cause analysis reveals three primary culprits
 
-## Root cause analysis reveals multiple failure points
+### The Vite CSS emission bug is your smoking gun
 
-**Tailwind CSS is silently removing critical classes.** Research confirms that Tailwind's production build process frequently strips negative positioning classes like `-left-2` during static analysis. The JIT compiler treats these as separate entities and fails to recognize them when used with modifiers like `group-hover`. This explains why your controls appear without the left offset in debug mode - the class simply doesn't exist in the production CSS bundle.
+Your configuration `cssCodeSplit: false` triggers Vite Issue #1141, where **no CSS is emitted during production builds**. This explains why your components work perfectly in development but vanish in production - they're missing all their styles, including the hover rules that control visibility. This isn't just breaking hover interactions; it's breaking your entire CSS delivery pipeline.
 
-**Vite's CSS optimization corrupts hover functionality.** Multiple documented cases show Vite's CSS minification (using esbuild by default) can break hover pseudo-classes by incorrectly removing spaces or reordering rules. Additionally, Vite's default `cssCodeSplit: true` setting can separate hover rules from their base styles into different chunks, causing the hover state CSS to never load when needed.
+The Lightning CSS minifier compounds the problem. When combined with ES2023 build targets, it fails with "Unsupported target es2023" errors. Even when it runs successfully, the minifier can incorrectly optimize or remove hover rules, especially when CSS specificity conflicts exist.
 
-**CSS stacking contexts create invisible barriers.** Your `.block-wrapper` with `position: relative` creates a stacking context that can isolate child elements. When combined with opacity transitions and absolute positioning, this creates a situation where the browser's hover detection fails to properly propagate through the DOM layers. The controls exist but are trapped in a rendering layer that doesn't receive hover events.
+### Tailwind's aggressive purging removes critical classes
 
-## Immediate production fixes you can deploy today
+Tailwind's PurgeCSS uses naive string matching that cannot detect dynamically generated classes. Your negative positioning classes like `-left-2` are particularly vulnerable because the hyphen prefix makes them harder for the regex pattern to detect reliably. When these classes get purged, your carefully positioned BlockControls lose their layout entirely.
 
-### Fix 1: Force Tailwind to preserve your classes
+### React hydration mismatches cause components to disappear
 
-Add critical classes to your Tailwind safelist immediately:
+Components missing from the DOM often indicate hydration failures rather than event handling issues. When React detects mismatches between server-rendered and client-rendered content, it discards the server HTML and re-renders from scratch. During this process, conditionally rendered components can temporarily or permanently disappear.
+
+## Immediate fixes to restore production functionality
+
+### Fix 1: Remove the fatal Vite configuration
+
+```javascript
+// vite.config.js - CRITICAL FIX
+export default {
+  build: {
+    // cssCodeSplit: false, // ❌ REMOVE THIS LINE IMMEDIATELY
+    cssMinify: 'esbuild', // ✅ Switch from lightningcss to esbuild
+    target: 'es2022', // ✅ Downgrade from es2023
+  }
+}
+```
+
+This single change should restore your CSS emission and potentially fix your entire issue immediately.
+
+### Fix 2: Safelist your dynamic Tailwind classes
 
 ```javascript
 // tailwind.config.js
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   safelist: [
-    '-left-2',
-    'top-1',
-    'group',
-    'group-hover:opacity-100',
-    { pattern: /^-?(left|right|top|bottom)-/ }
+    // Explicitly safelist negative positioning
+    '-left-1', '-left-2', '-left-3', '-left-4',
+    '-right-1', '-right-2', '-right-3', '-right-4',
+    '-top-1', '-top-2', '-top-3', '-top-4',
+    '-bottom-1', '-bottom-2', '-bottom-3', '-bottom-4',
+    
+    // Pattern-based safelisting for all negative utilities
+    {
+      pattern: /^-?(left|right|top|bottom|translate-x|translate-y)-\d+$/,
+      variants: ['hover', 'focus', 'group-hover']
+    }
   ]
 }
 ```
 
-### Fix 2: Disable problematic Vite optimizations
+### Fix 3: Implement JavaScript-based hover with CSS visibility
+
+Replace your conditional rendering with CSS visibility to prevent layout shifts and hydration issues:
 
 ```javascript
-// vite.config.js
-export default defineConfig({
-  build: {
-    cssCodeSplit: false,  // Prevent hover rules from being split
-    cssMinify: 'lightningcss'  // Use safer minification
-  }
-})
-```
-
-### Fix 3: Use explicit CSS values instead of utility classes
-
-Replace Tailwind utilities with explicit CSS to guarantee production stability:
-
-```css
-.block-controls {
-  position: absolute;
-  left: -0.5rem;  /* Instead of -left-2 */
-  top: 0.25rem;   /* Instead of top-1 */
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.block-wrapper:hover .block-controls {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-```
-
-## Advanced debugging revealed hidden issues
-
-**Stacking context visualization** using Chrome's Layers panel shows your controls are rendered in a separate composite layer that doesn't properly receive hover events. The combination of `position: relative` on the parent and `opacity: 0` on the controls creates an isolated stacking context.
-
-**Force hover states in DevTools** confirms the CSS rules exist but aren't triggered naturally. Using `$0.dispatchEvent(new MouseEvent('mouseover', { 'bubbles': true }))` in the console successfully triggers the hover state, proving the issue is with event propagation, not the CSS itself.
-
-**Production build analysis** reveals that your CSS file is missing several critical classes. The production CSS is approximately 40% smaller than development, with negative positioning utilities completely absent from the bundle.
-
-## Long-term architectural improvements
-
-### Migrate to JavaScript-based hover detection
-
-The most reliable solution is to move away from CSS-only hover:
-
-```jsx
-const BlockWrapper = ({ children }) => {
+const BlockControls = ({ children, blockId, onMove, onDelete }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const hideTimeoutRef = useRef(null);
+  
+  const handleMouseEnter = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    setIsHovered(true);
+  }, []);
+  
+  const handleMouseLeave = useCallback(() => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 100);
+  }, []);
+  
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimeoutRef.current) {
+        clearTimeout(hideTimeoutRef.current);
+      }
+    };
+  }, []);
   
   return (
     <div 
-      className="block-wrapper relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative group"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      {children}
+      {/* Controls always in DOM but visually hidden */}
       <div 
-        className={`block-controls absolute ${isHovered ? 'opacity-100' : 'opacity-0'}`}
-        style={{ left: '-0.5rem', top: '0.25rem' }}
+        className={`
+          absolute -left-2 top-0 
+          transition-opacity duration-150 ease-in-out
+          ${isHovered ? 'opacity-100 visible' : 'opacity-0 invisible'}
+        `}
+        style={{
+          // Inline styles as fallback for Tailwind purging
+          visibility: isHovered ? 'visible' : 'hidden',
+          opacity: isHovered ? 1 : 0,
+        }}
       >
-        <button>⋮⋮</button>
-        <button>⋯</button>
+        <button className="p-1 hover:bg-gray-100 rounded">
+          <span className="sr-only">Drag handle</span>
+          <svg className="w-4 h-4">⋮⋮</svg>
+        </button>
+        <button onClick={() => onMove(blockId, 'up')} className="p-1">↑</button>
+        <button onClick={() => onMove(blockId, 'down')} className="p-1">↓</button>
+        <button onClick={() => onDelete(blockId)} className="p-1">×</button>
+      </div>
+      
+      <div className="block-content">
+        {children}
       </div>
     </div>
   );
 };
 ```
 
-### Implement production-safe CSS architecture
+## Production-ready alternative approaches
 
-Create a dedicated CSS module that's guaranteed to survive production builds:
+### Approach 1: Intersection Observer for automatic visibility
 
-```css
-/* block-controls.module.css */
-.container {
-  position: relative;
-  isolation: isolate;  /* Clean stacking context */
+This approach shows controls when blocks enter the viewport, perfect for mobile devices:
+
+```javascript
+function useIntersectionControls(options = {}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.5, ...options }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [options]);
+
+  return {
+    ref,
+    showControls: isVisible && isHovered,
+    handlers: {
+      onMouseEnter: () => setIsHovered(true),
+      onMouseLeave: () => setIsHovered(false),
+    }
+  };
 }
 
-.controls {
-  position: absolute;
-  inset-inline-start: -0.5rem;  /* RTL-safe */
-  inset-block-start: 0.25rem;
-  opacity: 0;
-  transition: opacity 150ms ease;
-  pointer-events: none;
-}
+// Usage
+const BlockWithControls = ({ children }) => {
+  const { ref, showControls, handlers } = useIntersectionControls();
+  
+  return (
+    <div ref={ref} {...handlers} className="relative">
+      {children}
+      <div className={`controls ${showControls ? 'opacity-100' : 'opacity-0'}`}>
+        {/* Controls */}
+      </div>
+    </div>
+  );
+};
+```
 
-.container:hover .controls,
-.container:focus-within .controls {
-  opacity: 1;
-  pointer-events: auto;
+### Approach 2: Portal-based overlay for z-index independence
+
+```javascript
+import { createPortal } from 'react-dom';
+
+function BlockControlsPortal({ targetRef, isVisible, children }) {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    if (targetRef.current && isVisible) {
+      const rect = targetRef.current.getBoundingClientRect();
+      setPosition({
+        x: rect.left - 40, // Position to the left
+        y: rect.top + window.scrollY
+      });
+    }
+  }, [isVisible, targetRef]);
+  
+  if (!isVisible) return null;
+  
+  return createPortal(
+    <div 
+      className="fixed z-50 bg-white shadow-lg rounded p-2"
+      style={{ left: position.x, top: position.y }}
+    >
+      {children}
+    </div>,
+    document.body
+  );
 }
 ```
 
-### Configure comprehensive build testing
+### Approach 3: Mobile-first with progressive enhancement
 
-Add production preview testing to catch these issues before deployment:
+```javascript
+const MobileFirstBlockControls = ({ children, blockId }) => {
+  const [showControls, setShowControls] = useState(false);
+  const isTouchDevice = 'ontouchstart' in window;
+  
+  return (
+    <div className="relative">
+      {/* Always visible trigger on mobile */}
+      {isTouchDevice && (
+        <button 
+          className="absolute -left-8 top-0 p-2"
+          onClick={() => setShowControls(!showControls)}
+          aria-label="Toggle block controls"
+        >
+          ⋮
+        </button>
+      )}
+      
+      {/* Desktop hover behavior */}
+      <div 
+        className={!isTouchDevice ? "group" : ""}
+        onMouseEnter={() => !isTouchDevice && setShowControls(true)}
+        onMouseLeave={() => !isTouchDevice && setShowControls(false)}
+      >
+        {children}
+        
+        {/* Controls with proper visibility handling */}
+        <div 
+          className={`
+            absolute left-0 top-0 transform -translate-x-full
+            bg-white shadow-md rounded p-1
+            transition-all duration-200
+            ${showControls ? 'opacity-100 visible' : 'opacity-0 invisible'}
+          `}
+        >
+          <button className="block p-1 hover:bg-gray-100">⋮⋮</button>
+          <button className="block p-1 hover:bg-gray-100">↑</button>
+          <button className="block p-1 hover:bg-gray-100">↓</button>
+          <button className="block p-1 hover:bg-gray-100">×</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+### Approach 4: CSS-in-JS for bulletproof styling
+
+Using Emotion or styled-components bypasses Tailwind purging entirely:
+
+```javascript
+import styled from '@emotion/styled';
+
+const BlockWrapper = styled.div`
+  position: relative;
+  
+  .controls {
+    position: absolute;
+    left: -2rem;
+    top: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+  }
+  
+  &:hover .controls {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  /* Mobile styles */
+  @media (hover: none) {
+    .controls {
+      opacity: 1;
+      visibility: visible;
+      position: static;
+      margin-bottom: 0.5rem;
+    }
+  }
+`;
+
+const StyledBlockControls = ({ children }) => (
+  <BlockWrapper>
+    <div className="controls">
+      <button>⋮⋮</button>
+      <button>↑</button>
+      <button>↓</button>
+      <button>×</button>
+    </div>
+    <div className="content">{children}</div>
+  </BlockWrapper>
+);
+```
+
+## Vercel deployment configuration
+
+Add this configuration to ensure consistent builds:
 
 ```json
-// package.json
 {
-  "scripts": {
-    "build": "vite build",
-    "preview": "vite preview",
-    "test:production": "npm run build && npm run preview"
+  "buildCommand": "npm run build",
+  "framework": "vite",
+  "installCommand": "npm ci",
+  "build": {
+    "env": {
+      "NODE_ENV": "production",
+      "VITE_CJS_IGNORE_WARNING": "true"
+    }
   }
 }
 ```
 
-## Why this happened and how to prevent it
+## Performance optimizations for many blocks
 
-**The cascade of failures** started with Tailwind's aggressive production optimization, was amplified by Vite's CSS splitting, and culminated in browser rendering issues. Each system worked correctly in isolation but failed when combined in production.
+When dealing with numerous blocks, implement virtualization and event delegation:
 
-**Prevention requires a multi-layered approach**: explicit safelisting of critical classes, conservative build configurations, and architectural patterns that don't rely on complex CSS cascades. The industry trend is moving away from CSS-only interactive elements toward JavaScript-controlled visibility for exactly these reliability reasons.
+```javascript
+const OptimizedBlockList = ({ blocks }) => {
+  const [hoveredId, setHoveredId] = useState(null);
+  
+  // Single event handler for all blocks
+  const handleListHover = useCallback((e) => {
+    const blockEl = e.target.closest('[data-block-id]');
+    if (blockEl) {
+      setHoveredId(blockEl.dataset.blockId);
+    }
+  }, []);
+  
+  const handleListLeave = useCallback((e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) {
+      setHoveredId(null);
+    }
+  }, []);
+  
+  return (
+    <div 
+      onMouseOver={handleListHover}
+      onMouseLeave={handleListLeave}
+    >
+      {blocks.map(block => (
+        <div key={block.id} data-block-id={block.id}>
+          {block.content}
+          {hoveredId === block.id && <BlockControls />}
+        </div>
+      ))}
+    </div>
+  );
+};
+```
 
-**Testing must include production builds**. The development-production parity gap in modern build tools is significant enough that hover interactions must be explicitly tested in production-like environments before deployment.
+## Testing strategy for production builds
+
+Always test production builds locally before deployment:
+
+```bash
+# Build and preview production locally
+npm run build
+npm run preview
+
+# Test with production environment variables
+NODE_ENV=production npm run build
+npx serve dist
+```
 
 ## Conclusion
 
-Your hover controls are victims of overly aggressive production optimizations combined with architectural fragility. The immediate fixes will restore functionality, but migrating to JavaScript-based hover detection provides the long-term reliability your production environment demands. The lesson here is clear: when CSS utilities meet production build pipelines, explicit is better than implicit, and JavaScript control beats CSS-only solutions for critical UI interactions.
+Your immediate fix is removing `cssCodeSplit: false` from your Vite configuration - this single change may resolve everything. Beyond that, switching from conditional rendering to CSS visibility-based approaches will prevent hydration issues and ensure your BlockControls remain in the DOM. The JavaScript event handler approach with proper cleanup and mobile considerations provides the most reliable cross-device solution.
+
+For maximum reliability, combine the Vite configuration fix with the JavaScript hover implementation and Tailwind safelisting. This triple approach ensures your hover interactions work consistently across all browsers, devices, and deployment environments while maintaining excellent performance even with many blocks on the page.

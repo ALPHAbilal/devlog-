@@ -30,8 +30,16 @@ export default {
     'flex',
     'items-start',
     'gap-1',
-    // Pattern to preserve all negative positioning
-    { pattern: /^-?(left|right|top|bottom)-\d+$/ },
+    // Comprehensive pattern to preserve all negative utilities
+    { 
+      pattern: /^-?(left|right|top|bottom|translate-x|translate-y)-\d+$/,
+      variants: ['hover', 'focus', 'group-hover']
+    },
+    // Additional negative positioning classes
+    '-left-1', '-left-3', '-left-4',
+    '-right-1', '-right-2', '-right-3', '-right-4',
+    '-top-1', '-top-2', '-top-3', '-top-4',
+    '-bottom-1', '-bottom-2', '-bottom-3', '-bottom-4',
     // Preserve transform classes
     'scale-95',
     'scale-100',

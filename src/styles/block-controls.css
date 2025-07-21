@@ -1,21 +1,42 @@
-/* Block controls - JavaScript controlled visibility */
+/* Block controls - Enterprise pattern with always-visible trigger */
 .block-wrapper {
   position: relative;
   isolation: isolate; /* Create clean stacking context */
 }
 
-/* Position controls - no visibility rules as JavaScript handles that */
+/* Always-visible trigger button (enterprise pattern) */
+.block-controls-trigger {
+  /* Critical: Always in DOM, always visible */
+  opacity: 0.6 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition: opacity 200ms ease-out !important;
+}
+
+.block-wrapper:hover .block-controls-trigger,
+.block-controls-trigger:hover,
+.block-controls-trigger:focus {
+  opacity: 1 !important;
+}
+
+/* Controls panel - positioned relative to trigger */
 .block-wrapper .block-controls {
-  /* Use explicit positioning values instead of Tailwind utilities */
+  /* Use explicit positioning values */
   position: absolute !important;
-  left: -0.5rem !important; /* Explicit value for -left-2 */
-  top: 0.25rem !important;  /* Explicit value for top-1 */
+  left: -0.5rem !important;
+  top: 2.5rem !important; /* Below trigger button */
   
   /* Ensure proper sizing */
-  min-width: 80px; /* Ensure container has minimum width */
+  min-width: 80px;
   
   /* Ensure proper stacking */
   z-index: 20 !important;
+  
+  /* Enterprise pattern: always in DOM */
+  background: rgba(10, 22, 40, 0.95) !important;
+  border: 1px solid rgba(30, 58, 95, 0.5) !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Ensure proper flex layout */

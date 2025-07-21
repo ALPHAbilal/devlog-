@@ -179,7 +179,7 @@ export default function Block({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* Enhanced Block Controls - Back to original position */}
+        {/* Enterprise Pattern Block Controls - Always visible trigger */}
         <BlockControls
           isVisible={isHovered && !isDragging}
           onDelete={() => onDelete(block.id)}

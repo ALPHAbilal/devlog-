@@ -14,6 +14,7 @@ export default function BlockControls({
   onMenuToggle
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [showControls, setShowControls] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const hideTimeoutRef = useRef(null);
@@ -113,29 +114,76 @@ export default function BlockControls({
   }, []);
 
   // Determine if controls should be shown
-  const shouldShow = isVisible || isHovered || isMobile || isDebugMode || showMenu;
+  const shouldShow = isVisible || isHovered || isMobile || isDebugMode || showMenu || showControls;
+  
+  // Log for production debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hostname === 'www.devlog.design') {
+      console.log('[BlockControls Production Debug]', {
+        blockId,
+        isVisible,
+        isHovered,
+        showControls,
+        showMenu,
+        shouldShow,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [blockId, isVisible, isHovered, showControls, showMenu, shouldShow]);
 
   return (
-    <div 
-      className={`block-controls absolute flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''} ${shouldShow ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
-      style={{ 
-        // Explicit positioning as fallback for Tailwind purging
-        position: 'absolute',
-        left: '-0.5rem',
-        top: '0.25rem',
-        zIndex: 20,
-        minHeight: '44px', // Ensure touch targets are large enough
-        // Inline styles for visibility control
-        visibility: shouldShow ? 'visible' : 'hidden',
-        opacity: shouldShow ? 1 : 0,
-        pointerEvents: shouldShow ? 'auto' : 'none',
-        transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
-        transition: 'opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out',
-        ...(isDebugMode ? { border: '2px dashed blue', background: 'rgba(0,0,255,0.1)' } : {})
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={(e) => e.stopPropagation()}>
+    <>
+      {/* Always-visible trigger button (enterprise pattern) */}
+      <button
+        className={`block-controls-trigger absolute p-1.5 rounded-md
+                   text-text-secondary/40 hover:text-text-secondary
+                   hover:bg-dark-secondary/50 transition-all duration-150
+                   ${showControls || showMenu ? 'bg-dark-secondary/50 text-text-secondary' : ''}`}
+        style={{
+          position: 'absolute',
+          left: '-2rem',
+          top: '0.25rem',
+          zIndex: 20,
+          minWidth: '32px',
+          minHeight: '32px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          // Always visible, following enterprise patterns
+          opacity: 1,
+          visibility: 'visible',
+          pointerEvents: 'auto'
+        }}
+        onClick={() => setShowControls(!showControls)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        title="Block options"
+        aria-label="Block options"
+      >
+        <span style={{fontSize: '16px', lineHeight: 1}}>⋮</span>
+      </button>
+
+      {/* Controls panel - shown on trigger click or hover */}
+      <div 
+        className={`block-controls absolute flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''}`}
+        style={{ 
+          // Explicit positioning as fallback for Tailwind purging
+          position: 'absolute',
+          left: '-0.5rem',
+          top: '2.5rem',
+          zIndex: 20,
+          minHeight: '44px',
+          // Enterprise pattern: never remove from DOM, use visibility
+          visibility: shouldShow ? 'visible' : 'hidden',
+          opacity: shouldShow ? 1 : 0,
+          pointerEvents: shouldShow ? 'auto' : 'none',
+          transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
+          transition: 'opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out',
+          ...(isDebugMode ? { border: '2px dashed blue', background: 'rgba(0,0,255,0.1)' } : {})
+        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={(e) => e.stopPropagation()}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
         <div
@@ -271,5 +319,6 @@ export default function BlockControls({
         </div>
       </div>
     </div>
+    </>
   );
 }

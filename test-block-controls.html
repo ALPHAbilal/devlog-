@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockControls Hover Test</title>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #e5e5e5;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 40px;
+        }
+
+        /* Simulate the block-wrapper and block-controls CSS */
+        .block-wrapper {
+            position: relative;
+            background: #1a1a1a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+
+        .block-controls {
+            position: absolute;
+            left: -8px;
+            top: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            transition: opacity 200ms ease-out, transform 200ms ease-out;
+            background: #2a2a2a;
+            padding: 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Show on hover */
+        .block-wrapper:hover .block-controls {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* Mobile simulation */
+        .block-controls.show-always {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .control-button {
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            color: #e5e5e5;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 200ms;
+        }
+
+        .control-button:hover {
+            background: #4a4a4a;
+            border-color: #5a5a5a;
+        }
+
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2a2a2a;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        #hover-status {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <h1>BlockControls Hover Test</h1>
+    <p>Hover over the blocks below to see if controls appear:</p>
+
+    <div class="status">
+        Hover Status: <span id="hover-status">Not hovering</span>
+    </div>
+
+    <!-- Test blocks -->
+    <div class="block-wrapper" id="block1">
+        <div class="block-controls">
+            <button class="control-button">⋮⋮</button>
+            <button class="control-button">⋯</button>
+        </div>
+        <div>Block 1: Hover over me!</div>
+    </div>
+
+    <div class="block-wrapper" id="block2">
+        <div class="block-controls">
+            <button class="control-button">⋮⋮</button>
+            <button class="control-button">⋯</button>
+        </div>
+        <div>Block 2: Another test block</div>
+    </div>
+
+    <div class="block-wrapper" id="block3">
+        <div class="block-controls show-always">
+            <button class="control-button">⋮⋮</button>
+            <button class="control-button">⋯</button>
+        </div>
+        <div>Block 3: Mobile mode (always visible)</div>
+    </div>
+
+    <script>
+        // Monitor hover states
+        const blocks = document.querySelectorAll('.block-wrapper');
+        const status = document.getElementById('hover-status');
+
+        blocks.forEach((block, index) => {
+            block.addEventListener('mouseenter', () => {
+                status.textContent = `Hovering block ${index + 1}`;
+                status.style.color = '#10b981';
+                
+                // Check if controls are visible
+                const controls = block.querySelector('.block-controls');
+                const opacity = window.getComputedStyle(controls).opacity;
+                console.log(`Block ${index + 1} controls opacity: ${opacity}`);
+            });
+
+            block.addEventListener('mouseleave', () => {
+                status.textContent = 'Not hovering';
+                status.style.color = '#e5e5e5';
+            });
+        });
+
+        // Test programmatic opacity check
+        setTimeout(() => {
+            console.log('=== Initial State Check ===');
+            document.querySelectorAll('.block-controls').forEach((control, i) => {
+                const styles = window.getComputedStyle(control);
+                console.log(`Block ${i + 1} controls:`, {
+                    opacity: styles.opacity,
+                    transform: styles.transform,
+                    pointerEvents: styles.pointerEvents
+                });
+            });
+        }, 100);
+    </script>
+</body>
+</html>

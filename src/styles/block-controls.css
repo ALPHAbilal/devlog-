@@ -1,40 +1,27 @@
-/* Pure CSS hover fallback for BlockControls visibility */
+/* Block controls visibility with pure CSS hover */
 .block-wrapper {
   position: relative;
 }
 
+/* Hide controls by default */
 .block-controls {
   opacity: 0;
-  transition: opacity 200ms ease-out;
-  /* Prevent partial values with step-based transition */
-  transition-timing-function: steps(10);
+  transform: scale(0.95);
+  pointer-events: none;
+  transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
 
-/* Mobile or forced visibility */
-.block-controls.show-always,
-.block-wrapper:hover .block-controls {
+/* Show on hover or when forced (mobile) */
+.block-wrapper:hover .block-controls,
+.block-controls.show-always {
   opacity: 1;
-  /* Force exact value with !important */
-  opacity: 1 !important;
+  transform: scale(1);
+  pointer-events: auto;
 }
 
-/* Fallback for stuck values */
-@supports (opacity: 0.685) {
-  .block-controls {
-    /* If browser reports partial value support, force binary */
-    opacity: 0;
-  }
-  .block-wrapper:hover .block-controls {
-    opacity: 1;
-  }
-}
-
-/* Additional fixes for GPU precision issues */
-.block-controls {
-  /* Disable will-change to prevent GPU precision issues */
-  will-change: auto;
-  /* Use 3D transform to create GPU layer but with careful control */
-  transform: translateZ(0);
-  /* Ensure proper stacking context */
-  isolation: isolate;
+/* Ensure dropdown menu stays visible when open */
+.block-controls:has(.relative > div:last-child) {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
 }

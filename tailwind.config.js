@@ -13,6 +13,32 @@ export default {
     'min-h-[44px]',
     'min-w-[44px]',
     'p-3',
+    // Critical BlockControls classes
+    '-left-2',
+    'top-1',
+    'absolute',
+    'relative',
+    'group',
+    'block-wrapper',
+    'block-controls',
+    'opacity-0',
+    'opacity-100',
+    'pointer-events-none',
+    'pointer-events-auto',
+    'group-hover:opacity-100',
+    'group-hover:pointer-events-auto',
+    'flex',
+    'items-start',
+    'gap-1',
+    // Pattern to preserve all negative positioning
+    { pattern: /^-?(left|right|top|bottom)-\d+$/ },
+    // Preserve transform classes
+    'scale-95',
+    'scale-100',
+    'transform',
+    'transition-all',
+    'duration-200',
+    'ease-out'
   ],
   theme: {
     extend: {

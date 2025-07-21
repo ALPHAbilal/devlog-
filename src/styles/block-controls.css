@@ -1,15 +1,32 @@
 /* Block controls visibility with pure CSS hover */
 .block-wrapper {
   position: relative;
+  isolation: isolate; /* Create clean stacking context */
 }
 
 /* Hide controls by default - using !important to override any conflicting styles */
 .block-wrapper .block-controls {
+  /* Use explicit positioning values instead of Tailwind utilities */
+  position: absolute !important;
+  left: -0.5rem !important; /* Explicit value for -left-2 */
+  top: 0.25rem !important;  /* Explicit value for top-1 */
+  
+  /* Visibility styles */
   opacity: 0 !important;
   transform: scale(0.95) !important;
   pointer-events: none !important;
   transition: opacity 200ms ease-out, transform 200ms ease-out;
   min-width: 80px; /* Ensure container has minimum width */
+  
+  /* Ensure proper stacking */
+  z-index: 20 !important;
+}
+
+/* Ensure proper flex layout */
+.block-controls {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.25rem !important; /* gap-1 equivalent */
 }
 
 /* Show on hover or when forced (mobile) - using !important for maximum specificity */

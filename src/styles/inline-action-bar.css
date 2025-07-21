@@ -51,19 +51,25 @@
   }
 }
 
-/* Ensure controls don't go off-screen on small viewports */
-@media (max-width: 1024px) {
-  .inline-action-bar {
-    left: -4rem !important;
-  }
+/* Vertical layout adjustments */
+.inline-action-bar {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* Extra small screens */
+/* Hide scrollbar but keep functionality */
+.inline-action-bar::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+/* Ensure controls stay within viewport on small screens */
 @media (max-width: 640px) {
   .inline-action-bar {
-    left: -3rem !important;
-    transform: scale(0.9);
-    transform-origin: left center;
+    left: -2.5rem !important;
+    transform: scale(0.95);
+    transform-origin: left top;
   }
 }
 

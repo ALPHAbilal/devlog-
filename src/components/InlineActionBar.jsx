@@ -163,44 +163,45 @@ export default function InlineActionBar({
 
   return (
     <>
-      {/* Visual connector line */}
+      {/* Visual indicator dot */}
       {shouldShow && !isMobile && (
         <div
           style={{
             position: 'absolute',
-            left: '-9rem',
-            top: '1.5rem',
-            width: '8rem',
-            height: '1px',
-            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 80%, transparent)',
+            left: '-2.25rem',
+            top: '0.5rem',
+            width: '3px',
+            height: '3px',
+            borderRadius: '50%',
+            background: 'rgba(16, 185, 129, 0.4)',
+            boxShadow: '0 0 8px rgba(16, 185, 129, 0.3)',
             zIndex: 19,
             pointerEvents: 'none',
-            opacity: 0.5,
             transition: 'opacity 200ms ease-out'
           }}
         />
       )}
       
       <div 
-        className={`inline-action-bar absolute flex items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
+        className={`inline-action-bar absolute flex flex-col items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
         style={{
           position: 'absolute',
-          left: isMobile ? '-6rem' : '-10rem',
-          top: '0.5rem',
+          left: '-3rem',
+          top: '-0.5rem',
           zIndex: 20,
           padding: '0.25rem',
-        // Visual design
-        background: shouldShow ? 'rgba(10, 22, 40, 0.98)' : 'transparent',
-        backdropFilter: shouldShow ? 'blur(12px)' : 'none',
-        border: shouldShow ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
-        borderRadius: '0.75rem',
-        boxShadow: shouldShow ? '0 8px 24px -4px rgba(0, 0, 0, 0.3), 0 2px 8px -2px rgba(0, 0, 0, 0.2)' : 'none',
-        // Visibility control
-        opacity: shouldShow ? 1 : 0,
-        visibility: shouldShow ? 'visible' : 'hidden',
-        pointerEvents: shouldShow ? 'auto' : 'none',
-        transform: shouldShow ? 'translateX(0) scale(1)' : 'translateX(4px) scale(0.95)',
-        transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)'
+          // Visual design
+          background: shouldShow ? 'rgba(10, 22, 40, 0.98)' : 'transparent',
+          backdropFilter: shouldShow ? 'blur(12px)' : 'none',
+          border: shouldShow ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
+          borderRadius: '0.75rem',
+          boxShadow: shouldShow ? '0 8px 24px -4px rgba(0, 0, 0, 0.3), 0 2px 8px -2px rgba(0, 0, 0, 0.2)' : 'none',
+          // Visibility control
+          opacity: shouldShow ? 1 : 0,
+          visibility: shouldShow ? 'visible' : 'hidden',
+          pointerEvents: shouldShow ? 'auto' : 'none',
+          transform: shouldShow ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.95)',
+          transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)'
       }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -242,7 +243,7 @@ export default function InlineActionBar({
       </div>
 
       {/* Divider */}
-      <div className="w-px h-5 bg-white/10" />
+      <div className="h-px w-6 bg-white/10 mx-1" />
 
       {/* Move Up */}
       <ActionButton

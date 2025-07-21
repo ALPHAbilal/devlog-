@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, GripVertical, MoreVertical, Copy, ArrowUp, ArrowDown } from 'lucide-react';
+import { useHover } from '../hooks/useHover';
 
 export default function BlockControls({ 
   onDelete, 
@@ -14,11 +15,34 @@ export default function BlockControls({
   blockId
 }) {
   const [showMenu, setShowMenu] = useState(false);
+  const [ref, isHovered] = useHover();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect if we're on mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Determine visibility based on hover state or mobile
+  const shouldShow = isMobile || isHovered || showMenu;
 
   return (
     <div 
-      className="absolute -left-2 top-1 flex items-start gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 scale-100 md:scale-95 md:group-hover:scale-100 focus-within:opacity-100 focus-within:scale-100 transition-all duration-200 ease-out"
-      style={{ zIndex: 20 }}>
+      ref={ref}
+      className={`absolute -left-2 top-1 flex items-start gap-1 transition-all duration-200 ease-out ${
+        shouldShow ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+      }`}
+      style={{ 
+        zIndex: 20,
+        pointerEvents: shouldShow ? 'auto' : 'none',
+        minHeight: '44px' // Ensure touch targets are large enough
+      }}
+      onTouchStart={(e) => e.stopPropagation()}>
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
         <div

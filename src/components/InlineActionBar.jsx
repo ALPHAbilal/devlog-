@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-// Custom hook for click-outside dismissal that actually works
+// Custom hook for click-outside dismissal
 export const useClickOutside = (callback, deps = []) => {
   const ref = useRef();
   const callbackRef = useRef(callback);
@@ -16,7 +16,6 @@ export const useClickOutside = (callback, deps = []) => {
       }
     };
 
-    // Use capture phase to intercept before any stopPropagation
     document.addEventListener('mousedown', handleClick, true);
     document.addEventListener('touchstart', handleClick, true);
     
@@ -41,7 +40,7 @@ export default function InlineActionBar({
   blockId,
   isVisible = false
 }) {
-  const [showActions, setShowActions] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const hideTimeoutRef = useRef(null);
@@ -64,13 +63,13 @@ export default function InlineActionBar({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Extended hover handling with better zone coverage
+  // Hover handling
   const handleMouseEnter = useCallback(() => {
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
-    setShowActions(true);
+    setShowMenu(true);
   }, []);
   
   const handleMouseLeave = useCallback((e) => {
@@ -80,9 +79,9 @@ export default function InlineActionBar({
     }
     
     hideTimeoutRef.current = setTimeout(() => {
-      setShowActions(false);
+      setShowMenu(false);
       setShowDropdown(false);
-    }, 300); // Longer timeout for easier access
+    }, 300);
   }, []);
   
   // Cleanup timeout on unmount
@@ -94,44 +93,20 @@ export default function InlineActionBar({
     };
   }, []);
 
-  // Determine if actions should be shown
-  const shouldShow = isVisible || showActions || isMobile || showDropdown;
-
-  // Action button component
-  const ActionButton = ({ onClick, icon, label, danger = false }) => (
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-      className={`
-        inline-action-button
-        p-1.5 rounded-md transition-all duration-150
-        ${danger
-          ? 'hover:bg-red-500/20 hover:text-red-400 text-text-secondary/60'
-          : 'hover:bg-white/10 hover:text-text-primary text-text-secondary/60'
-        }
-        min-w-[32px] min-h-[32px] flex items-center justify-center
-        focus:outline-none focus:ring-2 focus:ring-accent-green/50
-      `}
-      title={label}
-      aria-label={label}
-    >
-      {icon}
-    </button>
-  );
+  // Determine if menu should be shown
+  const shouldShow = isVisible || showMenu || isMobile || showDropdown;
 
   return (
     <>
-      {/* Invisible hover bridge to maintain hover state */}
+      {/* Invisible hover bridge */}
       {shouldShow && (
         <div
           style={{
             position: 'absolute',
-            left: '-4.5rem',
+            left: '-4rem',
             top: '-0.5rem',
             width: '5rem',
-            height: '8rem',
+            height: '3rem',
             pointerEvents: 'auto',
             zIndex: 19,
           }}
@@ -140,151 +115,162 @@ export default function InlineActionBar({
         />
       )}
       
-      {/* Compact action bar */}
+      {/* Single three dots button */}
       <div 
         ref={containerRef}
-        className={`inline-action-bar absolute flex flex-col items-center gap-1 ${isMobile ? 'always-visible' : ''}`}
+        className={`inline-action-bar absolute ${isMobile ? 'always-visible' : ''}`}
         style={{
           position: 'absolute',
-          left: '-4.5rem',
-          top: '-0.25rem',
+          left: '-3rem',
+          top: '0rem',
           zIndex: 20,
-          padding: '0.5rem',
-          // Visual design
-          background: shouldShow ? 'rgba(10, 22, 40, 0.9)' : 'transparent',
-          backdropFilter: shouldShow ? 'blur(8px)' : 'none',
-          border: shouldShow ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid transparent',
-          borderRadius: '0.5rem',
-          boxShadow: shouldShow ? '0 4px 12px -2px rgba(0, 0, 0, 0.2)' : 'none',
           // Visibility control
           opacity: shouldShow ? 1 : 0,
           visibility: shouldShow ? 'visible' : 'hidden',
           pointerEvents: shouldShow ? 'auto' : 'none',
-          transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
+          transform: shouldShow ? 'scale(1)' : 'scale(0.9)',
           transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)'
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        role="toolbar"
-        aria-label="Block actions"
       >
-        {/* Menu button for secondary actions */}
-        <div className="relative">
-          <ActionButton
-            onClick={() => setShowDropdown(!showDropdown)}
-            label="More actions"
-            icon={
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="12" cy="19" r="1"></circle>
-              </svg>
-            }
-          />
-          
-          {/* Dropdown menu */}
-          {showDropdown && (
-            <div
-              ref={dropdownRef}
-              className="absolute left-full top-0 ml-2 z-50
-                         bg-dark-primary/95 backdrop-blur-sm rounded-lg 
-                         border border-dark-secondary/50 shadow-xl
-                         py-1 min-w-[160px]
-                         animate-in fade-in slide-in-from-left-1 duration-200"
-              onClick={(e) => e.stopPropagation()}
+        <button
+          onClick={() => setShowDropdown(!showDropdown)}
+          className="p-1.5 rounded-lg transition-all duration-150
+                     text-text-secondary/40 hover:text-text-secondary/70
+                     hover:bg-dark-secondary/30 hover:scale-110
+                     min-w-[32px] min-h-[32px] flex items-center justify-center
+                     focus:outline-none focus:ring-2 focus:ring-accent-green/50"
+          style={{
+            background: showDropdown ? 'rgba(30, 58, 95, 0.3)' : 'transparent',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+          }}
+          title="Block actions"
+          aria-label="Block actions"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="12" cy="5" r="1.5"></circle>
+            <circle cx="12" cy="12" r="1.5"></circle>
+            <circle cx="12" cy="19" r="1.5"></circle>
+          </svg>
+        </button>
+        
+        {/* Dropdown menu with all actions */}
+        {showDropdown && (
+          <div
+            ref={dropdownRef}
+            className="absolute left-full top-0 ml-2 z-50
+                       bg-dark-primary/95 backdrop-blur-sm rounded-lg 
+                       border border-dark-secondary/50 shadow-xl
+                       py-1 min-w-[180px]
+                       animate-in fade-in slide-in-from-left-1 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Duplicate */}
+            <button
+              onClick={() => {
+                onDuplicate?.();
+                setShowDropdown(false);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm
+                         hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary"
             >
-              {/* Drag handle */}
-              <div
-                className="flex items-center gap-2 px-3 py-2 cursor-grab hover:bg-dark-secondary/50
-                           text-text-secondary hover:text-text-primary text-sm"
-                draggable={true}
-                onDragStart={(e) => {
-                  e.stopPropagation();
-                  e.dataTransfer.effectAllowed = 'move';
-                  e.dataTransfer.setData('text/plain', String(blockId));
-                  setShowDropdown(false);
-                  if (onDragStart) onDragStart(e);
-                }}
-                onDragEnd={(e) => {
-                  e.stopPropagation();
-                  if (onDragEnd) onDragEnd(e);
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="5" cy="12" r="1"></circle>
-                  <circle cx="12" cy="12" r="1"></circle>
-                  <circle cx="19" cy="12" r="1"></circle>
-                  <circle cx="5" cy="5" r="1"></circle>
-                  <circle cx="12" cy="5" r="1"></circle>
-                  <circle cx="19" cy="5" r="1"></circle>
-                </svg>
-                <span>Drag to reorder</span>
-              </div>
-              
-              {/* Move up */}
-              <button
-                onClick={() => {
-                  onMoveUp?.();
-                  setShowDropdown(false);
-                }}
-                disabled={!canMoveUp}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm
-                           ${!canMoveUp 
-                             ? 'opacity-50 cursor-not-allowed text-text-secondary/50' 
-                             : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
-                           }`}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-                <span>Move up</span>
-              </button>
-              
-              {/* Move down */}
-              <button
-                onClick={() => {
-                  onMoveDown?.();
-                  setShowDropdown(false);
-                }}
-                disabled={!canMoveDown}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm
-                           ${!canMoveDown
-                             ? 'opacity-50 cursor-not-allowed text-text-secondary/50' 
-                             : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
-                           }`}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 5v14M19 12l-7 7-7-7" />
-                </svg>
-                <span>Move down</span>
-              </button>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>Duplicate</span>
+            </button>
+            
+            {/* Divider */}
+            <div className="h-px bg-dark-secondary/30 my-1" />
+            
+            {/* Move up */}
+            <button
+              onClick={() => {
+                onMoveUp?.();
+                setShowDropdown(false);
+              }}
+              disabled={!canMoveUp}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm
+                         ${!canMoveUp 
+                           ? 'opacity-50 cursor-not-allowed text-text-secondary/50' 
+                           : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
+                         }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+              <span>Move up</span>
+            </button>
+            
+            {/* Move down */}
+            <button
+              onClick={() => {
+                onMoveDown?.();
+                setShowDropdown(false);
+              }}
+              disabled={!canMoveDown}
+              className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm
+                         ${!canMoveDown
+                           ? 'opacity-50 cursor-not-allowed text-text-secondary/50' 
+                           : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
+                         }`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 5v14M19 12l-7 7-7-7" />
+              </svg>
+              <span>Move down</span>
+            </button>
+            
+            {/* Drag handle */}
+            <div
+              className="flex items-center gap-2 px-3 py-2 cursor-grab hover:bg-dark-secondary/50
+                         text-text-secondary hover:text-text-primary text-sm"
+              draggable={true}
+              onDragStart={(e) => {
+                e.stopPropagation();
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', String(blockId));
+                setShowDropdown(false);
+                if (onDragStart) onDragStart(e);
+              }}
+              onDragEnd={(e) => {
+                e.stopPropagation();
+                if (onDragEnd) onDragEnd(e);
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="5" cy="12" r="1"></circle>
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+                <circle cx="5" cy="5" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="19" cy="5" r="1"></circle>
+              </svg>
+              <span>Drag to reorder</span>
             </div>
-          )}
-        </div>
-
-        {/* Duplicate - primary action */}
-        <ActionButton
-          onClick={() => onDuplicate?.()}
-          label="Duplicate"
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-          }
-        />
-
-        {/* Delete - primary action */}
-        <ActionButton
-          onClick={() => onDelete()}
-          label="Delete"
-          danger
-          icon={
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-            </svg>
-          }
-        />
+            
+            {/* Divider */}
+            <div className="h-px bg-dark-secondary/30 my-1" />
+            
+            {/* Delete */}
+            <button
+              onClick={() => {
+                onDelete();
+                setShowDropdown(false);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm
+                         text-red-400 hover:text-red-300 hover:bg-red-500/10"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+              </svg>
+              <span>Delete</span>
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

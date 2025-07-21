@@ -11,13 +11,7 @@ export const useClickOutside = (callback, deps = []) => {
 
   useEffect(() => {
     const handleClick = (event) => {
-      // Handle portal elements
-      const portalRoot = document.getElementById('portal-root');
-      const clickedInPortal = portalRoot?.contains(event.target);
-      
-      if (ref.current && 
-          !ref.current.contains(event.target) && 
-          !clickedInPortal) {
+      if (ref.current && !ref.current.contains(event.target)) {
         callbackRef.current(event);
       }
     };
@@ -48,9 +42,15 @@ export default function InlineActionBar({
   isVisible = false
 }) {
   const [showActions, setShowActions] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [activeAction, setActiveAction] = useState(null);
   const hideTimeoutRef = useRef(null);
+  const containerRef = useRef(null);
+  
+  // Use click outside hook for dropdown
+  const dropdownRef = useClickOutside(() => {
+    setShowDropdown(false);
+  });
   
   // Detect mobile/touch devices
   useEffect(() => {
@@ -64,7 +64,7 @@ export default function InlineActionBar({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Handle mouse enter with timeout cleanup
+  // Extended hover handling with better zone coverage
   const handleMouseEnter = useCallback(() => {
     if (hideTimeoutRef.current) {
       clearTimeout(hideTimeoutRef.current);
@@ -73,12 +73,16 @@ export default function InlineActionBar({
     setShowActions(true);
   }, []);
   
-  // Handle mouse leave with delay to prevent flicker
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback((e) => {
+    // Don't hide if moving to dropdown
+    if (e.relatedTarget && containerRef.current?.contains(e.relatedTarget)) {
+      return;
+    }
+    
     hideTimeoutRef.current = setTimeout(() => {
       setShowActions(false);
-      setActiveAction(null);
-    }, 100);
+      setShowDropdown(false);
+    }, 300); // Longer timeout for easier access
   }, []);
   
   // Cleanup timeout on unmount
@@ -91,67 +95,23 @@ export default function InlineActionBar({
   }, []);
 
   // Determine if actions should be shown
-  const shouldShow = isVisible || showActions || isMobile;
+  const shouldShow = isVisible || showActions || isMobile || showDropdown;
 
-  // Handle keyboard navigation
-  const handleKeyDown = (e) => {
-    if (!shouldShow) return;
-    
-    switch (e.key) {
-      case 'Escape':
-        setShowActions(false);
-        setActiveAction(null);
-        break;
-      case 'Delete':
-      case 'Backspace':
-        if (e.metaKey || e.ctrlKey) {
-          e.preventDefault();
-          onDelete();
-        }
-        break;
-      case 'd':
-        if (e.metaKey || e.ctrlKey) {
-          e.preventDefault();
-          onDuplicate?.();
-        }
-        break;
-      case 'ArrowUp':
-        if (e.metaKey || e.ctrlKey) {
-          e.preventDefault();
-          if (canMoveUp) onMoveUp?.();
-        }
-        break;
-      case 'ArrowDown':
-        if (e.metaKey || e.ctrlKey) {
-          e.preventDefault();
-          if (canMoveDown) onMoveDown?.();
-        }
-        break;
-    }
-  };
-
-  // Action button component for consistent styling
-  const ActionButton = ({ onClick, disabled, icon, label, danger = false }) => (
+  // Action button component
+  const ActionButton = ({ onClick, icon, label, danger = false }) => (
     <button
       onClick={(e) => {
         e.stopPropagation();
-        setActiveAction(label);
         onClick();
-        // Visual feedback
-        setTimeout(() => setActiveAction(null), 150);
       }}
-      disabled={disabled}
       className={`
         inline-action-button
         p-1.5 rounded-md transition-all duration-150
-        ${disabled 
-          ? 'opacity-30 cursor-not-allowed' 
-          : danger
-            ? 'hover:bg-red-500/20 hover:text-red-400'
-            : 'hover:bg-white/10 hover:text-text-primary'
+        ${danger
+          ? 'hover:bg-red-500/20 hover:text-red-400 text-text-secondary/60'
+          : 'hover:bg-white/10 hover:text-text-primary text-text-secondary/60'
         }
-        ${activeAction === label ? 'scale-95 bg-white/20' : ''}
-        min-w-[32px] min-h-[32px] flex items-center justify-center
+        min-w-[28px] min-h-[28px] flex items-center justify-center
         focus:outline-none focus:ring-2 focus:ring-accent-green/50
       `}
       title={label}
@@ -163,137 +123,168 @@ export default function InlineActionBar({
 
   return (
     <>
-      {/* Visual indicator dot */}
-      {shouldShow && !isMobile && (
+      {/* Invisible hover bridge to maintain hover state */}
+      {shouldShow && (
         <div
           style={{
             position: 'absolute',
-            left: '-2.25rem',
-            top: '0.5rem',
-            width: '3px',
-            height: '3px',
-            borderRadius: '50%',
-            background: 'rgba(16, 185, 129, 0.4)',
-            boxShadow: '0 0 8px rgba(16, 185, 129, 0.3)',
+            left: '-3.5rem',
+            top: '-0.5rem',
+            width: '4rem',
+            height: '2.5rem',
+            pointerEvents: 'auto',
             zIndex: 19,
-            pointerEvents: 'none',
-            transition: 'opacity 200ms ease-out'
           }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
         />
       )}
       
+      {/* Compact action bar */}
       <div 
-        className={`inline-action-bar absolute flex flex-col items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
+        ref={containerRef}
+        className={`inline-action-bar absolute flex items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
         style={{
           position: 'absolute',
-          left: '-3rem',
+          left: '0rem',
           top: '-0.5rem',
           zIndex: 20,
           padding: '0.25rem',
           // Visual design
-          background: shouldShow ? 'rgba(10, 22, 40, 0.98)' : 'transparent',
-          backdropFilter: shouldShow ? 'blur(12px)' : 'none',
-          border: shouldShow ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
-          borderRadius: '0.75rem',
-          boxShadow: shouldShow ? '0 8px 24px -4px rgba(0, 0, 0, 0.3), 0 2px 8px -2px rgba(0, 0, 0, 0.2)' : 'none',
+          background: shouldShow ? 'rgba(10, 22, 40, 0.9)' : 'transparent',
+          backdropFilter: shouldShow ? 'blur(8px)' : 'none',
+          border: shouldShow ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid transparent',
+          borderRadius: '0.5rem',
+          boxShadow: shouldShow ? '0 4px 12px -2px rgba(0, 0, 0, 0.2)' : 'none',
           // Visibility control
           opacity: shouldShow ? 1 : 0,
           visibility: shouldShow ? 'visible' : 'hidden',
           pointerEvents: shouldShow ? 'auto' : 'none',
-          transform: shouldShow ? 'translateY(0) scale(1)' : 'translateY(-8px) scale(0.95)',
+          transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
           transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)'
-      }}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onKeyDown={handleKeyDown}
-      role="toolbar"
-      aria-label="Block actions"
-    >
-      {/* Drag Handle */}
-      <div
-        className="drag-handle p-1.5 rounded-md cursor-grab active:cursor-grabbing
-                   text-text-secondary/50 hover:text-text-secondary/80
-                   hover:bg-white/10 transition-all duration-150
-                   min-w-[32px] min-h-[32px] flex items-center justify-center"
-        draggable={true}
-        onDragStart={(e) => {
-          e.stopPropagation();
-          e.dataTransfer.effectAllowed = 'move';
-          e.dataTransfer.setData('text/plain', String(blockId));
-          if (onDragStart) onDragStart(e);
         }}
-        onDragEnd={(e) => {
-          e.stopPropagation();
-          if (onDragEnd) onDragEnd(e);
-        }}
-        title="Drag to reorder"
-        aria-label="Drag to reorder"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        role="toolbar"
+        aria-label="Block actions"
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <circle cx="5" cy="12" r="1.5"></circle>
-          <circle cx="12" cy="12" r="1.5"></circle>
-          <circle cx="19" cy="12" r="1.5"></circle>
-          <circle cx="5" cy="5" r="1.5"></circle>
-          <circle cx="12" cy="5" r="1.5"></circle>
-          <circle cx="19" cy="5" r="1.5"></circle>
-          <circle cx="5" cy="19" r="1.5"></circle>
-          <circle cx="12" cy="19" r="1.5"></circle>
-          <circle cx="19" cy="19" r="1.5"></circle>
-        </svg>
-      </div>
+        {/* Menu button for secondary actions */}
+        <div className="relative">
+          <ActionButton
+            onClick={() => setShowDropdown(!showDropdown)}
+            label="More actions"
+            icon={
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            }
+          />
+          
+          {/* Dropdown menu */}
+          {showDropdown && (
+            <div
+              ref={dropdownRef}
+              className="absolute left-0 top-full mt-1 z-50
+                         bg-dark-primary/95 backdrop-blur-sm rounded-lg 
+                         border border-dark-secondary/50 shadow-xl
+                         py-1 min-w-[160px]
+                         animate-in fade-in slide-in-from-top-1 duration-200"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Drag handle */}
+              <div
+                className="flex items-center gap-2 px-3 py-2 cursor-grab hover:bg-dark-secondary/50
+                           text-text-secondary hover:text-text-primary text-sm"
+                draggable={true}
+                onDragStart={(e) => {
+                  e.stopPropagation();
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/plain', String(blockId));
+                  setShowDropdown(false);
+                  if (onDragStart) onDragStart(e);
+                }}
+                onDragEnd={(e) => {
+                  e.stopPropagation();
+                  if (onDragEnd) onDragEnd(e);
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="5" cy="12" r="1"></circle>
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="19" cy="12" r="1"></circle>
+                  <circle cx="5" cy="5" r="1"></circle>
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="19" cy="5" r="1"></circle>
+                </svg>
+                <span>Drag to reorder</span>
+              </div>
+              
+              {/* Move up */}
+              <button
+                onClick={() => {
+                  onMoveUp?.();
+                  setShowDropdown(false);
+                }}
+                disabled={!canMoveUp}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm
+                           ${!canMoveUp 
+                             ? 'opacity-50 cursor-not-allowed text-text-secondary/50' 
+                             : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
+                           }`}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+                <span>Move up</span>
+              </button>
+              
+              {/* Move down */}
+              <button
+                onClick={() => {
+                  onMoveDown?.();
+                  setShowDropdown(false);
+                }}
+                disabled={!canMoveDown}
+                className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm
+                           ${!canMoveDown
+                             ? 'opacity-50 cursor-not-allowed text-text-secondary/50' 
+                             : 'hover:bg-dark-secondary/50 text-text-secondary hover:text-text-primary'
+                           }`}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+                <span>Move down</span>
+              </button>
+            </div>
+          )}
+        </div>
 
-      {/* Divider */}
-      <div className="h-px w-6 bg-white/10 mx-1" />
+        {/* Duplicate - primary action */}
+        <ActionButton
+          onClick={() => onDuplicate?.()}
+          label="Duplicate"
+          icon={
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          }
+        />
 
-      {/* Move Up */}
-      <ActionButton
-        onClick={() => onMoveUp?.()}
-        disabled={!canMoveUp}
-        label="Move up"
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg>
-        }
-      />
-
-      {/* Move Down */}
-      <ActionButton
-        onClick={() => onMoveDown?.()}
-        disabled={!canMoveDown}
-        label="Move down"
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M19 12l-7 7-7-7" />
-          </svg>
-        }
-      />
-
-      {/* Duplicate */}
-      <ActionButton
-        onClick={() => onDuplicate?.()}
-        label="Duplicate"
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-          </svg>
-        }
-      />
-
-      {/* Delete */}
-      <ActionButton
-        onClick={() => onDelete()}
-        label="Delete"
-        danger
-        icon={
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
-            <line x1="10" y1="11" x2="10" y2="17"></line>
-            <line x1="14" y1="11" x2="14" y2="17"></line>
-          </svg>
-        }
-      />
+        {/* Delete - primary action */}
+        <ActionButton
+          onClick={() => onDelete()}
+          label="Delete"
+          danger
+          icon={
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+            </svg>
+          }
+        />
       </div>
     </>
   );

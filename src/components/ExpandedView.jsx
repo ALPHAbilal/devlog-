@@ -215,7 +215,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
       {/* Blocks */}
       <div 
-        className="space-y-4 mb-8 min-h-[400px] relative pl-16"
+        className="space-y-4 mb-8 min-h-[400px] relative pl-8"
         onClick={(e) => {
           // Clear focus if clicking in empty space between blocks
           if (e.target === e.currentTarget) {

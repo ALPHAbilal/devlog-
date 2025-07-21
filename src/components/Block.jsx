@@ -151,7 +151,8 @@ export default function Block({
         onMouseLeave={(e) => {
           // Check if mouse is moving to child element
           const relatedTarget = e.relatedTarget;
-          if (relatedTarget && e.currentTarget.contains(relatedTarget)) {
+          // Add null check to prevent TypeError
+          if (relatedTarget && e.currentTarget && e.currentTarget.contains(relatedTarget)) {
             return; // Don't hide if moving to child element
           }
           

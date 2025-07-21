@@ -17,6 +17,15 @@ export default function BlockControls({
   const [showMenu, setShowMenu] = useState(false);
   const [ref, isHovered] = useHover();
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Debug logging
+  console.log('🎯 BlockControls rendering:', {
+    blockId,
+    isVisible,
+    isHovered,
+    isMobile,
+    showMenu
+  });
 
   // Detect if we're on mobile
   useEffect(() => {

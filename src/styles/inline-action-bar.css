@@ -1,0 +1,102 @@
+/* Inline Action Bar - World-class UX patterns */
+.inline-action-bar {
+  /* Ensure smooth animations */
+  will-change: opacity, transform;
+  
+  /* Prevent layout shifts */
+  contain: layout style;
+}
+
+/* Individual action buttons */
+.inline-action-button {
+  /* Remove default button styles */
+  appearance: none;
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  
+  /* Ensure proper touch targets */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth spring physics on hover */
+@media (hover: hover) {
+  .inline-action-button {
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .inline-action-button:hover {
+    transform: scale(1.05);
+  }
+  
+  .inline-action-button:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+  .inline-action-bar.always-visible {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+  
+  /* Larger touch targets on mobile */
+  .inline-action-button {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+}
+
+/* Keyboard focus indicators */
+.inline-action-button:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Drag handle cursor states */
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Prevent text selection during drag */
+.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth transitions for visibility */
+.inline-action-bar {
+  transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              visibility 200ms;
+}
+
+/* Active state animation */
+@keyframes buttonPress {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.inline-action-button:active {
+  animation: buttonPress 150ms ease-out;
+}
+
+/* Divider styling */
+.inline-action-bar .divider {
+  opacity: 0.2;
+  transition: opacity 200ms;
+}
+
+.inline-action-bar:hover .divider {
+  opacity: 0.3;
+}

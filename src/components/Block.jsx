@@ -9,7 +9,7 @@ import TodoBlock from './blocks/TodoBlock';
 import ImageBlock from './blocks/ImageBlock';
 import InlineImageBlock from './blocks/InlineImageBlock';
 import BlockDivider from './BlockDivider';
-import BlockControls from './BlockControls';
+import InlineActionBar from './InlineActionBar';
 
 const blockComponents = {
   text: TextBlock,
@@ -180,8 +180,8 @@ export default function Block({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* Enterprise Pattern Block Controls - Always visible trigger */}
-        <BlockControls
+        {/* World-Class Inline Action Bar - Single click for any action */}
+        <InlineActionBar
           isVisible={isHovered && !isDragging}
           onDelete={() => onDelete(block.id)}
           onDuplicate={() => onDuplicate?.(block.id)}
@@ -192,7 +192,6 @@ export default function Block({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           blockId={block.id}
-          onMenuToggle={setShowMenu}
         />
 
         {/* Block Content */}

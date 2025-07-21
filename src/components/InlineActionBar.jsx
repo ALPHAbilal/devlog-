@@ -111,7 +111,7 @@ export default function InlineActionBar({
           ? 'hover:bg-red-500/20 hover:text-red-400 text-text-secondary/60'
           : 'hover:bg-white/10 hover:text-text-primary text-text-secondary/60'
         }
-        min-w-[28px] min-h-[28px] flex items-center justify-center
+        min-w-[32px] min-h-[32px] flex items-center justify-center
         focus:outline-none focus:ring-2 focus:ring-accent-green/50
       `}
       title={label}
@@ -128,10 +128,10 @@ export default function InlineActionBar({
         <div
           style={{
             position: 'absolute',
-            left: '-5rem',
+            left: '-4.5rem',
             top: '-0.5rem',
-            width: '6rem',
-            height: '3rem',
+            width: '5rem',
+            height: '8rem',
             pointerEvents: 'auto',
             zIndex: 19,
           }}
@@ -143,13 +143,13 @@ export default function InlineActionBar({
       {/* Compact action bar */}
       <div 
         ref={containerRef}
-        className={`inline-action-bar absolute flex items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
+        className={`inline-action-bar absolute flex flex-col items-center gap-1 ${isMobile ? 'always-visible' : ''}`}
         style={{
           position: 'absolute',
-          left: '-5rem',
-          top: '0rem',
+          left: '-4.5rem',
+          top: '-0.25rem',
           zIndex: 20,
-          padding: '0.25rem',
+          padding: '0.5rem',
           // Visual design
           background: shouldShow ? 'rgba(10, 22, 40, 0.9)' : 'transparent',
           backdropFilter: shouldShow ? 'blur(8px)' : 'none',
@@ -186,11 +186,11 @@ export default function InlineActionBar({
           {showDropdown && (
             <div
               ref={dropdownRef}
-              className="absolute left-0 top-full mt-1 z-50
+              className="absolute left-full top-0 ml-2 z-50
                          bg-dark-primary/95 backdrop-blur-sm rounded-lg 
                          border border-dark-secondary/50 shadow-xl
                          py-1 min-w-[160px]
-                         animate-in fade-in slide-in-from-top-1 duration-200"
+                         animate-in fade-in slide-in-from-left-1 duration-200"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drag handle */}

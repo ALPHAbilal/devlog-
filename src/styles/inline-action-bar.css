@@ -51,10 +51,11 @@
   }
 }
 
-/* Compact horizontal layout */
+/* Compact vertical layout */
 .inline-action-bar {
   height: auto;
-  max-width: fit-content;
+  width: auto;
+  max-width: 48px;
 }
 
 /* Responsive positioning for different screen sizes */
@@ -73,9 +74,21 @@
 @media (max-width: 640px) {
   .inline-action-bar {
     left: -3rem !important;
-    transform: scale(0.95);
+    transform: scale(0.9);
     transform-origin: left top;
   }
+}
+
+/* Vertical layout specific styles */
+.inline-action-bar.vertical {
+  flex-direction: column;
+}
+
+.inline-action-bar .dropdown-menu {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 0.5rem;
 }
 
 /* Keyboard focus indicators */

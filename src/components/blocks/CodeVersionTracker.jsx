@@ -79,11 +79,12 @@ export default function CodeVersionTracker({
 
   return (
     <>
-      {/* Gutter indicator - positioned in the far left margin to avoid overlap with block controls */}
+      {/* Gutter indicator - positioned far left with 3x more spacing to avoid any overlap */}
       <div 
-        className={`absolute -left-14 top-4 transition-all duration-300 ${
+        className={`absolute top-4 transition-all duration-300 ${
           shouldShow ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
+        style={{ left: '-7rem' }} // -112px (was -56px, now 3x more spacing)
         onMouseEnter={() => {
           setIsHovered(true);
           setShowTimeline(true);
@@ -201,7 +202,7 @@ export function VersionTimeline({
       // Position in the gutter area - aligned with the new dot position
       const startY = startRect.top - containerRect.top + 20; // Align with gutter dots
       const endY = endRect.top - containerRect.top + 20;
-      const x = -56; // Align with -left-14 (-56px)
+      const x = -112; // Align with -7rem (-112px)
 
       setPathData({
         x,

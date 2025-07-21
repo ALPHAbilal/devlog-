@@ -42,6 +42,34 @@ export default function BlockControls({
       });
       
       console.log('📋 CSS File Loaded:', hasBlockControlsCSS);
+      
+      // Check if Lucide icons are available
+      console.log('🎨 Icon Components:', {
+        hasGripVertical: !!GripVertical,
+        hasMoreVertical: !!MoreVertical,
+        hasTrash2: !!Trash2,
+        hasCopy: !!Copy,
+        hasArrowUp: !!ArrowUp,
+        hasArrowDown: !!ArrowDown
+      });
+      
+      // Check DOM elements
+      setTimeout(() => {
+        const controlsElement = document.querySelector(`[data-block-id="${blockId}"] .block-controls`);
+        if (controlsElement) {
+          console.log('📦 BlockControls DOM:', {
+            element: controlsElement,
+            children: controlsElement.children.length,
+            innerHTML: controlsElement.innerHTML.substring(0, 100) + '...',
+            computedStyle: {
+              display: getComputedStyle(controlsElement).display,
+              opacity: getComputedStyle(controlsElement).opacity,
+              width: getComputedStyle(controlsElement).width,
+              height: getComputedStyle(controlsElement).height
+            }
+          });
+        }
+      }, 100);
     }
   }, [isDebugMode, blockId, isMobile, showMenu]);
 

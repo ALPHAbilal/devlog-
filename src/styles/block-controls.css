@@ -9,6 +9,7 @@
   transform: scale(0.95) !important;
   pointer-events: none !important;
   transition: opacity 200ms ease-out, transform 200ms ease-out;
+  min-width: 80px; /* Ensure container has minimum width */
 }
 
 /* Show on hover or when forced (mobile) - using !important for maximum specificity */
@@ -40,6 +41,29 @@
   border: 3px solid red !important;
   background: rgba(255, 255, 0, 0.3) !important;
   box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  padding: 10px !important;
+}
+
+/* Force all inner content visible in debug mode */
+.debug-block-controls .block-controls * {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  border: 1px solid blue !important;
+}
+
+/* Specifically target buttons and drag handles */
+.debug-block-controls .block-controls button,
+.debug-block-controls .block-controls .drag-handle {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  background: rgba(0, 255, 0, 0.5) !important;
+  color: black !important;
 }
 
 /* Debug info overlay */

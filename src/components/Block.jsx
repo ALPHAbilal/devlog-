@@ -52,6 +52,23 @@ export default function Block({
   const [isDragging, setIsDragging] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
   
+  // Debug mode detection
+  const isDebugMode = typeof window !== 'undefined' && 
+    window.location.search.includes('debug=blockcontrols');
+  
+  // Debug logging
+  useEffect(() => {
+    if (isDebugMode) {
+      console.log('🎯 Block Debug:', {
+        blockId: block.id,
+        blockType: block.type,
+        hasBlockControls: true,
+        parentClasses: 'group block-wrapper relative',
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [isDebugMode, block.id, block.type]);
+  
   const isDropTarget = dropTargetId === block.id;
   const isDraggedBlock = draggedBlockId === block.id;
   
@@ -114,6 +131,8 @@ export default function Block({
           isDragging ? 'opacity-30 scale-[0.98]' : ''
         } ${
           isDropTarget && !isDraggedBlock ? 'transform scale-[0.98]' : ''
+        } ${
+          isDebugMode ? 'debug-block-controls' : ''
         }`}
         data-block-id={block.id}
         style={{ 

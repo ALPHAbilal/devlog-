@@ -15,6 +15,35 @@ export default function BlockControls({
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Debug mode detection
+  const isDebugMode = typeof window !== 'undefined' && 
+    window.location.search.includes('debug=blockcontrols');
+  
+  // Debug logging
+  useEffect(() => {
+    if (isDebugMode) {
+      console.log('🔍 BlockControls Debug:', {
+        blockId,
+        rendered: true,
+        isMobile,
+        showMenu,
+        cssFileCheck: document.styleSheets.length,
+        timestamp: new Date().toISOString()
+      });
+      
+      // Check if our CSS is loaded
+      const hasBlockControlsCSS = Array.from(document.styleSheets).some(sheet => {
+        try {
+          return sheet.href && sheet.href.includes('block-controls.css');
+        } catch (e) {
+          return false;
+        }
+      });
+      
+      console.log('📋 CSS File Loaded:', hasBlockControlsCSS);
+    }
+  }, [isDebugMode, blockId, isMobile, showMenu]);
 
   // Detect if we're on mobile
   useEffect(() => {
@@ -28,10 +57,11 @@ export default function BlockControls({
 
   return (
     <div 
-      className={`block-controls absolute -left-2 top-1 flex items-start gap-1 ${isMobile ? 'show-always' : ''}`}
+      className={`block-controls absolute -left-2 top-1 flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''}`}
       style={{ 
         zIndex: 20,
-        minHeight: '44px' // Ensure touch targets are large enough
+        minHeight: '44px', // Ensure touch targets are large enough
+        ...(isDebugMode ? { border: '2px dashed blue', background: 'rgba(0,0,255,0.1)' } : {})
       }}
       onTouchStart={(e) => e.stopPropagation()}>
       {/* Drag Handle */}

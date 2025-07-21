@@ -31,3 +31,26 @@
 .block-controls * {
   opacity: inherit;
 }
+
+/* DEBUG MODE - Forces controls visible with visual indicators */
+.debug-block-controls .block-controls {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: auto !important;
+  border: 3px solid red !important;
+  background: rgba(255, 255, 0, 0.3) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+}
+
+/* Debug info overlay */
+.debug-block-controls::before {
+  content: "DEBUG: BlockControls CSS Loaded" !important;
+  position: fixed !important;
+  top: 10px !important;
+  right: 10px !important;
+  background: red !important;
+  color: white !important;
+  padding: 10px !important;
+  z-index: 99999 !important;
+  font-size: 14px !important;
+}

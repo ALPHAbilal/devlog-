@@ -228,34 +228,6 @@ export default function InlineActionBar({
               <span>Move down</span>
             </button>
             
-            {/* Drag handle */}
-            <div
-              className="flex items-center gap-2 px-3 py-2 cursor-grab hover:bg-dark-secondary/50
-                         text-text-secondary hover:text-text-primary text-sm"
-              draggable={true}
-              onDragStart={(e) => {
-                e.stopPropagation();
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', String(blockId));
-                setShowDropdown(false);
-                if (onDragStart) onDragStart(e);
-              }}
-              onDragEnd={(e) => {
-                e.stopPropagation();
-                if (onDragEnd) onDragEnd(e);
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="5" cy="12" r="1"></circle>
-                <circle cx="12" cy="12" r="1"></circle>
-                <circle cx="19" cy="12" r="1"></circle>
-                <circle cx="5" cy="5" r="1"></circle>
-                <circle cx="12" cy="5" r="1"></circle>
-                <circle cx="19" cy="5" r="1"></circle>
-              </svg>
-              <span>Drag to reorder</span>
-            </div>
-            
             {/* Divider */}
             <div className="h-px bg-dark-secondary/30 my-1" />
             

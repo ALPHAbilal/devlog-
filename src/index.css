@@ -229,14 +229,18 @@ body:has(.dashboard-container) {
   --tw-translate-y: -0.25rem;
 }
 
+.slide-in-from-right-1 {
+  --tw-translate-x: 0.25rem;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(var(--tw-translate-y, 0));
+    transform: translateY(var(--tw-translate-y, 0)) translateX(var(--tw-translate-x, 0));
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) translateX(0);
   }
 }
 

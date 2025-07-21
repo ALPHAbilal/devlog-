@@ -160,11 +160,11 @@ export default function InlineActionBar({
         {showDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute left-full top-0 ml-2
+            className="absolute right-full top-0 mr-2
                        bg-dark-primary/95 backdrop-blur-sm rounded-lg 
                        border border-dark-secondary/50 shadow-xl
                        py-1 min-w-[180px]
-                       animate-in fade-in slide-in-from-left-1 duration-200"
+                       animate-in fade-in slide-in-from-right-1 duration-200"
             style={{
               zIndex: 9999,
               position: 'absolute'

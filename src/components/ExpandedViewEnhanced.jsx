@@ -77,6 +77,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [linesScrollProgress, setLinesScrollProgress] = useState({ top: 0, bottom: 1 });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [hoveredBlockId, setHoveredBlockId] = useState(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [saveStatus, setSaveStatus] = useState(null);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
@@ -892,6 +893,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                     endBlockId={block.id}
                     blocks={blocks}
                     containerRef={contentContainerRef}
+                    isVisible={hoveredBlockId === block.id || hoveredBlockId === block.versionOf}
                   />
                 );
               }

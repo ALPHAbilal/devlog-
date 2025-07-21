@@ -83,6 +83,87 @@
   }
 }
 
+/* Version tracking gutter indicators */
+.code-block-gutter {
+  position: relative;
+  /* Reserve space for gutter indicators */
+  margin-left: 2.5rem;
+}
+
+/* Gutter dot indicators */
+.version-indicator-dot {
+  /* Smooth transitions for progressive disclosure */
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Ensure proper hit target for hover */
+  cursor: pointer;
+  position: relative;
+}
+
+/* Pulse animation for recent changes */
+@keyframes version-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+.version-indicator-recent {
+  animation: version-pulse 2s infinite;
+}
+
+/* Version timeline - subtle dotted line */
+.version-timeline {
+  /* Use CSS for dotted lines instead of SVG for better performance */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 4px,
+    rgba(76, 175, 80, 0.3) 4px,
+    rgba(76, 175, 80, 0.3) 6px
+  );
+  width: 1px;
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Temporal heat map overlay */
+.code-block-heat-map {
+  /* Very subtle background tint */
+  background-color: rgba(76, 175, 80, 0.02);
+  transition: background-color 500ms ease-in-out;
+  pointer-events: none;
+}
+
+/* Version tooltip styling */
+.version-tooltip {
+  /* Glassmorphism effect */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(10, 22, 40, 0.95);
+  border: 1px solid rgba(30, 58, 95, 0.5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Ensure gutter indicators don't interfere with scrolling */
+.version-gutter-container {
+  position: absolute;
+  left: -2rem;
+  top: 0;
+  bottom: 0;
+  width: 2rem;
+  pointer-events: none;
+}
+
+.version-gutter-container > * {
+  pointer-events: auto;
+}
+
 /* DEBUG MODE - Forces controls visible with visual indicators */
 .debug-block-controls .block-controls {
   opacity: 1 !important;

@@ -1,19 +1,23 @@
 import { useState, useEffect } from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { GitBranch, History, Clock } from 'lucide-react';
 
 // Feature flag - set to false to completely disable version tracking
 export const VERSION_TRACKING_ENABLED = true;
 
+// Gutter-based version indicator following modern UX patterns
 export default function CodeVersionTracker({ 
   block, 
   allBlocks = [], 
   onNavigateToVersion,
-  position = 'top' // 'top' or 'bottom'
+  isBlockHovered = false,
+  showAlways = false // For version comparison mode
 }) {
   if (!VERSION_TRACKING_ENABLED) return null;
   
   const [versionInfo, setVersionInfo] = useState(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [isRecent, setIsRecent] = useState(false);
 
   useEffect(() => {
     // Check if this block has version metadata
@@ -22,86 +26,167 @@ export default function CodeVersionTracker({
         isOriginal: !block.versionOf,
         originalId: block.versionOf || block.id,
         versionNumber: block.versionNumber || 1,
-        hasVersions: block.hasVersions || false
+        hasVersions: block.hasVersions || false,
+        versionCount: 0 // Will be calculated
       };
+      
+      // Count total versions
+      if (info.hasVersions) {
+        info.versionCount = allBlocks.filter(b => 
+          b.versionOf === block.id || b.id === block.id
+        ).length;
+      }
+      
       setVersionInfo(info);
+      
+      // Check if recently modified (within 24 hours)
+      const modifiedTime = block.versionCreatedAt || block.updatedAt;
+      if (modifiedTime) {
+        const hoursSinceModified = (Date.now() - new Date(modifiedTime).getTime()) / (1000 * 60 * 60);
+        setIsRecent(hoursSinceModified < 24);
+      }
     }
-  }, [block]);
+  }, [block, allBlocks]);
+
+  // Determine visibility based on context
+  const shouldShow = versionInfo && (
+    showAlways || // Version comparison mode
+    isBlockHovered || // Block is hovered
+    isHovered || // Indicator is hovered
+    (versionInfo.versionCount > 1) || // Multiple versions exist
+    isRecent // Recently modified
+  );
 
   if (!versionInfo) return null;
 
   const handleNavigate = (targetId) => {
     if (onNavigateToVersion) {
       onNavigateToVersion(targetId);
+      setShowTimeline(false);
+    }
+  };
+
+  // Gutter indicator styles based on state
+  const getIndicatorStyle = () => {
+    if (versionInfo.isOriginal && versionInfo.hasVersions) {
+      return 'bg-accent-green/60'; // Original with versions
+    } else if (versionInfo.isOriginal) {
+      return 'bg-accent-green/30'; // Original without versions
+    } else {
+      return 'bg-text-secondary/30'; // Version
     }
   };
 
   return (
-    <div 
-      className={`absolute ${position === 'top' ? '-top-10' : '-bottom-7'} left-0 
-                  flex items-center gap-2 transition-all duration-200
-                  ${isHovered ? 'opacity-100' : 'opacity-70'}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Version Badge - Redesigned */}
-      <div className={`
-        flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px]
-        ${versionInfo.isOriginal 
-          ? 'bg-accent-green/10 border border-accent-green/20 text-accent-green/90' 
-          : 'bg-dark-secondary/40 border border-dark-secondary/60 text-text-secondary'
-        }
-        backdrop-blur-sm transition-all duration-200
-        ${isHovered ? 'shadow-lg shadow-accent-green/10' : ''}
-      `}>
-        <div className={`w-1.5 h-1.5 rounded-full ${
-          versionInfo.isOriginal ? 'bg-accent-green' : 'bg-text-secondary/50'
-        }`} />
-        
-        {versionInfo.isOriginal ? (
-          <span className="font-medium">Original</span>
-        ) : (
-          <span className="font-mono">v{versionInfo.versionNumber}</span>
-        )}
-        
-        {/* Navigation arrows - more subtle */}
-        {!versionInfo.isOriginal && (
-          <button
-            onClick={() => handleNavigate(versionInfo.originalId)}
-            className="ml-1 -mr-1 p-1 hover:bg-white/5 rounded-full transition-colors"
-            title="Jump to original"
+    <>
+      {/* Gutter indicator - positioned in the left margin */}
+      <div 
+        className={`absolute -left-8 top-4 transition-all duration-300 ${
+          shouldShow ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        onMouseEnter={() => {
+          setIsHovered(true);
+          setShowTimeline(true);
+        }}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setTimeout(() => setShowTimeline(false), 200);
+        }}
+      >
+        {/* Dot indicator */}
+        <div className="relative">
+          <div 
+            className={`w-2 h-2 rounded-full ${getIndicatorStyle()} 
+                       transition-all duration-200 cursor-pointer
+                       ${isHovered ? 'scale-125' : ''}`}
+            onClick={() => {
+              if (!versionInfo.isOriginal) {
+                handleNavigate(versionInfo.originalId);
+              }
+            }}
           >
-            <ArrowUp size={10} className="text-current opacity-60 hover:opacity-100" />
-          </button>
-        )}
-        
-        {versionInfo.hasVersions && (
-          <button
-            onClick={() => {/* TODO: Show version list */}}
-            className="ml-0.5 -mr-1 p-1 hover:bg-white/5 rounded-full transition-colors"
-            title="View versions"
-          >
-            <ArrowDown size={10} className="text-current opacity-60 hover:opacity-100" />
-          </button>
-        )}
+            {/* Pulse animation for recent changes */}
+            {isRecent && (
+              <div className="absolute inset-0 rounded-full bg-accent-green/40 animate-ping" />
+            )}
+          </div>
+          
+          {/* Version number on hover */}
+          {isHovered && !versionInfo.isOriginal && (
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 
+                           text-[9px] text-text-secondary/70 font-mono whitespace-nowrap">
+              v{versionInfo.versionNumber}
+            </div>
+          )}
+          
+          {/* Tooltip with details */}
+          {isHovered && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 
+                           bg-dark-primary/95 backdrop-blur-sm border border-dark-secondary/50
+                           rounded px-2 py-1 text-[10px] whitespace-nowrap
+                           shadow-lg pointer-events-none z-50">
+              <div className="flex items-center gap-1.5">
+                {versionInfo.isOriginal ? (
+                  <>
+                    <GitBranch size={10} className="text-accent-green" />
+                    <span className="text-accent-green">Original</span>
+                    {versionInfo.hasVersions && (
+                      <span className="text-text-secondary/70">
+                        • {versionInfo.versionCount} versions
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <History size={10} className="text-text-secondary" />
+                    <span>Version {versionInfo.versionNumber}</span>
+                    <button
+                      className="text-accent-green/70 hover:text-accent-green underline ml-1"
+                      onClick={() => handleNavigate(versionInfo.originalId)}
+                    >
+                      → Original
+                    </button>
+                  </>
+                )}
+                {isRecent && (
+                  <>
+                    <span className="text-text-secondary/50">•</span>
+                    <Clock size={10} className="text-yellow-500/70" />
+                    <span className="text-yellow-500/70">Recent</span>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      
+      {/* Temporal heat map background (subtle) */}
+      {isRecent && isBlockHovered && (
+        <div 
+          className="absolute inset-0 bg-accent-green/[0.02] rounded-lg pointer-events-none
+                     transition-opacity duration-500"
+          style={{ zIndex: -1 }}
+        />
+      )}
+    </>
   );
 }
 
-// Timeline connector component
+// Subtle timeline connector component - only visible on hover
 export function VersionTimeline({ 
   startBlockId, 
   endBlockId, 
   blocks = [],
-  containerRef 
+  containerRef,
+  isVisible = false // Controlled by parent hover state
 }) {
   if (!VERSION_TRACKING_ENABLED) return null;
   
   const [pathData, setPathData] = useState(null);
 
   useEffect(() => {
-    if (!containerRef?.current) return;
+    if (!containerRef?.current || !isVisible) return;
 
     const calculatePath = () => {
       const startElement = document.querySelector(`[data-block-id="${startBlockId}"]`);
@@ -113,10 +198,10 @@ export function VersionTimeline({
       const startRect = startElement.getBoundingClientRect();
       const endRect = endElement.getBoundingClientRect();
 
-      // Calculate relative positions
-      const startY = startRect.bottom - containerRect.top - 10;
-      const endY = endRect.top - containerRect.top + 10;
-      const x = -24; // Position to the left of blocks
+      // Position in the gutter area
+      const startY = startRect.top - containerRect.top + 20; // Align with gutter dots
+      const endY = endRect.top - containerRect.top + 20;
+      const x = -32; // In the gutter area
 
       setPathData({
         x,
@@ -128,72 +213,60 @@ export function VersionTimeline({
       });
     };
 
-    calculatePath();
-    // Recalculate on scroll or resize
-    const handleUpdate = () => calculatePath();
-    window.addEventListener('resize', handleUpdate);
-    containerRef.current?.addEventListener('scroll', handleUpdate);
+    if (isVisible) {
+      calculatePath();
+      // Recalculate on scroll or resize
+      const handleUpdate = () => calculatePath();
+      window.addEventListener('resize', handleUpdate);
+      containerRef.current?.addEventListener('scroll', handleUpdate);
 
-    return () => {
-      window.removeEventListener('resize', handleUpdate);
-      containerRef.current?.removeEventListener('scroll', handleUpdate);
-    };
-  }, [startBlockId, endBlockId, blocks, containerRef]);
+      return () => {
+        window.removeEventListener('resize', handleUpdate);
+        containerRef.current?.removeEventListener('scroll', handleUpdate);
+      };
+    }
+  }, [startBlockId, endBlockId, blocks, containerRef, isVisible]);
 
-  if (!pathData || pathData.height < 0) return null;
+  if (!pathData || pathData.height < 0 || !isVisible) return null;
 
   return (
     <div
-      className="absolute pointer-events-none"
+      className="absolute pointer-events-none transition-opacity duration-300"
       style={{
         left: pathData.x + 'px',
         top: pathData.startY + 'px',
         width: '24px',
         height: pathData.height + 'px',
-        zIndex: 5
+        opacity: isVisible ? 0.3 : 0,
+        zIndex: 4
       }}
     >
-      {/* Vertical line with gradient */}
-      <div 
-        className="absolute left-1/2 -translate-x-1/2 w-[2px] transition-all duration-300
-                   hover:w-[3px] hover:shadow-[0_0_8px_rgba(76,175,80,0.5)]"
-        style={{
-          height: '100%',
-          background: 'linear-gradient(180deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.4) 100%)'
-        }}
-      />
+      {/* Subtle dotted line */}
+      <svg 
+        width="24" 
+        height={pathData.height} 
+        className="absolute inset-0"
+        style={{ overflow: 'visible' }}
+      >
+        <line
+          x1="12"
+          y1="0"
+          x2="12"
+          y2={pathData.height}
+          stroke="rgb(76, 175, 80)"
+          strokeWidth="1"
+          strokeDasharray="2,4"
+          opacity="0.4"
+        />
+      </svg>
       
-      {/* Subtle glow effect */}
-      <div 
-        className="absolute left-1/2 -translate-x-1/2 w-[20px] opacity-20"
-        style={{
-          height: '100%',
-          background: 'linear-gradient(180deg, transparent 0%, rgba(76, 175, 80, 0.1) 50%, transparent 100%)',
-          filter: 'blur(6px)'
-        }}
-      />
-      
-      {/* Start indicator */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div className="relative">
-          <div className="w-2 h-2 bg-accent-green/30 rounded-full" />
-          <div className="absolute inset-0 w-2 h-2 bg-accent-green/30 rounded-full animate-ping" />
-        </div>
+      {/* Connection dots - aligned with gutter indicators */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2">
+        <div className="w-1.5 h-1.5 bg-text-secondary/20 rounded-full" />
       </div>
       
-      {/* End indicator with arrow */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2">
-        <div className="relative">
-          <div className="w-3 h-3 bg-accent-green/50 rounded-full flex items-center justify-center">
-            <ArrowDown size={8} className="text-accent-green" />
-          </div>
-        </div>
-      </div>
-      
-      {/* Version flow label */}
-      <div className="absolute top-1/2 -translate-y-1/2 -left-8 -rotate-90 
-                      text-[10px] text-text-secondary/40 font-mono whitespace-nowrap">
-        version
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
+        <div className="w-1.5 h-1.5 bg-text-secondary/20 rounded-full" />
       </div>
     </div>
   );

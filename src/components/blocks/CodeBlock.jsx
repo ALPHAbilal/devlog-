@@ -15,6 +15,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [showFilePathSuggestions, setShowFilePathSuggestions] = useState(false);
   const [filePathSuggestions, setFilePathSuggestions] = useState([]);
+  const [isBlockHovered, setIsBlockHovered] = useState(false);
 
   // Update local state when block prop changes
   useEffect(() => {
@@ -445,13 +446,19 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   }
 
   return (
-    <div className="group relative overflow-visible pt-2" ref={containerRef} data-block-id={block.id}>
-      {/* Version Tracker - can be easily removed by setting VERSION_TRACKING_ENABLED to false */}
+    <div 
+      className="group relative overflow-visible pt-2" 
+      ref={containerRef} 
+      data-block-id={block.id}
+      onMouseEnter={() => setIsBlockHovered(true)}
+      onMouseLeave={() => setIsBlockHovered(false)}
+    >
+      {/* Version Tracker - Gutter-based, only visible on hover */}
       <CodeVersionTracker 
         block={block}
         allBlocks={allBlocks}
         onNavigateToVersion={onNavigateToBlock}
-        position="top"
+        isBlockHovered={isBlockHovered}
       />
       
       {/* File path display - only in view mode */}

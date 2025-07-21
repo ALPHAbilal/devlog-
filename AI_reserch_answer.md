@@ -1,644 +1,353 @@
-# Comprehensive debugging methodology for invisible React BlockControls component
+# Forensic analysis of CSS opacity reaching 0.685 and 0.770 instead of 1.0
 
-## Quick diagnostic checklist
+When CSS opacity transitions get stuck at precise decimal values like 0.685 and 0.770 instead of reaching 1.0, you're likely experiencing one of several deep rendering pipeline issues. These specific values strongly suggest interrupted transitions, floating-point precision errors, or competing style modifications happening at the browser's rendering layer.
 
-Before diving deep, run these commands in your browser console to quickly identify the most common issues:
+## Immediate diagnostic protocol for production debugging
+
+Start with this comprehensive opacity monitoring setup that captures the exact moment when partial values occur:
 
 ```javascript
-// 1. Check if element exists in DOM
-const elements = document.querySelectorAll('[class*="absolute"][class*="left"]');
-console.log('Found elements:', elements.length, elements);
-
-// 2. Force visibility on all potential BlockControls
-Array.from(elements).forEach(el => {
-  el.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; background: red !important; min-width: 100px !important; min-height: 50px !important; z-index: 9999 !important;';
-});
-
-// 3. Check computed styles of selected element
-if ($0) {
-  const styles = getComputedStyle($0);
-  console.table({
-    display: styles.display,
-    visibility: styles.visibility,
-    opacity: styles.opacity,
-    width: $0.offsetWidth,
-    height: $0.offsetHeight,
-    position: styles.position,
-    zIndex: styles.zIndex
-  });
-}
-```
-
-## Step 1: Component rendering verification
-
-### Verify DOM presence
-```javascript
-// Comprehensive element finder
-function findBlockControls() {
-  const strategies = [
-    // By class patterns
-    () => document.querySelectorAll('[class*="absolute"][class*="left"][class*="top"]'),
-    () => document.querySelectorAll('[class*="opacity-0"], [class*="opacity-100"]'),
-    () => document.querySelectorAll('[class*="scale-95"], [class*="scale-100"]'),
-    // By style attributes
-    () => document.querySelectorAll('[style*="z-index: 20"]'),
-    () => document.querySelectorAll('[style*="pointer-events"]'),
-    // By position
-    () => Array.from(document.querySelectorAll('*')).filter(el => {
-      const styles = getComputedStyle(el);
-      return styles.position === 'absolute' && styles.left === '-0.5rem';
-    })
-  ];
-  
-  const results = new Set();
-  strategies.forEach((strategy, i) => {
-    const found = strategy();
-    console.log(`Strategy ${i} found:`, found.length);
-    found.forEach(el => results.add(el));
-  });
-  
-  return Array.from(results);
-}
-
-const blockControls = findBlockControls();
-console.log('Total potential BlockControls found:', blockControls.length);
-blockControls.forEach((el, i) => {
-  console.log(`Element ${i}:`, el);
-  el.style.border = '3px solid lime';
-});
-```
-
-### React component verification
-```javascript
-// Find React fiber information
-function findReactComponent(element) {
-  const key = Object.keys(element).find(key => 
-    key.startsWith('__reactFiber$') || key.startsWith('__reactInternalInstance$')
-  );
-  
-  if (!key) return null;
-  
-  const fiber = element[key];
-  let current = fiber;
-  
-  // Walk up to find the actual component
-  while (current && typeof current.type === 'string') {
-    current = current.return;
-  }
-  
-  return current ? {
-    name: current.type?.name || 'Unknown',
-    props: current.memoizedProps,
-    state: current.memoizedState,
-    hooks: current.memoizedState
-  } : null;
-}
-
-// Apply to found elements
-blockControls.forEach((el, i) => {
-  const component = findReactComponent(el);
-  console.log(`React component ${i}:`, component);
-});
-```
-
-## Step 2: CSS cascade and visibility debugging
-
-### Complete visibility diagnostic
-```javascript
-function diagnoseVisibility(element) {
-  if (!element) element = $0;
-  
-  const rect = element.getBoundingClientRect();
-  const styles = getComputedStyle(element);
-  const parent = element.parentElement;
-  const parentStyles = parent ? getComputedStyle(parent) : null;
-  
-  const diagnosis = {
-    element: element.tagName + '.' + element.className,
+// Deploy this forensic opacity debugger immediately
+(function setupOpacityForensics() {
+    const suspiciousValues = [0.685, 0.770];
+    const opacitySnapshots = new Map();
     
-    // Visibility blockers
-    invisibilityReasons: {
-      displayNone: styles.display === 'none',
-      visibilityHidden: styles.visibility === 'hidden',
-      opacityZero: parseFloat(styles.opacity) === 0,
-      zeroWidth: rect.width === 0,
-      zeroHeight: rect.height === 0,
-      offScreen: rect.bottom < 0 || rect.right < 0 || 
-                 rect.top > window.innerHeight || rect.left > window.innerWidth,
-      parentHidden: parentStyles && (
-        parentStyles.display === 'none' || 
-        parentStyles.visibility === 'hidden' ||
-        parseFloat(parentStyles.opacity) === 0
-      ),
-      pointerEventsNone: styles.pointerEvents === 'none',
-      behindOtherElement: document.elementFromPoint(
-        rect.left + rect.width/2, 
-        rect.top + rect.height/2
-      ) !== element
-    },
-    
-    // Actual values
-    computedStyles: {
-      display: styles.display,
-      visibility: styles.visibility,
-      opacity: styles.opacity,
-      position: styles.position,
-      zIndex: styles.zIndex,
-      transform: styles.transform,
-      transition: styles.transition,
-      pointerEvents: styles.pointerEvents
-    },
-    
-    // Dimensions
-    dimensions: {
-      boundingRect: rect,
-      offsetWidth: element.offsetWidth,
-      offsetHeight: element.offsetHeight,
-      clientWidth: element.clientWidth,
-      clientHeight: element.clientHeight
-    },
-    
-    // Tailwind classes check
-    tailwindClasses: {
-      hasOpacityClasses: element.className.includes('opacity-'),
-      hasScaleClasses: element.className.includes('scale-'),
-      hasTransitionClasses: element.className.includes('transition')
-    }
-  };
-  
-  // Summary
-  const issues = Object.entries(diagnosis.invisibilityReasons)
-    .filter(([, value]) => value)
-    .map(([key]) => key);
-  
-  console.log('🔍 Visibility Diagnosis:', diagnosis);
-  console.log('❌ Issues found:', issues);
-  
-  return diagnosis;
-}
-
-// Run diagnosis
-blockControls.forEach((el, i) => {
-  console.log(`\n--- Diagnosing element ${i} ---`);
-  diagnoseVisibility(el);
-});
-```
-
-### Parent chain analysis
-```javascript
-function analyzeParentChain(element) {
-  const chain = [];
-  let current = element;
-  
-  while (current && current !== document.body) {
-    const styles = getComputedStyle(current);
-    const rect = current.getBoundingClientRect();
-    
-    chain.push({
-      element: current,
-      tag: current.tagName,
-      classes: current.className,
-      visibility: {
-        display: styles.display,
-        visibility: styles.visibility,
-        opacity: styles.opacity,
-        overflow: styles.overflow
-      },
-      dimensions: {
-        width: rect.width,
-        height: rect.height
-      },
-      positioning: {
-        position: styles.position,
-        zIndex: styles.zIndex
-      },
-      hasGroupClass: current.className.includes('group')
-    });
-    
-    current = current.parentElement;
-  }
-  
-  console.table(chain);
-  return chain;
-}
-```
-
-## Step 3: JavaScript state and hooks debugging
-
-### useHover hook verification
-```javascript
-// Test hover state changes
-function debugHoverState(element) {
-  if (!element) element = $0;
-  
-  console.log('🎯 Testing hover detection...');
-  
-  // Check current event listeners
-  const listeners = getEventListeners(element);
-  console.log('Event listeners:', listeners);
-  
-  // Monitor all mouse events
-  const events = ['mouseenter', 'mouseleave', 'mouseover', 'mouseout'];
-  events.forEach(event => {
-    element.addEventListener(event, (e) => {
-      console.log(`🖱️ ${event} fired on`, e.target);
-    });
-  });
-  
-  // Test manual hover trigger
-  setTimeout(() => {
-    console.log('📍 Triggering manual mouseenter...');
-    element.dispatchEvent(new MouseEvent('mouseenter', { bubbles: true }));
-  }, 1000);
-  
-  setTimeout(() => {
-    console.log('📍 Triggering manual mouseleave...');
-    element.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
-  }, 2000);
-  
-  // Check if parent has .group class
-  const parent = element.closest('.group');
-  if (parent) {
-    console.log('✅ Found .group parent:', parent);
-    monitorEvents(parent, 'mouse');
-  } else {
-    console.log('❌ No .group parent found');
-  }
-}
-
-// Run hover debugging
-blockControls.forEach((el, i) => {
-  console.log(`\n--- Debugging hover for element ${i} ---`);
-  debugHoverState(el);
-});
-```
-
-### React hooks state inspection
-```javascript
-// Inspect React component state and hooks
-function inspectReactHooks(element) {
-  const fiber = element._reactFiber || 
-                element.__reactFiber$ || 
-                element.__reactInternalInstance;
-                
-  if (!fiber) {
-    console.log('❌ No React fiber found');
-    return;
-  }
-  
-  let hookState = fiber.memoizedState;
-  const hooks = [];
-  let hookIndex = 0;
-  
-  while (hookState) {
-    hooks.push({
-      index: hookIndex++,
-      value: hookState.memoizedState,
-      deps: hookState.deps,
-      next: hookState.next ? 'has next' : 'last hook'
-    });
-    hookState = hookState.next;
-  }
-  
-  console.table(hooks);
-  
-  // Check for hover state (usually first or second hook)
-  const possibleHoverState = hooks.find(h => 
-    typeof h.value === 'boolean' || 
-    (Array.isArray(h.value) && h.value.length === 2)
-  );
-  
-  console.log('Possible hover state:', possibleHoverState);
-}
-```
-
-## Step 4: Production-specific issues
-
-### Check for Tailwind CSS purging
-```javascript
-// Verify Tailwind classes exist in production
-function checkTailwindClasses() {
-  const testClasses = [
-    'opacity-0', 'opacity-100',
-    'scale-95', 'scale-100',
-    'transition-all', 'duration-200',
-    'pointer-events-none', 'pointer-events-auto'
-  ];
-  
-  const results = {};
-  
-  testClasses.forEach(className => {
-    const testEl = document.createElement('div');
-    testEl.className = className;
-    document.body.appendChild(testEl);
-    
-    const styles = getComputedStyle(testEl);
-    results[className] = {
-      exists: styles.cssText.length > 0,
-      opacity: styles.opacity,
-      transform: styles.transform,
-      transition: styles.transition
+    // 1. Intercept all opacity modifications
+    const originalSetProperty = CSSStyleDeclaration.prototype.setProperty;
+    CSSStyleDeclaration.prototype.setProperty = function(property, value, priority) {
+        if (property === 'opacity') {
+            const numericValue = parseFloat(value);
+            if (suspiciousValues.some(v => Math.abs(v - numericValue) < 0.001)) {
+                console.error('🚨 SUSPICIOUS OPACITY DETECTED:', value);
+                console.trace('Stack trace at detection:');
+                debugger; // This will break into DevTools
+            }
+        }
+        return originalSetProperty.call(this, property, value, priority);
     };
     
-    document.body.removeChild(testEl);
-  });
-  
-  console.table(results);
-  
-  // Check if opacity transition classes work
-  const transitionTest = document.createElement('div');
-  transitionTest.className = 'transition-all duration-200 opacity-0';
-  document.body.appendChild(transitionTest);
-  
-  setTimeout(() => {
-    transitionTest.className = 'transition-all duration-200 opacity-100';
-    console.log('Opacity after class change:', getComputedStyle(transitionTest).opacity);
-    document.body.removeChild(transitionTest);
-  }, 100);
-}
-
-checkTailwindClasses();
-```
-
-### Detect build/compilation issues
-```javascript
-// Check if custom hooks are available
-function verifyProductionBuild() {
-  const checks = {
-    reactVersion: React?.version || 'React not found',
-    nodeEnv: process?.env?.NODE_ENV || 'Unknown',
-    customHooks: {
-      useHover: typeof window.useHover,
-      // Add other custom hooks
-    },
-    hasSourceMaps: new Error().stack.includes('.js:'),
-    documentReady: document.readyState
-  };
-  
-  console.table(checks);
-  
-  // Check for common production optimizations
-  if (checks.nodeEnv === 'production') {
-    console.log('⚠️ Running in production mode - some debug features may be disabled');
-  }
-}
-
-verifyProductionBuild();
-```
-
-## Step 5: Advanced diagnostic techniques
-
-### Complete element analysis function
-```javascript
-function completeElementAnalysis(element) {
-  if (!element) element = $0;
-  
-  console.group('🔍 Complete Element Analysis');
-  
-  // 1. Basic visibility
-  const rect = element.getBoundingClientRect();
-  const styles = getComputedStyle(element);
-  
-  console.log('1️⃣ Visibility State:', {
-    isVisible: rect.width > 0 && rect.height > 0 && styles.opacity > 0,
-    display: styles.display,
-    visibility: styles.visibility,
-    opacity: styles.opacity
-  });
-  
-  // 2. Positioning
-  console.log('2️⃣ Positioning:', {
-    position: styles.position,
-    coordinates: { top: rect.top, left: rect.left },
-    dimensions: { width: rect.width, height: rect.height },
-    zIndex: styles.zIndex,
-    transform: styles.transform
-  });
-  
-  // 3. Interaction
-  const elementAtCenter = document.elementFromPoint(
-    rect.left + rect.width/2,
-    rect.top + rect.height/2
-  );
-  
-  console.log('3️⃣ Interaction:', {
-    pointerEvents: styles.pointerEvents,
-    isClickable: elementAtCenter === element,
-    elementAtCenter: elementAtCenter
-  });
-  
-  // 4. Transitions
-  console.log('4️⃣ Transitions:', {
-    transition: styles.transition,
-    animationDuration: styles.animationDuration,
-    transitionDuration: styles.transitionDuration
-  });
-  
-  // 5. Classes and attributes
-  console.log('5️⃣ Classes:', {
-    classList: Array.from(element.classList),
-    dataset: element.dataset,
-    attributes: Array.from(element.attributes).map(a => ({
-      name: a.name,
-      value: a.value
-    }))
-  });
-  
-  // 6. React component
-  const reactComponent = findReactComponent(element);
-  if (reactComponent) {
-    console.log('6️⃣ React Component:', reactComponent);
-  }
-  
-  // 7. Parent analysis
-  const parentChain = [];
-  let parent = element.parentElement;
-  while (parent && parentChain.length < 5) {
-    parentChain.push({
-      tag: parent.tagName,
-      classes: parent.className,
-      hasGroup: parent.className.includes('group')
-    });
-    parent = parent.parentElement;
-  }
-  console.log('7️⃣ Parent Chain:', parentChain);
-  
-  console.groupEnd();
-}
-```
-
-### Force visibility with all overrides
-```javascript
-function forceElementVisible(element) {
-  if (!element) element = $0;
-  
-  // Nuclear option - override everything
-  const overrides = `
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: fixed !important;
-    top: 50px !important;
-    left: 50px !important;
-    width: 200px !important;
-    height: 100px !important;
-    background: rgba(255, 0, 0, 0.8) !important;
-    border: 3px solid yellow !important;
-    z-index: 999999 !important;
-    pointer-events: auto !important;
-    transform: none !important;
-    clip: auto !important;
-    clip-path: none !important;
-    overflow: visible !important;
-  `;
-  
-  element.style.cssText = overrides;
-  
-  console.log('🚨 Element forced visible with overrides');
-  console.log('If element still not visible, it may not be in DOM');
-}
-```
-
-## Step 6: Systematic debugging process
-
-### The definitive debugging sequence
-
-```javascript
-async function systematicDebug() {
-  console.clear();
-  console.log('🔧 Starting systematic BlockControls debugging...\n');
-  
-  // Step 1: Find all potential elements
-  console.group('STEP 1: Element Discovery');
-  const elements = findBlockControls();
-  console.log(`Found ${elements.length} potential BlockControls`);
-  console.groupEnd();
-  
-  if (elements.length === 0) {
-    console.error('❌ No BlockControls elements found in DOM');
-    console.log('Possible reasons:');
-    console.log('- Component not rendered');
-    console.log('- Conditional rendering always false');
-    console.log('- Build/compilation error');
-    return;
-  }
-  
-  // Step 2: Analyze each element
-  for (let i = 0; i < elements.length; i++) {
-    console.group(`\nSTEP 2: Analyzing Element ${i}`);
-    const el = elements[i];
+    // 2. Monitor computed style access
+    const originalGetComputedStyle = window.getComputedStyle;
+    window.getComputedStyle = function(element, pseudoElement) {
+        const styles = originalGetComputedStyle.call(this, element, pseudoElement);
+        const opacity = styles.opacity;
+        
+        if (opacity && suspiciousValues.some(v => Math.abs(v - parseFloat(opacity)) < 0.001)) {
+            console.warn('⚠️ Computed opacity at suspicious value:', opacity, 'for:', element);
+            opacitySnapshots.set(element, {
+                opacity: opacity,
+                timestamp: performance.now(),
+                stack: new Error().stack
+            });
+        }
+        return styles;
+    };
     
-    // Make it visible for testing
-    el.style.border = '2px dashed red';
+    // 3. Track transition interruptions
+    document.addEventListener('transitioncancel', (e) => {
+        if (e.propertyName === 'opacity') {
+            const currentOpacity = getComputedStyle(e.target).opacity;
+            console.error('💥 Opacity transition CANCELLED at:', currentOpacity);
+            console.log('Element:', e.target);
+            console.log('Elapsed time:', e.elapsedTime);
+        }
+    }, true);
     
-    // Run diagnostics
-    const diagnosis = diagnoseVisibility(el);
-    const issues = Object.entries(diagnosis.invisibilityReasons)
-      .filter(([, value]) => value)
-      .map(([key]) => key);
+    console.log('✅ Opacity forensics enabled. Watch for 🚨 and 💥 markers.');
+})();
+```
+
+## Primary culprits and their signatures
+
+### React concurrent rendering interruption
+
+The most likely cause in your React 18 environment is **concurrent rendering interrupting CSS transitions mid-execution**. When React's time-slicing yields to the browser, ongoing opacity animations can pause at intermediate values corresponding to specific animation timing functions.
+
+**Detection method:**
+```javascript
+// Monitor React render interruptions during transitions
+const detectRenderInterference = () => {
+    let renderCount = 0;
+    const originalSetState = React.Component.prototype.setState;
     
-    if (issues.length > 0) {
-      console.warn('Issues found:', issues);
-      
-      // Try to fix each issue
-      if (issues.includes('opacityZero')) {
-        console.log('🔧 Fixing opacity...');
-        el.style.opacity = '1';
-      }
-      
-      if (issues.includes('displayNone')) {
-        console.log('🔧 Fixing display...');
-        el.style.display = 'block';
-      }
-      
-      if (issues.includes('pointerEventsNone')) {
-        console.log('🔧 Fixing pointer events...');
-        el.style.pointerEvents = 'auto';
-      }
+    React.Component.prototype.setState = function(...args) {
+        renderCount++;
+        if (renderCount > 1) {
+            const element = document.querySelector('.BlockControls');
+            if (element) {
+                const opacity = getComputedStyle(element).opacity;
+                if (opacity !== '0' && opacity !== '1') {
+                    console.warn('React render during transition, opacity:', opacity);
+                }
+            }
+        }
+        return originalSetState.apply(this, args);
+    };
+};
+```
+
+### GPU floating-point precision errors
+
+The values 0.685 and 0.770 strongly suggest **floating-point conversion issues** in the GPU rendering pipeline. When browsers promote elements to composite layers for hardware acceleration, precision can be lost during the conversion between CSS values and GPU texture coordinates.
+
+**Key insight**: These specific values often result from:
+- **0.685** ≈ 175/255 (common RGB alpha channel conversion)
+- **0.770** ≈ ease-in-out timing function at ~80% completion
+
+**Verification approach:**
+```javascript
+// Detect GPU layer promotion issues
+function analyzeCompositeLayerIssues() {
+    const element = document.querySelector('.BlockControls');
+    const computed = getComputedStyle(element);
+    
+    // Check for layer-creating properties
+    const layerTriggers = {
+        transform: computed.transform !== 'none',
+        willChange: computed.willChange !== 'auto',
+        filter: computed.filter !== 'none',
+        backfaceVisibility: computed.backfaceVisibility === 'hidden',
+        position: computed.position === 'fixed'
+    };
+    
+    console.log('Composite layer triggers:', layerTriggers);
+    
+    // Force style recalculation to detect precision issues
+    element.style.opacity = '0.99999';
+    const preciseValue = getComputedStyle(element).opacity;
+    console.log('Precision test result:', preciseValue);
+}
+```
+
+### CSS percentage compilation bug
+
+A critical discovery: Using **percentage values for opacity** (like `opacity: 70%`) can be incorrectly compiled to `1%` in production builds due to CSS minification bugs in build tools.
+
+**Immediate fix**: Replace all percentage opacity values with decimals:
+```javascript
+// BAD - can compile incorrectly
+style={{ opacity: showMenu ? '100%' : '0%' }}
+
+// GOOD - always use decimal values
+style={{ opacity: showMenu ? 1 : 0 }}
+```
+
+## Advanced debugging techniques
+
+### Transition state machine monitoring
+
+Deploy this comprehensive transition tracker to identify exactly when and why opacity gets stuck:
+
+```javascript
+class OpacityTransitionDebugger {
+    constructor(selector) {
+        this.element = document.querySelector(selector);
+        this.transitionLog = [];
+        this.setupMonitoring();
     }
+    
+    setupMonitoring() {
+        // Track all transition events
+        ['transitionstart', 'transitionrun', 'transitioncancel', 'transitionend'].forEach(event => {
+            this.element.addEventListener(event, (e) => {
+                if (e.propertyName === 'opacity') {
+                    const currentOpacity = getComputedStyle(this.element).opacity;
+                    this.transitionLog.push({
+                        event: event,
+                        opacity: currentOpacity,
+                        time: performance.now(),
+                        elapsedTime: e.elapsedTime
+                    });
+                    
+                    console.log(`${event}: opacity=${currentOpacity}`);
+                    
+                    // Detect stuck transitions
+                    if (event === 'transitionend' && currentOpacity !== '1' && currentOpacity !== '0') {
+                        console.error('TRANSITION ENDED AT PARTIAL VALUE:', currentOpacity);
+                        this.analyzeFailure();
+                    }
+                }
+            });
+        });
+        
+        // Monitor competing modifications
+        this.detectCompetingChanges();
+    }
+    
+    detectCompetingChanges() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'style' || mutation.attributeName === 'class') {
+                    const opacity = getComputedStyle(this.element).opacity;
+                    console.log('Style mutation detected, current opacity:', opacity);
+                }
+            });
+        });
+        
+        observer.observe(this.element, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+    }
+    
+    analyzeFailure() {
+        console.group('🔍 Opacity Failure Analysis');
+        console.log('Transition log:', this.transitionLog);
+        console.log('Final computed styles:', getComputedStyle(this.element));
+        console.log('Inline styles:', this.element.style.cssText);
+        console.log('ClassList:', Array.from(this.element.classList));
+        console.groupEnd();
+    }
+}
+
+// Deploy on your problematic element
+new OpacityTransitionDebugger('.BlockControls');
+```
+
+### Chrome DevTools advanced inspection
+
+Enable these hidden features for deep rendering analysis:
+
+1. **Enable GPU layer borders**: DevTools → Rendering → Layer borders
+2. **Monitor style recalculation storms**: Performance panel → Enable CSS selector stats
+3. **Track paint operations**: Rendering → Paint flashing
+
+**Critical DevTools command** for your specific issue:
+```javascript
+// In Console, this reveals all elements with partial opacity
+$$('*').filter(el => {
+    const opacity = parseFloat(getComputedStyle(el).opacity);
+    return opacity === 0.685 || opacity === 0.770;
+}).forEach(el => {
+    console.log('Element with suspicious opacity:', el);
+    console.log('Styles:', getComputedStyle(el));
+});
+```
+
+## React-specific mitigations
+
+### Prevent concurrent rendering interference
+
+For your hover-based opacity changes, force synchronous updates:
+
+```javascript
+function BlockControls() {
+    const [ref, isHovered] = useHover();
+    const shouldShow = isMobile || isHovered || showMenu;
+    
+    // Use useLayoutEffect for synchronous DOM updates
+    useLayoutEffect(() => {
+        if (ref.current) {
+            // Direct DOM manipulation to bypass React batching
+            ref.current.style.opacity = shouldShow ? '1' : '0';
+        }
+    }, [shouldShow]);
+    
+    // Also apply inline styles as fallback
+    return (
+        <div 
+            ref={ref}
+            className="block-controls"
+            style={{ 
+                opacity: shouldShow ? 1 : 0,
+                // Critical: specify transition in JS to ensure consistency
+                transition: 'opacity 200ms ease-out',
+                // Prevent layer promotion issues
+                willChange: 'auto',
+                // Force GPU acceleration carefully
+                transform: 'translateZ(0)'
+            }}
+        >
+            {/* Controls content */}
+        </div>
+    );
+}
+```
+
+### CSS-only hover solution
+
+Given the complexity of the issue, consider a pure CSS approach that bypasses JavaScript entirely:
+
+```css
+.block-wrapper {
+    position: relative;
+}
+
+.block-controls {
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+    /* Prevent partial values with step-based transition */
+    transition-timing-function: steps(10);
+}
+
+/* Mobile or forced visibility */
+.block-controls.show-always,
+.block-wrapper:hover .block-controls {
+    opacity: 1;
+    /* Force exact value with !important */
+    opacity: 1 !important;
+}
+
+/* Fallback for stuck values */
+@supports (opacity: 0.685) {
+    .block-controls {
+        /* If browser reports partial value support, force binary */
+        opacity: 0;
+    }
+    .block-wrapper:hover .block-controls {
+        opacity: 1;
+    }
+}
+```
+
+## Root cause verification protocol
+
+Run this comprehensive diagnostic to identify your specific issue:
+
+```javascript
+async function diagnoseOpacityIssue() {
+    const element = document.querySelector('.BlockControls');
+    
+    console.group('🔬 Opacity Diagnostic Report');
+    
+    // 1. Check for React interference
+    const isReactFiber = element._reactInternalFiber || element._reactInternalInstance;
+    console.log('React fiber detected:', !!isReactFiber);
+    
+    // 2. Analyze computed styles
+    const computed = getComputedStyle(element);
+    console.log('Current opacity:', computed.opacity);
+    console.log('Transition:', computed.transition);
+    console.log('Will-change:', computed.willChange);
+    console.log('Transform:', computed.transform);
+    
+    // 3. Check for GPU layers
+    console.log('Compositing reasons:', element.style);
+    
+    // 4. Test precision
+    element.style.opacity = '0.999999';
+    await new Promise(r => setTimeout(r, 100));
+    console.log('Precision test:', getComputedStyle(element).opacity);
+    
+    // 5. Detect third-party interference
+    const stylesheets = Array.from(document.styleSheets);
+    const externalStyles = stylesheets.filter(s => s.href && !s.href.includes(window.location.hostname));
+    console.log('External stylesheets:', externalStyles.length);
     
     console.groupEnd();
-  }
-  
-  // Step 3: Test hover functionality
-  console.group('\nSTEP 3: Testing Hover Functionality');
-  elements.forEach((el, i) => {
-    debugHoverState(el);
-  });
-  console.groupEnd();
-  
-  // Step 4: Check production-specific issues
-  console.group('\nSTEP 4: Production Build Checks');
-  verifyProductionBuild();
-  checkTailwindClasses();
-  console.groupEnd();
-  
-  console.log('\n✅ Debugging complete. Check findings above.');
 }
 
-// Run the complete debug sequence
-systematicDebug();
+diagnoseOpacityIssue();
 ```
 
-## Common issue resolutions
+## Immediate solutions to implement
 
-Based on the debugging results, here are the most common fixes:
+Based on the forensic analysis, implement these fixes in order of likelihood:
 
-### 1. Opacity stuck at 0
-```javascript
-// Add to your component temporarily
-useEffect(() => {
-  if (ref.current) {
-    // Force opacity after mount
-    setTimeout(() => {
-      ref.current.style.opacity = '1';
-      console.log('Forced opacity to 1');
-    }, 100);
-  }
-}, [ref]);
-```
+1. **Replace percentage opacity values** with decimals throughout your codebase
+2. **Use useLayoutEffect** instead of useEffect for opacity changes
+3. **Add transition-timing-function: steps(2)** to force binary opacity values
+4. **Disable will-change** property which can cause GPU precision issues
+5. **Implement pure CSS hover** solution to bypass React rendering entirely
 
-### 2. Parent .group class missing
-```javascript
-// Add .group class to parent programmatically
-useEffect(() => {
-  if (ref.current) {
-    const parent = ref.current.parentElement;
-    if (parent && !parent.classList.contains('group')) {
-      parent.classList.add('group');
-      console.log('Added .group class to parent');
-    }
-  }
-}, [ref]);
-```
-
-### 3. Hover events not firing
-```javascript
-// Use callback ref to ensure proper attachment
-const callbackRef = useCallback(node => {
-  if (node) {
-    console.log('Ref attached to:', node);
-    // Attach listeners directly
-    node.addEventListener('mouseenter', () => setIsHovered(true));
-    node.addEventListener('mouseleave', () => setIsHovered(false));
-  }
-}, []);
-```
-
-### 4. Z-index stacking issues
-```javascript
-// Check stacking context
-function fixStackingContext(element) {
-  let parent = element.parentElement;
-  while (parent) {
-    const styles = getComputedStyle(parent);
-    if (styles.zIndex !== 'auto' || styles.position !== 'static') {
-      console.log('Found stacking context:', parent);
-      parent.style.zIndex = '1';
-    }
-    parent = parent.parentElement;
-  }
-}
-```
-
-This comprehensive debugging methodology should help you identify exactly why your BlockControls component isn't appearing. Start with the quick diagnostic checklist, then work through the systematic debugging process if needed. The key is to eliminate possibilities one by one until you find the root cause.
+The combination of React's concurrent rendering, GPU floating-point precision limits, and potential CSS compilation bugs creates a perfect storm for these specific partial opacity values. The forensic debugging tools provided will help you identify which specific issue affects your implementation.

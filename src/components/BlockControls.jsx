@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { Trash2, GripVertical, MoreVertical, Copy, ArrowUp, ArrowDown } from 'lucide-react';
 import { useHover } from '../hooks/useHover';
 
@@ -31,14 +31,30 @@ export default function BlockControls({
   // Determine visibility based on hover state or mobile
   const shouldShow = isMobile || isHovered || showMenu;
 
+  // Use useLayoutEffect for synchronous DOM updates to prevent partial opacity
+  useLayoutEffect(() => {
+    if (ref.current) {
+      // Direct DOM manipulation to bypass React batching issues
+      ref.current.style.opacity = shouldShow ? '1' : '0';
+      ref.current.style.transform = shouldShow ? 'scale(1)' : 'scale(0.95)';
+    }
+  }, [shouldShow]);
+
   return (
     <div 
       ref={ref}
-      className="absolute -left-2 top-1 flex items-start gap-1 transition-all duration-200 ease-out"
+      className={`block-controls absolute -left-2 top-1 flex items-start gap-1 transition-all duration-200 ease-out ${shouldShow ? 'show-always' : ''}`}
       style={{ 
         zIndex: 20,
+        // Fallback values - useLayoutEffect will set these directly
         opacity: shouldShow ? 1 : 0,
         transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
+        // Use step-based transition to force binary opacity values
+        transition: 'opacity 200ms steps(2), transform 200ms ease-out',
+        // Prevent layer promotion issues
+        willChange: 'auto',
+        // Force GPU acceleration carefully
+        transform3d: 'translateZ(0)',
         pointerEvents: shouldShow ? 'auto' : 'none',
         minHeight: '44px' // Ensure touch targets are large enough
       }}

@@ -6,6 +6,7 @@
 @import './styles/auth-enhanced.css';
 @import './styles/settings-minimal.css';
 @import './styles/pricing-fallback.css';
+@import './styles/block-controls.css';
 
 @tailwind base;
 @tailwind components;

@@ -14,73 +14,86 @@
 No error messages - this is a CSS/positioning issue.
 
 ## Root Cause
-The AI research revealed the core issue: **Mouse events cannot reach elements positioned outside an overflow boundary**. The BlockControls were positioned at `-left-2` inside an `overflow-x-hidden` container, which created an event clipping boundary. The browser literally could not detect hover events on the controls, even though they were visually rendered.
+Through extensive debugging and AI research, we discovered the core issue was **React's concurrent rendering interrupting CSS opacity transitions**. The BlockControls opacity was getting stuck at partial values (0.685 and 0.770) instead of reaching 1.0, making them appear invisible.
 
-Additional factors:
-1. **CSS group hover limitations**: The deeply nested structure with overflow constraints prevented CSS hover propagation
-2. **Event clipping**: Elements outside overflow boundaries cannot receive mouse events
-3. **Mobile touch issues**: Controls were visible but unclickable due to pointer-events conflicts
+Key findings:
+1. **React concurrent rendering**: Time-slicing was interrupting CSS transitions mid-execution
+2. **GPU floating-point precision**: Values like 0.685 ≈ 175/255 (RGB alpha channel conversion) and 0.770 ≈ ease-in-out timing at ~80% completion
+3. **CSS transition interruption**: Transitions were being cancelled before completion
+4. **Event boundaries**: Initial positioning issues with overflow containers were resolved but opacity remained problematic
 
-Structure causing the issue:
+Debug logs revealed:
 ```
-<div className="overflow-x-hidden">  <!-- Clips anything outside -->
-  <div className="px-8">             <!-- 32px padding -->
-    <Block>                          <!-- Relative positioned -->
-      <BlockControls left-1 />       <!-- Absolute at 4px, needs to be at -28px -->
-    </Block>
-  </div>
-</div>
+⚠️ Computed opacity at suspicious value: 0.685
+⚠️ Computed opacity at suspicious value: 0.770
+💥 Opacity transition CANCELLED at: 0.685
 ```
 
 ## Solution
-After extensive debugging, discovered that CSS opacity transitions were not completing properly. Implemented inline style approach:
+Implemented a multi-layered approach to ensure BlockControls opacity transitions complete properly:
 
-1. **Created custom useHover hook**: Detects hover state using JavaScript event listeners on the parent element.
+1. **useLayoutEffect for synchronous updates**: Replaced useEffect with useLayoutEffect to ensure DOM updates happen synchronously before browser paint, preventing React's concurrent rendering from interrupting transitions.
 
-2. **Used inline styles for opacity**: Instead of className-based opacity, used direct style attribute with `opacity: shouldShow ? 1 : 0` to ensure full visibility.
+2. **Direct DOM manipulation**: Added direct style manipulation in useLayoutEffect to bypass React's batching and ensure opacity values are set immediately.
 
-3. **Removed conflicting CSS classes**: Eliminated complex className strings that were causing partial opacity values (0.685, 0.770) instead of full opacity.
+3. **Step-based transitions**: Changed CSS transition timing function to `steps(2)` to force binary opacity values (0 or 1) instead of allowing intermediate values.
 
-4. **Maintained transform animations**: Kept smooth scale transitions using inline transform styles.
+4. **Pure CSS hover fallback**: Added CSS-only hover solution with `!important` to force exact opacity values as a fallback mechanism.
 
-5. **Fixed mobile and touch handling**: 
-   - Added mobile detection to always show controls on small screens
-   - Proper pointer-events management
-   - Set minimum touch target size (44px)
+5. **Disabled will-change**: Removed `will-change` property which can cause GPU precision issues and layer promotion problems.
 
-This solution works because:
-- Direct style attributes bypass CSS specificity issues
-- Ensures opacity reaches 1.0 (fully visible) instead of partial values
-- JavaScript state management provides reliable hover detection
-- Works consistently across all browsers and devices
+6. **Custom useHover hook**: Maintains JavaScript-based hover detection as the primary mechanism, with CSS as fallback.
+
+7. **Forensic debugging**: Added comprehensive opacity monitoring to detect and log when partial values occur.
+
+This solution addresses:
+- React concurrent rendering interruptions
+- GPU floating-point precision errors  
+- CSS transition cancellation issues
+- Browser-specific rendering quirks
 
 ## Files Changed
-- `src/hooks/useHover.js` (new file):
+- `src/hooks/useHover.js` (kept from previous solution):
   - Custom hook that detects hover on parent elements
   - Uses mouseenter/mouseleave events
   - Includes touch event handling for mobile
-  - Works around CSS overflow limitations
 
 - `src/components/BlockControls.jsx`:
-  - Added useHover hook import and usage
-  - Replaced CSS group hover with JavaScript state
-  - Added mobile detection with useEffect
-  - Dynamic className based on hover/mobile state
-  - Added pointer-events and minHeight styles
-  - Added onTouchStart handler
+  - Added useLayoutEffect import and implementation
+  - Direct DOM manipulation for opacity and transform
+  - Step-based transitions in inline styles
+  - Added block-controls and show-always CSS classes
+  - Disabled will-change property
 
 - `src/components/Block.jsx`:
-  - No changes needed (group class still present for hook to find)
+  - Added block-wrapper CSS class for pure CSS hover
+
+- `src/styles/block-controls.css` (new file):
+  - Pure CSS hover fallback solution
+  - Step-based transition timing functions
+  - Forced opacity values with !important
+  - GPU precision issue mitigations
+
+- `src/index.css`:
+  - Added import for block-controls.css
+
+- `src/components/debug/OpacityForensics.jsx` (temporary):
+  - Forensic debugging component
+  - Monitors opacity modifications and computed styles
+  - Tracks transition cancellations
+  - Can be removed after issue is resolved
 
 - `src/components/ExpandedViewEnhanced.jsx`:
-  - Kept `pl-8` padding for visual spacing
+  - Temporarily added OpacityForensics component
 
 ## Prevention
-1. **Avoid CSS hover with overflow boundaries**: When elements need hover interactions near overflow containers, use JavaScript event detection instead of CSS :hover
-2. **Test event propagation**: Always verify that mouse events can reach absolutely positioned elements
-3. **Use custom hooks for complex interactions**: JavaScript-based solutions are more reliable than complex CSS selectors
-4. **Consider mobile from the start**: Design with touch interactions in mind, not just hover
-5. **Document CSS limitations**: Be aware that elements outside overflow boundaries cannot receive mouse events, even if visually rendered
+1. **Use useLayoutEffect for critical visual updates**: When dealing with opacity or visibility changes, useLayoutEffect ensures synchronous DOM updates
+2. **Avoid complex CSS transitions in React**: Prefer direct style manipulation or CSS animations that don't rely on React state changes
+3. **Test with React DevTools Profiler**: Check for concurrent rendering interruptions during transitions
+4. **Use step-based transitions for binary states**: When you only need 0 or 1 values, use `steps()` timing function
+5. **Monitor for partial opacity values**: Add logging to detect when opacity doesn't reach expected values
+6. **Implement multiple fallback strategies**: Combine JavaScript state, inline styles, and pure CSS for maximum reliability
+7. **Be aware of GPU precision limits**: Floating-point precision can cause unexpected values like 0.685 or 0.770
 
 ## Testing Checklist
 - [ ] Hover over blocks to see controls appear

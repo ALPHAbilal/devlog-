@@ -12,6 +12,7 @@
 }
 
 /* Show on hover or when forced (mobile) - using !important for maximum specificity */
+.group:hover .block-controls,
 .block-wrapper:hover .block-controls,
 .block-controls.show-always {
   opacity: 1 !important;

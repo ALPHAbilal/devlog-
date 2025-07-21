@@ -108,7 +108,7 @@ export default function InlineActionBar({
             width: '5rem',
             height: '3rem',
             pointerEvents: 'auto',
-            zIndex: 19,
+            zIndex: 49,
           }}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
@@ -123,7 +123,7 @@ export default function InlineActionBar({
           position: 'absolute',
           left: '-3rem',
           top: '0rem',
-          zIndex: 20,
+          zIndex: 50,
           // Visibility control
           opacity: shouldShow ? 1 : 0,
           visibility: shouldShow ? 'visible' : 'hidden',
@@ -160,11 +160,15 @@ export default function InlineActionBar({
         {showDropdown && (
           <div
             ref={dropdownRef}
-            className="absolute left-full top-0 ml-2 z-50
+            className="absolute left-full top-0 ml-2
                        bg-dark-primary/95 backdrop-blur-sm rounded-lg 
                        border border-dark-secondary/50 shadow-xl
                        py-1 min-w-[180px]
                        animate-in fade-in slide-in-from-left-1 duration-200"
+            style={{
+              zIndex: 9999,
+              position: 'absolute'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Duplicate */}

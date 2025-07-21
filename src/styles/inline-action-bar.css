@@ -134,6 +134,8 @@
 /* Dropdown menu styling */
 .inline-action-bar .dropdown-menu {
   animation: slideDown 200ms ease-out;
+  z-index: 9999 !important;
+  position: relative;
 }
 
 @keyframes slideDown {

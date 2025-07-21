@@ -445,7 +445,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   }
 
   return (
-    <div className="group relative overflow-visible" ref={containerRef} data-block-id={block.id}>
+    <div className="group relative overflow-visible pt-2" ref={containerRef} data-block-id={block.id}>
       {/* Version Tracker - can be easily removed by setting VERSION_TRACKING_ENABLED to false */}
       <CodeVersionTracker 
         block={block}

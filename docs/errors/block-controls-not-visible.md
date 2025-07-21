@@ -33,24 +33,26 @@ Structure causing the issue:
 ```
 
 ## Solution
-Implemented JavaScript-based hover detection to bypass CSS limitations:
+After extensive debugging, discovered that CSS opacity transitions were not completing properly. Implemented inline style approach:
 
-1. **Created custom useHover hook**: Detects hover state using JavaScript event listeners on the parent element, which aren't limited by CSS overflow boundaries.
+1. **Created custom useHover hook**: Detects hover state using JavaScript event listeners on the parent element.
 
-2. **Replaced CSS group hover with state-based visibility**: Controls now use JavaScript state (`isHovered`) instead of relying on CSS `group-hover:` utilities.
+2. **Used inline styles for opacity**: Instead of className-based opacity, used direct style attribute with `opacity: shouldShow ? 1 : 0` to ensure full visibility.
 
-3. **Fixed mobile detection and touch handling**: 
+3. **Removed conflicting CSS classes**: Eliminated complex className strings that were causing partial opacity values (0.685, 0.770) instead of full opacity.
+
+4. **Maintained transform animations**: Kept smooth scale transitions using inline transform styles.
+
+5. **Fixed mobile and touch handling**: 
    - Added mobile detection to always show controls on small screens
-   - Added proper touch event handlers
+   - Proper pointer-events management
    - Set minimum touch target size (44px)
 
-4. **Added pointer-events management**: Controls have `pointer-events: auto` when visible, ensuring they're clickable.
-
-This JavaScript approach has a 98% success rate because:
-- Event listeners work regardless of overflow boundaries
-- Direct state management ensures reliable hover detection
-- Works consistently across all browsers
-- Fixes both desktop hover and mobile touch issues
+This solution works because:
+- Direct style attributes bypass CSS specificity issues
+- Ensures opacity reaches 1.0 (fully visible) instead of partial values
+- JavaScript state management provides reliable hover detection
+- Works consistently across all browsers and devices
 
 ## Files Changed
 - `src/hooks/useHover.js` (new file):

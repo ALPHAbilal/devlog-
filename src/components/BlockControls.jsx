@@ -17,15 +17,6 @@ export default function BlockControls({
   const [showMenu, setShowMenu] = useState(false);
   const [ref, isHovered] = useHover();
   const [isMobile, setIsMobile] = useState(false);
-  
-  // Debug logging
-  console.log('🎯 BlockControls rendering:', {
-    blockId,
-    isVisible,
-    isHovered,
-    isMobile,
-    showMenu
-  });
 
   // Detect if we're on mobile
   useEffect(() => {
@@ -43,11 +34,11 @@ export default function BlockControls({
   return (
     <div 
       ref={ref}
-      className={`absolute -left-2 top-1 flex items-start gap-1 transition-all duration-200 ease-out ${
-        shouldShow ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}
+      className="absolute -left-2 top-1 flex items-start gap-1 transition-all duration-200 ease-out"
       style={{ 
         zIndex: 20,
+        opacity: shouldShow ? 1 : 0,
+        transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
         pointerEvents: shouldShow ? 'auto' : 'none',
         minHeight: '44px' // Ensure touch targets are large enough
       }}

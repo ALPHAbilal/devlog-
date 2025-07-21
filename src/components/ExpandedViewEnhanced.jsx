@@ -17,7 +17,6 @@ import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
 import './VirtualizedGrid.css'; // For scrollbar styles
-import BlockControlsDebugger from './debug/BlockControlsDebugger'; // Temporary debug component
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
@@ -674,9 +673,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
   return (
     <>
-      {/* Temporary debug component */}
-      <BlockControlsDebugger />
-      
       {/* Floating Controls Trigger - Outside scrollable container */}
       <FloatingControlsTrigger
         viewMode={viewMode}

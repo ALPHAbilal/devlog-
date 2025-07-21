@@ -10,23 +10,13 @@ export function useHover() {
   
   useEffect(() => {
     const element = ref.current;
-    if (!element) {
-      console.log('❌ useHover: No element ref');
-      return;
-    }
+    if (!element) return;
     
     // Find the parent block wrapper (the element with the group class)
     const parent = element.closest('.group') || element;
-    console.log('🔍 useHover: Found parent:', parent, 'Has .group class:', parent.classList.contains('group'));
     
-    const handleEnter = () => {
-      console.log('🟢 useHover: Mouse entered');
-      setIsHovered(true);
-    };
-    const handleLeave = () => {
-      console.log('🔴 useHover: Mouse left');
-      setIsHovered(false);
-    };
+    const handleEnter = () => setIsHovered(true);
+    const handleLeave = () => setIsHovered(false);
     
     // Add event listeners to the parent for hover detection
     parent.addEventListener('mouseenter', handleEnter);

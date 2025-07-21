@@ -3,25 +3,30 @@
   position: relative;
 }
 
-/* Hide controls by default */
-.block-controls {
-  opacity: 0;
-  transform: scale(0.95);
-  pointer-events: none;
+/* Hide controls by default - using !important to override any conflicting styles */
+.block-wrapper .block-controls {
+  opacity: 0 !important;
+  transform: scale(0.95) !important;
+  pointer-events: none !important;
   transition: opacity 200ms ease-out, transform 200ms ease-out;
 }
 
-/* Show on hover or when forced (mobile) */
+/* Show on hover or when forced (mobile) - using !important for maximum specificity */
 .block-wrapper:hover .block-controls,
 .block-controls.show-always {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: auto !important;
 }
 
 /* Ensure dropdown menu stays visible when open */
 .block-controls:has(.relative > div:last-child) {
-  opacity: 1;
-  transform: scale(1);
-  pointer-events: auto;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: auto !important;
+}
+
+/* Reset any inherited opacity values */
+.block-controls * {
+  opacity: inherit;
 }

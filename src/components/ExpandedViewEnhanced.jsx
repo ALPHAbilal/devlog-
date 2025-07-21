@@ -16,7 +16,7 @@ import { ShareDialogEnhanced } from './ShareDialogEnhanced';
 import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
-import OpacityForensics from './debug/OpacityForensics';
+// import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
 export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
@@ -674,8 +674,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
   return (
     <>
-      {/* Temporary opacity forensics debugger */}
-      <OpacityForensics />
+      {/* Opacity forensics debugger removed - was interfering with transitions */}
       
       {/* Floating Controls Trigger - Outside scrollable container */}
       <FloatingControlsTrigger

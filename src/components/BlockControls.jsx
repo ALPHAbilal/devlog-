@@ -135,24 +135,28 @@ export default function BlockControls({
     <>
       {/* Always-visible trigger button (enterprise pattern) */}
       <button
-        className={`block-controls-trigger absolute p-1.5 rounded-md
-                   text-text-secondary/40 hover:text-text-secondary
-                   hover:bg-dark-secondary/50 transition-all duration-150
-                   ${showControls || showMenu ? 'bg-dark-secondary/50 text-text-secondary' : ''}`}
+        className={`block-controls-trigger absolute p-1 rounded-lg
+                   text-text-secondary/30 hover:text-text-secondary/70
+                   hover:bg-dark-secondary/30 hover:scale-110
+                   transition-all duration-200 ease-out
+                   ${showControls || showMenu ? 'active bg-dark-secondary/50 text-text-secondary scale-110' : ''}`}
         style={{
           position: 'absolute',
-          left: '-2rem',
-          top: '0.25rem',
+          left: '-3.5rem',
+          top: '0.5rem',
           zIndex: 20,
-          minWidth: '32px',
-          minHeight: '32px',
+          width: '28px',
+          height: '28px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           // Always visible, following enterprise patterns
           opacity: 1,
           visibility: 'visible',
-          pointerEvents: 'auto'
+          pointerEvents: 'auto',
+          // Visual refinements
+          backdropFilter: 'blur(8px)',
+          border: '1px solid rgba(255, 255, 255, 0.05)'
         }}
         onClick={() => setShowControls(!showControls)}
         onMouseEnter={handleMouseEnter}
@@ -160,25 +164,36 @@ export default function BlockControls({
         title="Block options"
         aria-label="Block options"
       >
-        <span style={{fontSize: '16px', lineHeight: 1}}>⋮</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="1"></circle>
+          <circle cx="12" cy="5" r="1"></circle>
+          <circle cx="12" cy="19" r="1"></circle>
+        </svg>
       </button>
 
       {/* Controls panel - shown on trigger click or hover */}
       <div 
-        className={`block-controls absolute flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''}`}
+        className={`block-controls absolute flex flex-col items-start gap-0.5 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''}`}
         style={{ 
           // Explicit positioning as fallback for Tailwind purging
           position: 'absolute',
-          left: '-0.5rem',
-          top: '2.5rem',
+          left: '-3.75rem',
+          top: '3rem',
           zIndex: 20,
           minHeight: '44px',
+          padding: '0.5rem',
           // Enterprise pattern: never remove from DOM, use visibility
           visibility: shouldShow ? 'visible' : 'hidden',
           opacity: shouldShow ? 1 : 0,
           pointerEvents: shouldShow ? 'auto' : 'none',
-          transform: shouldShow ? 'scale(1)' : 'scale(0.95)',
-          transition: 'opacity 200ms ease-out, transform 200ms ease-out, visibility 200ms ease-out',
+          transform: shouldShow ? 'translateY(0) scale(1)' : 'translateY(-4px) scale(0.95)',
+          transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+          // Enhanced visual styling
+          background: 'rgba(10, 22, 40, 0.98)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '0.75rem',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
           ...(isDebugMode ? { border: '2px dashed blue', background: 'rgba(0,0,255,0.1)' } : {})
         }}
         onMouseEnter={handleMouseEnter}
@@ -187,10 +202,10 @@ export default function BlockControls({
       {/* Drag Handle */}
       <div className="flex flex-col gap-1 py-2">
         <div
-          className="drag-handle p-2 md:p-1.5 rounded-md cursor-grab active:cursor-grabbing
-                     text-text-secondary/40 hover:text-text-secondary
-                     hover:bg-dark-secondary/50 transition-all duration-150
-                     group min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 
+          className="drag-handle p-1.5 rounded-md cursor-grab active:cursor-grabbing
+                     text-text-secondary/50 hover:text-text-secondary/80
+                     hover:bg-white/5 transition-all duration-150
+                     min-w-[36px] min-h-[36px] 
                      flex items-center justify-center"
           title="Drag to reorder"
           draggable={true}
@@ -211,23 +226,35 @@ export default function BlockControls({
             if (onDragEnd) onDragEnd(e);
           }}
         >
-          <span className="md:hidden text-base leading-none select-none pointer-events-none" style={{fontSize: '20px'}}>⋮⋮</span>
-          <span className="hidden md:block text-sm leading-none select-none pointer-events-none" style={{fontSize: '16px'}}>⋮⋮</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+            <circle cx="5" cy="12" r="1"></circle>
+            <circle cx="12" cy="12" r="1"></circle>
+            <circle cx="19" cy="12" r="1"></circle>
+            <circle cx="5" cy="5" r="1"></circle>
+            <circle cx="12" cy="5" r="1"></circle>
+            <circle cx="19" cy="5" r="1"></circle>
+            <circle cx="5" cy="19" r="1"></circle>
+            <circle cx="12" cy="19" r="1"></circle>
+            <circle cx="19" cy="19" r="1"></circle>
+          </svg>
         </div>
 
         {/* More Options */}
         <div className="relative">
           <button 
             onClick={() => setShowMenu(!showMenu)}
-            className="p-2 md:p-1.5 rounded-md
-                       text-text-secondary/40 hover:text-text-secondary
-                       hover:bg-dark-secondary/50 transition-all duration-150
-                       group min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 
+            className="p-1.5 rounded-md
+                       text-text-secondary/50 hover:text-text-secondary/80
+                       hover:bg-white/5 transition-all duration-150
+                       min-w-[36px] min-h-[36px] 
                        flex items-center justify-center"
             title="More options"
           >
-            <span className="md:hidden text-base leading-none select-none" style={{fontSize: '20px'}}>⋯</span>
-            <span className="hidden md:block text-sm leading-none select-none" style={{fontSize: '16px'}}>⋯</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-70">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="19" cy="12" r="1"></circle>
+              <circle cx="5" cy="12" r="1"></circle>
+            </svg>
           </button>
 
           {/* Dropdown Menu */}

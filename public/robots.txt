@@ -34,7 +34,3 @@ Disallow: /
 
 # Sitemap location
 Sitemap: https://www.devlog.design/sitemap.xml
-
-# Additional sitemaps for future content
-Sitemap: https://www.devlog.design/sitemap-pages.xml
-Sitemap: https://www.devlog.design/sitemap-blog.xml

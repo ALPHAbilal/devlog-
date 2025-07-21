@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Trash2, GripVertical, MoreVertical, Copy, ArrowUp, ArrowDown } from 'lucide-react';
 
 export default function BlockControls({ 
   onDelete, 
@@ -43,15 +42,8 @@ export default function BlockControls({
       
       console.log('📋 CSS File Loaded:', hasBlockControlsCSS);
       
-      // Check if Lucide icons are available
-      console.log('🎨 Icon Components:', {
-        hasGripVertical: !!GripVertical,
-        hasMoreVertical: !!MoreVertical,
-        hasTrash2: !!Trash2,
-        hasCopy: !!Copy,
-        hasArrowUp: !!ArrowUp,
-        hasArrowDown: !!ArrowDown
-      });
+      // Log that we're using Unicode icons
+      console.log('🎨 Using Unicode icons instead of Lucide');
       
       // Check DOM elements
       setTimeout(() => {
@@ -119,8 +111,8 @@ export default function BlockControls({
             if (onDragEnd) onDragEnd(e);
           }}
         >
-          <GripVertical size={16} className="md:hidden group-hover:scale-110 transition-transform pointer-events-none" />
-          <GripVertical size={14} className="hidden md:block group-hover:scale-110 transition-transform pointer-events-none" />
+          <span className="md:hidden text-base leading-none select-none pointer-events-none" style={{fontSize: '20px'}}>⋮⋮</span>
+          <span className="hidden md:block text-sm leading-none select-none pointer-events-none" style={{fontSize: '16px'}}>⋮⋮</span>
         </div>
 
         {/* More Options */}
@@ -134,8 +126,8 @@ export default function BlockControls({
                        flex items-center justify-center"
             title="More options"
           >
-            <MoreVertical size={16} className="md:hidden group-hover:scale-110 transition-transform" />
-            <MoreVertical size={14} className="hidden md:block group-hover:scale-110 transition-transform" />
+            <span className="md:hidden text-base leading-none select-none" style={{fontSize: '20px'}}>⋯</span>
+            <span className="hidden md:block text-sm leading-none select-none" style={{fontSize: '16px'}}>⋯</span>
           </button>
 
           {/* Dropdown Menu */}
@@ -165,7 +157,7 @@ export default function BlockControls({
                                hover:bg-dark-primary/50 transition-colors
                                flex items-center gap-2 min-h-[44px] md:min-h-0"
                   >
-                    <ArrowUp size={14} />
+                    <span style={{fontSize: '14px'}}>↑</span>
                     Move up
                   </button>
                 )}
@@ -182,7 +174,7 @@ export default function BlockControls({
                                hover:bg-dark-primary/50 transition-colors
                                flex items-center gap-2 min-h-[44px] md:min-h-0"
                   >
-                    <ArrowDown size={14} />
+                    <span style={{fontSize: '14px'}}>↓</span>
                     Move down
                   </button>
                 )}
@@ -203,7 +195,7 @@ export default function BlockControls({
                              hover:bg-dark-primary/50 transition-colors
                              flex items-center gap-2 min-h-[44px] md:min-h-0"
                 >
-                  <Copy size={14} />
+                  <span style={{fontSize: '14px'}}>📋</span>
                   Duplicate
                 </button>
 
@@ -218,7 +210,7 @@ export default function BlockControls({
                              hover:bg-red-500/10 transition-colors
                              flex items-center gap-2 min-h-[44px] md:min-h-0"
                 >
-                  <Trash2 size={14} />
+                  <span style={{fontSize: '14px'}}>🗑</span>
                   Delete
                 </button>
               </div>

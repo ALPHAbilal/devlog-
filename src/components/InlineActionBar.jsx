@@ -162,14 +162,33 @@ export default function InlineActionBar({
   );
 
   return (
-    <div 
-      className={`inline-action-bar absolute flex items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
-      style={{
-        position: 'absolute',
-        left: isMobile ? '-2.5rem' : '-3.5rem',
-        top: '0.5rem',
-        zIndex: 20,
-        padding: '0.25rem',
+    <>
+      {/* Visual connector line */}
+      {shouldShow && !isMobile && (
+        <div
+          style={{
+            position: 'absolute',
+            left: '-9rem',
+            top: '1.5rem',
+            width: '8rem',
+            height: '1px',
+            background: 'linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1) 20%, rgba(255, 255, 255, 0.1) 80%, transparent)',
+            zIndex: 19,
+            pointerEvents: 'none',
+            opacity: 0.5,
+            transition: 'opacity 200ms ease-out'
+          }}
+        />
+      )}
+      
+      <div 
+        className={`inline-action-bar absolute flex items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
+        style={{
+          position: 'absolute',
+          left: isMobile ? '-6rem' : '-10rem',
+          top: '0.5rem',
+          zIndex: 20,
+          padding: '0.25rem',
         // Visual design
         background: shouldShow ? 'rgba(10, 22, 40, 0.98)' : 'transparent',
         backdropFilter: shouldShow ? 'blur(12px)' : 'none',
@@ -274,6 +293,7 @@ export default function InlineActionBar({
           </svg>
         }
       />
-    </div>
+      </div>
+    </>
   );
 }

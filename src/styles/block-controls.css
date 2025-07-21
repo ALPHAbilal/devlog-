@@ -86,8 +86,8 @@
 /* Version tracking gutter indicators */
 .code-block-gutter {
   position: relative;
-  /* Reserve space for gutter indicators */
-  margin-left: 2.5rem;
+  /* Reserve extra space for gutter indicators to avoid overlap with block controls */
+  margin-left: 3.5rem;
 }
 
 /* Gutter dot indicators */
@@ -153,10 +153,10 @@
 /* Ensure gutter indicators don't interfere with scrolling */
 .version-gutter-container {
   position: absolute;
-  left: -2rem;
+  left: -3.5rem; /* Adjusted to match new dot position */
   top: 0;
   bottom: 0;
-  width: 2rem;
+  width: 3.5rem;
   pointer-events: none;
 }
 

@@ -57,10 +57,22 @@
   max-width: fit-content;
 }
 
-/* Ensure controls stay within viewport on small screens */
+/* Responsive positioning for different screen sizes */
+@media (max-width: 1024px) {
+  .inline-action-bar {
+    left: -4rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .inline-action-bar {
+    left: -3.5rem !important;
+  }
+}
+
 @media (max-width: 640px) {
   .inline-action-bar {
-    left: -2.5rem !important;
+    left: -3rem !important;
     transform: scale(0.95);
     transform-origin: left top;
   }

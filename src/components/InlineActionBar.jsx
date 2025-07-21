@@ -128,10 +128,10 @@ export default function InlineActionBar({
         <div
           style={{
             position: 'absolute',
-            left: '-3.5rem',
+            left: '-5rem',
             top: '-0.5rem',
-            width: '4rem',
-            height: '2.5rem',
+            width: '6rem',
+            height: '3rem',
             pointerEvents: 'auto',
             zIndex: 19,
           }}
@@ -146,8 +146,8 @@ export default function InlineActionBar({
         className={`inline-action-bar absolute flex items-center gap-0.5 ${isMobile ? 'always-visible' : ''}`}
         style={{
           position: 'absolute',
-          left: '0rem',
-          top: '-0.5rem',
+          left: '-5rem',
+          top: '0rem',
           zIndex: 20,
           padding: '0.25rem',
           // Visual design

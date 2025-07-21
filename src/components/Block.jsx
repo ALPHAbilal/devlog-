@@ -50,6 +50,8 @@ export default function Block({
   dropPosition
 }) {
   const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
   
   // Debug mode detection
@@ -139,6 +141,14 @@ export default function Block({
           position: 'relative', 
           zIndex: isDragging ? 10 : 'auto'
         }}
+        // Mouse events for hover detection
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          // Don't hide if menu is open
+          if (!showMenu) {
+            setIsHovered(false);
+          }
+        }}
         // Make the whole block draggable as fallback
         draggable={false}
         onDragStart={(e) => {
@@ -157,7 +167,7 @@ export default function Block({
       >
         {/* Enhanced Block Controls - Back to original position */}
         <BlockControls
-          isVisible={!isDragging}
+          isVisible={isHovered && !isDragging}
           onDelete={() => onDelete(block.id)}
           onDuplicate={() => onDuplicate?.(block.id)}
           onMoveUp={() => onMoveUp?.(block.id)}
@@ -167,6 +177,7 @@ export default function Block({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
           blockId={block.id}
+          onMenuToggle={setShowMenu}
         />
 
         {/* Block Content */}

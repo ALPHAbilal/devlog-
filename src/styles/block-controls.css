@@ -1,21 +1,17 @@
-/* Block controls visibility with pure CSS hover */
+/* Block controls - JavaScript controlled visibility */
 .block-wrapper {
   position: relative;
   isolation: isolate; /* Create clean stacking context */
 }
 
-/* Hide controls by default - using !important to override any conflicting styles */
+/* Position controls - no visibility rules as JavaScript handles that */
 .block-wrapper .block-controls {
   /* Use explicit positioning values instead of Tailwind utilities */
   position: absolute !important;
   left: -0.5rem !important; /* Explicit value for -left-2 */
   top: 0.25rem !important;  /* Explicit value for top-1 */
   
-  /* Visibility styles */
-  opacity: 0 !important;
-  transform: scale(0.95) !important;
-  pointer-events: none !important;
-  transition: opacity 200ms ease-out, transform 200ms ease-out;
+  /* Ensure proper sizing */
   min-width: 80px; /* Ensure container has minimum width */
   
   /* Ensure proper stacking */
@@ -29,19 +25,9 @@
   gap: 0.25rem !important; /* gap-1 equivalent */
 }
 
-/* Show on hover or when forced (mobile) - using !important for maximum specificity */
-.group:hover .block-controls,
-.block-wrapper:hover .block-controls,
+/* Mobile always visible */
 .block-controls.show-always {
   opacity: 1 !important;
-  transform: scale(1) !important;
-  pointer-events: auto !important;
-}
-
-/* Ensure dropdown menu stays visible when open */
-.block-controls:has(.relative > div:last-child) {
-  opacity: 1 !important;
-  transform: scale(1) !important;
   pointer-events: auto !important;
 }
 

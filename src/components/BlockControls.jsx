@@ -10,10 +10,18 @@ export default function BlockControls({
   canMoveDown,
   onDragStart,
   onDragEnd,
-  blockId
+  blockId,
+  onMenuToggle
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  
+  // Update parent when menu state changes
+  useEffect(() => {
+    if (onMenuToggle) {
+      onMenuToggle(showMenu);
+    }
+  }, [showMenu, onMenuToggle]);
   
   // Debug mode detection
   const isDebugMode = typeof window !== 'undefined' && 
@@ -75,12 +83,21 @@ export default function BlockControls({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Don't render if not visible (unless on mobile or in debug mode)
+  if (!isVisible && !isMobile && !isDebugMode) {
+    return null;
+  }
+
   return (
     <div 
       className={`block-controls absolute -left-2 top-1 flex items-start gap-1 ${isMobile ? 'show-always' : ''} ${isDebugMode ? 'debug-visible' : ''}`}
       style={{ 
         zIndex: 20,
         minHeight: '44px', // Ensure touch targets are large enough
+        opacity: isVisible || isMobile || isDebugMode ? 1 : 0,
+        pointerEvents: isVisible || isMobile || isDebugMode ? 'auto' : 'none',
+        transform: isVisible || isMobile || isDebugMode ? 'scale(1)' : 'scale(0.95)',
+        transition: 'opacity 200ms ease-out, transform 200ms ease-out',
         ...(isDebugMode ? { border: '2px dashed blue', background: 'rgba(0,0,255,0.1)' } : {})
       }}
       onTouchStart={(e) => e.stopPropagation()}>

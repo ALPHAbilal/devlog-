@@ -968,6 +968,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   };
 
   return (
+    <>
     <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d] flex h-[600px]">
       {/* File Tree Sidebar */}
       {showFileTree && (
@@ -1391,5 +1392,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         onClose={() => setContextMenu(null)}
       />
     )}
+    </>
   );
 }

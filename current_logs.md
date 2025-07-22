@@ -1,344 +1,48 @@
-index-foFGBMFa.js:25 Using optimized Supabase client
-index-foFGBMFa.js:25 Global auto-save manager initialized with defensive wrappers
-index-foFGBMFa.js:25 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-foFGBMFa.js:25 Starting auto-save with interval: 1 seconds
-index-foFGBMFa.js:25 IndexedDB initialized successfully
-index-foFGBMFa.js:25 Starting auto-save with interval: 2 seconds
-index-foFGBMFa.js:25 [Supabase] Auth event: SIGNED_IN
-index-foFGBMFa.js:25 [AuthContext] Auth state change received: SIGNED_IN {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-foFGBMFa.js:25 [Supabase] Auth event: SIGNED_IN
-index-foFGBMFa.js:25 [AuthContext] Auth state change received: SIGNED_IN {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-foFGBMFa.js:25 [Supabase] Auth event: INITIAL_SESSION
-index-foFGBMFa.js:25 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-foFGBMFa.js:25 Starting auto-save with interval: 2 seconds
-index-foFGBMFa.js:25 Dashboard: Starting to load entries...
-index-foFGBMFa.js:25 Using Supabase for storage
-index-foFGBMFa.js:25 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-foFGBMFa.js:25 Dashboard: Storage initialized (128ms)
-index-foFGBMFa.js:25 SupabaseAdapter: getDocuments called
-index-foFGBMFa.js:25 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-foFGBMFa.js:25 SupabaseAdapter: Documents query completed in 786ms
-index-foFGBMFa.js:25 SupabaseAdapter: Found 66 documents
-index-foFGBMFa.js:25 SupabaseAdapter: Found 5 unsynced documents in IndexedDB
-index-foFGBMFa.js:25 SupabaseAdapter: Total documents after merge: 68
-index-foFGBMFa.js:25 SupabaseAdapter: Returning 68 documents
-index-foFGBMFa.js:25 Dashboard: Loaded 68 entries (796ms)
-index-foFGBMFa.js:25 Dashboard: Total load time: 928ms
-index-foFGBMFa.js:25 SupabaseAdapter: Getting projects...
-index-foFGBMFa.js:25 SupabaseAdapter: Found 0 projects
-index-foFGBMFa.js:25 Dashboard: Loaded 0 projects
-index-foFGBMFa.js:25 Dashboard: Setting isLoading to false
-index-foFGBMFa.js:90 [Violation] 'message' handler took 160ms
-index-foFGBMFa.js:25 VirtualizedGrid - scroll container: {"totalHeight":10324,"containerHeight":756,"hasOverflow":true,"parentIsCardsContainer":true}
-index-foFGBMFa.js:25 VirtualizedGrid - scroll container: {"totalHeight":4032,"containerHeight":756,"hasOverflow":true,"parentIsCardsContainer":true}
-index-foFGBMFa.js:25 Dashboard: Showing ExpandedView instead of grid
-index-foFGBMFa.js:25 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document 90285e09-262a-40cb-b727-22be8f980cd3
-index-foFGBMFa.js:25 PaginatedBlockLoader: Loaded 0 blocks for page 0 of document 90285e09-262a-40cb-b727-22be8f980cd3
-index-foFGBMFa.js:25 ExpandedView: Initial load period complete, enabling saves
-index-foFGBMFa.js:25 Dashboard: Showing ExpandedView instead of grid
-index-foFGBMFa.js:25 SessionCache: Cached 1 blocks for document 90285e09-262a-40cb-b727-22be8f980cd3
-index-foFGBMFa.js:25 ErrorBoundary caught: ReferenceError: pan is not defined
-    at PW (index-foFGBMFa.js:880:2619)
-    at Xm (index-foFGBMFa.js:105:34206)
-    at pg (index-foFGBMFa.js:105:62638)
-    at qw (index-foFGBMFa.js:105:73203)
-    at vS (index-foFGBMFa.js:105:107341)
-    at xD (index-foFGBMFa.js:105:106400)
-    at Bg (index-foFGBMFa.js:105:106230)
-    at hS (index-foFGBMFa.js:105:103321)
-    at DS (index-foFGBMFa.js:105:114828)
-    at MessagePort.Y (index-foFGBMFa.js:90:1576)Caused by: React ErrorBoundary ReferenceError: pan is not defined
-    at PW (https://www.devlog.design/assets/index-foFGBMFa.js:877:1989)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at a3 (https://www.devlog.design/assets/index-foFGBMFa.js:917:490)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at SY (https://www.devlog.design/assets/index-foFGBMFa.js:1059:1647)
-    at main (<anonymous>)
-    at div (<anonymous>)
-    at lee (https://www.devlog.design/assets/index-foFGBMFa.js:1242:3490)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at LE (https://www.devlog.design/assets/index-foFGBMFa.js:613:1420)
-    at uz (https://www.devlog.design/assets/index-foFGBMFa.js:73:3968)
-    at bz (https://www.devlog.design/assets/index-foFGBMFa.js:73:7879)
-    at sentryRoute(bz) (<anonymous>)
-    at Ute (https://www.devlog.design/assets/index-foFGBMFa.js:1408:647)
-    at hY (https://www.devlog.design/assets/index-foFGBMFa.js:959:2546)
-    at iF (https://www.devlog.design/assets/index-foFGBMFa.js:113:44441)
-    at sF (https://www.devlog.design/assets/index-foFGBMFa.js:113:42639)
-    at rF (https://www.devlog.design/assets/index-foFGBMFa.js:113:40667)
-    at xz (https://www.devlog.design/assets/index-foFGBMFa.js:73:7263)
-    at Cz (https://www.devlog.design/assets/index-foFGBMFa.js:82:874)
-    at Pte (https://www.devlog.design/assets/index-foFGBMFa.js:1399:779)
-    at Fte (<anonymous>) {componentStack: '\n    at PW (https://www.devlog.design/assets/index…ex-foFGBMFa.js:1399:779)\n    at Fte (<anonymous>)'}
-(anonymous) @ index-foFGBMFa.js:25
-componentDidCatch @ index-foFGBMFa.js:1399
-Rw.N.componentDidCatch.a.callback @ index-foFGBMFa.js:105
-O1 @ index-foFGBMFa.js:105
-I1 @ index-foFGBMFa.js:105
-Yw @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_S @ index-foFGBMFa.js:105
-wS @ index-foFGBMFa.js:105
-pS @ index-foFGBMFa.js:105
-hS @ index-foFGBMFa.js:105
-DS @ index-foFGBMFa.js:105
-Y @ index-foFGBMFa.js:90
-index-foFGBMFa.js:1399 Error Report
-index-foFGBMFa.js:25 Error: ReferenceError: pan is not defined
-    at PW (index-foFGBMFa.js:880:2619)
-    at Xm (index-foFGBMFa.js:105:34206)
-    at pg (index-foFGBMFa.js:105:62638)
-    at qw (index-foFGBMFa.js:105:73203)
-    at vS (index-foFGBMFa.js:105:107341)
-    at xD (index-foFGBMFa.js:105:106400)
-    at Bg (index-foFGBMFa.js:105:106230)
-    at hS (index-foFGBMFa.js:105:103321)
-    at DS (index-foFGBMFa.js:105:114828)
-    at MessagePort.Y (index-foFGBMFa.js:90:1576)Caused by: React ErrorBoundary ReferenceError: pan is not defined
-    at PW (https://www.devlog.design/assets/index-foFGBMFa.js:877:1989)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at a3 (https://www.devlog.design/assets/index-foFGBMFa.js:917:490)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at SY (https://www.devlog.design/assets/index-foFGBMFa.js:1059:1647)
-    at main (<anonymous>)
-    at div (<anonymous>)
-    at lee (https://www.devlog.design/assets/index-foFGBMFa.js:1242:3490)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at LE (https://www.devlog.design/assets/index-foFGBMFa.js:613:1420)
-    at uz (https://www.devlog.design/assets/index-foFGBMFa.js:73:3968)
-    at bz (https://www.devlog.design/assets/index-foFGBMFa.js:73:7879)
-    at sentryRoute(bz) (<anonymous>)
-    at Ute (https://www.devlog.design/assets/index-foFGBMFa.js:1408:647)
-    at hY (https://www.devlog.design/assets/index-foFGBMFa.js:959:2546)
-    at iF (https://www.devlog.design/assets/index-foFGBMFa.js:113:44441)
-    at sF (https://www.devlog.design/assets/index-foFGBMFa.js:113:42639)
-    at rF (https://www.devlog.design/assets/index-foFGBMFa.js:113:40667)
-    at xz (https://www.devlog.design/assets/index-foFGBMFa.js:73:7263)
-    at Cz (https://www.devlog.design/assets/index-foFGBMFa.js:82:874)
-    at Pte (https://www.devlog.design/assets/index-foFGBMFa.js:1399:779)
-    at Fte (<anonymous>)
-(anonymous) @ index-foFGBMFa.js:25
-reportError @ index-foFGBMFa.js:1399
-componentDidCatch @ index-foFGBMFa.js:1399
-Rw.N.componentDidCatch.a.callback @ index-foFGBMFa.js:105
-O1 @ index-foFGBMFa.js:105
-I1 @ index-foFGBMFa.js:105
-Yw @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_S @ index-foFGBMFa.js:105
-wS @ index-foFGBMFa.js:105
-pS @ index-foFGBMFa.js:105
-hS @ index-foFGBMFa.js:105
-DS @ index-foFGBMFa.js:105
-Y @ index-foFGBMFa.js:90
-index-foFGBMFa.js:25 Component Stack: 
-    at PW (https://www.devlog.design/assets/index-foFGBMFa.js:877:1989)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at a3 (https://www.devlog.design/assets/index-foFGBMFa.js:917:490)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at SY (https://www.devlog.design/assets/index-foFGBMFa.js:1059:1647)
-    at main (<anonymous>)
-    at div (<anonymous>)
-    at lee (https://www.devlog.design/assets/index-foFGBMFa.js:1242:3490)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at LE (https://www.devlog.design/assets/index-foFGBMFa.js:613:1420)
-    at uz (https://www.devlog.design/assets/index-foFGBMFa.js:73:3968)
-    at bz (https://www.devlog.design/assets/index-foFGBMFa.js:73:7879)
-    at sentryRoute(bz) (<anonymous>)
-    at Ute (https://www.devlog.design/assets/index-foFGBMFa.js:1408:647)
-    at hY (https://www.devlog.design/assets/index-foFGBMFa.js:959:2546)
-    at iF (https://www.devlog.design/assets/index-foFGBMFa.js:113:44441)
-    at sF (https://www.devlog.design/assets/index-foFGBMFa.js:113:42639)
-    at rF (https://www.devlog.design/assets/index-foFGBMFa.js:113:40667)
-    at xz (https://www.devlog.design/assets/index-foFGBMFa.js:73:7263)
-    at Cz (https://www.devlog.design/assets/index-foFGBMFa.js:82:874)
-    at Pte (https://www.devlog.design/assets/index-foFGBMFa.js:1399:779)
-    at Fte (<anonymous>)
-(anonymous) @ index-foFGBMFa.js:25
-reportError @ index-foFGBMFa.js:1399
-componentDidCatch @ index-foFGBMFa.js:1399
-Rw.N.componentDidCatch.a.callback @ index-foFGBMFa.js:105
-O1 @ index-foFGBMFa.js:105
-I1 @ index-foFGBMFa.js:105
-Yw @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_S @ index-foFGBMFa.js:105
-wS @ index-foFGBMFa.js:105
-pS @ index-foFGBMFa.js:105
-hS @ index-foFGBMFa.js:105
-DS @ index-foFGBMFa.js:105
-Y @ index-foFGBMFa.js:90
-index-foFGBMFa.js:25 Props: {children: {…}}
-(anonymous) @ index-foFGBMFa.js:25
-reportError @ index-foFGBMFa.js:1399
-componentDidCatch @ index-foFGBMFa.js:1399
-Rw.N.componentDidCatch.a.callback @ index-foFGBMFa.js:105
-O1 @ index-foFGBMFa.js:105
-I1 @ index-foFGBMFa.js:105
-Yw @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_a @ index-foFGBMFa.js:105
-eS @ index-foFGBMFa.js:105
-_S @ index-foFGBMFa.js:105
-wS @ index-foFGBMFa.js:105
-pS @ index-foFGBMFa.js:105
-hS @ index-foFGBMFa.js:105
-DS @ index-foFGBMFa.js:105
-Y @ index-foFGBMFa.js:90
-index-foFGBMFa.js:25 SupabaseAdapter: saveDocument called for 90285e09-262a-40cb-b727-22be8f980cd3 with 1 blocks
-index-foFGBMFa.js:25 SupabaseAdapter: Using userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b for save
-index-foFGBMFa.js:25 SupabaseAdapter: Saving document to Supabase: {id: '90285e09-262a-40cb-b727-22be8f980cd3', title: 'test 1010', blockCount: 1, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', isNew: false}
-index-foFGBMFa.js:25  PATCH https://zqcjipwiznesnbgbocnu.supabase.co/rest/v1/documents?id=eq.90285e09-262a-40cb-b727-22be8f980cd3&user_id=eq.8eac28e6-0127-40d1-ba55-c10cbe52a32b&deleted_at=is.null&select=* 406 (Not Acceptable)
-(anonymous) @ index-foFGBMFa.js:25
-(anonymous) @ index-foFGBMFa.js:111
-(anonymous) @ index-foFGBMFa.js:111
-d @ index-foFGBMFa.js:111
-Promise.then
-p @ index-foFGBMFa.js:111
-(anonymous) @ index-foFGBMFa.js:111
-U$ @ index-foFGBMFa.js:111
-(anonymous) @ index-foFGBMFa.js:111
-then @ index-foFGBMFa.js:106
-requestIdleCallback
-(anonymous) @ index-foFGBMFa.js:1251
-gn @ index-foFGBMFa.js:1059
-onSelect @ index-foFGBMFa.js:1082
-onClick @ index-foFGBMFa.js:948
-IS @ index-foFGBMFa.js:105
-(anonymous) @ index-foFGBMFa.js:105
-Hb @ index-foFGBMFa.js:105
-Wg @ index-foFGBMFa.js:105
-iy @ index-foFGBMFa.js:106
-sR @ index-foFGBMFa.js:106
-r @ index-foFGBMFa.js:25
-index-foFGBMFa.js:25 Error saving document: {code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned', details: 'The result contains 0 rows', hint: null, status: undefined, …}
-(anonymous) @ index-foFGBMFa.js:25
-saveDocument @ index-foFGBMFa.js:950
-await in saveDocument
-saveDocument @ index-foFGBMFa.js:950
-lY @ index-foFGBMFa.js:950
-await in lY
-ft @ index-foFGBMFa.js:1251
-requestIdleCallback.timeout @ index-foFGBMFa.js:1251
-requestIdleCallback
-(anonymous) @ index-foFGBMFa.js:1251
-gn @ index-foFGBMFa.js:1059
-onSelect @ index-foFGBMFa.js:1082
-onClick @ index-foFGBMFa.js:948
-IS @ index-foFGBMFa.js:105
-(anonymous) @ index-foFGBMFa.js:105
-Hb @ index-foFGBMFa.js:105
-Wg @ index-foFGBMFa.js:105
-iy @ index-foFGBMFa.js:106
-sR @ index-foFGBMFa.js:106
-r @ index-foFGBMFa.js:25
-index-foFGBMFa.js:25 Error saving document: {message: 'JSON object requested, multiple (or no) rows returned', code: 'PGRST116', details: 'The result contains 0 rows', hint: null, status: undefined}
-(anonymous) @ index-foFGBMFa.js:25
-ft @ index-foFGBMFa.js:1251
-await in ft
-requestIdleCallback.timeout @ index-foFGBMFa.js:1251
-requestIdleCallback
-(anonymous) @ index-foFGBMFa.js:1251
-gn @ index-foFGBMFa.js:1059
-onSelect @ index-foFGBMFa.js:1082
-onClick @ index-foFGBMFa.js:948
-IS @ index-foFGBMFa.js:105
-(anonymous) @ index-foFGBMFa.js:105
-Hb @ index-foFGBMFa.js:105
-Wg @ index-foFGBMFa.js:105
-iy @ index-foFGBMFa.js:106
-sR @ index-foFGBMFa.js:106
-r @ index-foFGBMFa.js:25
-index-foFGBMFa.js:25 SupabaseAdapter: updateAllDocuments called with 68 documents
-index-foFGBMFa.js:25 SupabaseAdapter: Saving document 90285e09-262a-40cb-b727-22be8f980cd3 with 1 blocks
-index-foFGBMFa.js:25 SupabaseAdapter: saveDocument called for 90285e09-262a-40cb-b727-22be8f980cd3 with 1 blocks
-index-foFGBMFa.js:25 SupabaseAdapter: Using userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b for save
-index-foFGBMFa.js:25 SupabaseAdapter: Saving document to Supabase: {id: '90285e09-262a-40cb-b727-22be8f980cd3', title: 'test 1010', blockCount: 1, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', isNew: false}
-index-foFGBMFa.js:25  PATCH https://zqcjipwiznesnbgbocnu.supabase.co/rest/v1/documents?id=eq.90285e09-262a-40cb-b727-22be8f980cd3&user_id=eq.8eac28e6-0127-40d1-ba55-c10cbe52a32b&deleted_at=is.null&select=* 406 (Not Acceptable)
-(anonymous) @ index-foFGBMFa.js:25
-(anonymous) @ index-foFGBMFa.js:111
-(anonymous) @ index-foFGBMFa.js:111
-d @ index-foFGBMFa.js:111
-Promise.then
-p @ index-foFGBMFa.js:111
-(anonymous) @ index-foFGBMFa.js:111
-U$ @ index-foFGBMFa.js:111
-(anonymous) @ index-foFGBMFa.js:111
-then @ index-foFGBMFa.js:106
-index-foFGBMFa.js:25 Error saving document: {code: 'PGRST116', message: 'JSON object requested, multiple (or no) rows returned', details: 'The result contains 0 rows', hint: null, status: undefined, …}
-(anonymous) @ index-foFGBMFa.js:25
-saveDocument @ index-foFGBMFa.js:950
-await in saveDocument
-updateAllDocuments @ index-foFGBMFa.js:950
-saveEntries @ index-foFGBMFa.js:950
-oY @ index-foFGBMFa.js:950
-await in oY
-ft @ index-foFGBMFa.js:1251
-await in ft
-requestIdleCallback.timeout @ index-foFGBMFa.js:1251
-requestIdleCallback
-(anonymous) @ index-foFGBMFa.js:1251
-gn @ index-foFGBMFa.js:1059
-onSelect @ index-foFGBMFa.js:1082
-onClick @ index-foFGBMFa.js:948
-IS @ index-foFGBMFa.js:105
-(anonymous) @ index-foFGBMFa.js:105
-Hb @ index-foFGBMFa.js:105
-Wg @ index-foFGBMFa.js:105
-iy @ index-foFGBMFa.js:106
-sR @ index-foFGBMFa.js:106
-r @ index-foFGBMFa.js:25
-index-foFGBMFa.js:25 Fallback save also failed: {message: 'JSON object requested, multiple (or no) rows returned', code: 'PGRST116', details: 'The result contains 0 rows', hint: null, status: undefined}
-(anonymous) @ index-foFGBMFa.js:25
-ft @ index-foFGBMFa.js:1251
-await in ft
-requestIdleCallback.timeout @ index-foFGBMFa.js:1251
-requestIdleCallback
-(anonymous) @ index-foFGBMFa.js:1251
-gn @ index-foFGBMFa.js:1059
-onSelect @ index-foFGBMFa.js:1082
-onClick @ index-foFGBMFa.js:948
-IS @ index-foFGBMFa.js:105
-(anonymous) @ index-foFGBMFa.js:105
-Hb @ index-foFGBMFa.js:105
-Wg @ index-foFGBMFa.js:105
-iy @ index-foFGBMFa.js:106
-sR @ index-foFGBMFa.js:106
-r @ index-foFGBMFa.js:25
+[21:55:37.955] Running build in Washington, D.C., USA (East) – iad1
+[21:55:37.955] Build machine configuration: 2 cores, 8 GB
+[21:55:37.973] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: e43069a)
+[21:55:38.566] Cloning completed: 592.000ms
+[21:55:39.149] Restored build cache from previous deployment (Gh5fxPueUDhJ78gteV6h1qNVPt8Y)
+[21:55:39.646] Running "vercel build"
+[21:55:40.566] Vercel CLI 44.5.0
+[21:55:41.908] Installing dependencies...
+[21:55:43.343] 
+[21:55:43.344] up to date in 1s
+[21:55:43.345] 
+[21:55:43.345] 75 packages are looking for funding
+[21:55:43.345]   run `npm fund` for details
+[21:55:43.485] 
+[21:55:43.486] > journey-log-compass@0.0.0 build
+[21:55:43.487] > vite build
+[21:55:43.487] 
+[21:55:45.485] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[21:55:45.528] [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
+[21:55:45.881] transforming...
+[21:55:50.156] [32m✓[39m 2302 modules transformed.
+[21:55:50.166] [31m✗[39m Build failed in 4.64s
+[21:55:50.168] [31merror during build:
+[21:55:50.168] [31m[vite:esbuild] Transform failed with 1 error:
+[21:55:50.169] /vercel/path0/src/components/blocks/VersionTrackBlock.jsx:1385:4: ERROR: Expected ")" but found "{"[31m
+[21:55:50.169] file: [36m/vercel/path0/src/components/blocks/VersionTrackBlock.jsx:1385:4[31m
+[21:55:50.169] [33m
+[21:55:50.169] [33mExpected ")" but found "{"[33m
+[21:55:50.170] 1383|      </div>
+[21:55:50.170] 1384|      
+[21:55:50.170] 1385|      {/* Context Menu */}
+[21:55:50.171]    |      ^
+[21:55:50.171] 1386|      {contextMenu && (
+[21:55:50.171] 1387|        <ContextMenu
+[21:55:50.171] [31m
+[21:55:50.172]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
+[21:55:50.172]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
+[21:55:50.172]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
+[21:55:50.172]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
+[21:55:50.173]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
+[21:55:50.173]     at Socket.emit (node:events:518:28)
+[21:55:50.173]     at addChunk (node:internal/streams/readable:561:12)
+[21:55:50.173]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[21:55:50.174]     at Readable.push (node:internal/streams/readable:392:5)
+[21:55:50.174]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
+[21:55:50.261] Error: Command "npm run build" exited with 1
+[21:55:50.476] 
+[21:55:53.243] Exiting build container

@@ -1,87 +1,106 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Save, GitBranch, Clock, User } from 'lucide-react';
 
-// Simple color palette for branches
+// Branch colors matching the screenshot
 const BRANCH_COLORS = {
-  master: '#F59E0B', // Yellow/amber
-  'json-payload': '#3B82F6', // Blue
-  'rouge_1': '#8B5CF6', // Purple
-  'pull-mark': '#EC4899', // Pink
-  '2.4-patch': '#10B981', // Green
+  main: '#F59E0B',      // Yellow
+  feature: '#3B82F6',   // Blue  
+  develop: '#8B5CF6',   // Purple
+  hotfix: '#EC4899',    // Pink
+  release: '#10B981',   // Green
 };
 
-// Demo data structure matching the screenshot
-const DEMO_BRANCHES = {
-  master: {
-    name: 'origin/3.5-stable',
-    color: BRANCH_COLORS.master,
-    nodes: [
-      { id: 'm1', x: 280, y: 60 },
-      { id: 'm2', x: 340, y: 60 },
-      { id: 'm3', x: 400, y: 60 }
-    ]
-  },
-  'json-payload': {
-    name: 'origin/json-payload',
-    color: BRANCH_COLORS['json-payload'],
-    nodes: [
-      { id: 'j1', x: 180, y: 100, parent: 'm1' },
-      { id: 'j2', x: 240, y: 100 },
-      { id: 'j3', x: 280, y: 100, merge: 'm1' }
-    ]
-  },
-  'rouge_1': {
-    name: 'origin/rouge_1',
-    color: BRANCH_COLORS['rouge_1'],
-    nodes: [
-      { id: 'r1', x: 140, y: 140, parent: 'j1' },
-      { id: 'r2', x: 220, y: 140 },
-      { id: 'r3', x: 320, y: 140 }
-    ]
-  },
-  'pull-mark': {
-    name: 'origin/pull/mark',
-    color: BRANCH_COLORS['pull-mark'],
-    nodes: [
-      { id: 'p1', x: 240, y: 180 },
-      { id: 'p2', x: 360, y: 180 },
-      { id: 'p3', x: 440, y: 180 }
-    ]
-  },
-  '2.4-patch': {
-    name: 'origin/2.4-patch',
-    color: BRANCH_COLORS['2.4-patch'],
-    nodes: [
-      { id: 't1', x: 300, y: 220 },
-      { id: 't2', x: 360, y: 220 }
-    ]
-  }
+// Generate a short ID for versions
+const generateVersionId = () => {
+  return 'v' + Date.now().toString(36);
+};
+
+// Calculate node positions for metro map
+const calculateNodePositions = (repository) => {
+  const positions = {};
+  const branchYOffsets = { main: 100, feature: 180, develop: 260, hotfix: 340, release: 420 };
+  let xOffset = 100;
+
+  // Sort versions by timestamp
+  const sortedVersions = Object.values(repository.versions).sort(
+    (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+  );
+
+  // Calculate positions
+  sortedVersions.forEach((version, index) => {
+    const branch = version.branch || 'main';
+    const y = branchYOffsets[branch] || 100;
+    positions[version.id] = {
+      x: xOffset + (index * 80),
+      y: y,
+      branch: branch
+    };
+  });
+
+  return positions;
 };
 
 export default function VersionTrackBlock({ block, onUpdate }) {
-  const [mode, setMode] = useState('view'); // 'view' or 'edit'
-  const [selectedBranch, setSelectedBranch] = useState('master');
-  const [selectedNode, setSelectedNode] = useState(null);
-  const [editingContent, setEditingContent] = useState('');
-  const [branches] = useState(DEMO_BRANCHES);
-  const [hoveredNode, setHoveredNode] = useState(null);
+  // Initialize with proper version control structure
+  const [repository, setRepository] = useState(() => {
+    if (block.repository) {
+      return block.repository;
+    }
+    
+    // Create initial repository structure
+    const initialVersion = {
+      id: 'v1',
+      content: '// Initial version\nfunction hello() {\n  return "Hello, World!";\n}',
+      message: 'Initial commit',
+      timestamp: new Date().toISOString(),
+      author: 'user',
+      parent: null,
+      branch: 'main'
+    };
+
+    return {
+      versions: { v1: initialVersion },
+      branches: {
+        main: { name: 'main', head: 'v1', color: BRANCH_COLORS.main }
+      },
+      HEAD: 'v1'
+    };
+  });
+
+  const [currentVersion, setCurrentVersion] = useState(repository.HEAD);
+  const [editingCode, setEditingCode] = useState('');
+  const [commitMessage, setCommitMessage] = useState('');
+  const [selectedBranch, setSelectedBranch] = useState('main');
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
-  
+  const [mode, setMode] = useState('view'); // 'view' or 'edit'
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [nodePositions, setNodePositions] = useState({});
+
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
 
-  // Initialize block data
+  // Update node positions when repository changes
   useEffect(() => {
-    if (!block.branches) {
-      onUpdate(block.id, {
-        ...block,
-        branches: DEMO_BRANCHES,
-        currentBranch: 'master'
-      });
-    }
-  }, [block, onUpdate]);
+    setNodePositions(calculateNodePositions(repository));
+  }, [repository]);
 
-  // Draw the metro map
+  // Load current version's code when HEAD changes
+  useEffect(() => {
+    const version = repository.versions[currentVersion];
+    if (version) {
+      setEditingCode(version.content);
+      setSelectedBranch(version.branch || 'main');
+    }
+  }, [currentVersion, repository]);
+
+  // Save repository changes
+  useEffect(() => {
+    if (onUpdate && block.repository !== repository) {
+      onUpdate(block.id, { repository });
+    }
+  }, [repository, block.id, onUpdate]);
+
+  // Draw metro map visualization
   const drawMetroMap = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -89,95 +108,92 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
     
-    // Set canvas size
     canvas.width = rect.width;
     canvas.height = rect.height;
     
-    // Clear canvas with pure black background
+    // Clear canvas
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw connections between nodes
-    Object.values(branches).forEach(branch => {
-      ctx.strokeStyle = branch.color;
-      ctx.lineWidth = 4;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      
-      // Draw lines between consecutive nodes
-      for (let i = 0; i < branch.nodes.length - 1; i++) {
-        const node1 = branch.nodes[i];
-        const node2 = branch.nodes[i + 1];
+    // Draw connections between versions
+    Object.values(repository.versions).forEach(version => {
+      if (version.parent) {
+        const parentPos = nodePositions[version.parent];
+        const childPos = nodePositions[version.id];
         
-        ctx.beginPath();
-        ctx.moveTo(node1.x, node1.y);
-        ctx.lineTo(node2.x, node2.y);
-        ctx.stroke();
+        if (parentPos && childPos) {
+          const branch = repository.branches[version.branch] || repository.branches.main;
+          ctx.strokeStyle = branch.color;
+          ctx.lineWidth = 4;
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          
+          ctx.beginPath();
+          ctx.moveTo(parentPos.x, parentPos.y);
+          
+          // Smooth curve for branch connections
+          if (parentPos.y !== childPos.y) {
+            const midX = (parentPos.x + childPos.x) / 2;
+            ctx.bezierCurveTo(
+              midX, parentPos.y,
+              midX, childPos.y,
+              childPos.x, childPos.y
+            );
+          } else {
+            ctx.lineTo(childPos.x, childPos.y);
+          }
+          
+          ctx.stroke();
+        }
       }
-      
-      // Draw parent connections
-      branch.nodes.forEach(node => {
-        if (node.parent) {
-          // Find parent node
-          Object.values(branches).forEach(b => {
-            const parentNode = b.nodes.find(n => n.id === node.parent);
-            if (parentNode) {
-              ctx.beginPath();
-              ctx.moveTo(parentNode.x, parentNode.y);
-              ctx.lineTo(node.x, node.y);
-              ctx.stroke();
-            }
-          });
-        }
-        
-        if (node.merge) {
-          // Find merge target
-          Object.values(branches).forEach(b => {
-            const mergeNode = b.nodes.find(n => n.id === node.merge);
-            if (mergeNode) {
-              ctx.beginPath();
-              ctx.moveTo(node.x, node.y);
-              ctx.lineTo(mergeNode.x, mergeNode.y);
-              ctx.stroke();
-            }
-          });
-        }
-      });
     });
     
     // Draw nodes
-    Object.values(branches).forEach(branch => {
-      branch.nodes.forEach(node => {
-        const isHovered = hoveredNode === node.id;
-        const isSelected = selectedNode?.id === node.id;
-        
-        // Node circle
+    Object.entries(repository.versions).forEach(([versionId, version]) => {
+      const pos = nodePositions[versionId];
+      if (!pos) return;
+      
+      const branch = repository.branches[version.branch] || repository.branches.main;
+      const isCurrentVersion = versionId === currentVersion;
+      const isHovered = hoveredNode === versionId;
+      
+      // Outer circle
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+      ctx.fillStyle = '#000000';
+      ctx.fill();
+      ctx.strokeStyle = branch.color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      
+      // Inner circle
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = branch.color;
+      ctx.fill();
+      
+      // Highlight current version
+      if (isCurrentVersion) {
         ctx.beginPath();
-        ctx.arc(node.x, node.y, 8, 0, Math.PI * 2);
-        ctx.fillStyle = '#000000';
-        ctx.fill();
+        ctx.arc(pos.x, pos.y, 15, 0, Math.PI * 2);
         ctx.strokeStyle = branch.color;
-        ctx.lineWidth = 3;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
         ctx.stroke();
-        
-        // Inner circle
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = branch.color;
-        ctx.fill();
-      });
+        ctx.setLineDash([]);
+      }
     });
     
-    // Draw branch labels on the left side
+    // Draw branch labels
     let yOffset = 40;
-    Object.entries(branches).forEach(([key, branch]) => {
+    Object.entries(repository.branches).forEach(([branchName, branch]) => {
       ctx.fillStyle = branch.color;
       ctx.font = '13px sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(branch.name, 20, yOffset);
+      ctx.fillText(`origin/${branchName}`, 20, yOffset);
       yOffset += 25;
     });
-  }, [branches, hoveredNode, selectedNode]);
+  }, [repository, nodePositions, currentVersion, hoveredNode]);
 
   // Animation loop
   useEffect(() => {
@@ -194,127 +210,198 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     };
   }, [drawMetroMap]);
 
-  // Handle canvas click
+  // Handle canvas interactions
   const handleCanvasClick = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    // Check if click is on a node
-    let clickedNode = null;
-    let clickedBranch = null;
-    
-    Object.entries(branches).forEach(([branchKey, branch]) => {
-      branch.nodes.forEach(node => {
-        const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
-        if (distance < 12) {
-          clickedNode = node;
-          clickedBranch = branchKey;
-        }
-      });
-    });
-    
-    if (clickedNode) {
-      setSelectedNode(clickedNode);
-      setSelectedBranch(clickedBranch);
-      if (mode === 'view') {
-        // In view mode, clicking a node switches to edit mode
-        setMode('edit');
-        setEditingContent(`Version ${clickedNode.id} content`);
+    // Find clicked node
+    Object.entries(nodePositions).forEach(([versionId, pos]) => {
+      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+      if (distance < 12) {
+        // Checkout this version
+        setCurrentVersion(versionId);
+        setRepository(prev => ({ ...prev, HEAD: versionId }));
       }
-    }
+    });
   };
 
-  // Handle canvas hover
   const handleCanvasMouseMove = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
     let foundNode = null;
-    Object.values(branches).forEach(branch => {
-      branch.nodes.forEach(node => {
-        const distance = Math.sqrt((x - node.x) ** 2 + (y - node.y) ** 2);
-        if (distance < 12) {
-          foundNode = node.id;
-        }
-      });
+    Object.entries(nodePositions).forEach(([versionId, pos]) => {
+      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+      if (distance < 12) {
+        foundNode = versionId;
+      }
     });
     
     setHoveredNode(foundNode);
     canvasRef.current.style.cursor = foundNode ? 'pointer' : 'default';
   };
 
-  // Save new version
-  const handleSave = () => {
-    // In a real implementation, this would create a new node
-    console.log('Saving new version:', editingContent);
+  // Create new version (commit)
+  const handleCommit = () => {
+    if (!editingCode.trim() || !commitMessage.trim()) {
+      alert('Please provide both code and commit message');
+      return;
+    }
+
+    const newVersionId = generateVersionId();
+    const newVersion = {
+      id: newVersionId,
+      content: editingCode,
+      message: commitMessage,
+      timestamp: new Date().toISOString(),
+      author: 'user',
+      parent: currentVersion,
+      branch: selectedBranch
+    };
+
+    setRepository(prev => ({
+      ...prev,
+      versions: {
+        ...prev.versions,
+        [newVersionId]: newVersion
+      },
+      branches: {
+        ...prev.branches,
+        [selectedBranch]: {
+          ...prev.branches[selectedBranch],
+          head: newVersionId
+        }
+      },
+      HEAD: newVersionId
+    }));
+
+    setCurrentVersion(newVersionId);
+    setCommitMessage('');
     setMode('view');
-    setSelectedNode(null);
-    setEditingContent('');
   };
+
+  // Create new branch
+  const handleCreateBranch = (branchName) => {
+    const colorOptions = Object.values(BRANCH_COLORS);
+    const usedColors = Object.values(repository.branches).map(b => b.color);
+    const availableColor = colorOptions.find(c => !usedColors.includes(c)) || colorOptions[0];
+
+    setRepository(prev => ({
+      ...prev,
+      branches: {
+        ...prev.branches,
+        [branchName]: {
+          name: branchName,
+          head: currentVersion,
+          color: availableColor
+        }
+      }
+    }));
+
+    setSelectedBranch(branchName);
+  };
+
+  const currentVersionData = repository.versions[currentVersion];
 
   return (
     <div className="bg-black rounded-xl overflow-hidden border border-gray-900">
       {/* Header */}
       <div className="p-4 border-b border-gray-900">
         <div className="flex items-center justify-between">
-          <div className="relative">
-            <button 
-              onClick={() => setShowBranchDropdown(!showBranchDropdown)}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-950 rounded-lg
-                         text-gray-300 hover:text-gray-100 hover:bg-gray-900 
-                         transition-all text-sm border border-gray-800">
-              <span className="font-medium">{selectedBranch}</span>
-              <ChevronDown size={14} className={`transition-transform ${showBranchDropdown ? 'rotate-180' : ''}`} />
-            </button>
-            
-            {showBranchDropdown && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900 rounded-md 
-                              shadow-xl border border-gray-800 py-1 z-50">
-                {Object.keys(branches).map((branchKey) => (
-                  <button
-                    key={branchKey}
-                    onClick={() => {
-                      setSelectedBranch(branchKey);
-                      setShowBranchDropdown(false);
-                    }}
-                    className="w-full text-left px-3 py-2 text-sm text-gray-400
-                               hover:bg-gray-800 hover:text-gray-200 transition-colors"
-                  >
-                    {branchKey}
-                  </button>
-                ))}
+          <div className="flex items-center gap-4">
+            {/* Branch selector */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowBranchDropdown(!showBranchDropdown)}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-950 rounded-lg
+                           text-gray-300 hover:text-gray-100 hover:bg-gray-900 
+                           transition-all text-sm border border-gray-800">
+                <GitBranch size={14} />
+                <span className="font-medium">{selectedBranch}</span>
+                <ChevronDown size={14} className={`transition-transform ${showBranchDropdown ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {showBranchDropdown && (
+                <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900 rounded-md 
+                                shadow-xl border border-gray-800 py-1 z-50">
+                  {Object.keys(repository.branches).map((branchName) => (
+                    <button
+                      key={branchName}
+                      onClick={() => {
+                        setSelectedBranch(branchName);
+                        setShowBranchDropdown(false);
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-gray-400
+                                 hover:bg-gray-800 hover:text-gray-200 transition-colors"
+                    >
+                      {branchName}
+                    </button>
+                  ))}
+                  <div className="border-t border-gray-800 mt-1 pt-1">
+                    <button
+                      onClick={() => {
+                        const name = prompt('New branch name:');
+                        if (name) {
+                          handleCreateBranch(name);
+                          setShowBranchDropdown(false);
+                        }
+                      }}
+                      className="w-full text-left px-3 py-2 text-sm text-blue-400
+                                 hover:bg-gray-800 transition-colors"
+                    >
+                      + Create new branch
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Current version info */}
+            {currentVersionData && (
+              <div className="text-xs text-gray-500">
+                <span className="text-gray-400">{currentVersion}</span>
+                {' · '}
+                <span>{currentVersionData.message}</span>
               </div>
             )}
           </div>
           
-          {mode === 'edit' && (
-            <div className="flex items-center gap-2">
+          {/* Mode toggle */}
+          <div className="flex items-center gap-2">
+            {mode === 'edit' ? (
+              <>
+                <button
+                  onClick={() => setMode('view')}
+                  className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCommit}
+                  className="px-3 py-1.5 bg-gray-800 text-gray-300 rounded-md text-sm
+                             hover:bg-gray-700 transition-colors flex items-center gap-2"
+                >
+                  <Save size={14} />
+                  Commit
+                </button>
+              </>
+            ) : (
               <button
-                onClick={() => {
-                  setMode('view');
-                  setSelectedNode(null);
-                  setEditingContent('');
-                }}
-                className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                onClick={() => setMode('edit')}
+                className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors"
               >
-                Cancel
+                Edit Code
               </button>
-              <button
-                onClick={handleSave}
-                className="px-3 py-1.5 bg-gray-800 text-gray-300 rounded-md text-sm
-                           hover:bg-gray-700 transition-colors"
-              >
-                Save
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Metro Map */}
-      <div className={`relative bg-black ${mode === 'edit' ? 'h-64' : 'h-80'}`}>
+      {/* Metro Map Visualization */}
+      <div className="relative bg-black h-64">
         <canvas
           ref={canvasRef}
           className="w-full h-full cursor-crosshair"
@@ -323,44 +410,60 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           onMouseLeave={() => setHoveredNode(null)}
         />
         
-        {/* Simple node label */}
-        {hoveredNode && mode === 'view' && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-1 
+        {/* Version tooltip */}
+        {hoveredNode && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 
                           bg-gray-900/90 rounded text-xs text-gray-400">
-            {hoveredNode}
+            {repository.versions[hoveredNode]?.message || hoveredNode}
           </div>
         )}
-        
-        {/* Master label button */}
-        <div className="absolute bottom-4 left-4">
-          <button className="px-3 py-1 bg-red-500/20 text-red-400 rounded-md text-xs font-medium
-                             hover:bg-red-500/30 transition-colors">
-            master
-          </button>
-        </div>
       </div>
 
-      {/* Edit Mode */}
-      {mode === 'edit' && selectedNode && (
-        <div className="p-4 border-t border-gray-900">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-xs text-gray-500">
-              Version: <span className="text-gray-400 font-mono">{selectedNode.id}</span>
-            </span>
-            <span className="text-xs text-gray-500">
-              Branch: <span className="text-gray-400">{selectedBranch}</span>
-            </span>
+      {/* Code Editor */}
+      <div className="p-4 border-t border-gray-900">
+        {mode === 'edit' ? (
+          <>
+            <div className="mb-3">
+              <input
+                type="text"
+                value={commitMessage}
+                onChange={(e) => setCommitMessage(e.target.value)}
+                placeholder="Commit message..."
+                className="w-full px-3 py-2 bg-gray-950 text-gray-300 text-sm
+                           rounded-md border border-gray-800 focus:border-gray-700
+                           focus:outline-none"
+              />
+            </div>
+            <textarea
+              value={editingCode}
+              onChange={(e) => setEditingCode(e.target.value)}
+              className="w-full h-48 p-3 bg-gray-950 text-gray-300 font-mono text-sm
+                         rounded-md border border-gray-800 focus:border-gray-700
+                         focus:outline-none resize-none"
+              placeholder="Enter your code..."
+            />
+          </>
+        ) : (
+          <div className="relative">
+            <pre className="p-3 bg-gray-950 text-gray-300 font-mono text-sm rounded-md
+                            border border-gray-800 overflow-x-auto">
+              <code>{currentVersionData?.content || '// No code yet'}</code>
+            </pre>
+            {currentVersionData && (
+              <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+                <span className="flex items-center gap-1">
+                  <User size={12} />
+                  {currentVersionData.author}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock size={12} />
+                  {new Date(currentVersionData.timestamp).toLocaleString()}
+                </span>
+              </div>
+            )}
           </div>
-          <textarea
-            value={editingContent}
-            onChange={(e) => setEditingContent(e.target.value)}
-            className="w-full h-32 p-3 bg-gray-950 text-gray-300 font-mono text-sm
-                       rounded-md border border-gray-800 focus:border-gray-700
-                       focus:outline-none resize-none"
-            placeholder="Version content..."
-          />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

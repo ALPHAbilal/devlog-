@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown, Save, GitBranch, Clock, User, Code2 } from 'lucide-react';
+import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
-// Branch colors with gradients
+// Professional branch colors - muted tones inspired by GitHub
 const BRANCH_COLORS = {
-  main: { primary: '#F59E0B', secondary: '#D97706' },      // Yellow/Amber
-  feature: { primary: '#3B82F6', secondary: '#2563EB' },   // Blue
-  develop: { primary: '#8B5CF6', secondary: '#7C3AED' },   // Purple
-  hotfix: { primary: '#EC4899', secondary: '#DB2777' },    // Pink
-  release: { primary: '#10B981', secondary: '#059669' },   // Green
+  main: { primary: '#6B7280', secondary: '#4B5563' },      // Gray (default branch)
+  feature: { primary: '#3B82F6', secondary: '#2563EB' },   // Blue (active development)
+  develop: { primary: '#8B5CF6', secondary: '#7C3AED' },   // Purple (development)
+  hotfix: { primary: '#EF4444', secondary: '#DC2626' },    // Red (urgent fixes)
+  release: { primary: '#10B981', secondary: '#059669' },   // Green (stable releases)
 };
 
 // Generate a short ID for versions
@@ -86,21 +86,21 @@ const highlightCode = (code, language = 'javascript') => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-  // More robust patterns
+  // GitHub-style syntax highlighting
   const patterns = [
     // Comments (single and multi-line)
-    { regex: /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)/g, class: 'text-gray-500' },
+    { regex: /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)/g, class: 'text-[#8b949e]' },
     // Strings (including template literals)
-    { regex: /(["'])(?:(?!\1)[^\\\n]|\\[\s\S])*\1/g, class: 'text-green-400' },
-    { regex: /`(?:[^`\\]|\\[\s\S])*`/g, class: 'text-green-400' },
+    { regex: /(["'])(?:(?!\1)[^\\\n]|\\[\s\S])*\1/g, class: 'text-[#a5d6ff]' },
+    { regex: /`(?:[^`\\]|\\[\s\S])*`/g, class: 'text-[#a5d6ff]' },
     // Keywords
-    { regex: /\b(function|const|let|var|if|else|return|for|while|do|switch|case|break|continue|class|extends|import|export|from|default|new|async|await|try|catch|finally|throw|typeof|instanceof|in|of|this|super)\b/g, class: 'text-purple-400' },
+    { regex: /\b(function|const|let|var|if|else|return|for|while|do|switch|case|break|continue|class|extends|import|export|from|default|new|async|await|try|catch|finally|throw|typeof|instanceof|in|of|this|super)\b/g, class: 'text-[#ff7b72]' },
     // Numbers
-    { regex: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g, class: 'text-orange-400' },
+    { regex: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g, class: 'text-[#79c0ff]' },
     // Boolean and null
-    { regex: /\b(true|false|null|undefined)\b/g, class: 'text-orange-400' },
+    { regex: /\b(true|false|null|undefined)\b/g, class: 'text-[#79c0ff]' },
     // Function calls
-    { regex: /\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, class: 'text-blue-400' },
+    { regex: /\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, class: 'text-[#d2a8ff]' },
   ];
 
   // Apply patterns in order
@@ -146,6 +146,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [mode, setMode] = useState('view'); // 'view' or 'edit'
   const [hoveredNode, setHoveredNode] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -184,15 +188,20 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     canvas.height = rect.height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     
-    // Clear canvas with anti-aliasing
-    ctx.fillStyle = '#000000';
+    // Clear canvas with professional dark background
+    ctx.fillStyle = '#0d1117'; // GitHub dark theme background
     ctx.fillRect(0, 0, rect.width, rect.height);
     
     // Enable better rendering
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     
-    // Draw connections with gradients
+    // Apply zoom and pan transforms
+    ctx.save();
+    ctx.translate(pan.x, pan.y);
+    ctx.scale(zoom, zoom);
+    
+    // Draw connections with refined styling
     Object.values(repository.versions).forEach(version => {
       if (version.parent) {
         const parentPos = nodePositions[version.parent];
@@ -200,8 +209,11 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         
         if (parentPos && childPos) {
           const branch = repository.branches[version.branch] || repository.branches.main;
-          ctx.strokeStyle = branch.color.primary;
-          ctx.lineWidth = 3;
+          const isCurrentBranch = version.branch === selectedBranch;
+          
+          // Muted colors for inactive branches
+          ctx.strokeStyle = isCurrentBranch ? branch.color.primary : branch.color.primary + '60';
+          ctx.lineWidth = 2; // Thinner, more professional
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
           
@@ -243,79 +255,68 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       const isMergeCommit = version.message?.toLowerCase().includes('merge');
       
       
-      // Add subtle shadow for depth
-      if (isHovered || isCurrentVersion) {
-        ctx.save();
-        ctx.shadowColor = branch.color.primary;
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.globalAlpha = 0.3;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
+      // Professional node design - simple and clean
+      const nodeRadius = 6;
+      const activeRadius = 7;
       
-      // Outer ring with smooth edges
+      // Node background
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, isHovered ? 11 : 10, 0, Math.PI * 2);
-      ctx.fillStyle = '#000000';
+      ctx.arc(pos.x, pos.y, isCurrentVersion ? activeRadius : nodeRadius, 0, Math.PI * 2);
+      ctx.fillStyle = '#0d1117'; // Match canvas background
       ctx.fill();
       
-      ctx.strokeStyle = branch.color.primary;
-      ctx.lineWidth = isCurrentVersion ? 4 : 3;
+      // Node border
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, isCurrentVersion ? activeRadius : nodeRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = isCurrentVersion ? branch.color.primary : 
+                       isHovered ? branch.color.primary + 'CC' : branch.color.primary + '80';
+      ctx.lineWidth = isCurrentVersion ? 2 : 1;
       ctx.stroke();
       
-      // Inner circle with better visual hierarchy
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = isCurrentVersion ? branch.color.primary : '#000000';
-      ctx.fill();
-      
-      if (!isCurrentVersion) {
+      // Inner dot for current version
+      if (isCurrentVersion) {
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = isHovered ? branch.color.primary : branch.color.primary + '99';
+        ctx.fillStyle = branch.color.primary;
         ctx.fill();
       }
       
-      
-      // Selection ring
+      // Simple selection indicator
       if (isCurrentVersion) {
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
-        ctx.strokeStyle = branch.color.primary;
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
+        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+        ctx.strokeStyle = branch.color.primary + '40';
+        ctx.lineWidth = 1;
         ctx.stroke();
-        ctx.setLineDash([]);
       }
     });
     
-    // Draw branch labels
-    let yOffset = 30;
+    // Draw branch labels with professional styling
+    let yOffset = 20;
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
-      // Branch line preview with rounded caps
-      ctx.save();
-      ctx.strokeStyle = branch.color.primary;
-      ctx.lineWidth = 3;
+      const isActive = branchName === selectedBranch;
+      
+      // Branch indicator line
+      ctx.strokeStyle = isActive ? branch.color.primary : branch.color.primary + '60';
+      ctx.lineWidth = 2;
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(20, yOffset);
-      ctx.lineTo(45, yOffset);
+      ctx.moveTo(16, yOffset);
+      ctx.lineTo(32, yOffset);
       ctx.stroke();
-      ctx.restore();
       
-      // Branch name with better typography
-      ctx.fillStyle = '#E5E7EB';
-      ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      // Branch name with system font
+      ctx.fillStyle = isActive ? '#f0f6fc' : '#8b949e'; // GitHub's text colors
+      ctx.font = `${isActive ? '600' : '400'} 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'left';
-      ctx.fillText(branchName, 55, yOffset + 4);
+      ctx.fillText(branchName, 40, yOffset + 4);
       
-      yOffset += 25;
+      yOffset += 20;
     });
-  }, [repository, nodePositions, currentVersion, hoveredNode]);
+    
+    // Restore transform
+    ctx.restore();
+  }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
 
   // Animation loop
   useEffect(() => {
@@ -332,11 +333,57 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     };
   }, [drawMetroMap]);
 
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          setPan(prev => ({ ...prev, x: prev.x + 50 }));
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          setPan(prev => ({ ...prev, x: prev.x - 50 }));
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setPan(prev => ({ ...prev, y: prev.y + 50 }));
+          break;
+        case 'ArrowDown':
+          e.preventDefault();
+          setPan(prev => ({ ...prev, y: prev.y - 50 }));
+          break;
+        case '+':
+        case '=':
+          e.preventDefault();
+          setZoom(prev => Math.min(prev * 1.2, 3));
+          break;
+        case '-':
+        case '_':
+          e.preventDefault();
+          setZoom(prev => Math.max(prev / 1.2, 0.5));
+          break;
+        case '0':
+          e.preventDefault();
+          setZoom(1);
+          setPan({ x: 0, y: 0 });
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Handle canvas interactions with visual feedback
   const handleCanvasClick = (e) => {
+    if (isDragging) return;
+    
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left - pan.x) / zoom;
+    const y = (e.clientY - rect.top - pan.y) / zoom;
     
     // Find clicked node
     let clickedVersion = null;
@@ -352,19 +399,28 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       setCurrentVersion(clickedVersion);
       setRepository(prev => ({ ...prev, HEAD: clickedVersion }));
       
-      // Visual feedback
+      // Subtle visual feedback
       const canvas = canvasRef.current;
-      canvas.style.transform = 'scale(0.98)';
+      canvas.style.transform = 'scale(0.99)';
       setTimeout(() => {
         canvas.style.transform = 'scale(1)';
-      }, 100);
+      }, 150);
     }
   };
 
   const handleCanvasMouseMove = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const x = (e.clientX - rect.left - pan.x) / zoom;
+    const y = (e.clientY - rect.top - pan.y) / zoom;
+    
+    if (isDragging) {
+      const dx = e.clientX - dragStart.x;
+      const dy = e.clientY - dragStart.y;
+      setPan({ x: pan.x + dx, y: pan.y + dy });
+      setDragStart({ x: e.clientX, y: e.clientY });
+      canvasRef.current.style.cursor = 'grabbing';
+      return;
+    }
     
     let foundNode = null;
     Object.entries(nodePositions).forEach(([versionId, pos]) => {
@@ -375,13 +431,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     });
     
     setHoveredNode(foundNode);
-    canvasRef.current.style.cursor = foundNode ? 'pointer' : 'default';
-    
-    // Add hover effect feedback
-    if (foundNode !== hoveredNode) {
-      // Trigger redraw when hover state changes
-      setHoveredNode(foundNode);
-    }
+    canvasRef.current.style.cursor = foundNode ? 'pointer' : isDragging ? 'grabbing' : 'grab';
   };
 
   // Create new version (commit)
@@ -450,45 +500,60 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const currentVersionData = repository.versions[currentVersion];
 
   return (
-    <div className="bg-black rounded-xl overflow-hidden border border-gray-900 shadow-2xl">
+    <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d]">
       {/* Header */}
-      <div className="p-4 border-b border-gray-900">
+      <div className="px-4 py-3 border-b border-[#30363d] bg-[#010409]">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Branch selector */}
             <div className="relative">
               <button 
                 onClick={() => setShowBranchDropdown(!showBranchDropdown)}
-                className="flex items-center gap-2 px-3 py-1.5 bg-gray-900 rounded-md
-                           text-gray-400 hover:text-gray-200 hover:bg-gray-800 
-                           transition-colors text-sm border border-gray-800">
+                className="flex items-center gap-2 px-3 py-1 bg-[#21262d] rounded-md
+                           text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#30363d] 
+                           transition-all duration-150 text-sm border border-[#30363d]
+                           font-normal focus:outline-none focus:ring-2 focus:ring-[#58a6ff] focus:ring-offset-2 
+                           focus:ring-offset-[#0d1117]"
+                aria-label="Branch selector"
+                aria-expanded={showBranchDropdown}>
                 <GitBranch size={14} />
-                <span className="font-medium">{selectedBranch}</span>
-                <ChevronDown size={14} className={`transition-transform ${showBranchDropdown ? 'rotate-180' : ''}`} />
+                <span>{selectedBranch}</span>
+                <ChevronDown size={14} className={`transition-transform duration-150 ${showBranchDropdown ? 'rotate-180' : ''}`} />
               </button>
               
               {showBranchDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900 rounded-md 
-                                shadow-lg border border-gray-800 py-1 z-50">
-                  {Object.keys(repository.branches).map((branchName) => (
-                    <button
-                      key={branchName}
-                      onClick={() => {
-                        setSelectedBranch(branchName);
-                        setShowBranchDropdown(false);
-                      }}
-                      className="w-full text-left px-3 py-2 text-sm text-gray-400
-                                 hover:bg-gray-800 hover:text-gray-200 transition-colors
-                                 flex items-center gap-2"
-                    >
-                      <div 
-                        className="w-3 h-3 rounded-full"
-                        style={{ backgroundColor: repository.branches[branchName].color.primary }}
-                      />
-                      {branchName}
-                    </button>
-                  ))}
-                  <div className="border-t border-gray-800 mt-1 pt-1">
+                <div className="absolute top-full left-0 mt-1 w-56 bg-[#161b22] rounded-md 
+                                shadow-lg border border-[#30363d] py-1 z-50">
+                  {Object.keys(repository.branches).map((branchName) => {
+                    const isActive = branchName === selectedBranch;
+                    return (
+                      <button
+                        key={branchName}
+                        onClick={() => {
+                          setSelectedBranch(branchName);
+                          setShowBranchDropdown(false);
+                        }}
+                        className={`w-full text-left px-3 py-1.5 text-sm
+                                   hover:bg-[#21262d] transition-colors duration-150
+                                   flex items-center gap-2 ${
+                                     isActive ? 'text-[#f0f6fc] bg-[#21262d]' : 'text-[#8b949e]'
+                                   }`}
+                      >
+                        <div 
+                          className="w-2 h-2 rounded-full"
+                          style={{ 
+                            backgroundColor: repository.branches[branchName].color.primary,
+                            opacity: isActive ? 1 : 0.6 
+                          }}
+                        />
+                        {branchName}
+                        {isActive && (
+                          <span className="ml-auto text-[10px] text-[#7d8590]">current</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  <div className="border-t border-[#30363d] mt-1 pt-1">
                     <button
                       onClick={() => {
                         const name = prompt('New branch name:');
@@ -497,8 +562,8 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                           setShowBranchDropdown(false);
                         }
                       }}
-                      className="w-full text-left px-3 py-2 text-sm text-blue-400
-                                 hover:bg-gray-800 transition-colors"
+                      className="w-full text-left px-3 py-1.5 text-sm text-[#58a6ff]
+                                 hover:bg-[#21262d] transition-colors duration-150"
                     >
                       + Create new branch
                     </button>
@@ -509,11 +574,11 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
             {/* Current version info */}
             {currentVersionData && (
-              <div className="text-xs text-gray-500">
-                <Code2 size={12} className="inline mr-1" />
-                <span className="text-gray-400 font-mono">{currentVersion}</span>
-                {' · '}
-                <span>{currentVersionData.message}</span>
+              <div className="flex items-center gap-2 text-xs">
+                <Code2 size={12} className="text-[#7d8590]" />
+                <span className="text-[#7d8590] font-mono">{currentVersion}</span>
+                <span className="text-[#7d8590]">·</span>
+                <span className="text-[#8b949e]">{currentVersionData.message}</span>
               </div>
             )}
           </div>
@@ -524,27 +589,34 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               <>
                 <button
                   onClick={() => setMode('view')}
-                  className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-300 transition-colors"
+                  className="px-3 py-1 text-sm text-[#8b949e] hover:text-[#f0f6fc] 
+                             transition-colors duration-150"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCommit}
                   disabled={!editingCode.trim() || !commitMessage.trim()}
-                  className="px-4 py-1.5 bg-blue-600 text-white rounded-md text-sm
-                             hover:bg-blue-700 transition-colors flex items-center gap-2
-                             disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-[#238636] text-white rounded-md text-sm
+                             hover:bg-[#2ea043] transition-colors duration-150 
+                             flex items-center gap-1.5 font-medium
+                             disabled:opacity-60 disabled:cursor-not-allowed
+                             focus:outline-none focus:ring-2 focus:ring-[#238636] focus:ring-offset-2 
+                             focus:ring-offset-[#0d1117]"
                 >
                   <Save size={14} />
-                  Commit
+                  Commit changes
                 </button>
               </>
             ) : (
               <button
                 onClick={() => setMode('edit')}
-                className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors"
+                className="px-3 py-1 text-sm text-[#8b949e] hover:text-[#f0f6fc] 
+                           hover:bg-[#21262d] rounded-md border border-[#30363d]
+                           transition-all duration-150 focus:outline-none focus:ring-2 
+                           focus:ring-[#58a6ff] focus:ring-offset-2 focus:ring-offset-[#0d1117]"
               >
-                Edit Code
+                Edit code
               </button>
             )}
           </div>
@@ -552,47 +624,113 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       </div>
 
       {/* Metro Map Visualization */}
-      <div className="relative bg-black h-80 overflow-hidden rounded-lg border border-gray-900">
+      <div className="relative bg-[#0d1117] h-64 overflow-hidden">
         <canvas
           ref={canvasRef}
-          className="w-full h-full transition-transform duration-100"
+          className="w-full h-full transition-transform duration-150"
           style={{ imageRendering: 'auto' }}
           onClick={handleCanvasClick}
+          onMouseDown={(e) => {
+            if (!hoveredNode) {
+              setIsDragging(true);
+              setDragStart({ x: e.clientX, y: e.clientY });
+              canvasRef.current.style.cursor = 'grabbing';
+            }
+          }}
+          onMouseUp={() => {
+            setIsDragging(false);
+            canvasRef.current.style.cursor = hoveredNode ? 'pointer' : 'grab';
+          }}
           onMouseMove={handleCanvasMouseMove}
-          onMouseLeave={() => setHoveredNode(null)}
+          onMouseLeave={() => {
+            setHoveredNode(null);
+            setIsDragging(false);
+          }}
         />
         
+        {/* Zoom controls */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1">
+          <button
+            onClick={() => setZoom(Math.min(zoom * 1.2, 3))}
+            className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
+                       rounded-md transition-colors duration-150 text-[#8b949e] hover:text-[#f0f6fc]"
+            title="Zoom in"
+          >
+            <ZoomIn size={14} />
+          </button>
+          <button
+            onClick={() => setZoom(Math.max(zoom / 1.2, 0.5))}
+            className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
+                       rounded-md transition-colors duration-150 text-[#8b949e] hover:text-[#f0f6fc]"
+            title="Zoom out"
+          >
+            <ZoomOut size={14} />
+          </button>
+          <button
+            onClick={() => {
+              setZoom(1);
+              setPan({ x: 0, y: 0 });
+            }}
+            className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
+                       rounded-md transition-colors duration-150 text-[#8b949e] hover:text-[#f0f6fc]"
+            title="Reset view"
+          >
+            <Maximize2 size={14} />
+          </button>
+        </div>
         
-        {/* Enhanced version tooltip */}
-        {hoveredNode && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 
-                          bg-gray-900 rounded-lg text-xs
-                          border border-gray-800 shadow-lg
-                          transform transition-all duration-200 ease-out">
-            <div className="font-mono text-gray-500 text-[10px] uppercase tracking-wider mb-1">Version {hoveredNode}</div>
-            <div className="text-gray-300 font-medium">{repository.versions[hoveredNode]?.message}</div>
-            <div className="text-gray-500 mt-1">{new Date(repository.versions[hoveredNode]?.timestamp).toLocaleDateString()}</div>
+        {/* Professional version tooltip */}
+        {hoveredNode && repository.versions[hoveredNode] && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 
+                          bg-[#161b22] rounded-md text-xs
+                          border border-[#30363d] shadow-md
+                          transform transition-all duration-150 pointer-events-none">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-mono text-[#7d8590]">{hoveredNode}</span>
+              <span className="text-[#7d8590]">·</span>
+              <span className="text-[#8b949e]">
+                {(() => {
+                  const date = new Date(repository.versions[hoveredNode].timestamp);
+                  const now = new Date();
+                  const diff = now - date;
+                  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                  const hours = Math.floor(diff / (1000 * 60 * 60));
+                  const minutes = Math.floor(diff / (1000 * 60));
+                  
+                  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
+                  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+                  return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+                })()}
+              </span>
+            </div>
+            <div className="text-[#f0f6fc] font-medium">{repository.versions[hoveredNode].message}</div>
+            <div className="text-[#7d8590] text-[11px] mt-1">
+              by {repository.versions[hoveredNode].author}
+            </div>
           </div>
         )}
       </div>
 
       {/* Code Editor */}
-      <div className="border-t border-gray-900 rounded-b-xl overflow-hidden">
+      <div className="border-t border-[#30363d] overflow-hidden">
         {mode === 'edit' ? (
-          <div className="p-4 space-y-3">
-            <input
-              type="text"
-              value={commitMessage}
-              onChange={(e) => setCommitMessage(e.target.value)}
-              placeholder="Describe your changes..."
-              className="w-full px-3 py-2 bg-gray-950 text-gray-300 text-sm
-                         rounded-md border border-gray-800 focus:border-blue-600
-                         focus:outline-none placeholder-gray-600"
-            />
+          <div className="bg-[#0d1117]">
+            <div className="px-4 py-3 border-b border-[#30363d]">
+              <input
+                type="text"
+                value={commitMessage}
+                onChange={(e) => setCommitMessage(e.target.value)}
+                placeholder="Commit message"
+                className="w-full px-3 py-1.5 bg-[#0d1117] text-[#f0f6fc] text-sm
+                           rounded-md border border-[#30363d] focus:border-[#58a6ff]
+                           focus:outline-none focus:ring-1 focus:ring-[#58a6ff]/20 
+                           placeholder-[#7d8590] font-normal"
+              />
+            </div>
             <div className="relative">
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-900 
-                              border-r border-gray-800 rounded-l-md overflow-hidden">
-                <div className="text-gray-500 text-xs font-mono leading-6 py-3 px-2 select-none">
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
+                              border-r border-[#30363d]">
+                <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
                   {editingCode.split('\n').map((_, i) => (
                     <div key={i}>{i + 1}</div>
                   ))}
@@ -601,26 +739,25 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               <textarea
                 value={editingCode}
                 onChange={(e) => setEditingCode(e.target.value)}
-                className="w-full h-64 pl-14 pr-3 py-3 bg-gray-950 text-gray-300 font-mono text-sm
-                           rounded-md border border-gray-800 focus:border-blue-600
-                           focus:outline-none resize-none leading-6"
-                placeholder="Enter your code..."
+                className="w-full h-64 pl-14 pr-4 py-3 bg-[#0d1117] text-[#f0f6fc] 
+                           font-mono text-sm focus:outline-none resize-none leading-6"
+                placeholder="// Enter your code..."
                 spellCheck={false}
               />
             </div>
           </div>
         ) : (
-          <div className="relative" ref={codeContainerRef}>
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-900 
-                            border-r border-gray-800 rounded-bl-lg">
-              <div className="text-gray-600 text-xs font-mono leading-6 py-3 px-2 select-none">
+          <div className="relative bg-[#0d1117]" ref={codeContainerRef}>
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
+                            border-r border-[#30363d]">
+              <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
                 {(currentVersionData?.content || '').split('\n').map((_, i) => (
                   <div key={i}>{i + 1}</div>
                 ))}
               </div>
             </div>
-            <div className="pl-14 pr-4 py-3 bg-gray-950 max-h-64 overflow-y-auto">
-              <pre className="text-gray-300 font-mono text-sm leading-6 whitespace-pre-wrap break-words">
+            <div className="pl-14 pr-4 py-3 max-h-64 overflow-y-auto custom-scrollbar">
+              <pre className="text-[#f0f6fc] font-mono text-sm leading-6 whitespace-pre-wrap break-words">
                 <code 
                   dangerouslySetInnerHTML={{ 
                     __html: highlightCode(currentVersionData?.content || '// No code yet') 
@@ -629,19 +766,26 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               </pre>
             </div>
             {currentVersionData && (
-              <div className="px-4 py-2 bg-black border-t border-gray-800
-                              flex items-center gap-6 text-xs text-gray-500">
-                <span className="flex items-center gap-1.5">
+              <div className="px-4 py-2 bg-[#010409] border-t border-[#30363d]
+                              flex items-center gap-4 text-xs">
+                <span className="flex items-center gap-1.5 text-[#7d8590]">
                   <User size={12} />
-                  {currentVersionData.author}
+                  <span className="text-[#8b949e]">{currentVersionData.author}</span>
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-[#7d8590]">
                   <Clock size={12} />
-                  {new Date(currentVersionData.timestamp).toLocaleString()}
+                  <span className="text-[#8b949e]">
+                    {new Date(currentVersionData.timestamp).toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-[#7d8590]">
                   <GitBranch size={12} />
-                  {currentVersionData.branch || 'main'}
+                  <span className="text-[#8b949e]">{currentVersionData.branch || 'main'}</span>
                 </span>
               </div>
             )}

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown, Save, GitBranch, Clock, User, Code2, GitMerge, ZoomIn, ZoomOut } from 'lucide-react';
+import { ChevronDown, Save, GitBranch, Clock, User, Code2 } from 'lucide-react';
 
 // Branch colors with gradients
 const BRANCH_COLORS = {
@@ -123,10 +123,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [mode, setMode] = useState('view'); // 'view' or 'edit'
   const [hoveredNode, setHoveredNode] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -169,26 +165,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, rect.width, rect.height);
     
-    // Apply zoom and pan transformations
-    ctx.save();
-    ctx.translate(pan.x, pan.y);
-    ctx.scale(zoom, zoom);
     
-    // Draw grid pattern (subtle)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < rect.width * 2; x += 40) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, rect.height * 2);
-      ctx.stroke();
-    }
-    for (let y = 0; y < rect.height * 2; y += 40) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(rect.width * 2, y);
-      ctx.stroke();
-    }
     
     // Draw connections with gradients
     Object.values(repository.versions).forEach(version => {
@@ -198,18 +175,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         
         if (parentPos && childPos) {
           const branch = repository.branches[version.branch] || repository.branches.main;
-          const gradient = ctx.createLinearGradient(
-            parentPos.x, parentPos.y,
-            childPos.x, childPos.y
-          );
-          gradient.addColorStop(0, branch.color.primary);
-          gradient.addColorStop(1, branch.color.secondary);
-          
-          ctx.strokeStyle = gradient;
-          ctx.lineWidth = 4;
+          ctx.strokeStyle = branch.color.primary;
+          ctx.lineWidth = 3;
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
-          ctx.globalAlpha = 0.8;
           
           ctx.beginPath();
           ctx.moveTo(parentPos.x, parentPos.y);
@@ -231,7 +200,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           }
           
           ctx.stroke();
-          ctx.globalAlpha = 1;
         }
       }
     });
@@ -246,14 +214,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       const isHovered = hoveredNode === versionId;
       const isMergeCommit = version.message?.toLowerCase().includes('merge');
       
-      // Node shadow/glow
-      if (isCurrentVersion || isHovered) {
-        const glowGradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 20);
-        glowGradient.addColorStop(0, `${branch.color.primary}40`);
-        glowGradient.addColorStop(1, 'transparent');
-        ctx.fillStyle = glowGradient;
-        ctx.fillRect(pos.x - 20, pos.y - 20, 40, 40);
-      }
       
       // Outer ring
       ctx.beginPath();
@@ -261,74 +221,57 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       ctx.fillStyle = '#000000';
       ctx.fill();
       
-      const ringGradient = ctx.createLinearGradient(
-        pos.x - 10, pos.y - 10,
-        pos.x + 10, pos.y + 10
-      );
-      ringGradient.addColorStop(0, branch.color.primary);
-      ringGradient.addColorStop(1, branch.color.secondary);
-      ctx.strokeStyle = ringGradient;
+      ctx.strokeStyle = branch.color.primary;
       ctx.lineWidth = 3;
       ctx.stroke();
       
-      // Inner circle with gradient
+      // Inner circle
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
-      const innerGradient = ctx.createRadialGradient(
-        pos.x - 2, pos.y - 2, 0,
-        pos.x, pos.y, 5
-      );
-      innerGradient.addColorStop(0, branch.color.primary);
-      innerGradient.addColorStop(1, branch.color.secondary);
-      ctx.fillStyle = innerGradient;
+      ctx.fillStyle = isCurrentVersion ? branch.color.primary : '#000000';
       ctx.fill();
       
-      // Special icon for merge commits
-      if (isMergeCommit) {
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = 'bold 8px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('M', pos.x, pos.y);
+      if (!isCurrentVersion) {
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = branch.color.primary;
+        ctx.fill();
       }
       
-      // Animated selection ring
+      
+      // Selection ring
       if (isCurrentVersion) {
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 16 + Math.sin(Date.now() * 0.003) * 2, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, 16, 0, Math.PI * 2);
         ctx.strokeStyle = branch.color.primary;
         ctx.lineWidth = 2;
         ctx.setLineDash([5, 5]);
-        ctx.lineDashOffset = Date.now() * 0.01;
         ctx.stroke();
         ctx.setLineDash([]);
       }
     });
     
-    ctx.restore();
     
-    // Draw branch labels with better styling
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-    ctx.fillRect(10, 20, 160, Object.keys(repository.branches).length * 28 + 20);
-    
-    let yOffset = 40;
+    // Draw branch labels
+    let yOffset = 30;
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
-      // Branch color indicator
-      const gradient = ctx.createLinearGradient(20, yOffset - 8, 36, yOffset - 8);
-      gradient.addColorStop(0, branch.color.primary);
-      gradient.addColorStop(1, branch.color.secondary);
-      ctx.fillStyle = gradient;
-      ctx.fillRect(20, yOffset - 12, 16, 16);
+      // Branch line preview
+      ctx.strokeStyle = branch.color.primary;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(20, yOffset);
+      ctx.lineTo(50, yOffset);
+      ctx.stroke();
       
       // Branch name
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '13px monospace';
+      ctx.fillStyle = '#9CA3AF';
+      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(branchName, 44, yOffset - 4);
+      ctx.fillText(branchName, 60, yOffset + 4);
       
-      yOffset += 28;
+      yOffset += 25;
     });
-  }, [repository, nodePositions, currentVersion, hoveredNode, zoom, pan]);
+  }, [repository, nodePositions, currentVersion, hoveredNode]);
 
   // Animation loop
   useEffect(() => {
@@ -347,43 +290,25 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
   // Handle canvas interactions
   const handleCanvasClick = (e) => {
-    if (isDragging) return;
-    
     const rect = canvasRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left - pan.x) / zoom;
-    const y = (e.clientY - rect.top - pan.y) / zoom;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
     // Find clicked node
     Object.entries(nodePositions).forEach(([versionId, pos]) => {
       const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
       if (distance < 12) {
-        // Checkout this version with animation
+        // Checkout this version
         setCurrentVersion(versionId);
         setRepository(prev => ({ ...prev, HEAD: versionId }));
-        
-        // Auto-center on selected node
-        const targetPan = {
-          x: rect.width / 2 - pos.x * zoom,
-          y: rect.height / 2 - pos.y * zoom
-        };
-        setPan(targetPan);
       }
     });
   };
 
   const handleCanvasMouseMove = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
-    
-    if (isDragging) {
-      const dx = e.clientX - dragStart.x;
-      const dy = e.clientY - dragStart.y;
-      setPan(prev => ({ x: prev.x + dx, y: prev.y + dy }));
-      setDragStart({ x: e.clientX, y: e.clientY });
-      return;
-    }
-    
-    const x = (e.clientX - rect.left - pan.x) / zoom;
-    const y = (e.clientY - rect.top - pan.y) / zoom;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
     
     let foundNode = null;
     Object.entries(nodePositions).forEach(([versionId, pos]) => {
@@ -394,22 +319,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     });
     
     setHoveredNode(foundNode);
-    canvasRef.current.style.cursor = foundNode ? 'pointer' : isDragging ? 'grabbing' : 'grab';
-  };
-
-  const handleCanvasMouseDown = (e) => {
-    if (!hoveredNode) {
-      setIsDragging(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-    }
-  };
-
-  const handleCanvasMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  const handleZoom = (delta) => {
-    setZoom(prev => Math.max(0.5, Math.min(2, prev + delta)));
+    canvasRef.current.style.cursor = foundNode ? 'pointer' : 'default';
   };
 
   // Create new version (commit)
@@ -480,24 +390,24 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   return (
     <div className="bg-black rounded-xl overflow-hidden border border-gray-900">
       {/* Header */}
-      <div className="p-4 border-b border-gray-900 bg-gradient-to-r from-gray-950 to-gray-900">
+      <div className="p-4 border-b border-gray-900">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             {/* Branch selector */}
             <div className="relative">
               <button 
                 onClick={() => setShowBranchDropdown(!showBranchDropdown)}
-                className="flex items-center gap-2 px-4 py-2 bg-black/50 backdrop-blur-sm rounded-lg
-                           text-gray-300 hover:text-gray-100 hover:bg-black/70 
-                           transition-all text-sm border border-gray-800/50">
+                className="flex items-center gap-2 px-3 py-1.5 bg-gray-900 rounded-md
+                           text-gray-400 hover:text-gray-200 hover:bg-gray-800 
+                           transition-colors text-sm border border-gray-800">
                 <GitBranch size={14} />
                 <span className="font-medium">{selectedBranch}</span>
                 <ChevronDown size={14} className={`transition-transform ${showBranchDropdown ? 'rotate-180' : ''}`} />
               </button>
               
               {showBranchDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-48 bg-gray-950/95 backdrop-blur-md rounded-md 
-                                shadow-xl border border-gray-800 py-1 z-50">
+                <div className="absolute top-full left-0 mt-1 w-48 bg-gray-900 rounded-md 
+                                shadow-lg border border-gray-800 py-1 z-50">
                   {Object.keys(repository.branches).map((branchName) => (
                     <button
                       key={branchName}
@@ -506,14 +416,12 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                         setShowBranchDropdown(false);
                       }}
                       className="w-full text-left px-3 py-2 text-sm text-gray-400
-                                 hover:bg-gray-800/50 hover:text-gray-200 transition-colors
+                                 hover:bg-gray-800 hover:text-gray-200 transition-colors
                                  flex items-center gap-2"
                     >
                       <div 
                         className="w-3 h-3 rounded-full"
-                        style={{ 
-                          background: `linear-gradient(135deg, ${repository.branches[branchName].color.primary}, ${repository.branches[branchName].color.secondary})` 
-                        }}
+                        style={{ backgroundColor: repository.branches[branchName].color.primary }}
                       />
                       {branchName}
                     </button>
@@ -528,7 +436,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                         }
                       }}
                       className="w-full text-left px-3 py-2 text-sm text-blue-400
-                                 hover:bg-gray-800/50 transition-colors"
+                                 hover:bg-gray-800 transition-colors"
                     >
                       + Create new branch
                     </button>
@@ -561,8 +469,8 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                 <button
                   onClick={handleCommit}
                   disabled={!editingCode.trim() || !commitMessage.trim()}
-                  className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md text-sm
-                             hover:from-blue-700 hover:to-blue-800 transition-all flex items-center gap-2
+                  className="px-4 py-1.5 bg-blue-600 text-white rounded-md text-sm
+                             hover:bg-blue-700 transition-colors flex items-center gap-2
                              disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save size={14} />
@@ -572,8 +480,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             ) : (
               <button
                 onClick={() => setMode('edit')}
-                className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 
-                           bg-gray-900/50 hover:bg-gray-800/50 rounded-md transition-all"
+                className="px-3 py-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors"
               >
                 Edit Code
               </button>
@@ -590,44 +497,15 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           style={{ imageRendering: 'crisp-edges' }}
           onClick={handleCanvasClick}
           onMouseMove={handleCanvasMouseMove}
-          onMouseDown={handleCanvasMouseDown}
-          onMouseUp={handleCanvasMouseUp}
-          onMouseLeave={() => {
-            setHoveredNode(null);
-            setIsDragging(false);
-          }}
+          onMouseLeave={() => setHoveredNode(null)}
         />
         
-        {/* Zoom controls */}
-        <div className="absolute bottom-4 right-4 flex flex-col gap-2">
-          <button
-            onClick={() => handleZoom(0.1)}
-            className="p-2 bg-gray-900/80 backdrop-blur-sm rounded-md text-gray-400
-                       hover:text-gray-200 hover:bg-gray-800/80 transition-all"
-          >
-            <ZoomIn size={16} />
-          </button>
-          <button
-            onClick={() => handleZoom(-0.1)}
-            className="p-2 bg-gray-900/80 backdrop-blur-sm rounded-md text-gray-400
-                       hover:text-gray-200 hover:bg-gray-800/80 transition-all"
-          >
-            <ZoomOut size={16} />
-          </button>
-          <button
-            onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-            className="p-2 bg-gray-900/80 backdrop-blur-sm rounded-md text-gray-400
-                       hover:text-gray-200 hover:bg-gray-800/80 transition-all text-xs"
-          >
-            Reset
-          </button>
-        </div>
         
         {/* Version tooltip */}
         {hoveredNode && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 
-                          bg-gray-900/95 backdrop-blur-sm rounded-md text-xs text-gray-300
-                          border border-gray-800/50 shadow-lg">
+                          bg-gray-900 rounded text-xs text-gray-400
+                          border border-gray-800 shadow-sm">
             <div className="font-mono text-gray-400 mb-0.5">{hoveredNode}</div>
             <div>{repository.versions[hoveredNode]?.message}</div>
           </div>
@@ -643,13 +521,12 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               value={commitMessage}
               onChange={(e) => setCommitMessage(e.target.value)}
               placeholder="Describe your changes..."
-              className="w-full px-3 py-2 bg-gray-950/50 text-gray-300 text-sm
-                         rounded-md border border-gray-800 focus:border-blue-600/50
-                         focus:outline-none focus:ring-1 focus:ring-blue-600/20
-                         placeholder-gray-600"
+              className="w-full px-3 py-2 bg-gray-950 text-gray-300 text-sm
+                         rounded-md border border-gray-800 focus:border-blue-600
+                         focus:outline-none placeholder-gray-600"
             />
             <div className="relative">
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-950/50 
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-950 
                               border-r border-gray-800 rounded-l-md overflow-hidden">
                 <div className="text-gray-600 text-xs font-mono leading-6 py-3 px-2 select-none">
                   {editingCode.split('\n').map((_, i) => (
@@ -660,10 +537,9 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               <textarea
                 value={editingCode}
                 onChange={(e) => setEditingCode(e.target.value)}
-                className="w-full h-64 pl-14 pr-3 py-3 bg-gray-950/50 text-gray-300 font-mono text-sm
-                           rounded-md border border-gray-800 focus:border-blue-600/50
-                           focus:outline-none focus:ring-1 focus:ring-blue-600/20
-                           resize-none leading-6"
+                className="w-full h-64 pl-14 pr-3 py-3 bg-gray-950 text-gray-300 font-mono text-sm
+                           rounded-md border border-gray-800 focus:border-blue-600
+                           focus:outline-none resize-none leading-6"
                 placeholder="Enter your code..."
                 spellCheck={false}
               />
@@ -671,15 +547,15 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           </div>
         ) : (
           <div className="relative" ref={codeContainerRef}>
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-950/30 
-                            border-r border-gray-800/50">
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-950 
+                            border-r border-gray-800">
               <div className="text-gray-600 text-xs font-mono leading-6 py-3 px-2 select-none">
                 {(currentVersionData?.content || '').split('\n').map((_, i) => (
                   <div key={i}>{i + 1}</div>
                 ))}
               </div>
             </div>
-            <div className="pl-14 pr-4 py-3 bg-gray-950/30 max-h-64 overflow-y-auto">
+            <div className="pl-14 pr-4 py-3 bg-gray-950 max-h-64 overflow-y-auto">
               <pre className="text-gray-300 font-mono text-sm leading-6">
                 <code 
                   dangerouslySetInnerHTML={{ 
@@ -689,7 +565,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               </pre>
             </div>
             {currentVersionData && (
-              <div className="px-4 py-2 bg-gray-950/50 border-t border-gray-800/50
+              <div className="px-4 py-2 bg-black border-t border-gray-800
                               flex items-center gap-6 text-xs text-gray-500">
                 <span className="flex items-center gap-1.5">
                   <User size={12} />

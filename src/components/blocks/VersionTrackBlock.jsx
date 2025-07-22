@@ -1,6 +1,60 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2, 
-         FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft } from 'lucide-react';
+         FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft,
+         FilePlus, FolderPlus, Trash2, Edit3, Home } from 'lucide-react';
+
+// Context Menu Component
+function ContextMenu({ x, y, onClose, items }) {
+  useEffect(() => {
+    const handleClick = () => onClose();
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    
+    document.addEventListener('click', handleClick);
+    document.addEventListener('keydown', handleEsc);
+    
+    return () => {
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      className="fixed bg-[#161b22] rounded-md shadow-lg border border-[#30363d] py-1 z-50"
+      style={{ 
+        left: `${x}px`, 
+        top: `${y}px`,
+        minWidth: '160px'
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {items.map((item, index) => (
+        item.divider ? (
+          <div key={index} className="border-t border-[#30363d] my-1" />
+        ) : (
+          <button
+            key={index}
+            onClick={() => {
+              item.onClick();
+              onClose();
+            }}
+            className="w-full text-left px-3 py-1.5 text-sm text-[#8b949e] 
+                       hover:bg-[#21262d] hover:text-[#f0f6fc] transition-colors duration-150
+                       flex items-center gap-2"
+            disabled={item.disabled}
+          >
+            {item.icon && <item.icon size={14} />}
+            {item.label}
+          </button>
+        )
+      ))}
+    </div>,
+    document.body
+  );
+}
 
 // Professional branch colors - muted tones inspired by GitHub
 const BRANCH_COLORS = {
@@ -132,7 +186,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       return block.repository;
     }
     
-    // Create initial repository structure with file tree support
+    // Create initial repository structure with nested file tree support
     const initialVersion = {
       id: 'v1',
       message: 'Initial commit',
@@ -141,15 +195,20 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       parent: null,
       branch: 'main',
       files: {
-        'index.js': {
-          content: '// Main entry point\nfunction main() {\n  console.log("Hello, World!");\n}\n\nmain();',
-          action: 'created',
-          stats: { additions: 5, deletions: 0 }
-        },
         'README.md': {
           content: '# My Project\n\nWelcome to my project!',
           action: 'created',
           stats: { additions: 3, deletions: 0 }
+        },
+        'src/index.js': {
+          content: '// Main entry point\nimport App from "./App";\n\nfunction main() {\n  console.log("Starting app...");\n  App.init();\n}\n\nmain();',
+          action: 'created',
+          stats: { additions: 8, deletions: 0 }
+        },
+        'src/App.js': {
+          content: '// App component\nconst App = {\n  init() {\n    console.log("App initialized!");\n  }\n};\n\nexport default App;',
+          action: 'created',
+          stats: { additions: 8, deletions: 0 }
         }
       }
     };
@@ -161,10 +220,17 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       },
       HEAD: 'v1',
       fileTree: {
-        'index.js': { type: 'file', lastModified: 'v1' },
-        'README.md': { type: 'file', lastModified: 'v1' }
+        'README.md': { type: 'file', lastModified: 'v1' },
+        'src': {
+          type: 'folder',
+          expanded: true,
+          children: {
+            'index.js': { type: 'file', lastModified: 'v1' },
+            'App.js': { type: 'file', lastModified: 'v1' }
+          }
+        }
       },
-      activeFile: 'index.js'
+      activeFile: 'src/index.js'
     };
   });
 
@@ -183,6 +249,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [activeFile, setActiveFile] = useState(repository.activeFile || 'index.js');
   const [showFileTree, setShowFileTree] = useState(true);
   const [expandedDirs, setExpandedDirs] = useState(new Set());
+  const [contextMenu, setContextMenu] = useState(null);
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -466,7 +533,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     if (isDragging) {
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
-      setPan({ x: pan.x + dx, y: pan.y + dy });
+      setPan(prevPan => ({ x: prevPan.x + dx, y: prevPan.y + dy }));
       setDragStart({ x: e.clientX, y: e.clientY });
       canvasRef.current.style.cursor = 'grabbing';
       return;
@@ -573,113 +640,335 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     setSelectedBranch(branchName);
   };
   
-  // Create new file
-  const handleCreateFile = () => {
-    const fileName = prompt('Enter file name:');
-    if (!fileName) return;
+  // Helper function to update file tree structure
+  const updateFileTree = (tree, path, item) => {
+    const parts = path.split('/');
+    const fileName = parts.pop();
+    let current = tree;
     
-    // Check if file already exists
-    if (repository.fileTree[fileName]) {
-      alert('File already exists!');
+    // Navigate to the correct folder
+    for (const part of parts) {
+      if (!current[part]) {
+        current[part] = { type: 'folder', expanded: true, children: {} };
+      }
+      current = current[part].children || {};
+    }
+    
+    // Add the file/folder
+    current[fileName] = item;
+    return tree;
+  };
+  
+  // Create new file or folder
+  const handleCreateFile = (isFolder = false, parentPath = '') => {
+    const itemType = isFolder ? 'folder' : 'file';
+    const itemName = prompt(`Enter ${itemType} name:`);
+    if (!itemName) return;
+    
+    const fullPath = parentPath ? `${parentPath}/${itemName}` : itemName;
+    
+    // Check if item already exists
+    const checkExists = (tree, path) => {
+      const parts = path.split('/');
+      let current = tree;
+      for (const part of parts) {
+        if (!current[part]) return false;
+        if (current[part].type === 'folder') {
+          current = current[part].children || {};
+        }
+      }
+      return true;
+    };
+    
+    if (checkExists(repository.fileTree, fullPath)) {
+      alert(`${itemType} already exists!`);
       return;
     }
     
-    // Determine file content based on extension
-    const ext = fileName.split('.').pop().toLowerCase();
-    let defaultContent = '// New file\n';
-    
-    if (ext === 'md') {
-      defaultContent = '# New Document\n\nStart writing here...';
-    } else if (ext === 'json') {
-      defaultContent = '{\n  \n}';
-    } else if (ext === 'html') {
-      defaultContent = '<!DOCTYPE html>\n<html>\n<head>\n  <title>New Page</title>\n</head>\n<body>\n  \n</body>\n</html>';
-    } else if (ext === 'css') {
-      defaultContent = '/* New stylesheet */\n';
-    }
-    
-    // Create a new version with the new file
-    const newVersionId = generateVersionId();
-    const currentVersionData = repository.versions[currentVersion];
-    
-    const newVersion = {
-      id: newVersionId,
-      message: `Created ${fileName}`,
-      timestamp: new Date().toISOString(),
-      author: 'user',
-      parent: currentVersion,
-      branch: selectedBranch,
-      files: {
-        ...(currentVersionData?.files || {}),
-        [fileName]: {
-          content: defaultContent,
-          action: 'created',
-          stats: { additions: defaultContent.split('\n').length, deletions: 0 }
+    if (isFolder) {
+      // Create folder without creating a new version
+      const newTree = JSON.parse(JSON.stringify(repository.fileTree));
+      updateFileTree(newTree, fullPath, {
+        type: 'folder',
+        expanded: true,
+        children: {}
+      });
+      
+      setRepository(prev => ({
+        ...prev,
+        fileTree: newTree
+      }));
+      
+      // Expand parent folders
+      if (parentPath) {
+        const parts = parentPath.split('/');
+        let path = '';
+        for (const part of parts) {
+          path = path ? `${path}/${part}` : part;
+          setExpandedDirs(prev => new Set([...prev, path]));
         }
       }
-    };
-    
-    setRepository(prev => ({
-      ...prev,
-      versions: {
-        ...prev.versions,
-        [newVersionId]: newVersion
-      },
-      branches: {
-        ...prev.branches,
-        [selectedBranch]: {
-          ...prev.branches[selectedBranch],
-          head: newVersionId
+    } else {
+      // Determine file content based on extension
+      const ext = itemName.split('.').pop().toLowerCase();
+      let defaultContent = '// New file\n';
+      
+      if (ext === 'md') {
+        defaultContent = '# New Document\n\nStart writing here...';
+      } else if (ext === 'json') {
+        defaultContent = '{\n  \n}';
+      } else if (ext === 'html') {
+        defaultContent = '<!DOCTYPE html>\n<html>\n<head>\n  <title>New Page</title>\n</head>\n<body>\n  \n</body>\n</html>';
+      } else if (ext === 'css') {
+        defaultContent = '/* New stylesheet */\n';
+      }
+      
+      // Create a new version with the new file
+      const newVersionId = generateVersionId();
+      const currentVersionData = repository.versions[currentVersion];
+      
+      const newVersion = {
+        id: newVersionId,
+        message: `Created ${fullPath}`,
+        timestamp: new Date().toISOString(),
+        author: 'user',
+        parent: currentVersion,
+        branch: selectedBranch,
+        files: {
+          ...(currentVersionData?.files || {}),
+          [fullPath]: {
+            content: defaultContent,
+            action: 'created',
+            stats: { additions: defaultContent.split('\n').length, deletions: 0 }
+          }
         }
-      },
-      HEAD: newVersionId,
-      fileTree: {
-        ...prev.fileTree,
-        [fileName]: { type: 'file', lastModified: newVersionId }
-      },
-      activeFile: fileName
-    }));
-    
-    setCurrentVersion(newVersionId);
-    setActiveFile(fileName);
-    setEditingCode(defaultContent);
-    setMode('edit');
+      };
+      
+      const newTree = JSON.parse(JSON.stringify(repository.fileTree));
+      updateFileTree(newTree, fullPath, { type: 'file', lastModified: newVersionId });
+      
+      setRepository(prev => ({
+        ...prev,
+        versions: {
+          ...prev.versions,
+          [newVersionId]: newVersion
+        },
+        branches: {
+          ...prev.branches,
+          [selectedBranch]: {
+            ...prev.branches[selectedBranch],
+            head: newVersionId
+          }
+        },
+        HEAD: newVersionId,
+        fileTree: newTree,
+        activeFile: fullPath
+      }));
+      
+      setCurrentVersion(newVersionId);
+      setActiveFile(fullPath);
+      setEditingCode(defaultContent);
+      setMode('edit');
+    }
   };
 
   const currentVersionData = repository.versions[currentVersion];
   
-  // Render file tree item
-  const renderFileTreeItem = (name, item, path = '') => {
-    const fullPath = path ? `${path}/${name}` : name;
-    const isActive = fullPath === activeFile;
-    const FileIcon = getFileIcon(name);
+  // Toggle folder expansion
+  const toggleFolder = (path) => {
+    setExpandedDirs(prev => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      return next;
+    });
+  };
+  
+  // Handle context menu for files/folders
+  const handleContextMenu = (e, fullPath, isFolder, parentPath) => {
+    e.preventDefault();
+    e.stopPropagation();
     
-    return (
-      <div
-        key={fullPath}
-        className={`flex items-center gap-2 px-3 py-1 text-sm cursor-pointer
-                   hover:bg-[#21262d] transition-colors duration-150
-                   ${isActive ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#8b949e]'}`}
-        onClick={() => {
-          setActiveFile(fullPath);
-          // Load the file content for the current version
-          const version = repository.versions[currentVersion];
-          if (version?.files?.[fullPath]) {
-            setEditingCode(version.files[fullPath].content);
+    const items = [];
+    
+    if (isFolder) {
+      items.push(
+        { label: 'New File', icon: FilePlus, onClick: () => handleCreateFile(false, fullPath) },
+        { label: 'New Folder', icon: FolderPlus, onClick: () => handleCreateFile(true, fullPath) },
+        { divider: true },
+        { label: 'Rename', icon: Edit3, onClick: () => handleRename(fullPath) },
+        { label: 'Delete', icon: Trash2, onClick: () => handleDelete(fullPath) }
+      );
+    } else {
+      items.push(
+        { label: 'Rename', icon: Edit3, onClick: () => handleRename(fullPath) },
+        { label: 'Delete', icon: Trash2, onClick: () => handleDelete(fullPath) }
+      );
+    }
+    
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      items
+    });
+  };
+
+  // Handle rename operation
+  const handleRename = (fullPath) => {
+    const parts = fullPath.split('/');
+    const oldName = parts.pop();
+    const parentPath = parts.join('/');
+    const newName = prompt('Enter new name:', oldName);
+    
+    if (newName && newName !== oldName) {
+      const newFullPath = parentPath ? `${parentPath}/${newName}` : newName;
+      
+      // Update file tree
+      const newTree = JSON.parse(JSON.stringify(repository.fileTree));
+      const parent = parentPath ? getNodeAtPath(newTree, parentPath) : newTree;
+      
+      if (parent) {
+        const node = parent.children ? parent.children[oldName] : parent[oldName];
+        if (node) {
+          if (parent.children) {
+            parent.children[newName] = node;
+            delete parent.children[oldName];
+          } else {
+            parent[newName] = node;
+            delete parent[oldName];
           }
-        }}
-      >
-        <FileIcon size={16} className={isActive ? 'text-[#58a6ff]' : ''} />
-        <span className="flex-1 truncate">{name}</span>
-        {item.lastModified && (
-          <span className="text-[10px] text-[#7d8590]">{item.lastModified}</span>
-        )}
-      </div>
-    );
+        }
+      }
+      
+      // Update active file if needed
+      if (activeFile === fullPath) {
+        setActiveFile(newFullPath);
+      }
+      
+      setRepository({
+        ...repository,
+        fileTree: newTree
+      });
+      onUpdate(block.id, { repository: { ...repository, fileTree: newTree } });
+    }
+  };
+
+  // Handle delete operation
+  const handleDelete = (fullPath) => {
+    if (confirm(`Are you sure you want to delete "${fullPath}"?`)) {
+      const newTree = JSON.parse(JSON.stringify(repository.fileTree));
+      const parts = fullPath.split('/');
+      const name = parts.pop();
+      
+      if (parts.length === 0) {
+        // Root level item
+        delete newTree[name];
+      } else {
+        // Nested item
+        const parent = getNodeAtPath(newTree, parts.join('/'));
+        if (parent && parent.children) {
+          delete parent.children[name];
+        }
+      }
+      
+      // Reset active file if deleted
+      if (activeFile === fullPath) {
+        setActiveFile('');
+      }
+      
+      setRepository({
+        ...repository,
+        fileTree: newTree
+      });
+      onUpdate(block.id, { repository: { ...repository, fileTree: newTree } });
+    }
+  };
+
+  // Get node at path helper
+  const getNodeAtPath = (tree, path) => {
+    const parts = path.split('/');
+    let current = tree;
+    
+    for (const part of parts) {
+      if (!current[part]) return null;
+      if (current[part].type === 'folder') {
+        current = current[part].children || {};
+      } else {
+        return current[part];
+      }
+    }
+    
+    return current;
+  };
+
+  // Render file tree recursively
+  const renderFileTree = (items, path = '', depth = 0) => {
+    return Object.entries(items).map(([name, item]) => {
+      const fullPath = path ? `${path}/${name}` : name;
+      const isFolder = item.type === 'folder';
+      const isExpanded = isFolder && (item.expanded || expandedDirs.has(fullPath));
+      const paddingLeft = 12 + (depth * 16);
+      
+      if (isFolder) {
+        return (
+          <div key={fullPath}>
+            <div
+              className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer
+                         hover:bg-[#21262d] transition-colors duration-150 text-[#8b949e]`}
+              style={{ paddingLeft: `${paddingLeft}px` }}
+              onClick={() => toggleFolder(fullPath)}
+              onContextMenu={(e) => handleContextMenu(e, fullPath, true, path)}
+            >
+              <ChevronRight 
+                size={16} 
+                className={`transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
+              />
+              {isExpanded ? <FolderOpen size={16} /> : <Folder size={16} />}
+              <span className="flex-1 truncate">{name}</span>
+            </div>
+            {isExpanded && item.children && (
+              <div>
+                {renderFileTree(item.children, fullPath, depth + 1)}
+              </div>
+            )}
+          </div>
+        );
+      } else {
+        const isActive = fullPath === activeFile;
+        const FileIcon = getFileIcon(name);
+        
+        return (
+          <div
+            key={fullPath}
+            className={`flex items-center gap-2 px-2 py-1 text-sm cursor-pointer
+                       hover:bg-[#21262d] transition-colors duration-150
+                       ${isActive ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#8b949e]'}`}
+            style={{ paddingLeft: `${paddingLeft + 20}px` }}
+            onClick={() => {
+              setActiveFile(fullPath);
+              const version = repository.versions[currentVersion];
+              if (version?.files?.[fullPath]) {
+                setEditingCode(version.files[fullPath].content);
+              }
+            }}
+            onContextMenu={(e) => handleContextMenu(e, fullPath, false, path)}
+          >
+            <FileIcon size={16} className={isActive ? 'text-[#58a6ff]' : ''} />
+            <span className="flex-1 truncate">{name}</span>
+            {item.lastModified && (
+              <span className="text-[10px] text-[#7d8590] ml-2">{item.lastModified}</span>
+            )}
+          </div>
+        );
+      }
+    });
   };
 
   return (
-    <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d] flex">
+    <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d] flex h-[600px]">
       {/* File Tree Sidebar */}
       {showFileTree && (
         <div className="w-64 bg-[#010409] border-r border-[#30363d] flex flex-col">
@@ -702,10 +991,24 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               </button>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto py-2">
-            {Object.entries(repository.fileTree || {}).map(([name, item]) => 
-              renderFileTreeItem(name, item)
-            )}
+          <div 
+            className="flex-1 overflow-y-auto py-2"
+            onContextMenu={(e) => {
+              // Only trigger if clicking on empty space, not on items
+              if (e.target === e.currentTarget || e.target.classList.contains('overflow-y-auto')) {
+                e.preventDefault();
+                setContextMenu({
+                  x: e.clientX,
+                  y: e.clientY,
+                  items: [
+                    { label: 'New File', icon: FilePlus, onClick: () => handleCreateFile(false, '') },
+                    { label: 'New Folder', icon: FolderPlus, onClick: () => handleCreateFile(true, '') }
+                  ]
+                });
+              }
+            }}
+          >
+            {renderFileTree(repository.fileTree || {})}
           </div>
         </div>
       )}
@@ -727,14 +1030,56 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                 </button>
               )}
               
-              {/* Current file indicator */}
-              <div className="flex items-center gap-2 text-sm">
+              {/* Breadcrumb navigation */}
+              <div className="flex items-center gap-1 text-sm">
                 {(() => {
-                  const FileIcon = getFileIcon(activeFile);
+                  if (!activeFile) {
+                    return <span className="text-[#7d8590]">No file selected</span>;
+                  }
+                  
+                  const parts = activeFile.split('/');
+                  const fileName = parts.pop();
+                  const FileIcon = getFileIcon(fileName);
+                  
                   return (
                     <>
-                      <FileIcon size={16} className="text-[#58a6ff]" />
-                      <span className="text-[#f0f6fc] font-medium">{activeFile}</span>
+                      {/* Root/Home */}
+                      <button
+                        onClick={() => setActiveFile('')}
+                        className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                        title="Root"
+                      >
+                        <Home size={14} className="text-[#7d8590]" />
+                      </button>
+                      
+                      {/* Folder path */}
+                      {parts.map((part, index) => {
+                        const path = parts.slice(0, index + 1).join('/');
+                        return (
+                          <React.Fragment key={path}>
+                            <ChevronRight size={14} className="text-[#30363d]" />
+                            <button
+                              onClick={() => {
+                                // Expand the folder in tree
+                                const newExpandedDirs = new Set(expandedDirs);
+                                newExpandedDirs.add(path);
+                                setExpandedDirs(newExpandedDirs);
+                              }}
+                              className="px-2 py-1 hover:bg-[#21262d] rounded transition-colors duration-150 
+                                         text-[#8b949e] hover:text-[#f0f6fc]"
+                            >
+                              {part}
+                            </button>
+                          </React.Fragment>
+                        );
+                      })}
+                      
+                      {/* Current file */}
+                      {parts.length > 0 && <ChevronRight size={14} className="text-[#30363d]" />}
+                      <div className="flex items-center gap-2 px-2 py-1 bg-[#21262d] rounded">
+                        <FileIcon size={16} className="text-[#58a6ff]" />
+                        <span className="text-[#f0f6fc] font-medium">{fileName}</span>
+                      </div>
                     </>
                   );
                 })()}
@@ -859,7 +1204,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       </div>
 
       {/* Metro Map Visualization */}
-      <div className="relative bg-[#0d1117] h-64 overflow-hidden">
+      <div className="relative bg-[#0d1117] h-48 overflow-hidden flex-shrink-0">
         <canvas
           ref={canvasRef}
           className="w-full h-full transition-transform duration-150"
@@ -952,10 +1297,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       </div>
 
       {/* Code Editor */}
-      <div className="border-t border-[#30363d] overflow-hidden">
+      <div className="border-t border-[#30363d] flex-1 flex flex-col overflow-hidden">
         {mode === 'edit' ? (
-          <div className="bg-[#0d1117]">
-            <div className="px-4 py-3 border-b border-[#30363d]">
+          <div className="bg-[#0d1117] flex flex-col h-full">
+            <div className="px-4 py-3 border-b border-[#30363d] flex-shrink-0">
               <input
                 type="text"
                 value={commitMessage}
@@ -967,9 +1312,9 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                            placeholder-[#7d8590] font-normal"
               />
             </div>
-            <div className="relative">
+            <div className="relative flex-1 overflow-hidden">
               <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
-                              border-r border-[#30363d]">
+                              border-r border-[#30363d] overflow-y-auto">
                 <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
                   {editingCode.split('\n').map((_, i) => (
                     <div key={i}>{i + 1}</div>
@@ -979,35 +1324,37 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               <textarea
                 value={editingCode}
                 onChange={(e) => setEditingCode(e.target.value)}
-                className="w-full h-64 pl-14 pr-4 py-3 bg-[#0d1117] text-[#f0f6fc] 
-                           font-mono text-sm focus:outline-none resize-none leading-6"
+                className="w-full h-full pl-14 pr-4 py-3 bg-[#0d1117] text-[#f0f6fc] 
+                           font-mono text-sm focus:outline-none resize-none leading-6 overflow-y-auto"
                 placeholder="// Enter your code..."
                 spellCheck={false}
               />
             </div>
           </div>
         ) : (
-          <div className="relative bg-[#0d1117]" ref={codeContainerRef}>
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
-                            border-r border-[#30363d]">
-              <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
-                {(currentVersionData?.files?.[activeFile]?.content || '').split('\n').map((_, i) => (
-                  <div key={i}>{i + 1}</div>
-                ))}
+          <div className="relative bg-[#0d1117] h-full flex flex-col" ref={codeContainerRef}>
+            <div className="relative flex-1 overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
+                              border-r border-[#30363d] overflow-y-auto">
+                <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
+                  {(currentVersionData?.files?.[activeFile]?.content || '').split('\n').map((_, i) => (
+                    <div key={i}>{i + 1}</div>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="pl-14 pr-4 py-3 max-h-64 overflow-y-auto custom-scrollbar">
-              <pre className="text-[#f0f6fc] font-mono text-sm leading-6 whitespace-pre-wrap break-words">
-                <code 
-                  dangerouslySetInnerHTML={{ 
-                    __html: highlightCode(currentVersionData?.files?.[activeFile]?.content || '// No code yet') 
-                  }} 
-                />
-              </pre>
+              <div className="pl-14 pr-4 py-3 h-full overflow-y-auto custom-scrollbar">
+                <pre className="text-[#f0f6fc] font-mono text-sm leading-6 whitespace-pre-wrap break-words">
+                  <code 
+                    dangerouslySetInnerHTML={{ 
+                      __html: highlightCode(currentVersionData?.files?.[activeFile]?.content || '// No code yet') 
+                    }} 
+                  />
+                </pre>
+              </div>
             </div>
             {currentVersionData && (
               <div className="px-4 py-2 bg-[#010409] border-t border-[#30363d]
-                              flex items-center gap-4 text-xs">
+                              flex items-center gap-4 text-xs flex-shrink-0">
                 <span className="flex items-center gap-1.5 text-[#7d8590]">
                   <User size={12} />
                   <span className="text-[#8b949e]">{currentVersionData.author}</span>
@@ -1034,5 +1381,15 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       </div>
       </div>
     </div>
+    
+    {/* Context Menu */}
+    {contextMenu && (
+      <ContextMenu
+        x={contextMenu.x}
+        y={contextMenu.y}
+        items={contextMenu.items}
+        onClose={() => setContextMenu(null)}
+      />
+    )}
   );
 }

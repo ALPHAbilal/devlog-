@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2, 
+         FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft } from 'lucide-react';
 
 // Professional branch colors - muted tones inspired by GitHub
 const BRANCH_COLORS = {
@@ -13,6 +14,19 @@ const BRANCH_COLORS = {
 // Generate a short ID for versions
 const generateVersionId = () => {
   return 'v' + Date.now().toString(36);
+};
+
+// Get appropriate icon for file type
+const getFileIcon = (filename) => {
+  const ext = filename.split('.').pop().toLowerCase();
+  const codeExtensions = ['js', 'jsx', 'ts', 'tsx', 'py', 'java', 'cpp', 'c', 'cs', 'go', 'rs'];
+  
+  if (codeExtensions.includes(ext)) {
+    return Code2;
+  } else if (ext === 'md' || ext === 'txt') {
+    return FileText;
+  }
+  return File;
 };
 
 // Enhanced node positioning with better branch handling
@@ -118,15 +132,26 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       return block.repository;
     }
     
-    // Create initial repository structure
+    // Create initial repository structure with file tree support
     const initialVersion = {
       id: 'v1',
-      content: '// Initial version\nfunction hello() {\n  return "Hello, World!";\n}',
       message: 'Initial commit',
       timestamp: new Date().toISOString(),
       author: 'user',
       parent: null,
-      branch: 'main'
+      branch: 'main',
+      files: {
+        'index.js': {
+          content: '// Main entry point\nfunction main() {\n  console.log("Hello, World!");\n}\n\nmain();',
+          action: 'created',
+          stats: { additions: 5, deletions: 0 }
+        },
+        'README.md': {
+          content: '# My Project\n\nWelcome to my project!',
+          action: 'created',
+          stats: { additions: 3, deletions: 0 }
+        }
+      }
     };
 
     return {
@@ -134,7 +159,12 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       branches: {
         main: { name: 'main', head: 'v1', color: BRANCH_COLORS.main }
       },
-      HEAD: 'v1'
+      HEAD: 'v1',
+      fileTree: {
+        'index.js': { type: 'file', lastModified: 'v1' },
+        'README.md': { type: 'file', lastModified: 'v1' }
+      },
+      activeFile: 'index.js'
     };
   });
 
@@ -150,6 +180,9 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [activeFile, setActiveFile] = useState(repository.activeFile || 'index.js');
+  const [showFileTree, setShowFileTree] = useState(true);
+  const [expandedDirs, setExpandedDirs] = useState(new Set());
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -160,14 +193,18 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     setNodePositions(calculateNodePositions(repository));
   }, [repository]);
 
-  // Load current version's code when HEAD changes
+  // Load current version's active file content when HEAD or active file changes
   useEffect(() => {
     const version = repository.versions[currentVersion];
-    if (version) {
+    if (version && version.files && version.files[activeFile]) {
+      setEditingCode(version.files[activeFile].content || '');
+      setSelectedBranch(version.branch || 'main');
+    } else if (version && version.content) {
+      // Fallback for old single-file format
       setEditingCode(version.content);
       setSelectedBranch(version.branch || 'main');
     }
-  }, [currentVersion, repository]);
+  }, [currentVersion, activeFile, repository]);
 
   // Save repository changes
   useEffect(() => {
@@ -254,10 +291,13 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       const isHovered = hoveredNode === versionId;
       const isMergeCommit = version.message?.toLowerCase().includes('merge');
       
+      // Count changed files
+      const fileCount = version.files ? Object.keys(version.files).length : 0;
+      const hasMultipleFiles = fileCount > 1;
       
       // Professional node design - simple and clean
-      const nodeRadius = 6;
-      const activeRadius = 7;
+      const nodeRadius = hasMultipleFiles ? 8 : 6;
+      const activeRadius = hasMultipleFiles ? 9 : 7;
       
       // Node background
       ctx.beginPath();
@@ -288,6 +328,16 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         ctx.strokeStyle = branch.color.primary + '40';
         ctx.lineWidth = 1;
         ctx.stroke();
+      }
+      
+      // File count indicator
+      if (hasMultipleFiles && (isHovered || isCurrentVersion)) {
+        ctx.fillStyle = '#161b22';
+        ctx.fillRect(pos.x + 8, pos.y - 10, 16, 14);
+        ctx.fillStyle = isCurrentVersion ? '#f0f6fc' : '#8b949e';
+        ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(fileCount.toString(), pos.x + 16, pos.y - 1);
       }
     });
     
@@ -441,14 +491,33 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     }
 
     const newVersionId = generateVersionId();
+    const currentVersionData = repository.versions[currentVersion];
+    
+    // Calculate stats for the active file
+    const oldContent = currentVersionData?.files?.[activeFile]?.content || '';
+    const oldLines = oldContent.split('\n').length;
+    const newLines = editingCode.split('\n').length;
+    const additions = Math.max(0, newLines - oldLines);
+    const deletions = Math.max(0, oldLines - newLines);
+    
+    // Create new version with updated file
     const newVersion = {
       id: newVersionId,
-      content: editingCode,
       message: commitMessage,
       timestamp: new Date().toISOString(),
       author: 'user',
       parent: currentVersion,
-      branch: selectedBranch
+      branch: selectedBranch,
+      files: {
+        // Copy all existing files from parent version
+        ...(currentVersionData?.files || {}),
+        // Update the active file
+        [activeFile]: {
+          content: editingCode,
+          action: currentVersionData?.files?.[activeFile] ? 'modified' : 'created',
+          stats: { additions, deletions }
+        }
+      }
     };
 
     setRepository(prev => ({
@@ -464,7 +533,14 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           head: newVersionId
         }
       },
-      HEAD: newVersionId
+      HEAD: newVersionId,
+      fileTree: {
+        ...prev.fileTree,
+        [activeFile]: { 
+          type: 'file', 
+          lastModified: newVersionId 
+        }
+      }
     }));
 
     setCurrentVersion(newVersionId);
@@ -496,17 +572,176 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
     setSelectedBranch(branchName);
   };
+  
+  // Create new file
+  const handleCreateFile = () => {
+    const fileName = prompt('Enter file name:');
+    if (!fileName) return;
+    
+    // Check if file already exists
+    if (repository.fileTree[fileName]) {
+      alert('File already exists!');
+      return;
+    }
+    
+    // Determine file content based on extension
+    const ext = fileName.split('.').pop().toLowerCase();
+    let defaultContent = '// New file\n';
+    
+    if (ext === 'md') {
+      defaultContent = '# New Document\n\nStart writing here...';
+    } else if (ext === 'json') {
+      defaultContent = '{\n  \n}';
+    } else if (ext === 'html') {
+      defaultContent = '<!DOCTYPE html>\n<html>\n<head>\n  <title>New Page</title>\n</head>\n<body>\n  \n</body>\n</html>';
+    } else if (ext === 'css') {
+      defaultContent = '/* New stylesheet */\n';
+    }
+    
+    // Create a new version with the new file
+    const newVersionId = generateVersionId();
+    const currentVersionData = repository.versions[currentVersion];
+    
+    const newVersion = {
+      id: newVersionId,
+      message: `Created ${fileName}`,
+      timestamp: new Date().toISOString(),
+      author: 'user',
+      parent: currentVersion,
+      branch: selectedBranch,
+      files: {
+        ...(currentVersionData?.files || {}),
+        [fileName]: {
+          content: defaultContent,
+          action: 'created',
+          stats: { additions: defaultContent.split('\n').length, deletions: 0 }
+        }
+      }
+    };
+    
+    setRepository(prev => ({
+      ...prev,
+      versions: {
+        ...prev.versions,
+        [newVersionId]: newVersion
+      },
+      branches: {
+        ...prev.branches,
+        [selectedBranch]: {
+          ...prev.branches[selectedBranch],
+          head: newVersionId
+        }
+      },
+      HEAD: newVersionId,
+      fileTree: {
+        ...prev.fileTree,
+        [fileName]: { type: 'file', lastModified: newVersionId }
+      },
+      activeFile: fileName
+    }));
+    
+    setCurrentVersion(newVersionId);
+    setActiveFile(fileName);
+    setEditingCode(defaultContent);
+    setMode('edit');
+  };
 
   const currentVersionData = repository.versions[currentVersion];
+  
+  // Render file tree item
+  const renderFileTreeItem = (name, item, path = '') => {
+    const fullPath = path ? `${path}/${name}` : name;
+    const isActive = fullPath === activeFile;
+    const FileIcon = getFileIcon(name);
+    
+    return (
+      <div
+        key={fullPath}
+        className={`flex items-center gap-2 px-3 py-1 text-sm cursor-pointer
+                   hover:bg-[#21262d] transition-colors duration-150
+                   ${isActive ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#8b949e]'}`}
+        onClick={() => {
+          setActiveFile(fullPath);
+          // Load the file content for the current version
+          const version = repository.versions[currentVersion];
+          if (version?.files?.[fullPath]) {
+            setEditingCode(version.files[fullPath].content);
+          }
+        }}
+      >
+        <FileIcon size={16} className={isActive ? 'text-[#58a6ff]' : ''} />
+        <span className="flex-1 truncate">{name}</span>
+        {item.lastModified && (
+          <span className="text-[10px] text-[#7d8590]">{item.lastModified}</span>
+        )}
+      </div>
+    );
+  };
 
   return (
-    <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d]">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-[#30363d] bg-[#010409]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Branch selector */}
-            <div className="relative">
+    <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d] flex">
+      {/* File Tree Sidebar */}
+      {showFileTree && (
+        <div className="w-64 bg-[#010409] border-r border-[#30363d] flex flex-col">
+          <div className="px-3 py-2 border-b border-[#30363d] flex items-center justify-between">
+            <span className="text-xs font-medium text-[#8b949e]">FILES</span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleCreateFile}
+                className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                title="New file"
+              >
+                <Plus size={14} className="text-[#7d8590] hover:text-[#f0f6fc]" />
+              </button>
+              <button
+                onClick={() => setShowFileTree(false)}
+                className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                title="Hide file tree"
+              >
+                <PanelLeftClose size={14} className="text-[#7d8590]" />
+              </button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-y-auto py-2">
+            {Object.entries(repository.fileTree || {}).map(([name, item]) => 
+              renderFileTreeItem(name, item)
+            )}
+          </div>
+        </div>
+      )}
+      
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-[#30363d] bg-[#010409]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* File tree toggle */}
+              {!showFileTree && (
+                <button
+                  onClick={() => setShowFileTree(true)}
+                  className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                  title="Show file tree"
+                >
+                  <PanelLeft size={18} className="text-[#7d8590]" />
+                </button>
+              )}
+              
+              {/* Current file indicator */}
+              <div className="flex items-center gap-2 text-sm">
+                {(() => {
+                  const FileIcon = getFileIcon(activeFile);
+                  return (
+                    <>
+                      <FileIcon size={16} className="text-[#58a6ff]" />
+                      <span className="text-[#f0f6fc] font-medium">{activeFile}</span>
+                    </>
+                  );
+                })()}
+              </div>
+              
+              {/* Branch selector */}
+              <div className="relative">
               <button 
                 onClick={() => setShowBranchDropdown(!showBranchDropdown)}
                 className="flex items-center gap-2 px-3 py-1 bg-[#21262d] rounded-md
@@ -706,6 +941,11 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             <div className="text-[#f0f6fc] font-medium">{repository.versions[hoveredNode].message}</div>
             <div className="text-[#7d8590] text-[11px] mt-1">
               by {repository.versions[hoveredNode].author}
+              {repository.versions[hoveredNode].files && (
+                <span className="ml-2">
+                  · {Object.keys(repository.versions[hoveredNode].files).length} file{Object.keys(repository.versions[hoveredNode].files).length > 1 ? 's' : ''} changed
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -751,7 +991,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
                             border-r border-[#30363d]">
               <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
-                {(currentVersionData?.content || '').split('\n').map((_, i) => (
+                {(currentVersionData?.files?.[activeFile]?.content || '').split('\n').map((_, i) => (
                   <div key={i}>{i + 1}</div>
                 ))}
               </div>
@@ -760,7 +1000,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               <pre className="text-[#f0f6fc] font-mono text-sm leading-6 whitespace-pre-wrap break-words">
                 <code 
                   dangerouslySetInnerHTML={{ 
-                    __html: highlightCode(currentVersionData?.content || '// No code yet') 
+                    __html: highlightCode(currentVersionData?.files?.[activeFile]?.content || '// No code yet') 
                   }} 
                 />
               </pre>
@@ -791,6 +1031,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

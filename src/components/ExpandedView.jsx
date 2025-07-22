@@ -111,10 +111,9 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       newBlock.level = 2;
     } else if (type === 'version-track') {
       newBlock.title = 'New Version Track';
-      newBlock.description = 'Track version history';
-      newBlock.mainLine = [];
-      newBlock.branches = [];
-      newBlock.viewMode = 'collapsed';
+      newBlock.versions = [];
+      newBlock.currentVersion = null;
+      newBlock.viewMode = 'metro';
     }
 
     let updatedBlocks;

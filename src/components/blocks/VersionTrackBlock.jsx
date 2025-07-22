@@ -580,18 +580,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             <div className="text-gray-500 mt-1">{new Date(repository.versions[hoveredNode]?.timestamp).toLocaleDateString()}</div>
           </div>
         )}
-        
-        {/* Reset view button */}
-        {(pan.x !== 0 || pan.y !== 0) && (
-          <button
-            onClick={() => setPan({ x: 0, y: 0 })}
-            className="absolute top-4 right-4 px-3 py-1.5 bg-gray-900/80 text-gray-400 
-                       hover:text-gray-200 hover:bg-gray-800/80 rounded-md text-xs
-                       border border-gray-800 transition-all"
-          >
-            Reset View
-          </button>
-        )}
       </div>
 
       {/* Code Editor */}

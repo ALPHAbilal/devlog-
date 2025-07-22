@@ -373,9 +373,9 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     '/table': { type: 'block', blockType: 'table' },
     '/code': { type: 'block', blockType: 'code' },
     '/ai': { type: 'block', blockType: 'ai' },
-    '/math': { type: 'block', blockType: 'math' },
     '/todo': { type: 'block', blockType: 'todo' },
-    '/image': { type: 'block', blockType: 'image' }
+    '/image': { type: 'block', blockType: 'image' },
+    '/version-track': { type: 'block', blockType: 'version-track' }
   };
 
   const handleChange = (e) => {

@@ -32,7 +32,7 @@ export default function PricingSection() {
       features: [
         { text: 'Unlimited documents', included: true },
         { text: '2 GB total storage', included: true },
-        { text: 'All 8 block types (Text, Code, Math, etc.)', included: true },
+        { text: 'All 9 block types (Text, Code, Version Track, etc.)', included: true },
         { text: 'Markdown editing with live preview', included: true },
         { text: 'Document linking ([[links]] & @mentions)', included: true },
         { text: 'Advanced search across all content', included: true },

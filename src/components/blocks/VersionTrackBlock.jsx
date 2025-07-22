@@ -291,7 +291,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       }
     });
     
-    // Draw branch labels with professional styling
+    // Restore transform
+    ctx.restore();
+    
+    // Draw branch labels with professional styling (outside transform to keep them fixed)
     let yOffset = 20;
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
       const isActive = branchName === selectedBranch;
@@ -313,9 +316,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       
       yOffset += 20;
     });
-    
-    // Restore transform
-    ctx.restore();
   }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
 
   // Animation loop

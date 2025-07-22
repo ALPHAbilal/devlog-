@@ -15,75 +15,98 @@ const generateVersionId = () => {
   return 'v' + Date.now().toString(36);
 };
 
-// Smart node positioning algorithm
+// Enhanced node positioning with better branch handling
 const calculateNodePositions = (repository) => {
   const positions = {};
-  const branchLanes = {};
-  const LANE_WIDTH = 100;
-  const NODE_SPACING = 80;
-  const START_X = 120;
-  const START_Y = 80;
+  const branchLanes = { main: 0 };
+  const LANE_HEIGHT = 80;
+  const NODE_SPACING = 100;
+  const START_X = 140;
+  const START_Y = 60;
   
-  // First, organize versions by branch and time
-  const branchVersions = {};
+  // Build parent-child relationships
+  const children = {};
   Object.values(repository.versions).forEach(version => {
-    const branch = version.branch || 'main';
-    if (!branchVersions[branch]) {
-      branchVersions[branch] = [];
+    if (version.parent) {
+      if (!children[version.parent]) {
+        children[version.parent] = [];
+      }
+      children[version.parent].push(version.id);
     }
-    branchVersions[branch].push(version);
   });
-
-  // Sort versions within each branch by timestamp
-  Object.keys(branchVersions).forEach(branch => {
-    branchVersions[branch].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-  });
-
-  // Assign lanes to branches
-  let laneIndex = 0;
-  Object.keys(branchVersions).forEach(branch => {
-    branchLanes[branch] = laneIndex++;
-  });
-
-  // Position nodes
-  const globalTimeline = Object.values(repository.versions)
+  
+  // Sort all versions by timestamp
+  const timeline = Object.values(repository.versions)
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-  globalTimeline.forEach((version, index) => {
+  
+  // Assign lanes dynamically
+  let nextLane = 1;
+  const timelineX = {};
+  
+  timeline.forEach((version, index) => {
     const branch = version.branch || 'main';
-    const lane = branchLanes[branch];
+    
+    // Assign lane if branch doesn't have one
+    if (!(branch in branchLanes) && branch !== 'main') {
+      branchLanes[branch] = nextLane++;
+    }
+    
+    // Calculate X position based on timeline
+    const x = START_X + (index * NODE_SPACING);
+    timelineX[version.id] = x;
+    
+    // Calculate Y position based on branch lane
+    let y = START_Y + (branchLanes[branch] * LANE_HEIGHT);
+    
+    // Adjust Y for merge commits to create smoother connections
+    if (version.parent && children[version.parent]?.length > 1) {
+      // This is a branch point - slightly offset
+      y += 10;
+    }
     
     positions[version.id] = {
-      x: START_X + (index * NODE_SPACING),
-      y: START_Y + (lane * LANE_WIDTH),
+      x: x,
+      y: y,
       branch: branch,
-      lane: lane
+      lane: branchLanes[branch],
+      timestamp: version.timestamp
     };
   });
-
+  
   return positions;
 };
 
-// Syntax highlighting for code
+// Enhanced syntax highlighting with better regex patterns
 const highlightCode = (code, language = 'javascript') => {
-  // Simple syntax highlighting for JavaScript
-  const keywords = /\b(function|const|let|var|if|else|return|for|while|class|import|export|from|new|async|await)\b/g;
-  const strings = /(["'`])(?:(?=(\\?))\2.)*?\1/g;
-  const comments = /(\/\/.*$)|(\/\*[\s\S]*?\*\/)/gm;
-  const numbers = /\b\d+\b/g;
-  const functions = /\b(\w+)(?=\()/g;
-
+  // Escape HTML first
   let highlighted = code
+    .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
-  // Apply highlighting in order
-  highlighted = highlighted
-    .replace(comments, '<span class="text-gray-500">$&</span>')
-    .replace(strings, '<span class="text-green-400">$&</span>')
-    .replace(keywords, '<span class="text-purple-400">$&</span>')
-    .replace(functions, '<span class="text-blue-400">$1</span>')
-    .replace(numbers, '<span class="text-orange-400">$&</span>');
+  // More robust patterns
+  const patterns = [
+    // Comments (single and multi-line)
+    { regex: /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)/g, class: 'text-gray-500' },
+    // Strings (including template literals)
+    { regex: /(["'])(?:(?!\1)[^\\\n]|\\[\s\S])*\1/g, class: 'text-green-400' },
+    { regex: /`(?:[^`\\]|\\[\s\S])*`/g, class: 'text-green-400' },
+    // Keywords
+    { regex: /\b(function|const|let|var|if|else|return|for|while|do|switch|case|break|continue|class|extends|import|export|from|default|new|async|await|try|catch|finally|throw|typeof|instanceof|in|of|this|super)\b/g, class: 'text-purple-400' },
+    // Numbers
+    { regex: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g, class: 'text-orange-400' },
+    // Boolean and null
+    { regex: /\b(true|false|null|undefined)\b/g, class: 'text-orange-400' },
+    // Function calls
+    { regex: /\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, class: 'text-blue-400' },
+  ];
+
+  // Apply patterns in order
+  patterns.forEach(({ regex, class: className }) => {
+    highlighted = highlighted.replace(regex, `<span class="${className}">$&</span>`);
+  });
 
   return highlighted;
 };
@@ -161,9 +184,13 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     canvas.height = rect.height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     
-    // Clear canvas
+    // Clear canvas with anti-aliasing
     ctx.fillStyle = '#000000';
     ctx.fillRect(0, 0, rect.width, rect.height);
+    
+    // Enable better rendering
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     
     
     
@@ -183,20 +210,23 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           ctx.beginPath();
           ctx.moveTo(parentPos.x, parentPos.y);
           
-          // Smooth bezier curves for branch connections
+          // Enhanced bezier curves for smoother connections
           if (parentPos.y !== childPos.y) {
-            const controlPoint1X = parentPos.x + (childPos.x - parentPos.x) * 0.5;
-            const controlPoint1Y = parentPos.y;
-            const controlPoint2X = parentPos.x + (childPos.x - parentPos.x) * 0.5;
-            const controlPoint2Y = childPos.y;
+            const dx = childPos.x - parentPos.x;
+            const dy = childPos.y - parentPos.y;
+            const tension = 0.4;
             
-            ctx.bezierCurveTo(
-              controlPoint1X, controlPoint1Y,
-              controlPoint2X, controlPoint2Y,
-              childPos.x, childPos.y
-            );
+            // Create smoother curves with better control points
+            const cp1x = parentPos.x + dx * tension;
+            const cp1y = parentPos.y;
+            const cp2x = childPos.x - dx * tension;
+            const cp2y = childPos.y;
+            
+            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, childPos.x, childPos.y);
           } else {
-            ctx.lineTo(childPos.x, childPos.y);
+            // Even straight lines get slight curves for visual appeal
+            const midX = (parentPos.x + childPos.x) / 2;
+            ctx.quadraticCurveTo(midX, parentPos.y - 2, childPos.x, childPos.y);
           }
           
           ctx.stroke();
@@ -215,17 +245,31 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       const isMergeCommit = version.message?.toLowerCase().includes('merge');
       
       
-      // Outer ring
+      // Add subtle shadow for depth
+      if (isHovered || isCurrentVersion) {
+        ctx.save();
+        ctx.shadowColor = branch.color.primary;
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      
+      // Outer ring with smooth edges
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, isHovered ? 12 : 10, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, isHovered ? 11 : 10, 0, Math.PI * 2);
       ctx.fillStyle = '#000000';
       ctx.fill();
       
       ctx.strokeStyle = branch.color.primary;
-      ctx.lineWidth = 3;
+      ctx.lineWidth = isCurrentVersion ? 4 : 3;
       ctx.stroke();
       
-      // Inner circle
+      // Inner circle with better visual hierarchy
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, 5, 0, Math.PI * 2);
       ctx.fillStyle = isCurrentVersion ? branch.color.primary : '#000000';
@@ -234,7 +278,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       if (!isCurrentVersion) {
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = branch.color.primary;
+        ctx.fillStyle = isHovered ? branch.color.primary : branch.color.primary + '99';
         ctx.fill();
       }
       
@@ -255,19 +299,22 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     // Draw branch labels
     let yOffset = 30;
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
-      // Branch line preview
+      // Branch line preview with rounded caps
+      ctx.save();
       ctx.strokeStyle = branch.color.primary;
       ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
       ctx.beginPath();
       ctx.moveTo(20, yOffset);
-      ctx.lineTo(50, yOffset);
+      ctx.lineTo(45, yOffset);
       ctx.stroke();
+      ctx.restore();
       
-      // Branch name
-      ctx.fillStyle = '#9CA3AF';
-      ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      // Branch name with better typography
+      ctx.fillStyle = '#E5E7EB';
+      ctx.font = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
       ctx.textAlign = 'left';
-      ctx.fillText(branchName, 60, yOffset + 4);
+      ctx.fillText(branchName, 55, yOffset + 4);
       
       yOffset += 25;
     });
@@ -288,21 +335,33 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     };
   }, [drawMetroMap]);
 
-  // Handle canvas interactions
+  // Handle canvas interactions with visual feedback
   const handleCanvasClick = (e) => {
     const rect = canvasRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
     // Find clicked node
+    let clickedVersion = null;
     Object.entries(nodePositions).forEach(([versionId, pos]) => {
       const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
       if (distance < 12) {
-        // Checkout this version
-        setCurrentVersion(versionId);
-        setRepository(prev => ({ ...prev, HEAD: versionId }));
+        clickedVersion = versionId;
       }
     });
+    
+    if (clickedVersion && clickedVersion !== currentVersion) {
+      // Checkout this version with smooth transition
+      setCurrentVersion(clickedVersion);
+      setRepository(prev => ({ ...prev, HEAD: clickedVersion }));
+      
+      // Visual feedback
+      const canvas = canvasRef.current;
+      canvas.style.transform = 'scale(0.98)';
+      setTimeout(() => {
+        canvas.style.transform = 'scale(1)';
+      }, 100);
+    }
   };
 
   const handleCanvasMouseMove = (e) => {
@@ -320,6 +379,12 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     
     setHoveredNode(foundNode);
     canvasRef.current.style.cursor = foundNode ? 'pointer' : 'default';
+    
+    // Add hover effect feedback
+    if (foundNode !== hoveredNode) {
+      // Trigger redraw when hover state changes
+      setHoveredNode(foundNode);
+    }
   };
 
   // Create new version (commit)
@@ -388,7 +453,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const currentVersionData = repository.versions[currentVersion];
 
   return (
-    <div className="bg-black rounded-xl overflow-hidden border border-gray-900">
+    <div className="bg-black rounded-xl overflow-hidden border border-gray-900 shadow-2xl">
       {/* Header */}
       <div className="p-4 border-b border-gray-900">
         <div className="flex items-center justify-between">
@@ -490,30 +555,32 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       </div>
 
       {/* Metro Map Visualization */}
-      <div className="relative bg-black h-80 overflow-hidden">
+      <div className="relative bg-black h-80 overflow-hidden rounded-lg border border-gray-900">
         <canvas
           ref={canvasRef}
-          className="w-full h-full"
-          style={{ imageRendering: 'crisp-edges' }}
+          className="w-full h-full transition-transform duration-100"
+          style={{ imageRendering: 'auto' }}
           onClick={handleCanvasClick}
           onMouseMove={handleCanvasMouseMove}
           onMouseLeave={() => setHoveredNode(null)}
         />
         
         
-        {/* Version tooltip */}
+        {/* Enhanced version tooltip */}
         {hoveredNode && (
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1.5 
-                          bg-gray-900 rounded text-xs text-gray-400
-                          border border-gray-800 shadow-sm">
-            <div className="font-mono text-gray-400 mb-0.5">{hoveredNode}</div>
-            <div>{repository.versions[hoveredNode]?.message}</div>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 
+                          bg-gray-900 rounded-lg text-xs
+                          border border-gray-800 shadow-lg
+                          transform transition-all duration-200 ease-out">
+            <div className="font-mono text-gray-500 text-[10px] uppercase tracking-wider mb-1">Version {hoveredNode}</div>
+            <div className="text-gray-300 font-medium">{repository.versions[hoveredNode]?.message}</div>
+            <div className="text-gray-500 mt-1">{new Date(repository.versions[hoveredNode]?.timestamp).toLocaleDateString()}</div>
           </div>
         )}
       </div>
 
       {/* Code Editor */}
-      <div className="border-t border-gray-900">
+      <div className="border-t border-gray-900 rounded-b-xl overflow-hidden">
         {mode === 'edit' ? (
           <div className="p-4 space-y-3">
             <input
@@ -526,9 +593,9 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                          focus:outline-none placeholder-gray-600"
             />
             <div className="relative">
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-950 
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-900 
                               border-r border-gray-800 rounded-l-md overflow-hidden">
-                <div className="text-gray-600 text-xs font-mono leading-6 py-3 px-2 select-none">
+                <div className="text-gray-500 text-xs font-mono leading-6 py-3 px-2 select-none">
                   {editingCode.split('\n').map((_, i) => (
                     <div key={i}>{i + 1}</div>
                   ))}
@@ -547,8 +614,8 @@ export default function VersionTrackBlock({ block, onUpdate }) {
           </div>
         ) : (
           <div className="relative" ref={codeContainerRef}>
-            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-950 
-                            border-r border-gray-800">
+            <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-900 
+                            border-r border-gray-800 rounded-bl-lg">
               <div className="text-gray-600 text-xs font-mono leading-6 py-3 px-2 select-none">
                 {(currentVersionData?.content || '').split('\n').map((_, i) => (
                   <div key={i}>{i + 1}</div>
@@ -556,7 +623,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               </div>
             </div>
             <div className="pl-14 pr-4 py-3 bg-gray-950 max-h-64 overflow-y-auto">
-              <pre className="text-gray-300 font-mono text-sm leading-6">
+              <pre className="text-gray-300 font-mono text-sm leading-6 whitespace-pre-wrap break-words">
                 <code 
                   dangerouslySetInnerHTML={{ 
                     __html: highlightCode(currentVersionData?.content || '// No code yet') 

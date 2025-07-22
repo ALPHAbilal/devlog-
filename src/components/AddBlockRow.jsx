@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image } from 'lucide-react';
+import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, GitBranch } from 'lucide-react';
 
 const blockTypes = [
   { type: 'text', label: 'text', icon: Type },
@@ -9,6 +9,7 @@ const blockTypes = [
   { type: 'table', label: 'table', icon: Table },
   { type: 'ai', label: 'AI interaction', icon: MessageSquare },
   { type: 'filetree', label: 'file tree', icon: Folder },
+  { type: 'version-track', label: 'version track', icon: GitBranch },
 ];
 
 export default function AddBlockRow({ onSelect, onClose, show }) {

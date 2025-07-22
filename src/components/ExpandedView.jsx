@@ -109,6 +109,12 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       newBlock.messages = [];
     } else if (type === 'heading') {
       newBlock.level = 2;
+    } else if (type === 'version-track') {
+      newBlock.title = 'New Version Track';
+      newBlock.description = 'Track version history';
+      newBlock.mainLine = [];
+      newBlock.branches = [];
+      newBlock.viewMode = 'collapsed';
     }
 
     let updatedBlocks;

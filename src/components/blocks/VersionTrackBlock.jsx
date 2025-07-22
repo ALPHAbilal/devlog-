@@ -296,7 +296,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     });
     
     
-    // Draw branch labels
+    // Restore context before drawing UI elements
+    ctx.restore();
+    
+    // Draw branch labels (not affected by pan)
     let yOffset = 30;
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
       // Branch line preview with rounded caps
@@ -318,7 +321,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       
       yOffset += 25;
     });
-  }, [repository, nodePositions, currentVersion, hoveredNode]);
+  }, [repository, nodePositions, currentVersion, hoveredNode, pan]);
 
   // Animation loop
   useEffect(() => {
@@ -576,6 +579,18 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             <div className="text-gray-300 font-medium">{repository.versions[hoveredNode]?.message}</div>
             <div className="text-gray-500 mt-1">{new Date(repository.versions[hoveredNode]?.timestamp).toLocaleDateString()}</div>
           </div>
+        )}
+        
+        {/* Reset view button */}
+        {(pan.x !== 0 || pan.y !== 0) && (
+          <button
+            onClick={() => setPan({ x: 0, y: 0 })}
+            className="absolute top-4 right-4 px-3 py-1.5 bg-gray-900/80 text-gray-400 
+                       hover:text-gray-200 hover:bg-gray-800/80 rounded-md text-xs
+                       border border-gray-800 transition-all"
+          >
+            Reset View
+          </button>
         )}
       </div>
 

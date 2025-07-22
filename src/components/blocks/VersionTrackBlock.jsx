@@ -192,8 +192,6 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     
-    
-    
     // Draw connections with gradients
     Object.values(repository.versions).forEach(version => {
       if (version.parent) {
@@ -295,11 +293,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       }
     });
     
-    
-    // Restore context before drawing UI elements
-    ctx.restore();
-    
-    // Draw branch labels (not affected by pan)
+    // Draw branch labels
     let yOffset = 30;
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
       // Branch line preview with rounded caps
@@ -321,7 +315,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       
       yOffset += 25;
     });
-  }, [repository, nodePositions, currentVersion, hoveredNode, pan]);
+  }, [repository, nodePositions, currentVersion, hoveredNode]);
 
   // Animation loop
   useEffect(() => {

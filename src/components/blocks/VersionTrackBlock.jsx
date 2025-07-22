@@ -240,6 +240,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [selectedBranch, setSelectedBranch] = useState('main');
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
   const [mode, setMode] = useState('view'); // 'view' or 'edit'
+  const [modifiedFiles, setModifiedFiles] = useState({}); // Track all modified files
   const [hoveredNode, setHoveredNode] = useState(null);
   const [nodePositions, setNodePositions] = useState({});
   const [zoom, setZoom] = useState(1);
@@ -513,8 +514,26 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     
     if (clickedVersion && clickedVersion !== currentVersion) {
       // Checkout this version with smooth transition
+      const versionData = repository.versions[clickedVersion];
+      
+      // Restore the complete directory state from this version
+      if (versionData.fileTree) {
+        setRepository(prev => ({ 
+          ...prev, 
+          HEAD: clickedVersion,
+          fileTree: JSON.parse(JSON.stringify(versionData.fileTree)) // Deep copy to avoid mutations
+        }));
+      }
+      
       setCurrentVersion(clickedVersion);
-      setRepository(prev => ({ ...prev, HEAD: clickedVersion }));
+      
+      // Reset editing state
+      setMode('view');
+      if (activeFile && versionData.files?.[activeFile]) {
+        setEditingCode(versionData.files[activeFile].content);
+      } else {
+        setEditingCode('');
+      }
       
       // Subtle visual feedback
       const canvas = canvasRef.current;
@@ -553,21 +572,50 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
   // Create new version (commit)
   const handleCommit = () => {
-    if (!editingCode.trim() || !commitMessage.trim()) {
+    if (!commitMessage.trim()) {
       return;
     }
 
     const newVersionId = generateVersionId();
     const currentVersionData = repository.versions[currentVersion];
     
-    // Calculate stats for the active file
-    const oldContent = currentVersionData?.files?.[activeFile]?.content || '';
-    const oldLines = oldContent.split('\n').length;
-    const newLines = editingCode.split('\n').length;
-    const additions = Math.max(0, newLines - oldLines);
-    const deletions = Math.max(0, oldLines - newLines);
+    // Save current file if being edited
+    const allModifiedFiles = { ...modifiedFiles };
+    if (mode === 'edit' && activeFile && editingCode !== undefined) {
+      allModifiedFiles[activeFile] = editingCode;
+    }
     
-    // Create new version with updated file
+    // Build complete file snapshot from current state
+    const fileSnapshot = {};
+    
+    // Helper to traverse file tree and collect all file contents
+    const collectFiles = (tree, path = '') => {
+      Object.entries(tree).forEach(([name, item]) => {
+        const fullPath = path ? `${path}/${name}` : name;
+        
+        if (item.type === 'file') {
+          // Get content from modified files or current version
+          let content = '';
+          if (allModifiedFiles[fullPath] !== undefined) {
+            content = allModifiedFiles[fullPath];
+          } else if (currentVersionData?.files?.[fullPath]) {
+            content = currentVersionData.files[fullPath].content;
+          }
+          
+          fileSnapshot[fullPath] = {
+            content,
+            type: 'file'
+          };
+        } else if (item.type === 'folder' && item.children) {
+          collectFiles(item.children, fullPath);
+        }
+      });
+    };
+    
+    // Collect all files from the file tree
+    collectFiles(repository.fileTree);
+    
+    // Create new version with complete directory snapshot
     const newVersion = {
       id: newVersionId,
       message: commitMessage,
@@ -575,16 +623,8 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       author: 'user',
       parent: currentVersion,
       branch: selectedBranch,
-      files: {
-        // Copy all existing files from parent version
-        ...(currentVersionData?.files || {}),
-        // Update the active file
-        [activeFile]: {
-          content: editingCode,
-          action: currentVersionData?.files?.[activeFile] ? 'modified' : 'created',
-          stats: { additions, deletions }
-        }
-      }
+      files: fileSnapshot,
+      fileTree: JSON.parse(JSON.stringify(repository.fileTree)) // Deep copy of file tree structure
     };
 
     setRepository(prev => ({
@@ -613,6 +653,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     setCurrentVersion(newVersionId);
     setCommitMessage('');
     setMode('view');
+    setModifiedFiles({}); // Clear all modified files after commit
   };
 
   // Create new branch
@@ -948,17 +989,37 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                        ${isActive ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#8b949e]'}`}
             style={{ paddingLeft: `${paddingLeft + 20}px` }}
             onClick={() => {
+              // Save current file changes if in edit mode
+              if (mode === 'edit' && activeFile && editingCode !== undefined) {
+                setModifiedFiles(prev => ({
+                  ...prev,
+                  [activeFile]: editingCode
+                }));
+              }
+              
               setActiveFile(fullPath);
-              const version = repository.versions[currentVersion];
-              if (version?.files?.[fullPath]) {
-                setEditingCode(version.files[fullPath].content);
+              
+              // Load content from modified files or current version
+              if (modifiedFiles[fullPath] !== undefined) {
+                setEditingCode(modifiedFiles[fullPath]);
+              } else {
+                const version = repository.versions[currentVersion];
+                if (version?.files?.[fullPath]) {
+                  setEditingCode(version.files[fullPath].content);
+                } else {
+                  setEditingCode('');
+                }
               }
             }}
             onContextMenu={(e) => handleContextMenu(e, fullPath, false, path)}
           >
             <FileIcon size={16} className={isActive ? 'text-[#58a6ff]' : ''} />
             <span className="flex-1 truncate">{name}</span>
-            {item.lastModified && (
+            {/* Show modified indicator */}
+            {(modifiedFiles[fullPath] !== undefined || (isActive && mode === 'edit')) && (
+              <span className="text-[10px] text-[#f0ad4e] ml-2">●</span>
+            )}
+            {item.lastModified && !modifiedFiles[fullPath] && (
               <span className="text-[10px] text-[#7d8590] ml-2">{item.lastModified}</span>
             )}
           </div>
@@ -1153,13 +1214,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               )}
             </div>
 
-            {/* Current version info */}
+            {/* Current version info - minimal */}
             {currentVersionData && (
-              <div className="flex items-center gap-2 text-xs">
-                <Code2 size={12} className="text-[#7d8590]" />
+              <div className="text-xs">
                 <span className="text-[#7d8590] font-mono">{currentVersion}</span>
-                <span className="text-[#7d8590]">·</span>
-                <span className="text-[#8b949e]">{currentVersionData.message}</span>
               </div>
             )}
           </div>
@@ -1169,7 +1227,16 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             {mode === 'edit' ? (
               <>
                 <button
-                  onClick={() => setMode('view')}
+                  onClick={() => {
+                    // Save current changes before switching mode
+                    if (activeFile && editingCode !== undefined) {
+                      setModifiedFiles(prev => ({
+                        ...prev,
+                        [activeFile]: editingCode
+                      }));
+                    }
+                    setMode('view');
+                  }}
                   className="px-3 py-1 text-sm text-[#8b949e] hover:text-[#f0f6fc] 
                              transition-colors duration-150"
                 >
@@ -1177,7 +1244,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                 </button>
                 <button
                   onClick={handleCommit}
-                  disabled={!editingCode.trim() || !commitMessage.trim()}
+                  disabled={!commitMessage.trim()}
                   className="px-3 py-1 bg-[#238636] text-white rounded-md text-sm
                              hover:bg-[#2ea043] transition-colors duration-150 
                              flex items-center gap-1.5 font-medium

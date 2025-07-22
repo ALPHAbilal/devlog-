@@ -135,6 +135,11 @@ export default {
         'surface-1': '#161b22', // Slightly elevated
         'surface-2': '#1f2428', // More elevated
         'surface-3': '#2d333b', // Highest elevation
+        // Version Track colors
+        'vt-base': '#121212',
+        'vt-surface': '#1E1E1E',
+        'vt-glass': 'rgba(255, 255, 255, 0.05)',
+        'vt-glass-border': 'rgba(255, 255, 255, 0.1)',
       },
       backgroundImage: {
         'card-gradient': 'linear-gradient(135deg, #1e3a5f 0%, #0a1628 100%)',

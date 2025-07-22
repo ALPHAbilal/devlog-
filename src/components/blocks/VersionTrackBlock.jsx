@@ -1,36 +1,55 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { 
-  GitBranch, Clock, ChevronDown, ChevronRight, X, GitCommit, 
-  Edit3, Eye, Save, Code2, FileText, Plus, Search, Download,
-  ChevronLeft, Sparkles
+  GitBranch, ChevronLeft, ChevronRight, X, GitCommit, 
+  Edit3, Eye, Save, Plus, Search, ZoomIn, ZoomOut,
+  Filter, Sparkles, Clock, User, FileText, AlertCircle
 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 
-// Beautiful color palette
+// LCH-based color system for world-class dark theme
 const COLORS = {
-  tracks: {
-    main: 'rgb(34, 197, 94)', // Emerald green
-    branch: 'rgb(59, 130, 246)', // Blue
-    experimental: 'rgb(251, 146, 60)', // Orange
-    merge: 'rgb(168, 85, 247)', // Purple
+  // Base colors
+  base: '#121212',
+  surface: '#1E1E1E',
+  surfaceElevated: '#2A2A2A',
+  glass: 'rgba(255, 255, 255, 0.05)',
+  glassBorder: 'rgba(255, 255, 255, 0.1)',
+  
+  // Metro lines with semantic meaning
+  lines: {
+    main: '#22C55E', // Emerald green
+    feature: '#3B82F6', // Blue  
+    experimental: '#FB923C', // Orange
+    hotfix: '#EF4444', // Red
+    merge: '#A855F7', // Purple
   },
+  
+  // Station states
   stations: {
-    current: '#3b82f6',
-    stable: '#10b981',
-    experimental: '#f97316',
-    deprecated: '#6b7280',
-    draft: '#8b5cf6'
+    default: 'rgba(255, 255, 255, 0.87)',
+    hover: 'rgba(255, 255, 255, 1)',
+    selected: '#3B82F6',
+    current: '#22C55E',
+    conflict: '#EF4444',
   },
-  ui: {
-    glass: 'rgba(30, 41, 59, 0.8)',
-    glassLight: 'rgba(148, 163, 184, 0.1)',
-    border: 'rgba(148, 163, 184, 0.2)',
-    text: '#e2e8f0',
-    textSecondary: '#94a3b8'
+  
+  // Text
+  text: {
+    primary: 'rgba(255, 255, 255, 0.87)',
+    secondary: 'rgba(255, 255, 255, 0.6)',
+    tertiary: 'rgba(255, 255, 255, 0.38)',
   }
 };
 
-// Sample version content for demo
+// Spring physics for animations
+const SPRING = {
+  tension: 170,
+  friction: 26,
+  duration: 600,
+  easing: 'cubic-bezier(0.4, 0, 0.2, 1)'
+};
+
+// Demo content remains the same
 const DEMO_CONTENT = {
   v1: `function authenticate(username, password) {
   // Basic authentication
@@ -78,20 +97,28 @@ async function authenticate(username, password, method = 'basic') {
 };
 
 export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
-  const [mode, setMode] = useState('read'); // 'read' or 'edit'
-  const [viewStyle, setViewStyle] = useState('metro'); // 'metro' or 'timeline'
+  // State management
   const [selectedVersion, setSelectedVersion] = useState(null);
+  const [hoveredVersion, setHoveredVersion] = useState(null);
+  const [compareMode, setCompareMode] = useState(false);
   const [compareVersions, setCompareVersions] = useState([]);
-  const [isComparing, setIsComparing] = useState(false);
+  const [editingVersion, setEditingVersion] = useState(null);
   const [editingContent, setEditingContent] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSearch, setShowSearch] = useState(false);
-  const [hoveredVersion, setHoveredVersion] = useState(null);
+  const [filterBy, setFilterBy] = useState('all'); // all, author, branch, date
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showLeftPanel, setShowLeftPanel] = useState(true);
+  const [showRightPanel, setShowRightPanel] = useState(true);
   
-  const svgRef = useRef(null);
+  // Refs
+  const canvasRef = useRef(null);
   const containerRef = useRef(null);
-
-  // Initialize with demo data if empty
+  const animationRef = useRef(null);
+  
+  // Initialize with demo data
   useEffect(() => {
     if (!block.versions || block.versions.length === 0) {
       const demoVersions = [
@@ -104,10 +131,10 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
           message: 'Initial authentication implementation',
           branch: 'main',
           parents: [],
-          stats: { additions: 8, deletions: 0 }
+          stats: { additions: 8, deletions: 0, files: 1 }
         },
         {
-          id: 'v2',
+          id: 'v2', 
           label: 'Add Hashing',
           content: DEMO_CONTENT.v2,
           timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
@@ -115,7 +142,7 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
           message: 'Enhanced security with bcrypt password hashing',
           branch: 'main',
           parents: ['v1'],
-          stats: { additions: 15, deletions: 3 }
+          stats: { additions: 15, deletions: 3, files: 1 }
         },
         {
           id: 'v3',
@@ -126,7 +153,7 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
           message: 'Added OAuth support and two-factor authentication',
           branch: 'main',
           parents: ['v2'],
-          stats: { additions: 22, deletions: 5 }
+          stats: { additions: 22, deletions: 5, files: 2 }
         }
       ];
       
@@ -139,219 +166,203 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
     }
   }, [block, onUpdate]);
 
-  // Beautiful SVG metro map rendering
-  const renderMetroMap = () => {
+  // Calculate layout for metro map
+  const calculateLayout = useMemo(() => {
     const versions = block.versions || [];
-    if (versions.length === 0) return null;
+    if (versions.length === 0) return { positions: {}, connections: [] };
 
-    const width = 800;
-    const height = 300;
-    const stationRadius = 24;
-    const trackWidth = 4;
-    const stationSpacing = 200;
-    const startX = 80;
-    const centerY = height / 2;
-
-    // Calculate positions for each version
     const positions = {};
+    const connections = [];
+    const branchYOffsets = { main: 0 };
+    let maxY = 0;
+
+    // Calculate positions
     versions.forEach((version, index) => {
-      positions[version.id] = {
-        x: startX + index * stationSpacing,
-        y: centerY,
-        version
-      };
+      const x = 200 + index * 250;
+      const branchOffset = branchYOffsets[version.branch] || 0;
+      const y = 200 + branchOffset;
+      
+      positions[version.id] = { x, y, version };
+      
+      // Calculate connections
+      version.parents.forEach(parentId => {
+        const parent = positions[parentId];
+        if (parent) {
+          connections.push({
+            from: parent,
+            to: positions[version.id],
+            branch: version.branch
+          });
+        }
+      });
     });
 
-    return (
-      <svg 
-        ref={svgRef}
-        width={width} 
-        height={height}
-        className="w-full h-full"
-        style={{ background: 'transparent' }}
-      >
-        {/* Definitions for gradients and filters */}
-        <defs>
-          {/* Glow filter */}
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-          
-          {/* Track gradient */}
-          <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={COLORS.tracks.main} stopOpacity="0.3" />
-            <stop offset="50%" stopColor={COLORS.tracks.main} stopOpacity="0.8" />
-            <stop offset="100%" stopColor={COLORS.tracks.main} stopOpacity="0.3" />
-          </linearGradient>
+    return { positions, connections };
+  }, [block.versions]);
 
-          {/* Station gradients */}
-          {Object.entries(COLORS.stations).map(([state, color]) => (
-            <radialGradient key={state} id={`station-${state}`}>
-              <stop offset="0%" stopColor={color} stopOpacity="0.8" />
-              <stop offset="100%" stopColor={color} stopOpacity="0.4" />
-            </radialGradient>
-          ))}
-        </defs>
+  // Render metro map with Canvas for performance
+  const renderMetroMap = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-        {/* Main track line with animation */}
-        <line
-          x1={startX - 20}
-          y1={centerY}
-          x2={startX + (versions.length - 1) * stationSpacing + 20}
-          y2={centerY}
-          stroke="url(#trackGradient)"
-          strokeWidth={trackWidth}
-          strokeLinecap="round"
-        />
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    
+    // High DPI support
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    ctx.scale(dpr * zoomLevel, dpr * zoomLevel);
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Apply pan offset
+    ctx.save();
+    ctx.translate(panOffset.x, panOffset.y);
+    
+    const { positions, connections } = calculateLayout;
+    
+    // Draw connections with bezier curves
+    connections.forEach(({ from, to, branch }) => {
+      const color = COLORS.lines[branch] || COLORS.lines.main;
+      
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      
+      // Calculate control points for smooth curves
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const cx1 = from.x + dx * 0.5;
+      const cy1 = from.y;
+      const cx2 = to.x - dx * 0.5;
+      const cy2 = to.y;
+      
+      ctx.bezierCurveTo(cx1, cy1, cx2, cy2, to.x, to.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    });
+    
+    // Draw stations
+    Object.entries(positions).forEach(([id, pos]) => {
+      const version = pos.version;
+      const isHovered = hoveredVersion === id;
+      const isSelected = selectedVersion?.id === id;
+      const isCurrent = block.currentVersion === id;
+      
+      // Station size based on state
+      const baseRadius = 24;
+      const radius = isHovered ? baseRadius * 1.1 : baseRadius;
+      
+      // Glow effect for hover/selected
+      if (isHovered || isSelected || isCurrent) {
+        const gradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, radius * 2);
+        gradient.addColorStop(0, `${COLORS.stations[isCurrent ? 'current' : isSelected ? 'selected' : 'hover']}33`);
+        gradient.addColorStop(1, 'transparent');
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, radius * 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      // Main station circle
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = isCurrent ? COLORS.stations.current : COLORS.surface;
+      ctx.fill();
+      ctx.strokeStyle = COLORS.stations[isSelected ? 'selected' : 'default'];
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Station label
+      ctx.fillStyle = COLORS.text.primary;
+      ctx.font = '14px Inter, system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(version.label, pos.x, pos.y - radius - 10);
+      
+      // Author and time
+      ctx.fillStyle = COLORS.text.secondary;
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.fillText(version.author, pos.x, pos.y + radius + 20);
+      ctx.fillText(formatTimestamp(version.timestamp), pos.x, pos.y + radius + 35);
+    });
+    
+    ctx.restore();
+  }, [calculateLayout, hoveredVersion, selectedVersion, block.currentVersion, zoomLevel, panOffset]);
 
-        {/* Progress indicator line */}
-        <line
-          x1={startX - 20}
-          y1={centerY}
-          x2={positions[block.currentVersion]?.x || startX}
-          y2={centerY}
-          stroke={COLORS.tracks.main}
-          strokeWidth={trackWidth + 2}
-          strokeLinecap="round"
-          opacity="0.8"
-        >
-          <animate
-            attributeName="x2"
-            from={startX - 20}
-            to={positions[block.currentVersion]?.x || startX}
-            dur="1s"
-            fill="freeze"
-          />
-        </line>
+  // Animation loop
+  useEffect(() => {
+    const animate = () => {
+      renderMetroMap();
+      animationRef.current = requestAnimationFrame(animate);
+    };
+    animate();
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [renderMetroMap]);
 
-        {/* Version stations */}
-        {versions.map((version, index) => {
-          const pos = positions[version.id];
-          const isCurrent = version.id === block.currentVersion;
-          const isHovered = hoveredVersion === version.id;
-          const isSelected = selectedVersion?.id === version.id;
-          
-          return (
-            <g key={version.id}>
-              {/* Station glow effect */}
-              {(isCurrent || isHovered) && (
-                <circle
-                  cx={pos.x}
-                  cy={pos.y}
-                  r={stationRadius + 8}
-                  fill={COLORS.stations[version.state || 'stable']}
-                  opacity="0.2"
-                  filter="url(#glow)"
-                >
-                  <animate
-                    attributeName="r"
-                    from={stationRadius}
-                    to={stationRadius + 8}
-                    dur="0.3s"
-                    fill="freeze"
-                  />
-                </circle>
-              )}
-
-              {/* Station circle */}
-              <circle
-                cx={pos.x}
-                cy={pos.y}
-                r={isCurrent ? stationRadius : stationRadius - 4}
-                fill={`url(#station-${version.state || 'stable'})`}
-                stroke={isSelected ? '#fff' : 'transparent'}
-                strokeWidth="3"
-                className="cursor-pointer transition-all duration-200"
-                onMouseEnter={() => setHoveredVersion(version.id)}
-                onMouseLeave={() => setHoveredVersion(null)}
-                onClick={() => handleVersionClick(version)}
-              >
-                {isCurrent && (
-                  <animate
-                    attributeName="r"
-                    values={`${stationRadius - 2};${stationRadius};${stationRadius - 2}`}
-                    dur="2s"
-                    repeatCount="indefinite"
-                  />
-                )}
-              </circle>
-
-              {/* Version label */}
-              <text
-                x={pos.x}
-                y={pos.y - stationRadius - 10}
-                textAnchor="middle"
-                className="fill-text-primary text-sm font-medium select-none"
-                style={{ fill: COLORS.ui.text }}
-              >
-                {version.label}
-              </text>
-
-              {/* Author and time */}
-              <text
-                x={pos.x}
-                y={pos.y + stationRadius + 20}
-                textAnchor="middle"
-                className="fill-text-secondary text-xs select-none"
-                style={{ fill: COLORS.ui.textSecondary }}
-              >
-                {version.author}
-              </text>
-              <text
-                x={pos.x}
-                y={pos.y + stationRadius + 35}
-                textAnchor="middle"
-                className="fill-text-secondary text-xs select-none"
-                style={{ fill: COLORS.ui.textSecondary }}
-              >
-                {formatTimestamp(version.timestamp)}
-              </text>
-
-              {/* Stats badge */}
-              {version.stats && (
-                <g transform={`translate(${pos.x - 30}, ${pos.y + stationRadius + 45})`}>
-                  <rect
-                    width="60"
-                    height="20"
-                    rx="10"
-                    fill={COLORS.ui.glass}
-                    stroke={COLORS.ui.border}
-                    strokeWidth="1"
-                  />
-                  <text
-                    x="30"
-                    y="14"
-                    textAnchor="middle"
-                    className="text-xs"
-                    style={{ fill: COLORS.ui.text, fontSize: '10px' }}
-                  >
-                    +{version.stats.additions} -{version.stats.deletions}
-                  </text>
-                </g>
-              )}
-            </g>
-          );
-        })}
-      </svg>
-    );
+  // Handle canvas interactions
+  const handleCanvasMouseMove = (e) => {
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left - panOffset.x) / zoomLevel;
+    const y = (e.clientY - rect.top - panOffset.y) / zoomLevel;
+    
+    if (isDragging) {
+      setPanOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+      return;
+    }
+    
+    // Check hover over stations
+    const { positions } = calculateLayout;
+    let foundHover = null;
+    
+    Object.entries(positions).forEach(([id, pos]) => {
+      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+      if (distance < 30) {
+        foundHover = id;
+      }
+    });
+    
+    setHoveredVersion(foundHover);
+    canvasRef.current.style.cursor = foundHover ? 'pointer' : isDragging ? 'grabbing' : 'grab';
   };
 
-  const handleVersionClick = (version) => {
-    if (isComparing) {
-      if (compareVersions.find(v => v.id === version.id)) {
-        setCompareVersions(compareVersions.filter(v => v.id !== version.id));
-      } else if (compareVersions.length < 2) {
-        setCompareVersions([...compareVersions, version]);
+  const handleCanvasClick = (e) => {
+    if (isDragging) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left - panOffset.x) / zoomLevel;
+    const y = (e.clientY - rect.top - panOffset.y) / zoomLevel;
+    
+    const { positions } = calculateLayout;
+    
+    Object.entries(positions).forEach(([id, pos]) => {
+      const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
+      if (distance < 30) {
+        if (compareMode) {
+          handleCompareSelect(pos.version);
+        } else {
+          setSelectedVersion(pos.version);
+          setShowRightPanel(true);
+        }
       }
-    } else {
-      setSelectedVersion(version);
-      if (mode === 'edit') {
-        setEditingContent(version.content);
-      }
+    });
+  };
+
+  const handleCompareSelect = (version) => {
+    if (compareVersions.find(v => v.id === version.id)) {
+      setCompareVersions(compareVersions.filter(v => v.id !== version.id));
+    } else if (compareVersions.length < 2) {
+      setCompareVersions([...compareVersions, version]);
     }
   };
 
@@ -375,9 +386,9 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
       timestamp: new Date(),
       author: 'You',
       message: 'Updated version',
-      branch: 'main',
-      parents: [block.currentVersion],
-      stats: { additions: 10, deletions: 5 } // Would calculate real diff
+      branch: editingVersion.branch || 'main',
+      parents: [editingVersion.id],
+      stats: { additions: 10, deletions: 5, files: 1 }
     };
 
     onUpdate(block.id, {
@@ -386,151 +397,309 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
       currentVersion: newVersion.id
     });
 
-    setMode('read');
+    setEditingVersion(null);
+    setEditingContent('');
     setSelectedVersion(newVersion);
   };
 
-  // Main render
+  // Main render with three-panel layout
   return (
-    <div className="relative bg-dark-secondary/20 backdrop-blur-sm rounded-xl overflow-hidden border border-dark-secondary/30">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-dark-secondary/40 to-transparent p-4 border-b border-dark-secondary/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-accent-green/20 rounded-lg">
-              <GitBranch size={24} className="text-accent-green" />
-            </div>
-            <div>
-              <h3 className="text-text-primary font-semibold text-lg flex items-center gap-2">
-                {block.title || 'Version Track'}
-                <Sparkles size={16} className="text-accent-green opacity-60" />
-              </h3>
-              <p className="text-text-secondary text-sm">
-                {block.versions?.length || 0} versions • {mode === 'read' ? 'Read Mode' : 'Edit Mode'}
-              </p>
-            </div>
+    <div className="relative bg-base rounded-xl overflow-hidden border border-glass">
+      {/* Header Bar */}
+      <div className="h-14 bg-surface border-b border-glass flex items-center justify-between px-4">
+        <div className="flex items-center gap-3">
+          <div className="p-1.5 bg-glass rounded-lg">
+            <GitBranch size={20} className="text-primary" style={{ color: COLORS.lines.main }} />
           </div>
-
-          <div className="flex items-center gap-2">
-            {/* Search button */}
-            <button
-              onClick={() => setShowSearch(!showSearch)}
-              className="p-2 rounded-lg hover:bg-dark-secondary/50 transition-colors"
-              title="Search versions"
-            >
-              <Search size={18} className="text-text-secondary" />
-            </button>
-
-            {/* View style toggle */}
-            <div className="flex items-center bg-dark-secondary/30 rounded-lg p-1">
-              <button
-                onClick={() => setViewStyle('metro')}
-                className={`px-3 py-1 rounded text-sm transition-colors ${
-                  viewStyle === 'metro' 
-                    ? 'bg-accent-green text-dark-primary' 
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                Metro
-              </button>
-              <button
-                onClick={() => setViewStyle('timeline')}
-                className={`px-3 py-1 rounded text-sm transition-colors ${
-                  viewStyle === 'timeline' 
-                    ? 'bg-accent-green text-dark-primary' 
-                    : 'text-text-secondary hover:text-text-primary'
-                }`}
-              >
-                Timeline
-              </button>
-            </div>
-
-            {/* Mode toggle */}
-            <button
-              onClick={() => setMode(mode === 'read' ? 'edit' : 'read')}
-              className="flex items-center gap-2 px-4 py-2 bg-accent-green/20 
-                         text-accent-green rounded-lg hover:bg-accent-green/30 transition-colors"
-            >
-              {mode === 'read' ? (
-                <>
-                  <Edit3 size={16} />
-                  <span className="text-sm font-medium">Edit Mode</span>
-                </>
-              ) : (
-                <>
-                  <Eye size={16} />
-                  <span className="text-sm font-medium">Read Mode</span>
-                </>
-              )}
-            </button>
+          <div>
+            <h3 className="text-primary font-medium flex items-center gap-2">
+              {block.title || 'Version Track'}
+              <span className="text-xs text-secondary bg-glass px-2 py-0.5 rounded-full">
+                {block.versions?.length || 0} versions
+              </span>
+            </h3>
           </div>
         </div>
 
-        {/* Search bar */}
-        {showSearch && (
-          <div className="mt-3">
+        <div className="flex items-center gap-2">
+          {/* Search */}
+          <div className="relative">
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search versions by label, author, or content..."
-              className="w-full px-4 py-2 bg-dark-primary/50 rounded-lg 
-                         text-text-primary placeholder-text-secondary/50
-                         focus:outline-none focus:ring-2 focus:ring-accent-green/50"
+              placeholder="Search versions..."
+              className="w-48 h-8 pl-8 pr-3 bg-glass border border-glass rounded-lg
+                         text-primary placeholder-secondary text-sm
+                         focus:outline-none focus:ring-1 focus:ring-primary/50"
+              style={{
+                background: COLORS.glass,
+                borderColor: COLORS.glassBorder,
+                color: COLORS.text.primary
+              }}
             />
+            <Search size={14} className="absolute left-2.5 top-2 text-secondary" />
+          </div>
+
+          {/* View Controls */}
+          <div className="flex items-center gap-1 bg-glass rounded-lg p-1">
+            <button
+              onClick={() => setShowLeftPanel(!showLeftPanel)}
+              className={`p-1.5 rounded transition-colors ${
+                showLeftPanel ? 'bg-surface text-primary' : 'text-secondary hover:text-primary'
+              }`}
+              title="Toggle left panel"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <div className="w-px h-4 bg-glass" />
+            <button
+              onClick={() => setZoomLevel(Math.max(0.5, zoomLevel - 0.1))}
+              className="p-1.5 text-secondary hover:text-primary transition-colors"
+              title="Zoom out"
+            >
+              <ZoomOut size={16} />
+            </button>
+            <span className="text-xs text-secondary px-1">{Math.round(zoomLevel * 100)}%</span>
+            <button
+              onClick={() => setZoomLevel(Math.min(2, zoomLevel + 0.1))}
+              className="p-1.5 text-secondary hover:text-primary transition-colors"
+              title="Zoom in"
+            >
+              <ZoomIn size={16} />
+            </button>
+            <div className="w-px h-4 bg-glass" />
+            <button
+              onClick={() => setShowRightPanel(!showRightPanel)}
+              className={`p-1.5 rounded transition-colors ${
+                showRightPanel ? 'bg-surface text-primary' : 'text-secondary hover:text-primary'
+              }`}
+              title="Toggle right panel"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+
+          {/* Compare Mode Toggle */}
+          <button
+            onClick={() => {
+              setCompareMode(!compareMode);
+              setCompareVersions([]);
+            }}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+              compareMode 
+                ? 'bg-selected text-white' 
+                : 'bg-glass text-secondary hover:text-primary'
+            }`}
+            style={{
+              background: compareMode ? COLORS.stations.selected : COLORS.glass,
+              color: compareMode ? 'white' : COLORS.text.secondary
+            }}
+          >
+            Compare
+          </button>
+        </div>
+      </div>
+
+      {/* Three Panel Layout */}
+      <div className="flex h-[600px]">
+        {/* Left Panel - Context/Filters */}
+        {showLeftPanel && (
+          <div className="w-64 bg-surface border-r border-glass p-4 overflow-y-auto"
+               style={{ background: COLORS.surface, borderColor: COLORS.glassBorder }}>
+            <h4 className="text-sm font-medium text-primary mb-4">Filters</h4>
+            
+            {/* Branch Filter */}
+            <div className="mb-4">
+              <label className="text-xs text-secondary mb-2 block">Branch</label>
+              <select className="w-full h-8 px-2 bg-glass border border-glass rounded text-sm text-primary">
+                <option value="all">All branches</option>
+                <option value="main">main</option>
+                <option value="feature">feature</option>
+              </select>
+            </div>
+
+            {/* Author Filter */}
+            <div className="mb-4">
+              <label className="text-xs text-secondary mb-2 block">Author</label>
+              <select className="w-full h-8 px-2 bg-glass border border-glass rounded text-sm text-primary">
+                <option value="all">All authors</option>
+                <option value="you">You</option>
+                <option value="alex">Alex Chen</option>
+                <option value="sarah">Sarah Kim</option>
+              </select>
+            </div>
+
+            {/* Date Range */}
+            <div className="mb-4">
+              <label className="text-xs text-secondary mb-2 block">Date Range</label>
+              <select className="w-full h-8 px-2 bg-glass border border-glass rounded text-sm text-primary">
+                <option value="all">All time</option>
+                <option value="today">Today</option>
+                <option value="week">This week</option>
+                <option value="month">This month</option>
+              </select>
+            </div>
+
+            {/* Version List */}
+            <div className="mt-6">
+              <h4 className="text-sm font-medium text-primary mb-3">Versions</h4>
+              <div className="space-y-2">
+                {(block.versions || []).map(version => (
+                  <button
+                    key={version.id}
+                    onClick={() => setSelectedVersion(version)}
+                    className={`w-full text-left p-2 rounded-lg transition-all ${
+                      selectedVersion?.id === version.id
+                        ? 'bg-selected/20 border border-selected'
+                        : 'bg-glass hover:bg-glass/80'
+                    }`}
+                    style={{
+                      background: selectedVersion?.id === version.id 
+                        ? `${COLORS.stations.selected}20`
+                        : COLORS.glass,
+                      borderColor: selectedVersion?.id === version.id
+                        ? COLORS.stations.selected
+                        : 'transparent'
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-primary">{version.label}</span>
+                      {version.id === block.currentVersion && (
+                        <span className="text-xs px-1.5 py-0.5 bg-current/20 text-current rounded">
+                          current
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-secondary mt-0.5">
+                      {version.author} • {formatTimestamp(version.timestamp)}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Metro Map Visualization */}
-      <div className="relative p-6 overflow-x-auto">
-        {renderMetroMap()}
-      </div>
+        {/* Center Panel - Metro Map */}
+        <div className="flex-1 relative bg-base">
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full cursor-grab active:cursor-grabbing"
+            onMouseMove={handleCanvasMouseMove}
+            onMouseDown={(e) => {
+              setIsDragging(true);
+              setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+            }}
+            onMouseUp={() => setIsDragging(false)}
+            onMouseLeave={() => setIsDragging(false)}
+            onClick={handleCanvasClick}
+            style={{ background: COLORS.base }}
+          />
 
-      {/* Version Details / Editor */}
-      {selectedVersion && (
-        <div className="border-t border-dark-secondary/30">
-          {mode === 'read' ? (
-            // Read mode - show version details
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h4 className="text-text-primary font-medium text-lg flex items-center gap-2">
-                    <GitCommit size={20} />
-                    {selectedVersion.label}
-                  </h4>
-                  <p className="text-text-secondary text-sm mt-1">
-                    {selectedVersion.message}
-                  </p>
-                  <div className="flex items-center gap-4 mt-2 text-xs text-text-secondary">
-                    <span>{selectedVersion.author}</span>
-                    <span>•</span>
-                    <span>{formatTimestamp(selectedVersion.timestamp)}</span>
-                    <span>•</span>
-                    <span className="text-green-400">+{selectedVersion.stats?.additions || 0}</span>
-                    <span className="text-red-400">-{selectedVersion.stats?.deletions || 0}</span>
-                  </div>
-                </div>
+          {/* Minimap */}
+          <div className="absolute bottom-4 left-4 w-48 h-32 bg-surface/90 backdrop-blur 
+                          border border-glass rounded-lg p-2">
+            <div className="text-xs text-secondary mb-1">Overview</div>
+            {/* Minimap implementation would go here */}
+          </div>
+        </div>
+
+        {/* Right Panel - Details */}
+        {showRightPanel && selectedVersion && (
+          <div className="w-96 bg-surface border-l border-glass overflow-y-auto"
+               style={{ background: COLORS.surface, borderColor: COLORS.glassBorder }}>
+            {/* Version Header */}
+            <div className="p-4 border-b border-glass">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-medium text-primary flex items-center gap-2">
+                  <GitCommit size={20} />
+                  {selectedVersion.label}
+                </h3>
                 <button
                   onClick={() => setSelectedVersion(null)}
-                  className="p-2 hover:bg-dark-secondary/50 rounded-lg transition-colors"
+                  className="p-1 hover:bg-glass rounded transition-colors"
                 >
-                  <X size={18} className="text-text-secondary" />
+                  <X size={18} className="text-secondary" />
                 </button>
               </div>
+              
+              <p className="text-sm text-secondary mb-3">{selectedVersion.message}</p>
+              
+              <div className="flex items-center gap-4 text-xs text-secondary">
+                <span className="flex items-center gap-1">
+                  <User size={12} />
+                  {selectedVersion.author}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock size={12} />
+                  {formatTimestamp(selectedVersion.timestamp)}
+                </span>
+              </div>
 
-              {/* Code preview with syntax highlighting */}
-              <div className="bg-dark-primary rounded-lg overflow-hidden">
+              {/* Stats */}
+              <div className="flex items-center gap-3 mt-3">
+                <span className="text-xs text-green-400">
+                  +{selectedVersion.stats?.additions || 0}
+                </span>
+                <span className="text-xs text-red-400">
+                  -{selectedVersion.stats?.deletions || 0}
+                </span>
+                <span className="text-xs text-secondary">
+                  {selectedVersion.stats?.files || 0} files
+                </span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="p-4 border-b border-glass">
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setEditingVersion(selectedVersion);
+                    setEditingContent(selectedVersion.content);
+                  }}
+                  className="flex-1 px-3 py-2 bg-primary text-white rounded-lg
+                             hover:bg-primary/80 transition-colors text-sm font-medium"
+                  style={{ background: COLORS.stations.selected }}
+                >
+                  <Edit3 size={14} className="inline mr-1.5" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    onUpdate(block.id, { ...block, currentVersion: selectedVersion.id });
+                  }}
+                  className="flex-1 px-3 py-2 bg-glass text-primary rounded-lg
+                             hover:bg-glass/80 transition-colors text-sm font-medium"
+                >
+                  Set Current
+                </button>
+              </div>
+            </div>
+
+            {/* Code Content */}
+            <div className="p-4">
+              <h4 className="text-sm font-medium text-primary mb-3 flex items-center gap-2">
+                <FileText size={14} />
+                Code
+              </h4>
+              
+              <div className="bg-base rounded-lg overflow-hidden border border-glass">
                 <Highlight
                   theme={themes.nightOwl}
                   code={selectedVersion.content}
                   language="javascript"
                 >
                   {({ className, style, tokens, getLineProps, getTokenProps }) => (
-                    <pre className={`${className} p-4 text-sm`} style={style}>
+                    <pre className={`${className} p-4 text-sm overflow-x-auto`} 
+                         style={{ ...style, background: COLORS.base }}>
                       <code>
                         {tokens.map((line, i) => (
                           <div key={i} {...getLineProps({ line })}>
+                            <span className="text-secondary select-none pr-4 text-xs">
+                              {i + 1}
+                            </span>
                             {line.map((token, key) => (
                               <span key={key} {...getTokenProps({ token })} />
                             ))}
@@ -541,110 +710,100 @@ export default function VersionTrackBlock({ block, onUpdate, onDelete }) {
                   )}
                 </Highlight>
               </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-3 mt-4">
-                <button
-                  onClick={() => {
-                    setMode('edit');
-                    setEditingContent(selectedVersion.content);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent-green 
-                             text-dark-primary rounded-lg hover:bg-accent-green/80 
-                             transition-colors font-medium"
-                >
-                  <Edit3 size={16} />
-                  Edit this version
-                </button>
-                <button
-                  onClick={() => {
-                    onUpdate(block.id, { ...block, currentVersion: selectedVersion.id });
-                  }}
-                  className="px-4 py-2 bg-dark-secondary/50 text-text-primary 
-                             rounded-lg hover:bg-dark-secondary transition-colors"
-                >
-                  Set as current
-                </button>
-                <button
-                  onClick={() => setIsComparing(true)}
-                  className="px-4 py-2 bg-dark-secondary/50 text-text-primary 
-                             rounded-lg hover:bg-dark-secondary transition-colors"
-                >
-                  Compare with...
-                </button>
-              </div>
             </div>
-          ) : (
-            // Edit mode - show editor
-            <div className="p-6">
-              <div className="mb-4">
-                <h4 className="text-text-primary font-medium mb-2">
-                  Editing: {selectedVersion.label}
-                </h4>
-              </div>
-              
+          </div>
+        )}
+      </div>
+
+      {/* Edit Modal */}
+      {editingVersion && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-8">
+          <div className="bg-surface rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-glass flex items-center justify-between">
+              <h3 className="text-lg font-medium text-primary">
+                Editing: {editingVersion.label}
+              </h3>
+              <button
+                onClick={() => {
+                  setEditingVersion(null);
+                  setEditingContent('');
+                }}
+                className="p-1 hover:bg-glass rounded transition-colors"
+              >
+                <X size={20} className="text-secondary" />
+              </button>
+            </div>
+            
+            <div className="p-4">
               <textarea
                 value={editingContent}
                 onChange={(e) => setEditingContent(e.target.value)}
-                className="w-full h-96 p-4 bg-dark-primary rounded-lg text-text-primary 
-                           font-mono text-sm focus:outline-none focus:ring-2 
-                           focus:ring-accent-green/50 resize-none"
+                className="w-full h-96 p-4 bg-base rounded-lg text-primary font-mono text-sm
+                           border border-glass focus:outline-none focus:ring-1 focus:ring-primary/50"
+                style={{
+                  background: COLORS.base,
+                  borderColor: COLORS.glassBorder,
+                  color: COLORS.text.primary
+                }}
                 spellCheck={false}
               />
-
-              <div className="flex items-center gap-3 mt-4">
-                <button
-                  onClick={saveNewVersion}
-                  className="flex items-center gap-2 px-4 py-2 bg-accent-green 
-                             text-dark-primary rounded-lg hover:bg-accent-green/80 
-                             transition-colors font-medium"
-                >
-                  <Save size={16} />
-                  Save as new version
-                </button>
+              
+              <div className="flex justify-end gap-3 mt-4">
                 <button
                   onClick={() => {
-                    setMode('read');
+                    setEditingVersion(null);
                     setEditingContent('');
                   }}
-                  className="px-4 py-2 bg-dark-secondary/50 text-text-primary 
-                             rounded-lg hover:bg-dark-secondary transition-colors"
+                  className="px-4 py-2 text-secondary hover:text-primary transition-colors"
                 >
                   Cancel
                 </button>
+                <button
+                  onClick={saveNewVersion}
+                  className="px-4 py-2 bg-primary text-white rounded-lg
+                             hover:bg-primary/80 transition-colors font-medium"
+                  style={{ background: COLORS.stations.selected }}
+                >
+                  <Save size={16} className="inline mr-2" />
+                  Save as New Version
+                </button>
               </div>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {/* Comparison view */}
-      {isComparing && compareVersions.length === 2 && (
-        <div className="border-t border-dark-secondary/30 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h4 className="text-text-primary font-medium text-lg">
-              Comparing: {compareVersions[0].label} ↔ {compareVersions[1].label}
-            </h4>
-            <button
-              onClick={() => {
-                setIsComparing(false);
-                setCompareVersions([]);
-              }}
-              className="p-2 hover:bg-dark-secondary/50 rounded-lg transition-colors"
-            >
-              <X size={18} className="text-text-secondary" />
-            </button>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {compareVersions.map((version, index) => (
-              <div key={version.id} className="bg-dark-primary rounded-lg p-4">
-                <h5 className="text-text-primary font-medium mb-2">{version.label}</h5>
-                <pre className="text-xs text-text-secondary overflow-x-auto">
-                  <code>{version.content}</code>
-                </pre>
-              </div>
-            ))}
+      {/* Compare View */}
+      {compareMode && compareVersions.length === 2 && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-8">
+          <div className="bg-surface rounded-xl shadow-2xl w-full max-w-6xl max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-glass flex items-center justify-between">
+              <h3 className="text-lg font-medium text-primary">
+                Comparing: {compareVersions[0].label} ↔ {compareVersions[1].label}
+              </h3>
+              <button
+                onClick={() => {
+                  setCompareMode(false);
+                  setCompareVersions([]);
+                }}
+                className="p-1 hover:bg-glass rounded transition-colors"
+              >
+                <X size={20} className="text-secondary" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 h-[calc(100%-5rem)]">
+              {compareVersions.map((version, index) => (
+                <div key={version.id} className={`p-4 ${index === 0 ? 'border-r border-glass' : ''}`}>
+                  <h4 className="text-sm font-medium text-primary mb-3">{version.label}</h4>
+                  <div className="bg-base rounded-lg p-3 h-[calc(100%-2rem)] overflow-auto">
+                    <pre className="text-xs text-secondary font-mono">
+                      <code>{version.content}</code>
+                    </pre>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

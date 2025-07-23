@@ -38,7 +38,7 @@ const AuthDesktop = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-dark-primary flex">
+    <div className="h-screen bg-dark-primary flex overflow-hidden">
       {/* Left Panel - Branding & Value Props */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary relative overflow-hidden">
         {/* Animated Background Pattern */}
@@ -53,31 +53,32 @@ const AuthDesktop = () => {
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full filter blur-3xl" />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20 w-full">
+        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 w-full h-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
+            className="max-h-full flex flex-col justify-center"
           >
             {/* Logo & Title */}
-            <div className="flex items-center gap-3 mb-8">
-              <LogoMinimal size={48} />
-              <h1 className="text-4xl font-bold text-text-primary">Devlog</h1>
+            <div className="flex items-center gap-3 mb-4">
+              <LogoMinimal size={40} />
+              <h1 className="text-3xl font-bold text-text-primary">Devlog</h1>
             </div>
 
             {/* Tagline */}
-            <h2 className="text-3xl xl:text-4xl font-semibold text-text-primary mb-4 leading-tight">
+            <h2 className="text-2xl xl:text-3xl font-semibold text-text-primary mb-3 leading-tight">
               Where your code journey
               <span className="block text-accent-green">becomes knowledge</span>
             </h2>
 
-            <p className="text-lg text-text-secondary mb-12 max-w-md">
+            <p className="text-base text-text-secondary mb-6 max-w-md">
               Join 7,000+ developers who never lose a solution again. 
               Document as you code, find anything instantly.
             </p>
 
             {/* Animated Code Snippets */}
-            <div className="space-y-3 mb-12 font-mono text-sm">
+            <div className="space-y-2 mb-6 font-mono text-sm">
               {codeSnippets.map((snippet) => (
                 <motion.div
                   key={snippet.id}
@@ -92,35 +93,35 @@ const AuthDesktop = () => {
             </div>
 
             {/* Feature List */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 2 + index * 0.1, duration: 0.5 }}
-                  className="flex items-center gap-3 text-text-secondary"
+                  className="flex items-center gap-3 text-text-secondary text-sm"
                 >
-                  <div className="text-accent-green">{feature.icon}</div>
+                  <div className="text-accent-green flex-shrink-0">{feature.icon}</div>
                   <span>{feature.text}</span>
                 </motion.div>
               ))}
             </div>
 
-            {/* Decorative Terminal */}
+            {/* Decorative Terminal - Smaller and more compact */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 2.5, duration: 0.5 }}
-              className="mt-12 p-4 bg-dark-primary/50 backdrop-blur-sm rounded-lg border border-dark-secondary/30 max-w-md"
+              className="mt-6 p-3 bg-dark-primary/50 backdrop-blur-sm rounded-lg border border-dark-secondary/30 max-w-sm"
             >
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 rounded-full bg-red-500/70" />
-                <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-                <div className="w-3 h-3 rounded-full bg-green-500/70" />
+              <div className="flex items-center gap-1.5 mb-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
                 <span className="text-xs text-text-secondary/50 ml-2">devlog.terminal</span>
               </div>
-              <div className="font-mono text-sm text-text-secondary">
+              <div className="font-mono text-xs text-text-secondary">
                 <span className="text-accent-green">&gt;</span> Your documentation, evolved.
               </div>
             </motion.div>
@@ -129,7 +130,7 @@ const AuthDesktop = () => {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-8 lg:px-12 xl:px-20">
+      <div className="flex-1 flex items-center justify-center px-6 lg:px-8 xl:px-12 h-full overflow-hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -137,11 +138,11 @@ const AuthDesktop = () => {
           className="w-full max-w-md"
         >
           {/* Form Header */}
-          <div className="text-center mb-8">
-            <h3 className="text-2xl font-semibold text-text-primary mb-2">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold text-text-primary mb-1">
               {authView === 'sign_in' ? 'Welcome back' : 'Start your journey'}
             </h3>
-            <p className="text-text-secondary">
+            <p className="text-text-secondary text-sm">
               {authView === 'sign_in' 
                 ? 'Continue building your knowledge base' 
                 : 'Join thousands of developers documenting smarter'}
@@ -149,7 +150,7 @@ const AuthDesktop = () => {
           </div>
 
           {/* Auth Form Container */}
-          <div className="bg-dark-secondary/50 backdrop-blur-xl rounded-2xl p-8 border border-dark-secondary/50 shadow-2xl">
+          <div className="bg-dark-secondary/50 backdrop-blur-xl rounded-2xl p-6 border border-dark-secondary/50 shadow-2xl">
             <Auth
               supabaseClient={supabase}
               appearance={{
@@ -158,14 +159,14 @@ const AuthDesktop = () => {
                   button: {
                     borderRadius: '0.75rem',
                     fontWeight: '600',
-                    fontSize: '1rem',
-                    padding: '0.875rem',
+                    fontSize: '0.95rem',
+                    padding: '0.75rem',
                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   },
                   input: {
                     borderRadius: '0.75rem',
-                    fontSize: '1rem',
-                    padding: '0.875rem 1rem',
+                    fontSize: '0.95rem',
+                    padding: '0.75rem 1rem',
                     backgroundColor: 'rgba(10, 22, 40, 0.5)',
                     backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(75, 85, 99, 0.3)',
@@ -178,10 +179,10 @@ const AuthDesktop = () => {
                     color: '#e5e7eb',
                   },
                   container: {
-                    gap: '1.25rem',
+                    gap: '1rem',
                   },
                   divider: {
-                    margin: '1.5rem 0',
+                    margin: '1rem 0',
                   },
                   anchor: {
                     fontSize: '0.875rem',
@@ -319,7 +320,7 @@ const AuthDesktop = () => {
               .supabase-auth-ui_ui-divider {
                 position: relative;
                 text-align: center;
-                margin: 2rem 0 !important;
+                margin: 1.25rem 0 !important;
               }
               
               .supabase-auth-ui_ui-divider::before {
@@ -356,20 +357,20 @@ const AuthDesktop = () => {
                 backdrop-filter: blur(8px);
               }
             `}</style>
-          </div>
 
-          {/* Footer Links */}
-          <div className="mt-8 text-center text-sm text-text-secondary">
-            <p>
-              By signing up, you agree to our{' '}
-              <a href="/terms" className="text-accent-green hover:text-accent-green/80 transition-colors">
-                Terms
-              </a>{' '}
-              and{' '}
-              <a href="/privacy" className="text-accent-green hover:text-accent-green/80 transition-colors">
-                Privacy Policy
-              </a>
-            </p>
+            {/* Footer Links - Inside the form card */}
+            <div className="mt-6 pt-6 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/70">
+              <p>
+                By signing up, you agree to our{' '}
+                <a href="/terms" className="text-accent-green hover:text-accent-green/80 transition-colors">
+                  Terms
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" className="text-accent-green hover:text-accent-green/80 transition-colors">
+                  Privacy Policy
+                </a>
+              </p>
+            </div>
           </div>
         </motion.div>
       </div>

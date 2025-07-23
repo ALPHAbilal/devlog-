@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2, 
          FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft,
          FilePlus, FolderPlus, Trash2, Edit3, Home } from 'lucide-react';
+import { Highlight, themes } from 'prism-react-renderer';
 
 // Context Menu Component
 function ContextMenu({ x, y, onClose, items }) {
@@ -144,39 +145,36 @@ const calculateNodePositions = (repository) => {
   return positions;
 };
 
-// Enhanced syntax highlighting with better regex patterns
-const highlightCode = (code, language = 'javascript') => {
-  // Escape HTML first
-  let highlighted = code
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-
-  // GitHub-style syntax highlighting
-  const patterns = [
-    // Comments (single and multi-line)
-    { regex: /(\/\/[^\n]*)|(\/\*[\s\S]*?\*\/)/g, class: 'text-[#8b949e]' },
-    // Strings (including template literals)
-    { regex: /(["'])(?:(?!\1)[^\\\n]|\\[\s\S])*\1/g, class: 'text-[#a5d6ff]' },
-    { regex: /`(?:[^`\\]|\\[\s\S])*`/g, class: 'text-[#a5d6ff]' },
-    // Keywords
-    { regex: /\b(function|const|let|var|if|else|return|for|while|do|switch|case|break|continue|class|extends|import|export|from|default|new|async|await|try|catch|finally|throw|typeof|instanceof|in|of|this|super)\b/g, class: 'text-[#ff7b72]' },
-    // Numbers
-    { regex: /\b\d+(\.\d+)?([eE][+-]?\d+)?\b/g, class: 'text-[#79c0ff]' },
-    // Boolean and null
-    { regex: /\b(true|false|null|undefined)\b/g, class: 'text-[#79c0ff]' },
-    // Function calls
-    { regex: /\b([a-zA-Z_$][\w$]*)(?=\s*\()/g, class: 'text-[#d2a8ff]' },
-  ];
-
-  // Apply patterns in order
-  patterns.forEach(({ regex, class: className }) => {
-    highlighted = highlighted.replace(regex, `<span class="${className}">$&</span>`);
-  });
-
-  return highlighted;
+// Get language from filename for syntax highlighting
+const getLanguageFromFilename = (filename) => {
+  const ext = filename.split('.').pop().toLowerCase();
+  const languageMap = {
+    'js': 'javascript',
+    'jsx': 'jsx',
+    'ts': 'typescript',
+    'tsx': 'tsx',
+    'py': 'python',
+    'java': 'java',
+    'cpp': 'cpp',
+    'c': 'c',
+    'cs': 'csharp',
+    'php': 'php',
+    'rb': 'ruby',
+    'go': 'go',
+    'rs': 'rust',
+    'html': 'html',
+    'css': 'css',
+    'scss': 'scss',
+    'json': 'json',
+    'xml': 'xml',
+    'yaml': 'yaml',
+    'yml': 'yaml',
+    'md': 'markdown',
+    'sql': 'sql',
+    'sh': 'bash',
+    'bash': 'bash'
+  };
+  return languageMap[ext] || 'javascript';
 };
 
 export default function VersionTrackBlock({ block, onUpdate }) {
@@ -1398,13 +1396,23 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                 </div>
               </div>
               <div className="pl-14 pr-4 py-3 h-full overflow-y-auto custom-scrollbar">
-                <pre className="text-[#f0f6fc] font-mono text-sm leading-6 whitespace-pre-wrap break-words">
-                  <code 
-                    dangerouslySetInnerHTML={{ 
-                      __html: highlightCode(currentVersionData?.files?.[activeFile]?.content || '// No code yet') 
-                    }} 
-                  />
-                </pre>
+                <Highlight
+                  theme={themes.nightOwl}
+                  code={currentVersionData?.files?.[activeFile]?.content || '// No code yet'}
+                  language={getLanguageFromFilename(activeFile)}
+                >
+                  {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                    <pre className={`${className} font-mono text-sm leading-6`} style={{ ...style, background: 'transparent' }}>
+                      {tokens.map((line, i) => (
+                        <div key={i} {...getLineProps({ line, key: i })}>
+                          {line.map((token, key) => (
+                            <span key={key} {...getTokenProps({ token, key })} />
+                          ))}
+                        </div>
+                      ))}
+                    </pre>
+                  )}
+                </Highlight>
               </div>
             </div>
             {currentVersionData && (

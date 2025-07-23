@@ -88,8 +88,8 @@ const getFileIcon = (filename) => {
 const calculateNodePositions = (repository) => {
   const positions = {};
   const branchLanes = { main: 0 };
-  const LANE_HEIGHT = 80;
-  const NODE_SPACING = 100;
+  const LANE_HEIGHT = 100; // Increased for better vertical separation
+  const NODE_SPACING = 150; // Increased for better horizontal separation
   const START_X = 140;
   const START_Y = 60;
   
@@ -108,6 +108,14 @@ const calculateNodePositions = (repository) => {
   const timeline = Object.values(repository.versions)
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   
+  // Dynamic spacing based on number of commits
+  const numCommits = timeline.length;
+  let dynamicSpacing = NODE_SPACING;
+  if (numCommits > 10) {
+    // Scale down spacing for many commits, but not less than 80px
+    dynamicSpacing = Math.max(80, NODE_SPACING - (numCommits - 10) * 3);
+  }
+  
   // Assign lanes dynamically
   let nextLane = 1;
   const timelineX = {};
@@ -120,8 +128,8 @@ const calculateNodePositions = (repository) => {
       branchLanes[branch] = nextLane++;
     }
     
-    // Calculate X position based on timeline
-    const x = START_X + (index * NODE_SPACING);
+    // Calculate X position based on timeline with dynamic spacing
+    const x = START_X + (index * dynamicSpacing);
     timelineX[version.id] = x;
     
     // Calculate Y position based on branch lane
@@ -280,6 +288,28 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     // Clear canvas with professional dark background
     ctx.fillStyle = '#0d1117'; // GitHub dark theme background
     ctx.fillRect(0, 0, rect.width, rect.height);
+    
+    // Draw subtle grid pattern
+    ctx.strokeStyle = '#161b22';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 4]);
+    
+    const gridSize = 50;
+    // Vertical lines
+    for (let x = 0; x < rect.width; x += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, rect.height);
+      ctx.stroke();
+    }
+    // Horizontal lines
+    for (let y = 0; y < rect.height; y += gridSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(rect.width, y);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
     
     // Enable better rendering
     ctx.imageSmoothingEnabled = true;
@@ -747,7 +777,6 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       const newTree = JSON.parse(JSON.stringify(repository.fileTree));
       updateFileTree(newTree, fullPath, {
         type: 'folder',
-        expanded: true,
         children: {}
       });
       
@@ -756,14 +785,18 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         fileTree: newTree
       }));
       
-      // Expand parent folders
+      // Expand parent folders to show the new folder
       if (parentPath) {
-        const parts = parentPath.split('/');
-        let path = '';
-        for (const part of parts) {
-          path = path ? `${path}/${part}` : part;
-          setExpandedDirs(prev => new Set([...prev, path]));
-        }
+        setExpandedDirs(prev => {
+          const newSet = new Set(prev);
+          const parts = parentPath.split('/');
+          let path = '';
+          for (const part of parts) {
+            path = path ? `${path}/${part}` : part;
+            newSet.add(path);
+          }
+          return newSet;
+        });
       }
     } else {
       // Determine file content based on extension
@@ -968,7 +1001,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     const result = entries.map(([name, item]) => {
       const fullPath = path ? `${path}/${name}` : name;
       const isFolder = item.type === 'folder';
-      const isExpanded = isFolder && (item.expanded || expandedDirs.has(fullPath));
+      const isExpanded = isFolder && expandedDirs.has(fullPath);
       const paddingLeft = 12 + (depth * 16);
       const isBeingRenamed = renamingPath === fullPath;
       
@@ -1461,23 +1494,25 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           }}
         />
         
-        {/* Zoom controls */}
-        <div className="absolute top-3 right-3 flex flex-col gap-1">
+        {/* Zoom controls - enhanced visibility */}
+        <div className="absolute top-3 right-3 flex flex-col gap-1 bg-[#161b22] rounded-lg p-1 border border-[#30363d] shadow-lg">
           <button
             onClick={() => setZoom(Math.min(zoom * 1.2, 3))}
             className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
-                       rounded-md transition-colors duration-150 text-[#8b949e] hover:text-[#f0f6fc]"
-            title="Zoom in"
+                       rounded transition-all duration-150 text-[#8b949e] hover:text-[#f0f6fc]
+                       hover:scale-110"
+            title="Zoom in (+)"
           >
-            <ZoomIn size={14} />
+            <ZoomIn size={16} />
           </button>
           <button
             onClick={() => setZoom(Math.max(zoom / 1.2, 0.5))}
             className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
-                       rounded-md transition-colors duration-150 text-[#8b949e] hover:text-[#f0f6fc]"
-            title="Zoom out"
+                       rounded transition-all duration-150 text-[#8b949e] hover:text-[#f0f6fc]
+                       hover:scale-110"
+            title="Zoom out (-)"
           >
-            <ZoomOut size={14} />
+            <ZoomOut size={16} />
           </button>
           <button
             onClick={() => {
@@ -1485,11 +1520,15 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               setPan({ x: 0, y: 0 });
             }}
             className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
-                       rounded-md transition-colors duration-150 text-[#8b949e] hover:text-[#f0f6fc]"
-            title="Reset view"
+                       rounded transition-all duration-150 text-[#8b949e] hover:text-[#f0f6fc]
+                       hover:scale-110"
+            title="Reset view (0)"
           >
-            <Maximize2 size={14} />
+            <Maximize2 size={16} />
           </button>
+          <div className="text-[10px] text-center text-[#7d8590] mt-1">
+            {Math.round(zoom * 100)}%
+          </div>
         </div>
         
         {/* Professional version tooltip */}

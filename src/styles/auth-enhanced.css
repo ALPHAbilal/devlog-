@@ -89,7 +89,7 @@
 }
 
 .auth-enhanced-wrapper .supabase-auth-ui_ui-divider span {
-  background: rgba(10, 22, 40, 0.8);
+  background: #0a1628;
   padding: 0 1rem;
   position: relative;
   color: #6b7280;

@@ -12,7 +12,7 @@ export default function AuthComponent() {
           <p className="text-gray-400">Sign in to continue your journey</p>
         </div>
         
-        <div className="bg-dark-secondary rounded-lg p-6 shadow-lg">
+        <div className="rounded-lg p-6">
           <Auth
             supabaseClient={supabase}
             appearance={{

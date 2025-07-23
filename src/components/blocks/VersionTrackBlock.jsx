@@ -230,6 +230,11 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
   const [renamingValue, setRenamingValue] = useState('');
   const [creatingBranch, setCreatingBranch] = useState(false);
   const [newBranchName, setNewBranchName] = useState('');
+  const [stagedChanges, setStagedChanges] = useState({
+    created: [], // { path, type: 'file'|'folder', content }
+    modified: [], // { path }
+    deleted: []  // { path }
+  });
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -556,6 +561,15 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       allModifiedFiles[activeFile] = editingCode;
     }
     
+    // Check if there are any changes to commit
+    const hasChanges = stagedChanges.created.length > 0 || 
+                      stagedChanges.deleted.length > 0 || 
+                      Object.keys(allModifiedFiles).length > 0;
+    
+    if (!hasChanges) {
+      return; // Nothing to commit
+    }
+    
     // Build complete file snapshot from current state
     const fileSnapshot = {};
     
@@ -565,10 +579,19 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         const fullPath = path ? `${path}/${name}` : name;
         
         if (item.type === 'file') {
-          // Get content from modified files or current version
+          // Skip deleted files
+          if (stagedChanges.deleted.some(d => d === fullPath)) {
+            return;
+          }
+          
+          // Get content from modified files, staged files, or current version
           let content = '';
+          const stagedFile = stagedChanges.created.find(f => f.path === fullPath);
+          
           if (allModifiedFiles[fullPath] !== undefined) {
             content = allModifiedFiles[fullPath];
+          } else if (stagedFile) {
+            content = stagedFile.content;
           } else if (currentVersionData?.files?.[fullPath]) {
             content = currentVersionData.files[fullPath].content;
           }
@@ -618,6 +641,26 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     setCommitMessage('');
     setMode('view');
     setModifiedFiles({}); // Clear all modified files after commit
+    setStagedChanges({ created: [], modified: [], deleted: [] }); // Clear staged changes
+    
+    // Clean up staged indicators from file tree
+    const cleanTree = JSON.parse(JSON.stringify(repository.fileTree));
+    const cleanStaged = (tree) => {
+      Object.entries(tree).forEach(([name, item]) => {
+        if (item.staged) {
+          delete item.staged;
+        }
+        if (item.type === 'folder' && item.children) {
+          cleanStaged(item.children);
+        }
+      });
+    };
+    cleanStaged(cleanTree);
+    
+    setRepository(prev => ({
+      ...prev,
+      fileTree: cleanTree
+    }));
   };
 
   // Create new branch
@@ -737,49 +780,28 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         defaultContent = '/* New stylesheet */\n';
       }
       
-      // Create a new version with the new file
-      const newVersionId = generateVersionId();
-      const currentVersionData = repository.versions[currentVersion];
-      
-      const newVersion = {
-        id: newVersionId,
-        message: `Created ${fullPath}`,
-        timestamp: new Date().toISOString(),
-        author: 'user',
-        parent: currentVersion,
-        branch: selectedBranch,
-        files: {
-          ...(currentVersionData?.files || {}),
-          [fullPath]: {
-            content: defaultContent,
-            action: 'created',
-            stats: { additions: defaultContent.split('\n').length, deletions: 0 }
-          }
-        }
-      };
-      
+      // Stage the new file instead of creating a version
       const newTree = JSON.parse(JSON.stringify(repository.fileTree));
-      updateFileTree(newTree, fullPath, { type: 'file', lastModified: newVersionId });
+      updateFileTree(newTree, fullPath, { type: 'file', staged: 'created' });
       
       setRepository(prev => ({
         ...prev,
-        versions: {
-          ...prev.versions,
-          [newVersionId]: newVersion
-        },
-        branches: {
-          ...prev.branches,
-          [selectedBranch]: {
-            ...prev.branches[selectedBranch],
-            head: newVersionId
-          }
-        },
-        HEAD: newVersionId,
         fileTree: newTree,
         activeFile: fullPath
       }));
       
-      setCurrentVersion(newVersionId);
+      // Add to staged changes
+      setStagedChanges(prev => ({
+        ...prev,
+        created: [...prev.created, { path: fullPath, type: 'file', content: defaultContent }]
+      }));
+      
+      // Add to modified files so content is available
+      setModifiedFiles(prev => ({
+        ...prev,
+        [fullPath]: defaultContent
+      }));
+      
       setActiveFile(fullPath);
       setEditingCode(defaultContent);
       setMode('edit');
@@ -1021,6 +1043,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       } else {
         const isActive = fullPath === activeFile;
         const FileIcon = getFileIcon(name);
+        const isStaged = item.staged === 'created' || stagedChanges.created.some(f => f.path === fullPath);
+        const isModified = modifiedFiles[fullPath] !== undefined || (isActive && mode === 'edit');
         
         return (
           <div
@@ -1076,11 +1100,16 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
             ) : (
               <>
                 <span className="flex-1 truncate">{name}</span>
-                {/* Show modified indicator */}
-                {(modifiedFiles[fullPath] !== undefined || (isActive && mode === 'edit')) && (
-                  <span className="text-[10px] text-[#f0ad4e] ml-2">●</span>
-                )}
-                {item.lastModified && !modifiedFiles[fullPath] && (
+                {/* Show staged/modified indicators */}
+                <div className="flex items-center gap-1">
+                  {isStaged && (
+                    <span className="text-[10px] text-[#3fb950]" title="Staged">●</span>
+                  )}
+                  {isModified && !isStaged && (
+                    <span className="text-[10px] text-[#f0ad4e]" title="Modified">●</span>
+                  )}
+                </div>
+                {item.lastModified && !modifiedFiles[fullPath] && !isStaged && (
                   <span className="text-[10px] text-[#7d8590] ml-2">{item.lastModified}</span>
                 )}
               </>

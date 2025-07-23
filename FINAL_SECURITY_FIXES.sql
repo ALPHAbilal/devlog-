@@ -8,7 +8,7 @@
 -- 3. Missing search_path on security functions
 
 -- ============================================
--- PART 1: FIX SECURITY DEFINER VIEW (CRITICAL)
+-- PART 1: FIX SECURITY DEFINER VIEW (CRITICAL)d
 -- ============================================
 
 -- Drop the vulnerable view

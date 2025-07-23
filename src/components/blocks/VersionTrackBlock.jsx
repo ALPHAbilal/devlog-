@@ -1171,12 +1171,12 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               }
             }}
           >
-            {Object.keys(repository.fileTree || {}).length === 0 ? (
+            {Object.keys(repository.fileTree || {}).length === 0 && !inlineCreateState ? (
               <div className="text-center py-8 px-4">
                 <Folder size={32} className="mx-auto mb-2 text-[#30363d]" />
                 <p className="text-[#7d8590] text-xs mb-2">No files yet</p>
                 <p className="text-[#7d8590] text-[11px]">
-                  Right-click to create files
+                  Click + or right-click to create files
                 </p>
               </div>
             ) : (

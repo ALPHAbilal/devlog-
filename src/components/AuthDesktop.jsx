@@ -122,7 +122,7 @@ const AuthDesktop = () => {
           </div>
 
           {/* Auth Form Container */}
-          <div className="bg-dark-secondary/50 backdrop-blur-xl rounded-xl p-4 border border-dark-secondary/50 shadow-2xl">
+          <div className="backdrop-blur-xl rounded-xl p-4 border border-dark-secondary/50 shadow-2xl">
             <Auth
               supabaseClient={supabase}
               appearance={{
@@ -306,7 +306,7 @@ const AuthDesktop = () => {
               }
               
               .supabase-auth-ui_ui-divider span {
-                background: rgba(30, 41, 59, 0.8);
+                background: #0a1628;
                 padding: 0 1rem;
                 position: relative;
                 color: #6b7280;

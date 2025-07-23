@@ -333,29 +333,26 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           // Muted colors for inactive branches
           ctx.strokeStyle = isCurrentBranch ? branch.color.primary : branch.color.primary + '60';
           ctx.lineWidth = 2; // Thinner, more professional
-          ctx.lineCap = 'round';
-          ctx.lineJoin = 'round';
+          ctx.lineCap = 'square';
+          ctx.lineJoin = 'miter';
           
           ctx.beginPath();
           ctx.moveTo(parentPos.x, parentPos.y);
           
-          // Enhanced bezier curves for smoother connections
+          // 90-degree connections like traditional Git graphs
           if (parentPos.y !== childPos.y) {
-            const dx = childPos.x - parentPos.x;
-            const dy = childPos.y - parentPos.y;
-            const tension = 0.4;
+            // Draw a right-angle connection
+            const midX = parentPos.x + (childPos.x - parentPos.x) * 0.5;
             
-            // Create smoother curves with better control points
-            const cp1x = parentPos.x + dx * tension;
-            const cp1y = parentPos.y;
-            const cp2x = childPos.x - dx * tension;
-            const cp2y = childPos.y;
-            
-            ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, childPos.x, childPos.y);
+            // Horizontal line to mid-point
+            ctx.lineTo(midX, parentPos.y);
+            // Vertical line to child's Y position
+            ctx.lineTo(midX, childPos.y);
+            // Horizontal line to child
+            ctx.lineTo(childPos.x, childPos.y);
           } else {
-            // Even straight lines get slight curves for visual appeal
-            const midX = (parentPos.x + childPos.x) / 2;
-            ctx.quadraticCurveTo(midX, parentPos.y - 2, childPos.x, childPos.y);
+            // Straight horizontal line for same lane
+            ctx.lineTo(childPos.x, childPos.y);
           }
           
           ctx.stroke();
@@ -1186,10 +1183,10 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
 
   return (
     <>
-    <div className="bg-dark-primary rounded-lg overflow-hidden border border-dark-secondary flex h-[600px]">
+    <div className="bg-dark-primary rounded-lg overflow-hidden border-2 border-dark-secondary flex h-[600px]">
       {/* File Tree Sidebar */}
       {showFileTree && (
-        <div className="w-64 bg-dark-secondary border-r border-dark-secondary/50 flex flex-col">
+        <div className="w-64 bg-dark-secondary border-r-2 border-dark-secondary flex flex-col">
           <div className="px-3 py-2 border-b border-dark-secondary/50 flex items-center justify-between">
             <span className="text-xs font-medium text-text-secondary">FILES</span>
             <div className="flex items-center gap-1">
@@ -1412,12 +1409,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               )}
             </div>
 
-            {/* Current version info - minimal */}
-            {currentVersionData && (
-              <div className="text-xs">
-                <span className="text-text-secondary/70 font-mono">{currentVersion}</span>
-              </div>
-            )}
+            {/* Branch info only */}
           </div>
           
           {/* Mode toggle */}
@@ -1470,7 +1462,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       </div>
 
       {/* Metro Map Visualization */}
-      <div className="relative bg-dark-primary h-48 overflow-hidden flex-shrink-0">
+      <div className="relative bg-dark-primary h-48 overflow-hidden flex-shrink-0 border-b-2 border-dark-secondary">
         <canvas
           ref={canvasRef}
           className="w-full h-full transition-transform duration-150"
@@ -1569,7 +1561,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       </div>
 
       {/* Code Editor */}
-      <div className="border-t border-dark-secondary/50 flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {!activeFile ? (
           <div className="flex-1 flex items-center justify-center bg-dark-primary">
             <div className="text-center">

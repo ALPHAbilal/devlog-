@@ -12,8 +12,6 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import SettingsMinimal from './pages/SettingsMinimal';
 import SettingsClaude from './pages/SettingsClaude';
-import AuthComponent from './components/Auth';
-import AuthEnhanced from './components/AuthEnhanced';
 import AuthDesktop from './components/AuthDesktop';
 import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';

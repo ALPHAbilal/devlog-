@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code, X, Menu } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
-import CodeVersionTracker, { VERSION_TRACKING_ENABLED } from './CodeVersionTracker';
 import { useResponsive } from '../../hooks/useResponsive';
 import { useTouchGestures } from '../../hooks/useTouchGestures';
 
@@ -453,16 +452,6 @@ export default function ResponsiveCodeBlock({ block, onUpdate, allBlocks, onNavi
   // Normal view mode
   return (
     <div className="group relative overflow-visible" ref={containerRef} data-block-id={block.id}>
-      {/* Version Tracker */}
-      {!isMobile && VERSION_TRACKING_ENABLED && (
-        <CodeVersionTracker 
-          block={block}
-          allBlocks={allBlocks}
-          onNavigateToVersion={onNavigateToBlock}
-          position="top"
-        />
-      )}
-      
       {/* File path display */}
       {block.filePath && !isEditing && (
         <div className={`absolute -top-3 left-0 text-xs text-accent-green/80 

@@ -6,7 +6,6 @@ import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
 import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
 import { getBacklinks } from '../utils/extractLinks';
-import { linkCodeVersions, markAsHavingVersions, VersionTimeline } from './blocks/CodeVersionTracker';
 import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
 import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
@@ -281,31 +280,14 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       isNew: false
     };
     
-    // If duplicating a code block, set up version tracking
-    if (blockToDuplicate.type === 'code') {
-      // Link the new block to the original
-      duplicatedBlock = linkCodeVersions(blockToDuplicate, duplicatedBlock);
-      
-      // Update the original block to indicate it has versions
-      const updatedBlocks = [...blocks];
-      updatedBlocks[blockIndex] = markAsHavingVersions(blockToDuplicate);
-      updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
-      
-      updateLoadedBlocks(updatedBlocks);
-      if (onUpdate && !isInitialLoadRef.current) {
-        setIsInternalUpdate(true);
-        onUpdate(entry.id, { blocks: updatedBlocks });
-      }
-    } else {
-      // Normal duplication for non-code blocks
-      const updatedBlocks = [...blocks];
-      updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
-      
-      updateLoadedBlocks(updatedBlocks);
-      if (onUpdate && !isInitialLoadRef.current) {
-        setIsInternalUpdate(true);
-        onUpdate(entry.id, { blocks: updatedBlocks });
-      }
+    // Normal duplication for all blocks
+    const updatedBlocks = [...blocks];
+    updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
+    
+    updateLoadedBlocks(updatedBlocks);
+    if (onUpdate && !isInitialLoadRef.current) {
+      setIsInternalUpdate(true);
+      onUpdate(entry.id, { blocks: updatedBlocks });
     }
   };
 
@@ -880,27 +862,6 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               setFocusedBlockId(null);
             }
           }}>
-          {/* Render version timelines */}
-          {blocks.map((block, index) => {
-            if (block.versionOf) {
-              // Find the original block
-              const originalBlock = blocks.find(b => b.id === block.versionOf);
-              if (originalBlock) {
-                return (
-                  <VersionTimeline
-                    key={`timeline-${block.id}`}
-                    startBlockId={block.versionOf}
-                    endBlockId={block.id}
-                    blocks={blocks}
-                    containerRef={contentContainerRef}
-                    isVisible={hoveredBlockId === block.id || hoveredBlockId === block.versionOf}
-                  />
-                );
-              }
-            }
-            return null;
-          })}
-          
           {blocks.filter(block => block !== null).map((block, index) => (
             <div key={block.id} className="relative pl-8">
               {block.isLoading ? (

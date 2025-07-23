@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
-import CodeVersionTracker, { VERSION_TRACKING_ENABLED } from './CodeVersionTracker';
 
 export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
@@ -15,7 +14,6 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const [showFilePathSuggestions, setShowFilePathSuggestions] = useState(false);
   const [filePathSuggestions, setFilePathSuggestions] = useState([]);
-  const [isBlockHovered, setIsBlockHovered] = useState(false);
 
   // Update local state when block prop changes
   useEffect(() => {
@@ -450,17 +448,7 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
       className="group relative overflow-visible pt-2" 
       ref={containerRef} 
       data-block-id={block.id}
-      onMouseEnter={() => setIsBlockHovered(true)}
-      onMouseLeave={() => setIsBlockHovered(false)}
     >
-      {/* Version Tracker - Gutter-based, only visible on hover */}
-      <CodeVersionTracker 
-        block={block}
-        allBlocks={allBlocks}
-        onNavigateToVersion={onNavigateToBlock}
-        isBlockHovered={isBlockHovered}
-      />
-      
       {/* File path display - only in view mode */}
       {block.filePath && !isEditing && (
         <div className="absolute -top-3 left-0 text-xs text-accent-green/80 

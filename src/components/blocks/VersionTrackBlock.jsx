@@ -177,11 +177,11 @@ const getLanguageFromFilename = (filename) => {
   return languageMap[ext] || 'javascript';
 };
 
-export default function VersionTrackBlock({ block, onUpdate }) {
+export default function VersionTrackBlock({ block, updateBlock, isActive }) {
   // Initialize with proper version control structure
   const [repository, setRepository] = useState(() => {
-    if (block.repository) {
-      return block.repository;
+    if (block.data?.repository) {
+      return block.data.repository;
     }
     
     // Create initial empty repository
@@ -224,6 +224,12 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [showFileTree, setShowFileTree] = useState(true);
   const [expandedDirs, setExpandedDirs] = useState(new Set());
   const [contextMenu, setContextMenu] = useState(null);
+  const [inlineCreateState, setInlineCreateState] = useState(null); // { type: 'file'|'folder', parentPath: string }
+  const [inlineCreateValue, setInlineCreateValue] = useState('');
+  const [renamingPath, setRenamingPath] = useState(null);
+  const [renamingValue, setRenamingValue] = useState('');
+  const [creatingBranch, setCreatingBranch] = useState(false);
+  const [newBranchName, setNewBranchName] = useState('');
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -249,10 +255,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
   // Save repository changes
   useEffect(() => {
-    if (onUpdate && block.repository !== repository) {
-      onUpdate(block.id, { repository });
+    if (updateBlock && block.data?.repository !== repository) {
+      updateBlock(block.id, { ...block, data: { ...block.data, repository } });
     }
-  }, [repository, block.id, onUpdate]);
+  }, [repository, block.id, updateBlock]);
 
   // Draw metro map visualization with enhanced graphics
   const drawMetroMap = useCallback(() => {
@@ -667,10 +673,19 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   
   // Create new file or folder
   const handleCreateFile = (isFolder = false, parentPath = '') => {
-    const itemType = isFolder ? 'folder' : 'file';
-    const itemName = prompt(`Enter ${itemType} name:`);
-    if (!itemName) return;
-    
+    setInlineCreateState({ type: isFolder ? 'folder' : 'file', parentPath });
+    setInlineCreateValue('');
+  };
+
+  // Handle inline creation submission
+  const handleInlineCreateSubmit = () => {
+    if (!inlineCreateValue.trim()) {
+      setInlineCreateState(null);
+      return;
+    }
+
+    const { type, parentPath } = inlineCreateState;
+    const itemName = inlineCreateValue.trim();
     const fullPath = parentPath ? `${parentPath}/${itemName}` : itemName;
     
     // Check if item already exists
@@ -687,11 +702,11 @@ export default function VersionTrackBlock({ block, onUpdate }) {
     };
     
     if (checkExists(repository.fileTree, fullPath)) {
-      alert(`${itemType} already exists!`);
+      // Could show an error state here instead of alert
       return;
     }
     
-    if (isFolder) {
+    if (type === 'folder') {
       // Create folder without creating a new version
       const newTree = JSON.parse(JSON.stringify(repository.fileTree));
       updateFileTree(newTree, fullPath, {
@@ -776,6 +791,10 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       setEditingCode(defaultContent);
       setMode('edit');
     }
+    
+    // Clear inline create state
+    setInlineCreateState(null);
+    setInlineCreateValue('');
   };
 
   const currentVersionData = repository.versions[currentVersion];
@@ -826,8 +845,22 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const handleRename = (fullPath) => {
     const parts = fullPath.split('/');
     const oldName = parts.pop();
+    setRenamingPath(fullPath);
+    setRenamingValue(oldName);
+  };
+
+  // Handle rename submission
+  const handleRenameSubmit = () => {
+    if (!renamingValue.trim() || !renamingPath) {
+      setRenamingPath(null);
+      setRenamingValue('');
+      return;
+    }
+
+    const parts = renamingPath.split('/');
+    const oldName = parts.pop();
     const parentPath = parts.join('/');
-    const newName = prompt('Enter new name:', oldName);
+    const newName = renamingValue.trim();
     
     if (newName && newName !== oldName) {
       const newFullPath = parentPath ? `${parentPath}/${newName}` : newName;
@@ -850,7 +883,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       }
       
       // Update active file if needed
-      if (activeFile === fullPath) {
+      if (activeFile === renamingPath) {
         setActiveFile(newFullPath);
       }
       
@@ -858,8 +891,12 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         ...repository,
         fileTree: newTree
       });
-      onUpdate(block.id, { repository: { ...repository, fileTree: newTree } });
+      updateBlock(block.id, { ...block, data: { ...block.data, repository: { ...repository, fileTree: newTree } } });
     }
+    
+    // Clear rename state
+    setRenamingPath(null);
+    setRenamingValue('');
   };
 
   // Handle delete operation
@@ -889,7 +926,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         ...repository,
         fileTree: newTree
       });
-      onUpdate(block.id, { repository: { ...repository, fileTree: newTree } });
+      updateBlock(block.id, { ...block, data: { ...block.data, repository: { ...repository, fileTree: newTree } } });
     }
   };
 
@@ -912,11 +949,13 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
   // Render file tree recursively
   const renderFileTree = (items, path = '', depth = 0) => {
-    return Object.entries(items).map(([name, item]) => {
+    const entries = Object.entries(items);
+    const result = entries.map(([name, item]) => {
       const fullPath = path ? `${path}/${name}` : name;
       const isFolder = item.type === 'folder';
       const isExpanded = isFolder && (item.expanded || expandedDirs.has(fullPath));
       const paddingLeft = 12 + (depth * 16);
+      const isBeingRenamed = renamingPath === fullPath;
       
       if (isFolder) {
         return (
@@ -925,7 +964,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer
                          hover:bg-[#21262d] transition-colors duration-150 text-[#8b949e]`}
               style={{ paddingLeft: `${paddingLeft}px` }}
-              onClick={() => toggleFolder(fullPath)}
+              onClick={() => !isBeingRenamed && toggleFolder(fullPath)}
               onContextMenu={(e) => handleContextMenu(e, fullPath, true, path)}
             >
               <ChevronRight 
@@ -933,11 +972,55 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                 className={`transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
               />
               {isExpanded ? <FolderOpen size={16} /> : <Folder size={16} />}
-              <span className="flex-1 truncate">{name}</span>
+              {isBeingRenamed ? (
+                <input
+                  type="text"
+                  value={renamingValue}
+                  onChange={(e) => setRenamingValue(e.target.value)}
+                  onBlur={handleRenameSubmit}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleRenameSubmit();
+                    if (e.key === 'Escape') {
+                      setRenamingPath(null);
+                      setRenamingValue('');
+                    }
+                  }}
+                  className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff]"
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <span className="flex-1 truncate">{name}</span>
+              )}
             </div>
             {isExpanded && item.children && (
               <div>
                 {renderFileTree(item.children, fullPath, depth + 1)}
+                {/* Inline create for folders */}
+                {inlineCreateState && inlineCreateState.parentPath === fullPath && (
+                  <div
+                    className="flex items-center gap-2 px-2 py-1"
+                    style={{ paddingLeft: `${paddingLeft + 36}px` }}
+                  >
+                    {inlineCreateState.type === 'folder' ? <Folder size={16} /> : <File size={16} />}
+                    <input
+                      type="text"
+                      value={inlineCreateValue}
+                      onChange={(e) => setInlineCreateValue(e.target.value)}
+                      onBlur={handleInlineCreateSubmit}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleInlineCreateSubmit();
+                        if (e.key === 'Escape') {
+                          setInlineCreateState(null);
+                          setInlineCreateValue('');
+                        }
+                      }}
+                      placeholder={`New ${inlineCreateState.type} name...`}
+                      className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff] placeholder-[#7d8590]"
+                      autoFocus
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -954,6 +1037,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                        ${isActive ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#8b949e]'}`}
             style={{ paddingLeft: `${paddingLeft + 20}px` }}
             onClick={() => {
+              if (isBeingRenamed) return;
               // Save current file changes if in edit mode
               if (mode === 'edit' && activeFile && editingCode !== undefined) {
                 setModifiedFiles(prev => ({
@@ -979,18 +1063,70 @@ export default function VersionTrackBlock({ block, onUpdate }) {
             onContextMenu={(e) => handleContextMenu(e, fullPath, false, path)}
           >
             <FileIcon size={16} className={isActive ? 'text-[#58a6ff]' : ''} />
-            <span className="flex-1 truncate">{name}</span>
-            {/* Show modified indicator */}
-            {(modifiedFiles[fullPath] !== undefined || (isActive && mode === 'edit')) && (
-              <span className="text-[10px] text-[#f0ad4e] ml-2">●</span>
-            )}
-            {item.lastModified && !modifiedFiles[fullPath] && (
-              <span className="text-[10px] text-[#7d8590] ml-2">{item.lastModified}</span>
+            {isBeingRenamed ? (
+              <input
+                type="text"
+                value={renamingValue}
+                onChange={(e) => setRenamingValue(e.target.value)}
+                onBlur={handleRenameSubmit}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleRenameSubmit();
+                  if (e.key === 'Escape') {
+                    setRenamingPath(null);
+                    setRenamingValue('');
+                  }
+                }}
+                className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff]"
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <>
+                <span className="flex-1 truncate">{name}</span>
+                {/* Show modified indicator */}
+                {(modifiedFiles[fullPath] !== undefined || (isActive && mode === 'edit')) && (
+                  <span className="text-[10px] text-[#f0ad4e] ml-2">●</span>
+                )}
+                {item.lastModified && !modifiedFiles[fullPath] && (
+                  <span className="text-[10px] text-[#7d8590] ml-2">{item.lastModified}</span>
+                )}
+              </>
             )}
           </div>
         );
       }
     });
+    
+    // Add inline create at root level if needed
+    if (path === '' && inlineCreateState && inlineCreateState.parentPath === '') {
+      result.push(
+        <div
+          key="inline-create-root"
+          className="flex items-center gap-2 px-2 py-1"
+          style={{ paddingLeft: `${12}px` }}
+        >
+          {inlineCreateState.type === 'folder' ? <Folder size={16} /> : <File size={16} />}
+          <input
+            type="text"
+            value={inlineCreateValue}
+            onChange={(e) => setInlineCreateValue(e.target.value)}
+            onBlur={handleInlineCreateSubmit}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleInlineCreateSubmit();
+              if (e.key === 'Escape') {
+                setInlineCreateState(null);
+                setInlineCreateValue('');
+              }
+            }}
+            placeholder={`New ${inlineCreateState.type} name...`}
+            className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff] placeholder-[#7d8590]"
+            autoFocus
+          />
+        </div>
+      );
+    }
+    
+    return result;
   };
 
   return (
@@ -1171,19 +1307,51 @@ export default function VersionTrackBlock({ block, onUpdate }) {
                     );
                   })}
                   <div className="border-t border-[#30363d] mt-1 pt-1">
-                    <button
-                      onClick={() => {
-                        const name = prompt('New branch name:');
-                        if (name && !repository.branches[name]) {
-                          handleCreateBranch(name);
-                          setShowBranchDropdown(false);
-                        }
-                      }}
-                      className="w-full text-left px-3 py-1.5 text-sm text-[#58a6ff]
-                                 hover:bg-[#21262d] transition-colors duration-150"
-                    >
-                      + Create new branch
-                    </button>
+                    {creatingBranch ? (
+                      <div className="px-3 py-1.5">
+                        <input
+                          type="text"
+                          value={newBranchName}
+                          onChange={(e) => setNewBranchName(e.target.value)}
+                          onBlur={() => {
+                            if (newBranchName.trim() && !repository.branches[newBranchName.trim()]) {
+                              handleCreateBranch(newBranchName.trim());
+                              setShowBranchDropdown(false);
+                            }
+                            setCreatingBranch(false);
+                            setNewBranchName('');
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              if (newBranchName.trim() && !repository.branches[newBranchName.trim()]) {
+                                handleCreateBranch(newBranchName.trim());
+                                setShowBranchDropdown(false);
+                              }
+                              setCreatingBranch(false);
+                              setNewBranchName('');
+                            }
+                            if (e.key === 'Escape') {
+                              setCreatingBranch(false);
+                              setNewBranchName('');
+                            }
+                          }}
+                          placeholder="Branch name..."
+                          className="w-full bg-[#1c2128] border border-[#30363d] rounded px-2 py-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff] placeholder-[#7d8590]"
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setCreatingBranch(true);
+                          setNewBranchName('');
+                        }}
+                        className="w-full text-left px-3 py-1.5 text-sm text-[#58a6ff]
+                                   hover:bg-[#21262d] transition-colors duration-150"
+                      >
+                        + Create new branch
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

@@ -186,7 +186,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       return block.repository;
     }
     
-    // Create initial repository structure with nested file tree support
+    // Create initial empty repository
     const initialVersion = {
       id: 'v1',
       message: 'Initial commit',
@@ -194,23 +194,8 @@ export default function VersionTrackBlock({ block, onUpdate }) {
       author: 'user',
       parent: null,
       branch: 'main',
-      files: {
-        'README.md': {
-          content: '# My Project\n\nWelcome to my project!',
-          action: 'created',
-          stats: { additions: 3, deletions: 0 }
-        },
-        'src/index.js': {
-          content: '// Main entry point\nimport App from "./App";\n\nfunction main() {\n  console.log("Starting app...");\n  App.init();\n}\n\nmain();',
-          action: 'created',
-          stats: { additions: 8, deletions: 0 }
-        },
-        'src/App.js': {
-          content: '// App component\nconst App = {\n  init() {\n    console.log("App initialized!");\n  }\n};\n\nexport default App;',
-          action: 'created',
-          stats: { additions: 8, deletions: 0 }
-        }
-      }
+      files: {},
+      fileTree: {}
     };
 
     return {
@@ -219,18 +204,8 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         main: { name: 'main', head: 'v1', color: BRANCH_COLORS.main }
       },
       HEAD: 'v1',
-      fileTree: {
-        'README.md': { type: 'file', lastModified: 'v1' },
-        'src': {
-          type: 'folder',
-          expanded: true,
-          children: {
-            'index.js': { type: 'file', lastModified: 'v1' },
-            'App.js': { type: 'file', lastModified: 'v1' }
-          }
-        }
-      },
-      activeFile: 'src/index.js'
+      fileTree: {},
+      activeFile: ''
     };
   });
 
@@ -247,7 +222,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [activeFile, setActiveFile] = useState(repository.activeFile || 'index.js');
+  const [activeFile, setActiveFile] = useState(repository.activeFile || '');
   const [showFileTree, setShowFileTree] = useState(true);
   const [expandedDirs, setExpandedDirs] = useState(new Set());
   const [contextMenu, setContextMenu] = useState(null);
@@ -398,15 +373,7 @@ export default function VersionTrackBlock({ block, onUpdate }) {
         ctx.stroke();
       }
       
-      // File count indicator
-      if (hasMultipleFiles && (isHovered || isCurrentVersion)) {
-        ctx.fillStyle = '#161b22';
-        ctx.fillRect(pos.x + 8, pos.y - 10, 16, 14);
-        ctx.fillStyle = isCurrentVersion ? '#f0f6fc' : '#8b949e';
-        ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(fileCount.toString(), pos.x + 16, pos.y - 1);
-      }
+      // Removed file count indicator - keeping nodes clean
     });
     
     // Restore transform
@@ -1070,7 +1037,17 @@ export default function VersionTrackBlock({ block, onUpdate }) {
               }
             }}
           >
-            {renderFileTree(repository.fileTree || {})}
+            {Object.keys(repository.fileTree || {}).length === 0 ? (
+              <div className="text-center py-8 px-4">
+                <Folder size={32} className="mx-auto mb-2 text-[#30363d]" />
+                <p className="text-[#7d8590] text-xs mb-2">No files yet</p>
+                <p className="text-[#7d8590] text-[11px]">
+                  Right-click to create files
+                </p>
+              </div>
+            ) : (
+              renderFileTree(repository.fileTree || {})
+            )}
           </div>
         </div>
       )}
@@ -1366,7 +1343,17 @@ export default function VersionTrackBlock({ block, onUpdate }) {
 
       {/* Code Editor */}
       <div className="border-t border-[#30363d] flex-1 flex flex-col overflow-hidden">
-        {mode === 'edit' ? (
+        {!activeFile ? (
+          <div className="flex-1 flex items-center justify-center bg-[#0d1117]">
+            <div className="text-center">
+              <FileText size={48} className="mx-auto mb-3 text-[#30363d]" />
+              <p className="text-[#7d8590] text-sm mb-2">No file selected</p>
+              <p className="text-[#7d8590] text-xs">
+                Create or select a file to start editing
+              </p>
+            </div>
+          </div>
+        ) : mode === 'edit' ? (
           <div className="bg-[#0d1117] flex flex-col h-full">
             <div className="px-4 py-3 border-b border-[#30363d] flex-shrink-0">
               <input

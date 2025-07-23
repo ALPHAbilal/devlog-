@@ -87,14 +87,16 @@ const getFileIcon = (filename) => {
 // Enhanced node positioning with better branch handling
 const calculateNodePositions = (repository) => {
   const positions = {};
-  const branchLanes = { main: 0 };
-  const LANE_HEIGHT = 100; // Increased for better vertical separation
-  const NODE_SPACING = 150; // Increased for better horizontal separation
-  const START_X = 140;
-  const START_Y = 60;
+  const branchLanes = {};
+  const activeLanes = new Set();
+  const LANE_HEIGHT = 50; // Reduced for better fit
+  const NODE_SPACING = 100; // Base spacing
+  const START_X = 180; // More space from branch labels
+  const START_Y = 40;
   
-  // Build parent-child relationships
+  // Build parent-child relationships and branch info
   const children = {};
+  const branchHeads = {};
   Object.values(repository.versions).forEach(version => {
     if (version.parent) {
       if (!children[version.parent]) {
@@ -102,51 +104,93 @@ const calculateNodePositions = (repository) => {
       }
       children[version.parent].push(version.id);
     }
+    // Track branch heads
+    const branch = version.branch || 'main';
+    if (!branchHeads[branch] || new Date(version.timestamp) > new Date(branchHeads[branch].timestamp)) {
+      branchHeads[branch] = version;
+    }
   });
   
   // Sort all versions by timestamp
   const timeline = Object.values(repository.versions)
     .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
   
-  // Dynamic spacing based on number of commits
-  const numCommits = timeline.length;
-  let dynamicSpacing = NODE_SPACING;
-  if (numCommits > 10) {
-    // Scale down spacing for many commits, but not less than 80px
-    dynamicSpacing = Math.max(80, NODE_SPACING - (numCommits - 10) * 3);
-  }
+  // Always assign main to lane 0
+  branchLanes['main'] = 0;
+  activeLanes.add(0);
   
-  // Assign lanes dynamically
-  let nextLane = 1;
-  const timelineX = {};
+  // Track merge information
+  const mergeInfo = {};
   
-  timeline.forEach((version, index) => {
+  // First pass: assign lanes to branches
+  let maxLane = 0;
+  timeline.forEach(version => {
     const branch = version.branch || 'main';
     
-    // Assign lane if branch doesn't have one
-    if (!(branch in branchLanes) && branch !== 'main') {
-      branchLanes[branch] = nextLane++;
+    if (!(branch in branchLanes)) {
+      // Find the first available lane
+      let lane = 1;
+      while (activeLanes.has(lane)) {
+        lane++;
+      }
+      branchLanes[branch] = lane;
+      activeLanes.add(lane);
+      maxLane = Math.max(maxLane, lane);
     }
     
-    // Calculate X position based on timeline with dynamic spacing
-    const x = START_X + (index * dynamicSpacing);
-    timelineX[version.id] = x;
-    
-    // Calculate Y position based on branch lane
-    let y = START_Y + (branchLanes[branch] * LANE_HEIGHT);
-    
-    // Adjust Y for merge commits to create smoother connections
-    if (version.parent && children[version.parent]?.length > 1) {
-      // This is a branch point - slightly offset
-      y += 10;
+    // Check if this is a merge (has multiple children or merges back to parent branch)
+    if (version.parent) {
+      const parentVersion = repository.versions[version.parent];
+      if (parentVersion && parentVersion.branch !== version.branch) {
+        // This could be a merge point
+        const childrenOfParent = children[version.parent] || [];
+        if (childrenOfParent.length > 1) {
+          mergeInfo[version.id] = {
+            fromLane: branchLanes[parentVersion.branch],
+            toLane: branchLanes[version.branch]
+          };
+        }
+      }
     }
+  });
+  
+  // Calculate X positions with better spacing
+  const xPositions = {};
+  let currentX = START_X;
+  
+  // Group versions by timestamp proximity
+  let lastTimestamp = null;
+  timeline.forEach((version, index) => {
+    if (lastTimestamp) {
+      const timeDiff = new Date(version.timestamp) - new Date(lastTimestamp);
+      const hoursDiff = timeDiff / (1000 * 60 * 60);
+      
+      // Adjust spacing based on time difference
+      if (hoursDiff < 1) {
+        currentX += NODE_SPACING * 0.8; // Closer for rapid commits
+      } else if (hoursDiff > 24) {
+        currentX += NODE_SPACING * 1.2; // Further for distant commits
+      } else {
+        currentX += NODE_SPACING;
+      }
+    }
+    
+    xPositions[version.id] = currentX;
+    lastTimestamp = version.timestamp;
+  });
+  
+  // Second pass: calculate positions
+  timeline.forEach(version => {
+    const branch = version.branch || 'main';
+    const lane = branchLanes[branch];
     
     positions[version.id] = {
-      x: x,
-      y: y,
+      x: xPositions[version.id],
+      y: START_Y + (lane * LANE_HEIGHT),
       branch: branch,
-      lane: branchLanes[branch],
-      timestamp: version.timestamp
+      lane: lane,
+      timestamp: version.timestamp,
+      isMerge: !!mergeInfo[version.id]
     };
   });
   
@@ -289,26 +333,23 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     ctx.fillStyle = '#111827'; // bg-dark-primary equivalent
     ctx.fillRect(0, 0, rect.width, rect.height);
     
-    // Draw subtle grid pattern
+    // Draw subtle grid pattern - only vertical lines at commit positions
+    ctx.save();
     ctx.strokeStyle = '#1f2937'; // border-dark-secondary equivalent
-    ctx.lineWidth = 1;
-    ctx.setLineDash([2, 4]);
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([1, 3]);
+    ctx.globalAlpha = 0.3;
     
-    const gridSize = 50;
-    // Vertical lines
-    for (let x = 0; x < rect.width; x += gridSize) {
+    // Draw vertical guide lines at major intervals
+    const majorInterval = 200;
+    for (let x = 180; x < rect.width; x += majorInterval) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, rect.height);
       ctx.stroke();
     }
-    // Horizontal lines
-    for (let y = 0; y < rect.height; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(rect.width, y);
-      ctx.stroke();
-    }
+    
+    ctx.restore();
     ctx.setLineDash([]);
     
     // Enable better rendering
@@ -368,74 +409,107 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       const branch = repository.branches[version.branch] || repository.branches.main;
       const isCurrentVersion = versionId === currentVersion;
       const isHovered = hoveredNode === versionId;
-      const isMergeCommit = version.message?.toLowerCase().includes('merge');
+      const isMergeCommit = pos.isMerge || version.message?.toLowerCase().includes('merge');
       
-      // Count changed files
-      const fileCount = version.files ? Object.keys(version.files).length : 0;
-      const hasMultipleFiles = fileCount > 1;
+      // Node sizes
+      const nodeRadius = 8;
+      const innerRadius = 6;
       
-      // Professional node design - simple and clean
-      const nodeRadius = hasMultipleFiles ? 8 : 6;
-      const activeRadius = hasMultipleFiles ? 9 : 7;
-      
-      // Node background
+      // Outer ring for all nodes (branch color)
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, isCurrentVersion ? activeRadius : nodeRadius, 0, Math.PI * 2);
+      ctx.arc(pos.x, pos.y, nodeRadius, 0, Math.PI * 2);
+      ctx.fillStyle = branch.color.primary;
+      ctx.fill();
+      
+      // Inner circle with dark background
+      ctx.beginPath();
+      ctx.arc(pos.x, pos.y, innerRadius, 0, Math.PI * 2);
       ctx.fillStyle = '#111827'; // bg-dark-primary equivalent
       ctx.fill();
       
-      // Node border
+      // Branch color dot in center
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, isCurrentVersion ? activeRadius : nodeRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = isCurrentVersion ? branch.color.primary : 
-                       isHovered ? branch.color.primary + 'CC' : branch.color.primary + '80';
-      ctx.lineWidth = isCurrentVersion ? 2 : 1;
-      ctx.stroke();
+      ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = branch.color.primary;
+      ctx.fill();
       
-      // Inner dot for current version
+      // Current version indicator - pulsing ring
       if (isCurrentVersion) {
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 3, 0, Math.PI * 2);
-        ctx.fillStyle = branch.color.primary;
-        ctx.fill();
-      }
-      
-      // Simple selection indicator
-      if (isCurrentVersion) {
+        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.strokeStyle = branch.color.primary;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Inner pulsing ring
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
-        ctx.strokeStyle = branch.color.primary + '40';
+        ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
+        ctx.strokeStyle = branch.color.primary + '60';
         ctx.lineWidth = 1;
         ctx.stroke();
       }
       
-      // Removed file count indicator - keeping nodes clean
+      // Hover effect
+      if (isHovered && !isCurrentVersion) {
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+        ctx.strokeStyle = branch.color.primary + '80';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+      
+      // Merge commit indicator - diamond shape overlay
+      if (isMergeCommit) {
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = branch.color.secondary;
+        ctx.fillRect(-3, -3, 6, 6);
+        ctx.restore();
+      }
     });
     
     // Restore transform
     ctx.restore();
     
-    // Draw branch labels with professional styling (outside transform to keep them fixed)
-    let yOffset = 20;
+    // Draw branch labels aligned with their lanes
+    const branchLanes = {};
+    Object.values(repository.versions).forEach(version => {
+      const branch = version.branch || 'main';
+      if (nodePositions[version.id]) {
+        branchLanes[branch] = nodePositions[version.id].lane;
+      }
+    });
+    
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
       const isActive = branchName === selectedBranch;
+      const lane = branchLanes[branchName] || 0;
+      const yPos = 40 + (lane * 50); // Match node positioning
       
       // Branch indicator line
       ctx.strokeStyle = isActive ? branch.color.primary : branch.color.primary + '60';
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
+      ctx.lineWidth = 3;
+      ctx.lineCap = 'square';
       ctx.beginPath();
-      ctx.moveTo(16, yOffset);
-      ctx.lineTo(32, yOffset);
+      ctx.moveTo(16, yPos);
+      ctx.lineTo(40, yPos);
       ctx.stroke();
       
       // Branch name with system font
       ctx.fillStyle = isActive ? '#e5e7eb' : '#9ca3af'; // text-text-primary/secondary equivalents
       ctx.font = `${isActive ? '600' : '400'} 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'left';
-      ctx.fillText(branchName, 40, yOffset + 4);
+      ctx.fillText(branchName, 48, yPos + 4);
       
-      yOffset += 20;
+      // Draw lane guide line
+      ctx.strokeStyle = branch.color.primary + '20';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(150, yPos);
+      ctx.lineTo(rect.width - 20, yPos);
+      ctx.stroke();
+      ctx.setLineDash([]);
     });
   }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
 

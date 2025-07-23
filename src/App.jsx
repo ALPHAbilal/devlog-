@@ -14,6 +14,7 @@ import SettingsMinimal from './pages/SettingsMinimal';
 import SettingsClaude from './pages/SettingsClaude';
 import AuthComponent from './components/Auth';
 import AuthEnhanced from './components/AuthEnhanced';
+import AuthDesktop from './components/AuthDesktop';
 import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
@@ -104,7 +105,7 @@ function AppContent() {
     return (
       <SentryRoutes>
         <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<AuthEnhanced />} />
+        <Route path="/auth" element={<AuthDesktop />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />

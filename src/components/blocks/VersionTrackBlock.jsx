@@ -611,14 +611,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           head: newVersionId
         }
       },
-      HEAD: newVersionId,
-      fileTree: {
-        ...prev.fileTree,
-        [activeFile]: { 
-          type: 'file', 
-          lastModified: newVersionId 
-        }
-      }
+      HEAD: newVersionId
     }));
 
     setCurrentVersion(newVersionId);

@@ -39,7 +39,7 @@ function LandingContent() {
     {
       icon: <Link2 className="text-accent-green" size={32} />,
       title: 'Everything connected',
-      description: 'Link solutions with @mentions. Your knowledge compounds.'
+      description: 'Organize with projects and folders. Share knowledge easily.'
     },
     {
       icon: <Search className="text-accent-green" size={32} />,

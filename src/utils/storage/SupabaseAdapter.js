@@ -354,7 +354,13 @@ export class SupabaseAdapter {
   async saveDocument(document) {
     if (!this.initialized) await this.init();
 
-    console.log(`SupabaseAdapter: saveDocument called for ${document.id} with ${document.blocks?.length || 0} blocks`);
+    console.log(`SupabaseAdapter: saveDocument called`, {
+      documentId: document.id,
+      blockCount: document.blocks?.length || 0,
+      folderId: document.folder_id || 'none',
+      hasCreatedAt: !!document.created_at || !!document.createdAt,
+      title: document.title
+    });
     
     // Skip auth check if we already have userId (reduces latency)
     if (!this.userId) {
@@ -462,6 +468,41 @@ export class SupabaseAdapter {
     let docError;
     
     if (isNewDocumentForSave && hasFolderId) {
+      // Try to use atomic save for better reliability
+      let hasAtomicSave = true; // Assume it exists, will catch error if not
+      
+      if (hasAtomicSave && documentBlocks && documentBlocks.length > 0) {
+        // Use atomic save for new documents with blocks
+        console.log('SupabaseAdapter: Using atomic save for new document with blocks');
+        
+        const { data, error } = await supabase.rpc('save_document_with_blocks_atomic', {
+          p_document_id: docData.id,
+          p_user_id: this.userId,
+          p_title: docData.title,
+          p_folder_id: docData.folder_id,
+          p_tags: docData.tags || [],
+          p_metadata: {
+            ...(docData.metadata || {}),
+            preview: preview,
+            blockCount: documentBlocks?.length || 0,
+            syncStatus: 'synced',
+            lastSyncedAt: new Date().toISOString(),
+            isNewDocument: false,
+            createdLocally: false
+          },
+          p_blocks: documentBlocks
+        });
+        
+        if (!error && data?.success) {
+          // Document and blocks saved atomically
+          this.invalidateCache();
+          return docData.id;
+        } else if (error) {
+          console.error('Atomic save failed:', error);
+          // Fall back to regular flow
+        }
+      }
+      
       // Use the security definer function for new documents with folders
       console.log('SupabaseAdapter: Using security definer function for document creation with folder');
       
@@ -486,6 +527,12 @@ export class SupabaseAdapter {
       
       savedDoc = data;
       docError = error;
+      
+      // Add a small delay to ensure transaction visibility
+      if (!docError && documentBlocks && documentBlocks.length > 0) {
+        console.log('SupabaseAdapter: Adding delay to ensure document visibility before saving blocks');
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     } else {
       // Use regular upsert for updates or documents without folders
       const documentToSave = {
@@ -651,27 +698,50 @@ export class SupabaseAdapter {
     //   blocksToSave.map(b => ({ id: b.id, type: b.type, content: b.content.substring(0, 50) + '...' }))
     // );
     
+    // Note: Atomic save is now handled earlier in the flow for new documents with folders
+    // This prevents race conditions when saving blocks immediately after document creation
+    
     // Try optimized save function first, fallback to original if not available
     let blocksError = null;
     let useOptimized = true;
+    let retryCount = 0;
+    const maxRetries = 2;
     
-    try {
-      // Try the safer save_document_blocks_v3 function that prevents data loss
-      const { error } = await supabase.rpc('save_document_blocks_v3', {
-        p_document_id: savedDoc.id,
-        p_blocks: blocksToSave
-      });
-      
-      if (error) {
-        if (error.message?.includes('function') && error.message?.includes('does not exist')) {
-          console.log('SupabaseAdapter: Optimized function not available, falling back to original');
-          useOptimized = false;
+    // Retry logic for the optimized function as well
+    while (retryCount <= maxRetries && useOptimized) {
+      try {
+        // Try the safer save_document_blocks_v3 function that prevents data loss
+        const { error } = await supabase.rpc('save_document_blocks_v3', {
+          p_document_id: savedDoc.id,
+          p_user_id: this.userId,
+          p_title: savedDoc.title,
+          p_tags: savedDoc.tags || [],
+          p_blocks: blocksToSave
+        });
+        
+        if (error) {
+          if (error.message?.includes('function') && error.message?.includes('does not exist')) {
+            console.log('SupabaseAdapter: Optimized function not available, falling back to original');
+            useOptimized = false;
+            break;
+          } else if (error.message?.includes('Document not found') && retryCount < maxRetries) {
+            // Document might not be visible yet due to transaction timing
+            console.log(`Document not found error, retrying (${retryCount + 1}/${maxRetries})...`);
+            await new Promise(resolve => setTimeout(resolve, 200 * (retryCount + 1)));
+            retryCount++;
+            continue;
+          } else {
+            blocksError = error;
+            break;
+          }
         } else {
-          blocksError = error;
+          // Success, break the loop
+          break;
         }
+      } catch (e) {
+        useOptimized = false;
+        break;
       }
-    } catch (e) {
-      useOptimized = false;
     }
     
     // Fallback to original function with retry logic

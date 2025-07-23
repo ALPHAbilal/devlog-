@@ -22,19 +22,16 @@ const AuthDesktop = () => {
   const [authView, setAuthView] = useState('sign_in')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Animated code snippets for background
+  // Animated code snippets for background - reduced
   const codeSnippets = [
     { id: 1, text: 'const solution = await debug()', delay: 0 },
-    { id: 2, text: '// Never lose this fix again', delay: 0.5 },
-    { id: 3, text: 'git commit -m "Documented for future me"', delay: 1 },
-    { id: 4, text: '[[Link]] your knowledge', delay: 1.5 },
+    { id: 2, text: '[[Link]] your knowledge', delay: 0.5 },
   ]
 
   const features = [
-    { icon: <Zap size={20} />, text: 'Capture solutions in seconds' },
-    { icon: <Link2 size={20} />, text: 'Connect your knowledge' },
-    { icon: <Shield size={20} />, text: 'Your data, always yours' },
-    { icon: <GitBranch size={20} />, text: 'Track code evolution' },
+    { icon: <Zap size={16} />, text: 'Instant capture' },
+    { icon: <Link2 size={16} />, text: 'Connected docs' },
+    { icon: <Shield size={16} />, text: 'Your data, safe' },
   ]
 
   return (
@@ -53,7 +50,7 @@ const AuthDesktop = () => {
         <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full filter blur-3xl" />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-16 w-full h-full">
+        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-12 w-full h-full">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -61,24 +58,22 @@ const AuthDesktop = () => {
             className="max-h-full flex flex-col justify-center"
           >
             {/* Logo & Title */}
-            <div className="flex items-center gap-3 mb-4">
-              <LogoMinimal size={40} />
-              <h1 className="text-3xl font-bold text-text-primary">Devlog</h1>
+            <div className="flex items-center gap-2 mb-3">
+              <LogoMinimal size={32} />
+              <h1 className="text-2xl font-bold text-text-primary">Devlog</h1>
             </div>
 
-            {/* Tagline */}
-            <h2 className="text-2xl xl:text-3xl font-semibold text-text-primary mb-3 leading-tight">
-              Where your code journey
-              <span className="block text-accent-green">becomes knowledge</span>
+            {/* Tagline - single line */}
+            <h2 className="text-xl xl:text-2xl font-semibold text-text-primary mb-2">
+              Where code becomes <span className="text-accent-green">knowledge</span>
             </h2>
 
-            <p className="text-base text-text-secondary mb-6 max-w-md">
-              Join 7,000+ developers who never lose a solution again. 
-              Document as you code, find anything instantly.
+            <p className="text-sm text-text-secondary mb-4 max-w-sm">
+              Join 7,000+ developers. Never lose a solution again.
             </p>
 
             {/* Animated Code Snippets */}
-            <div className="space-y-2 mb-6 font-mono text-sm">
+            <div className="space-y-1.5 mb-4 font-mono text-xs">
               {codeSnippets.map((snippet) => (
                 <motion.div
                   key={snippet.id}
@@ -92,97 +87,74 @@ const AuthDesktop = () => {
               ))}
             </div>
 
-            {/* Feature List */}
-            <div className="space-y-3">
+            {/* Feature List - Compact */}
+            <div className="flex flex-wrap gap-x-6 gap-y-2">
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 2 + index * 0.1, duration: 0.5 }}
-                  className="flex items-center gap-3 text-text-secondary text-sm"
+                  transition={{ delay: 1.5 + index * 0.1, duration: 0.5 }}
+                  className="flex items-center gap-2 text-text-secondary text-xs"
                 >
                   <div className="text-accent-green flex-shrink-0">{feature.icon}</div>
                   <span>{feature.text}</span>
                 </motion.div>
               ))}
             </div>
-
-            {/* Decorative Terminal - Smaller and more compact */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 2.5, duration: 0.5 }}
-              className="mt-6 p-3 bg-dark-primary/50 backdrop-blur-sm rounded-lg border border-dark-secondary/30 max-w-sm"
-            >
-              <div className="flex items-center gap-1.5 mb-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-                <span className="text-xs text-text-secondary/50 ml-2">devlog.terminal</span>
-              </div>
-              <div className="font-mono text-xs text-text-secondary">
-                <span className="text-accent-green">&gt;</span> Your documentation, evolved.
-              </div>
-            </motion.div>
           </motion.div>
         </div>
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-6 lg:px-8 xl:px-12 h-full overflow-hidden">
+      <div className="flex-1 flex items-center justify-center px-4 lg:px-6 xl:px-8 h-full overflow-hidden">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="w-full max-w-md"
         >
-          {/* Form Header */}
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-semibold text-text-primary mb-1">
-              {authView === 'sign_in' ? 'Welcome back' : 'Start your journey'}
+          {/* Minimal Form Header */}
+          <div className="text-center mb-3">
+            <h3 className="text-lg font-semibold text-text-primary">
+              {authView === 'sign_in' ? 'Welcome back' : 'Get started'}
             </h3>
-            <p className="text-text-secondary text-sm">
-              {authView === 'sign_in' 
-                ? 'Continue building your knowledge base' 
-                : 'Join thousands of developers documenting smarter'}
-            </p>
           </div>
 
           {/* Auth Form Container */}
-          <div className="bg-dark-secondary/50 backdrop-blur-xl rounded-2xl p-6 border border-dark-secondary/50 shadow-2xl">
+          <div className="bg-dark-secondary/50 backdrop-blur-xl rounded-xl p-4 border border-dark-secondary/50 shadow-2xl">
             <Auth
               supabaseClient={supabase}
               appearance={{
                 theme: ThemeSupa,
                 style: {
                   button: {
-                    borderRadius: '0.75rem',
+                    borderRadius: '0.5rem',
                     fontWeight: '600',
-                    fontSize: '0.95rem',
-                    padding: '0.75rem',
+                    fontSize: '0.875rem',
+                    padding: '0.625rem',
                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   },
                   input: {
-                    borderRadius: '0.75rem',
-                    fontSize: '0.95rem',
-                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    fontSize: '0.875rem',
+                    padding: '0.625rem 0.875rem',
                     backgroundColor: 'rgba(10, 22, 40, 0.5)',
                     backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(75, 85, 99, 0.3)',
                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   },
                   label: {
-                    fontSize: '0.875rem',
+                    fontSize: '0.813rem',
                     fontWeight: '500',
-                    marginBottom: '0.5rem',
+                    marginBottom: '0.25rem',
                     color: '#e5e7eb',
                   },
                   container: {
-                    gap: '1rem',
+                    gap: '0.75rem',
                   },
                   divider: {
-                    margin: '1rem 0',
+                    margin: '0.75rem 0',
                   },
                   anchor: {
                     fontSize: '0.875rem',
@@ -320,7 +292,7 @@ const AuthDesktop = () => {
               .supabase-auth-ui_ui-divider {
                 position: relative;
                 text-align: center;
-                margin: 1.25rem 0 !important;
+                margin: 0.75rem 0 !important;
               }
               
               .supabase-auth-ui_ui-divider::before {
@@ -358,17 +330,13 @@ const AuthDesktop = () => {
               }
             `}</style>
 
-            {/* Footer Links - Inside the form card */}
-            <div className="mt-6 pt-6 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/70">
+            {/* Footer Links - Ultra compact */}
+            <div className="mt-4 pt-3 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/60">
               <p>
-                By signing up, you agree to our{' '}
-                <a href="/terms" className="text-accent-green hover:text-accent-green/80 transition-colors">
-                  Terms
-                </a>{' '}
-                and{' '}
-                <a href="/privacy" className="text-accent-green hover:text-accent-green/80 transition-colors">
-                  Privacy Policy
-                </a>
+                By continuing, you agree to our{' '}
+                <a href="/terms" className="text-accent-green/80 hover:text-accent-green">Terms</a>
+                {' & '}
+                <a href="/privacy" className="text-accent-green/80 hover:text-accent-green">Privacy</a>
               </p>
             </div>
           </div>

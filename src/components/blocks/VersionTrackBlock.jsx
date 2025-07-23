@@ -24,7 +24,7 @@ function ContextMenu({ x, y, onClose, items }) {
 
   return createPortal(
     <div
-      className="fixed bg-[#161b22] rounded-md shadow-lg border border-[#30363d] py-1 z-50"
+      className="fixed bg-dark-secondary rounded-md shadow-lg border border-dark-secondary/50 py-1 z-50"
       style={{ 
         left: `${x}px`, 
         top: `${y}px`,
@@ -34,7 +34,7 @@ function ContextMenu({ x, y, onClose, items }) {
     >
       {items.map((item, index) => (
         item.divider ? (
-          <div key={index} className="border-t border-[#30363d] my-1" />
+          <div key={index} className="border-t border-dark-secondary/50 my-1" />
         ) : (
           <button
             key={index}
@@ -42,8 +42,8 @@ function ContextMenu({ x, y, onClose, items }) {
               item.onClick();
               onClose();
             }}
-            className="w-full text-left px-3 py-1.5 text-sm text-[#8b949e] 
-                       hover:bg-[#21262d] hover:text-[#f0f6fc] transition-colors duration-150
+            className="w-full text-left px-3 py-1.5 text-sm text-text-secondary 
+                       hover:bg-dark-primary/50 hover:text-text-primary transition-colors duration-150
                        flex items-center gap-2"
             disabled={item.disabled}
           >
@@ -57,13 +57,13 @@ function ContextMenu({ x, y, onClose, items }) {
   );
 }
 
-// Professional branch colors - muted tones inspired by GitHub
+// Platform branch colors - matches the platform's design system
 const BRANCH_COLORS = {
-  main: { primary: '#6B7280', secondary: '#4B5563' },      // Gray (default branch)
-  feature: { primary: '#3B82F6', secondary: '#2563EB' },   // Blue (active development)
-  develop: { primary: '#8B5CF6', secondary: '#7C3AED' },   // Purple (development)
-  hotfix: { primary: '#EF4444', secondary: '#DC2626' },    // Red (urgent fixes)
-  release: { primary: '#10B981', secondary: '#059669' },   // Green (stable releases)
+  main: { primary: '#4ade80', secondary: '#22c55e' },      // accent-green (default branch)
+  feature: { primary: '#60a5fa', secondary: '#3b82f6' },   // blue-400/500 (active development)
+  develop: { primary: '#a78bfa', secondary: '#8b5cf6' },   // purple-400/500 (development)
+  hotfix: { primary: '#f87171', secondary: '#ef4444' },    // red-400/500 (urgent fixes)
+  release: { primary: '#34d399', secondary: '#10b981' },   // emerald-400/500 (stable releases)
 };
 
 // Generate a short ID for versions
@@ -285,12 +285,12 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     canvas.height = rect.height * window.devicePixelRatio;
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     
-    // Clear canvas with professional dark background
-    ctx.fillStyle = '#0d1117'; // GitHub dark theme background
+    // Clear canvas with platform dark background
+    ctx.fillStyle = '#111827'; // bg-dark-primary equivalent
     ctx.fillRect(0, 0, rect.width, rect.height);
     
     // Draw subtle grid pattern
-    ctx.strokeStyle = '#161b22';
+    ctx.strokeStyle = '#1f2937'; // border-dark-secondary equivalent
     ctx.lineWidth = 1;
     ctx.setLineDash([2, 4]);
     
@@ -384,7 +384,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       // Node background
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, isCurrentVersion ? activeRadius : nodeRadius, 0, Math.PI * 2);
-      ctx.fillStyle = '#0d1117'; // Match canvas background
+      ctx.fillStyle = '#111827'; // bg-dark-primary equivalent
       ctx.fill();
       
       // Node border
@@ -433,7 +433,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       ctx.stroke();
       
       // Branch name with system font
-      ctx.fillStyle = isActive ? '#f0f6fc' : '#8b949e'; // GitHub's text colors
+      ctx.fillStyle = isActive ? '#e5e7eb' : '#9ca3af'; // text-text-primary/secondary equivalents
       ctx.font = `${isActive ? '600' : '400'} 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'left';
       ctx.fillText(branchName, 40, yOffset + 4);
@@ -1010,7 +1010,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           <div key={fullPath}>
             <div
               className={`flex items-center gap-1 px-2 py-1 text-sm cursor-pointer
-                         hover:bg-[#21262d] transition-colors duration-150 text-[#8b949e]`}
+                         hover:bg-dark-primary/50 transition-colors duration-150 text-text-secondary`}
               style={{ paddingLeft: `${paddingLeft}px` }}
               onClick={() => !isBeingRenamed && toggleFolder(fullPath)}
               onContextMenu={(e) => handleContextMenu(e, fullPath, true, path)}
@@ -1033,7 +1033,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                       setRenamingValue('');
                     }
                   }}
-                  className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff]"
+                  className="flex-1 bg-dark-secondary border border-dark-secondary/50 rounded px-1 text-sm text-text-primary outline-none focus:border-accent-green"
                   autoFocus
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -1064,7 +1064,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                         }
                       }}
                       placeholder={`New ${inlineCreateState.type} name...`}
-                      className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff] placeholder-[#7d8590]"
+                      className="flex-1 bg-dark-secondary border border-dark-secondary/50 rounded px-1 text-sm text-text-primary outline-none focus:border-accent-green placeholder-text-secondary/50"
                       autoFocus
                     />
                   </div>
@@ -1083,8 +1083,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           <div
             key={fullPath}
             className={`flex items-center gap-2 px-2 py-1 text-sm cursor-pointer
-                       hover:bg-[#21262d] transition-colors duration-150
-                       ${isActive ? 'bg-[#21262d] text-[#f0f6fc]' : 'text-[#8b949e]'}`}
+                       hover:bg-dark-primary/50 transition-colors duration-150
+                       ${isActive ? 'bg-dark-primary/50 text-text-primary' : 'text-text-secondary'}`}
             style={{ paddingLeft: `${paddingLeft + 20}px` }}
             onClick={() => {
               if (isBeingRenamed) return;
@@ -1112,7 +1112,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
             }}
             onContextMenu={(e) => handleContextMenu(e, fullPath, false, path)}
           >
-            <FileIcon size={16} className={isActive ? 'text-[#58a6ff]' : ''} />
+            <FileIcon size={16} className={isActive ? 'text-accent-green' : ''} />
             {isBeingRenamed ? (
               <input
                 type="text"
@@ -1126,7 +1126,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                     setRenamingValue('');
                   }
                 }}
-                className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff]"
+                className="flex-1 bg-dark-secondary border border-dark-secondary/50 rounded px-1 text-sm text-text-primary outline-none focus:border-accent-green"
                 autoFocus
                 onClick={(e) => e.stopPropagation()}
               />
@@ -1136,14 +1136,14 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                 {/* Show staged/modified indicators */}
                 <div className="flex items-center gap-1">
                   {isStaged && (
-                    <span className="text-[10px] text-[#3fb950]" title="Staged">●</span>
+                    <span className="text-[10px] text-accent-green" title="Staged">●</span>
                   )}
                   {isModified && !isStaged && (
-                    <span className="text-[10px] text-[#f0ad4e]" title="Modified">●</span>
+                    <span className="text-[10px] text-yellow-500" title="Modified">●</span>
                   )}
                 </div>
                 {item.lastModified && !modifiedFiles[fullPath] && !isStaged && (
-                  <span className="text-[10px] text-[#7d8590] ml-2">{item.lastModified}</span>
+                  <span className="text-[10px] text-text-secondary/70 ml-2">{item.lastModified}</span>
                 )}
               </>
             )}
@@ -1174,7 +1174,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               }
             }}
             placeholder={`New ${inlineCreateState.type} name...`}
-            className="flex-1 bg-[#1c2128] border border-[#30363d] rounded px-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff] placeholder-[#7d8590]"
+            className="flex-1 bg-dark-secondary border border-dark-secondary/50 rounded px-1 text-sm text-text-primary outline-none focus:border-accent-green placeholder-text-secondary/50"
             autoFocus
           />
         </div>
@@ -1186,26 +1186,26 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
 
   return (
     <>
-    <div className="bg-[#0d1117] rounded-lg overflow-hidden border border-[#30363d] flex h-[600px]">
+    <div className="bg-dark-primary rounded-lg overflow-hidden border border-dark-secondary flex h-[600px]">
       {/* File Tree Sidebar */}
       {showFileTree && (
-        <div className="w-64 bg-[#010409] border-r border-[#30363d] flex flex-col">
-          <div className="px-3 py-2 border-b border-[#30363d] flex items-center justify-between">
-            <span className="text-xs font-medium text-[#8b949e]">FILES</span>
+        <div className="w-64 bg-dark-secondary border-r border-dark-secondary/50 flex flex-col">
+          <div className="px-3 py-2 border-b border-dark-secondary/50 flex items-center justify-between">
+            <span className="text-xs font-medium text-text-secondary">FILES</span>
             <div className="flex items-center gap-1">
               <button
                 onClick={handleCreateFile}
-                className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                className="p-1 hover:bg-dark-primary/50 rounded transition-colors duration-150"
                 title="New file"
               >
-                <Plus size={14} className="text-[#7d8590] hover:text-[#f0f6fc]" />
+                <Plus size={14} className="text-text-secondary hover:text-text-primary" />
               </button>
               <button
                 onClick={() => setShowFileTree(false)}
-                className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                className="p-1 hover:bg-dark-primary/50 rounded transition-colors duration-150"
                 title="Hide file tree"
               >
-                <PanelLeftClose size={14} className="text-[#7d8590]" />
+                <PanelLeftClose size={14} className="text-text-secondary" />
               </button>
             </div>
           </div>
@@ -1228,9 +1228,9 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           >
             {Object.keys(repository.fileTree || {}).length === 0 && !inlineCreateState ? (
               <div className="text-center py-8 px-4">
-                <Folder size={32} className="mx-auto mb-2 text-[#30363d]" />
-                <p className="text-[#7d8590] text-xs mb-2">No files yet</p>
-                <p className="text-[#7d8590] text-[11px]">
+                <Folder size={32} className="mx-auto mb-2 text-dark-secondary/50" />
+                <p className="text-text-secondary text-xs mb-2">No files yet</p>
+                <p className="text-text-secondary text-[11px]">
                   Click + or right-click to create files
                 </p>
               </div>
@@ -1244,17 +1244,17 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="px-4 py-3 border-b border-[#30363d] bg-[#010409]">
+        <div className="px-4 py-3 border-b border-dark-secondary/50 bg-dark-secondary">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               {/* File tree toggle */}
               {!showFileTree && (
                 <button
                   onClick={() => setShowFileTree(true)}
-                  className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                  className="p-1 hover:bg-dark-primary/50 rounded transition-colors duration-150"
                   title="Show file tree"
                 >
-                  <PanelLeft size={18} className="text-[#7d8590]" />
+                  <PanelLeft size={18} className="text-text-secondary" />
                 </button>
               )}
               
@@ -1262,7 +1262,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               <div className="flex items-center gap-1 text-sm">
                 {(() => {
                   if (!activeFile) {
-                    return <span className="text-[#7d8590]">No file selected</span>;
+                    return <span className="text-text-secondary">No file selected</span>;
                   }
                   
                   const parts = activeFile.split('/');
@@ -1274,10 +1274,10 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                       {/* Root/Home */}
                       <button
                         onClick={() => setActiveFile('')}
-                        className="p-1 hover:bg-[#21262d] rounded transition-colors duration-150"
+                        className="p-1 hover:bg-dark-primary/50 rounded transition-colors duration-150"
                         title="Root"
                       >
-                        <Home size={14} className="text-[#7d8590]" />
+                        <Home size={14} className="text-text-secondary" />
                       </button>
                       
                       {/* Folder path */}
@@ -1285,7 +1285,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                         const path = parts.slice(0, index + 1).join('/');
                         return (
                           <React.Fragment key={path}>
-                            <ChevronRight size={14} className="text-[#30363d]" />
+                            <ChevronRight size={14} className="text-dark-secondary" />
                             <button
                               onClick={() => {
                                 // Expand the folder in tree
@@ -1293,8 +1293,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                                 newExpandedDirs.add(path);
                                 setExpandedDirs(newExpandedDirs);
                               }}
-                              className="px-2 py-1 hover:bg-[#21262d] rounded transition-colors duration-150 
-                                         text-[#8b949e] hover:text-[#f0f6fc]"
+                              className="px-2 py-1 hover:bg-dark-primary/50 rounded transition-colors duration-150 
+                                         text-text-secondary hover:text-text-primary"
                             >
                               {part}
                             </button>
@@ -1303,10 +1303,10 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                       })}
                       
                       {/* Current file */}
-                      {parts.length > 0 && <ChevronRight size={14} className="text-[#30363d]" />}
-                      <div className="flex items-center gap-2 px-2 py-1 bg-[#21262d] rounded">
-                        <FileIcon size={16} className="text-[#58a6ff]" />
-                        <span className="text-[#f0f6fc] font-medium">{fileName}</span>
+                      {parts.length > 0 && <ChevronRight size={14} className="text-dark-secondary" />}
+                      <div className="flex items-center gap-2 px-2 py-1 bg-dark-primary/50 rounded">
+                        <FileIcon size={16} className="text-accent-green" />
+                        <span className="text-text-primary font-medium">{fileName}</span>
                       </div>
                     </>
                   );
@@ -1317,11 +1317,11 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               <div className="relative">
               <button 
                 onClick={() => setShowBranchDropdown(!showBranchDropdown)}
-                className="flex items-center gap-2 px-3 py-1 bg-[#21262d] rounded-md
-                           text-[#8b949e] hover:text-[#f0f6fc] hover:bg-[#30363d] 
-                           transition-all duration-150 text-sm border border-[#30363d]
-                           font-normal focus:outline-none focus:ring-2 focus:ring-[#58a6ff] focus:ring-offset-2 
-                           focus:ring-offset-[#0d1117]"
+                className="flex items-center gap-2 px-3 py-1 bg-dark-primary/50 rounded-md
+                           text-text-secondary hover:text-text-primary hover:bg-dark-secondary 
+                           transition-all duration-150 text-sm border border-dark-secondary/50
+                           font-normal focus:outline-none focus:ring-2 focus:ring-accent-green focus:ring-offset-2 
+                           focus:ring-offset-dark-primary"
                 aria-label="Branch selector"
                 aria-expanded={showBranchDropdown}>
                 <GitBranch size={14} />
@@ -1330,8 +1330,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               </button>
               
               {showBranchDropdown && (
-                <div className="absolute top-full left-0 mt-1 w-56 bg-[#161b22] rounded-md 
-                                shadow-lg border border-[#30363d] py-1 z-50">
+                <div className="absolute top-full left-0 mt-1 w-56 bg-dark-secondary rounded-md 
+                                shadow-lg border border-dark-secondary/50 py-1 z-50">
                   {Object.keys(repository.branches).map((branchName) => {
                     const isActive = branchName === selectedBranch;
                     return (
@@ -1342,9 +1342,9 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                           setShowBranchDropdown(false);
                         }}
                         className={`w-full text-left px-3 py-1.5 text-sm
-                                   hover:bg-[#21262d] transition-colors duration-150
+                                   hover:bg-dark-primary/50 transition-colors duration-150
                                    flex items-center gap-2 ${
-                                     isActive ? 'text-[#f0f6fc] bg-[#21262d]' : 'text-[#8b949e]'
+                                     isActive ? 'text-text-primary bg-dark-primary/50' : 'text-text-secondary'
                                    }`}
                       >
                         <div 
@@ -1356,12 +1356,12 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                         />
                         {branchName}
                         {isActive && (
-                          <span className="ml-auto text-[10px] text-[#7d8590]">current</span>
+                          <span className="ml-auto text-[10px] text-text-secondary/70">current</span>
                         )}
                       </button>
                     );
                   })}
-                  <div className="border-t border-[#30363d] mt-1 pt-1">
+                  <div className="border-t border-dark-secondary/50 mt-1 pt-1">
                     {creatingBranch ? (
                       <div className="px-3 py-1.5">
                         <input
@@ -1391,7 +1391,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                             }
                           }}
                           placeholder="Branch name..."
-                          className="w-full bg-[#1c2128] border border-[#30363d] rounded px-2 py-1 text-sm text-[#f0f6fc] outline-none focus:border-[#58a6ff] placeholder-[#7d8590]"
+                          className="w-full bg-dark-secondary border border-dark-secondary/50 rounded px-2 py-1 text-sm text-text-primary outline-none focus:border-accent-green placeholder-text-secondary/50"
                           autoFocus
                         />
                       </div>
@@ -1401,8 +1401,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                           setCreatingBranch(true);
                           setNewBranchName('');
                         }}
-                        className="w-full text-left px-3 py-1.5 text-sm text-[#58a6ff]
-                                   hover:bg-[#21262d] transition-colors duration-150"
+                        className="w-full text-left px-3 py-1.5 text-sm text-accent-green
+                                   hover:bg-dark-primary/50 transition-colors duration-150"
                       >
                         + Create new branch
                       </button>
@@ -1415,7 +1415,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
             {/* Current version info - minimal */}
             {currentVersionData && (
               <div className="text-xs">
-                <span className="text-[#7d8590] font-mono">{currentVersion}</span>
+                <span className="text-text-secondary/70 font-mono">{currentVersion}</span>
               </div>
             )}
           </div>
@@ -1435,7 +1435,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                     }
                     setMode('view');
                   }}
-                  className="px-3 py-1 text-sm text-[#8b949e] hover:text-[#f0f6fc] 
+                  className="px-3 py-1 text-sm text-text-secondary hover:text-text-primary 
                              transition-colors duration-150"
                 >
                   Cancel
@@ -1443,12 +1443,12 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                 <button
                   onClick={handleCommit}
                   disabled={!commitMessage.trim()}
-                  className="px-3 py-1 bg-[#238636] text-white rounded-md text-sm
-                             hover:bg-[#2ea043] transition-colors duration-150 
+                  className="px-3 py-1 bg-accent-green text-dark-primary rounded-md text-sm
+                             hover:bg-accent-green/80 transition-colors duration-150 
                              flex items-center gap-1.5 font-medium
                              disabled:opacity-60 disabled:cursor-not-allowed
-                             focus:outline-none focus:ring-2 focus:ring-[#238636] focus:ring-offset-2 
-                             focus:ring-offset-[#0d1117]"
+                             focus:outline-none focus:ring-2 focus:ring-accent-green focus:ring-offset-2 
+                             focus:ring-offset-dark-primary"
                 >
                   <Save size={14} />
                   Commit changes
@@ -1457,10 +1457,10 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
             ) : (
               <button
                 onClick={() => setMode('edit')}
-                className="px-3 py-1 text-sm text-[#8b949e] hover:text-[#f0f6fc] 
-                           hover:bg-[#21262d] rounded-md border border-[#30363d]
+                className="px-3 py-1 text-sm text-text-secondary hover:text-text-primary 
+                           hover:bg-dark-primary/50 rounded-md border border-dark-secondary/50
                            transition-all duration-150 focus:outline-none focus:ring-2 
-                           focus:ring-[#58a6ff] focus:ring-offset-2 focus:ring-offset-[#0d1117]"
+                           focus:ring-accent-green focus:ring-offset-2 focus:ring-offset-dark-primary"
               >
                 Edit code
               </button>
@@ -1470,7 +1470,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       </div>
 
       {/* Metro Map Visualization */}
-      <div className="relative bg-[#0d1117] h-48 overflow-hidden flex-shrink-0">
+      <div className="relative bg-dark-primary h-48 overflow-hidden flex-shrink-0">
         <canvas
           ref={canvasRef}
           className="w-full h-full transition-transform duration-150"
@@ -1495,11 +1495,11 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         />
         
         {/* Zoom controls - enhanced visibility */}
-        <div className="absolute top-3 right-3 flex flex-col gap-1 bg-[#161b22] rounded-lg p-1 border border-[#30363d] shadow-lg">
+        <div className="absolute top-3 right-3 flex flex-col gap-1 bg-dark-secondary rounded-lg p-1 border border-dark-secondary/50 shadow-lg">
           <button
             onClick={() => setZoom(Math.min(zoom * 1.2, 3))}
-            className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
-                       rounded transition-all duration-150 text-[#8b949e] hover:text-[#f0f6fc]
+            className="p-1.5 bg-dark-primary/50 hover:bg-dark-secondary border border-dark-secondary/50 
+                       rounded transition-all duration-150 text-text-secondary hover:text-text-primary
                        hover:scale-110"
             title="Zoom in (+)"
           >
@@ -1507,8 +1507,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
           </button>
           <button
             onClick={() => setZoom(Math.max(zoom / 1.2, 0.5))}
-            className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
-                       rounded transition-all duration-150 text-[#8b949e] hover:text-[#f0f6fc]
+            className="p-1.5 bg-dark-primary/50 hover:bg-dark-secondary border border-dark-secondary/50 
+                       rounded transition-all duration-150 text-text-secondary hover:text-text-primary
                        hover:scale-110"
             title="Zoom out (-)"
           >
@@ -1519,14 +1519,14 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               setZoom(1);
               setPan({ x: 0, y: 0 });
             }}
-            className="p-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] 
-                       rounded transition-all duration-150 text-[#8b949e] hover:text-[#f0f6fc]
+            className="p-1.5 bg-dark-primary/50 hover:bg-dark-secondary border border-dark-secondary/50 
+                       rounded transition-all duration-150 text-text-secondary hover:text-text-primary
                        hover:scale-110"
             title="Reset view (0)"
           >
             <Maximize2 size={16} />
           </button>
-          <div className="text-[10px] text-center text-[#7d8590] mt-1">
+          <div className="text-[10px] text-center text-text-secondary/70 mt-1">
             {Math.round(zoom * 100)}%
           </div>
         </div>
@@ -1534,13 +1534,13 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         {/* Professional version tooltip */}
         {hoveredNode && repository.versions[hoveredNode] && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 
-                          bg-[#161b22] rounded-md text-xs
-                          border border-[#30363d] shadow-md
+                          bg-dark-secondary rounded-md text-xs
+                          border border-dark-secondary/50 shadow-md
                           transform transition-all duration-150 pointer-events-none">
             <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-[#7d8590]">{hoveredNode}</span>
-              <span className="text-[#7d8590]">·</span>
-              <span className="text-[#8b949e]">
+              <span className="font-mono text-text-secondary/70">{hoveredNode}</span>
+              <span className="text-text-secondary/70">·</span>
+              <span className="text-text-secondary">
                 {(() => {
                   const date = new Date(repository.versions[hoveredNode].timestamp);
                   const now = new Date();
@@ -1555,8 +1555,8 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                 })()}
               </span>
             </div>
-            <div className="text-[#f0f6fc] font-medium">{repository.versions[hoveredNode].message}</div>
-            <div className="text-[#7d8590] text-[11px] mt-1">
+            <div className="text-text-primary font-medium">{repository.versions[hoveredNode].message}</div>
+            <div className="text-text-secondary/70 text-[11px] mt-1">
               by {repository.versions[hoveredNode].author}
               {repository.versions[hoveredNode].files && (
                 <span className="ml-2">
@@ -1569,35 +1569,35 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       </div>
 
       {/* Code Editor */}
-      <div className="border-t border-[#30363d] flex-1 flex flex-col overflow-hidden">
+      <div className="border-t border-dark-secondary/50 flex-1 flex flex-col overflow-hidden">
         {!activeFile ? (
-          <div className="flex-1 flex items-center justify-center bg-[#0d1117]">
+          <div className="flex-1 flex items-center justify-center bg-dark-primary">
             <div className="text-center">
-              <FileText size={48} className="mx-auto mb-3 text-[#30363d]" />
-              <p className="text-[#7d8590] text-sm mb-2">No file selected</p>
-              <p className="text-[#7d8590] text-xs">
+              <FileText size={48} className="mx-auto mb-3 text-dark-secondary" />
+              <p className="text-text-secondary/70 text-sm mb-2">No file selected</p>
+              <p className="text-text-secondary/70 text-xs">
                 Create or select a file to start editing
               </p>
             </div>
           </div>
         ) : mode === 'edit' ? (
-          <div className="bg-[#0d1117] flex flex-col h-full">
-            <div className="px-4 py-3 border-b border-[#30363d] flex-shrink-0">
+          <div className="bg-dark-primary flex flex-col h-full">
+            <div className="px-4 py-3 border-b border-dark-secondary/50 flex-shrink-0">
               <input
                 type="text"
                 value={commitMessage}
                 onChange={(e) => setCommitMessage(e.target.value)}
                 placeholder="Commit message"
-                className="w-full px-3 py-1.5 bg-[#0d1117] text-[#f0f6fc] text-sm
-                           rounded-md border border-[#30363d] focus:border-[#58a6ff]
-                           focus:outline-none focus:ring-1 focus:ring-[#58a6ff]/20 
-                           placeholder-[#7d8590] font-normal"
+                className="w-full px-3 py-1.5 bg-dark-primary text-text-primary text-sm
+                           rounded-md border border-dark-secondary/50 focus:border-accent-green
+                           focus:outline-none focus:ring-1 focus:ring-accent-green/20 
+                           placeholder-text-secondary/50 font-normal"
               />
             </div>
             <div className="relative flex-1 overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
-                              border-r border-[#30363d] overflow-y-auto">
-                <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-dark-secondary 
+                              border-r border-dark-secondary/50 overflow-y-auto">
+                <div className="text-text-secondary/70 text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
                   {editingCode.split('\n').map((_, i) => (
                     <div key={i}>{i + 1}</div>
                   ))}
@@ -1606,7 +1606,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               <textarea
                 value={editingCode}
                 onChange={(e) => setEditingCode(e.target.value)}
-                className="w-full h-full pl-14 pr-4 py-3 bg-[#0d1117] text-[#f0f6fc] 
+                className="w-full h-full pl-14 pr-4 py-3 bg-dark-primary text-text-primary 
                            font-mono text-sm focus:outline-none resize-none leading-6 overflow-y-auto"
                 placeholder="// Enter your code..."
                 spellCheck={false}
@@ -1614,11 +1614,11 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
             </div>
           </div>
         ) : (
-          <div className="relative bg-[#0d1117] h-full flex flex-col" ref={codeContainerRef}>
+          <div className="relative bg-dark-primary h-full flex flex-col" ref={codeContainerRef}>
             <div className="relative flex-1 overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-12 bg-[#161b22] 
-                              border-r border-[#30363d] overflow-y-auto">
-                <div className="text-[#7d8590] text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
+              <div className="absolute left-0 top-0 bottom-0 w-12 bg-dark-secondary 
+                              border-r border-dark-secondary/50 overflow-y-auto">
+                <div className="text-text-secondary/70 text-xs font-mono leading-6 py-3 text-right pr-3 select-none">
                   {(currentVersionData?.files?.[activeFile]?.content || '').split('\n').map((_, i) => (
                     <div key={i}>{i + 1}</div>
                   ))}
@@ -1645,15 +1645,15 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
               </div>
             </div>
             {currentVersionData && (
-              <div className="px-4 py-2 bg-[#010409] border-t border-[#30363d]
+              <div className="px-4 py-2 bg-dark-primary border-t border-dark-secondary/50
                               flex items-center gap-4 text-xs flex-shrink-0">
-                <span className="flex items-center gap-1.5 text-[#7d8590]">
+                <span className="flex items-center gap-1.5 text-text-secondary/70">
                   <User size={12} />
-                  <span className="text-[#8b949e]">{currentVersionData.author}</span>
+                  <span className="text-text-secondary">{currentVersionData.author}</span>
                 </span>
-                <span className="flex items-center gap-1.5 text-[#7d8590]">
+                <span className="flex items-center gap-1.5 text-text-secondary/70">
                   <Clock size={12} />
-                  <span className="text-[#8b949e]">
+                  <span className="text-text-secondary">
                     {new Date(currentVersionData.timestamp).toLocaleString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -1662,9 +1662,9 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
                     })}
                   </span>
                 </span>
-                <span className="flex items-center gap-1.5 text-[#7d8590]">
+                <span className="flex items-center gap-1.5 text-text-secondary/70">
                   <GitBranch size={12} />
-                  <span className="text-[#8b949e]">{currentVersionData.branch || 'main'}</span>
+                  <span className="text-text-secondary">{currentVersionData.branch || 'main'}</span>
                 </span>
               </div>
             )}

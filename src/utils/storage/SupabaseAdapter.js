@@ -464,10 +464,14 @@ export class SupabaseAdapter {
     const isNewDocumentForSave = !docData.createdAt && !docData.created_at;
     const hasFolderId = docData.folder_id && docData.folder_id !== null;
     
+    // Special handling for documents created locally with folders
+    // These need to be created in the database first
+    const isLocallyCreatedWithFolder = docData.metadata?.createdLocally && hasFolderId;
+    
     let savedDoc;
     let docError;
     
-    if (isNewDocumentForSave && hasFolderId) {
+    if ((isNewDocumentForSave || isLocallyCreatedWithFolder) && hasFolderId) {
       // Try to use atomic save for better reliability
       let hasAtomicSave = true; // Assume it exists, will catch error if not
       
@@ -564,8 +568,8 @@ export class SupabaseAdapter {
         isNew: isNewDocumentForSave
       });
       
-      if (isNewDocumentForSave) {
-        // For new documents, use insert to avoid conflicts with soft-deleted documents
+      if (isNewDocumentForSave || isLocallyCreatedWithFolder) {
+        // For new documents or documents created locally with folders, use insert
         const { data, error } = await supabase
           .from('documents')
           .insert(documentToSave)
@@ -713,9 +717,6 @@ export class SupabaseAdapter {
         // Try the safer save_document_blocks_v3 function that prevents data loss
         const { error } = await supabase.rpc('save_document_blocks_v3', {
           p_document_id: savedDoc.id,
-          p_user_id: this.userId,
-          p_title: savedDoc.title,
-          p_tags: savedDoc.tags || [],
           p_blocks: blocksToSave
         });
         
@@ -938,8 +939,8 @@ export class SupabaseAdapter {
       baseBlock.versionOf = block.version_of;
     }
 
-    // For blocks that use 'data' property (table, todo, template), restore it from metadata
-    if (block.type === 'table' || block.type === 'todo' || block.type === 'template') {
+    // For blocks that use 'data' property (table, todo, template, version-track), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track') {
       baseBlock.data = block.metadata || {};
       // console.log(`🟧 SupabaseAdapter: Restoring data property for ${block.type} block:`, {
       //   blockId: block.id,
@@ -1015,6 +1016,16 @@ export class SupabaseAdapter {
         dbBlock.metadata[key] = block[key];
       }
     });
+
+    // Generate content preview for version-track blocks
+    if (block.type === 'version-track' && block.data?.repository) {
+      const repo = block.data.repository;
+      const versionCount = Object.keys(repo.versions || {}).length;
+      const branchCount = Object.keys(repo.branches || {}).length;
+      const currentVersion = repo.HEAD ? repo.versions[repo.HEAD] : null;
+      
+      dbBlock.content = `Version Control: ${versionCount} versions, ${branchCount} branches${currentVersion ? ` - Latest: "${currentVersion.message}"` : ''}`;
+    }
 
     return dbBlock;
   }

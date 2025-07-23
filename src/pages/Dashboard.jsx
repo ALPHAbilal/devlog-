@@ -14,7 +14,7 @@ import NavigationCommandPalette from '../components/NavigationCommandPalette';
 import Breadcrumb from '../components/Breadcrumb';
 import ScrollToTop from '../components/ScrollToTop';
 import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft } from 'lucide-react';
-import storageWrapper from '../utils/storage/storageWrapper';
+import storageWrapper, { deleteEntry } from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';

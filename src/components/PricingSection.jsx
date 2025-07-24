@@ -30,16 +30,26 @@ export default function PricingSection() {
         annual: 7
       },
       features: [
-        { text: '500 documents', included: true },
-        { text: '5 GB storage', included: true },
-        { text: '50 AI conversations/month', included: true },
-        { text: '30-day version history', included: true },
-        { text: '5 device sync', included: true },
-        { text: 'All 8 block types', included: true },
-        { text: 'Basic sharing (7-day links)', included: true },
-        { text: 'Full-text search', included: true },
-        { text: 'Offline support', included: true },
-        { text: 'Email support', included: true }
+        { 
+          text: 'AI conversations saved forever', 
+          included: true,
+          description: 'Before: That perfect ChatGPT solution vanishes. After: Every AI chat becomes searchable knowledge.'
+        },
+        { 
+          text: 'Git-style version control for docs', 
+          included: true,
+          description: 'Before: "What did I change?" is a mystery. After: Visual timeline shows every edit with diffs.'
+        },
+        { 
+          text: 'Works offline, syncs when ready', 
+          included: true,
+          description: 'Before: No internet = no work. After: Code on a plane, sync when you land.'
+        },
+        { 
+          text: 'Block-based developer workspace', 
+          included: true,
+          description: 'Before: Copy-paste code into docs. After: Native code blocks with syntax highlighting.'
+        }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'primary',
@@ -49,22 +59,36 @@ export default function PricingSection() {
     {
       name: 'Professional',
       icon: <Building2 size={24} />,
-      description: 'For power users & teams',
+      description: 'For serious documentation',
       price: {
         monthly: 19,
         annual: 15
       },
       features: [
-        { text: 'Unlimited documents', included: true },
-        { text: '50 GB storage', included: true },
-        { text: 'Unlimited AI conversations', included: true },
-        { text: '1-year version history', included: true },
-        { text: 'Unlimited device sync', included: true },
-        { text: 'Advanced sharing with password & analytics', included: true },
-        { text: 'API access (10K calls/month)', included: true },
-        { text: 'Command palette & VS Code explorer', included: true },
-        { text: 'Export to multiple formats', included: true },
-        { text: 'Priority support & 99.9% uptime', included: true }
+        { 
+          text: 'Everything in Personal', 
+          included: true
+        },
+        { 
+          text: 'Password-protected sharing', 
+          included: true,
+          description: 'Before: Screenshots in Slack get lost. After: Share secure links with expiry dates.'
+        },
+        { 
+          text: 'Multi-branch documentation', 
+          included: true,
+          description: 'Before: One messy doc for everything. After: Feature branches for experiments.'
+        },
+        { 
+          text: 'Team collaboration (5 seats)', 
+          included: true,
+          description: 'Before: "What did John code yesterday?" After: See team progress in real-time.'
+        },
+        { 
+          text: 'Full data export & backups', 
+          included: true,
+          description: 'Before: Vendor lock-in anxiety. After: Export everything as JSON anytime.'
+        }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'secondary',
@@ -268,19 +292,28 @@ export default function PricingSection() {
 
                 <div className="mt-4 md:mt-6 space-y-2 md:space-y-3">
                   {plan.features.map((feature, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <Check size={16} className="text-accent-green mt-0.5 flex-shrink-0" />
-                      ) : (
-                        <X size={16} className="text-text-secondary/30 mt-0.5 flex-shrink-0" />
-                      )}
-                      <span
-                        className={`text-xs md:text-sm ${
-                          feature.included ? 'text-text-primary' : 'text-text-secondary/50'
-                        }`}
-                      >
-                        {feature.text}
-                      </span>
+                    <div key={i} className="group">
+                      <div className="flex items-start gap-3">
+                        {feature.included ? (
+                          <Check size={16} className="text-accent-green mt-0.5 flex-shrink-0" />
+                        ) : (
+                          <X size={16} className="text-text-secondary/30 mt-0.5 flex-shrink-0" />
+                        )}
+                        <div className="flex-1">
+                          <span
+                            className={`text-xs md:text-sm ${
+                              feature.included ? 'text-text-primary' : 'text-text-secondary/50'
+                            }`}
+                          >
+                            {feature.text}
+                          </span>
+                          {feature.description && (
+                            <p className="text-[11px] md:text-xs text-text-secondary/70 mt-1 leading-relaxed">
+                              {feature.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkCallback, setLinkCallback] = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [deletedDocuments, setDeletedDocuments] = useState(new Map());
   const [selectedTags, setSelectedTags] = useState([]);
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +59,27 @@ export default function Dashboard() {
       navigate('/upgrade');
     }
   }, [user, trialStatus, navigate]);
+
+  // Cleanup old deleted documents periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDeletedDocuments(prev => {
+        const newMap = new Map();
+        const now = Date.now();
+        
+        // Keep only documents deleted within last 30 seconds
+        for (const [id, doc] of prev) {
+          if (now - doc.deletedAt < 30000) {
+            newMap.set(id, doc);
+          }
+        }
+        
+        return newMap;
+      });
+    }, 5000); // Check every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, []);
   
   // Project state
   const [projects, setProjects] = useState([]);
@@ -688,6 +710,32 @@ export default function Dashboard() {
     setShowProjectModal(true);
   }, []);
 
+  // Handle undo delete
+  const handleUndoDelete = useCallback(async (docId) => {
+    const deletedDoc = deletedDocuments.get(docId);
+    if (!deletedDoc) return;
+
+    try {
+      // Restore the document
+      await storageWrapper.saveDocument(deletedDoc);
+      
+      // Add back to entries
+      setEntries(prev => [...prev, deletedDoc]);
+      
+      // Remove from deleted documents
+      setDeletedDocuments(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(docId);
+        return newMap;
+      });
+      
+      toast.success('Document restored');
+    } catch (error) {
+      console.error('Error restoring document:', error);
+      toast.error('Failed to restore document');
+    }
+  }, [deletedDocuments, toast]);
+
   // Helper function to extract all searchable text content from blocks
   const getFullTextContent = useCallback((entry) => {
     // If blocks are not loaded (undefined), return empty string
@@ -1100,11 +1148,42 @@ export default function Dashboard() {
             }}
             onDocumentDelete={async (document) => {
               const docId = document.id || document;
-              if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+              const docToDelete = entries.find(e => e.id === docId);
+              
+              if (docToDelete) {
+                // Store document for undo
+                setDeletedDocuments(prev => {
+                  const newMap = new Map(prev);
+                  newMap.set(docId, { ...docToDelete, deletedAt: Date.now() });
+                  return newMap;
+                });
+                
+                // Delete immediately
                 await deleteEntry(docId);
-                // Update local state immediately
                 setEntries(prev => prev.filter(entry => entry.id !== docId));
-                toast.success('Document deleted successfully');
+                
+                // Show toast with undo
+                toast.info(
+                  <div className="flex items-center justify-between gap-4">
+                    <span>Document deleted</span>
+                    <button
+                      onClick={() => handleUndoDelete(docId)}
+                      className="text-accent-green hover:text-accent-green-light transition-colors font-medium"
+                    >
+                      Undo
+                    </button>
+                  </div>,
+                  5000
+                );
+                
+                // Auto-cleanup after 30 seconds
+                setTimeout(() => {
+                  setDeletedDocuments(prev => {
+                    const newMap = new Map(prev);
+                    newMap.delete(docId);
+                    return newMap;
+                  });
+                }, 30000);
               }
             }}
             onCreateProject={() => {
@@ -1294,11 +1373,42 @@ export default function Dashboard() {
           }}
           onDocumentDelete={async (document) => {
             const docId = document.id || document;
-            if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+            const docToDelete = entries.find(e => e.id === docId);
+            
+            if (docToDelete) {
+              // Store document for undo
+              setDeletedDocuments(prev => {
+                const newMap = new Map(prev);
+                newMap.set(docId, { ...docToDelete, deletedAt: Date.now() });
+                return newMap;
+              });
+              
+              // Delete immediately
               await deleteEntry(docId);
-              // Update local state immediately
               setEntries(prev => prev.filter(entry => entry.id !== docId));
-              toast.success('Document deleted successfully');
+              
+              // Show toast with undo
+              toast.info(
+                <div className="flex items-center justify-between gap-4">
+                  <span>Document deleted</span>
+                  <button
+                    onClick={() => handleUndoDelete(docId)}
+                    className="text-accent-green hover:text-accent-green-light transition-colors font-medium"
+                  >
+                    Undo
+                  </button>
+                </div>,
+                5000
+              );
+              
+              // Auto-cleanup after 30 seconds
+              setTimeout(() => {
+                setDeletedDocuments(prev => {
+                  const newMap = new Map(prev);
+                  newMap.delete(docId);
+                  return newMap;
+                });
+              }, 30000);
             }
           }}
           onCreateProject={() => {

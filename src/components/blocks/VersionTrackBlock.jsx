@@ -514,12 +514,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     
-    // Apply zoom and pan transforms
-    ctx.save();
-    ctx.translate(pan.x, pan.y);
-    ctx.scale(zoom, zoom);
-    
-    // Draw dynamic grid that follows nodes
+    // Draw dynamic grid that follows nodes (in screen space)
     ctx.save();
     
     // Draw vertical lines at each node's X position
@@ -529,10 +524,12 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.globalAlpha = 0.15;
     
     nodeXPositions.forEach(x => {
+      // Transform node position to screen coordinates
+      const screenX = (x * zoom) + pan.x;
       ctx.beginPath();
       ctx.setLineDash([2, 4]);
-      ctx.moveTo(x, -1000);
-      ctx.lineTo(x, rect.height / zoom + 1000);
+      ctx.moveTo(screenX, 0);
+      ctx.lineTo(screenX, rect.height);
       ctx.stroke();
     });
     
@@ -542,15 +539,22 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.lineWidth = 0.3;
     
     laneLevels.forEach(y => {
+      // Transform node position to screen coordinates
+      const screenY = (y * zoom) + pan.y;
       ctx.beginPath();
       ctx.setLineDash([1, 8]);
-      ctx.moveTo(-1000, y);
-      ctx.lineTo(rect.width / zoom + 1000, y);
+      ctx.moveTo(0, screenY);
+      ctx.lineTo(rect.width, screenY);
       ctx.stroke();
     });
     
     ctx.setLineDash([]);
     ctx.restore();
+    
+    // Apply zoom and pan transforms for drawing nodes and connections
+    ctx.save();
+    ctx.translate(pan.x, pan.y);
+    ctx.scale(zoom, zoom);
     
     // Draw branch lane backgrounds
     const laneBgData = {};

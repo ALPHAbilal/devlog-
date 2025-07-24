@@ -85,7 +85,7 @@ function LandingContent() {
             <div>
               <LogoMinimal size={32} />
             </div>
-            <h1 className="text-xl font-semibold">Devlog</h1>
+            <h1 className="text-xl font-semibold select-none">Devlog</h1>
           </motion.div>
           
           {/* Desktop Navigation */}
@@ -143,7 +143,7 @@ function LandingContent() {
             <div className="flex items-center justify-between p-4 border-b border-dark-secondary/20">
               <div className="flex items-center gap-2.5">
                 <LogoMinimal size={32} />
-                <h1 className="text-xl font-semibold">Devlog</h1>
+                <h1 className="text-xl font-semibold select-none">Devlog</h1>
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}

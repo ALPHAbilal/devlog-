@@ -354,6 +354,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     modified: [], // { path }
     deleted: []  // { path }
   });
+  const [hoveredNodeDetails, setHoveredNodeDetails] = useState(null);
 
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
@@ -495,27 +496,19 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     
     // Clear canvas with platform dark background
-    ctx.fillStyle = '#111827'; // bg-dark-primary equivalent
+    ctx.fillStyle = '#0a1628'; // Darker background for better contrast
     ctx.fillRect(0, 0, rect.width, rect.height);
     
-    // Draw subtle grid pattern - only vertical lines at commit positions
+    // Add subtle noise texture
     ctx.save();
-    ctx.strokeStyle = '#1f2937'; // border-dark-secondary equivalent
-    ctx.lineWidth = 0.5;
-    ctx.setLineDash([1, 3]);
-    ctx.globalAlpha = 0.3;
-    
-    // Draw vertical guide lines at major intervals
-    const majorInterval = 200;
-    for (let x = 180; x < rect.width; x += majorInterval) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, rect.height);
-      ctx.stroke();
+    for (let i = 0; i < rect.width * rect.height * 0.03; i++) {
+      const x = Math.random() * rect.width;
+      const y = Math.random() * rect.height;
+      const opacity = Math.random() * 0.02 + 0.01;
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.fillRect(x, y, 1, 1);
     }
-    
     ctx.restore();
-    ctx.setLineDash([]);
     
     // Enable better rendering
     ctx.imageSmoothingEnabled = true;
@@ -526,7 +519,75 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.translate(pan.x, pan.y);
     ctx.scale(zoom, zoom);
     
-    // Draw connections with refined styling
+    // Draw dynamic grid that follows nodes
+    ctx.save();
+    
+    // Draw vertical lines at each node's X position
+    const nodeXPositions = [...new Set(Object.values(nodePositions).map(pos => pos.x))].sort((a, b) => a - b);
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.15;
+    
+    nodeXPositions.forEach(x => {
+      ctx.beginPath();
+      ctx.setLineDash([2, 4]);
+      ctx.moveTo(x, -1000);
+      ctx.lineTo(x, rect.height / zoom + 1000);
+      ctx.stroke();
+    });
+    
+    // Draw horizontal lane guides for each branch
+    const laneLevels = [...new Set(Object.values(nodePositions).map(pos => pos.y))].sort((a, b) => a - b);
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.lineWidth = 0.3;
+    
+    laneLevels.forEach(y => {
+      ctx.beginPath();
+      ctx.setLineDash([1, 8]);
+      ctx.moveTo(-1000, y);
+      ctx.lineTo(rect.width / zoom + 1000, y);
+      ctx.stroke();
+    });
+    
+    ctx.setLineDash([]);
+    ctx.restore();
+    
+    // Draw branch lane backgrounds
+    const branchLanes = {};
+    Object.values(repository.versions).forEach(version => {
+      const pos = nodePositions[version.id];
+      if (pos) {
+        if (!branchLanes[pos.lane]) {
+          branchLanes[pos.lane] = {
+            y: pos.y,
+            branch: version.branch || 'main',
+            color: repository.branches[version.branch || 'main']?.color || BRANCH_COLORS.main
+          };
+        }
+      }
+    });
+    
+    // Draw subtle lane backgrounds
+    ctx.save();
+    Object.values(branchLanes).forEach(lane => {
+      const isActiveBranch = lane.branch === selectedBranch;
+      ctx.fillStyle = isActiveBranch ? `${lane.color.primary}08` : `${lane.color.primary}04`;
+      ctx.fillRect(-1000, lane.y - 25, rect.width / zoom + 2000, 50);
+    });
+    ctx.restore();
+    
+    // Build path from current version to root for highlighting
+    const pathToRoot = new Set();
+    if (currentVersion) {
+      let current = currentVersion;
+      while (current) {
+        pathToRoot.add(current);
+        const version = repository.versions[current];
+        current = version ? version.parent : null;
+      }
+    }
+    
+    // Draw connections with enhanced styling
     Object.values(repository.versions).forEach(version => {
       if (version.parent) {
         const parentPos = nodePositions[version.parent];
@@ -535,12 +596,34 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
         if (parentPos && childPos) {
           const branch = repository.branches[version.branch] || repository.branches.main;
           const isCurrentBranch = version.branch === selectedBranch;
+          const isHovered = hoveredNode === version.id || hoveredNode === version.parent;
+          const isInPath = pathToRoot.has(version.id) && pathToRoot.has(version.parent);
           
-          // Muted colors for inactive branches
-          ctx.strokeStyle = isCurrentBranch ? branch.color.primary : branch.color.primary + '60';
-          ctx.lineWidth = 2; // Thinner, more professional
-          ctx.lineCap = 'square';
-          ctx.lineJoin = 'miter';
+          // Create gradient for the connection
+          const gradient = ctx.createLinearGradient(parentPos.x, parentPos.y, childPos.x, childPos.y);
+          if (isInPath) {
+            // Highlighted path with brighter colors
+            gradient.addColorStop(0, branch.color.primary);
+            gradient.addColorStop(1, `${branch.color.primary}EE`);
+          } else if (isCurrentBranch) {
+            gradient.addColorStop(0, `${branch.color.primary}CC`);
+            gradient.addColorStop(1, branch.color.primary);
+          } else {
+            gradient.addColorStop(0, `${branch.color.primary}40`);
+            gradient.addColorStop(1, `${branch.color.primary}60`);
+          }
+          
+          ctx.save();
+          ctx.strokeStyle = gradient;
+          ctx.lineWidth = isInPath ? 5 : (isCurrentBranch ? 4 : 3);
+          ctx.lineCap = 'round';
+          ctx.lineJoin = 'round';
+          
+          // Add glow effect for active branch or path
+          if (isInPath || isCurrentBranch || isHovered) {
+            ctx.shadowColor = branch.color.primary;
+            ctx.shadowBlur = isInPath ? 10 : (isHovered ? 8 : 4);
+          }
           
           ctx.beginPath();
           ctx.moveTo(parentPos.x, parentPos.y);
@@ -562,76 +645,104 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
           }
           
           ctx.stroke();
+          ctx.restore();
         }
       }
     });
     
-    // Draw nodes with enhanced effects
+    // Draw nodes with modern enhanced design
     Object.entries(repository.versions).forEach(([versionId, version]) => {
       const pos = nodePositions[versionId];
       if (!pos) return;
       
       const branch = repository.branches[version.branch] || repository.branches.main;
       const isCurrentVersion = versionId === currentVersion;
+      const isHEAD = versionId === repository.HEAD;
       const isHovered = hoveredNode === versionId;
       const isMergeCommit = pos.isMerge || version.message?.toLowerCase().includes('merge');
+      const isInPath = pathToRoot.has(versionId);
       
-      // Node sizes
-      const nodeRadius = 8;
-      const innerRadius = 6;
+      ctx.save();
       
-      // Outer ring for all nodes (branch color)
+      // Drop shadow for depth
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2;
+      
+      // Base node - larger size for important nodes
+      const nodeRadius = (isHEAD || isInPath) ? 8 : 7;
+      
+      // Draw node border/background
       ctx.beginPath();
       ctx.arc(pos.x, pos.y, nodeRadius, 0, Math.PI * 2);
-      ctx.fillStyle = branch.color.primary;
+      ctx.fillStyle = '#0a1628'; // Dark background
       ctx.fill();
+      ctx.strokeStyle = isInPath ? branch.color.primary : `${branch.color.primary}CC`;
+      ctx.lineWidth = isInPath ? 3 : 2;
+      ctx.stroke();
       
-      // Inner circle with dark background
+      // Inner fill with branch color
       ctx.beginPath();
-      ctx.arc(pos.x, pos.y, innerRadius, 0, Math.PI * 2);
-      ctx.fillStyle = '#111827'; // bg-dark-primary equivalent
+      ctx.arc(pos.x, pos.y, nodeRadius - 2, 0, Math.PI * 2);
+      ctx.fillStyle = isCurrentVersion || isInPath ? branch.color.primary : `${branch.color.primary}40`;
       ctx.fill();
       
-      // Branch color dot in center
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, 4, 0, Math.PI * 2);
-      ctx.fillStyle = branch.color.primary;
-      ctx.fill();
+      // Reset shadow for cleaner rings
+      ctx.shadowColor = 'transparent';
       
-      // Current version indicator - pulsing ring
-      if (isCurrentVersion) {
+      // HEAD double-ring indicator
+      if (isHEAD) {
+        // Outer ring
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
         ctx.strokeStyle = branch.color.primary;
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Inner pulsing ring
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
-        ctx.strokeStyle = branch.color.primary + '60';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-      
-      // Hover effect
-      if (isHovered && !isCurrentVersion) {
+        // Optional: Add a subtle glow
+        ctx.save();
+        ctx.shadowColor = branch.color.primary;
+        ctx.shadowBlur = 6;
         ctx.beginPath();
         ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
-        ctx.strokeStyle = branch.color.primary + '80';
+        ctx.strokeStyle = `${branch.color.primary}60`;
         ctx.lineWidth = 1;
         ctx.stroke();
-      }
-      
-      // Merge commit indicator - diamond shape overlay
-      if (isMergeCommit) {
-        ctx.save();
-        ctx.translate(pos.x, pos.y);
-        ctx.rotate(Math.PI / 4);
-        ctx.fillStyle = branch.color.secondary;
-        ctx.fillRect(-3, -3, 6, 6);
         ctx.restore();
       }
+      
+      // Current version highlight (if different from HEAD)
+      if (isCurrentVersion && !isHEAD) {
+        ctx.strokeStyle = `${branch.color.primary}80`;
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 2]);
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      
+      // Hover effect - scale animation suggestion
+      if (isHovered) {
+        ctx.globalAlpha = 0.3;
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
+        ctx.fillStyle = branch.color.primary;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      
+      // Merge commit indicator - special symbol
+      if (isMergeCommit) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('⬡', pos.x, pos.y);
+      }
+      
+      ctx.restore();
     });
     
     // Restore transform
@@ -777,9 +888,10 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
         setEditingCode('');
       }
       
-      // Subtle visual feedback
+      // Subtle visual feedback with smooth transition
       const canvas = canvasRef.current;
-      canvas.style.transform = 'scale(0.99)';
+      canvas.style.transition = 'transform 0.15s ease';
+      canvas.style.transform = 'scale(0.98)';
       setTimeout(() => {
         canvas.style.transform = 'scale(1)';
       }, 150);
@@ -801,14 +913,59 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     }
     
     let foundNode = null;
+    let foundNodePos = null;
     Object.entries(nodePositions).forEach(([versionId, pos]) => {
       const distance = Math.sqrt((x - pos.x) ** 2 + (y - pos.y) ** 2);
       if (distance < 12) {
         foundNode = versionId;
+        foundNodePos = pos;
       }
     });
     
     setHoveredNode(foundNode);
+    
+    // Set hover details for tooltip
+    if (foundNode && foundNodePos) {
+      const version = repository.versions[foundNode];
+      if (version) {
+        // Calculate screen position for tooltip
+        const screenX = (foundNodePos.x * zoom + pan.x) + rect.left;
+        const screenY = (foundNodePos.y * zoom + pan.y) + rect.top;
+        
+        // Count files changed
+        let filesChanged = 0;
+        if (version.files) {
+          filesChanged = Object.keys(version.files).length;
+        }
+        
+        // Calculate time ago
+        const timeAgo = (timestamp) => {
+          const now = new Date();
+          const date = new Date(timestamp);
+          const seconds = Math.floor((now - date) / 1000);
+          
+          if (seconds < 60) return 'just now';
+          if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+          if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+          if (seconds < 2592000) return `${Math.floor(seconds / 86400)} days ago`;
+          return date.toLocaleDateString();
+        };
+        
+        setHoveredNodeDetails({
+          x: screenX,
+          y: screenY,
+          version: foundNode,
+          message: version.message || 'No message',
+          author: version.author || 'Unknown',
+          time: timeAgo(version.timestamp),
+          filesChanged,
+          branch: version.branch || 'main'
+        });
+      }
+    } else {
+      setHoveredNodeDetails(null);
+    }
+    
     canvasRef.current.style.cursor = foundNode ? 'pointer' : isDragging ? 'grabbing' : 'grab';
   };
 
@@ -1768,6 +1925,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
           onMouseMove={handleCanvasMouseMove}
           onMouseLeave={() => {
             setHoveredNode(null);
+            setHoveredNodeDetails(null);
             setIsDragging(false);
           }}
         />
@@ -1809,40 +1967,65 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
           </div>
         </div>
         
-        {/* Professional version tooltip */}
-        {hoveredNode && repository.versions[hoveredNode] && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-2 
-                          bg-dark-secondary rounded-md text-xs
-                          border border-dark-secondary/50 shadow-md
-                          transform transition-all duration-150 pointer-events-none">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-mono text-text-secondary/70">{hoveredNode}</span>
-              <span className="text-text-secondary/70">·</span>
-              <span className="text-text-secondary">
-                {(() => {
-                  const date = new Date(repository.versions[hoveredNode].timestamp);
-                  const now = new Date();
-                  const diff = now - date;
-                  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-                  const hours = Math.floor(diff / (1000 * 60 * 60));
-                  const minutes = Math.floor(diff / (1000 * 60));
-                  
-                  if (days > 0) return `${days} day${days > 1 ? 's' : ''} ago`;
-                  if (hours > 0) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-                  return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-                })()}
-              </span>
+        {/* Enhanced commit preview tooltip */}
+        {hoveredNodeDetails && createPortal(
+          <div 
+            className="fixed px-4 py-3 bg-dark-secondary/95 backdrop-blur-sm rounded-lg text-sm
+                       border border-dark-secondary/50 shadow-xl pointer-events-none z-50
+                       transform -translate-x-1/2 -translate-y-full -mt-3"
+            style={{
+              left: `${hoveredNodeDetails.x}px`,
+              top: `${hoveredNodeDetails.y - 10}px`,
+            }}
+          >
+            {/* Arrow pointing down */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-full -mt-px">
+              <div className="w-0 h-0 border-l-[6px] border-l-transparent 
+                              border-r-[6px] border-r-transparent 
+                              border-t-[6px] border-t-dark-secondary/95"></div>
             </div>
-            <div className="text-text-primary font-medium">{repository.versions[hoveredNode].message}</div>
-            <div className="text-text-secondary/70 text-[11px] mt-1">
-              by {repository.versions[hoveredNode].author}
-              {repository.versions[hoveredNode].files && (
-                <span className="ml-2">
-                  · {Object.keys(repository.versions[hoveredNode].files).length} file{Object.keys(repository.versions[hoveredNode].files).length > 1 ? 's' : ''} changed
+            
+            {/* Content */}
+            <div className="space-y-2">
+              {/* Header with branch and version */}
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-xs font-medium"
+                      style={{ 
+                        backgroundColor: `${repository.branches[hoveredNodeDetails.branch]?.color.primary || BRANCH_COLORS.main.primary}20`,
+                        color: repository.branches[hoveredNodeDetails.branch]?.color.primary || BRANCH_COLORS.main.primary
+                      }}>
+                  {hoveredNodeDetails.branch}
                 </span>
-              )}
+                <span className="font-mono text-xs text-text-secondary">
+                  {hoveredNodeDetails.version}
+                </span>
+              </div>
+              
+              {/* Commit message */}
+              <div className="font-medium text-text-primary leading-relaxed">
+                {hoveredNodeDetails.message}
+              </div>
+              
+              {/* Meta info */}
+              <div className="flex items-center gap-3 text-xs text-text-secondary">
+                <div className="flex items-center gap-1">
+                  <User size={12} />
+                  <span>{hoveredNodeDetails.author}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock size={12} />
+                  <span>{hoveredNodeDetails.time}</span>
+                </div>
+                {hoveredNodeDetails.filesChanged > 0 && (
+                  <div className="flex items-center gap-1">
+                    <FileText size={12} />
+                    <span>{hoveredNodeDetails.filesChanged} {hoveredNodeDetails.filesChanged === 1 ? 'file' : 'files'}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
 

@@ -232,6 +232,7 @@ const getLanguageFromFilename = (filename) => {
 export default function VersionTrackBlock({ block, onUpdate, isActive }) {
   // Debug flag - set to true to enable comprehensive logging
   const DEBUG = false;
+  const DEBUG_GRID = false; // Set to true to debug grid alignment
   const LOG_PREFIX = '🔵 VersionTrack:';
   
   // Log initial props
@@ -514,47 +515,56 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     
-    // Draw dynamic grid that follows nodes (in screen space)
+    // Apply zoom and pan transforms for everything
     ctx.save();
+    ctx.translate(pan.x, pan.y);
+    ctx.scale(zoom, zoom);
+    
+    // Draw dynamic grid in world space (same coordinate system as nodes)
+    ctx.save();
+    
+    // Calculate visible bounds in world coordinates
+    const worldLeft = -pan.x / zoom;
+    const worldTop = -pan.y / zoom;
+    const worldRight = (rect.width - pan.x) / zoom;
+    const worldBottom = (rect.height - pan.y) / zoom;
     
     // Draw vertical lines at each node's X position
     const nodeXPositions = [...new Set(Object.values(nodePositions).map(pos => pos.x))].sort((a, b) => a - b);
     ctx.strokeStyle = '#1e3a5f';
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 0.5 / zoom; // Adjust line width for zoom
     ctx.globalAlpha = 0.15;
     
     nodeXPositions.forEach(x => {
-      // Transform node position to screen coordinates
-      const screenX = (x * zoom) + pan.x;
-      ctx.beginPath();
-      ctx.setLineDash([2, 4]);
-      ctx.moveTo(screenX, 0);
-      ctx.lineTo(screenX, rect.height);
-      ctx.stroke();
+      // Only draw if line is within or near visible bounds
+      if (x >= worldLeft - 50 && x <= worldRight + 50) {
+        ctx.beginPath();
+        ctx.setLineDash([2 / zoom, 4 / zoom]); // Adjust dash for zoom
+        ctx.moveTo(x, worldTop - 100);
+        ctx.lineTo(x, worldBottom + 100);
+        ctx.stroke();
+      }
     });
     
     // Draw horizontal lane guides for each branch
     const laneLevels = [...new Set(Object.values(nodePositions).map(pos => pos.y))].sort((a, b) => a - b);
     ctx.strokeStyle = '#1e3a5f';
-    ctx.lineWidth = 0.3;
+    ctx.lineWidth = 0.3 / zoom; // Adjust line width for zoom
+    ctx.globalAlpha = 0.2;
     
     laneLevels.forEach(y => {
-      // Transform node position to screen coordinates
-      const screenY = (y * zoom) + pan.y;
-      ctx.beginPath();
-      ctx.setLineDash([1, 8]);
-      ctx.moveTo(0, screenY);
-      ctx.lineTo(rect.width, screenY);
-      ctx.stroke();
+      // Only draw if line is within or near visible bounds
+      if (y >= worldTop - 50 && y <= worldBottom + 50) {
+        ctx.beginPath();
+        ctx.setLineDash([1 / zoom, 8 / zoom]); // Adjust dash for zoom
+        ctx.moveTo(worldLeft - 100, y);
+        ctx.lineTo(worldRight + 100, y);
+        ctx.stroke();
+      }
     });
     
     ctx.setLineDash([]);
     ctx.restore();
-    
-    // Apply zoom and pan transforms for drawing nodes and connections
-    ctx.save();
-    ctx.translate(pan.x, pan.y);
-    ctx.scale(zoom, zoom);
     
     // Draw branch lane backgrounds
     const laneBgData = {};

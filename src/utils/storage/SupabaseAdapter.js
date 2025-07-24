@@ -466,7 +466,7 @@ export class SupabaseAdapter {
     
     // Special handling for documents created locally with folders
     // These need to be created in the database first
-    const isLocallyCreatedWithFolder = docData.metadata?.createdLocally && hasFolderId;
+    let isLocallyCreatedWithFolder = docData.metadata?.createdLocally && hasFolderId;
     
     let savedDoc;
     let docError;
@@ -795,7 +795,8 @@ export class SupabaseAdapter {
         };
         
         // Update in IndexedDB
-        await this.indexedDB.saveDocument(updatedDoc);
+        const IndexedDBAdapter = (await import('./IndexedDBAdapter.js')).default;
+        await IndexedDBAdapter.saveDocument(updatedDoc);
         console.log('SupabaseAdapter: Updated document in IndexedDB to clear createdLocally flag');
       } catch (error) {
         console.error('Error updating document in IndexedDB:', error);

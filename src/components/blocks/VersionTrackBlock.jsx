@@ -231,7 +231,7 @@ const getLanguageFromFilename = (filename) => {
 
 export default function VersionTrackBlock({ block, onUpdate, isActive }) {
   // Debug flag - set to true to enable comprehensive logging
-  const DEBUG = true;
+  const DEBUG = false;
   const LOG_PREFIX = '🔵 VersionTrack:';
   
   // Log initial props

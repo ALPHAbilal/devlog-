@@ -372,7 +372,10 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
   const handleDragLeave = (e) => {
     // Only clear if leaving the entire block area
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+    if (e.relatedTarget && e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+      setDropTargetId(null);
+    } else if (!e.relatedTarget) {
+      // If relatedTarget is null (mouse left the document), clear the drop target
       setDropTargetId(null);
     }
   };

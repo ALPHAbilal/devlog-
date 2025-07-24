@@ -242,7 +242,11 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
 
   const handleDragLeave = (e) => {
     // Only clear if we're actually leaving the element
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+    if (e.relatedTarget && e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+      setDragOver(false);
+      setDragOverPosition(null);
+    } else if (!e.relatedTarget) {
+      // If relatedTarget is null (mouse left the document), clear the state
       setDragOver(false);
       setDragOverPosition(null);
     }
@@ -660,7 +664,11 @@ export default function FileTreeBlock({ block, onUpdate }) {
   };
 
   const handleRootDragLeave = (e) => {
-    if (!e.currentTarget.contains(e.relatedTarget)) {
+    if (e.relatedTarget && e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+      setRootDragOver(false);
+      setRootDropPosition(null);
+    } else if (!e.relatedTarget) {
+      // If relatedTarget is null (mouse left the document), clear the state
       setRootDragOver(false);
       setRootDropPosition(null);
     }

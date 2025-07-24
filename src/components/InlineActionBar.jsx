@@ -74,7 +74,7 @@ export default function InlineActionBar({
   
   const handleMouseLeave = useCallback((e) => {
     // Don't hide if moving to dropdown
-    if (e.relatedTarget && containerRef.current?.contains(e.relatedTarget)) {
+    if (e.relatedTarget && containerRef.current && containerRef.current.contains(e.relatedTarget)) {
       return;
     }
     

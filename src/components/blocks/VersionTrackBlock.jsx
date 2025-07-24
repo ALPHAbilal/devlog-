@@ -774,32 +774,36 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
       const isActive = branchName === selectedBranch;
       const lane = branchLanes[branchName] || 0;
-      const yPos = 40 + (lane * 50); // Match node positioning
+      const worldYPos = 40 + (lane * 50); // Y position in world coordinates
+      const screenYPos = (worldYPos * zoom) + pan.y; // Transform to screen coordinates
       
-      // Branch indicator line
-      ctx.strokeStyle = isActive ? branch.color.primary : branch.color.primary + '60';
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'square';
-      ctx.beginPath();
-      ctx.moveTo(16, yPos);
-      ctx.lineTo(40, yPos);
-      ctx.stroke();
-      
-      // Branch name with system font
-      ctx.fillStyle = isActive ? '#e5e7eb' : '#9ca3af'; // text-text-primary/secondary equivalents
-      ctx.font = `${isActive ? '600' : '400'} 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
-      ctx.textAlign = 'left';
-      ctx.fillText(branchName, 48, yPos + 4);
-      
-      // Draw lane guide line
-      ctx.strokeStyle = branch.color.primary + '20';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(150, yPos);
-      ctx.lineTo(rect.width - 20, yPos);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      // Only draw if visible
+      if (screenYPos >= -50 && screenYPos <= rect.height + 50) {
+        // Branch indicator line
+        ctx.strokeStyle = isActive ? branch.color.primary : branch.color.primary + '60';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'square';
+        ctx.beginPath();
+        ctx.moveTo(16, screenYPos);
+        ctx.lineTo(40, screenYPos);
+        ctx.stroke();
+        
+        // Branch name with system font
+        ctx.fillStyle = isActive ? '#e5e7eb' : '#9ca3af'; // text-text-primary/secondary equivalents
+        ctx.font = `${isActive ? '600' : '400'} 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.fillText(branchName, 48, screenYPos + 4);
+        
+        // Draw lane guide line
+        ctx.strokeStyle = branch.color.primary + '20';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(150, screenYPos);
+        ctx.lineTo(rect.width - 20, screenYPos);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
     });
   }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
 

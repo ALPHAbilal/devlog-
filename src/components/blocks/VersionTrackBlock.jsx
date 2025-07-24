@@ -553,12 +553,12 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.restore();
     
     // Draw branch lane backgrounds
-    const branchLanes = {};
+    const laneBgData = {};
     Object.values(repository.versions).forEach(version => {
       const pos = nodePositions[version.id];
       if (pos) {
-        if (!branchLanes[pos.lane]) {
-          branchLanes[pos.lane] = {
+        if (!laneBgData[pos.lane]) {
+          laneBgData[pos.lane] = {
             y: pos.y,
             branch: version.branch || 'main',
             color: repository.branches[version.branch || 'main']?.color || BRANCH_COLORS.main
@@ -569,7 +569,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     
     // Draw subtle lane backgrounds
     ctx.save();
-    Object.values(branchLanes).forEach(lane => {
+    Object.values(laneBgData).forEach(lane => {
       const isActiveBranch = lane.branch === selectedBranch;
       ctx.fillStyle = isActiveBranch ? `${lane.color.primary}08` : `${lane.color.primary}04`;
       ctx.fillRect(-1000, lane.y - 25, rect.width / zoom + 2000, 50);

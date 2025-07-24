@@ -24,42 +24,47 @@ export default function PricingSection() {
     {
       name: 'Personal',
       icon: <Users size={24} />,
-      description: 'For individual developers',
+      description: 'For developers preserving their coding journey',
       price: {
         monthly: 9,
         annual: 7
       },
       features: [
         { 
-          text: 'AI conversations saved forever', 
+          text: 'Never lose AI insights again', 
           included: true,
-          description: 'Before: That perfect ChatGPT solution vanishes. After: Every AI chat becomes searchable knowledge.'
+          description: 'Save every ChatGPT & Claude solution permanently. Find that React optimization from 3 months ago in seconds.',
+          jobStory: 'When my ChatGPT solutions disappear after closing the tab'
         },
         { 
-          text: 'Git-style version control for docs', 
+          text: 'Time travel through your knowledge', 
           included: true,
-          description: 'Before: "What did I change?" is a mystery. After: Visual timeline shows every edit with diffs.'
+          description: 'Git-style version control shows exactly when and why you made critical decisions.',
+          jobStory: 'When I can\'t explain past architecture choices'
         },
         { 
-          text: 'Works offline, syncs when ready', 
+          text: 'Works everywhere you do', 
           included: true,
-          description: 'Before: No internet = no work. After: Code on a plane, sync when you land.'
+          description: 'Code on planes, trains, anywhere. Everything syncs when you\'re back online.',
+          jobStory: 'When WiFi drops during critical work'
         },
         { 
-          text: 'Block-based developer workspace', 
+          text: 'Save 4 hours every week', 
           included: true,
-          description: 'Before: Copy-paste code into docs. After: Native code blocks with syntax highlighting.'
+          description: 'Stop hunting through Slack, browser history, and screenshots. Everything\'s in one searchable place.',
+          value: '$200+ monthly value'
         }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'primary',
       popular: false,
-      savingText: 'Save 22%'
+      savingText: 'Save 22%',
+      badge: 'Perfect for side projects'
     },
     {
       name: 'Professional',
       icon: <Building2 size={24} />,
-      description: 'For serious documentation',
+      description: 'For teams building shared knowledge',
       price: {
         monthly: 19,
         annual: 15
@@ -70,30 +75,36 @@ export default function PricingSection() {
           included: true
         },
         { 
-          text: 'Password-protected sharing', 
+          text: 'Turn your team into a knowledge powerhouse', 
           included: true,
-          description: 'Before: Screenshots in Slack get lost. After: Share secure links with expiry dates.'
+          description: 'Share documented solutions with secure links. Perfect for onboarding new devs 60% faster.',
+          jobStory: 'When knowledge is trapped in individual silos'
         },
         { 
-          text: 'Multi-branch documentation', 
+          text: 'Ship with confidence', 
           included: true,
-          description: 'Before: One messy doc for everything. After: Feature branches for experiments.'
+          description: 'Branch your docs like code. Test ideas without breaking main documentation.',
+          jobStory: 'When experimenting might break existing docs'
         },
         { 
-          text: 'Team collaboration (5 seats)', 
+          text: 'Capture $10K+ of team insights', 
           included: true,
-          description: 'Before: "What did John code yesterday?" After: See team progress in real-time.'
+          description: '5 team seats to preserve everyone\'s AI conversations and critical decisions.',
+          value: 'ROI in first month'
         },
         { 
-          text: 'Full data export & backups', 
+          text: 'No vendor lock-in', 
           included: true,
-          description: 'Before: Vendor lock-in anxiety. After: Export everything as JSON anytime.'
+          description: 'Export everything as JSON anytime. Your knowledge stays yours forever.',
+          jobStory: 'When switching tools means losing history'
         }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'secondary',
       popular: true,
-      savingText: 'Save 21%'
+      savingText: 'Save 21%',
+      badge: 'Most teams choose this',
+      upgradeReason: 'Need to share with your team?'
     }
   ];
 
@@ -137,10 +148,13 @@ export default function PricingSection() {
           transition={{ duration: 0.6 }}
         >
           <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
-            Simple Pricing, Powerful Features
+            Turn AI Conversations Into Permanent Team Knowledge
           </h3>
-          <p className="text-text-secondary text-base md:text-lg mb-6 md:mb-8">
-            Start free and upgrade as you grow. No hidden fees.
+          <p className="text-text-secondary text-base md:text-lg mb-2">
+            Don't lose another $100 ChatGPT solution. Capture every insight permanently.
+          </p>
+          <p className="text-accent-green text-sm mb-6 md:mb-8">
+            Join 10,000+ developers who save 4 hours every week
           </p>
 
           {/* Billing Toggle */}
@@ -265,6 +279,11 @@ export default function PricingSection() {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                  {plan.badge && (
+                    <div className="text-xs text-text-secondary mt-2">
+                      {plan.badge}
+                    </div>
+                  )}
                 </div>
 
                 <motion.button
@@ -289,6 +308,12 @@ export default function PricingSection() {
                   )}
                   <span className="relative z-10">{plan.cta}</span>
                 </motion.button>
+                
+                {plan.upgradeReason && (
+                  <p className="text-xs text-center text-accent-green mt-3">
+                    {plan.upgradeReason}
+                  </p>
+                )}
 
                 <div className="mt-4 md:mt-6 space-y-2 md:space-y-3">
                   {plan.features.map((feature, i) => (
@@ -312,6 +337,11 @@ export default function PricingSection() {
                               {feature.description}
                             </p>
                           )}
+                          {feature.value && (
+                            <p className="text-[10px] md:text-[11px] text-accent-green/80 mt-1 font-medium">
+                              = {feature.value}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -322,16 +352,35 @@ export default function PricingSection() {
           ))}
         </motion.div>
 
-        {/* FAQ or Additional Info */}
-        <div className="text-center">
+        {/* Trust Signals and Additional Info */}
+        <div className="text-center space-y-4">
+          <div className="flex items-center justify-center gap-4 text-sm text-text-secondary">
+            <span className="flex items-center gap-1">
+              <Check size={16} className="text-accent-green" />
+              14-day free trial
+            </span>
+            <span className="flex items-center gap-1">
+              <Check size={16} className="text-accent-green" />
+              No credit card
+            </span>
+            <span className="flex items-center gap-1">
+              <Check size={16} className="text-accent-green" />
+              Cancel anytime
+            </span>
+          </div>
+          
           <p className="text-text-secondary mb-4">
-            All plans include automatic backups, SSL encryption, and regular updates.
+            100% user-supported. No ads. Your data stays yours.
           </p>
+          
           <p className="text-sm text-text-secondary/70">
-            Questions? <a href="#" className="text-accent-green hover:underline">Check our FAQ</a> or{' '}
             <a href="mailto:support@devlog.app" className="text-accent-green hover:underline">
-              contact support
+              Get help in minutes
             </a>
+            {' '}or{' '}
+            <button className="text-accent-green hover:underline">
+              calculate your ROI
+            </button>
           </p>
         </div>
       </div>

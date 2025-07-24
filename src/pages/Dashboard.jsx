@@ -1163,7 +1163,7 @@ export default function Dashboard() {
                 <Menu size={20} className="text-text-primary" />
               </button>
               <LogoMinimal size={32} />
-              <h1 className="text-xl font-semibold text-text-primary select-none">Devlog</h1>
+              <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
             </div>
 
             {/* Stats and Profile - Moved from main content */}

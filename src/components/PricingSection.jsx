@@ -30,45 +30,45 @@ export default function PricingSection() {
         annual: 7
       },
       features: [
-        { text: 'Unlimited documents', included: true },
-        { text: '2 GB storage', included: true },
-        { text: '8 block types (Text, Code, AI, Table, Todo, Heading, File Tree, Version Track)', included: true },
-        { text: 'AI conversation preservation', included: true },
-        { text: 'Basic document sharing (7-day links)', included: true },
+        { text: '500 documents', included: true },
+        { text: '5 GB storage', included: true },
+        { text: '50 AI conversations/month', included: true },
+        { text: '30-day version history', included: true },
+        { text: '5 device sync', included: true },
+        { text: 'All 8 block types', included: true },
+        { text: 'Basic sharing (7-day links)', included: true },
         { text: 'Full-text search', included: true },
-        { text: 'Project & folder organization', included: true },
-        { text: 'Cloud sync with offline support', included: true },
-        { text: 'Auto-save with visual indicators', included: true },
+        { text: 'Offline support', included: true },
         { text: 'Email support', included: true }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'primary',
-      popular: true,
+      popular: false,
       savingText: 'Save 22%'
     },
     {
       name: 'Professional',
       icon: <Building2 size={24} />,
-      description: 'For power users & freelancers',
+      description: 'For power users & teams',
       price: {
         monthly: 19,
         annual: 15
       },
       features: [
-        { text: 'Everything in Personal', included: true },
-        { text: '10 GB storage', included: true },
-        { text: 'Advanced sharing (password, custom expiration, analytics)', included: true },
-        { text: 'Share analytics dashboard', included: true },
-        { text: 'Watermarked documents', included: true },
-        { text: 'Command palette (slash commands)', included: true },
-        { text: 'VS Code-style project explorer', included: true },
-        { text: 'Virtual scrolling for large documents', included: true },
-        { text: 'Mobile gestures (pull-to-refresh, swipe)', included: true },
-        { text: 'Priority support', included: true }
+        { text: 'Unlimited documents', included: true },
+        { text: '50 GB storage', included: true },
+        { text: 'Unlimited AI conversations', included: true },
+        { text: '1-year version history', included: true },
+        { text: 'Unlimited device sync', included: true },
+        { text: 'Advanced sharing with password & analytics', included: true },
+        { text: 'API access (10K calls/month)', included: true },
+        { text: 'Command palette & VS Code explorer', included: true },
+        { text: 'Export to multiple formats', included: true },
+        { text: 'Priority support & 99.9% uptime', included: true }
       ],
       cta: 'Start 14-Day Trial',
       ctaVariant: 'secondary',
-      popular: false,
+      popular: true,
       savingText: 'Save 21%'
     }
   ];

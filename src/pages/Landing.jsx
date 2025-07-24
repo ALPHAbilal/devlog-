@@ -2,7 +2,7 @@ import { useState, lazy, Suspense, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
-import { Code2, Link2, Shield, Zap, GitBranch, Search, ArrowRight, Menu, X } from 'lucide-react';
+import { Code2, Link2, Zap, GitBranch, Search, ArrowRight, Menu, X } from 'lucide-react';
 import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
 import HowItWorksSimple from '../components/HowItWorksSimple';
@@ -50,11 +50,6 @@ function LandingContent() {
       icon: <GitBranch className="text-accent-green" size={32} />,
       title: 'Never lose context',
       description: 'See how your code evolved and why you made those changes.'
-    },
-    {
-      icon: <Shield className="text-accent-green" size={32} />,
-      title: 'Zero data loss',
-      description: '6-layer protection system. Your knowledge is always safe.'
     }
   ];
 

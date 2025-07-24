@@ -472,18 +472,28 @@ export class SupabaseAdapter {
     let docError;
     
     if ((isNewDocumentForSave || isLocallyCreatedWithFolder) && hasFolderId) {
-      // Try to use atomic save for better reliability
-      let hasAtomicSave = true; // Assume it exists, will catch error if not
+      // First check if document already exists in database
+      const { data: existingDoc, error: checkError } = await supabase
+        .from('documents')
+        .select('id, created_at')
+        .eq('id', docData.id)
+        .eq('user_id', this.userId)
+        .maybeSingle();
       
-      if (hasAtomicSave && documentBlocks && documentBlocks.length > 0) {
-        // Use atomic save for new documents with blocks
-        console.log('SupabaseAdapter: Using atomic save for new document with blocks');
+      if (existingDoc) {
+        // Document already exists, update it instead
+        console.log('SupabaseAdapter: Document already exists in database, updating instead of creating');
+        isLocallyCreatedWithFolder = false; // Clear the flag
+        // Fall through to the regular update logic below
+      } else {
+        // Document doesn't exist, create it
+        console.log('SupabaseAdapter: Using security definer function for document creation with folder');
         
-        const { data, error } = await supabase.rpc('save_document_with_blocks_atomic', {
-          p_document_id: docData.id,
-          p_user_id: this.userId,
+        const { data, error } = await supabase.rpc('create_document_with_folder_check', {
+          p_id: docData.id,
           p_title: docData.title,
           p_folder_id: docData.folder_id,
+          p_preview: preview,
           p_tags: docData.tags || [],
           p_metadata: {
             ...(docData.metadata || {}),
@@ -491,53 +501,26 @@ export class SupabaseAdapter {
             blockCount: documentBlocks?.length || 0,
             syncStatus: 'synced',
             lastSyncedAt: new Date().toISOString(),
-            isNewDocument: false,
-            createdLocally: false
+            isNewDocument: false, // Clear the flag after first save
+            createdLocally: false // Clear this flag too
           },
-          p_blocks: documentBlocks
+          p_is_template: docData.isTemplate || false,
+          p_position: docData.position || 0
         });
         
-        if (!error && data?.success) {
-          // Document and blocks saved atomically
-          this.invalidateCache();
-          return docData.id;
-        } else if (error) {
-          console.error('Atomic save failed:', error);
-          // Fall back to regular flow
-        }
+        savedDoc = data;
+        docError = error;
       }
-      
-      // Use the security definer function for new documents with folders
-      console.log('SupabaseAdapter: Using security definer function for document creation with folder');
-      
-      const { data, error } = await supabase.rpc('create_document_with_folder_check', {
-        p_id: docData.id,
-        p_title: docData.title,
-        p_folder_id: docData.folder_id,
-        p_preview: preview,
-        p_tags: docData.tags || [],
-        p_metadata: {
-          ...(docData.metadata || {}),
-          preview: preview,
-          blockCount: documentBlocks?.length || 0,
-          syncStatus: 'synced',
-          lastSyncedAt: new Date().toISOString(),
-          isNewDocument: false, // Clear the flag after first save
-          createdLocally: false // Clear this flag too
-        },
-        p_is_template: docData.isTemplate || false,
-        p_position: docData.position || 0
-      });
-      
-      savedDoc = data;
-      docError = error;
       
       // Add a small delay to ensure transaction visibility
       if (!docError && documentBlocks && documentBlocks.length > 0) {
         console.log('SupabaseAdapter: Adding delay to ensure document visibility before saving blocks');
         await new Promise(resolve => setTimeout(resolve, 100));
       }
-    } else {
+    }
+    
+    // If we haven't saved the document yet (either it's not new with folder, or it already exists)
+    if (!savedDoc && !docError) {
       // Use regular upsert for updates or documents without folders
       const documentToSave = {
         id: docData.id,
@@ -794,6 +777,31 @@ export class SupabaseAdapter {
     
     // Invalidate cache after successful save
     this.invalidateCache();
+    
+    // Update the document in IndexedDB to clear the createdLocally flag
+    if (savedDoc && (docData.metadata?.createdLocally || docData.metadata?.isNewDocument)) {
+      try {
+        const updatedDoc = {
+          ...docData,
+          createdAt: savedDoc.created_at,
+          created_at: savedDoc.created_at,
+          metadata: {
+            ...(docData.metadata || {}),
+            createdLocally: false,
+            isNewDocument: false,
+            syncStatus: 'synced',
+            lastSyncedAt: new Date().toISOString()
+          }
+        };
+        
+        // Update in IndexedDB
+        await this.indexedDB.saveDocument(updatedDoc);
+        console.log('SupabaseAdapter: Updated document in IndexedDB to clear createdLocally flag');
+      } catch (error) {
+        console.error('Error updating document in IndexedDB:', error);
+        // Don't throw - the save to Supabase was successful
+      }
+    }
 
     return savedDoc.id;
   }

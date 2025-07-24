@@ -229,7 +229,7 @@ const getLanguageFromFilename = (filename) => {
   return languageMap[ext] || 'javascript';
 };
 
-export default function VersionTrackBlock({ block, updateBlock, isActive }) {
+export default function VersionTrackBlock({ block, onUpdate, isActive }) {
   // Debug flag - set to true to enable comprehensive logging
   const DEBUG = true;
   const LOG_PREFIX = '🔵 VersionTrack:';
@@ -241,7 +241,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     console.log('Block Type:', block?.type);
     console.log('Block Data:', block?.data);
     console.log('Has Repository:', !!block?.data?.repository);
-    console.log('UpdateBlock Function:', typeof updateBlock);
+    console.log('OnUpdate Function:', typeof onUpdate);
     console.log('IsActive:', isActive);
     console.groupEnd();
   }
@@ -366,10 +366,10 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       console.log('Timestamp:', new Date().toISOString());
       
       // Check critical props
-      if (!updateBlock) {
-        console.error('❌ CRITICAL: updateBlock prop is missing or undefined!');
+      if (!onUpdate) {
+        console.error('❌ CRITICAL: onUpdate prop is missing or undefined!');
       } else {
-        console.log('✅ updateBlock prop is available');
+        console.log('✅ onUpdate prop is available');
       }
       
       if (!block) {
@@ -403,7 +403,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       
       console.groupEnd();
     }
-  }, [updateBlock, block, repository, DEBUG]);
+  }, [onUpdate, block, repository, DEBUG]);
   
   // Update node positions when repository changes
   useEffect(() => {
@@ -428,7 +428,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     if (DEBUG) {
       console.group(`${LOG_PREFIX} Save Effect Triggered`);
       console.log('Timestamp:', new Date().toISOString());
-      console.log('UpdateBlock exists:', !!updateBlock);
+      console.log('OnUpdate exists:', !!onUpdate);
       console.log('Block ID:', block.id);
       console.log('Current block.data?.repository:', block.data?.repository);
       console.log('Current repository state:', repository);
@@ -443,11 +443,11 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       }
     }
     
-    if (updateBlock && block.data?.repository !== repository) {
+    if (onUpdate && block.data?.repository !== repository) {
       const blockToSave = { ...block, data: { ...block.data, repository } };
       
       if (DEBUG) {
-        console.log('🚀 Calling updateBlock with:', {
+        console.log('🚀 Calling onUpdate with:', {
           blockId: block.id,
           blockType: block.type,
           dataStructure: blockToSave,
@@ -457,21 +457,21 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
       }
       
       try {
-        updateBlock(block.id, blockToSave);
+        onUpdate(block.id, blockToSave);
         
         if (DEBUG) {
-          console.log('✅ updateBlock called successfully');
+          console.log('✅ onUpdate called successfully');
         }
       } catch (error) {
         if (DEBUG) {
-          console.error('❌ Error calling updateBlock:', error);
+          console.error('❌ Error calling onUpdate:', error);
           console.error('Error stack:', error.stack);
         }
       }
     } else {
       if (DEBUG) {
         console.log('⏭️ Skipping update:', {
-          hasUpdateBlock: !!updateBlock,
+          hasOnUpdate: !!onUpdate,
           isRepositorySame: block.data?.repository === repository
         });
       }
@@ -480,7 +480,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
     if (DEBUG) {
       console.groupEnd();
     }
-  }, [repository, block.id, updateBlock, block.data]);
+  }, [repository, block.id, onUpdate, block.data]);
 
   // Draw metro map visualization with enhanced graphics
   const drawMetroMap = useCallback(() => {
@@ -1222,7 +1222,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         ...repository,
         fileTree: newTree
       });
-      updateBlock(block.id, { ...block, data: { ...block.data, repository: { ...repository, fileTree: newTree } } });
+      onUpdate(block.id, { ...block, data: { ...block.data, repository: { ...repository, fileTree: newTree } } });
     }
     
     // Clear rename state
@@ -1257,7 +1257,7 @@ export default function VersionTrackBlock({ block, updateBlock, isActive }) {
         ...repository,
         fileTree: newTree
       });
-      updateBlock(block.id, { ...block, data: { ...block.data, repository: { ...repository, fileTree: newTree } } });
+      onUpdate(block.id, { ...block, data: { ...block.data, repository: { ...repository, fileTree: newTree } } });
     }
   };
 

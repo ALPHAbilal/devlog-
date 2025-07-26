@@ -125,8 +125,8 @@ const AuthDesktop = () => {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 h-full overflow-hidden auth-form-panel">
-        <div className="w-full max-w-sm sm:max-w-md auth-scale-in auth-form-wrapper">
+      <div className="auth-form-panel">
+        <div className="auth-form-wrapper auth-scale-in">
           {/* Mobile Logo - shown only on small screens */}
           <div className="auth-mobile-branding block xl:hidden">
             <div className="flex items-center justify-center gap-3 mb-2">

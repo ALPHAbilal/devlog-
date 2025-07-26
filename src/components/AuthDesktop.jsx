@@ -59,9 +59,9 @@ const AuthDesktop = () => {
   }, [])
 
   return (
-    <div className="h-screen bg-dark-primary flex overflow-hidden">
+    <div className="auth-page-wrapper bg-dark-primary">
       {/* Left Panel - Branding & Value Props */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] auth-desktop-left-panel bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary relative overflow-hidden">
+      <div className="auth-branding-panel hidden xl:flex xl:w-1/2 2xl:w-[55%] bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary relative overflow-hidden">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -128,11 +128,14 @@ const AuthDesktop = () => {
       <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 h-full overflow-hidden auth-form-panel">
         <div className="w-full max-w-sm sm:max-w-md auth-scale-in auth-form-wrapper">
           {/* Mobile Logo - shown only on small screens */}
-          <div className="lg:hidden flex justify-center mb-8">
-            <div className="flex items-center gap-3">
+          <div className="auth-mobile-branding block xl:hidden">
+            <div className="flex items-center justify-center gap-3 mb-2">
               <LogoMinimal size={40} />
               <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">Devlog</h1>
             </div>
+            <p className="text-base text-text-secondary text-center mb-6">
+              Where code becomes knowledge
+            </p>
           </div>
           
           {/* Minimal Form Header */}
@@ -398,7 +401,7 @@ const AuthDesktop = () => {
             `}</style>
 
             {/* Footer Links - Ultra compact */}
-            <div className="mt-4 pt-3 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/60 auth-footer-links">
+            <div className="auth-form-footer mt-4 pt-3 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/60">
               <p>
                 By continuing, you agree to our{' '}
                 <a href="/terms" className="text-accent-green/80 hover:text-accent-green">Terms</a>

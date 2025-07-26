@@ -1,5 +1,66 @@
 /* Auth Page - Medium Viewport Optimizations (1366px-1600px) */
 
+/* Viewport-aware container for proper height management */
+.auth-page-wrapper {
+  min-height: 100vh;
+  max-height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Content container with proper scrolling */
+.auth-content {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+}
+
+/* CRITICAL: Single-column layout for medium displays */
+@media (max-width: 1599px) {
+  /* Hide the left branding panel completely */
+  .auth-branding-panel {
+    display: none !important;
+  }
+  
+  /* Make form panel take full width and center content */
+  .auth-form-panel {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #0a1628 0%, #1a2332 100%);
+  }
+  
+  /* Center the form wrapper with constrained width */
+  .auth-form-wrapper {
+    width: 100%;
+    max-width: min(90vw, 440px);
+    margin: 0 auto;
+  }
+  
+  /* Show branding elements above form on medium displays */
+  .auth-mobile-branding {
+    display: block !important;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .auth-mobile-branding h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+  
+  .auth-mobile-branding p {
+    font-size: 1.125rem;
+    color: #9ca3af;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
 /* Target common laptop displays that have scaling issues */
 @media (min-width: 1280px) and (max-width: 1600px) {
   /* Reduce overall scaling for auth page */
@@ -183,21 +244,58 @@
   }
 }
 
-/* Fluid container sizing using clamp for smoother scaling */
-.auth-form-wrapper {
+/* Global height constraints for all viewports */
+.auth-page-wrapper {
+  position: relative;
   width: 100%;
-  max-width: clamp(24rem, 30vw, 28rem);
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
 }
 
-.auth-branding-content {
-  max-width: clamp(28rem, 40vw, 36rem);
+/* Ensure form never exceeds viewport */
+.auth-form-container {
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-/* Ensure proper focus states on medium displays */
-@media (min-width: 1280px) and (max-width: 1600px) {
-  .supabase-auth-ui_ui-button:focus-visible,
-  .supabase-auth-ui_ui-input:focus-visible {
-    outline-width: 2px !important;
-    outline-offset: 1px !important;
+/* Compact form elements for better fit */
+@media (max-width: 1599px) {
+  .supabase-auth-ui_ui-container {
+    gap: 0.75rem !important;
+  }
+  
+  .supabase-auth-ui_ui-button {
+    min-height: 42px !important;
+    font-size: 0.9375rem !important;
+  }
+  
+  .supabase-auth-ui_ui-input {
+    min-height: 42px !important;
+    font-size: 0.9375rem !important;
+  }
+  
+  .supabase-auth-ui_ui-divider {
+    margin: 1rem 0 !important;
+  }
+  
+  /* Hide footer on very constrained heights */
+  @media (max-height: 700px) {
+    .auth-form-footer {
+      display: none;
+    }
+  }
+}
+
+/* CSS Grid for better height distribution */
+@media (min-width: 1600px) {
+  .auth-page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  
+  .auth-branding-panel {
+    display: flex !important;
   }
 }

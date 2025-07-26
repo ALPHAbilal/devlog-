@@ -14,6 +14,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Global viewport fixes */
+@layer base {
+  /* Ensure HTML and body take full height */
+  html {
+    height: 100%;
+    overflow-x: hidden;
+  }
+  
+  body {
+    min-height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  /* Root app container */
+  #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Prevent horizontal scroll on all viewports */
+  * {
+    max-width: 100vw;
+  }
+}
+
 /* Fluid Typography System */
 @layer base {
   :root {

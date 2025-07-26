@@ -70,9 +70,11 @@ export function AuthProviderOptimized({ children }) {
     let mounted = true;
     const timerId = performanceMonitor.startTimer('auth:initialize');
 
-
     const initializeAuth = async () => {
       try {
+        // Add a small delay to ensure Supabase client is ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         // Get initial session with caching
         const { data: { session }, error } = await getSession();
         
@@ -80,6 +82,15 @@ export function AuthProviderOptimized({ children }) {
           if (error) {
             console.error('Session error:', error);
             setError(error.message);
+            // Try to refresh if we have a session error
+            if (error.message.includes('refresh_token') || error.message.includes('expired')) {
+              console.log('[AuthContext] Attempting to refresh expired session...');
+              const { data: refreshData, error: refreshError } = await optimizedSupabase.refreshSession();
+              if (!refreshError && refreshData?.session) {
+                setUser(refreshData.session.user);
+                setError(null);
+              }
+            }
           } else {
             setUser(session?.user ?? null);
           }

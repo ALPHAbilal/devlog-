@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { supabase, ensureAuthenticated } from '../../lib/supabaseOptimized';
 
 export class SupabaseAdapter {
   constructor() {
@@ -160,6 +160,14 @@ export class SupabaseAdapter {
   // Get documents list without blocks (for dashboard/list views)
   async getDocumentsList() {
     if (!this.initialized) await this.init();
+    
+    // Ensure authentication before querying
+    try {
+      await ensureAuthenticated();
+    } catch (authError) {
+      console.error('SupabaseAdapter: Authentication failed:', authError);
+      throw authError;
+    }
 
     const queryStart = performance.now();
     const { data: documents, error } = await supabase
@@ -196,6 +204,14 @@ export class SupabaseAdapter {
   async getDocuments() {
     if (!this.initialized) await this.init();
     console.log('SupabaseAdapter: getDocuments called');
+    
+    // Ensure authentication before querying
+    try {
+      await ensureAuthenticated();
+    } catch (authError) {
+      console.error('SupabaseAdapter: Authentication failed:', authError);
+      throw authError;
+    }
 
     // Check cache first
     const now = Date.now();

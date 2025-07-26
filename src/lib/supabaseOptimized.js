@@ -120,6 +120,18 @@ class OptimizedSupabaseClient {
    * Initialize auth state and listeners
    */
   async initializeAuth() {
+    // First, try to restore existing session
+    try {
+      const { data: { session }, error } = await this.client.auth.getSession();
+      if (session) {
+        console.log('[Supabase] Restored existing session:', session.user.id);
+      } else if (error) {
+        console.error('[Supabase] Error restoring session:', error);
+      }
+    } catch (err) {
+      console.error('[Supabase] Failed to restore session:', err);
+    }
+    
     const { data: { subscription } } = this.client.auth.onAuthStateChange(async (event, session) => {
       console.log(`[Supabase] Auth event: ${event}`);
       sessionMonitor.logActivity('auth_event', { event, hasSession: !!session });
@@ -364,6 +376,36 @@ export const getSession = () => optimizedSupabase.getSession();
 export const onAuthStateChange = (callback) => optimizedSupabase.onAuthStateChange(callback);
 export const deduplicateRequest = (key, fn) => optimizedSupabase.deduplicateRequest(key, fn);
 export const setInactivityTimeout = (minutes) => optimizedSupabase.setInactivityTimeout(minutes);
+
+// Helper to ensure authenticated session before operations
+export const ensureAuthenticated = async () => {
+  const { data: { session }, error } = await getSession();
+  
+  if (error) {
+    console.error('[Supabase] Auth check error:', error);
+    throw new Error('Authentication error: ' + error.message);
+  }
+  
+  if (!session) {
+    console.error('[Supabase] No active session');
+    throw new Error('No active session. Please sign in again.');
+  }
+  
+  // Check if session is about to expire (within 5 minutes)
+  const expiresAt = session.expires_at;
+  const now = Math.floor(Date.now() / 1000);
+  const timeUntilExpiry = expiresAt - now;
+  
+  if (timeUntilExpiry < 300) {
+    console.log('[Supabase] Session expiring soon, refreshing...');
+    const { error: refreshError } = await optimizedSupabase.refreshSession();
+    if (refreshError) {
+      throw new Error('Failed to refresh session: ' + refreshError.message);
+    }
+  }
+  
+  return session;
+};
 
 // Emergency helper to clear auth issues
 export const clearAuthIssues = () => {

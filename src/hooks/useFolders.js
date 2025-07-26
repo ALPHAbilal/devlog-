@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, ensureAuthenticated } from '../lib/supabaseOptimized';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { useToast } from './useToast';
 
@@ -29,6 +29,16 @@ export function useFolders() {
 
     try {
       setLoading(true);
+      
+      // Ensure we have a valid session before querying
+      try {
+        await ensureAuthenticated();
+      } catch (authError) {
+        console.error('Authentication required for folders:', authError);
+        toast.error('Please sign in to access your folders');
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('folders')
         .select('*')

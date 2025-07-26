@@ -1,4 +1,4 @@
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabaseOptimized';
 import { SupabaseAdapter } from './SupabaseAdapter';
 import IndexedDBAdapter from './IndexedDBAdapter';
 

@@ -763,17 +763,18 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     ctx.restore();
     
     // Draw branch labels aligned with their lanes
-    const branchLanes = {};
+    // Extract branch lanes from nodePositions
+    const branchToLane = {};
     Object.values(repository.versions).forEach(version => {
       const branch = version.branch || 'main';
       if (nodePositions[version.id]) {
-        branchLanes[branch] = nodePositions[version.id].lane;
+        branchToLane[branch] = nodePositions[version.id].lane;
       }
     });
     
     Object.entries(repository.branches).forEach(([branchName, branch]) => {
       const isActive = branchName === selectedBranch;
-      const lane = branchLanes[branchName] || 0;
+      const lane = branchToLane[branchName] || 0;
       const worldYPos = 40 + (lane * 50); // Y position in world coordinates
       const screenYPos = (worldYPos * zoom) + pan.y; // Transform to screen coordinates
       

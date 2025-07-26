@@ -35,7 +35,23 @@ export function useFolders() {
         .eq('user_id', user.id)
         .order('position', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Folders query error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          status: error.status
+        });
+        
+        // Handle 401 specifically
+        if (error.status === 401 || error.code === 'PGRST301') {
+          console.error('Authentication error when fetching folders. User ID:', user.id);
+          toast.error('Authentication error. Please refresh the page.');
+        }
+        
+        throw error;
+      }
 
       // Build tree structure
       const folderMap = new Map();

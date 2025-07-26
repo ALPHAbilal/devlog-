@@ -298,7 +298,7 @@ export function ShareDialogElite({ document, isOpen, onClose }) {
             <label className="block text-xs font-medium text-slate-400 uppercase tracking-wider">
               Share link
             </label>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <div className="relative flex-1 link-input-elite">
                 <Link2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
                 <input
@@ -306,7 +306,7 @@ export function ShareDialogElite({ document, isOpen, onClose }) {
                   type="text"
                   value={shareUrl}
                   readOnly
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-800/50 text-white rounded-xl
+                  className="w-full h-12 pl-12 pr-4 py-3 bg-slate-800/50 text-white rounded-xl
                            border border-slate-700/50 focus:border-blue-500/50
                            focus:ring-2 focus:ring-blue-500/20 transition-all duration-200
                            text-sm font-mono selection:bg-blue-500/30 placeholder-slate-600
@@ -323,7 +323,7 @@ export function ShareDialogElite({ document, isOpen, onClose }) {
                 ref={copyButtonRef}
                 onClick={handleCopy}
                 disabled={!shareUrl || loading}
-                className={`px-6 py-3.5 rounded-xl font-medium transition-all duration-200
+                className={`h-12 px-6 py-3 rounded-xl font-medium transition-all duration-200
                          flex items-center gap-2.5 relative overflow-hidden
                          copy-button-elite group ${
                   copied 
@@ -405,7 +405,7 @@ export function ShareDialogElite({ document, isOpen, onClose }) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter a secure password"
-                      className="w-full pl-12 pr-4 py-3.5 bg-slate-800/50 text-white rounded-xl
+                      className="w-full h-12 pl-12 pr-4 py-3 bg-slate-800/50 text-white rounded-xl
                                border border-slate-700/50 focus:border-blue-500/50
                                focus:ring-2 focus:ring-blue-500/20 transition-all duration-200
                                placeholder-slate-600 backdrop-blur-sm hover:bg-slate-800/70"
@@ -424,7 +424,7 @@ export function ShareDialogElite({ document, isOpen, onClose }) {
                     <select
                       value={expiresIn}
                       onChange={(e) => setExpiresIn(e.target.value)}
-                      className="w-full pl-12 pr-10 py-3.5 bg-slate-800/50 text-white rounded-xl
+                      className="w-full h-12 pl-12 pr-10 py-3 bg-slate-800/50 text-white rounded-xl
                                border border-slate-700/50 focus:border-blue-500/50
                                focus:ring-2 focus:ring-blue-500/20 transition-all duration-200
                                appearance-none cursor-pointer backdrop-blur-sm hover:bg-slate-800/70"
@@ -448,7 +448,7 @@ export function ShareDialogElite({ document, isOpen, onClose }) {
                 <button
                   onClick={handleUpdateShare}
                   disabled={isUpdating}
-                  className="w-full px-4 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600
+                  className="w-full h-12 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600
                            hover:from-blue-600 hover:to-blue-700 text-white
                            rounded-xl font-medium transition-all duration-200 shadow-lg
                            shadow-blue-500/25 hover:shadow-blue-500/40

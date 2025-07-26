@@ -65,6 +65,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        'mono': ['JetBrains Mono', 'SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'monospace'],
+      },
       // Fluid typography scale
       fontSize: {
         'xs-fluid': 'clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)',

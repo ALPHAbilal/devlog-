@@ -1,6 +1,10 @@
 /* Fluid Typography System - Enhanced for All Viewports */
 
 :root {
+  /* Font families with proper fallbacks */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  
   /* Viewport widths for calculations */
   --min-width: 320; /* Mobile min */
   --max-width: 2560; /* Ultra-wide max */
@@ -12,22 +16,22 @@
   
   /* Base font size - smoother scaling across all viewports */
   --step-0: clamp(
-    0.875rem,                    /* 14px minimum on mobile */
-    0.875rem + 0.5vw,           /* Fluid scaling */
+    1rem,                        /* 16px minimum for better readability */
+    0.95rem + 0.25vw,           /* Smoother fluid scaling */
     1.125rem                     /* 18px maximum on ultra-wide */
   );
   
   /* Heading sizes with optimized scaling for tablet/laptop ranges */
-  --step-1: clamp(1.125rem, 1rem + 0.625vw, 1.5rem);
-  --step-2: clamp(1.25rem, 1.125rem + 1vw, 2rem);
-  --step-3: clamp(1.5rem, 1.25rem + 1.5vw, 2.5rem);
-  --step-4: clamp(1.875rem, 1.5rem + 2vw, 3rem);
-  --step-5: clamp(2.25rem, 1.75rem + 2.5vw, 4rem);
-  --step-6: clamp(3rem, 2rem + 3vw, 5rem);
+  --step-1: clamp(1.125rem, 1.05rem + 0.375vw, 1.5rem);
+  --step-2: clamp(1.333rem, 1.2rem + 0.666vw, 1.875rem);
+  --step-3: clamp(1.777rem, 1.5rem + 1.385vw, 2.5rem);
+  --step-4: clamp(2.369rem, 1.8rem + 2.845vw, 3.333rem);
+  --step-5: clamp(3.157rem, 2.2rem + 4.785vw, 4.444rem);
+  --step-6: clamp(4.209rem, 2.5rem + 8.545vw, 5.926rem);
   
   /* Small text with minimal scaling */
-  --step--1: clamp(0.75rem, 0.75rem + 0.125vw, 0.875rem);
-  --step--2: clamp(0.625rem, 0.625rem + 0.0625vw, 0.75rem);
+  --step--1: clamp(0.833rem, 0.8rem + 0.165vw, 0.937rem);
+  --step--2: clamp(0.694rem, 0.68rem + 0.07vw, 0.781rem);
   
   /* Line heights based on golden ratio */
   --line-height-tight: 1.2;
@@ -61,40 +65,52 @@
 
 /* Apply fluid typography to base elements */
 body {
+  font-family: var(--font-sans);
   font-size: var(--step-0);
   line-height: var(--line-height-normal);
   letter-spacing: var(--letter-spacing-normal);
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11'; /* Inter's improved legibility features */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Headings with refined spacing */
 h1, .h1 {
+  font-family: var(--font-sans);
   font-size: var(--step-6);
+  font-weight: 800;
   line-height: var(--line-height-tight);
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: -0.03em;
   margin-top: 0;
   margin-bottom: var(--space-4);
 }
 
 h2, .h2 {
+  font-family: var(--font-sans);
   font-size: var(--step-5);
+  font-weight: 700;
   line-height: var(--line-height-tight);
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: -0.025em;
   margin-top: var(--space-6);
   margin-bottom: var(--space-3);
 }
 
 h3, .h3 {
+  font-family: var(--font-sans);
   font-size: var(--step-4);
+  font-weight: 600;
   line-height: calc(var(--line-height-tight) + 0.1);
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: -0.02em;
   margin-top: var(--space-5);
   margin-bottom: var(--space-2);
 }
 
 h4, .h4 {
+  font-family: var(--font-sans);
   font-size: var(--step-3);
+  font-weight: 600;
   line-height: calc(var(--line-height-tight) + 0.2);
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: -0.015em;
   margin-top: var(--space-4);
   margin-bottom: var(--space-2);
 }
@@ -177,4 +193,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* Code and monospace text */
+code, pre, kbd, samp, .font-mono {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 0.875em;
+  letter-spacing: 0;
+  font-feature-settings: 'calt' 1; /* Enable ligatures in JetBrains Mono */
 }

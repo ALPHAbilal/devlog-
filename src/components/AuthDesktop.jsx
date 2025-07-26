@@ -76,22 +76,22 @@ const AuthDesktop = () => {
         <div className="relative z-10 flex flex-col justify-center px-8 xl:px-12 w-full h-full">
           <div className="max-h-full flex flex-col justify-center auth-content-fade-in">
             {/* Logo & Title */}
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 mb-4">
               <LogoMinimal size={32} />
-              <h1 className="text-2xl font-bold text-text-primary">Devlog</h1>
+              <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">Devlog</h1>
             </div>
 
             {/* Tagline - single line */}
-            <h2 className="text-xl xl:text-2xl font-semibold text-text-primary mb-2">
-              Where code becomes <span className="text-accent-green">knowledge</span>
+            <h2 className="text-2xl xl:text-3xl font-bold text-text-primary mb-3 leading-tight">
+              Where code becomes <span className="text-accent-green font-extrabold">knowledge</span>
             </h2>
 
-            <p className="text-sm text-text-secondary mb-4 max-w-sm">
+            <p className="text-base lg:text-lg text-text-secondary mb-6 max-w-md font-medium leading-relaxed">
               Join 7,000+ developers. Never lose a solution again.
             </p>
 
             {/* Animated Code Snippets */}
-            <div className="space-y-1.5 mb-4 font-mono text-xs">
+            <div className="space-y-2 mb-6 font-mono text-sm">
               {codeSnippets.map((snippet) => (
                 <div
                   key={snippet.id}
@@ -113,8 +113,8 @@ const AuthDesktop = () => {
                     className="flex items-center gap-2 text-text-secondary text-xs auth-slide-in"
                     style={{ animationDelay: `${1.5 + index * 0.1}s` }}
                   >
-                    <div className="text-accent-green flex-shrink-0"><Icon size={16} /></div>
-                    <span>{feature.text}</span>
+                    <div className="text-accent-green flex-shrink-0"><Icon size={18} /></div>
+                    <span className="font-medium">{feature.text}</span>
                   </div>
                 )
               })}
@@ -124,17 +124,25 @@ const AuthDesktop = () => {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-4 lg:px-6 xl:px-8 h-full overflow-hidden">
-        <div className="w-full max-w-md auth-scale-in">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 h-full overflow-hidden">
+        <div className="w-full max-w-sm sm:max-w-md auth-scale-in">
+          {/* Mobile Logo - shown only on small screens */}
+          <div className="lg:hidden flex justify-center mb-8">
+            <div className="flex items-center gap-3">
+              <LogoMinimal size={40} />
+              <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">Devlog</h1>
+            </div>
+          </div>
+          
           {/* Minimal Form Header */}
-          <div className="text-center mb-3">
-            <h3 className="text-lg font-semibold text-text-primary">
+          <div className="text-center mb-6">
+            <h3 className="text-2xl font-bold text-text-primary tracking-tight">
               {authView === 'sign_in' ? 'Welcome back' : 'Get started'}
             </h3>
           </div>
 
           {/* Auth Form Container */}
-          <div className="backdrop-blur-xl rounded-xl p-4 border border-dark-secondary/50 shadow-2xl">
+          <div className="backdrop-blur-xl rounded-xl p-6 sm:p-8 border border-dark-secondary/50 shadow-2xl">
             <Auth
               supabaseClient={supabase}
               appearance={{
@@ -143,23 +151,23 @@ const AuthDesktop = () => {
                   button: {
                     borderRadius: '0.5rem',
                     fontWeight: '600',
-                    fontSize: '0.875rem',
-                    padding: '0.625rem',
+                    fontSize: '1rem',
+                    padding: '0.75rem 1rem',
                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   },
                   input: {
                     borderRadius: '0.5rem',
-                    fontSize: '0.875rem',
-                    padding: '0.625rem 0.875rem',
+                    fontSize: '1rem',
+                    padding: '0.875rem 1rem',
                     backgroundColor: 'rgba(10, 22, 40, 0.5)',
                     backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(75, 85, 99, 0.3)',
                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   },
                   label: {
-                    fontSize: '0.813rem',
-                    fontWeight: '500',
-                    marginBottom: '0.25rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '600',
+                    marginBottom: '0.375rem',
                     color: '#e5e7eb',
                   },
                   container: {
@@ -172,7 +180,7 @@ const AuthDesktop = () => {
                     fontSize: '0.875rem',
                     color: '#10b981',
                     textDecoration: 'none',
-                    fontWeight: '500',
+                    fontWeight: '600',
                   },
                 },
                 variables: {

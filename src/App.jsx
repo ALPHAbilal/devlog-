@@ -12,7 +12,7 @@ import Dashboard from './pages/Dashboard';
 import Settings from './pages/Settings';
 import SettingsMinimal from './pages/SettingsMinimal';
 import SettingsClaude from './pages/SettingsClaude';
-import AuthDesktop from './components/AuthDesktop';
+import AuthDesktopElite from './components/AuthDesktopElite';
 import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
@@ -103,7 +103,7 @@ function AppContent() {
     return (
       <SentryRoutes>
         <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<AuthDesktop />} />
+        <Route path="/auth" element={<AuthDesktopElite />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />

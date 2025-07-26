@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabaseOptimized'
 import { getURL } from '../utils/auth'
-import { motion } from 'framer-motion'
 import { 
   Code2, 
   Sparkles, 
@@ -14,25 +13,49 @@ import {
   FileCode,
   Braces,
   Database,
-  Link2
+  Link2,
+  Github,
+  Chrome,
+  ChevronRight,
+  ArrowRight
 } from 'lucide-react'
 import LogoMinimal from './LogoMinimal'
 
 const AuthDesktop = () => {
   const [authView, setAuthView] = useState('sign_in')
   const [isLoading, setIsLoading] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isHovering, setIsHovering] = useState(false)
+  const containerRef = useRef(null)
 
-  // Animated code snippets for background - reduced
+  // Animated code snippets for background
   const codeSnippets = [
-    { id: 1, text: 'const solution = await debug()', delay: 0 },
-    { id: 2, text: '[[Link]] your knowledge', delay: 0.5 },
+    { id: 1, text: 'const solution = await debug()', delay: 0, icon: Terminal },
+    { id: 2, text: '[[Link]] your knowledge', delay: 0.3, icon: Link2 },
+    { id: 3, text: 'git commit -m "fixed"', delay: 0.6, icon: GitBranch },
   ]
 
   const features = [
-    { icon: <Zap size={16} />, text: 'Instant capture' },
-    { icon: <Link2 size={16} />, text: 'Connected docs' },
-    { icon: <Shield size={16} />, text: 'Your data, safe' },
+    { icon: Zap, text: 'Instant capture', color: 'blue' },
+    { icon: Link2, text: 'Connected docs', color: 'purple' },
+    { icon: Shield, text: 'Your data, safe', color: 'emerald' },
   ]
+
+  // Mouse tracking for gradient effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        setMousePosition({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100
+        })
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
 
   return (
     <div className="h-screen bg-dark-primary flex overflow-hidden">

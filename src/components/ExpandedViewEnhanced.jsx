@@ -11,7 +11,7 @@ import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
-import { ShareDialogSimple } from './ShareDialogSimple';
+import { ShareDialogPro } from './ShareDialogPro';
 import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
@@ -1202,7 +1202,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
       {/* Share Dialog */}
       {showShareDialog && (
-        <ShareDialogSimple 
+        <ShareDialogPro 
           document={{
             id: entry.id,
             title: title,

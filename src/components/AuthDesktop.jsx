@@ -74,12 +74,7 @@ const AuthDesktop = () => {
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-8 xl:px-12 w-full h-full">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="max-h-full flex flex-col justify-center"
-          >
+          <div className="max-h-full flex flex-col justify-center auth-content-fade-in">
             {/* Logo & Title */}
             <div className="flex items-center gap-2 mb-3">
               <LogoMinimal size={32} />
@@ -98,45 +93,39 @@ const AuthDesktop = () => {
             {/* Animated Code Snippets */}
             <div className="space-y-1.5 mb-4 font-mono text-xs">
               {codeSnippets.map((snippet) => (
-                <motion.div
+                <div
                   key={snippet.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: snippet.delay, duration: 0.5 }}
-                  className="text-text-secondary/70"
+                  className="text-text-secondary/70 auth-slide-in"
+                  style={{ animationDelay: `${snippet.delay}s` }}
                 >
                   <span className="text-accent-green">$</span> {snippet.text}
-                </motion.div>
+                </div>
               ))}
             </div>
 
             {/* Feature List - Compact */}
             <div className="flex flex-wrap gap-x-6 gap-y-2">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 1.5 + index * 0.1, duration: 0.5 }}
-                  className="flex items-center gap-2 text-text-secondary text-xs"
-                >
-                  <div className="text-accent-green flex-shrink-0">{feature.icon}</div>
-                  <span>{feature.text}</span>
-                </motion.div>
-              ))}
+              {features.map((feature, index) => {
+                const Icon = feature.icon
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center gap-2 text-text-secondary text-xs auth-slide-in"
+                    style={{ animationDelay: `${1.5 + index * 0.1}s` }}
+                  >
+                    <div className="text-accent-green flex-shrink-0"><Icon size={16} /></div>
+                    <span>{feature.text}</span>
+                  </div>
+                )
+              })}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {/* Right Panel - Auth Form */}
       <div className="flex-1 flex items-center justify-center px-4 lg:px-6 xl:px-8 h-full overflow-hidden">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md"
-        >
+        <div className="w-full max-w-md auth-scale-in">
           {/* Minimal Form Header */}
           <div className="text-center mb-3">
             <h3 className="text-lg font-semibold text-text-primary">
@@ -351,6 +340,52 @@ const AuthDesktop = () => {
                 color: #f87171;
                 backdrop-filter: blur(8px);
               }
+              
+              /* CSS Animations for removed motion elements */
+              .auth-content-fade-in {
+                animation: authFadeInUp 0.8s ease-out;
+              }
+              
+              .auth-slide-in {
+                animation: authSlideIn 0.5s ease-out both;
+              }
+              
+              .auth-scale-in {
+                animation: authScaleIn 0.5s ease-out;
+              }
+              
+              @keyframes authFadeInUp {
+                from {
+                  opacity: 0;
+                  transform: translateY(20px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateY(0);
+                }
+              }
+              
+              @keyframes authSlideIn {
+                from {
+                  opacity: 0;
+                  transform: translateX(-20px);
+                }
+                to {
+                  opacity: 1;
+                  transform: translateX(0);
+                }
+              }
+              
+              @keyframes authScaleIn {
+                from {
+                  opacity: 0;
+                  transform: scale(0.95);
+                }
+                to {
+                  opacity: 1;
+                  transform: scale(1);
+                }
+              }
             `}</style>
 
             {/* Footer Links - Ultra compact */}
@@ -363,7 +398,7 @@ const AuthDesktop = () => {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

@@ -3,15 +3,18 @@
   <!-- Core Pages Sitemap -->
   <sitemap>
     <loc>https://www.devlog.design/sitemap-core.xml</loc>
+    <lastmod>2025-07-21T00:00:00+00:00</lastmod>
   </sitemap>
   
   <!-- Features Pages Sitemap -->
   <sitemap>
     <loc>https://www.devlog.design/sitemap-features.xml</loc>
+    <lastmod>2025-07-21T00:00:00+00:00</lastmod>
   </sitemap>
   
   <!-- Legal Pages Sitemap -->
   <sitemap>
     <loc>https://www.devlog.design/sitemap-legal.xml</loc>
+    <lastmod>2025-07-21T00:00:00+00:00</lastmod>
   </sitemap>
 </sitemapindex>

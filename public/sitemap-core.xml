@@ -3,6 +3,7 @@
   <!-- Main Landing Page -->
   <url>
     <loc>https://www.devlog.design/</loc>
-    <lastmod>2025-07-21T00:00:00+00:00</lastmod>
+    <priority>1.0</priority>
+    <changefreq>weekly</changefreq>
   </url>
 </urlset>

@@ -1102,8 +1102,8 @@ export default function Dashboard() {
               const docId = document.id || document;
               if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
                 await deleteEntry(docId);
-                // Update local state immediately
-                setEntries(prev => prev.filter(entry => entry.id !== docId));
+                // Refresh the entries list
+                await loadEntries();
                 toast.success('Document deleted successfully');
               }
             }}
@@ -1296,8 +1296,8 @@ export default function Dashboard() {
             const docId = document.id || document;
             if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
               await deleteEntry(docId);
-              // Update local state immediately
-              setEntries(prev => prev.filter(entry => entry.id !== docId));
+              // Refresh the entries list
+              await loadEntries();
               toast.success('Document deleted successfully');
             }
           }}

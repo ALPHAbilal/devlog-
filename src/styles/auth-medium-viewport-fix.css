@@ -1,0 +1,203 @@
+/* Auth Page - Medium Viewport Optimizations (1366px-1600px) */
+
+/* Target common laptop displays that have scaling issues */
+@media (min-width: 1280px) and (max-width: 1600px) {
+  /* Reduce overall scaling for auth page */
+  .auth-page-wrapper {
+    font-size: 0.9rem;
+  }
+
+  /* Left branding panel adjustments */
+  .auth-branding-panel {
+    max-width: 600px;
+    padding: 2rem !important;
+  }
+
+  /* Tighter typography for medium screens */
+  .auth-branding-panel h1 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+  }
+
+  .auth-branding-panel h2 {
+    font-size: clamp(1.25rem, 2vw, 1.75rem) !important;
+    line-height: 1.3 !important;
+  }
+
+  .auth-branding-panel p {
+    font-size: clamp(0.875rem, 1.2vw, 1rem) !important;
+    max-width: 400px;
+  }
+
+  /* Code snippets - smaller on medium displays */
+  .auth-code-snippets {
+    font-size: clamp(0.75rem, 1vw, 0.875rem) !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  .auth-code-snippets > div {
+    padding: 0.125rem 0;
+  }
+
+  /* Feature list - more compact */
+  .auth-features {
+    gap: 0.75rem 1.5rem !important;
+    font-size: clamp(0.75rem, 1vw, 0.875rem) !important;
+  }
+
+  .auth-features svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+
+  /* Auth form panel adjustments */
+  .auth-form-panel {
+    padding: 1rem 1.5rem !important;
+  }
+
+  .auth-form-wrapper {
+    max-width: 400px !important;
+  }
+
+  /* Form container - reduced padding */
+  .auth-form-container {
+    padding: 1.5rem !important;
+  }
+
+  /* Form header */
+  .auth-form-header h3 {
+    font-size: clamp(1.25rem, 2vw, 1.75rem) !important;
+    margin-bottom: 1.5rem !important;
+  }
+
+  /* Mobile logo (if shown) */
+  .auth-mobile-logo h1 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem) !important;
+  }
+}
+
+/* Specific breakpoint optimizations */
+
+/* 1366x768 - Common laptop resolution */
+@media (min-width: 1366px) and (max-width: 1440px) {
+  .auth-branding-panel {
+    flex: 0 0 45% !important;
+    max-width: 45% !important;
+  }
+
+  /* Reduce gradient orb sizes */
+  .auth-gradient-orb-1,
+  .auth-gradient-orb-2 {
+    width: 20rem !important;
+    height: 20rem !important;
+    filter: blur(2rem) !important;
+  }
+}
+
+/* 1440x900 - Another common resolution */
+@media (min-width: 1440px) and (max-width: 1536px) {
+  .auth-branding-panel {
+    flex: 0 0 48% !important;
+    max-width: 48% !important;
+  }
+}
+
+/* Height-based adjustments for medium displays */
+@media (min-height: 700px) and (max-height: 900px) {
+  /* Reduce vertical spacing */
+  .auth-page-wrapper {
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .auth-branding-content {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  .auth-form-wrapper {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+
+  /* Reduce form element heights */
+  .supabase-auth-ui_ui-button {
+    min-height: 40px !important;
+    padding: 0.625rem 1rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .supabase-auth-ui_ui-input {
+    min-height: 40px !important;
+    padding: 0.625rem 0.875rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .supabase-auth-ui_ui-label {
+    font-size: 0.813rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .supabase-auth-ui_ui-divider {
+    margin: 0.75rem 0 !important;
+  }
+}
+
+/* Ultra-compact mode for smaller medium displays */
+@media (max-width: 1400px) and (max-height: 800px) {
+  /* Hide decorative elements on space-constrained screens */
+  .auth-pattern-bg {
+    opacity: 0.02 !important;
+  }
+
+  /* Reduce all spacing by 25% */
+  .auth-branding-panel,
+  .auth-form-panel {
+    --spacing-multiplier: 0.75;
+  }
+
+  /* Smaller animations */
+  .auth-content-fade-in {
+    animation-duration: 0.5s !important;
+  }
+
+  .auth-slide-in {
+    animation-duration: 0.3s !important;
+  }
+
+  .auth-scale-in {
+    animation-duration: 0.3s !important;
+  }
+}
+
+/* High DPI displays (Retina) - ensure crisp rendering */
+@media (min-width: 1280px) and (max-width: 1600px) and (-webkit-min-device-pixel-ratio: 2) {
+  /* Sharper text rendering */
+  .auth-page-wrapper {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+
+  /* Thinner borders for high DPI */
+  .auth-form-container {
+    border-width: 0.5px !important;
+  }
+}
+
+/* Fluid container sizing using clamp for smoother scaling */
+.auth-form-wrapper {
+  width: 100%;
+  max-width: clamp(24rem, 30vw, 28rem);
+}
+
+.auth-branding-content {
+  max-width: clamp(28rem, 40vw, 36rem);
+}
+
+/* Ensure proper focus states on medium displays */
+@media (min-width: 1280px) and (max-width: 1600px) {
+  .supabase-auth-ui_ui-button:focus-visible,
+  .supabase-auth-ui_ui-input:focus-visible {
+    outline-width: 2px !important;
+    outline-offset: 1px !important;
+  }
+}

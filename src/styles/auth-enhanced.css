@@ -265,10 +265,28 @@
   }
 }
 
-/* Small laptops (1024px - 1439px) */
-@media (min-width: 1024px) and (max-width: 1439px) {
+/* Small laptops (1024px - 1365px) */
+@media (min-width: 1024px) and (max-width: 1365px) {
   .auth-form-container {
-    max-width: 36rem;
+    max-width: 32rem;
+  }
+}
+
+/* Medium laptops (1366px - 1439px) */
+@media (min-width: 1366px) and (max-width: 1439px) {
+  .auth-form-container {
+    max-width: 34rem;
+  }
+  
+  /* Reduce button and input sizes */
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-button {
+    font-size: 0.875rem !important;
+    padding: 0.625rem 1rem !important;
+  }
+  
+  .auth-enhanced-wrapper .supabase-auth-ui_ui-input {
+    font-size: 0.875rem !important;
+    padding: 0.625rem 0.875rem !important;
   }
 }
 

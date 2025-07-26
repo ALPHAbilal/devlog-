@@ -20,6 +20,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import LogoMinimal from './LogoMinimal'
+import '../styles/auth-medium-viewport-fix.css'
 
 const AuthDesktop = () => {
   const [authView, setAuthView] = useState('sign_in')
@@ -60,7 +61,7 @@ const AuthDesktop = () => {
   return (
     <div className="h-screen bg-dark-primary flex overflow-hidden">
       {/* Left Panel - Branding & Value Props */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] auth-desktop-left-panel bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary relative overflow-hidden">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -69,12 +70,12 @@ const AuthDesktop = () => {
         </div>
 
         {/* Gradient Orbs */}
-        <div className="absolute top-20 left-20 w-96 h-96 bg-accent-green/20 rounded-full filter blur-3xl" />
-        <div className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full filter blur-3xl" />
+        <div className="absolute top-20 left-20 w-96 h-96 auth-gradient-orb bg-accent-green/20 rounded-full filter blur-3xl" />
+        <div className="absolute bottom-20 right-20 w-96 h-96 auth-gradient-orb bg-blue-500/10 rounded-full filter blur-3xl" />
 
         {/* Content */}
         <div className="relative z-10 flex flex-col justify-center px-8 xl:px-12 w-full h-full">
-          <div className="max-h-full flex flex-col justify-center auth-content-fade-in">
+          <div className="max-h-full flex flex-col justify-center auth-content-fade-in auth-desktop-content">
             {/* Logo & Title */}
             <div className="flex items-center gap-2 mb-4">
               <LogoMinimal size={32} />
@@ -124,8 +125,8 @@ const AuthDesktop = () => {
       </div>
 
       {/* Right Panel - Auth Form */}
-      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 h-full overflow-hidden">
-        <div className="w-full max-w-sm sm:max-w-md auth-scale-in">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 xl:px-12 h-full overflow-hidden auth-form-panel">
+        <div className="w-full max-w-sm sm:max-w-md auth-scale-in auth-form-wrapper">
           {/* Mobile Logo - shown only on small screens */}
           <div className="lg:hidden flex justify-center mb-8">
             <div className="flex items-center gap-3">
@@ -135,7 +136,7 @@ const AuthDesktop = () => {
           </div>
           
           {/* Minimal Form Header */}
-          <div className="text-center mb-6">
+          <div className="text-center mb-6 auth-form-header">
             <h3 className="text-2xl font-bold text-text-primary tracking-tight">
               {authView === 'sign_in' ? 'Welcome back' : 'Get started'}
             </h3>
@@ -151,14 +152,14 @@ const AuthDesktop = () => {
                   button: {
                     borderRadius: '0.5rem',
                     fontWeight: '600',
-                    fontSize: '1rem',
-                    padding: '0.75rem 1rem',
+                    fontSize: 'clamp(0.875rem, 1vw, 1rem)',
+                    padding: 'clamp(0.625rem, 0.8vw, 0.75rem) clamp(0.875rem, 1vw, 1rem)',
                     transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   },
                   input: {
                     borderRadius: '0.5rem',
-                    fontSize: '1rem',
-                    padding: '0.875rem 1rem',
+                    fontSize: 'clamp(0.875rem, 1vw, 1rem)',
+                    padding: 'clamp(0.75rem, 0.9vw, 0.875rem) clamp(0.875rem, 1vw, 1rem)',
                     backgroundColor: 'rgba(10, 22, 40, 0.5)',
                     backdropFilter: 'blur(8px)',
                     border: '1px solid rgba(75, 85, 99, 0.3)',
@@ -397,7 +398,7 @@ const AuthDesktop = () => {
             `}</style>
 
             {/* Footer Links - Ultra compact */}
-            <div className="mt-4 pt-3 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/60">
+            <div className="mt-4 pt-3 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/60 auth-footer-links">
               <p>
                 By continuing, you agree to our{' '}
                 <a href="/terms" className="text-accent-green/80 hover:text-accent-green">Terms</a>

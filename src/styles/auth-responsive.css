@@ -81,9 +81,9 @@
    Base Layout - No Scroll Foundation
    ===================================================== */
 
-/* Desktop Logo Header - Hidden on mobile */
-.auth-logo-header {
-  display: none;
+/* Desktop Brand Mark - Professional placement */
+.auth-brand-mark {
+  display: none; /* Hidden on mobile by default */
 }
 
 .auth-page-wrapper {
@@ -158,10 +158,11 @@
 }
 
 .auth-logo-text {
-  font-size: var(--font-size-2xl);
+  font-size: 1.75rem;
   font-weight: 800;
   color: var(--auth-text-primary);
   margin: 0;
+  letter-spacing: -0.025em;
 }
 
 .auth-mobile-tagline {
@@ -369,34 +370,40 @@
    Desktop Breakpoint (1024px+) - Two Column Layout
    ===================================================== */
 @media (min-width: 1024px) {
-  /* Desktop Logo Header */
-  .auth-logo-header {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 60px;
-    background: rgba(10, 22, 40, 0.8);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(75, 85, 99, 0.2);
-    z-index: 100;
-    animation: fadeInDown 0.6s ease-out;
-  }
-  
-  .auth-logo-header-content {
+  /* Desktop Brand Mark - Inside form */
+  .auth-brand-mark {
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    height: 100%;
-    padding: 0 2rem;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeInDown 0.6s ease-out forwards;
+    position: relative;
   }
   
-  .auth-logo-header-text {
-    font-size: 1.25rem;
+  .auth-brand-text {
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--auth-text-primary);
-    letter-spacing: -0.025em;
+    letter-spacing: -0.02em;
+  }
+  
+  /* Subtle brand accent */
+  .auth-brand-mark::after {
+    content: '';
+    position: absolute;
+    bottom: -1rem;
+    left: 0;
+    width: 2rem;
+    height: 2px;
+    background: var(--auth-accent);
+    opacity: 0.5;
+    animation: expandWidth 0.8s ease-out 0.3s forwards;
+  }
+  
+  @keyframes expandWidth {
+    from { width: 0; }
+    to { width: 2rem; }
   }
   
   .auth-page-wrapper {

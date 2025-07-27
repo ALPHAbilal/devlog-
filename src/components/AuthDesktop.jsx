@@ -31,14 +31,6 @@ const AuthDesktop = () => {
 
   return (
     <>
-      {/* Desktop Logo Header - Professional placement */}
-      <div className="auth-logo-header">
-        <div className="auth-logo-header-content">
-          <LogoMinimal size={24} />
-          <span className="auth-logo-header-text">Devlog</span>
-        </div>
-      </div>
-      
       <div className="auth-page-wrapper" ref={authPageRef}>
         {/* Branding Panel */}
         <div className="auth-branding-panel" ref={brandingPanelRef}>
@@ -89,10 +81,16 @@ const AuthDesktop = () => {
       <div className="auth-form-panel" ref={formPanelRef}>
         <div className="auth-form-scaling-wrapper">
           <div className="auth-form-container" ref={formContainerRef}>
+          {/* Desktop Logo - Professional placement */}
+          <div className="auth-brand-mark">
+            <LogoMinimal size={32} />
+            <span className="auth-brand-text">Devlog</span>
+          </div>
+          
           {/* Mobile Branding */}
           <div className="auth-mobile-branding">
             <div className="auth-logo-group">
-              <LogoMinimal size={40} />
+              <LogoMinimal size={48} />
               <h1 className="auth-logo-text">Devlog</h1>
             </div>
             <p className="auth-mobile-tagline">

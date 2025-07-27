@@ -1,12 +1,12 @@
-/* Problem Cards - Premium UI Design */
+/* Problem Cards - Premium UI Design (Optimized) */
 
 /* CSS Variables for dynamic effects */
 :root {
-  /* Gradient color sets */
-  --gradient-red: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%);
-  --gradient-orange: linear-gradient(135deg, #fb923c 0%, #f97316 50%, #ea580c 100%);
-  --gradient-yellow: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
-  --gradient-purple: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #6d28d9 100%);
+  /* Gradient color sets - simplified to 2 stops */
+  --gradient-red: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  --gradient-orange: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
+  --gradient-yellow: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+  --gradient-purple: linear-gradient(135deg, #9333ea 0%, #6d28d9 100%);
   
   /* Glow colors */
   --glow-red: rgba(239, 68, 68, 0.4);
@@ -14,19 +14,16 @@
   --glow-yellow: rgba(251, 191, 36, 0.4);
   --glow-purple: rgba(147, 51, 234, 0.4);
   
-  /* Shadow depths */
-  --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.12);
-  --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 10px 15px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 20px 25px rgba(0, 0, 0, 0.25);
-  --shadow-xl: 0 25px 50px rgba(0, 0, 0, 0.3);
+  /* Shadow depths - reusable */
+  --card-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12), 0 16px 64px rgba(0, 0, 0, 0.16);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.18), 0 32px 96px rgba(0, 0, 0, 0.24);
 }
 
 /* Card Wrapper for 3D perspective */
 .problem-card-wrapper {
   position: relative;
-  perspective: 1000px;
-  transform-style: preserve-3d;
+  contain: layout style paint;
+  content-visibility: auto;
 }
 
 /* Gradient Orbs - Background elements */
@@ -35,9 +32,11 @@
   border-radius: 50%;
   filter: blur(60px);
   opacity: 0;
-  animation: orbFloat 8s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
+  will-change: opacity;
+  transform: translateZ(0);
+  contain: strict;
 }
 
 .gradient-orb-red {
@@ -74,7 +73,6 @@
 
 .problem-card-wrapper:hover .gradient-orb {
   opacity: 0.3;
-  animation: orbPulse 4s ease-in-out infinite;
 }
 
 /* Main Card Container */
@@ -85,65 +83,38 @@
   border-radius: 20px;
   padding: 32px;
   overflow: hidden;
-  transform-style: preserve-3d;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform;
   z-index: 1;
-  
-  /* Multi-layer shadow for depth */
-  box-shadow: 
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 16px 64px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--card-shadow-base);
+  transform: translate3d(0, 0, 0);
 }
 
 .problem-card:hover {
-  transform: translateZ(20px);
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.06),
-    0 8px 24px rgba(0, 0, 0, 0.12),
-    0 16px 48px rgba(0, 0, 0, 0.18),
-    0 32px 96px rgba(0, 0, 0, 0.24);
+  transform: translate3d(0, -4px, 0);
+  box-shadow: var(--card-shadow-hover);
 }
 
-/* Card Glow Effect */
+/* Card Glow Effect - Disabled for performance */
 .card-glow {
-  position: absolute;
-  inset: -2px;
-  border-radius: 20px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    var(--glow-color),
-    transparent 50%
-  );
+  display: none;
 }
 
-.card-glow-red { --glow-color: var(--glow-red); }
-.card-glow-orange { --glow-color: var(--glow-orange); }
-.card-glow-yellow { --glow-color: var(--glow-yellow); }
-.card-glow-purple { --glow-color: var(--glow-purple); }
+/* Glow effects removed for performance */
 
-.problem-card:hover .card-glow {
-  opacity: 0.6;
-}
-
-/* Animated Gradient Border */
+/* Animated Gradient Border - Simplified */
 .card-border-gradient {
   position: absolute;
   inset: -1px;
   border-radius: 20px;
   padding: 1px;
   background: linear-gradient(90deg, transparent, var(--border-color), transparent);
-  background-size: 200% 100%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0.5;
   transition: opacity 0.4s ease;
+  transform: translateZ(0);
 }
 
 .card-border-gradient-red { --border-color: #ef4444; }
@@ -153,12 +124,6 @@
 
 .card-border-gradient-animated {
   opacity: 1;
-  animation: borderRotate 3s linear infinite;
-}
-
-@keyframes borderRotate {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
 }
 
 /* Card Content */
@@ -177,33 +142,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   flex-shrink: 0;
+  transform: translate3d(0, 0, 0);
 }
 
 .problem-card:hover .icon-wrapper {
   background: rgba(10, 22, 40, 0.9);
-  transform: translateY(-4px) scale(1.1);
+  transform: translate3d(0, -4px, 0) scale(1.1);
 }
 
-/* Icon Glow */
+/* Icon Glow - Disabled for performance */
 .icon-glow {
-  position: absolute;
-  inset: -8px;
-  border-radius: 20px;
-  opacity: 0;
-  filter: blur(12px);
-  transition: opacity 0.4s ease;
-}
-
-.icon-glow-red { background: var(--gradient-red); }
-.icon-glow-orange { background: var(--gradient-orange); }
-.icon-glow-yellow { background: var(--gradient-yellow); }
-.icon-glow-purple { background: var(--gradient-purple); }
-
-.problem-card:hover .icon-glow {
-  opacity: 0.5;
-  animation: iconPulse 2s ease-in-out infinite;
+  display: none;
 }
 
 /* Text Content */
@@ -230,17 +181,19 @@
   color: #b8bdc6;
 }
 
-/* Progress Indicator */
+/* Progress Indicator - Optimized */
 .card-indicator {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, transparent, var(--indicator-color), transparent);
+  background: var(--indicator-color);
   transform: scaleX(0);
   transform-origin: left;
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+  contain: strict;
 }
 
 .card-indicator-red { --indicator-color: #ef4444; }
@@ -252,33 +205,12 @@
   transform: scaleX(1);
 }
 
-/* Noise Texture Overlay */
+/* Noise Texture Overlay - Disabled for performance */
 .card-noise {
-  position: absolute;
-  inset: 0;
-  border-radius: 20px;
-  opacity: 0.03;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 3;
+  display: none;
 }
 
-/* Animations */
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
-}
-
-@keyframes orbPulse {
-  0%, 100% { transform: scale(1); filter: blur(60px); }
-  50% { transform: scale(1.2); filter: blur(80px); }
-}
-
-@keyframes iconPulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-}
+/* Animations removed for performance */
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -292,8 +224,7 @@
   }
   
   .gradient-orb {
-    width: 150px !important;
-    height: 150px !important;
+    display: none; /* Hide orbs on mobile */
   }
   
   .text-content h3 {
@@ -308,8 +239,6 @@
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .gradient-orb,
-  .card-glow,
-  .icon-glow,
   .card-indicator {
     animation: none !important;
   }
@@ -317,5 +246,19 @@
   .problem-card,
   .icon-wrapper {
     transition: none !important;
+  }
+}
+
+/* Progressive Enhancement */
+@supports (backdrop-filter: blur(20px)) {
+  .problem-card {
+    background: rgba(26, 35, 50, 0.4);
+    backdrop-filter: blur(20px) saturate(150%);
+  }
+}
+
+@supports not (backdrop-filter: blur(20px)) {
+  .problem-card {
+    background: rgba(26, 35, 50, 0.95);
   }
 }

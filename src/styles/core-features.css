@@ -1,12 +1,12 @@
-/* Core Features - Premium Visual Design */
+/* Core Features - Premium Visual Design (Optimized) */
 
 /* CSS Variables for feature cards */
 :root {
-  /* Gradient sets for features */
-  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%);
-  --gradient-green: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
-  --gradient-indigo: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #4338ca 100%);
-  --gradient-cyan: linear-gradient(135deg, #06b6d4 0%, #0891b2 50%, #0e7490 100%);
+  /* Gradient sets for features - simplified to 2 stops */
+  --gradient-blue: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --gradient-green: linear-gradient(135deg, #10b981 0%, #047857 100%);
+  --gradient-indigo: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  --gradient-cyan: linear-gradient(135deg, #06b6d4 0%, #0e7490 100%);
   
   /* Glow colors */
   --glow-blue: rgba(59, 130, 246, 0.5);
@@ -19,14 +19,18 @@
   --feature-green: #10b981;
   --feature-indigo: #6366f1;
   --feature-cyan: #06b6d4;
+  
+  /* Reusable shadows */
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.08), 0 16px 32px rgba(0, 0, 0, 0.12), 0 32px 64px rgba(0, 0, 0, 0.16);
+  --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.03), 0 6px 12px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.12), 0 24px 48px rgba(0, 0, 0, 0.18), 0 48px 96px rgba(0, 0, 0, 0.24);
 }
 
 /* Feature Card Wrapper */
 .feature-card-wrapper {
   position: relative;
-  perspective: 1000px;
-  transform-style: preserve-3d;
   height: 100%;
+  contain: layout style paint;
+  content-visibility: auto;
 }
 
 /* Gradient Orbs for Features */
@@ -38,6 +42,9 @@
   transition: opacity 0.6s ease;
   pointer-events: none;
   z-index: 0;
+  will-change: opacity;
+  transform: translateZ(0); /* Hardware acceleration */
+  contain: strict;
 }
 
 .feature-card[data-feature="document"] .feature-gradient-orb {
@@ -74,7 +81,6 @@
 
 .feature-card:hover .feature-gradient-orb {
   opacity: 0.4;
-  animation: orbPulse 4s ease-in-out infinite;
 }
 
 /* Main Feature Card */
@@ -86,69 +92,38 @@
   border-radius: 24px;
   padding: 40px;
   overflow: hidden;
-  transform-style: preserve-3d;
-  transform: rotateX(var(--rotate-x, 0)) rotateY(var(--rotate-y, 0));
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   will-change: transform;
   z-index: 1;
-  
-  /* Advanced shadow system */
-  box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.02),
-    0 4px 8px rgba(0, 0, 0, 0.04),
-    0 8px 16px rgba(0, 0, 0, 0.08),
-    0 16px 32px rgba(0, 0, 0, 0.12),
-    0 32px 64px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--shadow-base);
+  transform: translate3d(0, 0, 0); /* Hardware acceleration */
 }
 
 .feature-card:hover {
-  transform: translateZ(30px) rotateX(var(--rotate-x, 0)) rotateY(var(--rotate-y, 0));
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    0 6px 12px rgba(0, 0, 0, 0.06),
-    0 12px 24px rgba(0, 0, 0, 0.12),
-    0 24px 48px rgba(0, 0, 0, 0.18),
-    0 48px 96px rgba(0, 0, 0, 0.24);
+  transform: translate3d(0, -4px, 0);
+  box-shadow: var(--shadow-hover);
 }
 
-/* Feature Card Glow */
+/* Feature Card Glow - Disabled for performance */
 .feature-card-glow {
-  position: absolute;
-  inset: -3px;
-  border-radius: 24px;
-  opacity: 0;
-  transition: opacity 0.4s ease;
-  pointer-events: none;
-  background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    var(--glow-color),
-    transparent 60%
-  );
+  display: none;
 }
 
-.feature-card[data-feature="document"] .feature-card-glow { --glow-color: var(--glow-blue); }
-.feature-card[data-feature="connect"] .feature-card-glow { --glow-color: var(--glow-green); }
-.feature-card[data-feature="search"] .feature-card-glow { --glow-color: var(--glow-indigo); }
-.feature-card[data-feature="context"] .feature-card-glow { --glow-color: var(--glow-cyan); }
+/* Glow effects removed for performance */
 
-.feature-card:hover .feature-card-glow {
-  opacity: 0.7;
-}
-
-/* Animated Border Gradient */
+/* Animated Border Gradient - Simplified */
 .feature-border-gradient {
   position: absolute;
   inset: -2px;
   border-radius: 24px;
   padding: 2px;
   background: linear-gradient(135deg, transparent, var(--border-color), transparent);
-  background-size: 300% 300%;
-  animation: borderShift 8s ease-in-out infinite;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   opacity: 0;
   transition: opacity 0.4s ease;
+  transform: translateZ(0);
 }
 
 .feature-card[data-feature="document"] .feature-border-gradient { --border-color: var(--feature-blue); }
@@ -158,12 +133,6 @@
 
 .feature-card:hover .feature-border-gradient {
   opacity: 0.8;
-  animation: borderShift 3s ease-in-out infinite;
-}
-
-@keyframes borderShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 /* Card Content Container */
@@ -185,88 +154,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: translate3d(0, 0, 0);
 }
 
 .feature-card:hover .feature-icon-wrapper {
   background: rgba(10, 22, 40, 0.8);
-  transform: translateY(-8px) translateZ(20px) rotateY(15deg);
+  transform: translate3d(0, -8px, 0);
 }
 
-/* Icon Glow Effect */
+/* Icon Glow Effect - Disabled for performance */
 .feature-icon-glow {
-  position: absolute;
-  inset: -15px;
-  border-radius: 24px;
-  opacity: 0;
-  filter: blur(20px);
-  transition: all 0.4s ease;
+  display: none;
 }
 
-.feature-card[data-feature="document"] .feature-icon-glow { background: var(--gradient-blue); }
-.feature-card[data-feature="connect"] .feature-icon-glow { background: var(--gradient-green); }
-.feature-card[data-feature="search"] .feature-icon-glow { background: var(--gradient-indigo); }
-.feature-card[data-feature="context"] .feature-icon-glow { background: var(--gradient-cyan); }
-
-.feature-card:hover .feature-icon-glow {
-  opacity: 0.6;
-  animation: iconPulse 2s ease-in-out infinite;
-}
-
-/* Particle Effects */
-.feature-icon-particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
+/* Particle Effects - Disabled for performance */
+.feature-icon-particles,
 .feature-particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  background: var(--particle-color);
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0);
-  filter: blur(1px);
-}
-
-.feature-card[data-feature="document"] .feature-particle { --particle-color: var(--feature-blue); }
-.feature-card[data-feature="connect"] .feature-particle { --particle-color: var(--feature-green); }
-.feature-card[data-feature="search"] .feature-particle { --particle-color: var(--feature-indigo); }
-.feature-card[data-feature="context"] .feature-particle { --particle-color: var(--feature-cyan); }
-
-.feature-card:hover .feature-particle {
-  animation: particleFloat 3s ease-in-out infinite;
-}
-
-.feature-particle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
-.feature-particle:nth-child(2) { top: 20%; right: 10%; animation-delay: 0.5s; }
-.feature-particle:nth-child(3) { bottom: 10%; left: 20%; animation-delay: 1s; }
-.feature-particle:nth-child(4) { bottom: 20%; right: 20%; animation-delay: 1.5s; }
-
-@keyframes particleFloat {
-  0% {
-    opacity: 0;
-    transform: scale(0) translate(0, 0);
-  }
-  20% {
-    opacity: 1;
-    transform: scale(1) translate(-20px, -30px);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1) translate(20px, -50px);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1) translate(-10px, -70px);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0) translate(0, -100px);
-  }
+  display: none;
 }
 
 /* Text Content Styling */
@@ -303,7 +208,7 @@
   color: #b8c5d6;
 }
 
-/* Progress Indicator */
+/* Progress Indicator - Optimized */
 .feature-progress {
   position: absolute;
   bottom: 0;
@@ -313,6 +218,7 @@
   background: rgba(255, 255, 255, 0.05);
   overflow: hidden;
   border-radius: 0 0 24px 24px;
+  contain: strict;
 }
 
 .feature-progress-fill {
@@ -321,9 +227,10 @@
   left: 0;
   height: 100%;
   width: 0;
-  background: linear-gradient(90deg, transparent, var(--progress-color), var(--progress-color), transparent);
+  background: var(--progress-color);
   transition: width 0.8s cubic-bezier(0.23, 1, 0.32, 1);
   transform-origin: left;
+  will-change: width;
 }
 
 .feature-card[data-feature="document"] .feature-progress-fill { --progress-color: var(--feature-blue); }
@@ -335,41 +242,12 @@
   width: 100%;
 }
 
-/* Noise Texture Overlay */
+/* Noise Texture Overlay - Disabled for performance */
 .feature-noise {
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  opacity: 0.02;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 3;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
+  display: none;
 }
 
-/* Icon Rotation Animation */
-@keyframes iconPulse {
-  0%, 100% { 
-    transform: scale(1);
-    filter: blur(20px);
-  }
-  50% { 
-    transform: scale(1.3);
-    filter: blur(30px);
-  }
-}
-
-/* Orb Animation */
-@keyframes orbPulse {
-  0%, 100% { 
-    transform: scale(1);
-    filter: blur(80px);
-  }
-  50% { 
-    transform: scale(1.2);
-    filter: blur(100px);
-  }
-}
+/* Animations removed for performance */
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
@@ -383,8 +261,7 @@
   }
   
   .feature-gradient-orb {
-    width: 200px !important;
-    height: 200px !important;
+    display: none; /* Hide orbs on mobile */
   }
   
   .feature-content h4 {
@@ -399,9 +276,6 @@
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
   .feature-gradient-orb,
-  .feature-card-glow,
-  .feature-icon-glow,
-  .feature-particle,
   .feature-progress-fill,
   .feature-border-gradient {
     animation: none !important;
@@ -410,5 +284,19 @@
   .feature-card,
   .feature-icon-wrapper {
     transition: none !important;
+  }
+}
+
+/* Progressive Enhancement */
+@supports (backdrop-filter: blur(24px)) {
+  .feature-card {
+    background: rgba(26, 35, 50, 0.3);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+}
+
+@supports not (backdrop-filter: blur(24px)) {
+  .feature-card {
+    background: rgba(26, 35, 50, 0.95);
   }
 }

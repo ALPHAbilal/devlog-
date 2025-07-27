@@ -14,10 +14,19 @@ export function useFolders() {
   const { user } = useAuth();
   const toast = useToast();
   const isMounted = useRef(true);
+  const lastAuthErrorRef = useRef(null);
+  const authRetryCountRef = useRef(0);
 
   // Load folders
   const loadFolders = useCallback(async (forceRefresh = false) => {
-    if (!user?.id) return;
+    // Early return if no user
+    if (!user?.id) {
+      setFolders([]);
+      setLoading(false);
+      foldersCache = null;
+      lastFetchTime = null;
+      return;
+    }
 
     // Use cache if available and fresh
     if (!forceRefresh && foldersCache && lastFetchTime && 
@@ -33,9 +42,28 @@ export function useFolders() {
       // Ensure we have a valid session before querying
       try {
         await ensureAuthenticated();
+        // Reset retry count on successful auth
+        authRetryCountRef.current = 0;
       } catch (authError) {
-        console.error('Authentication required for folders:', authError);
-        toast.error('Please sign in to access your folders');
+        // Prevent spam - only log once per minute
+        const now = Date.now();
+        if (!lastAuthErrorRef.current || now - lastAuthErrorRef.current > 60000) {
+          console.error('Authentication required for folders:', authError.message);
+          lastAuthErrorRef.current = now;
+        }
+        
+        // Clear cache on auth failure
+        foldersCache = null;
+        lastFetchTime = null;
+        setFolders([]);
+        setLoading(false);
+        
+        // Show toast only on first failure or after a long gap
+        if (authRetryCountRef.current === 0) {
+          toast.error('Please sign in to access your folders');
+        }
+        
+        authRetryCountRef.current++;
         return;
       }
       
@@ -341,15 +369,25 @@ export function useFolders() {
     }
   }, [user?.id, toast]);
 
-  // Load folders on mount
+  // Load folders when user is available
   useEffect(() => {
     isMounted.current = true;
-    loadFolders();
+    
+    // Only load folders if user exists
+    if (user?.id) {
+      loadFolders();
+    } else {
+      // Clear folders when no user
+      setFolders([]);
+      setLoading(false);
+      foldersCache = null;
+      lastFetchTime = null;
+    }
     
     return () => {
       isMounted.current = false;
     };
-  }, [loadFolders]);
+  }, [user?.id]); // Only depend on user.id, not loadFolders
 
   return {
     folders,

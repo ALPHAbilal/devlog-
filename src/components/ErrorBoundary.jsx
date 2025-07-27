@@ -30,6 +30,19 @@ class ErrorBoundary extends React.Component {
     // Log error to console for debugging
     console.error('ErrorBoundary caught:', error, errorInfo);
     
+    // Check if this is an authentication loop error
+    const isAuthError = error.message?.includes('auth') || 
+                       error.message?.includes('No active session') ||
+                       error.message?.includes('sign in');
+    
+    // If we're getting rapid auth errors, it might be an infinite loop
+    if (isAuthError && this.state.recoveryAttempts > 5) {
+      console.error('Authentication loop detected, stopping retries');
+      // Clear any auth-related storage to break the loop
+      localStorage.removeItem('sb-zqcjipwiznesnbgbocnu-auth-token');
+      sessionStorage.clear();
+    }
+    
     // Capture error with Sentry and get error ID
     const errorId = Sentry.captureException(error, {
       contexts: {

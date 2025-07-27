@@ -377,8 +377,19 @@ export const onAuthStateChange = (callback) => optimizedSupabase.onAuthStateChan
 export const deduplicateRequest = (key, fn) => optimizedSupabase.deduplicateRequest(key, fn);
 export const setInactivityTimeout = (minutes) => optimizedSupabase.setInactivityTimeout(minutes);
 
+// Track last auth check to prevent rapid retries
+let lastAuthCheckTime = 0;
+const MIN_AUTH_CHECK_INTERVAL = 1000; // 1 second minimum between checks
+
 // Helper to ensure authenticated session before operations
 export const ensureAuthenticated = async () => {
+  // Rate limit auth checks
+  const now = Date.now();
+  if (now - lastAuthCheckTime < MIN_AUTH_CHECK_INTERVAL) {
+    throw new Error('Authentication check rate limited');
+  }
+  lastAuthCheckTime = now;
+  
   const { data: { session }, error } = await getSession();
   
   if (error) {

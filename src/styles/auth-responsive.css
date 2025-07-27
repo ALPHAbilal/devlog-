@@ -1,6 +1,6 @@
 /* =====================================================
-   Auth Page - Elite Responsive Design System
-   Fixes vertical centering and overflow issues
+   Auth Page - Adaptive Layout System
+   Natural content flow with smart responsive behavior
    ===================================================== */
 
 /* =====================================================
@@ -26,6 +26,9 @@
   --auth-space-2xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
   --auth-space-3xl: clamp(3rem, 2rem + 5vw, 4rem);
 
+  /* Adaptive Spacing - responds to viewport height */
+  --auth-adaptive-padding: clamp(1.5rem, 5vh, 4rem);
+
   /* Container Widths */
   --auth-form-width-sm: 320px;
   --auth-form-width-md: 380px;
@@ -49,11 +52,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 100vh;
-  height: 100dvh; /* Dynamic viewport height */
+  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--auth-bg-primary);
   position: relative;
-  overflow: hidden; /* Prevent page-level scrolling */
 }
 
 /* Hide branding panel on mobile */
@@ -61,7 +63,7 @@
   display: none;
 }
 
-/* Form panel takes full height on mobile */
+/* Form panel - natural height with smart alignment */
 .auth-form-panel {
   flex: 1;
   display: flex;
@@ -70,38 +72,43 @@
   padding: var(--auth-space-lg);
   background: linear-gradient(135deg, var(--auth-bg-primary) 0%, var(--auth-bg-secondary) 100%);
   position: relative;
-  overflow-y: auto; /* Allow scrolling if needed */
   overflow-x: hidden;
+  overflow-y: auto;
+  
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Custom scrollbar for form panel */
+/* Custom scrollbar styling */
 .auth-form-panel::-webkit-scrollbar {
   width: 6px;
 }
 
 .auth-form-panel::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .auth-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.2);
   border-radius: 3px;
 }
 
 .auth-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.4);
 }
 
-/* Form container with responsive constraints */
+/* Form container - natural sizing */
 .auth-form-container {
   width: 100%;
   max-width: var(--auth-form-width-sm);
-  max-height: calc(100vh - 2 * var(--auth-space-lg));
-  max-height: calc(100dvh - 2 * var(--auth-space-lg));
   display: flex;
   flex-direction: column;
   gap: var(--auth-space-xl);
-  margin: auto 0; /* This helps with vertical centering */
+  /* Allow natural height */
+  height: auto;
+  /* Ensure minimum spacing from viewport edges */
+  margin-block: var(--auth-space-lg);
 }
 
 /* =====================================================
@@ -112,7 +119,6 @@
 .auth-mobile-branding {
   text-align: center;
   animation: fadeInUp 0.6s ease-out;
-  flex-shrink: 0; /* Prevent compression */
 }
 
 .auth-logo-group {
@@ -140,7 +146,6 @@
 .auth-form-header {
   text-align: center;
   animation: fadeInUp 0.6s ease-out 0.1s both;
-  flex-shrink: 0;
 }
 
 .auth-form-header h3 {
@@ -159,7 +164,6 @@
   padding: var(--auth-space-xl);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: scaleIn 0.5s ease-out 0.2s both;
-  flex-shrink: 0;
 }
 
 /* Footer */
@@ -337,8 +341,6 @@
   
   .auth-form-container {
     max-width: var(--auth-form-width-md);
-    max-height: calc(100vh - 2 * var(--auth-space-2xl));
-    max-height: calc(100dvh - 2 * var(--auth-space-2xl));
   }
   
   .auth-form-wrapper {
@@ -347,15 +349,15 @@
 }
 
 /* =====================================================
-   Desktop Breakpoint (1024px+) - Two Column Layout
+   Desktop Breakpoint (1024px+) - Adaptive Grid
    ===================================================== */
 @media (min-width: 1024px) {
   .auth-page-wrapper {
     display: grid;
-    grid-template-columns: 1fr minmax(320px, min(520px, 40vw));
-    height: 100vh;
-    height: 100dvh;
-    overflow: hidden;
+    /* Adaptive grid - form panel gets what it needs, branding fills rest */
+    grid-template-columns: 1fr min(max(480px, 35vw), 600px);
+    min-height: 100vh;
+    min-height: 100dvh;
   }
   
   /* Show branding panel */
@@ -367,7 +369,6 @@
     background: linear-gradient(135deg, var(--auth-bg-primary) 0%, var(--auth-bg-secondary) 50%, var(--auth-bg-primary) 100%);
     position: relative;
     overflow: hidden;
-    height: 100%;
   }
   
   /* Background pattern */
@@ -477,24 +478,28 @@
     display: none !important;
   }
   
-  /* Form panel adjustments for desktop */
+  /* Form panel - adaptive padding and alignment */
   .auth-form-panel {
     background: var(--auth-bg-primary);
-    padding: var(--auth-space-2xl);
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow-y: auto;
+    padding: var(--auth-adaptive-padding);
+    
+    /* Adaptive alignment - centers when content fits, top-aligns when it doesn't */
+    @supports (align-items: safe center) {
+      align-items: safe center;
+    }
+    
+    /* Fallback for browsers without safe alignment */
+    @supports not (align-items: safe center) {
+      align-items: flex-start;
+      padding-top: min(var(--auth-adaptive-padding), 10vh);
+    }
   }
   
-  /* Ensure form container respects viewport height */
+  /* Form container adapts to viewport */
   .auth-form-container {
     max-width: var(--auth-form-width-lg);
-    max-height: calc(100vh - 2 * var(--auth-space-2xl));
-    max-height: calc(100dvh - 2 * var(--auth-space-2xl));
-    width: 100%;
-    margin: 0; /* Remove auto margin on desktop */
+    /* Remove vertical margins on desktop - let flex handle it */
+    margin-block: 0;
   }
 }
 
@@ -503,7 +508,7 @@
    ===================================================== */
 @media (min-width: 1440px) {
   .auth-page-wrapper {
-    grid-template-columns: 1fr minmax(400px, min(560px, 35vw));
+    grid-template-columns: 1fr min(max(520px, 33vw), 640px);
   }
   
   .auth-branding-panel {
@@ -511,13 +516,11 @@
   }
   
   .auth-form-panel {
-    padding: var(--auth-space-3xl);
+    padding: var(--auth-adaptive-padding);
   }
   
   .auth-form-container {
     max-width: var(--auth-form-width-xl);
-    max-height: calc(100vh - 2 * var(--auth-space-3xl));
-    max-height: calc(100dvh - 2 * var(--auth-space-3xl));
   }
 }
 
@@ -548,24 +551,19 @@
   .auth-form-panel {
     padding: calc(var(--auth-space-3xl) * 1.5);
   }
-  
-  .auth-form-container {
-    max-height: calc(100vh - 3 * var(--auth-space-3xl));
-    max-height: calc(100dvh - 3 * var(--auth-space-3xl));
-  }
 }
 
 /* =====================================================
-   Short Viewport Heights (< 700px)
+   Short Viewports - Adaptive Behavior
    ===================================================== */
-@media (max-height: 700px) and (min-width: 1024px) {
-  .auth-form-panel {
-    padding: var(--auth-space-lg);
+@media (max-height: 750px) and (min-width: 1024px) {
+  :root {
+    /* Reduce adaptive padding on short viewports */
+    --auth-adaptive-padding: clamp(1rem, 3vh, 2rem);
   }
   
+  /* Tighter spacing for short viewports */
   .auth-form-container {
-    max-height: calc(100vh - 2 * var(--auth-space-lg));
-    max-height: calc(100dvh - 2 * var(--auth-space-lg));
     gap: var(--auth-space-lg);
   }
   
@@ -573,10 +571,12 @@
     padding: var(--auth-space-lg);
   }
   
+  /* Reduce branding panel padding */
   .auth-branding-panel {
     padding: var(--auth-space-lg);
   }
   
+  /* Smaller text on short viewports */
   .auth-tagline {
     font-size: var(--auth-text-2xl);
     margin: var(--auth-space-md) 0;
@@ -587,43 +587,57 @@
     margin-bottom: var(--auth-space-lg);
   }
   
-  .auth-code-snippets {
-    display: none; /* Hide on very short viewports */
-  }
-  
+  /* Compact features */
   .auth-features {
     gap: var(--auth-space-md);
   }
+  
+  /* Tighter form spacing */
+  .supabase-auth-ui_ui-container {
+    gap: var(--auth-space-md) !important;
+  }
+  
+  .supabase-auth-ui_ui-divider {
+    margin: var(--auth-space-md) 0 !important;
+  }
 }
 
-/* =====================================================
-   Landscape Mobile Fix
-   ===================================================== */
-@media (orientation: landscape) and (max-height: 600px) {
-  .auth-form-panel {
-    padding: var(--auth-space-md) var(--auth-space-xl);
+/* Very short viewports */
+@media (max-height: 600px) and (min-width: 1024px) {
+  /* Hide decorative elements */
+  .auth-code-snippets {
+    display: none;
   }
   
-  .auth-mobile-branding {
-    margin-bottom: var(--auth-space-md);
-  }
-  
+  /* Further reduce spacing */
   .auth-form-container {
     gap: var(--auth-space-md);
-    max-height: calc(100vh - 2 * var(--auth-space-md));
-    max-height: calc(100dvh - 2 * var(--auth-space-md));
   }
   
   .auth-form-wrapper {
     padding: var(--auth-space-md);
   }
-  
-  .supabase-auth-ui_ui-container {
-    gap: var(--auth-space-sm) !important;
+}
+
+/* =====================================================
+   Landscape Mobile
+   ===================================================== */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1023px) {
+  .auth-form-panel {
+    padding: var(--auth-space-sm) var(--auth-space-xl);
   }
   
-  .supabase-auth-ui_ui-divider {
-    margin: var(--auth-space-sm) 0 !important;
+  .auth-mobile-branding {
+    margin-bottom: var(--auth-space-sm);
+  }
+  
+  .auth-form-container {
+    gap: var(--auth-space-sm);
+    margin-block: var(--auth-space-sm);
+  }
+  
+  .auth-form-wrapper {
+    padding: var(--auth-space-md);
   }
 }
 

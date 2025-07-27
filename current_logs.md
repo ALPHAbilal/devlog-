@@ -1,7 +1,7 @@
 {
   "viewport": {
-    "width": 1841,
-    "height": 918,
+    "width": 1834,
+    "height": 917,
     "devicePixelRatio": 1,
     "orientation": "landscape-primary"
   },
@@ -43,12 +43,12 @@
   },
   "pageWrapper": {
     "measurements": {
-      "width": 1841,
-      "height": 918,
+      "width": 1834,
+      "height": 917,
       "top": 0,
       "left": 0,
-      "right": 1841,
-      "bottom": 918,
+      "right": 1834,
+      "bottom": 917,
       "padding": {
         "top": 0,
         "right": 0,
@@ -69,39 +69,39 @@
     },
     "styles": {
       "display": "grid",
-      "gridTemplateColumns": "1281px 560px",
-      "gridTemplateRows": "918px",
-      "gridGap": "0px",
-      "flexDirection": "row",
+      "gridTemplateColumns": "1274px 560px",
+      "gridTemplateRows": "917px",
+      "gridGap": "normal",
+      "flexDirection": "column",
       "justifyContent": "normal",
       "alignItems": "normal",
       "placeItems": "normal",
-      "width": "1841px",
-      "height": "918px",
-      "maxWidth": "1841px",
-      "minHeight": "918px",
+      "width": "1834px",
+      "height": "917px",
+      "maxWidth": "1834px",
+      "minHeight": "auto",
       "position": "relative",
       "zIndex": "auto"
     },
-    "gridTemplate": "1281px 560px",
+    "gridTemplate": "1274px 560px",
     "overflow": {
-      "hasOverflow": true,
+      "hasOverflow": false,
       "horizontal": false,
-      "vertical": true,
-      "scrollWidth": 1841,
-      "scrollHeight": 931,
-      "clientWidth": 1841,
-      "clientHeight": 918
+      "vertical": false,
+      "scrollWidth": 1834,
+      "scrollHeight": 917,
+      "clientWidth": 1834,
+      "clientHeight": 917
     }
   },
   "brandingPanel": {
     "measurements": {
-      "width": 1281,
-      "height": 918,
+      "width": 1274,
+      "height": 917,
       "top": 0,
       "left": 0,
-      "right": 1281,
-      "bottom": 918,
+      "right": 1274,
+      "bottom": 917,
       "padding": {
         "top": 64,
         "right": 64,
@@ -114,24 +114,24 @@
         "bottom": 0,
         "left": 0
       },
-      "display": "grid",
+      "display": "flex",
       "position": "relative",
       "overflow": "hidden",
       "overflowX": "hidden",
       "overflowY": "hidden"
     },
     "styles": {
-      "display": "grid",
-      "gridTemplateColumns": "1153px",
-      "gridTemplateRows": "790px",
+      "display": "flex",
+      "gridTemplateColumns": "none",
+      "gridTemplateRows": "none",
       "gridGap": "normal",
       "flexDirection": "row",
-      "justifyContent": "normal",
+      "justifyContent": "center",
       "alignItems": "center",
-      "placeItems": "center",
-      "width": "1281px",
-      "height": "918px",
-      "maxWidth": "1841px",
+      "placeItems": "center normal",
+      "width": "1274px",
+      "height": "917px",
+      "maxWidth": "1834px",
       "minHeight": "auto",
       "position": "relative",
       "zIndex": "auto"
@@ -141,16 +141,16 @@
   "formPanel": {
     "measurements": {
       "width": 560,
-      "height": 918,
+      "height": 917,
       "top": 0,
-      "left": 1281,
-      "right": 1841,
-      "bottom": 918,
+      "left": 1274,
+      "right": 1834,
+      "bottom": 917,
       "padding": {
-        "top": 48,
-        "right": 48,
-        "bottom": 48,
-        "left": 48
+        "top": 64,
+        "right": 64,
+        "bottom": 64,
+        "left": 64
       },
       "margin": {
         "top": 0,
@@ -158,25 +158,25 @@
         "bottom": 0,
         "left": 0
       },
-      "display": "grid",
+      "display": "flex",
       "position": "relative",
-      "overflow": "visible",
-      "overflowX": "visible",
-      "overflowY": "visible"
+      "overflow": "hidden auto",
+      "overflowX": "hidden",
+      "overflowY": "auto"
     },
     "styles": {
-      "display": "grid",
-      "gridTemplateColumns": "464px",
-      "gridTemplateRows": "882.594px",
+      "display": "flex",
+      "gridTemplateColumns": "none",
+      "gridTemplateRows": "none",
       "gridGap": "normal",
       "flexDirection": "row",
-      "justifyContent": "normal",
+      "justifyContent": "center",
       "alignItems": "center",
-      "placeItems": "center",
+      "placeItems": "center normal",
       "width": "560px",
-      "height": "918px",
-      "maxWidth": "1841px",
-      "minHeight": "918px",
+      "height": "917px",
+      "maxWidth": "1834px",
+      "minHeight": "auto",
       "position": "relative",
       "zIndex": "auto"
     },
@@ -184,20 +184,20 @@
       "hasOverflow": true,
       "horizontal": false,
       "vertical": true,
-      "scrollWidth": 560,
-      "scrollHeight": 931,
-      "clientWidth": 560,
-      "clientHeight": 918
+      "scrollWidth": 554,
+      "scrollHeight": 947,
+      "clientWidth": 554,
+      "clientHeight": 917
     }
   },
   "formContainer": {
     "measurements": {
-      "width": 464,
-      "height": 882.59375,
-      "top": 48,
-      "left": 1329,
-      "right": 1793,
-      "bottom": 930.59375,
+      "width": 426,
+      "height": 789,
+      "top": 64,
+      "left": 1338,
+      "right": 1764,
+      "bottom": 853,
       "padding": {
         "top": 0,
         "right": 0,
@@ -218,28 +218,24 @@
     },
     "centering": {
       "isCentered": false,
-      "horizontalOffset": 0,
-      "verticalOffset": 30.296875,
+      "horizontalOffset": 3,
+      "verticalOffset": 0,
       "parentWidth": 560,
-      "parentHeight": 918,
-      "elementWidth": 464,
-      "elementHeight": 882.59375
+      "parentHeight": 917,
+      "elementWidth": 426,
+      "elementHeight": 789
     }
   },
   "performance": {
     "domContentLoaded": 0,
-    "loadComplete": 0.9000000357627869,
-    "firstPaint": 1428,
-    "firstContentfulPaint": 1428
+    "loadComplete": 0.30000001192092896,
+    "firstPaint": 2996,
+    "firstContentfulPaint": 2996
   },
   "issues": [
     {
       "type": "centering",
-      "message": "Form not centered: H-offset: 0.0px, V-offset: 30.3px"
-    },
-    {
-      "type": "overflow",
-      "message": "Page wrapper has overflow:  vertical"
+      "message": "Form not centered: H-offset: 3.0px, V-offset: 0.0px"
     },
     {
       "type": "overflow",
@@ -248,8 +244,9 @@
   ]
 }
 
+---------------------
 
----------------------------
+
 {
   "viewport": {
     "width": 1366,
@@ -319,25 +316,25 @@
       "display": "grid",
       "gridTemplateColumns": "846px 520px",
       "gridTemplateRows": "607px",
-      "gridGap": "0px",
-      "flexDirection": "row",
+      "gridGap": "normal",
+      "flexDirection": "column",
       "justifyContent": "normal",
       "alignItems": "normal",
       "placeItems": "normal",
       "width": "1366px",
       "height": "607px",
       "maxWidth": "1366px",
-      "minHeight": "607px",
+      "minHeight": "auto",
       "position": "relative",
       "zIndex": "auto"
     },
     "gridTemplate": "846px 520px",
     "overflow": {
-      "hasOverflow": true,
+      "hasOverflow": false,
       "horizontal": false,
-      "vertical": true,
+      "vertical": false,
       "scrollWidth": 1366,
-      "scrollHeight": 928,
+      "scrollHeight": 607,
       "clientWidth": 1366,
       "clientHeight": 607
     }
@@ -351,10 +348,10 @@
       "right": 846,
       "bottom": 607,
       "padding": {
-        "top": 48,
-        "right": 48,
-        "bottom": 48,
-        "left": 48
+        "top": 24,
+        "right": 24,
+        "bottom": 24,
+        "left": 24
       },
       "margin": {
         "top": 0,
@@ -362,21 +359,21 @@
         "bottom": 0,
         "left": 0
       },
-      "display": "grid",
+      "display": "flex",
       "position": "relative",
       "overflow": "hidden",
       "overflowX": "hidden",
       "overflowY": "hidden"
     },
     "styles": {
-      "display": "grid",
-      "gridTemplateColumns": "750px",
-      "gridTemplateRows": "511px",
+      "display": "flex",
+      "gridTemplateColumns": "none",
+      "gridTemplateRows": "none",
       "gridGap": "normal",
       "flexDirection": "row",
-      "justifyContent": "normal",
+      "justifyContent": "center",
       "alignItems": "center",
-      "placeItems": "center",
+      "placeItems": "center normal",
       "width": "846px",
       "height": "607px",
       "maxWidth": "1366px",
@@ -395,10 +392,10 @@
       "right": 1366,
       "bottom": 607,
       "padding": {
-        "top": 48,
-        "right": 48,
-        "bottom": 48,
-        "left": 48
+        "top": 24,
+        "right": 24,
+        "bottom": 24,
+        "left": 24
       },
       "margin": {
         "top": 0,
@@ -406,25 +403,25 @@
         "bottom": 0,
         "left": 0
       },
-      "display": "grid",
+      "display": "flex",
       "position": "relative",
-      "overflow": "visible",
-      "overflowX": "visible",
-      "overflowY": "visible"
+      "overflow": "hidden auto",
+      "overflowX": "hidden",
+      "overflowY": "auto"
     },
     "styles": {
-      "display": "grid",
-      "gridTemplateColumns": "424px",
-      "gridTemplateRows": "880.219px",
+      "display": "flex",
+      "gridTemplateColumns": "none",
+      "gridTemplateRows": "none",
       "gridGap": "normal",
       "flexDirection": "row",
-      "justifyContent": "normal",
+      "justifyContent": "center",
       "alignItems": "center",
-      "placeItems": "center",
+      "placeItems": "center normal",
       "width": "520px",
       "height": "607px",
       "maxWidth": "1366px",
-      "minHeight": "607px",
+      "minHeight": "auto",
       "position": "relative",
       "zIndex": "auto"
     },
@@ -432,20 +429,20 @@
       "hasOverflow": true,
       "horizontal": false,
       "vertical": true,
-      "scrollWidth": 520,
-      "scrollHeight": 928,
-      "clientWidth": 520,
+      "scrollWidth": 514,
+      "scrollHeight": 848,
+      "clientWidth": 514,
       "clientHeight": 607
     }
   },
   "formContainer": {
     "measurements": {
-      "width": 424,
-      "height": 880.21875,
-      "top": 48,
-      "left": 894,
-      "right": 1318,
-      "bottom": 928.21875,
+      "width": 440,
+      "height": 559,
+      "top": 24,
+      "left": 883,
+      "right": 1323,
+      "bottom": 583,
       "padding": {
         "top": 0,
         "right": 0,
@@ -466,28 +463,24 @@
     },
     "centering": {
       "isCentered": false,
-      "horizontalOffset": 0,
-      "verticalOffset": 184.609375,
+      "horizontalOffset": 3,
+      "verticalOffset": 0,
       "parentWidth": 520,
       "parentHeight": 607,
-      "elementWidth": 424,
-      "elementHeight": 880.21875
+      "elementWidth": 440,
+      "elementHeight": 559
     }
   },
   "performance": {
     "domContentLoaded": 0,
-    "loadComplete": 0.3999999761581421,
-    "firstPaint": 876,
-    "firstContentfulPaint": 876
+    "loadComplete": 0.30000001192092896,
+    "firstPaint": 624,
+    "firstContentfulPaint": 624
   },
   "issues": [
     {
       "type": "centering",
-      "message": "Form not centered: H-offset: 0.0px, V-offset: 184.6px"
-    },
-    {
-      "type": "overflow",
-      "message": "Page wrapper has overflow:  vertical"
+      "message": "Form not centered: H-offset: 3.0px, V-offset: 0.0px"
     },
     {
       "type": "overflow",

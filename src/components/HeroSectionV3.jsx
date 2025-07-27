@@ -1,10 +1,27 @@
 import { ArrowRight, ChevronDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { textReveal, buttonHover, staggerContainer, staggerItem, gradientStatic } from '../utils/animations';
+import { useState, useEffect } from 'react';
+import { heroTextReveal, magneticHover, liquidMorph, staggerContainer, staggerItem, energyPulse } from '../utils/animations';
+import ParticleField from './ParticleField';
+import GradientMesh from './GradientMesh';
+import FloatingElements from './FloatingElements';
 
 export default function HeroSectionV3() {
   const navigate = useNavigate();
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const { clientX, clientY } = e;
+      const x = (clientX - window.innerWidth / 2) / 50;
+      const y = (clientY - window.innerHeight / 2) / 50;
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const scrollToDemo = () => {
     const demoSection = document.getElementById('problem-section');
@@ -14,27 +31,29 @@ export default function HeroSectionV3() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center py-16 md:py-20 overflow-hidden">
-      {/* Static gradient background */}
-      <div 
-        className="absolute inset-0 opacity-30"
-        style={{
-          background: "radial-gradient(circle at 20% 50%, #10b98120 0%, transparent 50%), radial-gradient(circle at 80% 80%, #10b98115 0%, transparent 50%)",
-          backgroundSize: "100% 100%",
-        }}
-      />
+    <section className="hero-container relative min-h-screen flex items-center py-16 md:py-20 overflow-hidden">
+      {/* Premium background effects */}
+      <GradientMesh />
+      <ParticleField count={30} />
+      <FloatingElements />
       
       <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10">
-        {/* Urgency Badge */}
+        {/* Enhanced Urgency Badge */}
         <motion.div
-          className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/20 text-accent-green 
-                     rounded-full text-sm font-medium mb-6"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
+          className="hero-badge mb-6"
+          initial={{ opacity: 0, scale: 0.9, y: -20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          whileHover={{ scale: 1.05 }}
         >
-          <span className="inline-block w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
-          Launch Week: 50% off ends Friday
+          <div className="hero-badge-pulse" />
+          <span>Launch Week: 50% off ends Friday</span>
+          <motion.div
+            className="absolute inset-0 rounded-full"
+            style={{ background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)' }}
+            animate={{ x: ["-100%", "200%"] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+          />
         </motion.div>
 
         {/* Main content - single column, centered */}
@@ -44,15 +63,16 @@ export default function HeroSectionV3() {
           variants={staggerContainer}
         >
           <motion.h1 
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 md:mb-8 leading-tight"
-            variants={textReveal}
+            className="hero-title mb-6 md:mb-8"
+            variants={heroTextReveal}
           >
             <motion.span variants={staggerItem}>
               Never Google The Same
             </motion.span>
             <br />
             <motion.span 
-              className="text-accent-green inline-block"
+              className="hero-title-gradient"
+              data-text="Error Twice"
               variants={staggerItem}
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -63,9 +83,9 @@ export default function HeroSectionV3() {
         </motion.div>
         
         <motion.p 
-          className="text-base sm:text-lg md:text-xl lg:text-2xl text-text-secondary mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
+          className="hero-subtitle mb-8 md:mb-12 px-4"
+          initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
         >
           That Stack Overflow answer you found at 2am? That ChatGPT explanation that finally made it click? 
@@ -80,35 +100,33 @@ export default function HeroSectionV3() {
         >
           <motion.button
               onClick={() => navigate('/auth')}
-              className="inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 
-                       bg-accent-green text-dark-primary rounded-lg font-medium text-base md:text-lg
-                       shadow-lg shadow-accent-green/20 relative overflow-hidden w-full sm:w-auto"
-              variants={buttonHover}
+              className="hero-cta-primary w-full sm:w-auto"
+              variants={liquidMorph}
               initial="rest"
               whileHover="hover"
-              whileTap="tap"
+              whileTap={{ scale: 0.98 }}
+              custom={mousePosition}
             >
-              <motion.span
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
-                transition={{ duration: 0.6, ease: "linear" }}
-              />
               <span className="relative z-10">Start Building</span>
-              <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight size={20} className="relative z-10" />
+              <motion.div
+                className="absolute inset-0 rounded-xl"
+                style={{ background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 70%)' }}
+                variants={energyPulse}
+                initial="initial"
+                whileHover="animate"
+              />
             </motion.button>
           
           <motion.button
             onClick={scrollToDemo}
-            className="inline-flex items-center justify-center gap-2 px-6 md:px-8 py-3 md:py-4 
-                     border border-dark-secondary text-text-primary rounded-lg text-base md:text-lg
-                     hover:border-accent-green/50 transition-all relative overflow-hidden w-full sm:w-auto"
-            whileHover={{ scale: 1 }}
+            className="hero-cta-secondary w-full sm:w-auto"
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <span>See It Work in 60 Seconds</span>
-            <ChevronDown size={20} />
+            <span className="relative z-10">See It Work in 60 Seconds</span>
+            <ChevronDown size={20} className="relative z-10" />
           </motion.button>
         </motion.div>
 
@@ -119,19 +137,21 @@ export default function HeroSectionV3() {
           transition={{ delay: 1, duration: 0.6 }}
         >
           <motion.div 
-            className="flex items-center gap-2"
-            whileHover={{ scale: 1 }}
+            className="hero-trust-item"
+            whileHover={{ scale: 1.05 }}
           >
-            <span className="text-accent-green">✓</span>
+            <span className="hero-trust-check" style={{ '--check-delay': '0s' }}>✓</span>
             <span>14-day free trial</span>
           </motion.div>
           <div className="hidden sm:block">•</div>
-          <motion.div whileHover={{ scale: 1 }}>
-            <span className="text-accent-green">✓</span> Export anytime
+          <motion.div className="hero-trust-item" whileHover={{ scale: 1.05 }}>
+            <span className="hero-trust-check" style={{ '--check-delay': '0.5s' }}>✓</span>
+            <span>Export anytime</span>
           </motion.div>
           <div className="hidden sm:block">•</div>
-          <motion.div whileHover={{ scale: 1 }}>
-            <span className="text-accent-green">✓</span> Works offline
+          <motion.div className="hero-trust-item" whileHover={{ scale: 1.05 }}>
+            <span className="hero-trust-check" style={{ '--check-delay': '1s' }}>✓</span>
+            <span>Works offline</span>
           </motion.div>
         </motion.div>
 

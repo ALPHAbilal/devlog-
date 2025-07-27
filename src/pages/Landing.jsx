@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect } from 'react';
+import { useState, lazy, Suspense, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
@@ -8,11 +8,109 @@ import ProblemSection from '../components/ProblemSection';
 import HowItWorksVideo from '../components/HowItWorksVideo';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover, featureReveal, tiltEffect } from '../utils/animations';
 import NoiseOverlay from '../components/NoiseOverlay';
 
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
+
+// Feature Card Component with Premium Effects
+function FeatureCard({ feature, index }) {
+  const cardRef = useRef(null);
+  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return;
+    
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    const rotateX = ((y - centerY) / centerY) * -10;
+    const rotateY = ((x - centerX) / centerX) * 10;
+    
+    setRotation({ x: rotateX, y: rotateY });
+    
+    // Update CSS variables for glow effect
+    cardRef.current.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+    cardRef.current.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+  };
+  
+  const handleMouseLeave = () => {
+    setRotation({ x: 0, y: 0 });
+  };
+  
+  return (
+    <motion.div 
+      className="feature-card-wrapper"
+      variants={featureReveal}
+      custom={index}
+    >
+      {/* Gradient Orb */}
+      <div className="feature-gradient-orb" />
+      
+      <motion.div
+        ref={cardRef}
+        className="feature-card"
+        data-feature={feature.dataFeature}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        animate={rotation}
+        variants={tiltEffect}
+        custom={rotation}
+        style={{
+          '--rotate-x': `${rotation.x}deg`,
+          '--rotate-y': `${rotation.y}deg`,
+        }}
+      >
+        {/* Card Glow Effect */}
+        <div className="feature-card-glow" />
+        
+        {/* Animated Border */}
+        <div className="feature-border-gradient" />
+        
+        {/* Card Content */}
+        <div className="card-content">
+          {/* Icon with Effects */}
+          <div className="feature-icon-wrapper">
+            <div className="feature-icon-glow" />
+            <div className="feature-icon-particles">
+              <span className="feature-particle" />
+              <span className="feature-particle" />
+              <span className="feature-particle" />
+              <span className="feature-particle" />
+            </div>
+            <span style={{ 
+              color: feature.color === 'blue' ? '#3b82f6' : 
+                     feature.color === 'green' ? '#10b981' : 
+                     feature.color === 'indigo' ? '#6366f1' : 
+                     '#06b6d4' 
+            }}>
+              {feature.icon}
+            </span>
+          </div>
+          
+          {/* Text Content */}
+          <div className="feature-content">
+            <h4>{feature.title}</h4>
+            <p>{feature.description}</p>
+          </div>
+        </div>
+        
+        {/* Progress Indicator */}
+        <div className="feature-progress">
+          <div className="feature-progress-fill" />
+        </div>
+        
+        {/* Noise Texture */}
+        <div className="feature-noise" />
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function LandingContent() {
   const navigate = useNavigate();
@@ -32,24 +130,32 @@ function LandingContent() {
 
   const features = [
     {
-      icon: <Code2 className="text-accent-green" size={32} />,
+      icon: <Code2 size={32} />,
       title: 'Document in 30 seconds',
-      description: 'Paste code, add context, done. No formatting needed.'
+      description: 'Paste code, add context, done. No formatting needed.',
+      color: 'blue',
+      dataFeature: 'document'
     },
     {
-      icon: <Link2 className="text-accent-green" size={32} />,
+      icon: <Link2 size={32} />,
       title: 'Everything connected',
-      description: 'Organize with projects and folders. Share knowledge easily.'
+      description: 'Organize with projects and folders. Share knowledge easily.',
+      color: 'green',
+      dataFeature: 'connect'
     },
     {
-      icon: <Search className="text-accent-green" size={32} />,
+      icon: <Search size={32} />,
       title: 'Find anything in 2 seconds',
-      description: 'Remember that fix from last year? It\'s one search away.'
+      description: 'Remember that fix from last year? It\'s one search away.',
+      color: 'indigo',
+      dataFeature: 'search'
     },
     {
-      icon: <GitBranch className="text-accent-green" size={32} />,
+      icon: <GitBranch size={32} />,
       title: 'Never lose context',
-      description: 'See how your code evolved and why you made those changes.'
+      description: 'See how your code evolved and why you made those changes.',
+      color: 'cyan',
+      dataFeature: 'context'
     }
   ];
 
@@ -192,15 +298,28 @@ function LandingContent() {
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6">
         <div className="max-w-6xl mx-auto">
-          <motion.h3 
-            className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            Core Features
-          </motion.h3>
+          <motion.div className="text-center mb-8 md:mb-16">
+            <motion.h3 
+              className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                Core Features
+              </span>
+            </motion.h3>
+            <motion.p
+              className="text-lg text-text-secondary max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              Everything you need to build your second brain for code
+            </motion.p>
+          </motion.div>
 
           <motion.div 
             className="fluid-grid-features"
@@ -210,28 +329,7 @@ function LandingContent() {
             viewport={{ once: true, margin: "-100px" }}
           >
             {features.map((feature, i) => (
-              <motion.div 
-                key={i}
-                className="glassmorphism-card glassmorphism-hover rounded-lg p-6
-                           relative overflow-hidden group"
-                variants={staggerItem}
-              >
-                {/* Gradient overlay on hover */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-br from-accent-green/0 to-accent-green/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                />
-                
-                <motion.div 
-                  className="mb-4 relative z-10"
-                  variants={iconLift}
-                  initial="rest"
-                  whileHover="hover"
-                >
-                  {feature.icon}
-                </motion.div>
-                <h4 className="text-xl font-semibold mb-2 relative z-10">{feature.title}</h4>
-                <p className="text-text-secondary text-sm relative z-10">{feature.description}</p>
-              </motion.div>
+              <FeatureCard key={i} feature={feature} index={i} />
             ))}
           </motion.div>
         </div>

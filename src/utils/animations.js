@@ -355,3 +355,144 @@ export const indicatorFill = {
     }
   }
 };
+
+// Magnetic hover effect for buttons
+export const magneticHover = {
+  rest: { x: 0, y: 0 },
+  hover: (offset) => ({
+    x: offset.x * 0.3,
+    y: offset.y * 0.3,
+    transition: {
+      type: "spring",
+      stiffness: 150,
+      damping: 15
+    }
+  })
+};
+
+// Liquid morph animation
+export const liquidMorph = {
+  rest: {
+    borderRadius: "12px",
+    scale: 1,
+  },
+  hover: {
+    borderRadius: ["12px", "16px", "12px"],
+    scale: [1, 1.02, 1],
+    transition: {
+      duration: 0.6,
+      ease: appleEase.smooth,
+      times: [0, 0.5, 1]
+    }
+  }
+};
+
+// Energy pulse animation
+export const energyPulse = {
+  initial: {
+    scale: 1,
+    opacity: 1,
+  },
+  animate: {
+    scale: [1, 2, 2.5],
+    opacity: [1, 0.5, 0],
+    transition: {
+      duration: 1.5,
+      ease: "easeOut",
+      repeat: Infinity,
+      repeatDelay: 1
+    }
+  }
+};
+
+// 3D Tilt effect based on mouse position
+export const tiltEffect = {
+  rest: {
+    rotateX: 0,
+    rotateY: 0,
+    scale: 1,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 30
+    }
+  },
+  hover: (rotation) => ({
+    rotateX: rotation.x,
+    rotateY: rotation.y,
+    scale: 1.02,
+    transition: {
+      type: "spring",
+      stiffness: 400,
+      damping: 30
+    }
+  })
+};
+
+// Particle float animation
+export const particleFloat = {
+  initial: {
+    y: 0,
+    x: 0,
+    opacity: 0,
+  },
+  animate: (custom) => ({
+    y: custom.y || -100,
+    x: custom.x || 0,
+    opacity: [0, 1, 1, 0],
+    transition: {
+      duration: custom.duration || 3,
+      delay: custom.delay || 0,
+      ease: "linear",
+      repeat: Infinity,
+      times: [0, 0.1, 0.9, 1]
+    }
+  })
+};
+
+// Feature card reveal animation
+export const featureReveal = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+    scale: 0.9,
+    rotateX: -10,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotateX: 0,
+    transition: {
+      duration: 0.8,
+      ease: appleEase.dramatic,
+      opacity: { duration: 0.6 },
+      scale: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  }
+};
+
+// Hero text reveal with blur
+export const heroTextReveal = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+    filter: "blur(10px)",
+    scale: 0.95,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    scale: 1,
+    transition: {
+      duration: 1,
+      ease: appleEase.dramatic,
+      filter: { duration: 0.8 }
+    }
+  }
+};

@@ -13,7 +13,11 @@ import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
 import Breadcrumb from '../components/Breadcrumb';
 import ScrollToTop from '../components/ScrollToTop';
-import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft } from 'lucide-react';
+import MobileFAB from '../components/MobileFAB';
+import MobileBottomSheet from '../components/MobileBottomSheet';
+import MobileContextMenu from '../components/MobileContextMenu';
+import { useTouchGestures, usePullToRefresh } from '../hooks/useTouchGestures';
+import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft, MoreVertical } from 'lucide-react';
 import storageWrapper, { deleteEntry } from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';
@@ -66,6 +70,10 @@ export default function Dashboard() {
   const [editingProject, setEditingProject] = useState(null);
   const { isCollapsed: isSidebarCollapsed, toggleCollapsed: toggleSidebarCollapse, showMobileSidebar: showSidebar, toggleMobileSidebar, closeMobileSidebar } = useSidebar();
   const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showMobileSidebarSheet, setShowMobileSidebarSheet] = useState(false);
+  const [showMobileContextMenu, setShowMobileContextMenu] = useState(false);
+  const [contextMenuTarget, setContextMenuTarget] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   // Initialize auto-save functionality
   const { performAutoSave } = useAutoSave();
@@ -94,6 +102,25 @@ export default function Dashboard() {
   
   // Currently dragged item
   const [activeId, setActiveId] = useState(null);
+  
+  // Detect mobile viewport
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Pull to refresh on mobile
+  const { elementRef: pullToRefreshRef, isPulling, pullDistance, pullProgress } = usePullToRefresh(
+    async () => {
+      await loadEntries();
+      toast.success('Documents refreshed');
+    },
+    isMobile ? 80 : 0 // Only enable on mobile
+  );
   
   // Handle document expansion with lazy block loading
   const handleDocumentExpand = useCallback((document) => {
@@ -1157,7 +1184,13 @@ export default function Dashboard() {
             <div className="flex items-center gap-2.5 ml-0 lg:ml-[288px]">
               {/* Mobile menu button */}
               <button
-                onClick={() => toggleMobileSidebar()}
+                onClick={() => {
+                  if (isMobile) {
+                    setShowMobileSidebarSheet(true);
+                  } else {
+                    toggleMobileSidebar();
+                  }
+                }}
                 className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden absolute left-4"
               >
                 <Menu size={20} className="text-text-primary" />
@@ -1345,7 +1378,7 @@ export default function Dashboard() {
               
               <button
                 onClick={createNewEntry}
-                className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 
+                className="hidden md:flex flex-shrink-0 items-center gap-1.5 px-3 py-2 
                            bg-dark-secondary/40 hover:bg-dark-secondary/60
                            text-text-primary rounded transition-all
                            border border-dark-secondary/50 hover:border-accent-green/40
@@ -1367,11 +1400,28 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content - Documents Grid */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar"
-             style={{ 
-               scrollbarWidth: 'thin',
-               scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)'
-             }}>
+        <div 
+          ref={pullToRefreshRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar relative"
+          style={{ 
+            scrollbarWidth: 'thin',
+            scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)',
+            paddingBottom: isMobile ? '80px' : '1rem' // Space for mobile FAB
+          }}>
+          {/* Pull to refresh indicator */}
+          {isPulling && (
+            <div 
+              className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all"
+              style={{ 
+                height: `${pullDistance}px`,
+                opacity: pullProgress 
+              }}
+            >
+              <div className="text-text-secondary text-sm">
+                {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
+              </div>
+            </div>
+          )}
           <VirtualizedGrid 
             entries={filteredEntries}
             onExpand={handleDocumentExpand}
@@ -1380,6 +1430,10 @@ export default function Dashboard() {
             onSelectDocument={handleDocumentSelect}
             selectionMode={selectedDocuments.size > 0}
             sidebarCollapsed={isSidebarCollapsed}
+            onContextMenu={isMobile ? (entry) => {
+              setContextMenuTarget(entry);
+              setShowMobileContextMenu(true);
+            } : undefined}
           />
         </div>
       </main>
@@ -1499,6 +1553,122 @@ export default function Dashboard() {
         onCreateDocument={handleCommandPaletteCreateDocument}
         onCreateProject={handleCommandPaletteCreateProject}
       />
+      
+      {/* Mobile FAB */}
+      {isMobile && !expandedEntry && (
+        <MobileFAB
+          onCreateDocument={() => createNewEntry()}
+          onCreateFolder={() => {
+            // TODO: Implement folder creation
+            toast.info('Folder creation coming soon!');
+          }}
+          onCreateProject={() => {
+            setEditingProject(null);
+            setShowProjectModal(true);
+          }}
+        />
+      )}
+      
+      {/* Mobile Bottom Sheet for Sidebar */}
+      {isMobile && (
+        <MobileBottomSheet
+          isOpen={showMobileSidebarSheet}
+          onClose={() => setShowMobileSidebarSheet(false)}
+          title="Projects & Folders"
+          snapPoints={['50%', '90%']}
+          defaultSnap={0}
+        >
+          <ProjectExplorer
+            isCollapsed={false}
+            onToggleCollapse={() => {}}
+            className="h-full"
+            onDocumentSelect={(data) => {
+              if (data?.action === 'create') {
+                createNewEntry(data.folderId);
+              } else if (data?.id) {
+                const doc = entries.find(e => e.id === data.id);
+                if (doc) {
+                  handleDocumentExpand(doc);
+                }
+              } else if (data) {
+                handleDocumentExpand(data);
+              }
+              setShowMobileSidebarSheet(false);
+            }}
+            selectedDocumentId={expandedEntry?.id}
+            projects={projects}
+            documents={entries}
+            selectedProjectId={selectedProjectId}
+            onProjectSelect={(projectId) => {
+              handleProjectSelect(projectId);
+              setShowMobileSidebarSheet(false);
+            }}
+            onDocumentMove={async (docId, folderId) => {
+              await updateEntry(docId, { folder_id: folderId });
+            }}
+            onDocumentDelete={async (document) => {
+              const docId = document.id || document;
+              if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+                await deleteEntry(docId);
+                await loadEntries();
+                toast.success('Document deleted successfully');
+              }
+            }}
+            onCreateProject={() => {
+              setEditingProject(null);
+              setShowProjectModal(true);
+              setShowMobileSidebarSheet(false);
+            }}
+            onUpdateProject={(project) => {
+              setEditingProject(project);
+              setShowProjectModal(true);
+              setShowMobileSidebarSheet(false);
+            }}
+            onDeleteProject={handleDeleteProject}
+            onToggleFavorite={handleToggleFavorite}
+            totalDocuments={entries.length}
+            uncategorizedCount={entries.filter(e => !e.project_id).length}
+          />
+        </MobileBottomSheet>
+      )}
+      
+      {/* Mobile Context Menu */}
+      {isMobile && showMobileContextMenu && contextMenuTarget && (
+        <MobileContextMenu
+          isOpen={showMobileContextMenu}
+          onClose={() => {
+            setShowMobileContextMenu(false);
+            setContextMenuTarget(null);
+          }}
+          title={contextMenuTarget.title}
+          actions={[
+            {
+              icon: FileText,
+              label: 'Open',
+              onClick: () => handleDocumentExpand(contextMenuTarget)
+            },
+            {
+              icon: Folder,
+              label: 'Move to Folder',
+              onClick: () => {
+                // TODO: Implement move to folder
+                toast.info('Move to folder coming soon!');
+              }
+            }
+          ]}
+          destructiveAction={{
+            icon: FileText,
+            label: 'Delete Document',
+            onClick: async () => {
+              if (confirm(`Delete "${contextMenuTarget.title}"?`)) {
+                await deleteEntry(contextMenuTarget.id);
+                await loadEntries();
+                toast.success('Document deleted');
+              }
+            }
+          }}
+        />
+      )}
     </DndContext>
   );
 }

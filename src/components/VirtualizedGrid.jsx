@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import EntryCard from './EntryCard';
 import Sparkline from './Sparkline';
 import { generateActivityData } from '../utils/activityData';
+import { useTouchGestures } from '../hooks/useTouchGestures';
 import './VirtualizedGrid.css';
 
 export default function VirtualizedGrid({ 
@@ -11,7 +12,8 @@ export default function VirtualizedGrid({
   selectedDocuments = new Set(),
   onSelectDocument,
   selectionMode = false,
-  sidebarCollapsed = false
+  sidebarCollapsed = false,
+  onContextMenu
 }) {
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
@@ -20,10 +22,15 @@ export default function VirtualizedGrid({
   
   // Configuration for cards - responsive sizes
   const isMobile = containerWidth < 640;
+  const isTablet = containerWidth >= 640 && containerWidth < 1024;
   const CARD_WIDTH = isMobile ? containerWidth - 32 : 280; // Full width on mobile minus padding
-  const CARD_HEIGHT = isMobile ? 140 : 160; // Slightly shorter on mobile
+  const CARD_HEIGHT = isMobile ? 120 : isTablet ? 140 : 160; // Optimized heights
   const GAP = isMobile ? 12 : 16; // Tighter spacing on mobile
-  const BUFFER_ROWS = 2; // Extra rows to render for smooth scrolling
+  const BUFFER_ROWS = isMobile ? 3 : 2; // More buffer on mobile for smoother scrolling
+  
+  // Touch optimization states
+  const [touchScrolling, setTouchScrolling] = useState(false);
+  const lastTouchY = useRef(0);
   
   // Dynamic max columns based on screen size for enterprise-grade responsiveness
   const calculateMaxColumns = useCallback(() => {
@@ -37,8 +44,8 @@ export default function VirtualizedGrid({
   
   const MAX_COLUMNS = calculateMaxColumns();
 
-  // Calculate columns based on container width
-  const columns = isMobile ? 1 : Math.min(
+  // Calculate columns based on container width with mobile optimization
+  const columns = isMobile ? 1 : isTablet ? 2 : Math.min(
     Math.floor((containerWidth + GAP) / (CARD_WIDTH + GAP)) || 1,
     MAX_COLUMNS
   );
@@ -131,6 +138,16 @@ export default function VirtualizedGrid({
   
   // Remove debug logging to prevent console spam
 
+  // Touch-optimized scroll handling
+  const handleTouchStart = useCallback((e) => {
+    lastTouchY.current = e.touches[0].clientY;
+    setTouchScrolling(true);
+  }, []);
+  
+  const handleTouchEnd = useCallback(() => {
+    setTouchScrolling(false);
+  }, []);
+  
   // Handle scroll to update visible range
   const handleScroll = useCallback(() => {
     // Find the parent scrollable container (the cards container in Dashboard)
@@ -158,11 +175,27 @@ export default function VirtualizedGrid({
     const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
     if (!scrollContainer) return;
 
-    scrollContainer.addEventListener('scroll', handleScroll);
+    // Optimized scroll handling with passive listeners for mobile
+    const scrollOptions = { passive: true };
+    
+    scrollContainer.addEventListener('scroll', handleScroll, scrollOptions);
+    
+    // Touch event listeners for mobile optimization
+    if (isMobile) {
+      scrollContainer.addEventListener('touchstart', handleTouchStart, scrollOptions);
+      scrollContainer.addEventListener('touchend', handleTouchEnd, scrollOptions);
+    }
+    
     handleScroll(); // Initial calculation
     
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      if (isMobile) {
+        scrollContainer.removeEventListener('touchstart', handleTouchStart);
+        scrollContainer.removeEventListener('touchend', handleTouchEnd);
+      }
+    };
+  }, [handleScroll, handleTouchStart, handleTouchEnd, isMobile]);
 
   // Get position for each item with smooth transitions
   const getItemStyle = (index) => {
@@ -175,8 +208,10 @@ export default function VirtualizedGrid({
       left: centerOffset + col * (CARD_WIDTH + GAP),
       width: CARD_WIDTH,
       height: CARD_HEIGHT,
-      transition: 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
-      willChange: 'left, top'
+      transition: touchScrolling ? 'none' : 'all 300ms cubic-bezier(0.4, 0, 0.2, 1)',
+      willChange: touchScrolling ? 'transform' : 'left, top',
+      // Hardware acceleration for mobile
+      transform: isMobile ? 'translateZ(0)' : 'none'
     };
   };
 
@@ -273,10 +308,12 @@ export default function VirtualizedGrid({
             <CompactEntryCard 
               entry={item} 
               onExpand={onExpand}
+              onContextMenu={onContextMenu}
               searchTerm={searchTerm}
               isSelected={selectedDocuments.has(item.id)}
               onSelect={onSelectDocument}
               selectionMode={selectionMode}
+              onContextMenu={onContextMenu}
             />
           </div>
         );

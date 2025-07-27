@@ -12,6 +12,7 @@
 @import './styles/inline-action-bar.css';
 @import './styles/video-showcase.css';
 @import './styles/hero-background-animation.css';
+@import './styles/mobile-optimizations.css';
 
 @tailwind base;
 @tailwind components;

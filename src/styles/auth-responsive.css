@@ -81,10 +81,8 @@
    Base Layout - No Scroll Foundation
    ===================================================== */
 
-/* Desktop Brand Mark - Professional placement */
-.auth-brand-mark {
-  display: none; /* Hidden on mobile by default */
-}
+/* Desktop Brand Mark - Removed */
+/* Logo elements have been removed from the auth page */
 
 .auth-page-wrapper {
   position: fixed;
@@ -147,28 +145,17 @@
 .auth-mobile-branding {
   text-align: center;
   animation: fadeInUp 0.6s ease-out;
+  margin-bottom: var(--spacing-lg);
 }
 
-.auth-logo-group {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-md);
-}
-
-.auth-logo-text {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: var(--auth-text-primary);
-  margin: 0;
-  letter-spacing: -0.025em;
-}
+/* Logo group and text - Removed */
+/* Logo elements have been removed from the auth page */
 
 .auth-mobile-tagline {
-  font-size: var(--font-size-base);
-  color: var(--auth-text-secondary);
+  font-size: var(--font-size-lg);
+  color: var(--auth-text-primary);
   margin: 0;
+  font-weight: 600;
 }
 
 /* Form Header */
@@ -370,41 +357,8 @@
    Desktop Breakpoint (1024px+) - Two Column Layout
    ===================================================== */
 @media (min-width: 1024px) {
-  /* Desktop Brand Mark - Inside form */
-  .auth-brand-mark {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 3rem;
-    opacity: 0;
-    animation: fadeInDown 0.6s ease-out forwards;
-    position: relative;
-  }
-  
-  .auth-brand-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--auth-text-primary);
-    letter-spacing: -0.02em;
-  }
-  
-  /* Subtle brand accent */
-  .auth-brand-mark::after {
-    content: '';
-    position: absolute;
-    bottom: -1rem;
-    left: 0;
-    width: 2rem;
-    height: 2px;
-    background: var(--auth-accent);
-    opacity: 0.5;
-    animation: expandWidth 0.8s ease-out 0.3s forwards;
-  }
-  
-  @keyframes expandWidth {
-    from { width: 0; }
-    to { width: 2rem; }
-  }
+  /* Desktop Brand Mark - Removed */
+  /* Logo elements have been removed from the auth page */
   
   .auth-page-wrapper {
     display: grid;

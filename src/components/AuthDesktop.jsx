@@ -4,7 +4,6 @@ import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabaseOptimized'
 import { getURL } from '../utils/auth'
 import { Terminal, Link2, GitBranch, Zap, Shield, MessageSquare, Search } from 'lucide-react'
-import LogoMinimal from './LogoMinimal'
 import AuthDebugConsole from './debug/AuthDebugConsole'
 import '../styles/auth-responsive.css'
 
@@ -81,18 +80,8 @@ const AuthDesktop = () => {
       <div className="auth-form-panel" ref={formPanelRef}>
         <div className="auth-form-scaling-wrapper">
           <div className="auth-form-container" ref={formContainerRef}>
-          {/* Desktop Logo - Professional placement */}
-          <div className="auth-brand-mark">
-            <LogoMinimal size={32} />
-            <span className="auth-brand-text">Devlog</span>
-          </div>
-          
-          {/* Mobile Branding */}
+          {/* Mobile Branding - Logo removed */}
           <div className="auth-mobile-branding">
-            <div className="auth-logo-group">
-              <LogoMinimal size={48} />
-              <h1 className="auth-logo-text">Devlog</h1>
-            </div>
             <p className="auth-mobile-tagline">
               Never Google The Same Error Twice
             </p>

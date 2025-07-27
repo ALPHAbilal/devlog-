@@ -84,7 +84,8 @@ const AuthDesktop = () => {
 
       {/* Auth Form Panel */}
       <div className="auth-form-panel" ref={formPanelRef}>
-        <div className="auth-form-container" ref={formContainerRef}>
+        <div className="auth-form-scaling-wrapper">
+          <div className="auth-form-container" ref={formContainerRef}>
           {/* Mobile Branding */}
           <div className="auth-mobile-branding">
             <div className="auth-logo-group">
@@ -173,6 +174,7 @@ const AuthDesktop = () => {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

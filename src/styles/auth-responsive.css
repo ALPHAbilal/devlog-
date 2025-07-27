@@ -1,40 +1,52 @@
 /* =====================================================
-   Auth Page - Adaptive Layout System
-   Natural content flow with smart responsive behavior
+   Auth Page - No-Scroll Intelligent Scaling System
+   Modern solution that eliminates scrolling entirely
    ===================================================== */
 
 /* =====================================================
-   CSS Custom Properties - Fluid Design Tokens
+   CSS Custom Properties - Dynamic Calculations
    ===================================================== */
 :root {
-  /* Fluid Typography Scale */
-  --auth-text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
-  --auth-text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
-  --auth-text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
-  --auth-text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
-  --auth-text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
-  --auth-text-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
-  --auth-text-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
-  --auth-text-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem);
-
-  /* Fluid Spacing Scale */
-  --auth-space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
-  --auth-space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
-  --auth-space-md: clamp(0.75rem, 0.6rem + 0.75vw, 1rem);
-  --auth-space-lg: clamp(1rem, 0.8rem + 1vw, 1.5rem);
-  --auth-space-xl: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
-  --auth-space-2xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
-  --auth-space-3xl: clamp(3rem, 2rem + 5vw, 4rem);
-
-  /* Adaptive Spacing - responds to viewport height */
-  --auth-adaptive-padding: clamp(1.5rem, 5vh, 4rem);
-
-  /* Container Widths */
-  --auth-form-width-sm: 320px;
-  --auth-form-width-md: 380px;
-  --auth-form-width-lg: 440px;
-  --auth-form-width-xl: 480px;
-
+  /* Viewport dimensions */
+  --viewport-width: 100vw;
+  --viewport-height: 100vh;
+  --viewport-height-dynamic: 100dvh;
+  
+  /* Form natural dimensions */
+  --form-natural-width: 480px;
+  --form-natural-height: 800px;
+  
+  /* Dynamic scale calculation */
+  --available-height: calc(var(--viewport-height-dynamic) - 2rem);
+  --available-width: calc(var(--viewport-width) - 2rem);
+  
+  --scale-factor-height: calc(var(--available-height) / var(--form-natural-height));
+  --scale-factor-width: calc(var(--available-width) / var(--form-natural-width));
+  --scale-factor: min(var(--scale-factor-height), var(--scale-factor-width), 1);
+  
+  /* Minimum scale to maintain readability */
+  --min-scale: 0.65;
+  --applied-scale: max(var(--scale-factor), var(--min-scale));
+  
+  /* Viewport-aware typography */
+  --font-size-base: clamp(14px, 2vmin, 16px);
+  --font-size-sm: clamp(12px, 1.5vmin, 14px);
+  --font-size-lg: clamp(16px, 2.5vmin, 20px);
+  --font-size-xl: clamp(20px, 3vmin, 24px);
+  --font-size-2xl: clamp(24px, 4vmin, 32px);
+  --font-size-3xl: clamp(28px, 5vmin, 40px);
+  
+  /* Dynamic spacing that scales with viewport */
+  --spacing-xs: clamp(0.25rem, 1vmin, 0.5rem);
+  --spacing-sm: clamp(0.5rem, 2vmin, 1rem);
+  --spacing-md: clamp(0.75rem, 3vmin, 1.5rem);
+  --spacing-lg: clamp(1rem, 4vmin, 2rem);
+  --spacing-xl: clamp(1.5rem, 5vmin, 3rem);
+  
+  /* Compact mode thresholds */
+  --compact-threshold: 750px;
+  --ultra-compact-threshold: 600px;
+  
   /* Colors */
   --auth-bg-primary: #0a1628;
   --auth-bg-secondary: #1a2332;
@@ -45,74 +57,84 @@
   --auth-border: rgba(75, 85, 99, 0.3);
 }
 
-/* =====================================================
-   Base Layout - Mobile First
-   ===================================================== */
-.auth-page-wrapper {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
-  background: var(--auth-bg-primary);
-  position: relative;
+/* Compact mode adjustments */
+@media (max-height: 750px) {
+  :root {
+    --form-natural-height: 700px;
+    --spacing-md: clamp(0.5rem, 2vmin, 1rem);
+    --spacing-lg: clamp(0.75rem, 3vmin, 1.5rem);
+    --spacing-xl: clamp(1rem, 4vmin, 2rem);
+  }
 }
 
-/* Hide branding panel on mobile */
+/* Ultra-compact mode */
+@media (max-height: 600px) {
+  :root {
+    --form-natural-height: 550px;
+    --spacing-sm: clamp(0.25rem, 1vmin, 0.5rem);
+    --spacing-md: clamp(0.375rem, 1.5vmin, 0.75rem);
+    --spacing-lg: clamp(0.5rem, 2vmin, 1rem);
+  }
+}
+
+/* =====================================================
+   Base Layout - No Scroll Foundation
+   ===================================================== */
+.auth-page-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--auth-bg-primary);
+  display: flex;
+  flex-direction: column;
+  
+  /* Prevent scrollbar space */
+  scrollbar-gutter: stable;
+}
+
+/* Mobile: Hide branding panel */
 .auth-branding-panel {
   display: none;
 }
 
-/* Form panel - natural height with smart alignment */
+/* Form panel - always fits viewport */
 .auth-form-panel {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--auth-space-lg);
+  padding: 1rem;
   background: linear-gradient(135deg, var(--auth-bg-primary) 0%, var(--auth-bg-secondary) 100%);
   position: relative;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden; /* Prevent any scrolling */
   
-  /* Smooth scrolling */
-  scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
+  /* Use dynamic viewport height */
+  height: var(--viewport-height-dynamic);
+  height: var(--viewport-height); /* Fallback */
 }
 
-/* Custom scrollbar styling */
-.auth-form-panel::-webkit-scrollbar {
-  width: 6px;
+/* Form scaling container */
+.auth-form-scaling-wrapper {
+  transform: scale(var(--applied-scale));
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Maintain aspect ratio */
+  width: var(--form-natural-width);
+  max-width: calc(90vw / var(--applied-scale));
 }
 
-.auth-form-panel::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
-
-.auth-form-panel::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.2);
-  border-radius: 3px;
-}
-
-.auth-form-panel::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.4);
-}
-
-/* Form container - natural sizing */
+/* Form container */
 .auth-form-container {
-  width: 100%;
-  max-width: var(--auth-form-width-sm);
   display: flex;
   flex-direction: column;
-  gap: var(--auth-space-xl);
-  /* Allow natural height */
-  height: auto;
-  /* Ensure minimum spacing from viewport edges */
-  margin-block: var(--auth-space-lg);
+  gap: var(--spacing-lg);
+  width: 100%;
+  padding: var(--spacing-md);
 }
 
 /* =====================================================
-   Component Styles
+   Component Styles - Viewport Aware
    ===================================================== */
 
 /* Mobile Branding */
@@ -125,19 +147,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--auth-space-sm);
-  margin-bottom: var(--auth-space-md);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .auth-logo-text {
-  font-size: var(--auth-text-3xl);
+  font-size: var(--font-size-2xl);
   font-weight: 800;
   color: var(--auth-text-primary);
   margin: 0;
 }
 
 .auth-mobile-tagline {
-  font-size: var(--auth-text-base);
+  font-size: var(--font-size-base);
   color: var(--auth-text-secondary);
   margin: 0;
 }
@@ -149,7 +171,7 @@
 }
 
 .auth-form-header h3 {
-  font-size: var(--auth-text-2xl);
+  font-size: var(--font-size-xl);
   font-weight: 700;
   color: var(--auth-text-primary);
   margin: 0;
@@ -161,7 +183,7 @@
   backdrop-filter: blur(12px);
   border: 1px solid var(--auth-border);
   border-radius: 0.75rem;
-  padding: var(--auth-space-xl);
+  padding: var(--spacing-lg);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   animation: scaleIn 0.5s ease-out 0.2s both;
 }
@@ -169,13 +191,13 @@
 /* Footer */
 .auth-form-footer {
   text-align: center;
-  margin-top: var(--auth-space-lg);
-  padding-top: var(--auth-space-lg);
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
   border-top: 1px solid rgba(75, 85, 99, 0.2);
 }
 
 .auth-form-footer p {
-  font-size: var(--auth-text-xs);
+  font-size: var(--font-size-sm);
   color: var(--auth-text-secondary);
   margin: 0;
 }
@@ -191,19 +213,19 @@
 }
 
 /* =====================================================
-   Supabase Auth UI Customizations
+   Supabase Auth UI - Dynamic Sizing
    ===================================================== */
 
 /* Form Container */
 .supabase-auth-ui_ui-container {
-  gap: var(--auth-space-lg) !important;
+  gap: var(--spacing-md) !important;
 }
 
-/* Buttons */
+/* Buttons - minimum 44px touch target */
 .supabase-auth-ui_ui-button {
-  font-size: var(--auth-text-base) !important;
-  padding: var(--auth-space-md) var(--auth-space-lg) !important;
-  min-height: 44px !important;
+  font-size: var(--font-size-base) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  min-height: max(44px, calc(2.5rem * var(--applied-scale))) !important;
   border-radius: 0.5rem !important;
   font-weight: 600 !important;
   transition: all 0.2s ease !important;
@@ -255,9 +277,9 @@
 
 /* Inputs */
 .supabase-auth-ui_ui-input {
-  font-size: var(--auth-text-base) !important;
-  padding: var(--auth-space-md) var(--auth-space-lg) !important;
-  min-height: 44px !important;
+  font-size: var(--font-size-base) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  min-height: max(44px, calc(2.5rem * var(--applied-scale))) !important;
   background: rgba(10, 22, 40, 0.5) !important;
   backdrop-filter: blur(8px) !important;
   border: 1px solid var(--auth-border) !important;
@@ -278,17 +300,17 @@
 
 /* Labels */
 .supabase-auth-ui_ui-label {
-  font-size: var(--auth-text-sm) !important;
+  font-size: var(--font-size-sm) !important;
   font-weight: 600 !important;
   color: var(--auth-text-primary) !important;
-  margin-bottom: var(--auth-space-xs) !important;
+  margin-bottom: var(--spacing-xs) !important;
 }
 
 /* Divider */
 .supabase-auth-ui_ui-divider {
   position: relative !important;
   text-align: center !important;
-  margin: var(--auth-space-lg) 0 !important;
+  margin: var(--spacing-md) 0 !important;
 }
 
 .supabase-auth-ui_ui-divider::before {
@@ -303,19 +325,19 @@
 
 .supabase-auth-ui_ui-divider span {
   background: var(--auth-bg-primary) !important;
-  padding: 0 var(--auth-space-lg) !important;
+  padding: 0 var(--spacing-md) !important;
   position: relative !important;
   color: var(--auth-text-secondary) !important;
-  font-size: var(--auth-text-sm) !important;
+  font-size: var(--font-size-sm) !important;
   font-weight: 500 !important;
 }
 
 /* Messages */
 .supabase-auth-ui_ui-message {
   border-radius: 0.5rem !important;
-  padding: var(--auth-space-sm) var(--auth-space-md) !important;
-  margin: var(--auth-space-sm) 0 !important;
-  font-size: var(--auth-text-sm) !important;
+  padding: var(--spacing-sm) !important;
+  margin: var(--spacing-sm) 0 !important;
+  font-size: var(--font-size-sm) !important;
 }
 
 .supabase-auth-ui_ui-message-error {
@@ -324,40 +346,35 @@
   color: #f87171 !important;
 }
 
-/* Loading State */
-.supabase-auth-ui_ui-button[disabled] {
-  opacity: 0.7 !important;
-  cursor: not-allowed !important;
-  transform: none !important;
-}
-
 /* =====================================================
    Tablet Breakpoint (768px+)
    ===================================================== */
 @media (min-width: 768px) {
-  .auth-form-panel {
-    padding: var(--auth-space-2xl);
-  }
-  
-  .auth-form-container {
-    max-width: var(--auth-form-width-md);
+  :root {
+    --form-natural-width: 440px;
   }
   
   .auth-form-wrapper {
-    padding: var(--auth-space-2xl);
+    padding: var(--spacing-xl);
   }
 }
 
 /* =====================================================
-   Desktop Breakpoint (1024px+) - Adaptive Grid
+   Desktop Breakpoint (1024px+) - Two Column Layout
    ===================================================== */
 @media (min-width: 1024px) {
   .auth-page-wrapper {
     display: grid;
-    /* Adaptive grid - form panel gets what it needs, branding fills rest */
-    grid-template-columns: 1fr min(max(480px, 35vw), 600px);
-    min-height: 100vh;
-    min-height: 100dvh;
+    grid-template-columns: 1fr minmax(480px, min(35vw, 640px));
+    position: fixed;
+    inset: 0;
+  }
+  
+  /* Reset scale for desktop if viewport is large enough */
+  @media (min-height: 850px) {
+    :root {
+      --applied-scale: 1;
+    }
   }
   
   /* Show branding panel */
@@ -365,10 +382,11 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
-    padding: var(--auth-space-2xl);
+    padding: var(--spacing-xl);
     background: linear-gradient(135deg, var(--auth-bg-primary) 0%, var(--auth-bg-secondary) 50%, var(--auth-bg-primary) 100%);
     position: relative;
     overflow: hidden;
+    height: 100%;
   }
   
   /* Background pattern */
@@ -413,10 +431,10 @@
   }
   
   .auth-tagline {
-    font-size: var(--auth-text-3xl);
+    font-size: var(--font-size-3xl);
     font-weight: 700;
     color: var(--auth-text-primary);
-    margin: var(--auth-space-lg) 0;
+    margin: var(--spacing-lg) 0;
     line-height: 1.2;
   }
   
@@ -426,44 +444,44 @@
   }
   
   .auth-subtitle {
-    font-size: var(--auth-text-lg);
+    font-size: var(--font-size-lg);
     color: var(--auth-text-secondary);
-    margin-bottom: var(--auth-space-xl);
+    margin-bottom: var(--spacing-xl);
     font-weight: 500;
   }
   
   /* Code snippets */
   .auth-code-snippets {
     font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-    font-size: var(--auth-text-sm);
-    margin-bottom: var(--auth-space-xl);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xl);
   }
   
   .auth-code-line {
     color: rgba(243, 244, 246, 0.7);
-    margin-bottom: var(--auth-space-sm);
+    margin-bottom: var(--spacing-sm);
     opacity: 0;
     animation: slideIn 0.5s ease-out forwards;
   }
   
   .auth-code-prompt {
     color: var(--auth-accent);
-    margin-right: var(--auth-space-xs);
+    margin-right: var(--spacing-xs);
   }
   
   /* Features */
   .auth-features {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--auth-space-lg);
+    gap: var(--spacing-lg);
   }
   
   .auth-feature-item {
     display: flex;
     align-items: center;
-    gap: var(--auth-space-sm);
+    gap: var(--spacing-sm);
     color: var(--auth-text-secondary);
-    font-size: var(--auth-text-sm);
+    font-size: var(--font-size-sm);
     opacity: 0;
     animation: slideIn 0.5s ease-out forwards;
   }
@@ -478,28 +496,37 @@
     display: none !important;
   }
   
-  /* Form panel - adaptive padding and alignment */
+  /* Form panel */
   .auth-form-panel {
     background: var(--auth-bg-primary);
-    padding: var(--auth-adaptive-padding);
-    
-    /* Adaptive alignment - centers when content fits, top-aligns when it doesn't */
-    @supports (align-items: safe center) {
-      align-items: safe center;
+    padding: var(--spacing-lg);
+  }
+  
+  /* Desktop compact modes */
+  @media (max-height: 700px) {
+    .auth-tagline {
+      font-size: var(--font-size-2xl);
+      margin: var(--spacing-md) 0;
     }
     
-    /* Fallback for browsers without safe alignment */
-    @supports not (align-items: safe center) {
-      align-items: flex-start;
-      padding-top: min(var(--auth-adaptive-padding), 10vh);
+    .auth-subtitle {
+      font-size: var(--font-size-base);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .auth-features {
+      gap: var(--spacing-md);
     }
   }
   
-  /* Form container adapts to viewport */
-  .auth-form-container {
-    max-width: var(--auth-form-width-lg);
-    /* Remove vertical margins on desktop - let flex handle it */
-    margin-block: 0;
+  @media (max-height: 600px) {
+    .auth-code-snippets {
+      display: none;
+    }
+    
+    .auth-branding-panel {
+      padding: var(--spacing-lg);
+    }
   }
 }
 
@@ -508,19 +535,11 @@
    ===================================================== */
 @media (min-width: 1440px) {
   .auth-page-wrapper {
-    grid-template-columns: 1fr min(max(520px, 33vw), 640px);
+    grid-template-columns: 1fr minmax(520px, min(33vw, 680px));
   }
   
-  .auth-branding-panel {
-    padding: var(--auth-space-3xl);
-  }
-  
-  .auth-form-panel {
-    padding: var(--auth-adaptive-padding);
-  }
-  
-  .auth-form-container {
-    max-width: var(--auth-form-width-xl);
+  :root {
+    --form-natural-width: 480px;
   }
 }
 
@@ -529,115 +548,13 @@
    ===================================================== */
 @media (min-width: 1920px) {
   .auth-page-wrapper {
-    grid-template-columns: 1fr 640px;
+    grid-template-columns: 1fr 720px;
     max-width: 2400px;
     margin: 0 auto;
   }
   
   .auth-branding-content {
     max-width: 600px;
-  }
-}
-
-/* =====================================================
-   4K Displays (2560px+)
-   ===================================================== */
-@media (min-width: 2560px) {
-  .auth-page-wrapper {
-    grid-template-columns: 1fr 720px;
-    max-width: 3200px;
-  }
-  
-  .auth-form-panel {
-    padding: calc(var(--auth-space-3xl) * 1.5);
-  }
-}
-
-/* =====================================================
-   Short Viewports - Adaptive Behavior
-   ===================================================== */
-@media (max-height: 750px) and (min-width: 1024px) {
-  :root {
-    /* Reduce adaptive padding on short viewports */
-    --auth-adaptive-padding: clamp(1rem, 3vh, 2rem);
-  }
-  
-  /* Tighter spacing for short viewports */
-  .auth-form-container {
-    gap: var(--auth-space-lg);
-  }
-  
-  .auth-form-wrapper {
-    padding: var(--auth-space-lg);
-  }
-  
-  /* Reduce branding panel padding */
-  .auth-branding-panel {
-    padding: var(--auth-space-lg);
-  }
-  
-  /* Smaller text on short viewports */
-  .auth-tagline {
-    font-size: var(--auth-text-2xl);
-    margin: var(--auth-space-md) 0;
-  }
-  
-  .auth-subtitle {
-    font-size: var(--auth-text-base);
-    margin-bottom: var(--auth-space-lg);
-  }
-  
-  /* Compact features */
-  .auth-features {
-    gap: var(--auth-space-md);
-  }
-  
-  /* Tighter form spacing */
-  .supabase-auth-ui_ui-container {
-    gap: var(--auth-space-md) !important;
-  }
-  
-  .supabase-auth-ui_ui-divider {
-    margin: var(--auth-space-md) 0 !important;
-  }
-}
-
-/* Very short viewports */
-@media (max-height: 600px) and (min-width: 1024px) {
-  /* Hide decorative elements */
-  .auth-code-snippets {
-    display: none;
-  }
-  
-  /* Further reduce spacing */
-  .auth-form-container {
-    gap: var(--auth-space-md);
-  }
-  
-  .auth-form-wrapper {
-    padding: var(--auth-space-md);
-  }
-}
-
-/* =====================================================
-   Landscape Mobile
-   ===================================================== */
-@media (orientation: landscape) and (max-height: 600px) and (max-width: 1023px) {
-  .auth-form-panel {
-    padding: var(--auth-space-sm) var(--auth-space-xl);
-  }
-  
-  .auth-mobile-branding {
-    margin-bottom: var(--auth-space-sm);
-  }
-  
-  .auth-form-container {
-    gap: var(--auth-space-sm);
-    margin-block: var(--auth-space-sm);
-  }
-  
-  .auth-form-wrapper {
-    padding: var(--auth-space-md);
   }
 }
 
@@ -694,5 +611,9 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  .auth-form-scaling-wrapper {
+    transition: none !important;
   }
 }

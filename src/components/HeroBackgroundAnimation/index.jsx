@@ -1,12 +1,9 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import BlockConstellation from './BlockConstellation';
-import CodeEvolution from './CodeEvolution';
-import KnowledgeGraph from './KnowledgeGraph';
-import WorkflowParticles from './WorkflowParticles';
+import MinimalParticles from './MinimalParticles';
 
-// Performance optimization - lazy load on desktop only
-const isMobile = window.innerWidth < 768;
+// Performance optimization - only render on larger screens
+const isMobile = window.innerWidth < 1024;
 
 export default function HeroBackgroundAnimation() {
   const [isVisible, setIsVisible] = useState(false);
@@ -47,37 +44,12 @@ export default function HeroBackgroundAnimation() {
       className="hero-background-animation"
       initial={{ opacity: 0 }}
       animate={{ opacity: isVisible ? 1 : 0 }}
-      transition={{ duration: 1 }}
+      transition={{ duration: 2, ease: "easeOut" }}
     >
-      {/* Layer 1: Block Constellation Network */}
-      <div className="animation-layer constellation-layer">
-        <Suspense fallback={null}>
-          {isVisible && <BlockConstellation />}
-        </Suspense>
-      </div>
-
-      {/* Layer 2: Code Evolution */}
-      <div className="animation-layer evolution-layer">
-        <Suspense fallback={null}>
-          {isVisible && <CodeEvolution />}
-        </Suspense>
-      </div>
-
-      {/* Layer 3: Knowledge Graph */}
-      <div className="animation-layer graph-layer">
-        <Suspense fallback={null}>
-          {isVisible && <KnowledgeGraph />}
-        </Suspense>
-      </div>
-
-      {/* Layer 4: Workflow Particles */}
-      <div className="animation-layer workflow-layer">
-        <Suspense fallback={null}>
-          {isVisible && <WorkflowParticles />}
-        </Suspense>
-      </div>
-
-      {/* Gradient overlay for depth */}
+      {/* Single minimal animation layer - 2025 enterprise style */}
+      {isVisible && <MinimalParticles />}
+      
+      {/* Subtle gradient overlay */}
       <div className="animation-gradient-overlay" />
     </motion.div>
   );

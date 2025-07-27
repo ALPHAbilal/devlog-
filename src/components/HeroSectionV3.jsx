@@ -6,6 +6,7 @@ import { heroTextReveal, magneticHover, liquidMorph, staggerContainer, staggerIt
 import ParticleField from './ParticleField';
 import GradientMesh from './GradientMesh';
 import FloatingElements from './FloatingElements';
+import HeroBackgroundAnimation from './HeroBackgroundAnimation';
 
 export default function HeroSectionV3() {
   const navigate = useNavigate();
@@ -36,6 +37,9 @@ export default function HeroSectionV3() {
       <GradientMesh />
       <ParticleField count={30} />
       <FloatingElements />
+      
+      {/* New sophisticated background animation */}
+      <HeroBackgroundAnimation />
       
       <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10">
         {/* Enhanced Urgency Badge */}

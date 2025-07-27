@@ -1,0 +1,553 @@
+/* Hero Background Animation Styles */
+
+/* Main container */
+.hero-background-animation {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+  contain: layout style paint;
+}
+
+/* Animation layers */
+.animation-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.constellation-layer {
+  z-index: 3;
+}
+
+.evolution-layer {
+  z-index: 2;
+  top: 10%;
+  right: 5%;
+  width: 400px;
+  height: 300px;
+}
+
+.graph-layer {
+  z-index: 2;
+  bottom: 10%;
+  left: 5%;
+  width: 500px;
+  height: 400px;
+}
+
+.workflow-layer {
+  z-index: 4;
+}
+
+/* Gradient overlay */
+.animation-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    rgba(10, 22, 40, 0.2) 50%,
+    rgba(10, 22, 40, 0.4) 100%
+  );
+  z-index: 5;
+}
+
+/* Block Constellation Styles */
+.block-constellation {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.constellation-connections {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.constellation-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.node-glow {
+  position: absolute;
+  inset: -50%;
+  border-radius: 50%;
+  filter: blur(20px);
+  transition: all 0.3s ease;
+}
+
+.node-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.node-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  pointer-events: none;
+}
+
+.transform-indicator {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 22, 40, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transform-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.875rem;
+}
+
+/* Code Evolution Styles */
+.code-evolution {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.evolution-timeline {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 40px;
+}
+
+.timeline-node {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+.version-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: linear-gradient(90deg, #10b981 0%, #3b82f6 100%);
+  transform-origin: left;
+  z-index: 1;
+}
+
+.evolution-code-block {
+  background: rgba(20, 30, 48, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(10, 22, 40, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.code-version {
+  font-weight: 600;
+  color: #10b981;
+}
+
+.code-highlight {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.code-content {
+  padding: 16px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.branch-merge {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 6px;
+  color: #10b981;
+  font-size: 0.75rem;
+}
+
+.version-badges {
+  position: absolute;
+  right: -50px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.version-badge {
+  position: absolute;
+  padding: 4px 8px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 4px;
+  color: #3b82f6;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.evolution-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.evolution-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+
+/* Knowledge Graph Styles */
+.knowledge-graph {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.graph-connections {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.graph-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.node-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.node-icon.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+}
+
+.node-title {
+  font-size: 0.75rem;
+  color: #e2e8f0;
+  text-align: center;
+  max-width: 100px;
+}
+
+.link-indicator {
+  position: absolute;
+  top: -20px;
+  padding: 4px 8px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  border-radius: 4px;
+  font-size: 0.625rem;
+  color: #10b981;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.tag-cloud {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  max-width: 200px;
+}
+
+.tag-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tag-count {
+  font-size: 0.625rem;
+  opacity: 0.6;
+  margin-left: 4px;
+}
+
+.search-animation {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+}
+
+.search-traverse {
+  position: absolute;
+  color: #10b981;
+}
+
+.folder-structure {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.8;
+}
+
+.folder-item {
+  white-space: nowrap;
+}
+
+.folder-item.indent {
+  padding-left: 16px;
+}
+
+.folder-item.indent-2 {
+  padding-left: 32px;
+}
+
+/* Workflow Particles Styles */
+.workflow-particles {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.workflow-hint {
+  position: absolute;
+  top: 30%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.hint-command {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.hint-description {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.terminal-prompt {
+  position: absolute;
+  bottom: 15%;
+  left: 10%;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  color: #e2e8f0;
+}
+
+.prompt-symbol {
+  color: #10b981;
+  margin-right: 8px;
+}
+
+.prompt-cursor {
+  margin-left: 2px;
+}
+
+.save-layers {
+  position: absolute;
+  top: 20%;
+  right: 10%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(20, 30, 48, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.save-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #10b981;
+  margin-bottom: 8px;
+}
+
+.save-layer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  position: relative;
+}
+
+.save-pulse {
+  position: absolute;
+  right: -8px;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+}
+
+.export-hint {
+  position: absolute;
+  bottom: 10%;
+  right: 10%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(30, 41, 59, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.keyboard-particles {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  pointer-events: none;
+}
+
+.keyboard-key {
+  position: absolute;
+  padding: 4px 8px;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 4px;
+  color: #8b5cf6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .evolution-layer {
+    display: none;
+  }
+  
+  .graph-layer {
+    width: 400px;
+    height: 300px;
+  }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .hero-background-animation {
+    display: none;
+  }
+}
+
+/* GPU acceleration hints */
+.constellation-node,
+.graph-node,
+.evolution-code-block,
+.workflow-hint {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}

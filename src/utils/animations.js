@@ -233,3 +233,125 @@ export const scrollAnimationOptions = {
   margin: "-100px",
   amount: 0.3
 };
+
+// Problem card animations
+export const problemCardContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.3
+    }
+  }
+};
+
+export const problemCardItem = {
+  hidden: { 
+    opacity: 0, 
+    y: 30,
+    scale: 0.95
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { 
+      duration: 0.6, 
+      ease: appleEase.dramatic,
+      scale: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  }
+};
+
+// Icon float animation
+export const iconFloat = {
+  rest: { 
+    y: 0,
+    rotate: 0
+  },
+  hover: {
+    y: -4,
+    rotate: 5,
+    transition: {
+      duration: 0.3,
+      ease: appleEase.smooth,
+      rotate: {
+        duration: 0.6,
+        ease: appleEase.dramatic
+      }
+    }
+  }
+};
+
+// Glow pulse animation
+export const glowPulse = {
+  initial: {
+    opacity: 0.5,
+    scale: 1
+  },
+  animate: {
+    opacity: [0.5, 1, 0.5],
+    scale: [1, 1.1, 1],
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: "easeInOut"
+    }
+  }
+};
+
+// Card 3D tilt effect (enhanced)
+export const card3DEnhanced = {
+  rest: {
+    rotateX: 0,
+    rotateY: 0,
+    scale: 1,
+    y: 0,
+    transition: { 
+      duration: 0.4, 
+      ease: appleEase.dramatic 
+    }
+  },
+  hover: {
+    scale: 1.02,
+    y: -4,
+    transition: { 
+      duration: 0.4, 
+      ease: appleEase.dramatic,
+      scale: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    }
+  }
+};
+
+// Gradient animation for borders
+export const gradientLoop = {
+  animate: {
+    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+    transition: {
+      duration: 3,
+      repeat: Infinity,
+      ease: "linear"
+    }
+  }
+};
+
+// Indicator fill animation
+export const indicatorFill = {
+  rest: { width: "0%" },
+  hover: {
+    width: "100%",
+    transition: {
+      duration: 0.6,
+      ease: appleEase.dramatic
+    }
+  }
+};

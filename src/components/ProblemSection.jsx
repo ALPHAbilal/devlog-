@@ -1,40 +1,151 @@
+import { useState, useRef } from 'react';
 import { MessageSquare, Search, BookOpen, Brain } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fadeInUp, staggerContainer, staggerItem, iconLift } from '../utils/animations';
+import { fadeInUp, problemCardContainer, problemCardItem, iconFloat } from '../utils/animations';
 
 const problems = [
   {
-    icon: <BookOpen className="text-red-400" size={24} />,
+    icon: <BookOpen size={24} />,
     title: 'No time to document',
     description: 'You solve problems daily but never capture the solutions properly',
-    delay: '0ms'
+    color: 'red',
+    colorHex: '#ef4444'
   },
   {
-    icon: <MessageSquare className="text-orange-400" size={24} />,
+    icon: <MessageSquare size={24} />,
     title: 'Knowledge scattered everywhere',
     description: 'Solutions in Slack, notes in Notion, code in GitHub - nothing connected',
-    delay: '100ms'
+    color: 'orange',
+    colorHex: '#fb923c'
   },
   {
-    icon: <Brain className="text-yellow-400" size={24} />,
+    icon: <Brain size={24} />,
     title: 'Context evaporates',
     description: 'Three months later, you can\'t remember why that solution worked',
-    delay: '200ms'
+    color: 'yellow',
+    colorHex: '#fbbf24'
   },
   {
-    icon: <Search className="text-purple-400" size={24} />,
+    icon: <Search size={24} />,
     title: 'Can\'t find what you wrote',
     description: 'You documented it somewhere, but good luck finding it when you need it',
-    delay: '300ms'
+    color: 'purple',
+    colorHex: '#9333ea'
   }
 ];
+
+function ProblemCard({ problem, index }) {
+  const cardRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Mouse position for 3D tilt effect
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  
+  // Transform mouse position to rotation values
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], [10, -10]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], [-10, 10]);
+  
+  const handleMouseMove = (e) => {
+    if (!cardRef.current || !isHovered) return;
+    
+    const rect = cardRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    
+    // Normalize mouse position to -0.5 to 0.5
+    const normalizedX = (e.clientX - centerX) / rect.width;
+    const normalizedY = (e.clientY - centerY) / rect.height;
+    
+    mouseX.set(normalizedX);
+    mouseY.set(normalizedY);
+    
+    // Update CSS variables for glow effect
+    const percentX = ((e.clientX - rect.left) / rect.width) * 100;
+    const percentY = ((e.clientY - rect.top) / rect.height) * 100;
+    cardRef.current.style.setProperty('--mouse-x', `${percentX}%`);
+    cardRef.current.style.setProperty('--mouse-y', `${percentY}%`);
+  };
+  
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+    setIsHovered(false);
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      className="problem-card-wrapper"
+      variants={problemCardItem}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
+      custom={index}
+    >
+      {/* Gradient orbs */}
+      <div className={`gradient-orb gradient-orb-${problem.color}`} />
+      
+      <motion.div 
+        className="problem-card"
+        style={{
+          rotateX: isHovered ? rotateX : 0,
+          rotateY: isHovered ? rotateY : 0,
+        }}
+      >
+        {/* Card glow effect */}
+        <div className={`card-glow card-glow-${problem.color}`} />
+        
+        {/* Animated gradient border */}
+        <div className={`card-border-gradient card-border-gradient-${problem.color} ${isHovered ? 'card-border-gradient-animated' : ''}`} />
+        
+        {/* Card content */}
+        <div className="card-content">
+          <div className="flex items-start gap-4">
+            <motion.div 
+              className="icon-wrapper"
+              variants={iconFloat}
+              initial="rest"
+              whileHover="hover"
+            >
+              <div className={`icon-glow icon-glow-${problem.color}`} />
+              <span style={{ color: problem.colorHex }}>
+                {problem.icon}
+              </span>
+            </motion.div>
+            
+            <div className="text-content flex-1">
+              <h3 className="text-lg font-semibold text-text-primary mb-2">
+                {problem.title}
+              </h3>
+              <p className="text-text-secondary">
+                {problem.description}
+              </p>
+            </div>
+          </div>
+          
+          {/* Progress indicator */}
+          <div className={`card-indicator card-indicator-${problem.color}`} />
+        </div>
+        
+        {/* Noise texture */}
+        <div 
+          className="card-noise"
+          style={{
+            backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Cfilter id="noise"%3E%3CfeTurbulence baseFrequency="0.9" /%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)" opacity="0.03"/%3E%3C/svg%3E")'
+          }}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
 
 export default function ProblemSection() {
   const { ref, isInView } = useScrollAnimation();
 
   return (
-    <section id="problem-section" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20" ref={ref}>
+    <section id="problem-section" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20 overflow-hidden" ref={ref}>
       <div className="max-w-6xl mx-auto">
         <motion.div 
           className="text-center mb-12 md:mb-16"
@@ -52,49 +163,13 @@ export default function ProblemSection() {
         </motion.div>
 
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-12 md:mb-16"
-          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16"
+          variants={problemCardContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
         >
           {problems.map((problem, index) => (
-            <motion.div
-              key={index}
-              className="relative bg-dark-secondary/50 rounded-lg p-4 md:p-6 border border-dark-secondary 
-                         hover:border-red-400/30 transition-all duration-300 group overflow-hidden"
-              variants={staggerItem}
-              whileHover={{ 
-                scale: 1.02,
-                transition: { duration: 0.2 }
-              }}
-            >
-              {/* Gradient border glow on hover */}
-              <motion.div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: "radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(239, 68, 68, 0.1), transparent 40%)",
-                }}
-              />
-              
-              <div className="flex items-start gap-3 md:gap-4 relative z-10">
-                <motion.div 
-                  className="p-2 bg-dark-primary rounded-lg"
-                  variants={iconLift}
-                  initial="rest"
-                  whileHover="hover"
-                >
-                  {problem.icon}
-                </motion.div>
-                <div>
-                  <h3 className="text-base md:text-lg font-semibold text-text-primary mb-1 md:mb-2">
-                    {problem.title}
-                  </h3>
-                  <p className="text-sm md:text-base text-text-secondary">
-                    {problem.description}
-                  </p>
-                </div>
-              </div>
-            </motion.div>
+            <ProblemCard key={index} problem={problem} index={index} />
           ))}
         </motion.div>
 
@@ -108,7 +183,8 @@ export default function ProblemSection() {
           <motion.div 
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
                           text-accent-green rounded-full text-sm font-medium mb-6"
-            whileHover={{ scale: 1 }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
             <span className="text-accent-green">●</span>
             There's a better way

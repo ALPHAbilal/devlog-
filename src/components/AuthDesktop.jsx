@@ -1,14 +1,21 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabaseOptimized'
 import { getURL } from '../utils/auth'
 import { Terminal, Link2, GitBranch, Zap, Shield } from 'lucide-react'
 import LogoMinimal from './LogoMinimal'
+import AuthDebugConsole from './debug/AuthDebugConsole'
 import '../styles/auth-responsive.css'
 
 const AuthDesktop = () => {
   const [authView, setAuthView] = useState('sign_in')
+  
+  // Refs for debug console
+  const authPageRef = useRef(null)
+  const brandingPanelRef = useRef(null)
+  const formPanelRef = useRef(null)
+  const formContainerRef = useRef(null)
 
   const codeSnippets = [
     { id: 1, text: 'const solution = await debug()', delay: 0 },
@@ -23,9 +30,10 @@ const AuthDesktop = () => {
   ]
 
   return (
-    <div className="auth-page-wrapper">
-      {/* Branding Panel */}
-      <div className="auth-branding-panel">
+    <>
+      <div className="auth-page-wrapper" ref={authPageRef}>
+        {/* Branding Panel */}
+        <div className="auth-branding-panel" ref={brandingPanelRef}>
         <div className="auth-pattern-bg"></div>
         <div className="auth-gradient-orb auth-gradient-orb-1"></div>
         <div className="auth-gradient-orb auth-gradient-orb-2"></div>
@@ -75,8 +83,8 @@ const AuthDesktop = () => {
       </div>
 
       {/* Auth Form Panel */}
-      <div className="auth-form-panel">
-        <div className="auth-form-container">
+      <div className="auth-form-panel" ref={formPanelRef}>
+        <div className="auth-form-container" ref={formContainerRef}>
           {/* Mobile Branding */}
           <div className="auth-mobile-branding">
             <div className="auth-logo-group">
@@ -168,6 +176,15 @@ const AuthDesktop = () => {
         </div>
       </div>
     </div>
+      
+      {/* Debug Console */}
+      <AuthDebugConsole 
+        authPageRef={authPageRef}
+        brandingPanelRef={brandingPanelRef}
+        formPanelRef={formPanelRef}
+        formContainerRef={formContainerRef}
+      />
+    </>
   )
 }
 

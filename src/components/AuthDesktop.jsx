@@ -20,7 +20,7 @@ import {
   ArrowRight
 } from 'lucide-react'
 import LogoMinimal from './LogoMinimal'
-import '../styles/auth-medium-viewport-fix.css'
+import '../styles/auth-responsive.css'
 
 const AuthDesktop = () => {
   const [authView, setAuthView] = useState('sign_in')
@@ -59,9 +59,9 @@ const AuthDesktop = () => {
   }, [])
 
   return (
-    <div className="auth-page-wrapper bg-dark-primary">
+    <div className="auth-page-wrapper">
       {/* Left Panel - Branding & Value Props */}
-      <div className="auth-branding-panel hidden xl:flex xl:w-1/2 2xl:w-[55%] bg-gradient-to-br from-dark-primary via-dark-secondary to-dark-primary relative overflow-hidden">
+      <div className="auth-branding-panel">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -74,8 +74,7 @@ const AuthDesktop = () => {
         <div className="absolute bottom-20 right-20 w-96 h-96 auth-gradient-orb bg-blue-500/10 rounded-full filter blur-3xl" />
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center px-8 xl:px-12 w-full h-full">
-          <div className="max-h-full flex flex-col justify-center auth-content-fade-in auth-desktop-content">
+        <div className="auth-desktop-content auth-content-fade-in">
             {/* Logo & Title */}
             <div className="flex items-center gap-2 mb-4">
               <LogoMinimal size={32} />
@@ -120,7 +119,6 @@ const AuthDesktop = () => {
                 )
               })}
             </div>
-          </div>
         </div>
       </div>
 
@@ -128,25 +126,25 @@ const AuthDesktop = () => {
       <div className="auth-form-panel">
         <div className="auth-form-wrapper auth-scale-in">
           {/* Mobile Logo - shown only on small screens */}
-          <div className="auth-mobile-branding block xl:hidden">
+          <div className="auth-mobile-branding">
             <div className="flex items-center justify-center gap-3 mb-2">
               <LogoMinimal size={40} />
-              <h1 className="text-3xl font-extrabold text-text-primary tracking-tight">Devlog</h1>
+              <h1 className="text-text-primary tracking-tight">Devlog</h1>
             </div>
-            <p className="text-base text-text-secondary text-center mb-6">
+            <p className="text-text-secondary text-center">
               Where code becomes knowledge
             </p>
           </div>
           
           {/* Minimal Form Header */}
-          <div className="text-center mb-6 auth-form-header">
-            <h3 className="text-2xl font-bold text-text-primary tracking-tight">
+          <div className="auth-form-header text-center">
+            <h3 className="font-bold text-text-primary tracking-tight">
               {authView === 'sign_in' ? 'Welcome back' : 'Get started'}
             </h3>
           </div>
 
           {/* Auth Form Container */}
-          <div className="backdrop-blur-xl rounded-xl p-6 sm:p-8 border border-dark-secondary/50 shadow-2xl">
+          <div className="backdrop-blur-xl rounded-xl border border-dark-secondary/50 shadow-2xl">
             <Auth
               supabaseClient={supabase}
               appearance={{
@@ -401,12 +399,12 @@ const AuthDesktop = () => {
             `}</style>
 
             {/* Footer Links - Ultra compact */}
-            <div className="auth-form-footer mt-4 pt-3 border-t border-dark-secondary/20 text-center text-xs text-text-secondary/60">
-              <p>
+            <div className="auth-form-footer mt-4 pt-3 border-t border-dark-secondary/20 text-center">
+              <p className="text-xs text-text-secondary/60">
                 By continuing, you agree to our{' '}
-                <a href="/terms" className="text-accent-green/80 hover:text-accent-green">Terms</a>
+                <a href="/terms" className="text-accent-green/80 hover:text-accent-green transition-colors">Terms</a>
                 {' & '}
-                <a href="/privacy" className="text-accent-green/80 hover:text-accent-green">Privacy</a>
+                <a href="/privacy" className="text-accent-green/80 hover:text-accent-green transition-colors">Privacy</a>
               </p>
             </div>
           </div>

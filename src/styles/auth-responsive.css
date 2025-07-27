@@ -1,0 +1,390 @@
+/* Auth Page - Complete Responsive Design System */
+/* Using modern CSS techniques for smooth scaling across all devices */
+
+/* ============================================
+   CSS Custom Properties for Responsive Values
+   ============================================ */
+:root {
+  /* Fluid Typography Scale */
+  --auth-text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --auth-text-sm: clamp(0.875rem, 0.8rem + 0.375vw, 1rem);
+  --auth-text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --auth-text-lg: clamp(1.125rem, 1rem + 0.625vw, 1.25rem);
+  --auth-text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --auth-text-2xl: clamp(1.5rem, 1.25rem + 1.25vw, 2rem);
+  --auth-text-3xl: clamp(1.875rem, 1.5rem + 1.875vw, 2.5rem);
+  --auth-text-4xl: clamp(2.25rem, 1.75rem + 2.5vw, 3rem);
+
+  /* Fluid Spacing Scale */
+  --auth-space-xs: clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem);
+  --auth-space-sm: clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem);
+  --auth-space-md: clamp(0.75rem, 0.6rem + 0.75vw, 1rem);
+  --auth-space-lg: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --auth-space-xl: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+  --auth-space-2xl: clamp(2rem, 1.5rem + 2.5vw, 3rem);
+  --auth-space-3xl: clamp(3rem, 2rem + 5vw, 4rem);
+
+  /* Container Widths */
+  --auth-container-sm: 320px;
+  --auth-container-md: 440px;
+  --auth-container-lg: 560px;
+  --auth-container-xl: 640px;
+
+  /* Dynamic Viewport Height */
+  --auth-vh: 100vh;
+  --auth-dvh: 100dvh;
+}
+
+/* Use dynamic viewport height where supported */
+@supports (height: 100dvh) {
+  :root {
+    --auth-vh: 100dvh;
+  }
+}
+
+/* ============================================
+   Base Auth Page Layout
+   ============================================ */
+.auth-page-wrapper {
+  width: 100%;
+  min-height: var(--auth-vh);
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   Mobile First: Base Styles (320px+)
+   ============================================ */
+.auth-branding-panel {
+  display: none;
+}
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--auth-space-lg);
+  background: linear-gradient(135deg, #0a1628 0%, #1a2332 100%);
+  min-height: var(--auth-vh);
+}
+
+.auth-form-wrapper {
+  width: 100%;
+  max-width: var(--auth-container-sm);
+  margin: 0 auto;
+}
+
+/* Mobile branding always visible on small screens */
+.auth-mobile-branding {
+  display: block;
+  text-align: center;
+  margin-bottom: var(--auth-space-xl);
+}
+
+.auth-mobile-branding h1 {
+  font-size: var(--auth-text-3xl);
+  font-weight: 800;
+  margin-bottom: var(--auth-space-sm);
+}
+
+.auth-mobile-branding p {
+  font-size: var(--auth-text-base);
+  color: #9ca3af;
+}
+
+/* Form header */
+.auth-form-header {
+  margin-bottom: var(--auth-space-lg);
+}
+
+.auth-form-header h3 {
+  font-size: var(--auth-text-2xl);
+}
+
+/* Form container */
+.auth-form-container,
+.backdrop-blur-xl {
+  padding: var(--auth-space-lg);
+  border-radius: 0.75rem;
+}
+
+/* ============================================
+   Small Phones (375px+)
+   ============================================ */
+@media (min-width: 375px) {
+  .auth-form-wrapper {
+    max-width: calc(100% - 2rem);
+  }
+}
+
+/* ============================================
+   Standard Phones (414px+)
+   ============================================ */
+@media (min-width: 414px) {
+  .auth-form-wrapper {
+    max-width: var(--auth-container-sm);
+  }
+  
+  .auth-form-panel {
+    padding: var(--auth-space-xl);
+  }
+}
+
+/* ============================================
+   Large Phones / Small Tablets (640px+)
+   ============================================ */
+@media (min-width: 640px) {
+  .auth-form-wrapper {
+    max-width: var(--auth-container-md);
+  }
+  
+  .auth-form-container,
+  .backdrop-blur-xl {
+    padding: var(--auth-space-xl);
+  }
+}
+
+/* ============================================
+   Tablets (768px+)
+   ============================================ */
+@media (min-width: 768px) {
+  .auth-form-panel {
+    padding: var(--auth-space-2xl);
+  }
+  
+  .auth-mobile-branding h1 {
+    font-size: var(--auth-text-4xl);
+  }
+  
+  .auth-mobile-branding p {
+    font-size: var(--auth-text-lg);
+  }
+}
+
+/* ============================================
+   Large Tablets / Small Laptops (1024px+)
+   ============================================ */
+@media (min-width: 1024px) {
+  .auth-page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr minmax(var(--auth-container-md), var(--auth-container-lg));
+    gap: 0;
+  }
+  
+  /* Show branding panel */
+  .auth-branding-panel {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: var(--auth-space-2xl);
+    background: linear-gradient(135deg, #0a1628 0%, #1a2332 50%, #0a1628 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Hide mobile branding */
+  .auth-mobile-branding {
+    display: none !important;
+  }
+  
+  /* Center form panel content */
+  .auth-form-panel {
+    background: #0a1628;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .auth-form-wrapper {
+    max-width: var(--auth-container-md);
+  }
+}
+
+/* ============================================
+   Small Desktops (1280px+)
+   ============================================ */
+@media (min-width: 1280px) {
+  .auth-page-wrapper {
+    grid-template-columns: minmax(480px, 1fr) minmax(var(--auth-container-md), var(--auth-container-lg));
+  }
+  
+  .auth-branding-panel {
+    padding: var(--auth-space-3xl);
+  }
+  
+  /* Scale up branding content */
+  .auth-desktop-content h1 {
+    font-size: var(--auth-text-3xl);
+  }
+  
+  .auth-desktop-content h2 {
+    font-size: var(--auth-text-2xl);
+  }
+  
+  .auth-desktop-content p {
+    font-size: var(--auth-text-lg);
+  }
+}
+
+/* ============================================
+   Standard Desktops (1536px+)
+   ============================================ */
+@media (min-width: 1536px) {
+  .auth-page-wrapper {
+    grid-template-columns: minmax(600px, 1.2fr) minmax(var(--auth-container-md), var(--auth-container-xl));
+  }
+  
+  .auth-form-wrapper {
+    max-width: var(--auth-container-lg);
+  }
+  
+  /* Larger form elements on bigger screens */
+  .auth-form-container,
+  .backdrop-blur-xl {
+    padding: var(--auth-space-2xl);
+  }
+}
+
+/* ============================================
+   Large Desktops (1920px+)
+   ============================================ */
+@media (min-width: 1920px) {
+  .auth-page-wrapper {
+    grid-template-columns: 1fr minmax(var(--auth-container-lg), var(--auth-container-xl));
+    max-width: 2400px;
+    margin: 0 auto;
+  }
+  
+  .auth-branding-panel {
+    padding: var(--auth-space-3xl) clamp(3rem, 5vw, 6rem);
+  }
+  
+  /* Max width for branding content */
+  .auth-desktop-content {
+    max-width: 800px;
+  }
+}
+
+/* ============================================
+   Ultra-Wide Displays (2560px+)
+   ============================================ */
+@media (min-width: 2560px) {
+  .auth-page-wrapper {
+    grid-template-columns: 1fr 800px;
+  }
+  
+  .auth-form-panel {
+    padding: var(--auth-space-3xl);
+  }
+  
+  .auth-form-wrapper {
+    max-width: var(--auth-container-xl);
+  }
+}
+
+/* ============================================
+   Landscape Orientation Fixes
+   ============================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .auth-form-panel {
+    padding: var(--auth-space-md) var(--auth-space-xl);
+    min-height: auto;
+  }
+  
+  .auth-mobile-branding {
+    margin-bottom: var(--auth-space-md);
+  }
+  
+  .auth-mobile-branding h1 {
+    font-size: var(--auth-text-2xl);
+  }
+  
+  .auth-form-header {
+    margin-bottom: var(--auth-space-md);
+  }
+  
+  .auth-form-container,
+  .backdrop-blur-xl {
+    padding: var(--auth-space-md) var(--auth-space-lg);
+  }
+}
+
+/* ============================================
+   Form Element Responsive Styles
+   ============================================ */
+.supabase-auth-ui_ui-button {
+  font-size: var(--auth-text-base) !important;
+  padding: var(--auth-space-md) var(--auth-space-lg) !important;
+  min-height: 44px !important; /* Touch target minimum */
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.supabase-auth-ui_ui-input {
+  font-size: var(--auth-text-base) !important;
+  padding: var(--auth-space-md) var(--auth-space-lg) !important;
+  min-height: 44px !important;
+  border-radius: 0.5rem !important;
+}
+
+.supabase-auth-ui_ui-label {
+  font-size: var(--auth-text-sm) !important;
+  margin-bottom: var(--auth-space-xs) !important;
+}
+
+.supabase-auth-ui_ui-container {
+  gap: var(--auth-space-lg) !important;
+}
+
+.supabase-auth-ui_ui-divider {
+  margin: var(--auth-space-lg) 0 !important;
+}
+
+/* ============================================
+   Smooth Animations
+   ============================================ */
+.auth-gradient-orb {
+  width: clamp(15rem, 25vw, 30rem);
+  height: clamp(15rem, 25vw, 30rem);
+  transition: all 0.3s ease;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   Container Queries for Form Scaling
+   ============================================ */
+@container (min-width: 400px) {
+  .auth-form-container {
+    padding: var(--auth-space-xl);
+  }
+}
+
+@container (min-width: 500px) {
+  .auth-form-container {
+    padding: var(--auth-space-2xl);
+  }
+}
+
+/* ============================================
+   Print Styles
+   ============================================ */
+@media print {
+  .auth-branding-panel {
+    display: none !important;
+  }
+  
+  .auth-form-panel {
+    background: white !important;
+    color: black !important;
+  }
+}

@@ -5,7 +5,7 @@ import LogoMinimal from '../components/LogoMinimal';
 import { Code2, Link2, Zap, GitBranch, Search, ArrowRight, Menu, X } from 'lucide-react';
 import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
-import HowItWorksSimple from '../components/HowItWorksSimple';
+import HowItWorksVideo from '../components/HowItWorksVideo';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover } from '../utils/animations';
@@ -186,8 +186,8 @@ function LandingContent() {
       {/* Problem Section */}
       <ProblemSection />
       
-      {/* How It Works - Proof of the Promise */}
-      <HowItWorksSimple />
+      {/* How It Works - Video Showcase */}
+      <HowItWorksVideo />
 
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6">

@@ -7,6 +7,7 @@
 @import './styles/pricing-fallback.css';
 @import './styles/block-controls.css';
 @import './styles/inline-action-bar.css';
+@import './styles/video-showcase.css';
 
 @tailwind base;
 @tailwind components;

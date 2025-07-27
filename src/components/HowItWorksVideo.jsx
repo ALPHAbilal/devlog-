@@ -1,0 +1,310 @@
+import { useState, useRef, useEffect } from 'react';
+import { Play, Pause, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, useInView, AnimatePresence } from 'framer-motion';
+import { staggerContainer, staggerItem } from '../utils/animations';
+
+const showcaseItems = [
+  {
+    id: 'capture',
+    title: 'Instant Capture',
+    description: 'Paste code snippets, save solutions, and document fixes in seconds. No formatting required.',
+    videoUrl: '/videos/capture-demo.mp4', // Replace with actual video URL
+    gifUrl: '/gifs/capture-demo.gif', // Fallback GIF
+    posterUrl: '/images/capture-poster.jpg', // Video poster
+    accentColor: 'rgba(16, 185, 129, 0.1)', // Subtle green tint
+  },
+  {
+    id: 'connect',
+    title: 'Smart Connections',
+    description: 'Link related solutions with @mentions. Build your interconnected knowledge graph effortlessly.',
+    videoUrl: '/videos/connect-demo.mp4',
+    gifUrl: '/gifs/connect-demo.gif',
+    posterUrl: '/images/connect-poster.jpg',
+    accentColor: 'rgba(59, 130, 246, 0.1)', // Subtle blue tint
+  },
+  {
+    id: 'search',
+    title: 'Lightning Search',
+    description: 'Find any solution in milliseconds. Your entire development history at your fingertips.',
+    videoUrl: '/videos/search-demo.mp4',
+    gifUrl: '/gifs/search-demo.gif',
+    posterUrl: '/images/search-poster.jpg',
+    accentColor: 'rgba(168, 85, 247, 0.1)', // Subtle purple tint
+  }
+];
+
+function VideoShowcaseItem({ item, index }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const [useGif, setUseGif] = useState(false);
+  const videoRef = useRef(null);
+  const containerRef = useRef(null);
+  const isInView = useInView(containerRef, { once: false, margin: "-100px" });
+
+  // Auto-play when in view
+  useEffect(() => {
+    if (videoRef.current && isInView && !useGif) {
+      videoRef.current.play().catch(() => {
+        // Fallback to GIF if video fails to play
+        setUseGif(true);
+      });
+      setIsPlaying(true);
+    } else if (videoRef.current && !isInView) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [isInView, useGif]);
+
+  const togglePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleFullscreen = () => {
+    if (videoRef.current) {
+      if (videoRef.current.requestFullscreen) {
+        videoRef.current.requestFullscreen();
+      } else if (videoRef.current.webkitRequestFullscreen) {
+        videoRef.current.webkitRequestFullscreen();
+      }
+    }
+  };
+
+  return (
+    <motion.div
+      ref={containerRef}
+      className={`showcase-item ${index % 2 === 1 ? 'showcase-item-reverse' : ''}`}
+      variants={staggerItem}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+    >
+      {/* Content Section */}
+      <div className="showcase-content">
+        <h3 className="showcase-title">{item.title}</h3>
+        <p className="showcase-description">{item.description}</p>
+        
+        <motion.div 
+          className="showcase-features"
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="feature-tag">No setup required</div>
+          <div className="feature-tag">Works instantly</div>
+        </motion.div>
+      </div>
+
+      {/* Media Section */}
+      <motion.div
+        className="showcase-media"
+        onMouseEnter={() => setShowControls(true)}
+        onMouseLeave={() => setShowControls(false)}
+        style={{ '--accent-color': item.accentColor }}
+      >
+        <div className="media-container">
+          {useGif ? (
+            <img
+              src={item.gifUrl}
+              alt={item.title}
+              className="media-element"
+              loading="lazy"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              className="media-element"
+              poster={item.posterUrl}
+              loop
+              muted
+              playsInline
+              onError={() => setUseGif(true)}
+            >
+              <source src={item.videoUrl} type="video/mp4" />
+              <source src={item.videoUrl.replace('.mp4', '.webm')} type="video/webm" />
+            </video>
+          )}
+          
+          {/* Video Controls Overlay */}
+          {!useGif && (
+            <motion.div
+              className="media-controls"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: showControls ? 1 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <button
+                onClick={togglePlayPause}
+                className="control-button play-pause"
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+              </button>
+              
+              <button
+                onClick={handleFullscreen}
+                className="control-button fullscreen"
+                aria-label="Fullscreen"
+              >
+                <Maximize2 size={18} />
+              </button>
+            </motion.div>
+          )}
+          
+          {/* Decorative Elements */}
+          <div className="media-decoration media-decoration-1" />
+          <div className="media-decoration media-decoration-2" />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export default function HowItWorksVideo() {
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const nextSlide = () => {
+    setMobileActiveIndex((prev) => (prev + 1) % showcaseItems.length);
+  };
+
+  const prevSlide = () => {
+    setMobileActiveIndex((prev) => (prev - 1 + showcaseItems.length) % showcaseItems.length);
+  };
+
+  return (
+    <section className="how-it-works-video">
+      <div className="container-wrapper">
+        <motion.div 
+          className="section-header"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="header-badge">
+            <span className="badge-dot" />
+            How it works
+          </div>
+          
+          <h2 className="section-title">
+            See Devlog in Action
+          </h2>
+          
+          <p className="section-subtitle">
+            Watch how developers capture, organize, and find their solutions in seconds
+          </p>
+        </motion.div>
+
+        {/* Desktop Layout */}
+        <motion.div 
+          className="showcase-list desktop-only"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+        >
+          {showcaseItems.map((item, index) => (
+            <VideoShowcaseItem key={item.id} item={item} index={index} />
+          ))}
+        </motion.div>
+
+        {/* Mobile Carousel Layout */}
+        <div className="mobile-carousel mobile-only">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={mobileActiveIndex}
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.3 }}
+            >
+              <VideoShowcaseItem 
+                item={showcaseItems[mobileActiveIndex]} 
+                index={mobileActiveIndex} 
+              />
+            </motion.div>
+          </AnimatePresence>
+          
+          {/* Mobile Navigation */}
+          <div className="carousel-navigation">
+            <button 
+              onClick={prevSlide}
+              className="carousel-nav-button"
+              aria-label="Previous"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            
+            <div className="carousel-indicators">
+              {showcaseItems.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setMobileActiveIndex(index)}
+                  className={`carousel-indicator ${index === mobileActiveIndex ? 'active' : ''}`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+            
+            <button 
+              onClick={nextSlide}
+              className="carousel-nav-button"
+              aria-label="Next"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom CTA */}
+        <motion.div 
+          className="section-cta"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.4, duration: 0.6 }}
+        >
+          <p className="cta-text">
+            Join thousands of developers who never lose a solution again
+          </p>
+          <button className="cta-button">
+            Start Free Trial
+            <svg 
+              className="cta-arrow" 
+              width="20" 
+              height="20" 
+              viewBox="0 0 20 20" 
+              fill="none"
+            >
+              <path 
+                d="M7 10H13M13 10L10 7M13 10L10 13" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </motion.div>
+      </div>
+    </section>
+  );
+}

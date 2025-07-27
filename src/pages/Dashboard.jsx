@@ -1174,7 +1174,7 @@ export default function Dashboard() {
         <TrialBanner trialStatus={trialStatus} />
         
         {/* Fixed Header - Outside Grid */}
-        <header className="flex-shrink-0 border-b border-dark-secondary/20 bg-dark-primary z-30">
+        <header className="flex-shrink-0 border-b border-dark-secondary/20 bg-dark-primary z-30 relative">
           {/* Top Navigation Bar - Compact and Efficient */}
           <div className="flex items-center justify-between px-4 md:px-6 py-2">
             {/* Logo and Brand - Fixed Position */}
@@ -1188,7 +1188,7 @@ export default function Dashboard() {
                     toggleMobileSidebar();
                   }
                 }}
-                className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden absolute left-4"
+                className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden absolute left-4 z-40"
               >
                 <Menu size={20} className="text-text-primary" />
               </button>

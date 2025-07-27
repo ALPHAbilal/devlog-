@@ -120,29 +120,33 @@ export default function MobileBottomSheet({
             initial={{ y: '100%' }}
             animate={controls}
             exit={{ y: '100%' }}
-            drag="y"
-            dragConstraints={{ top: 0 }}
-            dragElastic={0.2}
-            onDragStart={handleDragStart}
-            onDrag={handleDragMove}
-            onDragEnd={handleDragEnd}
             className="fixed bottom-0 left-0 right-0 bg-dark-primary 
                        rounded-t-3xl shadow-2xl z-50 overflow-hidden
                        border-t border-dark-secondary/50"
             style={{
               height: '95vh',
-              maxHeight: '95vh',
-              touchAction: 'none'
+              maxHeight: '95vh'
             }}
           >
-            {/* Drag Handle */}
-            <div className="absolute top-0 left-0 right-0 h-6 cursor-grab active:cursor-grabbing">
+            {/* Drag Handle Area - Only this area is draggable */}
+            <motion.div
+              drag="y"
+              dragConstraints={{ top: 0 }}
+              dragElastic={0.2}
+              onDragStart={handleDragStart}
+              onDrag={handleDragMove}
+              onDragEnd={handleDragEnd}
+              className="absolute top-0 left-0 right-0 h-14 cursor-grab active:cursor-grabbing z-10 
+                         bg-gradient-to-b from-dark-primary to-transparent"
+              style={{ touchAction: 'none' }}
+            >
               <div className="w-12 h-1 bg-dark-secondary/50 rounded-full 
-                             mx-auto mt-2 hover:bg-dark-secondary/70 transition-colors" />
-            </div>
+                             mx-auto mt-3 hover:bg-dark-secondary/70 transition-colors" />
+              <div className="text-xs text-text-secondary/40 text-center mt-1">Drag to close</div>
+            </motion.div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 mt-2 
+            <div className="flex items-center justify-between px-4 py-4 mt-8 
                            border-b border-dark-secondary/30">
               <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
               <button
@@ -153,8 +157,9 @@ export default function MobileBottomSheet({
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+            {/* Content - Normal scrolling enabled */}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
+                 style={{ touchAction: 'pan-y' }}>
               {children}
             </div>
           </motion.div>

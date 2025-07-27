@@ -198,6 +198,47 @@
     transition: opacity 0.2s ease;
   }
 
+  /* Touch Zone Separation */
+  .drag-handle-zone {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    min-height: 44px;
+  }
+
+  .scrollable-content {
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    will-change: scroll-position;
+  }
+
+  /* Prevent horizontal scroll in mobile sheets */
+  .mobile-sheet-content {
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  /* Document item touch targets */
+  .document-item-touch {
+    min-height: 44px;
+    padding: 12px;
+    touch-action: manipulation;
+  }
+
+  /* Prevent accidental drags on scroll */
+  .scrolling-active .draggable-item {
+    pointer-events: none;
+  }
+
+  /* Mobile sheet backdrop optimization */
+  .mobile-sheet-backdrop {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
   .mobile-block-control:active {
     opacity: 1;
     background: var(--dark-primary);

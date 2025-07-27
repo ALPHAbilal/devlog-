@@ -308,7 +308,6 @@ export default function VirtualizedGrid({
             <CompactEntryCard 
               entry={item} 
               onExpand={onExpand}
-              onContextMenu={onContextMenu}
               searchTerm={searchTerm}
               isSelected={selectedDocuments.has(item.id)}
               onSelect={onSelectDocument}

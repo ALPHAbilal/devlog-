@@ -285,145 +285,142 @@ export default function Dashboard() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [createNewEntry]);
+  
+  // Create a ref to track if we're currently loading
+  const loadingRef = useRef(false);
+  
+  // Load entries function - accessible from multiple places
+  const loadEntries = useCallback(async () => {
+    // Prevent concurrent loads
+    if (loadingRef.current || (isInitialized.current && !isPulling)) {
+      console.log('Dashboard: Skipping load - already loading or initialized');
+      return;
+    }
+    
+    loadingRef.current = true;
+    const startTime = performance.now();
+    console.log('Dashboard: Starting to load entries...');
+    setIsLoading(true);
+    
+    try {
+      // Ensure storage is initialized
+      const initStart = performance.now();
+      await storageWrapper.init();
+      console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
+      
+      // Load entries
+      const loadStart = performance.now();
+      const savedEntries = await storageWrapper.getEntries();
+      console.log(`Dashboard: Loaded ${savedEntries?.length || 0} entries (${Math.round(performance.now() - loadStart)}ms)`);
+      console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
+      
+      if (savedEntries && savedEntries.length > 0) {
+        // Check session cache first for any cached documents
+        const cachedDocs = sessionCache.getAllDocuments();
+        const cachedMap = new Map(cachedDocs.map(doc => [doc.id, doc]));
+        
+        // Merge cached data with saved entries
+        const mergedEntries = savedEntries.map(entry => {
+          const cached = cachedMap.get(entry.id);
+          if (cached) {
+            // Use cached version but update with any newer fields
+            return {
+              ...entry,
+              ...cached,
+              updatedAt: entry.updatedAt > cached.updatedAt ? entry.updatedAt : cached.updatedAt
+            };
+          }
+          
+          // Clean up any stale isNew flags
+          if (entry.blocks) {
+            return {
+              ...entry,
+              blocks: entry.blocks.map(block => {
+                if (block.isNew) {
+                  const { isNew, ...blockWithoutNew } = block;
+                  return blockWithoutNew;
+                }
+                return block;
+              })
+            };
+          }
+          return entry;
+        });
+        
+        setEntries(mergedEntries);
+      } else {
+        // Initialize with example entry
+        const initialEntries = [
+          {
+            id: crypto.randomUUID(),
+            title: 'Getting Started with Journey Logger',
+            preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
+            blocks: [
+              {
+                id: crypto.randomUUID(),
+                type: 'heading',
+                content: 'Welcome to Journey Logger!',
+                level: 1
+              },
+              {
+                id: crypto.randomUUID(),
+                type: 'text',
+                content: 'This is your personal documentation system powered by Supabase! 🚀\n\n• Cloud storage with real-time sync\n• Secure authentication\n• Access your documents from anywhere'
+              },
+              {
+                id: crypto.randomUUID(),
+                type: 'heading',
+                content: 'Available Block Types',
+                level: 2
+              },
+              {
+                id: crypto.randomUUID(),
+                type: 'text',
+                content: '• Text blocks for notes and documentation\n• Code blocks with syntax highlighting\n• AI conversation blocks for saving ChatGPT/Claude discussions\n• Heading blocks for structure\n• Tables for structured data\n• File trees for project structures'
+              }
+            ],
+            tags: ['tutorial', 'getting-started'],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ];
+        setEntries(initialEntries);
+        await storageWrapper.saveEntries(initialEntries);
+      }
+      
+      // Get initial storage info
+      await updateStorageInfo();
+      
+      // Load projects if using Supabase
+      if (storageWrapper.isSupabase) {
+        try {
+          const projectList = await storageWrapper.getProjects();
+          console.log(`Dashboard: Loaded ${projectList?.length || 0} projects`);
+          setProjects(projectList || []);
+        } catch (error) {
+          console.error('Error loading projects:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading entries:', error);
+    } finally {
+      console.log('Dashboard: Setting isLoading to false');
+      setIsLoading(false);
+      isInitialized.current = true;
+      loadingRef.current = false;
+    }
+  }, [isPulling, updateStorageInfo]);
 
   // Load entries on mount
   useEffect(() => {
     let isMounted = true;
-    let loadingInProgress = false;
     
-    const loadEntries = async () => {
-      // Prevent concurrent loads
-      if (loadingInProgress || isInitialized.current) {
-        console.log('Dashboard: Skipping load - already in progress or initialized');
-        return;
-      }
-      
-      loadingInProgress = true;
-      const startTime = performance.now();
-      console.log('Dashboard: Starting to load entries...');
-      setIsLoading(true);
-      
-      try {
-        // Ensure storage is initialized
-        const initStart = performance.now();
-        await storageWrapper.init();
-        if (!isMounted) return;
-        console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
-        
-        // Load entries
-        const loadStart = performance.now();
-        const savedEntries = await storageWrapper.getEntries();
-        if (!isMounted) return;
-        console.log(`Dashboard: Loaded ${savedEntries?.length || 0} entries (${Math.round(performance.now() - loadStart)}ms)`);
-        console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
-        
-        if (savedEntries && savedEntries.length > 0) {
-          // Check session cache first for any cached documents
-          const cachedDocs = sessionCache.getAllDocuments();
-          const cachedMap = new Map(cachedDocs.map(doc => [doc.id, doc]));
-          
-          // Merge cached data with saved entries
-          const mergedEntries = savedEntries.map(entry => {
-            const cached = cachedMap.get(entry.id);
-            if (cached) {
-              // Use cached version but update with any newer fields
-              return {
-                ...entry,
-                ...cached,
-                updatedAt: entry.updatedAt > cached.updatedAt ? entry.updatedAt : cached.updatedAt
-              };
-            }
-            
-            // Clean up any stale isNew flags
-            if (entry.blocks) {
-              return {
-                ...entry,
-                blocks: entry.blocks.map(block => {
-                  if (block.isNew) {
-                    const { isNew, ...blockWithoutNew } = block;
-                    return blockWithoutNew;
-                  }
-                  return block;
-                })
-              };
-            }
-            return entry;
-          });
-          
-          setEntries(mergedEntries);
-        } else {
-          // Initialize with example entry
-          const initialEntries = [
-            {
-              id: crypto.randomUUID(),
-              title: 'Getting Started with Journey Logger',
-              preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
-              blocks: [
-                {
-                  id: crypto.randomUUID(),
-                  type: 'heading',
-                  content: 'Welcome to Journey Logger!',
-                  level: 1
-                },
-                {
-                  id: crypto.randomUUID(),
-                  type: 'text',
-                  content: 'This is your personal documentation system powered by Supabase! 🚀\n\n• Cloud storage with real-time sync\n• Secure authentication\n• Access your documents from anywhere'
-                },
-                {
-                  id: crypto.randomUUID(),
-                  type: 'heading',
-                  content: 'Available Block Types',
-                  level: 2
-                },
-                {
-                  id: crypto.randomUUID(),
-                  type: 'text',
-                  content: '• Text blocks for notes and documentation\n• Code blocks with syntax highlighting\n• AI conversation blocks for saving ChatGPT/Claude discussions\n• Heading blocks for structure\n• Tables for structured data\n• File trees for project structures'
-                }
-              ],
-              tags: ['tutorial', 'getting-started'],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
-          ];
-          setEntries(initialEntries);
-          await storageWrapper.saveEntries(initialEntries);
-        }
-        
-        // Get initial storage info
-        if (isMounted) {
-          await updateStorageInfo();
-        }
-        
-        // Load projects if using Supabase
-        if (storageWrapper.isSupabase && isMounted) {
-          try {
-            const projectList = await storageWrapper.getProjects();
-            console.log(`Dashboard: Loaded ${projectList?.length || 0} projects`);
-            setProjects(projectList || []);
-          } catch (error) {
-            console.error('Error loading projects:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading entries:', error);
-      } finally {
-        if (isMounted) {
-          console.log('Dashboard: Setting isLoading to false');
-          setIsLoading(false);
-          isInitialized.current = true;
-          loadingInProgress = false;
-        }
-      }
-    };
-
     loadEntries();
     
     return () => {
       isMounted = false;
     };
-  }, [updateStorageInfo]);
+  }, [loadEntries]);
   
 
 

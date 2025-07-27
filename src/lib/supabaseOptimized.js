@@ -274,8 +274,8 @@ class OptimizedSupabaseClient {
         // Check if refresh is needed
         if (result.data.session) {
           const expiresAt = result.data.session.expires_at;
-          const now = Math.floor(Date.now() / 1000);
-          const timeUntilExpiry = expiresAt - now;
+          const nowInSeconds = Math.floor(Date.now() / 1000);
+          const timeUntilExpiry = expiresAt - nowInSeconds;
           
           // Refresh if less than 5 minutes until expiry
           if (timeUntilExpiry < 300 && !this.refreshPromise) {

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 
 /**
  * Custom hook for handling touch gestures
@@ -216,6 +216,63 @@ export const useTouchGestures = (elementRef, options = {}) => {
     simulateTap: (x = 0, y = 0) => onTap?.({ x, y, target: elementRef.current }),
   };
 };
+
+// Hook for detecting pull-to-refresh gesture
+export function usePullToRefresh(onRefresh, threshold = 80) {
+  const [isPulling, setIsPulling] = useState(false);
+  const [pullDistance, setPullDistance] = useState(0);
+  const startYRef = useRef(0);
+  const elementRef = useRef(null);
+
+  const handleTouchStart = useCallback((e) => {
+    if (elementRef.current?.scrollTop === 0) {
+      startYRef.current = e.touches[0].clientY;
+      setIsPulling(true);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e) => {
+    if (!isPulling) return;
+
+    const currentY = e.touches[0].clientY;
+    const distance = currentY - startYRef.current;
+
+    if (distance > 0) {
+      e.preventDefault();
+      setPullDistance(Math.min(distance, threshold * 1.5));
+    }
+  }, [isPulling, threshold]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (pullDistance > threshold) {
+      onRefresh();
+    }
+    setIsPulling(false);
+    setPullDistance(0);
+  }, [pullDistance, threshold, onRefresh]);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element) return;
+
+    element.addEventListener('touchstart', handleTouchStart, { passive: false });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+    element.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+      element.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
+
+  return {
+    elementRef,
+    isPulling,
+    pullDistance,
+    pullProgress: Math.min(pullDistance / threshold, 1)
+  };
+}
 
 // Simplified hook for common swipe gestures
 export const useSwipe = (elementRef, { onSwipeLeft, onSwipeRight, threshold = 50 } = {}) => {

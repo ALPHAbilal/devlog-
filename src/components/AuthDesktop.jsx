@@ -31,6 +31,14 @@ const AuthDesktop = () => {
 
   return (
     <>
+      {/* Desktop Logo Header - Professional placement */}
+      <div className="auth-logo-header">
+        <div className="auth-logo-header-content">
+          <LogoMinimal size={24} />
+          <span className="auth-logo-header-text">Devlog</span>
+        </div>
+      </div>
+      
       <div className="auth-page-wrapper" ref={authPageRef}>
         {/* Branding Panel */}
         <div className="auth-branding-panel" ref={brandingPanelRef}>
@@ -39,11 +47,6 @@ const AuthDesktop = () => {
         <div className="auth-gradient-orb auth-gradient-orb-2"></div>
         
         <div className="auth-branding-content">
-          <div className="auth-logo-group">
-            <LogoMinimal size={32} />
-            <h1 className="auth-logo-text">Devlog</h1>
-          </div>
-
           <h2 className="auth-tagline">
             Where code becomes <span className="auth-tagline-accent">knowledge</span>
           </h2>

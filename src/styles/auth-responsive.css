@@ -365,7 +365,6 @@
     grid-template-columns: 1fr minmax(480px, min(35vw, 640px));
     position: fixed;
     inset: 0;
-    top: 60px; /* Account for header height */
   }
   
   /* Reset scale for desktop if viewport is large enough */

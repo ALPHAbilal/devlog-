@@ -3,7 +3,7 @@ import { Auth } from '@supabase/auth-ui-react'
 import { ThemeSupa } from '@supabase/auth-ui-shared'
 import { supabase } from '../lib/supabaseOptimized'
 import { getURL } from '../utils/auth'
-import { Terminal, Link2, GitBranch, Zap, Shield } from 'lucide-react'
+import { Terminal, Link2, GitBranch, Zap, Shield, MessageSquare, Search } from 'lucide-react'
 import LogoMinimal from './LogoMinimal'
 import AuthDebugConsole from './debug/AuthDebugConsole'
 import '../styles/auth-responsive.css'
@@ -18,15 +18,15 @@ const AuthDesktop = () => {
   const formContainerRef = useRef(null)
 
   const codeSnippets = [
-    { id: 1, text: 'const solution = await debug()', delay: 0 },
-    { id: 2, text: '[[Link]] your knowledge', delay: 0.3 },
-    { id: 3, text: 'git commit -m "fixed"', delay: 0.6 },
+    { id: 1, text: '// Saved that React optimization from ChatGPT', delay: 0 },
+    { id: 2, text: '// Found that webpack fix from 6 months ago', delay: 0.3 },
+    { id: 3, text: '// Version tracked like git, but for knowledge', delay: 0.6 },
   ]
 
   const features = [
-    { icon: Zap, text: 'Instant capture' },
-    { icon: Link2, text: 'Connected docs' },
-    { icon: Shield, text: 'Your data, safe' },
+    { icon: MessageSquare, text: 'Save AI conversations' },
+    { icon: GitBranch, text: 'Version control for docs' },
+    { icon: Search, text: 'Find solutions in seconds' },
   ]
 
   return (
@@ -40,11 +40,11 @@ const AuthDesktop = () => {
         
         <div className="auth-branding-content">
           <h2 className="auth-tagline">
-            Where code becomes <span className="auth-tagline-accent">knowledge</span>
+            Never Google The Same <span className="auth-tagline-accent">Error Twice</span>
           </h2>
 
           <p className="auth-subtitle">
-            Join 7,000+ developers. Never lose a solution again.
+            Join 7,000+ developers who save their ChatGPT solutions before they disappear.
           </p>
 
           <div className="auth-code-snippets">
@@ -94,7 +94,7 @@ const AuthDesktop = () => {
               <h1 className="auth-logo-text">Devlog</h1>
             </div>
             <p className="auth-mobile-tagline">
-              Where code becomes knowledge
+              Never Google The Same Error Twice
             </p>
           </div>
           

@@ -1188,7 +1188,7 @@ export default function Dashboard() {
                     toggleMobileSidebar();
                   }
                 }}
-                className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden absolute left-4 z-40"
+                className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden"
               >
                 <Menu size={20} className="text-text-primary" />
               </button>

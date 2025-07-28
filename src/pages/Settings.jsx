@@ -4,11 +4,13 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { 
   X, User, Database, Download, Upload, Trash2, 
   AlertCircle, HardDrive, Check, Lock, Shield, AlertTriangle,
-  FileText, ChevronRight, FileJson
+  FileText, ChevronRight, FileJson, ChevronLeft, Menu
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { exportSupabaseData, importSupabaseData } from '../utils/supabaseDataExport';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
+import MobileBottomSheet from '../components/MobileBottomSheet';
+import { useToast } from '../hooks/useToast';
 import '../styles/settings.css';
 
 // Toggle Switch Component
@@ -143,6 +145,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { databaseSize, storageLimit, usagePercentage, isLoading: usageLoading, error: usageError, dataBreakdown, refresh: refreshUsage } = useSmartDatabaseUsage();
+  const toast = useToast();
   
   const [activeTab, setActiveTab] = useState('account');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -154,6 +157,12 @@ export default function Settings() {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ new: '', confirm: '' });
+  
+  // Mobile specific state
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [showPasswordSheet, setShowPasswordSheet] = useState(false);
+  const [showDeleteSheet, setShowDeleteSheet] = useState(false);
+  const [showExportSheet, setShowExportSheet] = useState(false);
   
   const fileInputRef = useRef(null);
 
@@ -300,24 +309,45 @@ export default function Settings() {
       return () => clearTimeout(timer);
     }
   }, [message]);
+  
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
-    <div className="settings-page">
-      <div className="settings-container">
+    <div className={`settings-page ${isMobile ? 'mobile' : ''}`}>
+      <div className={`settings-container ${isMobile ? 'mobile' : ''}`}>
         {/* Header */}
         <div className="settings-header">
+          {isMobile && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="mobile-back-btn"
+              title="Back to dashboard"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
           <h1>Settings</h1>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="close-btn"
-            title="Close settings"
-          >
-            <X size={24} />
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="close-btn"
+              title="Close settings"
+            >
+              <X size={24} />
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
-        <div className="settings-tabs">
+        <div className={`settings-tabs ${isMobile ? 'mobile-tabs' : ''}`}>
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -325,7 +355,7 @@ export default function Settings() {
               onClick={() => setActiveTab(tab.id)}
             >
               <tab.icon size={20} />
-              {tab.label}
+              {!isMobile && <span>{tab.label}</span>}
             </button>
           ))}
         </div>
@@ -434,23 +464,32 @@ export default function Settings() {
                     <p>Permanently delete your account and all associated data</p>
                   </div>
                   
-                  <div className="danger-actions">
-                    <input
-                      type="text"
-                      placeholder="Type DELETE to confirm"
-                      value={deleteConfirm}
-                      onChange={(e) => setDeleteConfirm(e.target.value)}
-                      className="danger-input"
-                    />
+                  {isMobile ? (
                     <button
-                      onClick={handleDeleteAccount}
-                      disabled={deleteConfirm !== 'DELETE' || isDeleting}
+                      onClick={() => setShowDeleteSheet(true)}
+                      className="btn-danger mobile-danger-btn"
+                    >
+                      Delete Account
+                    </button>
+                  ) : (
+                    <div className="danger-actions">
+                      <input
+                        type="text"
+                        placeholder="Type DELETE to confirm"
+                        value={deleteConfirm}
+                        onChange={(e) => setDeleteConfirm(e.target.value)}
+                        className="danger-input"
+                      />
+                      <button
+                        onClick={handleDeleteAccount}
+                        disabled={deleteConfirm !== 'DELETE' || isDeleting}
                       className="danger-button"
                     >
                       <Trash2 size={16} />
                       {isDeleting ? 'Deleting...' : 'Delete Account'}
                     </button>
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -550,6 +589,126 @@ export default function Settings() {
 
         </div>
       </div>
+      
+      {/* Mobile Bottom Sheets */}
+      {isMobile && (
+        <>
+          {/* Delete Account Bottom Sheet */}
+          <MobileBottomSheet
+            isOpen={showDeleteSheet}
+            onClose={() => {
+              setShowDeleteSheet(false);
+              setDeleteConfirm('');
+            }}
+            title="Delete Account"
+          >
+            <div className="mobile-delete-content">
+              <div className="delete-warning">
+                <AlertTriangle size={48} className="warning-icon" />
+                <h3>This action cannot be undone</h3>
+                <p>All your documents, settings, and data will be permanently deleted.</p>
+              </div>
+              
+              <div className="delete-confirm-section">
+                <label>Type DELETE to confirm</label>
+                <input
+                  type="text"
+                  placeholder="DELETE"
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  className="mobile-input danger-input"
+                  autoComplete="off"
+                />
+              </div>
+              
+              <div className="mobile-actions">
+                <button
+                  onClick={() => {
+                    setShowDeleteSheet(false);
+                    setDeleteConfirm('');
+                  }}
+                  className="btn-secondary"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    handleDeleteAccount();
+                    setShowDeleteSheet(false);
+                  }}
+                  disabled={deleteConfirm !== 'DELETE' || isDeleting}
+                  className="btn-danger"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Account'}
+                </button>
+              </div>
+            </div>
+          </MobileBottomSheet>
+          
+          {/* Password Change Bottom Sheet */}
+          <MobileBottomSheet
+            isOpen={showPasswordSheet}
+            onClose={() => {
+              setShowPasswordSheet(false);
+              setPasswordForm({ new: '', confirm: '' });
+            }}
+            title="Change Password"
+          >
+            <div className="mobile-password-content">
+              <form onSubmit={(e) => {
+                e.preventDefault();
+                handlePasswordChange();
+                setShowPasswordSheet(false);
+              }}>
+                <div className="form-field">
+                  <label>New Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.new}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                    className="mobile-input"
+                    placeholder="Enter new password"
+                    minLength={6}
+                    required
+                  />
+                </div>
+                
+                <div className="form-field">
+                  <label>Confirm Password</label>
+                  <input
+                    type="password"
+                    value={passwordForm.confirm}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                    className="mobile-input"
+                    placeholder="Confirm new password"
+                    required
+                  />
+                </div>
+                
+                <div className="mobile-actions">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPasswordSheet(false);
+                      setPasswordForm({ new: '', confirm: '' });
+                    }}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isChangingPassword || !passwordForm.new || passwordForm.new !== passwordForm.confirm}
+                    className="btn-primary"
+                  >
+                    {isChangingPassword ? 'Changing...' : 'Change Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </MobileBottomSheet>
+        </>
+      )}
     </div>
   );
 }

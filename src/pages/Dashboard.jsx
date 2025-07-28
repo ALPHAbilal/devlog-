@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
 import MobileDocumentViewer from '../components/MobileDocumentViewer';
@@ -43,6 +43,7 @@ import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, signOut, trialStatus } = useAuth();
   const [entries, setEntries] = useState([]);
   const [expandedEntry, setExpandedEntry] = useState(null);
@@ -76,6 +77,10 @@ export default function Dashboard() {
   const [showMobileContextMenu, setShowMobileContextMenu] = useState(false);
   const [contextMenuTarget, setContextMenuTarget] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const searchBarRef = useRef(null);
+  
+  // Check if we're in projects view
+  const isProjectsView = location.search.includes('view=projects');
   
   // Initialize auto-save functionality
   const { performAutoSave } = useAutoSave();
@@ -286,6 +291,25 @@ export default function Dashboard() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [createNewEntry]);
+  
+  // Mobile navigation event listeners
+  useEffect(() => {
+    const handleFocusSearch = () => {
+      searchBarRef.current?.focus();
+    };
+    
+    const handleCreateNewDocument = () => {
+      createNewEntry();
+    };
+    
+    window.addEventListener('focusSearch', handleFocusSearch);
+    window.addEventListener('createNewDocument', handleCreateNewDocument);
+    
+    return () => {
+      window.removeEventListener('focusSearch', handleFocusSearch);
+      window.removeEventListener('createNewDocument', handleCreateNewDocument);
+    };
   }, [createNewEntry]);
   
   // Create a ref to track if we're currently loading
@@ -1375,7 +1399,7 @@ export default function Dashboard() {
             </div>
             
             <div className="flex items-center gap-2">
-              <SearchBar value={searchTerm} onChange={setSearchTerm} />
+              <SearchBar ref={searchBarRef} value={searchTerm} onChange={setSearchTerm} />
               
               
               <button

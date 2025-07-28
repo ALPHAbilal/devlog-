@@ -1,8 +1,17 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import eventBus, { EVENT_TYPES } from '../utils/eventBus';
 
-export default function SearchBar({ value, onChange }) {
+const SearchBar = forwardRef(({ value, onChange }, ref) => {
   const debounceTimer = useRef(null);
+  const inputRef = useRef(null);
+  
+  // Expose focus method to parent
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+      inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }));
   
   // Emit search event after user stops typing
   useEffect(() => {
@@ -29,6 +38,7 @@ export default function SearchBar({ value, onChange }) {
   return (
     <div className="relative flex-grow">
       <input
+        ref={inputRef}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -41,4 +51,8 @@ export default function SearchBar({ value, onChange }) {
       />
     </div>
   );
-}
+});
+
+SearchBar.displayName = 'SearchBar';
+
+export default SearchBar;

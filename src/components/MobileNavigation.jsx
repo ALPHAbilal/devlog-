@@ -6,10 +6,10 @@ export default function MobileNavigation() {
   const location = useLocation();
   
   const navItems = [
-    { path: '/dashboard', icon: Home, label: 'Home' },
-    { path: '/dashboard?search=true', icon: Search, label: 'Search' },
-    { path: '/dashboard?new=true', icon: Plus, label: 'New' },
-    { path: '/dashboard', icon: Grid3X3, label: 'Projects' },
+    { path: '/dashboard', icon: Home, label: 'Home', exact: true },
+    { path: '/dashboard?search=true', icon: Search, label: 'Search', action: true },
+    { path: '/dashboard?new=true', icon: Plus, label: 'New', action: true },
+    { path: '/dashboard?view=projects', icon: Grid3X3, label: 'Projects' },
     { path: '/settings', icon: User, label: 'Profile' }
   ];
 
@@ -23,9 +23,22 @@ export default function MobileNavigation() {
                     backdrop-blur-lg border-t border-dark-secondary/50 z-50 pb-safe">
       <div className="flex items-center justify-around h-16 relative">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-                          (item.label === 'Search' && location.search.includes('search=true')) ||
-                          (item.label === 'New' && location.search.includes('new=true'));
+          const isActive = (() => {
+            // For exact matches (Home)
+            if (item.exact) {
+              return location.pathname === item.path && !location.search;
+            }
+            // For Projects view
+            if (item.label === 'Projects') {
+              return location.search.includes('view=projects');
+            }
+            // For Profile/Settings
+            if (item.path === '/settings') {
+              return location.pathname === item.path;
+            }
+            // Action items are never "active"
+            return false;
+          })();
           
           return (
             <NavLink
@@ -38,6 +51,9 @@ export default function MobileNavigation() {
                   : 'text-text-secondary hover:text-text-primary'
               }`}
               onClick={(e) => {
+                // Haptic feedback on mobile
+                if (navigator.vibrate) navigator.vibrate(5);
+                
                 // Handle special actions
                 if (item.label === 'New') {
                   e.preventDefault();
@@ -61,14 +77,19 @@ export default function MobileNavigation() {
               )}
               
               <motion.div
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.85 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 className="flex flex-col items-center gap-1"
               >
                 <item.icon 
                   size={22} 
-                  className={isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'}
+                  className={`transition-all duration-200 ${
+                    isActive ? 'stroke-[2.5]' : 'stroke-[1.5]'
+                  }`}
                 />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className="text-[10px] font-medium transition-opacity duration-200">
+                  {item.label}
+                </span>
               </motion.div>
             </NavLink>
           );

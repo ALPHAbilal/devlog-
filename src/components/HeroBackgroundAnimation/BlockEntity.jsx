@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { memo } from 'react';
 
 const blockIcons = {
   code: (
@@ -52,42 +52,18 @@ const blockIcons = {
   ),
 };
 
-export default function BlockEntity({ block, mousePosition }) {
-  const { type, x, y, size, opacity, layer, duration, delay } = block;
-
-  // Calculate mouse repulsion effect
-  const transform = useMemo(() => {
-    if (!mousePosition) return { x: 0, y: 0 };
-    
-    const blockCenterX = x + size / 2;
-    const blockCenterY = y + size / 2;
-    const distance = Math.sqrt(
-      Math.pow(mousePosition.x - blockCenterX, 2) + 
-      Math.pow(mousePosition.y - blockCenterY, 2)
-    );
-    
-    const maxDistance = 200;
-    if (distance < maxDistance) {
-      const force = (1 - distance / maxDistance) * 20;
-      const angle = Math.atan2(blockCenterY - mousePosition.y, blockCenterX - mousePosition.x);
-      return {
-        x: Math.cos(angle) * force,
-        y: Math.sin(angle) * force,
-      };
-    }
-    return { x: 0, y: 0 };
-  }, [mousePosition, x, y, size]);
+// Memoize to prevent unnecessary re-renders
+const BlockEntity = memo(function BlockEntity({ block }) {
+  const { type, x, y, size, opacity, layer, duration, delay, id } = block;
 
   const variants = {
     initial: {
       y: window.innerHeight + size,
-      x: x,
       opacity: 0,
       scale: 0.8,
     },
     animate: {
       y: -size * 2,
-      x: [x, x + Math.sin(block.id) * 30, x],
       opacity: [0, opacity, opacity, 0],
       scale: 1,
       transition: {
@@ -95,52 +71,51 @@ export default function BlockEntity({ block, mousePosition }) {
         delay: delay,
         repeat: Infinity,
         ease: "linear",
-        x: {
-          duration: duration / 2,
-          repeat: Infinity,
+        opacity: {
+          times: [0, 0.1, 0.9, 1],
           ease: "easeInOut",
         },
       },
     },
-    hover: {
-      scale: 1.05,
-      rotateY: 5,
-      rotateX: -5,
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 20,
-      },
-    },
+  };
+
+  // CSS custom properties for this block's position
+  const style = {
+    '--block-x': `${x + size / 2}px`,
+    '--block-y': `${y + size / 2}px`,
+    '--block-size': `${size}px`,
+    left: x,
+    top: 0,
+    width: size,
+    height: size,
   };
 
   return (
     <motion.div
       className={`hero-block hero-block--${type} hero-block--layer-${layer}`}
-      style={{
-        left: x,
-        width: size,
-        height: size,
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      }}
+      style={style}
       variants={variants}
       initial="initial"
       animate="animate"
-      whileHover="hover"
-      layout
+      data-block-id={id}
     >
-      <div className="hero-block__content">
-        <div className="hero-block__icon">
-          {blockIcons[type]}
-        </div>
-        {type === 'code' && (
-          <div className="hero-block__code-lines">
-            <span className="hero-block__code-line" />
-            <span className="hero-block__code-line" />
-            <span className="hero-block__code-line" />
+      <div className="hero-block__inner">
+        <div className="hero-block__content">
+          <div className="hero-block__icon">
+            {blockIcons[type]}
           </div>
-        )}
+          {type === 'code' && (
+            <div className="hero-block__code-lines">
+              <span className="hero-block__code-line" />
+              <span className="hero-block__code-line" />
+              <span className="hero-block__code-line" />
+            </div>
+          )}
+        </div>
+        <div className="hero-block__glow" />
       </div>
     </motion.div>
   );
-}
+});
+
+export default BlockEntity;

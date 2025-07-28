@@ -5,23 +5,31 @@ import useBlockAnimation from './useBlockAnimation';
 import { generateBlocks } from './blockConfigs';
 
 export default function HeroBackgroundAnimation() {
-  const containerRef = useRef(null);
   const [blocks, setBlocks] = useState([]);
   const [isVisible, setIsVisible] = useState(true);
-  const { mousePosition, handleMouseMove } = useBlockAnimation();
+  const { containerRef, handleMouseMove, handleMouseLeave } = useBlockAnimation();
+  
+  // Detect device capabilities
+  const [blockCount, setBlockCount] = useState(30);
+  
+  useEffect(() => {
+    // Adjust block count based on device
+    const isMobile = window.innerWidth < 768;
+    const isLowEnd = !window.matchMedia('(hover: hover)').matches;
+    
+    if (isMobile || isLowEnd) {
+      setBlockCount(15);
+    } else if (window.matchMedia('(prefers-reduced-data: reduce)').matches) {
+      setBlockCount(20);
+    }
+  }, []);
 
   // Generate blocks on mount
   useEffect(() => {
     if (isVisible) {
-      setBlocks(generateBlocks(30)); // 30 blocks for balanced performance
+      setBlocks(generateBlocks(blockCount));
     }
-  }, [isVisible]);
-
-  // Handle mouse movement for interactive effects
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [handleMouseMove]);
+  }, [isVisible, blockCount]);
 
   // Intersection Observer for performance
   useEffect(() => {
@@ -39,7 +47,7 @@ export default function HeroBackgroundAnimation() {
         observer.unobserve(containerRef.current);
       }
     };
-  }, []);
+  }, [containerRef]);
 
   // Check for reduced motion preference
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -49,13 +57,21 @@ export default function HeroBackgroundAnimation() {
   }
 
   return (
-    <div ref={containerRef} className="hero-background-animation">
+    <div 
+      ref={containerRef} 
+      className="hero-background-animation"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        '--mouse-x': '50%',
+        '--mouse-y': '50%',
+      }}
+    >
       <AnimatePresence>
         {isVisible && blocks.map((block) => (
           <BlockEntity
             key={block.id}
             block={block}
-            mousePosition={mousePosition}
           />
         ))}
       </AnimatePresence>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Block Animation Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0a0f1c;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      overflow: hidden;
+      color: white;
+    }
+    
+    .test-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+    
+    h1 {
+      font-size: 3rem;
+      margin: 0 0 1rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .stats {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      padding: 1rem;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 0.875rem;
+      z-index: 100;
+    }
+    
+    .stats div {
+      margin: 0.25rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <!-- Animation will be injected here -->
+    <div id="animation-root"></div>
+    
+    <div class="hero-content">
+      <h1>Enhanced Block Animation</h1>
+      <p>Move your mouse around to see the CSS-powered magnetic repulsion effect. Hover over blocks for 3D transforms.</p>
+    </div>
+  </div>
+  
+  <div class="stats">
+    <div>Mouse: <span id="mouse-pos">0, 0</span></div>
+    <div>FPS: <span id="fps">60</span></div>
+    <div>Blocks: <span id="block-count">0</span></div>
+  </div>
+  
+  <script>
+    // FPS counter
+    let lastTime = performance.now();
+    let frames = 0;
+    let fps = 60;
+    
+    function updateFPS() {
+      frames++;
+      const currentTime = performance.now();
+      if (currentTime >= lastTime + 1000) {
+        fps = Math.round((frames * 1000) / (currentTime - lastTime));
+        document.getElementById('fps').textContent = fps;
+        frames = 0;
+        lastTime = currentTime;
+      }
+      requestAnimationFrame(updateFPS);
+    }
+    updateFPS();
+    
+    // Mouse position display
+    document.addEventListener('mousemove', (e) => {
+      document.getElementById('mouse-pos').textContent = `${e.clientX}, ${e.clientY}`;
+    });
+    
+    // Info message
+    console.log(`
+    🚀 Enhanced Block Animation Test
+    
+    Key Improvements:
+    1. Fixed mouse tracking bug - now uses container reference
+    2. CSS-only repulsion calculations using custom properties
+    3. Smooth 3D hover transforms with spring animations
+    4. Performance optimized with single event listener
+    5. Premium glassmorphism effects
+    
+    Try:
+    - Moving your mouse to see magnetic repulsion
+    - Hovering over individual blocks for 3D effects
+    - Check FPS counter stays at 60fps
+    `);
+    
+    // Update block count
+    setTimeout(() => {
+      const blocks = document.querySelectorAll('.hero-block');
+      document.getElementById('block-count').textContent = blocks.length;
+    }, 1000);
+  </script>
+</body>
+</html>

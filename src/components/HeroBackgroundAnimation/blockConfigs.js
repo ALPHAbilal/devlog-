@@ -73,22 +73,37 @@ function randomInRange(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-// Generate block configuration
-export function generateBlocks(count) {
+// Performance-aware block generation
+function getDeviceBlockCount() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const pixelRatio = window.devicePixelRatio || 1;
+  
+  // Adjust block count based on device capabilities
+  if (width < 768) return 12; // Mobile
+  if (width < 1024) return 20; // Tablet
+  if (pixelRatio > 2) return 25; // High DPI screens
+  return 30; // Desktop
+}
+
+// Generate block configuration with performance optimizations
+export function generateBlocks(requestedCount) {
+  const count = Math.min(requestedCount, getDeviceBlockCount());
   const blocks = [];
   const usedPositions = [];
+  const viewportPadding = 100; // Blocks can start slightly outside viewport
   
   for (let i = 0; i < count; i++) {
     const type = getRandomBlockType();
     const config = BLOCK_TYPES[type];
     const size = randomInRange(...config.sizeRange);
     
-    // Find non-overlapping position
+    // Find non-overlapping position with viewport awareness
     let x, attempts = 0;
     const maxAttempts = 50;
     
     do {
-      x = Math.random() * (window.innerWidth - size);
+      x = Math.random() * (window.innerWidth + (viewportPadding * 2)) - viewportPadding;
       attempts++;
     } while (
       attempts < maxAttempts &&
@@ -97,16 +112,19 @@ export function generateBlocks(count) {
     
     usedPositions.push(x);
     
+    // Stagger initial Y positions for better distribution
+    const yOffset = (i / count) * window.innerHeight;
+    
     blocks.push({
       id: `block-${i}-${Date.now()}`,
       type,
       x,
-      y: Math.random() * window.innerHeight,
+      y: yOffset + randomInRange(-100, 100),
       size,
       opacity: randomInRange(...config.opacityRange),
       layer: Math.floor(Math.random() * 3) + 1, // 1-3 layers for depth
-      duration: randomInRange(15, 40), // Slower movement for elegance
-      delay: randomInRange(0, 20),
+      duration: randomInRange(20, 45), // Slower for elegance
+      delay: randomInRange(0, 5) + (i * 0.5), // Progressive delay
       color: config.color,
     });
   }

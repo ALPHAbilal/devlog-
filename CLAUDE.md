@@ -42,9 +42,8 @@ Documents are composed of different block types, each with its own component:
 - `CodeBlock` - Syntax highlighting with file path tracking
 - `TableBlock` - Dynamic tables with drag-and-drop
 - `AIBlock` - Preserved AI conversations
-- `TemplateBlock` - Interactive components (API builders, etc.)
 - `FileTreeBlock` - Visual project structure
-- `HeadingBlock`, `TodoBlock`, `MathBlock`
+- `HeadingBlock`, `TodoBlock`, `ImageBlock`, `InlineImageBlock`
 
 Each block extends from a base structure and can be converted between types.
 
@@ -66,7 +65,6 @@ The app uses a flexible storage system (`storageWrapper.js`) that can switch bet
 src/
 ├── components/
 │   ├── blocks/          # All block type components
-│   ├── Auth.jsx         # Authentication UI
 │   ├── Block.jsx        # Block container/wrapper
 │   ├── ExpandedViewEnhanced.jsx  # Document editor
 │   └── ...
@@ -532,7 +530,6 @@ if (block.type === 'image' && block.metadata.images) {
 | image | `images` (array of image objects) | metadata.images |
 | table | `data` (headers, rows) | metadata (as data property) |
 | todo | `data` (todos array) | metadata (as data property) |
-| template | `data` (template-specific) | metadata (as data property) |
 | inline-image | `url`, `alt`, `dimensions` | metadata.* |
 
 ### Files That MUST Be Synchronized
@@ -567,7 +564,7 @@ When adding new block types or modifying data persistence, ALL these files must 
    ALTER TABLE blocks DROP CONSTRAINT blocks_type_check;
    ALTER TABLE blocks ADD CONSTRAINT blocks_type_check 
    CHECK (type = ANY (ARRAY['text', 'code', 'heading', 'ai', 'table', 
-                            'filetree', 'todo', 'template', 'math', 
+                            'filetree', 'todo', 'math', 
                             'image', 'inline-image', 'your-type']));
    ```
 
@@ -663,7 +660,7 @@ Based on developer conversion research, redesigned landing page to focus on:
 ### IMPORTANT: How Changes Are Deployed
 
 1. **All code changes are made in the local directory**
-   - Working directory: `/mnt/c/Users/User004/Desktop/ma/devlog-`
+   - Working directory: `/home/bilal/devlog-`
    - I make changes to files in this directory only
 
 2. **GitHub deployment process**

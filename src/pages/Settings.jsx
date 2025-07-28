@@ -4,33 +4,46 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { 
   X, User, Database, Download, Upload, Trash2, 
   AlertCircle, HardDrive, Check, Lock, Shield, AlertTriangle,
-  FileText, ChevronRight, FileJson, ChevronLeft, Menu
+  FileText, ChevronRight, FileJson, ChevronLeft, Menu, ArrowLeft
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { exportSupabaseData, importSupabaseData } from '../utils/supabaseDataExport';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
 import MobileBottomSheet from '../components/MobileBottomSheet';
+import MobileTabNavigation from '../components/MobileTabNavigation';
+import CircularProgress from '../components/CircularProgress';
+import TouchFeedback from '../components/TouchFeedback';
+import MobileFormInput from '../components/MobileFormInput';
 import { useToast } from '../hooks/useToast';
 import '../styles/settings.css';
+import '../styles/settings-mobile-enhanced.css';
 
-// Toggle Switch Component
+// Enhanced Mobile Toggle Switch Component
 const ToggleSwitch = ({ id, label, description, checked, onChange }) => (
-  <div className="toggle-row">
-    <label htmlFor={id} className="toggle-switch">
-      <input
-        type="checkbox"
-        id={id}
-        className="toggle-input"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-      />
-      <span className="toggle-slider"></span>
-    </label>
-    <div className="toggle-content">
-      <label htmlFor={id} className="toggle-label">{label}</label>
-      {description && <p className="toggle-description">{description}</p>}
+  <TouchFeedback 
+    className="toggle-row-wrapper"
+    onClick={() => {
+      onChange(!checked);
+    }}
+    hapticFeedback={true}
+  >
+    <div className="toggle-row">
+      <div className="toggle-content">
+        <label htmlFor={id} className="toggle-label">{label}</label>
+        {description && <p className="toggle-description">{description}</p>}
+      </div>
+      <label htmlFor={id} className="toggle-switch">
+        <input
+          type="checkbox"
+          id={id}
+          className="toggle-input"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+        />
+        <span className="toggle-slider"></span>
+      </label>
     </div>
-  </div>
+  </TouchFeedback>
 );
 
 // Form Input Component
@@ -323,18 +336,22 @@ export default function Settings() {
   return (
     <div className={`settings-page ${isMobile ? 'mobile' : ''}`}>
       <div className={`settings-container ${isMobile ? 'mobile' : ''}`}>
-        {/* Header */}
-        <div className="settings-header">
-          {isMobile && (
-            <button
+        {/* Enhanced Mobile Header */}
+        <div className={`settings-header ${isMobile ? 'mobile-header' : ''}`}>
+          {isMobile ? (
+            <TouchFeedback
               onClick={() => navigate('/dashboard')}
-              className="mobile-back-btn"
-              title="Back to dashboard"
+              className="mobile-back-btn-wrapper"
             >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-          <h1>Settings</h1>
+              <button
+                className="mobile-back-btn enhanced"
+                title="Back to dashboard"
+              >
+                <ArrowLeft size={24} />
+              </button>
+            </TouchFeedback>
+          ) : null}
+          <h1 className="settings-title">Settings</h1>
           {!isMobile && (
             <button
               onClick={() => navigate('/dashboard')}
@@ -346,19 +363,27 @@ export default function Settings() {
           )}
         </div>
 
-        {/* Tabs */}
-        <div className={`settings-tabs ${isMobile ? 'mobile-tabs' : ''}`}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab ${activeTab === tab.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <tab.icon size={20} />
-              {!isMobile && <span>{tab.label}</span>}
-            </button>
-          ))}
-        </div>
+        {/* Enhanced Mobile Tabs */}
+        {isMobile ? (
+          <MobileTabNavigation
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
+        ) : (
+          <div className="settings-tabs">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`tab ${activeTab === tab.id ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <tab.icon size={20} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Message */}
         {message && (
@@ -383,15 +408,28 @@ export default function Settings() {
                 <h3>Profile Information</h3>
                 
                 <div className="form-row">
-                  <FormInput
-                    id="email"
-                    label="Email Address"
-                    type="email"
-                    value={user?.email || ''}
-                    onChange={() => {}}
-                    disabled={true}
-                    help="Your email address is used for login and notifications"
-                  />
+                  {isMobile ? (
+                    <MobileFormInput
+                      id="email"
+                      label="Email Address"
+                      type="email"
+                      value={user?.email || ''}
+                      onChange={() => {}}
+                      disabled={true}
+                      placeholder="your@email.com"
+                      inputMode="email"
+                    />
+                  ) : (
+                    <FormInput
+                      id="email"
+                      label="Email Address"
+                      type="email"
+                      value={user?.email || ''}
+                      onChange={() => {}}
+                      disabled={true}
+                      help="Your email address is used for login and notifications"
+                    />
+                  )}
                 </div>
               </div>
 
@@ -400,19 +438,39 @@ export default function Settings() {
                 <h3>Security</h3>
                 
                 {!showPasswordForm ? (
-                  <button 
-                    className="action-button"
-                    onClick={() => setShowPasswordForm(true)}
-                  >
-                    <Lock size={20} />
-                    <div className="action-content">
-                      <span className="action-title">Change Password</span>
-                      <span className="action-subtitle">
-                        Update your password to keep your account secure
-                      </span>
-                    </div>
-                    <ChevronRight size={16} />
-                  </button>
+                  isMobile ? (
+                    <TouchFeedback
+                      onClick={() => setShowPasswordSheet(true)}
+                      className="action-button-wrapper"
+                    >
+                      <button className="action-button mobile-enhanced">
+                        <div className="action-icon-wrapper">
+                          <Lock size={24} />
+                        </div>
+                        <div className="action-content">
+                          <span className="action-title">Change Password</span>
+                          <span className="action-subtitle">
+                            Update your password to keep your account secure
+                          </span>
+                        </div>
+                        <ChevronRight size={20} className="action-chevron" />
+                      </button>
+                    </TouchFeedback>
+                  ) : (
+                    <button 
+                      className="action-button"
+                      onClick={() => setShowPasswordForm(true)}
+                    >
+                      <Lock size={20} />
+                      <div className="action-content">
+                        <span className="action-title">Change Password</span>
+                        <span className="action-subtitle">
+                          Update your password to keep your account secure
+                        </span>
+                      </div>
+                      <ChevronRight size={16} />
+                    </button>
+                  )
                 ) : (
                   <form onSubmit={handlePasswordChange} className="password-form">
                     <FormInput
@@ -503,35 +561,104 @@ export default function Settings() {
                 <p>Export, import, and manage your application data</p>
               </div>
 
-              {/* Storage Usage */}
+              {/* Enhanced Mobile Storage Usage */}
               {usageLoading ? (
                 <StorageUsageSkeleton />
               ) : !usageError ? (
-                <StorageUsage 
-                  {...calculateStorageUsage()}
-                  breakdown={dataBreakdown ? [
-                    { 
-                      type: 'documents', 
-                      label: `Documents (${dataBreakdown.documents.count})`, 
-                      size: dataBreakdown.documents.size || 0, 
-                      color: '#10b981' 
-                    },
-                    { 
-                      type: 'blocks', 
-                      label: `Content Blocks (${dataBreakdown.blocks.count})`, 
-                      size: dataBreakdown.blocks.size || 0, 
-                      color: '#3b82f6' 
-                    },
-                    { 
-                      type: 'images', 
-                      label: `Images (${dataBreakdown.images.count})`, 
-                      size: dataBreakdown.images.size || 0, 
-                      color: '#f59e0b' 
-                    }
-                  ] : [
-                    { type: 'documents', label: 'Documents & Notes', size: calculateStorageUsage().used, color: '#10b981' }
-                  ]}
-                />
+                isMobile ? (
+                  <div className="mobile-storage-section">
+                    <h3>Storage Usage</h3>
+                    <div className="mobile-storage-content">
+                      <CircularProgress
+                        value={calculateStorageUsage().used}
+                        max={calculateStorageUsage().total}
+                        size={140}
+                        strokeWidth={10}
+                        animated={true}
+                      />
+                      
+                      {dataBreakdown && (
+                        <div className="storage-breakdown-cards">
+                          {[
+                            { 
+                              type: 'documents', 
+                              label: 'Documents', 
+                              count: dataBreakdown.documents.count,
+                              size: dataBreakdown.documents.size || 0, 
+                              color: '#10b981',
+                              icon: FileText
+                            },
+                            { 
+                              type: 'blocks', 
+                              label: 'Content', 
+                              count: dataBreakdown.blocks.count,
+                              size: dataBreakdown.blocks.size || 0, 
+                              color: '#3b82f6',
+                              icon: Database
+                            },
+                            { 
+                              type: 'images', 
+                              label: 'Images', 
+                              count: dataBreakdown.images.count,
+                              size: dataBreakdown.images.size || 0, 
+                              color: '#f59e0b',
+                              icon: FileText
+                            }
+                          ].map(item => (
+                            <TouchFeedback key={item.type} className="storage-card-wrapper">
+                              <div className="storage-card">
+                                <div className="storage-card-icon" style={{ backgroundColor: `${item.color}20` }}>
+                                  <item.icon size={20} color={item.color} />
+                                </div>
+                                <div className="storage-card-content">
+                                  <span className="storage-card-label">{item.label}</span>
+                                  <span className="storage-card-count">{item.count} items</span>
+                                </div>
+                              </div>
+                            </TouchFeedback>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {usagePercentage >= 80 && (
+                        <div className={`mobile-storage-warning ${usagePercentage >= 90 ? 'critical' : 'warning'}`}>
+                          <AlertCircle size={20} />
+                          <p>
+                            {usagePercentage >= 90 
+                              ? 'Storage nearly full. Consider upgrading.'
+                              : 'Storage usage is high.'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <StorageUsage 
+                    {...calculateStorageUsage()}
+                    breakdown={dataBreakdown ? [
+                      { 
+                        type: 'documents', 
+                        label: `Documents (${dataBreakdown.documents.count})`, 
+                        size: dataBreakdown.documents.size || 0, 
+                        color: '#10b981' 
+                      },
+                      { 
+                        type: 'blocks', 
+                        label: `Content Blocks (${dataBreakdown.blocks.count})`, 
+                        size: dataBreakdown.blocks.size || 0, 
+                        color: '#3b82f6' 
+                      },
+                      { 
+                        type: 'images', 
+                        label: `Images (${dataBreakdown.images.count})`, 
+                        size: dataBreakdown.images.size || 0, 
+                        color: '#f59e0b' 
+                      }
+                    ] : [
+                      { type: 'documents', label: 'Documents & Notes', size: calculateStorageUsage().used, color: '#10b981' }
+                    ]}
+                  />
+                )
               ) : null}
 
               {/* Export Data */}
@@ -604,20 +731,24 @@ export default function Settings() {
           >
             <div className="mobile-delete-content">
               <div className="delete-warning">
-                <AlertTriangle size={48} className="warning-icon" />
+                <div className="warning-icon-wrapper">
+                  <AlertTriangle size={56} className="warning-icon" />
+                </div>
                 <h3>This action cannot be undone</h3>
                 <p>All your documents, settings, and data will be permanently deleted.</p>
               </div>
               
               <div className="delete-confirm-section">
-                <label>Type DELETE to confirm</label>
-                <input
+                <MobileFormInput
+                  id="delete-confirm-mobile"
+                  label="Type DELETE to confirm"
                   type="text"
-                  placeholder="DELETE"
                   value={deleteConfirm}
-                  onChange={(e) => setDeleteConfirm(e.target.value)}
-                  className="mobile-input danger-input"
+                  onChange={setDeleteConfirm}
+                  placeholder="DELETE"
                   autoComplete="off"
+                  error={deleteConfirm && deleteConfirm !== 'DELETE' ? 'Please type DELETE exactly' : ''}
+                  success={deleteConfirm === 'DELETE'}
                 />
               </div>
               
@@ -645,7 +776,7 @@ export default function Settings() {
             </div>
           </MobileBottomSheet>
           
-          {/* Password Change Bottom Sheet */}
+          {/* Enhanced Password Change Bottom Sheet */}
           <MobileBottomSheet
             isOpen={showPasswordSheet}
             onClose={() => {
@@ -655,35 +786,35 @@ export default function Settings() {
             title="Change Password"
           >
             <div className="mobile-password-content">
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                handlePasswordChange();
-                setShowPasswordSheet(false);
-              }}>
-                <div className="form-field">
-                  <label>New Password</label>
-                  <input
-                    type="password"
-                    value={passwordForm.new}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                    className="mobile-input"
-                    placeholder="Enter new password"
-                    minLength={6}
-                    required
-                  />
-                </div>
+              <form onSubmit={handlePasswordChange}>
+                <MobileFormInput
+                  id="new-password-mobile"
+                  label="New Password"
+                  type="password"
+                  value={passwordForm.new}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, new: value })}
+                  placeholder="At least 6 characters"
+                  minLength={6}
+                  required
+                  showPasswordToggle={true}
+                  validationFn={(value) => {
+                    if (value.length < 6) return 'Password must be at least 6 characters';
+                    return true;
+                  }}
+                />
                 
-                <div className="form-field">
-                  <label>Confirm Password</label>
-                  <input
-                    type="password"
-                    value={passwordForm.confirm}
-                    onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                    className="mobile-input"
-                    placeholder="Confirm new password"
-                    required
-                  />
-                </div>
+                <MobileFormInput
+                  id="confirm-password-mobile"
+                  label="Confirm Password"
+                  type="password"
+                  value={passwordForm.confirm}
+                  onChange={(value) => setPasswordForm({ ...passwordForm, confirm: value })}
+                  placeholder="Re-enter your password"
+                  required
+                  showPasswordToggle={true}
+                  error={passwordForm.new && passwordForm.confirm && passwordForm.new !== passwordForm.confirm ? 'Passwords do not match' : ''}
+                  success={passwordForm.new && passwordForm.confirm && passwordForm.new === passwordForm.confirm}
+                />
                 
                 <div className="mobile-actions">
                   <button

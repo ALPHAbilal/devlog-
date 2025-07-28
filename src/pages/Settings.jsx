@@ -176,6 +176,7 @@ export default function Settings() {
   const [showPasswordSheet, setShowPasswordSheet] = useState(false);
   const [showDeleteSheet, setShowDeleteSheet] = useState(false);
   const [showExportSheet, setShowExportSheet] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   const fileInputRef = useRef(null);
 
@@ -200,6 +201,7 @@ export default function Settings() {
       setMessage({ type: 'success', text: 'Password updated successfully' });
       setPasswordForm({ new: '', confirm: '' });
       setShowPasswordForm(false);
+      setShowPasswordSheet(false);
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
     } finally {
@@ -332,6 +334,16 @@ export default function Settings() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  // Show swipe hint on first load
+  useEffect(() => {
+    if (isMobile && !hasInteracted) {
+      const timer = setTimeout(() => {
+        setHasInteracted(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [isMobile, hasInteracted]);
 
   return (
     <div className={`settings-page ${isMobile ? 'mobile' : ''}`}>
@@ -365,11 +377,13 @@ export default function Settings() {
 
         {/* Enhanced Mobile Tabs */}
         {isMobile ? (
-          <MobileTabNavigation
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
+          <div className="mobile-tab-wrapper">
+            <MobileTabNavigation
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+            />
+          </div>
         ) : (
           <div className="settings-tabs">
             {tabs.map(tab => (
@@ -471,7 +485,7 @@ export default function Settings() {
                       <ChevronRight size={16} />
                     </button>
                   )
-                ) : (
+                ) : !isMobile ? (
                   <form onSubmit={handlePasswordChange} className="password-form">
                     <FormInput
                       id="new-password"
@@ -505,7 +519,7 @@ export default function Settings() {
                       </button>
                     </div>
                   </form>
-                )}
+                ) : null}
               </div>
 
               {/* Danger Zone */}
@@ -665,25 +679,50 @@ export default function Settings() {
               <div className="settings-group">
                 <h3>Export Data</h3>
                 
-                <div className="export-options">
-                  <div className="export-option">
-                    <div className="option-icon">
-                      <FileJson size={32} />
+                {isMobile ? (
+                  <TouchFeedback
+                    onClick={handleExport}
+                    disabled={isExporting}
+                    className="mobile-export-card"
+                  >
+                    <div className="export-card">
+                      <div className="export-card-icon">
+                        <FileJson size={28} />
+                      </div>
+                      <div className="export-card-content">
+                        <h4>Export All Data</h4>
+                        <p>Download a complete backup</p>
+                      </div>
+                      <div className="export-card-action">
+                        {isExporting ? (
+                          <div className="loading-spinner small" />
+                        ) : (
+                          <Download size={24} />
+                        )}
+                      </div>
                     </div>
-                    <div className="option-content">
-                      <h4>Export All Data</h4>
-                      <p>Download a complete backup of all your documents and settings</p>
-                      <button 
-                        className="btn-primary"
-                        onClick={handleExport}
-                        disabled={isExporting}
-                      >
-                        <Download size={16} />
-                        {isExporting ? 'Exporting...' : 'Export to JSON'}
-                      </button>
+                  </TouchFeedback>
+                ) : (
+                  <div className="export-options">
+                    <div className="export-option">
+                      <div className="option-icon">
+                        <FileJson size={32} />
+                      </div>
+                      <div className="option-content">
+                        <h4>Export All Data</h4>
+                        <p>Download a complete backup of all your documents and settings</p>
+                        <button 
+                          className="btn-primary"
+                          onClick={handleExport}
+                          disabled={isExporting}
+                        >
+                          <Download size={16} />
+                          {isExporting ? 'Exporting...' : 'Export to JSON'}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Import Data */}

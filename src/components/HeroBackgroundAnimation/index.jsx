@@ -1,56 +1,118 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import NeuralCanvas from './NeuralCanvas';
 import MinimalParticles from './MinimalParticles';
-
-// Performance optimization - only render on larger screens
-const isMobile = window.innerWidth < 1024;
+import InteractionHints from './InteractionHints';
+import '../../styles/hero-background-animation.css';
 
 export default function HeroBackgroundAnimation() {
-  const [isVisible, setIsVisible] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-
+  const [quality, setQuality] = useState('high');
+  const [isVisible, setIsVisible] = useState(true);
+  const containerRef = useRef(null);
+  
+  // Detect device capabilities and set quality
   useEffect(() => {
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReducedMotion(mediaQuery.matches);
-
-    // Check if animation should be visible
+    const detectPerformance = () => {
+      // Check for reduced motion preference
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setQuality('minimal');
+        return;
+      }
+      
+      // Check device memory (if available)
+      const memory = navigator.deviceMemory;
+      if (memory && memory < 4) {
+        setQuality('medium');
+        return;
+      }
+      
+      // Check GPU (basic detection)
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        setQuality('minimal');
+        return;
+      }
+      
+      // Check for mobile devices
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                      window.innerWidth < 768;
+      if (isMobile) {
+        setQuality('medium');
+        return;
+      }
+      
+      // Default to high quality
+      setQuality('high');
+    };
+    
+    detectPerformance();
+    
+    // Re-evaluate on resize
+    const handleResize = () => {
+      if (window.innerWidth < 768 && quality === 'high') {
+        setQuality('medium');
+      }
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Intersection Observer for performance
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         setIsVisible(entry.isIntersecting);
       },
       { threshold: 0.1 }
     );
-
-    const heroSection = document.querySelector('.hero-container');
-    if (heroSection) {
-      observer.observe(heroSection);
+    
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
     }
-
+    
     return () => {
-      if (heroSection) {
-        observer.unobserve(heroSection);
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
       }
     };
   }, []);
-
-  // Don't render on mobile or with reduced motion
-  if (isMobile || reducedMotion) {
-    return null;
-  }
-
+  
   return (
-    <motion.div
+    <div 
+      ref={containerRef}
       className="hero-background-animation"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isVisible ? 1 : 0 }}
-      transition={{ duration: 2, ease: "easeOut" }}
+      data-quality={quality}
     >
-      {/* Single minimal animation layer - 2025 enterprise style */}
-      {isVisible && <MinimalParticles />}
+      {/* Loading state */}
+      <motion.div
+        className="hero-bg-loading"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      />
       
-      {/* Subtle gradient overlay */}
-      <div className="animation-gradient-overlay" />
-    </motion.div>
+      {/* Render based on quality setting */}
+      {quality === 'minimal' ? (
+        <MinimalParticles count={30} />
+      ) : (
+        <NeuralCanvas 
+          quality={quality} 
+          isVisible={isVisible}
+          particleCount={quality === 'high' ? 150 : 80}
+          connectionRadius={120}
+          interactionRadius={150}
+        />
+      )}
+      
+      {/* Depth gradient overlay */}
+      <div className="hero-bg-gradient-overlay" />
+      
+      {/* Interaction hints (only show for medium/high quality) */}
+      {quality !== 'minimal' && isVisible && (
+        <InteractionHints show={true} />
+      )}
+    </div>
   );
 }

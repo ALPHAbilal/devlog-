@@ -1,131 +1,339 @@
-/* Hero Background Animation - 2025 Enterprise Minimal Style */
-
-/* Main container */
+/* Hero Background Animation Styles */
 .hero-background-animation {
   position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-  contain: layout style paint;
-}
-
-/* Gradient overlay - subtle depth */
-.animation-gradient-overlay {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse at 50% 0%,
-    transparent 0%,
-    rgba(10, 22, 40, 0.1) 50%,
-    rgba(10, 22, 40, 0.3) 100%
-  );
-  z-index: 2;
-  mix-blend-mode: multiply;
-}
-
-/* Minimal Particles Container */
-.minimal-particles-container {
-  position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
 }
 
-/* Gradient mesh background - sophisticated but subtle */
-.particles-gradient-mesh {
+/* Loading state */
+.hero-bg-loading {
   position: absolute;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(circle at 30% 40%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(59, 130, 246, 0.06) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.04) 0%, transparent 70%);
-  filter: blur(80px);
-  opacity: 0.6;
-  animation: meshBreathe 20s ease-in-out infinite;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.05) 0%,
+    rgba(6, 182, 212, 0.05) 50%,
+    rgba(139, 92, 246, 0.05) 100%
+  );
+  animation: hero-bg-shimmer 2s ease-in-out infinite;
 }
 
-@keyframes meshBreathe {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.1) rotate(5deg);
-    opacity: 0.8;
-  }
+@keyframes hero-bg-shimmer {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.5; }
 }
 
-/* Minimal particles */
+/* Neural Canvas */
+.neural-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: all;
+  cursor: crosshair;
+  opacity: 0;
+  animation: hero-bg-fade-in 1s ease-out forwards;
+  animation-delay: 0.5s;
+  mix-blend-mode: screen;
+  filter: contrast(1.1) brightness(1.05);
+}
+
+/* Enhanced visual effects for high quality mode */
+[data-quality="high"] .neural-canvas {
+  filter: contrast(1.15) brightness(1.05) saturate(1.2);
+  image-rendering: optimizeQuality;
+}
+
+/* Chromatic aberration effect layer */
+.neural-canvas::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 0, 0, 0.01) 0%,
+    transparent 50%,
+    rgba(0, 0, 255, 0.01) 100%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0;
+  animation: chroma-shift 3s ease-in-out infinite alternate;
+}
+
+@keyframes chroma-shift {
+  0% { transform: translateX(-1px); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateX(1px); opacity: 0; }
+}
+
+@keyframes hero-bg-fade-in {
+  to { opacity: 1; }
+}
+
+/* Minimal particles fallback */
+.minimal-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
 .minimal-particle {
   position: absolute;
-  background: rgba(255, 255, 255, 0.8);
+  width: 2px;
+  height: 2px;
+  background: radial-gradient(
+    circle,
+    rgba(6, 182, 212, 0.8) 0%,
+    rgba(6, 182, 212, 0) 70%
+  );
   border-radius: 50%;
-  filter: blur(0.5px);
-  will-change: transform;
-  box-shadow: 
-    0 0 2px rgba(255, 255, 255, 0.5),
-    0 0 8px rgba(16, 185, 129, 0.3);
-}
-
-/* SVG connections - kept minimal */
-.particles-connections {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.3;
   pointer-events: none;
 }
 
-/* Responsive design - hide on smaller screens */
-@media (max-width: 1024px) {
+/* Gradient overlay for depth */
+.hero-bg-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: 
+    radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      rgba(10, 15, 28, 0.2) 50%,
+      rgba(10, 15, 28, 0.4) 100%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(59, 130, 246, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(139, 92, 246, 0.05) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      rgba(6, 182, 212, 0.03) 0%,
+      transparent 70%
+    );
+  pointer-events: none;
+  z-index: 2;
+  animation: gradient-shift 20s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.05) rotate(1deg); }
+  50% { transform: scale(0.98) rotate(-1deg); }
+  75% { transform: scale(1.02) rotate(0.5deg); }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
   .hero-background-animation {
     display: none;
   }
 }
 
-/* High contrast mode support */
-@media (prefers-contrast: high) {
-  .minimal-particle {
-    background: rgba(255, 255, 255, 1);
-    filter: none;
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .neural-canvas {
+    cursor: default;
   }
   
-  .particles-gradient-mesh {
-    display: none;
-  }
-}
-
-/* Reduced motion support */
-@media (prefers-reduced-motion: reduce) {
-  .particles-gradient-mesh {
-    animation: none;
-  }
-  
-  .minimal-particle {
-    transition: none;
-  }
-}
-
-/* Dark mode optimizations */
-@media (prefers-color-scheme: dark) {
-  .animation-gradient-overlay {
+  .hero-bg-gradient-overlay {
     background: radial-gradient(
-      ellipse at 50% 0%,
+      ellipse at center,
       transparent 0%,
-      rgba(0, 0, 0, 0.2) 50%,
-      rgba(0, 0, 0, 0.4) 100%
+      rgba(10, 15, 28, 0.3) 50%,
+      rgba(10, 15, 28, 0.5) 100%
     );
   }
 }
 
-/* Performance hints */
-.minimal-particles-container,
+/* GPU acceleration hints */
+.hero-background-animation,
+.neural-canvas,
 .minimal-particle {
+  will-change: transform;
   transform: translateZ(0);
   backface-visibility: hidden;
-  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+/* Quality-based adjustments */
+[data-quality="minimal"] .neural-canvas {
+  display: none;
+}
+
+[data-quality="medium"] .neural-canvas {
+  filter: blur(0.5px);
+}
+
+/* Noise texture overlay */
+.hero-background-animation::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 35px,
+      rgba(255, 255, 255, 0.01) 35px,
+      rgba(255, 255, 255, 0.01) 70px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 35px,
+      rgba(255, 255, 255, 0.01) 35px,
+      rgba(255, 255, 255, 0.01) 70px
+    );
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Glow effects for activity zones */
+@keyframes pulse-glow {
+  0%, 100% { 
+    box-shadow: 
+      0 0 20px rgba(59, 130, 246, 0.2),
+      0 0 40px rgba(6, 182, 212, 0.1),
+      0 0 60px rgba(139, 92, 246, 0.05);
+  }
+  50% { 
+    box-shadow: 
+      0 0 30px rgba(59, 130, 246, 0.3),
+      0 0 60px rgba(6, 182, 212, 0.2),
+      0 0 90px rgba(139, 92, 246, 0.1);
+  }
+}
+
+/* Interaction hints */
+.neural-canvas:hover {
+  cursor: none;
+}
+
+.neural-canvas:hover::after {
+  content: '';
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(147, 197, 253, 0.8) 0%,
+    rgba(147, 197, 253, 0.4) 40%,
+    transparent 70%
+  );
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 9999;
+  animation: cursor-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes cursor-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Interaction hints UI */
+.interaction-hints {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  pointer-events: none;
+}
+
+.hints-container {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.hint-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(10, 15, 28, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.hint-icon {
+  font-size: 1.2rem;
+  filter: saturate(1.5);
+}
+
+.hint-key {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.5rem;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
+  font-size: 0.875rem;
+  color: #93c5fd;
+  box-shadow: 
+    0 2px 0 rgba(59, 130, 246, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.hint-action {
+  font-size: 0.875rem;
+  color: rgba(147, 197, 253, 0.9);
+  font-weight: 500;
+}
+
+.hint-subtitle {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(147, 197, 253, 0.6);
+  margin: 0;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .interaction-hints {
+    bottom: 1rem;
+  }
+  
+  .hints-container {
+    gap: 0.75rem;
+  }
+  
+  .hint-item {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .hint-icon {
+    font-size: 1rem;
+  }
+  
+  .hint-key {
+    font-size: 0.75rem;
+    padding: 0.125rem 0.375rem;
+  }
+  
+  .hint-action {
+    font-size: 0.75rem;
+  }
 }

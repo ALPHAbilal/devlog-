@@ -9,8 +9,6 @@ import { register as registerServiceWorker } from './utils/serviceWorker';
 import { preloadResources } from './utils/performance';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
-import Settings from './pages/Settings';
-import SettingsMinimal from './pages/SettingsMinimal';
 import SettingsClaude from './pages/SettingsClaude';
 import AuthDesktop from './components/AuthDesktop';
 import AuthCallback from './pages/auth/callback';

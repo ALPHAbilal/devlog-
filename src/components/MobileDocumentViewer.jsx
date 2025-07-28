@@ -3,7 +3,6 @@ import { useResponsive } from '../hooks/useResponsive';
 import { useTouchGestures } from '../hooks/useTouchGestures';
 import ExpandedViewEnhanced from './ExpandedViewEnhanced';
 import MobileDocumentHeader from './MobileDocumentHeader';
-import MobileFloatingActionButton from './MobileFloatingActionButton';
 import MobileBottomSheet from './MobileBottomSheet';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -16,7 +15,6 @@ export default function MobileDocumentViewer({
 }) {
   const { isMobile, isTablet, getSafeAreaInsets } = useResponsive();
   const [showActionSheet, setShowActionSheet] = useState(false);
-  const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const scrollContainerRef = useRef(null);
@@ -72,16 +70,6 @@ export default function MobileDocumentViewer({
     swipeVelocityThreshold: 0.5,
   });
   
-  // Handle FAB actions
-  const handleFABClick = () => {
-    setShowBlockSelector(true);
-  };
-  
-  const handleAddBlock = (type) => {
-    // This will be passed down to ExpandedViewEnhanced
-    setShowBlockSelector(false);
-    // The actual block addition is handled by ExpandedViewEnhanced
-  };
   
   // Action handlers
   const handleShare = () => {
@@ -138,7 +126,7 @@ export default function MobileDocumentViewer({
         ref={scrollContainerRef}
         className="flex-1 overflow-y-auto overflow-x-hidden"
         style={{ 
-          paddingBottom: safeAreaInsets.bottom + 80, // Extra space for FAB
+          paddingBottom: safeAreaInsets.bottom + 20, // Extra space for last block
         }}
       >
         <ExpandedViewEnhanced
@@ -148,7 +136,6 @@ export default function MobileDocumentViewer({
           allEntries={allEntries}
           isMobileView={true}
           scrollContainerRef={scrollContainerRef}
-          onShowBlockSelector={() => setShowBlockSelector(true)}
         />
       </div>
       
@@ -185,14 +172,6 @@ export default function MobileDocumentViewer({
         </AnimatePresence>
       </div>
       
-      {/* Floating Action Button */}
-      <MobileFloatingActionButton
-        onClick={handleFABClick}
-        style={{ 
-          bottom: safeAreaInsets.bottom + 16,
-          right: 16 
-        }}
-      />
       
       {/* Action Sheet for Menu Options */}
       <MobileBottomSheet
@@ -248,37 +227,6 @@ export default function MobileDocumentViewer({
         </div>
       </MobileBottomSheet>
       
-      {/* Block Type Selector */}
-      <MobileBottomSheet
-        isOpen={showBlockSelector}
-        onClose={() => setShowBlockSelector(false)}
-        title="Add Block"
-      >
-        <div className="grid grid-cols-3 gap-3 p-4">
-          {[
-            { type: 'text', icon: '📝', label: 'Text' },
-            { type: 'code', icon: '💻', label: 'Code' },
-            { type: 'heading', icon: '📌', label: 'Heading' },
-            { type: 'ai', icon: '🤖', label: 'AI Chat' },
-            { type: 'table', icon: '📊', label: 'Table' },
-            { type: 'todo', icon: '✅', label: 'Todo' },
-            { type: 'image', icon: '🖼️', label: 'Image' },
-            { type: 'filetree', icon: '📁', label: 'File Tree' },
-            { type: 'math', icon: '🔢', label: 'Math' },
-          ].map(({ type, icon, label }) => (
-            <button
-              key={type}
-              onClick={() => handleAddBlock(type)}
-              className="p-4 bg-dark-secondary rounded-xl text-center
-                       hover:bg-dark-secondary/80 active:scale-95 transition-all
-                       flex flex-col items-center gap-2"
-            >
-              <span className="text-2xl">{icon}</span>
-              <span className="text-xs text-text-secondary">{label}</span>
-            </button>
-          ))}
-        </div>
-      </MobileBottomSheet>
     </div>
   );
 }

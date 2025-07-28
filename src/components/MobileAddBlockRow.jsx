@@ -84,7 +84,7 @@ export default function MobileAddBlockRow({ onSelect, onClose, show }) {
         {/* Quick tip */}
         <div className="mt-4 p-3 bg-dark-secondary/30 rounded-lg">
           <p className="text-xs text-text-secondary text-center">
-            Tip: You can also type / in any text block to quickly add blocks
+            Tip: Tap + between any blocks to add content exactly where you need it
           </p>
         </div>
       </div>

@@ -539,13 +539,8 @@ export default function ExpandedView({
   };
 
   const handleAddAtEnd = () => {
-    // If mobile and has callback, use that instead
-    if (isMobileView && onShowBlockSelector) {
-      onShowBlockSelector();
-    } else {
-      setSelectorPosition('end');
-      setShowBlockSelector(true);
-    }
+    setSelectorPosition('end');
+    setShowBlockSelector(true);
   };
 
   // Helper function for saving with status updates
@@ -979,18 +974,19 @@ export default function ExpandedView({
             </div>
           )}
 
-          {/* Add block at end - Hidden on mobile as FAB handles this */}
-          {!isMobileView && (
+          {/* Add block at end */}
           <div className="relative pt-4">
             <button
               onClick={handleAddAtEnd}
-              className="w-full py-8 border-2 border-dashed border-dark-secondary/50
+              className={`w-full ${isMobileView ? 'py-12' : 'py-8'} border-2 border-dashed 
+                         ${isMobileView ? 'border-dark-secondary/70 bg-dark-secondary/10' : 'border-dark-secondary/50'}
                          rounded-lg text-text-secondary hover:text-text-primary
                          hover:border-dark-secondary/50 transition-all
-                         flex items-center justify-center gap-2 group"
+                         flex items-center justify-center gap-2 group
+                         ${isMobileView ? 'active:scale-98 touch-manipulation active:bg-dark-secondary/20' : ''}`}
             >
-              <Plus size={20} className="group-hover:scale-110 transition-transform" />
-              <span>Add a block</span>
+              <Plus size={isMobileView ? 24 : 20} className="group-hover:scale-110 transition-transform" />
+              <span className={isMobileView ? 'text-base font-medium' : ''}>Add a block</span>
             </button>
             <AddBlockRow
               show={showBlockSelector && selectorPosition === 'end'}
@@ -999,7 +995,6 @@ export default function ExpandedView({
               isMobileView={isMobileView}
             />
           </div>
-          )}
         </div>
       )}
 

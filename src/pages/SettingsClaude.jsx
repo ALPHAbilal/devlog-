@@ -4,7 +4,8 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { supabase } from '../lib/supabase';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
 import { useSettings } from '../contexts/SettingsContext';
-import { X, ChevronLeft } from 'lucide-react';
+import { X, ChevronLeft, Lock } from 'lucide-react';
+import MobileBottomSheet from '../components/MobileBottomSheet';
 import '../styles/settings-claude.css';
 
 // Toggle Switch Component - Claude.ai style
@@ -57,6 +58,8 @@ export default function SettingsClaude() {
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPasswordSheet, setShowPasswordSheet] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   // Navigation sections
   const sections = [
@@ -93,6 +96,7 @@ export default function SettingsClaude() {
       if (error) throw error;
       
       setPasswordForm({ new: '', confirm: '' });
+      setShowPasswordSheet(false);
       // Silent success - no toast
     } catch (error) {
       setMessage({ type: 'error', text: error.message });
@@ -126,8 +130,10 @@ export default function SettingsClaude() {
   // Handle mobile sidebar
   useEffect(() => {
     const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
       if (window.innerWidth >= 768) {
         setShowMobileSidebar(false);
+        setShowPasswordSheet(false);
       }
     };
     window.addEventListener('resize', handleResize);
@@ -216,33 +222,43 @@ export default function SettingsClaude() {
               </SettingGroup>
 
               <SettingGroup title="Security">
-                <form onSubmit={handlePasswordChange} className="password-form">
-                  <div className="form-field">
-                    <label htmlFor="new-password">New Password</label>
-                    <input
-                      id="new-password"
-                      type="password"
-                      value={passwordForm.new}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                      placeholder="Enter new password"
-                      required
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label htmlFor="confirm-password">Confirm Password</label>
-                    <input
-                      id="confirm-password"
-                      type="password"
-                      value={passwordForm.confirm}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                      placeholder="Confirm new password"
-                      required
-                    />
-                  </div>
-                  <Button type="submit" disabled={isLoading}>
-                    Update Password
-                  </Button>
-                </form>
+                {isMobile ? (
+                  <button 
+                    className="password-trigger-btn"
+                    onClick={() => setShowPasswordSheet(true)}
+                  >
+                    <Lock size={20} />
+                    <span>Change Password</span>
+                  </button>
+                ) : (
+                  <form onSubmit={handlePasswordChange} className="password-form">
+                    <div className="form-field">
+                      <label htmlFor="new-password">New Password</label>
+                      <input
+                        id="new-password"
+                        type="password"
+                        value={passwordForm.new}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                        placeholder="Enter new password"
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label htmlFor="confirm-password">Confirm Password</label>
+                      <input
+                        id="confirm-password"
+                        type="password"
+                        value={passwordForm.confirm}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                        placeholder="Confirm new password"
+                        required
+                      />
+                    </div>
+                    <Button type="submit" disabled={isLoading}>
+                      Update Password
+                    </Button>
+                  </form>
+                )}
               </SettingGroup>
 
               <SettingGroup title="Account Management">
@@ -335,6 +351,60 @@ export default function SettingsClaude() {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* Mobile Bottom Sheet for Password Change */}
+      {isMobile && (
+        <MobileBottomSheet
+          isOpen={showPasswordSheet}
+          onClose={() => {
+            setShowPasswordSheet(false);
+            setPasswordForm({ new: '', confirm: '' });
+          }}
+          title="Change Password"
+        >
+          <div className="mobile-password-content">
+            <form onSubmit={handlePasswordChange}>
+              <div className="form-field">
+                <label htmlFor="new-password-mobile">New Password</label>
+                <input
+                  id="new-password-mobile"
+                  type="password"
+                  value={passwordForm.new}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                  placeholder="Enter new password"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label htmlFor="confirm-password-mobile">Confirm Password</label>
+                <input
+                  id="confirm-password-mobile"
+                  type="password"
+                  value={passwordForm.confirm}
+                  onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                  placeholder="Confirm new password"
+                  required
+                />
+              </div>
+              <div className="mobile-actions">
+                <Button 
+                  type="button" 
+                  variant="secondary"
+                  onClick={() => {
+                    setShowPasswordSheet(false);
+                    setPasswordForm({ new: '', confirm: '' });
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? 'Updating...' : 'Update Password'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </MobileBottomSheet>
       )}
     </div>
   );

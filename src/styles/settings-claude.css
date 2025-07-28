@@ -58,8 +58,14 @@
   padding: var(--space-4);
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 101;
+  height: 60px;
+  backdrop-filter: blur(10px);
+  background: rgba(30, 58, 95, 0.95);
 }
 
 .mobile-header h1 {
@@ -73,19 +79,48 @@
   align-items: center;
   gap: var(--space-2);
   color: var(--text-primary);
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-2) var(--space-3);
   font-size: 0.875rem;
   cursor: pointer;
+  border-radius: 8px;
+  transition: all var(--transition);
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.back-button:active {
+  transform: scale(0.95);
 }
 
 .menu-button {
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   cursor: pointer;
   padding: var(--space-2);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all var(--transition);
+}
+
+.menu-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.menu-button:active {
+  transform: scale(0.95);
 }
 
 /* Layout */
@@ -402,6 +437,50 @@
   max-width: 400px;
 }
 
+/* Password Trigger Button */
+.password-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.password-trigger-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.password-trigger-btn:active {
+  transform: scale(0.98);
+}
+
+/* Mobile Password Content */
+.mobile-password-content {
+  padding: var(--space-6) var(--space-4);
+}
+
+.mobile-password-content .form-field {
+  margin-bottom: var(--space-4);
+}
+
+.mobile-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.mobile-actions button {
+  flex: 1;
+}
+
 /* File Input */
 .file-input {
   display: none;
@@ -568,6 +647,7 @@
   .settings-layout {
     position: relative;
     height: 100%;
+    padding-top: 60px; /* Account for fixed header */
   }
   
   .settings-sidebar {
@@ -592,16 +672,21 @@
   }
   
   .settings-content {
-    padding-top: 60px;
+    padding-top: 76px; /* 60px header + 16px spacing */
     height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   
   .content-section {
     padding: var(--space-4);
+    padding-top: 0; /* Remove extra padding since we have it on container */
   }
   
   .section-title {
     font-size: 1.5rem;
+    margin-bottom: var(--space-4);
+    color: var(--text-primary);
   }
   
   .setting-item {
@@ -616,5 +701,34 @@
   
   .modal {
     margin: var(--space-4);
+  }
+  
+  /* Mobile Setting Group Improvements */
+  .setting-group {
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .setting-group-title {
+    font-size: 1.125rem;
+    margin-bottom: var(--space-4);
+  }
+  
+  /* Improve button sizes on mobile */
+  .btn {
+    min-height: 48px;
+    font-size: 16px;
+  }
+  
+  /* Ensure form fields are properly sized */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 48px;
   }
 }

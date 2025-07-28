@@ -137,11 +137,8 @@ export default function Block({
         onDuplicate={onDuplicate}
         onMoveUp={onMoveUp}
         onMoveDown={onMoveDown}
-        onConvert={onConvert}
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
       >
         <div className="relative">
           <BlockComponent 

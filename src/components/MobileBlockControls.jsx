@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { MoreHorizontal, Trash2, Copy, ChevronUp, ChevronDown, GripVertical } from 'lucide-react';
+import { MoreHorizontal, Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTouchGestures } from '../hooks/useTouchGestures';
 import MobileBottomSheet from './MobileBottomSheet';
@@ -11,11 +11,8 @@ export default function MobileBlockControls({
   onDuplicate,
   onMoveUp,
   onMoveDown,
-  onConvert,
   canMoveUp,
-  canMoveDown,
-  onDragStart,
-  onDragEnd
+  canMoveDown
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -51,17 +48,6 @@ export default function MobileBlockControls({
     onDelete(block.id);
   };
   
-  const blockTypeIcons = {
-    text: '📝',
-    code: '💻',
-    heading: '📌',
-    ai: '🤖',
-    table: '📊',
-    todo: '✅',
-    image: '🖼️',
-    filetree: '📁',
-    math: '🔢'
-  };
   
   return (
     <>
@@ -71,16 +57,6 @@ export default function MobileBlockControls({
         animate={{ x: isSwipedLeft ? -80 : 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        {/* Drag Handle */}
-        <div 
-          className="absolute -left-2 top-2 p-2 text-text-secondary/30 
-                     touch-manipulation cursor-move"
-          onTouchStart={() => onDragStart(block.id)}
-          onTouchEnd={onDragEnd}
-        >
-          <GripVertical size={16} />
-        </div>
-        
         {/* Block Content */}
         <div className="relative">
           {children}
@@ -119,31 +95,6 @@ export default function MobileBlockControls({
         title="Block Actions"
       >
         <div className="p-4 space-y-2">
-          {/* Convert Block Type */}
-          <div className="mb-4">
-            <p className="text-sm text-text-secondary mb-2">Convert to:</p>
-            <div className="grid grid-cols-3 gap-2">
-              {Object.entries(blockTypeIcons).map(([type, icon]) => (
-                <button
-                  key={type}
-                  onClick={() => {
-                    onConvert(block.id, type);
-                    setShowMenu(false);
-                  }}
-                  disabled={type === block.type}
-                  className={`p-3 rounded-lg flex flex-col items-center gap-1
-                            ${type === block.type 
-                              ? 'bg-dark-secondary/30 opacity-50' 
-                              : 'bg-dark-secondary active:scale-95'} 
-                            transition-all`}
-                >
-                  <span className="text-xl">{icon}</span>
-                  <span className="text-xs text-text-secondary capitalize">{type}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          
           {/* Action Buttons */}
           <button
             onClick={() => {
@@ -158,41 +109,51 @@ export default function MobileBlockControls({
             <span>Duplicate Block</span>
           </button>
           
-          {canMoveUp && (
-            <button
-              onClick={() => {
+          <button
+            onClick={() => {
+              if (canMoveUp) {
                 onMoveUp(block.id);
                 setShowMenu(false);
-              }}
-              className="w-full p-4 bg-dark-secondary rounded-xl text-left 
-                       hover:bg-dark-secondary/80 active:scale-98 transition-all
-                       flex items-center gap-3"
-            >
-              <ChevronUp size={20} className="text-text-secondary" />
-              <span>Move Up</span>
-            </button>
-          )}
+              }
+            }}
+            disabled={!canMoveUp}
+            className={`w-full p-4 rounded-xl text-left transition-all
+                     flex items-center gap-3 min-h-[56px]
+                     ${
+                       canMoveUp
+                         ? 'bg-dark-secondary hover:bg-dark-secondary/80 active:scale-98 text-text-primary'
+                         : 'bg-dark-secondary/30 opacity-50 cursor-not-allowed text-text-secondary'
+                     }`}
+          >
+            <ChevronUp size={20} className={canMoveUp ? 'text-text-secondary' : 'text-text-secondary/50'} />
+            <span>Move Up</span>
+          </button>
           
-          {canMoveDown && (
-            <button
-              onClick={() => {
+          <button
+            onClick={() => {
+              if (canMoveDown) {
                 onMoveDown(block.id);
                 setShowMenu(false);
-              }}
-              className="w-full p-4 bg-dark-secondary rounded-xl text-left 
-                       hover:bg-dark-secondary/80 active:scale-98 transition-all
-                       flex items-center gap-3"
-            >
-              <ChevronDown size={20} className="text-text-secondary" />
-              <span>Move Down</span>
-            </button>
-          )}
+              }
+            }}
+            disabled={!canMoveDown}
+            className={`w-full p-4 rounded-xl text-left transition-all
+                     flex items-center gap-3 min-h-[56px]
+                     ${
+                       canMoveDown
+                         ? 'bg-dark-secondary hover:bg-dark-secondary/80 active:scale-98 text-text-primary'
+                         : 'bg-dark-secondary/30 opacity-50 cursor-not-allowed text-text-secondary'
+                     }`}
+          >
+            <ChevronDown size={20} className={canMoveDown ? 'text-text-secondary' : 'text-text-secondary/50'} />
+            <span>Move Down</span>
+          </button>
           
           <button
             onClick={handleDelete}
             className="w-full p-4 bg-red-500/10 rounded-xl text-left 
                      hover:bg-red-500/20 active:scale-98 transition-all
-                     flex items-center gap-3"
+                     flex items-center gap-3 min-h-[56px]"
           >
             <Trash2 size={20} className="text-red-400" />
             <span className="text-red-400">Delete Block</span>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import NeuralCanvas from './NeuralCanvas';
+import LightweightCanvas from './LightweightCanvas';
 import MinimalParticles from './MinimalParticles';
 import InteractionHints from './InteractionHints';
 import '../../styles/hero-background-animation.css';
@@ -21,7 +21,7 @@ export default function HeroBackgroundAnimation() {
       
       // Check device memory (if available)
       const memory = navigator.deviceMemory;
-      if (memory && memory < 4) {
+      if (memory && memory < 8) {
         setQuality('medium');
         return;
       }
@@ -42,8 +42,15 @@ export default function HeroBackgroundAnimation() {
         return;
       }
       
-      // Default to high quality
-      setQuality('high');
+      // Check CPU cores for performance hint
+      const cores = navigator.hardwareConcurrency;
+      if (cores && cores < 4) {
+        setQuality('medium');
+        return;
+      }
+      
+      // Default to medium quality for better performance
+      setQuality('medium');
     };
     
     detectPerformance();
@@ -95,14 +102,14 @@ export default function HeroBackgroundAnimation() {
       
       {/* Render based on quality setting */}
       {quality === 'minimal' ? (
-        <MinimalParticles count={30} />
+        <MinimalParticles count={20} />
       ) : (
-        <NeuralCanvas 
+        <LightweightCanvas 
           quality={quality} 
           isVisible={isVisible}
-          particleCount={quality === 'high' ? 150 : 80}
-          connectionRadius={120}
-          interactionRadius={150}
+          particleCount={quality === 'high' ? 40 : 25}
+          connectionRadius={80}
+          interactionRadius={100}
         />
       )}
       

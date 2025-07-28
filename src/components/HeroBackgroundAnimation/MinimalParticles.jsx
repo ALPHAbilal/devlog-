@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 
-export default function MinimalParticles({ count = 30 }) {
+export default function MinimalParticles({ count = 20 }) {
   const particles = Array.from({ length: count }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
@@ -23,14 +23,14 @@ export default function MinimalParticles({ count = 30 }) {
             height: particle.size,
           }}
           animate={{
-            y: [0, -30, 0],
-            opacity: [0.3, 0.6, 0.3],
+            y: [0, -20, 0],
+            opacity: [0.2, 0.4, 0.2],
           }}
           transition={{
             duration: particle.duration,
             delay: particle.delay,
             repeat: Infinity,
-            ease: "easeInOut",
+            ease: "linear",
           }}
         />
       ))}

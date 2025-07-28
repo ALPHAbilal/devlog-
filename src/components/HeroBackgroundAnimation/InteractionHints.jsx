@@ -31,11 +31,8 @@ export default function InteractionHints({ show = true }) {
   }, [show, hasInteracted]);
   
   const hints = [
-    { key: 'Space', action: 'Explosion', icon: '💥' },
-    { key: 'V', action: 'Vortex', icon: '🌀' },
-    { key: 'W', action: 'Wave', icon: '🌊' },
-    { key: 'Click', action: 'Ripple', icon: '💫' },
-    { key: 'Move', action: 'Interact', icon: '✨' }
+    { key: 'Click', action: 'Ripple', icon: '○' },
+    { key: 'Move', action: 'Attract', icon: '•' }
   ];
   
   return (
@@ -69,7 +66,7 @@ export default function InteractionHints({ show = true }) {
             animate={{ opacity: 0.7 }}
             transition={{ delay: 0.5 }}
           >
-            Try these interactions!
+            Interactive background
           </motion.p>
         </motion.div>
       )}

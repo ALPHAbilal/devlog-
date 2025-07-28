@@ -40,38 +40,15 @@
   opacity: 0;
   animation: hero-bg-fade-in 1s ease-out forwards;
   animation-delay: 0.5s;
-  mix-blend-mode: screen;
-  filter: contrast(1.1) brightness(1.05);
+  /* Removed mix-blend-mode and filters for performance */
 }
 
-/* Enhanced visual effects for high quality mode */
+/* Simplified for performance */
 [data-quality="high"] .neural-canvas {
-  filter: contrast(1.15) brightness(1.05) saturate(1.2);
-  image-rendering: optimizeQuality;
+  image-rendering: auto;
 }
 
-/* Chromatic aberration effect layer */
-.neural-canvas::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    45deg,
-    rgba(255, 0, 0, 0.01) 0%,
-    transparent 50%,
-    rgba(0, 0, 255, 0.01) 100%
-  );
-  mix-blend-mode: screen;
-  pointer-events: none;
-  opacity: 0;
-  animation: chroma-shift 3s ease-in-out infinite alternate;
-}
-
-@keyframes chroma-shift {
-  0% { transform: translateX(-1px); opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { transform: translateX(1px); opacity: 0; }
-}
+/* Removed chromatic aberration for performance */
 
 @keyframes hero-bg-fade-in {
   to { opacity: 1; }
@@ -125,15 +102,10 @@
     );
   pointer-events: none;
   z-index: 2;
-  animation: gradient-shift 20s ease-in-out infinite;
+  /* Removed animation for performance */
 }
 
-@keyframes gradient-shift {
-  0%, 100% { transform: scale(1) rotate(0deg); }
-  25% { transform: scale(1.05) rotate(1deg); }
-  50% { transform: scale(0.98) rotate(-1deg); }
-  75% { transform: scale(1.02) rotate(0.5deg); }
-}
+/* Removed gradient animation for performance */
 
 /* Performance optimizations */
 @media (prefers-reduced-motion: reduce) {
@@ -158,13 +130,9 @@
   }
 }
 
-/* GPU acceleration hints */
-.hero-background-animation,
-.neural-canvas,
-.minimal-particle {
-  will-change: transform;
+/* Reduced GPU hints for performance */
+.neural-canvas {
   transform: translateZ(0);
-  backface-visibility: hidden;
 }
 
 /* Quality-based adjustments */
@@ -173,77 +141,16 @@
 }
 
 [data-quality="medium"] .neural-canvas {
-  filter: blur(0.5px);
+  /* Removed blur for performance */
 }
 
-/* Noise texture overlay */
-.hero-background-animation::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: 
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 35px,
-      rgba(255, 255, 255, 0.01) 35px,
-      rgba(255, 255, 255, 0.01) 70px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 35px,
-      rgba(255, 255, 255, 0.01) 35px,
-      rgba(255, 255, 255, 0.01) 70px
-    );
-  opacity: 0.3;
-  mix-blend-mode: overlay;
-  pointer-events: none;
-  z-index: 3;
-}
+/* Removed noise overlay for performance */
 
-/* Glow effects for activity zones */
-@keyframes pulse-glow {
-  0%, 100% { 
-    box-shadow: 
-      0 0 20px rgba(59, 130, 246, 0.2),
-      0 0 40px rgba(6, 182, 212, 0.1),
-      0 0 60px rgba(139, 92, 246, 0.05);
-  }
-  50% { 
-    box-shadow: 
-      0 0 30px rgba(59, 130, 246, 0.3),
-      0 0 60px rgba(6, 182, 212, 0.2),
-      0 0 90px rgba(139, 92, 246, 0.1);
-  }
-}
+/* Removed glow effects for performance */
 
 /* Interaction hints */
 .neural-canvas:hover {
-  cursor: none;
-}
-
-.neural-canvas:hover::after {
-  content: '';
-  position: fixed;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(147, 197, 253, 0.8) 0%,
-    rgba(147, 197, 253, 0.4) 40%,
-    transparent 70%
-  );
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-  z-index: 9999;
-  animation: cursor-pulse 1.5s ease-in-out infinite;
-}
-
-@keyframes cursor-pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50% { transform: translate(-50%, -50%) scale(1.2); }
+  cursor: crosshair;
 }
 
 /* Interaction hints UI */

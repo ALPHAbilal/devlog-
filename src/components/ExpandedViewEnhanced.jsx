@@ -924,7 +924,7 @@ export default function ExpandedView({
                       }
                     }}
                     onConvert={convertBlock}
-                    showAddButton={!isMobileView}
+                    showAddButton={true}
                     isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
                     onFocus={setFocusedBlockId}
                     allBlocks={blocks}
@@ -941,6 +941,7 @@ export default function ExpandedView({
                     show={showBlockSelector && selectorPosition === block.id}
                     onSelect={(type) => addBlock(type, block.id)}
                     onClose={() => setShowBlockSelector(false)}
+                    isMobileView={isMobileView}
                   />
                 </>
               )}
@@ -995,6 +996,7 @@ export default function ExpandedView({
               show={showBlockSelector && selectorPosition === 'end'}
               onSelect={(type) => addBlock(type)}
               onClose={() => setShowBlockSelector(false)}
+              isMobileView={isMobileView}
             />
           </div>
           )}

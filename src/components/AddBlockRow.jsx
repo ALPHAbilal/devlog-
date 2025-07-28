@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, GitBranch } from 'lucide-react';
+import MobileAddBlockRow from './MobileAddBlockRow';
+import { useResponsive } from '../hooks/useResponsive';
 
 const blockTypes = [
   { type: 'text', label: 'text', icon: Type },
@@ -12,7 +14,13 @@ const blockTypes = [
   { type: 'version-track', label: 'version track', icon: GitBranch },
 ];
 
-export default function AddBlockRow({ onSelect, onClose, show }) {
+export default function AddBlockRow({ onSelect, onClose, show, isMobileView }) {
+  const { isMobile } = useResponsive();
+  
+  // Use mobile version on mobile devices or when explicitly in mobile view
+  if (isMobileView || isMobile) {
+    return <MobileAddBlockRow onSelect={onSelect} onClose={onClose} show={show} />;
+  }
   const [hoveredType, setHoveredType] = useState(null);
   const containerRef = useRef(null);
 

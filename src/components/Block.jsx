@@ -257,7 +257,7 @@ export default function Block({
       
       {/* Add Block Divider - Separate hover zone */}
       {showAddButton && !draggedBlockId && (
-        <BlockDivider onAdd={() => onAddBelow(block.id)} />
+        <BlockDivider onAdd={() => onAddBelow(block.id)} isMobileView={isMobileView} />
       )}
     </>
   );

@@ -1,9 +1,18 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import MobileBlockDivider from './MobileBlockDivider';
+import { useResponsive } from '../hooks/useResponsive';
 
-export default function BlockDivider({ onAdd }) {
+export default function BlockDivider({ onAdd, isMobileView }) {
   const [isHovered, setIsHovered] = useState(false);
+  const { isMobile } = useResponsive();
+  
+  // Use mobile divider on mobile devices or when explicitly in mobile view
+  if (isMobileView || isMobile) {
+    return <MobileBlockDivider onAdd={onAdd} />;
+  }
 
+  // Desktop version with hover
   return (
     <div 
       className="relative h-10 -my-2 group cursor-pointer"

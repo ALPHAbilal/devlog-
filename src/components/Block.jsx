@@ -11,6 +11,8 @@ import InlineImageBlock from './blocks/InlineImageBlock';
 import VersionTrackBlock from './blocks/VersionTrackBlock';
 import BlockDivider from './BlockDivider';
 import InlineActionBar from './InlineActionBar';
+import MobileBlockControls from './MobileBlockControls';
+import { useResponsive } from '../hooks/useResponsive';
 
 const blockComponents = {
   text: TextBlock,
@@ -49,12 +51,15 @@ export default function Block({
   onDrop,
   draggedBlockId,
   dropTargetId,
-  dropPosition
+  dropPosition,
+  isMobileView = false
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const BlockComponent = blockComponents[block.type] || TextBlock;
+  const { isMobile } = useResponsive();
+  const useMobileControls = isMobileView || isMobile;
   
   // Debug mode detection
   const isDebugMode = typeof window !== 'undefined' && 
@@ -123,6 +128,38 @@ export default function Block({
     }
   };
 
+  // Mobile controls wrapper
+  if (useMobileControls) {
+    return (
+      <MobileBlockControls
+        block={block}
+        onDelete={onDelete}
+        onDuplicate={onDuplicate}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        onConvert={onConvert}
+        canMoveUp={canMoveUp}
+        canMoveDown={canMoveDown}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      >
+        <div className="relative">
+          <BlockComponent 
+            block={block} 
+            onUpdate={onUpdate}
+            onConvert={handleConvert}
+            isFocused={isFocused}
+            onFocus={onFocus}
+            onAddBelow={onAddBelow}
+            allBlocks={allBlocks}
+            onNavigateToBlock={onNavigateToBlock}
+          />
+        </div>
+      </MobileBlockControls>
+    );
+  }
+  
+  // Desktop view
   return (
     <>
       {/* Drop indicator before */}

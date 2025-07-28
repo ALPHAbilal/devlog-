@@ -18,7 +18,15 @@ import ScrollToTop from './ScrollToTop';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
-export default function ExpandedView({ entry, onClose, onUpdate, allEntries = [] }) {
+export default function ExpandedView({ 
+  entry, 
+  onClose, 
+  onUpdate, 
+  allEntries = [],
+  isMobileView = false,
+  scrollContainerRef: externalScrollRef = null,
+  onShowBlockSelector 
+}) {
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
   
@@ -67,7 +75,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   const [dropTargetId, setDropTargetId] = useState(null);
   const [dropPosition, setDropPosition] = useState('after'); // 'before' or 'after'
   const contentContainerRef = useRef(null);
-  const scrollContainerRef = useRef(null);
+  const internalScrollRef = useRef(null);
+  const scrollContainerRef = externalScrollRef || internalScrollRef;
   const dragScrollInterval = useRef(null);
   // Removed forceRenderCount - was causing excessive re-renders
   const [isInternalUpdate, setIsInternalUpdate] = useState(false); // Track internal updates
@@ -530,8 +539,13 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
   };
 
   const handleAddAtEnd = () => {
-    setSelectorPosition('end');
-    setShowBlockSelector(true);
+    // If mobile and has callback, use that instead
+    if (isMobileView && onShowBlockSelector) {
+      onShowBlockSelector();
+    } else {
+      setSelectorPosition('end');
+      setShowBlockSelector(true);
+    }
   };
 
   // Helper function for saving with status updates
@@ -662,7 +676,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
     <>
       {/* Opacity forensics debugger removed - was interfering with transitions */}
       
-      {/* Floating Controls Trigger - Outside scrollable container */}
+      {/* Floating Controls Trigger - Outside scrollable container - Hidden on mobile */}
+      {!isMobileView && (
       <FloatingControlsTrigger
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -671,14 +686,16 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         scrollThreshold={100}
         scrollContainerRef={scrollContainerRef}
       />
+      )}
       
       <div 
         ref={scrollContainerRef}
         className="h-full overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-stable"
         onClick={handleBackgroundClick}
       >
-        <div className="max-w-4xl mx-auto fade-in px-8 py-8">
-      {/* Header */}
+        <div className={`mx-auto fade-in ${isMobileView ? 'px-4 py-3' : 'max-w-4xl px-8 py-8'}`}>
+      {/* Header - Hidden on mobile as it's handled by MobileDocumentHeader */}
+      {!isMobileView && (
       <div className="flex items-start gap-4 mb-6">
         <button 
           onClick={async () => {
@@ -800,12 +817,12 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
           )}
         </div>
       </div>
-
+      )}
 
       {/* Blocks or Lines View */}
       {viewMode === 'lines' ? (
         /* Lines View */
-        <div className="mb-8 -mx-8">
+        <div className={`mb-8 ${isMobileView ? '-mx-4' : '-mx-8'}`}>
           <div className="relative bg-dark-primary/30 backdrop-blur-sm rounded-lg 
                           border border-dark-secondary/20 overflow-hidden"
                style={{ maxHeight: '500px' }}>
@@ -858,7 +875,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
         /* Blocks View */
         <div 
           ref={contentContainerRef}
-          className="space-y-4 mb-8 min-h-[400px] relative pl-8"
+          className={`space-y-4 mb-8 min-h-[400px] relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
           onClick={(e) => {
             // Clear focus if clicking in empty space between blocks
             if (e.target === e.currentTarget) {
@@ -866,7 +883,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             }
           }}>
           {blocks.filter(block => block !== null).map((block, index) => (
-            <div key={block.id} className="relative pl-8">
+            <div key={block.id} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
               {block.isLoading ? (
                 <OptimizedBlockSkeleton 
                   type={block.type} 
@@ -884,6 +901,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                     onMoveDown={(id) => moveBlock(id, 'down')}
                     canMoveUp={index > 0}
                     canMoveDown={index < blocks.length - 1}
+                    isMobileView={isMobileView}
                     onAddBelow={(data) => {
                       if (typeof data === 'object' && data.type) {
                         // Direct block creation from TextBlock
@@ -906,7 +924,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                       }
                     }}
                     onConvert={convertBlock}
-                    showAddButton={true}
+                    showAddButton={!isMobileView}
                     isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
                     onFocus={setFocusedBlockId}
                     allBlocks={blocks}
@@ -960,7 +978,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
             </div>
           )}
 
-          {/* Add block at end */}
+          {/* Add block at end - Hidden on mobile as FAB handles this */}
+          {!isMobileView && (
           <div className="relative pt-4">
             <button
               onClick={handleAddAtEnd}
@@ -978,12 +997,13 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
               onClose={() => setShowBlockSelector(false)}
             />
           </div>
+          )}
         </div>
       )}
 
 
       {/* Tags */}
-      <div className="flex items-center gap-3 flex-wrap mb-8">
+      <div className={`flex items-center gap-3 flex-wrap mb-8 ${isMobileView ? 'px-0' : ''}`}>
         {tags.map((tag, index) => (
           <div key={index} className="group relative">
             {editingTagIndex === index ? (
@@ -1016,9 +1036,10 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
                   setEditingTagIndex(index);
                   setEditingTagValue(tag);
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-dark-secondary/50 
+                className={`inline-flex items-center gap-2 px-4 py-2 bg-dark-secondary/50 
                            rounded-full text-text-secondary text-sm
-                           hover:bg-dark-secondary transition-colors cursor-pointer group"
+                           hover:bg-dark-secondary transition-colors cursor-pointer group
+                           ${isMobileView ? 'mobile-tag' : ''}`}
               >
                 {tag}
                 <button
@@ -1080,7 +1101,7 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
 
       {/* Backlinks */}
       {backlinks.length > 0 && (
-        <div className="border-t border-dark-secondary/30 pt-8">
+        <div className={`border-t border-dark-secondary/30 pt-8 ${isMobileView ? 'px-0' : ''}`}>
           <h3 className="text-text-secondary text-sm font-medium mb-4 flex items-center gap-2">
             <Link2 size={16} />
             Linked References ({backlinks.length})
@@ -1113,8 +1134,8 @@ export default function ExpandedView({ entry, onClose, onUpdate, allEntries = []
       )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
+      {/* Delete Confirmation Modal - Mobile-optimized */}
+      {showDeleteConfirm && !isMobileView && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
              onClick={() => setShowDeleteConfirm(false)}>
           <div className="bg-dark-secondary rounded-lg p-6 max-w-md w-full mx-4 

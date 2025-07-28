@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
+import MobileDocumentViewer from '../components/MobileDocumentViewer';
+import { useResponsive } from '../hooks/useResponsive';
 import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
@@ -1149,11 +1151,14 @@ export default function Dashboard() {
         
         {/* Expanded View Content */}
         <main className="flex flex-col min-w-0 overflow-hidden lg:col-start-2">
-          <ExpandedView 
+          <MobileDocumentViewer 
             entry={expandedEntry} 
             onClose={() => setExpandedEntry(null)}
             onUpdate={updateEntry}
             allEntries={entries}
+            onNavigateToDocument={(newEntry) => {
+              setExpandedEntry(newEntry);
+            }}
           />
         </main>
       </div>

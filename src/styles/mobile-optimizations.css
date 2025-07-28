@@ -358,6 +358,152 @@
   }
 }
 
+/* Mobile Document Viewer Specific Styles */
+@media (max-width: 768px) {
+  /* Mobile header styles */
+  .mobile-document-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  
+  /* Mobile block spacing */
+  .mobile-block-wrapper {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: var(--dark-secondary/5);
+    border-radius: 12px;
+    transition: background 0.2s ease;
+  }
+  
+  .mobile-block-wrapper:active {
+    background: var(--dark-secondary/10);
+  }
+  
+  /* Mobile FAB styles */
+  .mobile-fab {
+    box-shadow: 0 4px 16px rgba(46, 213, 115, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .mobile-fab:active {
+    box-shadow: 0 2px 8px rgba(46, 213, 115, 0.2),
+                0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Bottom sheet animations */
+  .mobile-bottom-sheet {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+  
+  /* Swipe indicators */
+  .swipe-indicator-left,
+  .swipe-indicator-right {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 40px;
+    opacity: 0.2;
+    transition: opacity 0.2s ease;
+  }
+  
+  .swipe-indicator-left {
+    left: 0;
+    background: linear-gradient(to right, var(--text-secondary), transparent);
+  }
+  
+  .swipe-indicator-right {
+    right: 0;
+    background: linear-gradient(to left, var(--text-secondary), transparent);
+  }
+  
+  /* Touch feedback */
+  .touch-feedback {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .touch-feedback::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+  }
+  
+  .touch-feedback:active::after {
+    width: 300px;
+    height: 300px;
+  }
+  
+  /* Mobile block controls */
+  .mobile-block-menu {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(10, 22, 40, 0.95);
+  }
+  
+  /* Prevent text selection during swipe */
+  .swipe-active {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  /* Mobile-optimized animations */
+  @keyframes mobile-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .mobile-fade-in {
+    animation: mobile-fade-in 0.3s ease-out;
+  }
+  
+  /* Elastic scroll for iOS */
+  .elastic-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Mobile tag styles */
+  .mobile-tag {
+    padding: 0.5rem 1rem;
+    font-size: 14px;
+    touch-action: manipulation;
+    min-height: 36px;
+  }
+  
+  /* Mobile save indicator */
+  .mobile-save-indicator {
+    position: fixed;
+    top: 60px;
+    right: 1rem;
+    z-index: 45;
+    padding: 0.5rem 1rem;
+    background: var(--dark-secondary/90);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    font-size: 12px;
+  }
+}
+
 /* Keyboard navigation indicators */
 .focus-visible:focus {
   outline: 2px solid var(--accent-green);
@@ -378,6 +524,15 @@
 .haptic-heavy:active {
   transform: scale(0.92);
   transition: transform 100ms ease;
+}
+
+/* Active state feedback */
+.active-scale-98:active {
+  transform: scale(0.98);
+}
+
+.active-scale-95:active {
+  transform: scale(0.95);
 }
 
 /* Gesture indicators */

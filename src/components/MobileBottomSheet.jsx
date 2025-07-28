@@ -1,106 +1,73 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence, useAnimation } from 'framer-motion';
-import { X, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useResponsive } from '../hooks/useResponsive';
 
 export default function MobileBottomSheet({ 
   isOpen, 
   onClose, 
-  children, 
-  title,
-  snapPoints = ['50%', '90%'],
-  defaultSnap = 0
+  title, 
+  children,
+  height = 'auto',
+  showHandle = true 
 }) {
-  const [currentSnap, setCurrentSnap] = useState(defaultSnap);
-  const [isDragging, setIsDragging] = useState(false);
   const sheetRef = useRef(null);
-  const dragStartY = useRef(0);
-  const sheetStartY = useRef(0);
-  const controls = useAnimation();
-
-  // Handle drag gestures
-  const handleDragStart = (e) => {
-    setIsDragging(true);
-    const touch = e.touches?.[0] || e;
-    dragStartY.current = touch.clientY;
-    sheetStartY.current = sheetRef.current?.getBoundingClientRect().top || 0;
-  };
-
-  const handleDragMove = (e) => {
-    if (!isDragging) return;
-    
-    const touch = e.touches?.[0] || e;
-    const deltaY = touch.clientY - dragStartY.current;
-    const newY = Math.max(0, sheetStartY.current + deltaY);
-    
-    // Apply resistance when dragging past bounds
-    const resistance = newY < 100 ? 0.5 : 1;
-    const finalY = newY * resistance;
-    
-    if (sheetRef.current) {
-      sheetRef.current.style.transform = `translateY(${finalY}px)`;
-    }
-  };
-
-  const handleDragEnd = (e) => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    
-    const touch = e.changedTouches?.[0] || e;
-    const deltaY = touch.clientY - dragStartY.current;
-    const velocity = deltaY / (Date.now() - dragStartY.current);
-    
-    // Determine snap point based on drag distance and velocity
-    if (deltaY > 100 || velocity > 0.5) {
-      // Close if dragged down significantly
-      onClose();
-    } else if (deltaY < -100 || velocity < -0.5) {
-      // Snap to next point if dragged up
-      const nextSnap = Math.min(currentSnap + 1, snapPoints.length - 1);
-      setCurrentSnap(nextSnap);
-    } else {
-      // Return to current snap point
-      snapToPoint(currentSnap);
-    }
-  };
-
-  const snapToPoint = (index) => {
-    const snapPoint = snapPoints[index];
-    const windowHeight = window.innerHeight;
-    let translateY = 0;
-    
-    if (snapPoint.endsWith('%')) {
-      const percentage = parseInt(snapPoint) / 100;
-      translateY = windowHeight * (1 - percentage);
-    } else if (snapPoint.endsWith('px')) {
-      translateY = windowHeight - parseInt(snapPoint);
-    }
-    
-    controls.start({
-      y: translateY,
-      transition: {
-        type: 'spring',
-        damping: 30,
-        stiffness: 300
-      }
-    });
-  };
-
+  const contentRef = useRef(null);
+  const [sheetHeight, setSheetHeight] = useState(0);
+  const { getSafeAreaInsets } = useResponsive();
+  const safeAreaInsets = getSafeAreaInsets();
+  
+  const y = useMotionValue(0);
+  const bgOpacity = useTransform(y, [0, sheetHeight], [0.5, 0]);
+  
+  // Calculate sheet height based on content
   useEffect(() => {
-    if (isOpen) {
-      snapToPoint(currentSnap);
+    if (isOpen && contentRef.current) {
+      const contentHeight = contentRef.current.scrollHeight;
+      const maxHeight = window.innerHeight * 0.9; // Max 90% of screen
+      setSheetHeight(Math.min(contentHeight + safeAreaInsets.bottom + 20, maxHeight));
     }
-  }, [isOpen, currentSnap]);
-
+  }, [isOpen, children, safeAreaInsets.bottom]);
+  
+  // Handle drag to close
+  const handleDragEnd = (event, info) => {
+    const shouldClose = info.velocity.y > 20 || info.offset.y > sheetHeight * 0.3;
+    
+    if (shouldClose) {
+      animate(y, sheetHeight, {
+        type: "spring",
+        stiffness: 300,
+        damping: 30,
+        onComplete: onClose
+      });
+    } else {
+      animate(y, 0, {
+        type: "spring",
+        stiffness: 300,
+        damping: 30
+      });
+    }
+  };
+  
+  // Close on backdrop click
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+  
   // Prevent body scroll when sheet is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      return () => {
-        document.body.style.overflow = '';
-      };
+    } else {
+      document.body.style.overflow = '';
     }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
-
+  
   return (
     <AnimatePresence>
       {isOpen && (
@@ -110,56 +77,54 @@ export default function MobileBottomSheet({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={onClose}
+            transition={{ duration: 0.2 }}
+            onClick={handleBackdropClick}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]"
+            style={{ opacity: bgOpacity }}
           />
-
+          
           {/* Bottom Sheet */}
           <motion.div
             ref={sheetRef}
             initial={{ y: '100%' }}
-            animate={controls}
+            animate={{ y: 0 }}
             exit={{ y: '100%' }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            drag="y"
+            dragDirectionLock
+            dragConstraints={{ top: 0 }}
+            dragElastic={{ top: 0, bottom: 0.3 }}
+            onDragEnd={handleDragEnd}
+            style={{ y, height: height === 'auto' ? sheetHeight : height }}
             className="fixed bottom-0 left-0 right-0 bg-dark-primary 
-                       rounded-t-3xl shadow-2xl z-50 overflow-hidden
-                       border-t border-dark-secondary/50"
-            style={{
-              height: '95vh',
-              maxHeight: '95vh'
-            }}
+                     rounded-t-3xl shadow-2xl z-[101] overflow-hidden
+                     border-t border-dark-secondary/30"
           >
-            {/* Drag Handle Area - Only this area is draggable */}
-            <motion.div
-              drag="y"
-              dragConstraints={{ top: 0 }}
-              dragElastic={0.2}
-              onDragStart={handleDragStart}
-              onDrag={handleDragMove}
-              onDragEnd={handleDragEnd}
-              className="absolute top-0 left-0 right-0 h-14 cursor-grab active:cursor-grabbing z-10 
-                         bg-gradient-to-b from-dark-primary to-transparent"
-              style={{ touchAction: 'none' }}
-            >
-              <div className="w-12 h-1 bg-dark-secondary/50 rounded-full 
-                             mx-auto mt-3 hover:bg-dark-secondary/70 transition-colors" />
-              <div className="text-xs text-text-secondary/40 text-center mt-1">Drag to close</div>
-            </motion.div>
-
+            {/* Drag Handle */}
+            {showHandle && (
+              <div className="pt-3 pb-2 touch-manipulation">
+                <div className="w-12 h-1 bg-dark-secondary/50 rounded-full mx-auto" />
+              </div>
+            )}
+            
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-4 mt-8 
-                           border-b border-dark-secondary/30">
-              <h3 className="text-lg font-semibold text-text-primary">{title}</h3>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-dark-secondary/40 rounded-lg transition-colors"
-              >
-                <X size={20} className="text-text-secondary" />
-              </button>
-            </div>
-
-            {/* Content - Normal scrolling enabled */}
-            <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain"
-                 style={{ touchAction: 'pan-y' }}>
+            {title && (
+              <div className="px-6 pb-3 border-b border-dark-secondary/20">
+                <h3 className="text-lg font-semibold text-text-primary text-center">
+                  {title}
+                </h3>
+              </div>
+            )}
+            
+            {/* Content */}
+            <div 
+              ref={contentRef}
+              className="overflow-y-auto overscroll-contain"
+              style={{ 
+                maxHeight: `calc(${sheetHeight}px - ${title ? 80 : 40}px)`,
+                paddingBottom: safeAreaInsets.bottom 
+              }}
+            >
               {children}
             </div>
           </motion.div>

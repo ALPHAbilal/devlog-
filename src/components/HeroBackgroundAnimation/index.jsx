@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import BlockEntity from './BlockEntity';
 import useBlockAnimation from './useBlockAnimation';
 import { generateBlocks } from './blockConfigs';
+import { debugBlocks } from './debug';
 
 export default function HeroBackgroundAnimation() {
   const [blocks, setBlocks] = useState([]);
@@ -27,7 +28,14 @@ export default function HeroBackgroundAnimation() {
   // Generate blocks on mount
   useEffect(() => {
     if (isVisible) {
-      setBlocks(generateBlocks(blockCount));
+      const generatedBlocks = generateBlocks(blockCount);
+      console.log('Generated blocks:', generatedBlocks);
+      setBlocks(generatedBlocks);
+      
+      // Debug after render
+      setTimeout(() => {
+        debugBlocks();
+      }, 100);
     }
   }, [isVisible, blockCount]);
 

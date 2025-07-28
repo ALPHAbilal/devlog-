@@ -63,7 +63,7 @@ const BlockEntity = memo(function BlockEntity({ block }) {
       scale: 0.8,
     },
     animate: {
-      y: -size * 2,
+      y: [-100, -window.innerHeight - size],
       opacity: [0, opacity, opacity, 0],
       scale: 1,
       transition: {

@@ -3,49 +3,49 @@ export const BLOCK_TYPES = {
   code: {
     weight: 3, // Higher weight = more common
     sizeRange: [80, 120],
-    opacityRange: [0.15, 0.25],
+    opacityRange: [0.4, 0.6],
     color: 'rgba(59, 130, 246, 0.1)', // Blue for code
   },
   text: {
     weight: 3,
     sizeRange: [60, 90],
-    opacityRange: [0.1, 0.2],
+    opacityRange: [0.3, 0.5],
     color: 'rgba(255, 255, 255, 0.05)',
   },
   ai: {
     weight: 2,
     sizeRange: [70, 100],
-    opacityRange: [0.2, 0.3],
+    opacityRange: [0.5, 0.7],
     color: 'rgba(168, 85, 247, 0.1)', // Purple for AI
   },
   heading: {
     weight: 2,
     sizeRange: [50, 70],
-    opacityRange: [0.15, 0.25],
+    opacityRange: [0.4, 0.6],
     color: 'rgba(255, 255, 255, 0.08)',
   },
   todo: {
     weight: 2,
     sizeRange: [50, 70],
-    opacityRange: [0.1, 0.2],
+    opacityRange: [0.3, 0.5],
     color: 'rgba(16, 185, 129, 0.1)', // Green for todos
   },
   version: {
     weight: 1,
     sizeRange: [80, 110],
-    opacityRange: [0.15, 0.25],
+    opacityRange: [0.4, 0.6],
     color: 'rgba(251, 146, 60, 0.1)', // Orange for version control
   },
   file: {
     weight: 2,
     sizeRange: [60, 80],
-    opacityRange: [0.1, 0.2],
+    opacityRange: [0.3, 0.5],
     color: 'rgba(255, 255, 255, 0.06)',
   },
   table: {
     weight: 1,
     sizeRange: [90, 120],
-    opacityRange: [0.1, 0.15],
+    opacityRange: [0.3, 0.4],
     color: 'rgba(255, 255, 255, 0.04)',
   },
 };
@@ -122,7 +122,7 @@ export function generateBlocks(requestedCount) {
       y: yOffset + randomInRange(-100, 100),
       size,
       opacity: randomInRange(...config.opacityRange),
-      layer: Math.floor(Math.random() * 3) + 1, // 1-3 layers for depth
+      layer: Math.floor(Math.random() * 3), // 0-2 layers for depth
       duration: randomInRange(20, 45), // Slower for elegance
       delay: randomInRange(0, 5) + (i * 0.5), // Progressive delay
       color: config.color,

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevLog Block Animation Test</title>
+  <style>
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0f1c;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Hero section */
+    .hero-section {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Content */
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .hero-title-gradient {
+      background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Block Animation Container */
+    .hero-background-animation {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* Block styles */
+    .hero-block {
+      position: absolute;
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      animation: floatUp linear infinite;
+      cursor: pointer;
+      pointer-events: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .hero-block:hover {
+      transform: scale(1.05) rotateY(5deg) rotateX(-5deg);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        0 0 80px rgba(16, 185, 129, 0.1),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-200px) translateX(30px);
+        opacity: 0;
+      }
+    }
+
+    /* Block types */
+    .hero-block--code {
+      background: linear-gradient(135deg, 
+        rgba(59, 130, 246, 0.1) 0%, 
+        rgba(59, 130, 246, 0.05) 100%);
+    }
+
+    .hero-block--text {
+      background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.05) 0%, 
+        rgba(255, 255, 255, 0.02) 100%);
+    }
+
+    .hero-block--ai {
+      background: linear-gradient(135deg, 
+        rgba(168, 85, 247, 0.1) 0%, 
+        rgba(168, 85, 247, 0.05) 100%);
+    }
+
+    .hero-block--todo {
+      background: linear-gradient(135deg, 
+        rgba(16, 185, 129, 0.1) 0%, 
+        rgba(16, 185, 129, 0.05) 100%);
+    }
+
+    .hero-block--version {
+      background: linear-gradient(135deg, 
+        rgba(251, 146, 60, 0.1) 0%, 
+        rgba(251, 146, 60, 0.05) 100%);
+    }
+
+    /* Block content */
+    .hero-block__content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 24px;
+    }
+
+    /* Layer depths */
+    .hero-block--layer-1 {
+      z-index: 1;
+      filter: blur(0.5px);
+      opacity: 0.6;
+    }
+
+    .hero-block--layer-2 {
+      z-index: 2;
+    }
+
+    .hero-block--layer-3 {
+      z-index: 3;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero-section">
+    <div class="hero-background-animation" id="blockContainer"></div>
+    
+    <div class="hero-content">
+      <h1 class="hero-title">
+        Never Google The Same<br>
+        <span class="hero-title-gradient">Error Twice</span>
+      </h1>
+      <p style="opacity: 0.7; max-width: 600px; margin: 0 auto;">
+        That Stack Overflow answer you found at 2am? That ChatGPT explanation that finally made it click? 
+        Capture, connect, and find them instantly when you need them again.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    // Block configuration
+    const blockTypes = [
+      { type: 'code', icon: '</>', weight: 3 },
+      { type: 'text', icon: '≡', weight: 3 },
+      { type: 'ai', icon: '◉', weight: 2 },
+      { type: 'todo', icon: '☐', weight: 2 },
+      { type: 'version', icon: '⎇', weight: 1 }
+    ];
+
+    // Get weighted random block type
+    function getRandomBlockType() {
+      const totalWeight = blockTypes.reduce((sum, type) => sum + type.weight, 0);
+      let random = Math.random() * totalWeight;
+      
+      for (const blockType of blockTypes) {
+        random -= blockType.weight;
+        if (random <= 0) return blockType;
+      }
+      return blockTypes[0];
+    }
+
+    // Create a block element
+    function createBlock() {
+      const block = document.createElement('div');
+      const blockType = getRandomBlockType();
+      const size = 60 + Math.random() * 60; // 60-120px
+      const layer = Math.ceil(Math.random() * 3);
+      
+      block.className = `hero-block hero-block--${blockType.type} hero-block--layer-${layer}`;
+      block.style.width = size + 'px';
+      block.style.height = size + 'px';
+      block.style.left = Math.random() * (window.innerWidth - size) + 'px';
+      block.style.animationDuration = (15 + Math.random() * 25) + 's';
+      block.style.animationDelay = Math.random() * 20 + 's';
+      
+      const content = document.createElement('div');
+      content.className = 'hero-block__content';
+      content.textContent = blockType.icon;
+      block.appendChild(content);
+      
+      return block;
+    }
+
+    // Initialize blocks
+    const container = document.getElementById('blockContainer');
+    const blockCount = 25;
+    
+    for (let i = 0; i < blockCount; i++) {
+      container.appendChild(createBlock());
+    }
+
+    // Mouse interaction
+    let mouseX = 0, mouseY = 0;
+    
+    document.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      
+      // Apply repulsion effect to nearby blocks
+      const blocks = document.querySelectorAll('.hero-block');
+      blocks.forEach(block => {
+        const rect = block.getBoundingClientRect();
+        const blockCenterX = rect.left + rect.width / 2;
+        const blockCenterY = rect.top + rect.height / 2;
+        
+        const distance = Math.sqrt(
+          Math.pow(mouseX - blockCenterX, 2) + 
+          Math.pow(mouseY - blockCenterY, 2)
+        );
+        
+        if (distance < 200) {
+          const force = (1 - distance / 200) * 20;
+          const angle = Math.atan2(blockCenterY - mouseY, blockCenterX - mouseX);
+          const offsetX = Math.cos(angle) * force;
+          const offsetY = Math.sin(angle) * force;
+          
+          block.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+        } else {
+          block.style.transform = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

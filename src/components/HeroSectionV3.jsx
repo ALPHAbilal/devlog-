@@ -6,7 +6,7 @@ import { heroTextReveal, magneticHover, liquidMorph, staggerContainer, staggerIt
 import ParticleField from './ParticleField';
 import GradientMesh from './GradientMesh';
 import FloatingElements from './FloatingElements';
-import HeroBackgroundAnimation from './HeroBackgroundAnimation';
+import HeroBackgroundAnimation from './HeroBackgroundAnimation/index';
 
 export default function HeroSectionV3() {
   const navigate = useNavigate();

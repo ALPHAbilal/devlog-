@@ -16,8 +16,41 @@ const AuthElite = () => {
   const [successMessage, setSuccessMessage] = useState(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [viewportClass, setViewportClass] = useState('')
   const containerRef = useRef(null)
   const navigate = useNavigate()
+  
+  // Viewport detection
+  useEffect(() => {
+    const updateViewportClass = () => {
+      const height = window.innerHeight
+      if (height < 600) {
+        setViewportClass('viewport-ultra-compact')
+      } else if (height < 700) {
+        setViewportClass('viewport-compact')
+      } else if (height < 800) {
+        setViewportClass('viewport-medium')
+      } else {
+        setViewportClass('')
+      }
+    }
+    
+    updateViewportClass()
+    window.addEventListener('resize', updateViewportClass)
+    
+    // Handle viewport resize on mobile (when keyboard appears)
+    const visualViewport = window.visualViewport
+    if (visualViewport) {
+      visualViewport.addEventListener('resize', updateViewportClass)
+    }
+    
+    return () => {
+      window.removeEventListener('resize', updateViewportClass)
+      if (visualViewport) {
+        visualViewport.removeEventListener('resize', updateViewportClass)
+      }
+    }
+  }, [])
 
   // Live typing animation for taglines
   const taglines = [
@@ -37,6 +70,40 @@ const AuthElite = () => {
     { value: '847K', label: 'bugs solved', icon: Zap },
     { value: '99.9%', label: 'uptime', icon: Shield }
   ]
+
+  // Viewport detection and dynamic class application
+  useEffect(() => {
+    const checkViewport = () => {
+      const vh = window.innerHeight
+      const vw = window.innerWidth
+      let classes = []
+      
+      if (vh < 600) classes.push('viewport-ultra-compact')
+      else if (vh < 700) classes.push('viewport-compact')
+      
+      if (vw < 640) classes.push('viewport-mobile')
+      else if (vw < 1024) classes.push('viewport-tablet')
+      
+      if (window.matchMedia('(orientation: landscape)').matches && vh < 500) {
+        classes.push('viewport-landscape-compact')
+      }
+      
+      setViewportClass(classes.join(' '))
+    }
+    
+    checkViewport()
+    window.addEventListener('resize', checkViewport)
+    window.addEventListener('orientationchange', checkViewport)
+    
+    // Also check on visibility change (mobile browser URL bar hide/show)
+    document.addEventListener('visibilitychange', checkViewport)
+    
+    return () => {
+      window.removeEventListener('resize', checkViewport)
+      window.removeEventListener('orientationchange', checkViewport)
+      document.removeEventListener('visibilitychange', checkViewport)
+    }
+  }, [])
 
   // Mouse parallax effect
   useEffect(() => {
@@ -142,7 +209,7 @@ const AuthElite = () => {
   }
 
   return (
-    <div className="auth-elite-container" ref={containerRef}>
+    <div className={`auth-elite-container ${viewportClass}`} ref={containerRef}>
       {/* Dynamic animated background */}
       <AuthBackground mousePosition={mousePosition} />
 

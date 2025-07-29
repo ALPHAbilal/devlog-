@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Viewport Fitting Test - AuthElite</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #050a15;
+            color: #f0f9ff;
+        }
+        
+        .test-container {
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .viewport-info {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .info-item {
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            font-size: 0.875rem;
+            color: #cbd5e1;
+            margin-bottom: 0.25rem;
+        }
+        
+        .info-value {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .test-modes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .test-button {
+            padding: 0.75rem 1.5rem;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .test-button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .test-button:active {
+            transform: translateY(0);
+        }
+        
+        .iframe-container {
+            position: fixed;
+            inset: 0;
+            background: #050a15;
+            display: none;
+            z-index: 9999;
+        }
+        
+        .iframe-container.active {
+            display: block;
+        }
+        
+        .close-button {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 10000;
+            padding: 0.5rem 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .viewport-presets {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+        
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .preset-button {
+            padding: 0.5rem;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 6px;
+            color: #f0f9ff;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        .preset-button:hover {
+            background: rgba(16, 185, 129, 0.3);
+            border-color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>AuthElite Viewport Fitting Test</h1>
+        
+        <div class="viewport-info">
+            <h2>Current Viewport Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Window Width</div>
+                    <div class="info-value" id="window-width">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Window Height</div>
+                    <div class="info-value" id="window-height">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Inner Width</div>
+                    <div class="info-value" id="inner-width">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Inner Height</div>
+                    <div class="info-value" id="inner-height">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Orientation</div>
+                    <div class="info-value" id="orientation">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Pixel Ratio</div>
+                    <div class="info-value" id="pixel-ratio">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-modes">
+            <button class="test-button" onclick="openAuth()">Open AuthElite Component</button>
+            <button class="test-button" onclick="toggleFullscreen()">Toggle Fullscreen</button>
+        </div>
+        
+        <div class="viewport-presets">
+            <h3>Test Common Viewport Sizes</h3>
+            <div class="preset-grid">
+                <button class="preset-button" onclick="testViewport(375, 667)">iPhone SE</button>
+                <button class="preset-button" onclick="testViewport(390, 844)">iPhone 12/13</button>
+                <button class="preset-button" onclick="testViewport(428, 926)">iPhone 14 Pro Max</button>
+                <button class="preset-button" onclick="testViewport(360, 800)">Android Small</button>
+                <button class="preset-button" onclick="testViewport(412, 915)">Pixel 6</button>
+                <button class="preset-button" onclick="testViewport(768, 1024)">iPad Portrait</button>
+                <button class="preset-button" onclick="testViewport(1024, 768)">iPad Landscape</button>
+                <button class="preset-button" onclick="testViewport(375, 812)">iPhone X</button>
+                <button class="preset-button" onclick="testViewport(414, 896)">iPhone 11 Pro Max</button>
+                <button class="preset-button" onclick="testViewport(320, 568)">iPhone 5</button>
+                <button class="preset-button" onclick="testViewport(375, 500)">Compact Height</button>
+                <button class="preset-button" onclick="testViewport(1920, 400)">Ultra Wide Short</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="iframe-container" id="iframe-container">
+        <button class="close-button" onclick="closeAuth()">Close Test</button>
+        <iframe id="auth-frame"></iframe>
+    </div>
+    
+    <script>
+        // Update viewport information
+        function updateViewportInfo() {
+            document.getElementById('window-width').textContent = window.outerWidth + 'px';
+            document.getElementById('window-height').textContent = window.outerHeight + 'px';
+            document.getElementById('inner-width').textContent = window.innerWidth + 'px';
+            document.getElementById('inner-height').textContent = window.innerHeight + 'px';
+            document.getElementById('orientation').textContent = window.matchMedia('(orientation: portrait)').matches ? 'Portrait' : 'Landscape';
+            document.getElementById('pixel-ratio').textContent = window.devicePixelRatio.toFixed(2);
+        }
+        
+        // Open AuthElite in iframe
+        function openAuth() {
+            const container = document.getElementById('iframe-container');
+            const frame = document.getElementById('auth-frame');
+            frame.src = '/auth';
+            container.classList.add('active');
+        }
+        
+        // Close AuthElite
+        function closeAuth() {
+            const container = document.getElementById('iframe-container');
+            container.classList.remove('active');
+            const frame = document.getElementById('auth-frame');
+            frame.src = '';
+        }
+        
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        // Test specific viewport size
+        function testViewport(width, height) {
+            if (window.resizeTo) {
+                window.resizeTo(width, height);
+                setTimeout(updateViewportInfo, 100);
+            } else {
+                alert(`Please manually resize your browser to ${width}x${height} pixels`);
+            }
+        }
+        
+        // Initialize
+        updateViewportInfo();
+        window.addEventListener('resize', updateViewportInfo);
+        window.addEventListener('orientationchange', updateViewportInfo);
+        
+        // Log viewport classes being applied
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    console.log('Viewport classes:', mutation.target.className);
+                }
+            });
+        });
+        
+        // Start observing when auth is opened
+        document.getElementById('auth-frame').addEventListener('load', function() {
+            const authContainer = this.contentDocument?.querySelector('.auth-elite-container');
+            if (authContainer) {
+                observer.observe(authContainer, { attributes: true });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -134,16 +134,16 @@
   }
 }
 
-/* Gradient orb animations */
+/* Gradient orb animations - constrained to viewport */
 @keyframes orb-float-1 {
   0%, 100% {
     transform: translate(0, 0) scale(1);
   }
   33% {
-    transform: translate(30px, -30px) scale(1.1);
+    transform: translate(min(30px, 2vw), max(-30px, -2vh)) scale(1.1);
   }
   66% {
-    transform: translate(-20px, 20px) scale(0.9);
+    transform: translate(max(-20px, -1.5vw), min(20px, 1.5vh)) scale(0.9);
   }
 }
 
@@ -152,10 +152,10 @@
     transform: translate(0, 0) scale(1);
   }
   33% {
-    transform: translate(-40px, 20px) scale(0.9);
+    transform: translate(max(-40px, -3vw), min(20px, 1.5vh)) scale(0.9);
   }
   66% {
-    transform: translate(20px, -40px) scale(1.1);
+    transform: translate(min(20px, 1.5vw), max(-40px, -3vh)) scale(1.1);
   }
 }
 
@@ -164,10 +164,10 @@
     transform: translate(0, 0) scale(1);
   }
   33% {
-    transform: translate(20px, 30px) scale(1.05);
+    transform: translate(min(20px, 1.5vw), min(30px, 2vh)) scale(1.05);
   }
   66% {
-    transform: translate(-30px, -20px) scale(0.95);
+    transform: translate(max(-30px, -2vw), max(-20px, -1.5vh)) scale(0.95);
   }
 }
 
@@ -247,22 +247,27 @@
   inset: 0;
   overflow: hidden;
   z-index: 0;
+  pointer-events: none;
 }
 
 .auth-gradient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(min(80px, 5vw));
   opacity: 0.5;
   animation-timing-function: ease-in-out;
   animation-iteration-count: infinite;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .auth-gradient-orb-1 {
   top: 20%;
   left: 10%;
-  width: 40vw;
-  height: 40vw;
+  width: min(40vw, 400px);
+  height: min(40vw, 400px);
+  max-width: 50%;
+  max-height: 50%;
   background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%);
   animation: orb-float-1 20s infinite;
 }
@@ -270,8 +275,10 @@
 .auth-gradient-orb-2 {
   bottom: 20%;
   right: 10%;
-  width: 35vw;
-  height: 35vw;
+  width: min(35vw, 350px);
+  height: min(35vw, 350px);
+  max-width: 45%;
+  max-height: 45%;
   background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
   animation: orb-float-2 25s infinite;
 }
@@ -279,8 +286,10 @@
 .auth-gradient-orb-3 {
   top: 50%;
   left: 50%;
-  width: 30vw;
-  height: 30vw;
+  width: min(30vw, 300px);
+  height: min(30vw, 300px);
+  max-width: 40%;
+  max-height: 40%;
   background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
   animation: orb-float-3 30s infinite;
   transform: translate(-50%, -50%);
@@ -446,5 +455,53 @@
   .auth-elite-particles::before,
   .auth-elite-particles::after {
     display: none;
+  }
+}
+
+/* Viewport-aware animations */
+@media (max-height: 700px) {
+  /* Reduce animation complexity in compact mode */
+  .auth-gradient-orb {
+    filter: blur(60px); /* Less blur for performance */
+    opacity: 0.3;
+  }
+  
+  .auth-gradient-orb-1 {
+    width: 30vw;
+    height: 30vw;
+  }
+  
+  .auth-gradient-orb-2 {
+    width: 25vw;
+    height: 25vw;
+  }
+  
+  .auth-gradient-orb-3 {
+    display: none; /* Remove third orb in compact mode */
+  }
+  
+  /* Simplify animations */
+  @keyframes orb-float-1,
+  @keyframes orb-float-2 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+  }
+}
+
+/* Ultra compact viewport adjustments */
+@media (max-height: 600px) {
+  .auth-elite-particles {
+    display: none; /* Remove particles in ultra compact mode */
+  }
+  
+  .auth-transition-layer {
+    display: none; /* Remove transition layers */
+  }
+  
+  /* Disable parallax in ultra compact mode */
+  .auth-elite-branding,
+  .auth-elite-form-section {
+    transform: none !important;
   }
 }

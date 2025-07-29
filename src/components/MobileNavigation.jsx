@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Home, Plus, Search, User, Grid3X3 } from 'lucide-react';
+import { Home, Plus, Search, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function MobileNavigation() {
@@ -9,7 +9,6 @@ export default function MobileNavigation() {
     { path: '/dashboard', icon: Home, label: 'Home', exact: true },
     { path: '/dashboard?search=true', icon: Search, label: 'Search', action: true },
     { path: '/dashboard?new=true', icon: Plus, label: 'New', action: true },
-    { path: '/dashboard?view=projects', icon: Grid3X3, label: 'Projects' },
     { path: '/settings', icon: User, label: 'Profile' }
   ];
 
@@ -27,10 +26,6 @@ export default function MobileNavigation() {
             // For exact matches (Home)
             if (item.exact) {
               return location.pathname === item.path && !location.search;
-            }
-            // For Projects view
-            if (item.label === 'Projects') {
-              return location.search.includes('view=projects');
             }
             // For Profile/Settings
             if (item.path === '/settings') {

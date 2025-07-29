@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import { CustomEase } from 'gsap/CustomEase';
-import { TextPlugin } from 'gsap/TextPlugin';
 import './MemoryErosion.css';
-
-gsap.registerPlugin(CustomEase, TextPlugin);
-
-// Custom erosion ease
-CustomEase.create("erosion", "M0,0 C0.126,0.382 0.282,0.674 0.44,0.822 0.632,1 0.818,1 1,1");
 
 const MemoryErosion = () => {
   const containerRef = useRef(null);

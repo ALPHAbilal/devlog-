@@ -1,15 +1,8 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { gsap } from 'gsap';
-import { CustomEase } from 'gsap/CustomEase';
-import { TextPlugin } from 'gsap/TextPlugin';
-import { DrawSVGPlugin } from 'gsap/DrawSVGPlugin';
-import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
-import { Physics2DPlugin } from 'gsap/Physics2DPlugin';
-import { PixiPlugin } from 'gsap/PixiPlugin';
+// Note: Premium plugins removed for npm compatibility
 import { performanceMonitor, OptimizationUtils, memoryManager } from './MemoryErosionPerformance';
 import './MemoryErosion.css';
-
-gsap.registerPlugin(CustomEase, TextPlugin, DrawSVGPlugin, MorphSVGPlugin, Physics2DPlugin, PixiPlugin);
 
 // Enhanced erosion patterns
 const EROSION_PATTERNS = {

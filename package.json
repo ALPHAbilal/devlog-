@@ -19,6 +19,7 @@
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.46.2",
     "framer-motion": "^12.23.6",
+    "gsap": "^3.12.5",
     "isomorphic-dompurify": "^2.9.0",
     "katex": "^0.16.9",
     "lucide-react": "^0.513.0",

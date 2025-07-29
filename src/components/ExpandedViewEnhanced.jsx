@@ -19,15 +19,16 @@ import ScrollToTop from './ScrollToTop';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
-const ExpandedView = forwardRef(({ 
-  entry, 
-  onClose, 
-  onUpdate, 
-  allEntries = [],
-  isMobileView = false,
-  scrollContainerRef: externalScrollRef,
-  onShowBlockSelector 
-}, ref) {
+const ExpandedView = forwardRef((props, ref) => {
+  const {
+    entry,
+    onClose,
+    onUpdate,
+    allEntries = [],
+    isMobileView = false,
+    scrollContainerRef: externalScrollRef,
+    onShowBlockSelector
+  } = props;
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
   

@@ -95,14 +95,20 @@ export default function DocumentToolbar({
       } ${
         isCompact ? 'top-4 right-4' : 'top-20 right-6'
       }`}
+      style={{
+        // Ensure toolbar stays within viewport on mobile
+        maxWidth: 'calc(100vw - 2rem)',
+        right: 'max(1rem, env(safe-area-inset-right, 0px))'
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div 
         className={`
-          bg-dark-primary/80 backdrop-blur-xl border border-dark-secondary/50
+          bg-dark-primary/90 backdrop-blur-xl border border-dark-secondary/50
           rounded-2xl shadow-2xl transition-all duration-300
           ${isCompact && !isExpanded ? 'px-3 py-2' : 'px-4 py-3'}
+          overflow-hidden
         `}
       >
         {(!isCompact || isExpanded) ? (

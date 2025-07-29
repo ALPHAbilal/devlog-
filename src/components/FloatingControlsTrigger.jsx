@@ -7,7 +7,8 @@ export default function FloatingControlsTrigger({
   onShare, 
   onDelete,
   scrollThreshold = 200, // Show after scrolling past this point
-  scrollContainerRef // Reference to the scrollable container
+  scrollContainerRef, // Reference to the scrollable container
+  isMobile = false // Mobile mode flag
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +57,8 @@ export default function FloatingControlsTrigger({
   if (!isVisible) return null;
 
   return (
-    <div ref={panelRef} className="fixed top-6 right-6 z-50">
+    <div ref={panelRef} className={`fixed z-50 ${isMobile ? 'bottom-20 right-4' : 'top-6 right-6'}`}
+         style={isMobile ? { bottom: `calc(5rem + env(safe-area-inset-bottom, 0px))` } : {}}>
       {/* Trigger Arrow Button - Sophisticated Design */}
       <button
         onClick={() => setIsOpen(!isOpen)}

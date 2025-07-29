@@ -57,6 +57,11 @@
 /* Fluid Typography System */
 @layer base {
   :root {
+  /* Safe area insets for mobile devices */
+  --sat: env(safe-area-inset-top, 0);
+  --sab: env(safe-area-inset-bottom, 0);
+  --sal: env(safe-area-inset-left, 0);
+  --sar: env(safe-area-inset-right, 0);
     /* Fluid font sizes using clamp() */
     --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
     --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);

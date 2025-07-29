@@ -22,11 +22,32 @@ export default function MobileBottomSheet({
   // Calculate sheet height based on content
   useEffect(() => {
     if (isOpen && contentRef.current) {
-      const contentHeight = contentRef.current.scrollHeight;
-      const maxHeight = window.innerHeight * 0.9; // Max 90% of screen
-      setSheetHeight(Math.min(contentHeight + safeAreaInsets.bottom + 20, maxHeight));
+      // Add a small delay to ensure content is rendered
+      const timer = setTimeout(() => {
+        if (contentRef.current) {
+          const contentHeight = contentRef.current.scrollHeight;
+          const viewportHeight = window.innerHeight;
+          
+          // Ensure we leave space at top for visual context
+          const minTopSpace = Math.max(80, safeAreaInsets.top + 40);
+          const maxHeight = viewportHeight - minTopSpace;
+          const minHeight = 200; // Minimum height
+          
+          // Account for drag handle, header, and safe areas
+          const totalPadding = (showHandle ? 40 : 0) + (title ? 60 : 0) + Math.max(safeAreaInsets.bottom, 20) + 20;
+          
+          const calculatedHeight = Math.max(
+            minHeight,
+            Math.min(contentHeight + totalPadding, maxHeight)
+          );
+          
+          setSheetHeight(calculatedHeight);
+        }
+      }, 50);
+      
+      return () => clearTimeout(timer);
     }
-  }, [isOpen, children, safeAreaInsets.bottom]);
+  }, [isOpen, children, safeAreaInsets.bottom, showHandle, title]);
   
   // Handle drag to close
   const handleDragEnd = (event, info) => {
@@ -95,10 +116,15 @@ export default function MobileBottomSheet({
             dragConstraints={{ top: 0 }}
             dragElastic={{ top: 0, bottom: 0.3 }}
             onDragEnd={handleDragEnd}
-            style={{ y, height: height === 'auto' ? sheetHeight : height }}
-            className="fixed bottom-0 left-0 right-0 bg-dark-primary 
-                     rounded-t-3xl shadow-2xl z-[101] overflow-hidden
-                     border-t border-dark-secondary/30"
+            style={{ 
+              y, 
+              height: height === 'auto' ? sheetHeight : height,
+              maxHeight: `calc(100vh - ${Math.max(80, safeAreaInsets.top + 40)}px)`,
+              minHeight: '200px'
+            }}
+            className="fixed bottom-0 left-0 right-0 bg-dark-primary/98
+                     backdrop-blur-xl rounded-t-3xl shadow-2xl z-[101] 
+                     overflow-hidden border-t border-dark-secondary/30"
           >
             {/* Drag Handle */}
             {showHandle && (
@@ -119,13 +145,18 @@ export default function MobileBottomSheet({
             {/* Content */}
             <div 
               ref={contentRef}
-              className="overflow-y-auto overscroll-contain"
+              className="overflow-y-auto overscroll-contain 
+                       scrollbar-thin scrollbar-thumb-dark-secondary/50 
+                       scrollbar-track-transparent"
               style={{ 
-                maxHeight: `calc(${sheetHeight}px - ${title ? 80 : 40}px)`,
-                paddingBottom: safeAreaInsets.bottom 
+                maxHeight: `calc(${sheetHeight}px - ${(showHandle ? 40 : 0) + (title ? 60 : 0)}px)`,
+                paddingBottom: safeAreaInsets.bottom + 20,
+                WebkitOverflowScrolling: 'touch'
               }}
             >
-              {children}
+              <div className="min-h-full">
+                {children}
+              </div>
             </div>
           </motion.div>
         </>

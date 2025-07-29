@@ -71,20 +71,32 @@ export default function MobileDocumentViewer({
   });
   
   
+  // Create refs to interact with ExpandedViewEnhanced
+  const expandedViewRef = useRef(null);
+  
   // Action handlers
   const handleShare = () => {
     setShowActionSheet(false);
-    // Share functionality will be handled by ExpandedViewEnhanced
+    // Trigger share in ExpandedViewEnhanced
+    if (expandedViewRef.current?.handleShare) {
+      expandedViewRef.current.handleShare();
+    }
   };
   
   const handleDelete = () => {
     setShowActionSheet(false);
-    // Delete functionality will be handled by ExpandedViewEnhanced
+    // Trigger delete in ExpandedViewEnhanced
+    if (expandedViewRef.current?.handleDelete) {
+      expandedViewRef.current.handleDelete();
+    }
   };
   
   const handleViewModeChange = (mode) => {
     setShowActionSheet(false);
-    // View mode change will be handled by ExpandedViewEnhanced
+    // Trigger view mode change in ExpandedViewEnhanced
+    if (expandedViewRef.current?.handleViewModeChange) {
+      expandedViewRef.current.handleViewModeChange(mode);
+    }
   };
   
   // If not mobile/tablet, render the regular desktop view
@@ -130,12 +142,14 @@ export default function MobileDocumentViewer({
         }}
       >
         <ExpandedViewEnhanced
+          ref={expandedViewRef}
           entry={entry}
           onClose={onClose}
           onUpdate={onUpdate}
           allEntries={allEntries}
           isMobileView={true}
           scrollContainerRef={scrollContainerRef}
+          onActionSheetOpen={() => setShowActionSheet(true)}
         />
       </div>
       
@@ -178,8 +192,10 @@ export default function MobileDocumentViewer({
         isOpen={showActionSheet}
         onClose={() => setShowActionSheet(false)}
         title="Document Actions"
+        height="auto"
+        showHandle={true}
       >
-        <div className="space-y-2 p-4">
+        <div className="space-y-2 p-4 pb-6">
           <button
             onClick={handleShare}
             className="w-full p-4 bg-dark-secondary rounded-xl text-left 
@@ -223,6 +239,16 @@ export default function MobileDocumentViewer({
               </svg>
             </div>
             <span className="text-red-400">Delete Document</span>
+          </button>
+          
+          {/* Cancel button for better UX */}
+          <button
+            onClick={() => setShowActionSheet(false)}
+            className="w-full p-4 bg-dark-secondary/50 rounded-xl text-left 
+                     hover:bg-dark-secondary/70 active:scale-98 transition-all
+                     flex items-center justify-center mt-4"
+          >
+            <span className="text-text-secondary">Cancel</span>
           </button>
         </div>
       </MobileBottomSheet>

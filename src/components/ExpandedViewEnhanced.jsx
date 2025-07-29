@@ -14,6 +14,7 @@ import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogElite } from './ShareDialogElite';
 import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
+import MobileFloatingActions from './MobileFloatingActions';
 import ScrollToTop from './ScrollToTop';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
@@ -671,16 +672,24 @@ export default function ExpandedView({
     <>
       {/* Opacity forensics debugger removed - was interfering with transitions */}
       
-      {/* Floating Controls Trigger - Outside scrollable container - Hidden on mobile */}
-      {!isMobileView && (
-      <FloatingControlsTrigger
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onShare={() => setShowShareDialog(true)}
-        onDelete={() => setShowDeleteConfirm(true)}
-        scrollThreshold={100}
-        scrollContainerRef={scrollContainerRef}
-      />
+      {/* Floating Controls - Desktop vs Mobile */}
+      {isMobileView ? (
+        <MobileFloatingActions
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onShare={() => setShowShareDialog(true)}
+          onDelete={() => setShowDeleteConfirm(true)}
+          scrollContainerRef={scrollContainerRef}
+        />
+      ) : (
+        <FloatingControlsTrigger
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onShare={() => setShowShareDialog(true)}
+          onDelete={() => setShowDeleteConfirm(true)}
+          scrollThreshold={100}
+          scrollContainerRef={scrollContainerRef}
+        />
       )}
       
       <div 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import MobileMenuPositioner from './MobileMenuPositioner';
 
 export default function BlockControls({ 
   onDelete, 
@@ -18,6 +19,7 @@ export default function BlockControls({
   const [isMobile, setIsMobile] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const hideTimeoutRef = useRef(null);
+  const menuButtonRef = useRef(null);
   
   // Update parent when menu state changes
   useEffect(() => {
@@ -240,7 +242,7 @@ export default function BlockControls({
         </div>
 
         {/* More Options */}
-        <div className="relative">
+        <div className="relative" ref={menuButtonRef}>
           <button 
             onClick={() => setShowMenu(!showMenu)}
             className="p-1.5 rounded-md
@@ -257,64 +259,24 @@ export default function BlockControls({
             </svg>
           </button>
 
-          {/* Dropdown Menu */}
-          {showMenu && (
-            <>
-              {/* Click outside to close */}
-              <div 
-                className="fixed inset-0 z-10" 
-                onClick={() => setShowMenu(false)}
-              />
-              
-              <div className="absolute left-0 top-full mt-1 z-50
-                              bg-dark-secondary/95 backdrop-blur-sm rounded-lg 
-                              border border-dark-secondary/50 shadow-xl
-                              py-1 min-w-[140px]
-                              animate-in fade-in slide-in-from-top-1 duration-200">
-                
-                {/* Move Up */}
-                {canMoveUp && (
-                  <button
-                    onClick={() => {
-                      onMoveUp?.();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-3 py-2 md:py-1.5 text-left text-sm
-                               text-text-secondary hover:text-text-primary
-                               hover:bg-dark-primary/50 transition-colors
-                               flex items-center gap-2 min-h-[44px] md:min-h-0"
-                  >
-                    <span style={{fontSize: '14px'}}>↑</span>
-                    Move up
-                  </button>
-                )}
-
-                {/* Move Down */}
-                {canMoveDown && (
-                  <button
-                    onClick={() => {
-                      onMoveDown?.();
-                      setShowMenu(false);
-                    }}
-                    className="w-full px-3 py-2 md:py-1.5 text-left text-sm
-                               text-text-secondary hover:text-text-primary
-                               hover:bg-dark-primary/50 transition-colors
-                               flex items-center gap-2 min-h-[44px] md:min-h-0"
-                  >
-                    <span style={{fontSize: '14px'}}>↓</span>
-                    Move down
-                  </button>
-                )}
-
-                {/* Divider */}
-                {(canMoveUp || canMoveDown) && (
-                  <div className="h-px bg-dark-secondary/50 my-1" />
-                )}
-
-                {/* Duplicate */}
+          {/* Dropdown Menu - Mobile Aware */}
+          <MobileMenuPositioner
+            isOpen={showMenu}
+            onClose={() => setShowMenu(false)}
+            triggerRef={menuButtonRef}
+            preferredPosition={isMobile ? 'auto' : 'bottom'}
+            className="block-controls-dropdown"
+            showBackdrop={true}
+            zIndex={150}
+          >
+            <div className="bg-dark-primary/98 backdrop-blur-xl rounded-xl 
+                            border border-dark-secondary/30 shadow-2xl
+                            py-1 overflow-hidden">
+              {/* Move Up */}
+              {canMoveUp && (
                 <button
                   onClick={() => {
-                    onDuplicate?.();
+                    onMoveUp?.();
                     setShowMenu(false);
                   }}
                   className="w-full px-3 py-2 md:py-1.5 text-left text-sm
@@ -322,27 +284,64 @@ export default function BlockControls({
                              hover:bg-dark-primary/50 transition-colors
                              flex items-center gap-2 min-h-[44px] md:min-h-0"
                 >
-                  <span style={{fontSize: '14px'}}>📋</span>
-                  Duplicate
+                  <span style={{fontSize: '14px'}}>↑</span>
+                  Move up
                 </button>
+              )}
 
-                {/* Delete */}
+              {/* Move Down */}
+              {canMoveDown && (
                 <button
                   onClick={() => {
-                    onDelete();
+                    onMoveDown?.();
                     setShowMenu(false);
                   }}
                   className="w-full px-3 py-2 md:py-1.5 text-left text-sm
-                             text-red-400 hover:text-red-300
-                             hover:bg-red-500/10 transition-colors
+                             text-text-secondary hover:text-text-primary
+                             hover:bg-dark-primary/50 transition-colors
                              flex items-center gap-2 min-h-[44px] md:min-h-0"
                 >
-                  <span style={{fontSize: '14px'}}>🗑</span>
-                  Delete
+                  <span style={{fontSize: '14px'}}>↓</span>
+                  Move down
                 </button>
-              </div>
-            </>
-          )}
+              )}
+
+              {/* Divider */}
+              {(canMoveUp || canMoveDown) && (
+                <div className="h-px bg-dark-secondary/50 my-1" />
+              )}
+
+              {/* Duplicate */}
+              <button
+                onClick={() => {
+                  onDuplicate?.();
+                  setShowMenu(false);
+                }}
+                className="w-full px-3 py-2 md:py-1.5 text-left text-sm
+                           text-text-secondary hover:text-text-primary
+                           hover:bg-dark-primary/50 transition-colors
+                           flex items-center gap-2 min-h-[44px] md:min-h-0"
+              >
+                <span style={{fontSize: '14px'}}>📋</span>
+                Duplicate
+              </button>
+
+              {/* Delete */}
+              <button
+                onClick={() => {
+                  onDelete();
+                  setShowMenu(false);
+                }}
+                className="w-full px-3 py-2 md:py-1.5 text-left text-sm
+                           text-red-400 hover:text-red-300
+                           hover:bg-red-500/10 transition-colors
+                           flex items-center gap-2 min-h-[44px] md:min-h-0"
+              >
+                <span style={{fontSize: '14px'}}>🗑</span>
+                Delete
+              </button>
+            </div>
+          </MobileMenuPositioner>
         </div>
       </div>
     </div>

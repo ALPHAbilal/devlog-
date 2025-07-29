@@ -768,11 +768,6 @@
     padding: 0.625rem 1rem;
   }
 }
-  .auth-form-elite {
-    max-height: calc(100vh - 2rem);
-    max-height: calc(100dvh - 2rem);
-  }
-}
 
 /* Viewport-specific classes from JS detection */
 .auth-elite-container.viewport-ultra-compact {

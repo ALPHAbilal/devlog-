@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import MemoryErosion from './MemoryErosion';
 import MemoryErosionEnhanced from './MemoryErosionEnhanced';
-import './MemoryErosionShowcase.css';
+import '../../styles/MemoryErosionShowcase.css';
 
 // Showcase component demonstrating the Memory Erosion animation
 const MemoryErosionShowcase = () => {

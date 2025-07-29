@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { gsap } from 'gsap';
 // Note: Premium plugins removed for npm compatibility
 import { performanceMonitor, OptimizationUtils, memoryManager } from './MemoryErosionPerformance';
-import './MemoryErosion.css';
+import '../../styles/MemoryErosion.css';
 
 // Enhanced erosion patterns
 const EROSION_PATTERNS = {

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import './MemoryErosion.css';
+import '../../styles/MemoryErosion.css';
 
 const MemoryErosion = () => {
   const containerRef = useRef(null);

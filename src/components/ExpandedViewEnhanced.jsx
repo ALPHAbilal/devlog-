@@ -14,7 +14,6 @@ import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogElite } from './ShareDialogElite';
 import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
-import MobileFloatingActions from './MobileFloatingActions';
 import ScrollToTop from './ScrollToTop';
 import MobileBottomSheet from './MobileBottomSheet';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
@@ -691,16 +690,8 @@ const ExpandedView = forwardRef((props, ref) => {
     <>
       {/* Opacity forensics debugger removed - was interfering with transitions */}
       
-      {/* Floating Controls - Desktop vs Mobile */}
-      {isMobileView ? (
-        <MobileFloatingActions
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onShare={() => setShowShareDialog(true)}
-          onDelete={() => setShowDeleteConfirm(true)}
-          scrollContainerRef={scrollContainerRef}
-        />
-      ) : (
+      {/* Floating Controls - Desktop only */}
+      {!isMobileView && (
         <FloatingControlsTrigger
           viewMode={viewMode}
           onViewModeChange={setViewMode}

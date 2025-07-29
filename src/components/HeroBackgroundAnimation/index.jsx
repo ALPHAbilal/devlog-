@@ -1,2 +1,2 @@
-// Export the new Quantum Documentation Field component
-export { default } from './QuantumDocumentationField';
+// Export the Knowledge Constellation component
+export { default } from './KnowledgeConstellation';

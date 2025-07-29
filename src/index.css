@@ -12,6 +12,7 @@
 @import './styles/video-showcase.css';
 @import './styles/hero-background-animation.css';
 @import './styles/hero-quantum-field.css';
+@import './styles/hero-knowledge-constellation.css';
 @import './styles/mobile-optimizations.css';
 
 @tailwind base;

@@ -389,7 +389,7 @@ export default function DevLogVsNotion() {
                 Lightning Performance
               </h3>
               <p className="text-gray-400 mb-4">
-                < 1 second load times. No waiting for servers. Instant search across 
+                &lt; 1 second load times. No waiting for servers. Instant search across 
                 thousands of documents.
               </p>
               <p className="text-sm text-accent-green">

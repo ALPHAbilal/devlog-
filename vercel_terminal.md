@@ -1,38 +1,48 @@
-[17:05:34.475] Running build in Washington, D.C., USA (East) – iad1
-[17:05:34.476] Build machine configuration: 2 cores, 8 GB
-[17:05:34.492] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 3c72ee7)
-[17:05:35.288] Cloning completed: 796.000ms
-[17:05:35.467] Restored build cache from previous deployment (BGAQUg92pyUGfgp1QsLJDXuqDQcJ)
-[17:05:37.684] Running "vercel build"
-[17:05:38.254] Vercel CLI 44.5.0
-[17:05:38.888] Installing dependencies...
-[17:05:40.258] 
-[17:05:40.258] up to date in 1s
-[17:05:40.259] 
-[17:05:40.259] 75 packages are looking for funding
-[17:05:40.259]   run `npm fund` for details
-[17:05:40.401] 
-[17:05:40.401] > journey-log-compass@0.0.0 build
-[17:05:40.401] > vite build
-[17:05:40.402] 
-[17:05:41.060] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
-[17:05:41.106] [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
-[17:05:41.464] transforming...
-[17:05:42.790] [32m✓[39m 102 modules transformed.
-[17:05:42.800] [31m✗[39m Build failed in 1.70s
-[17:05:42.804] [31merror during build:
-[17:05:42.804] [31m[vite:css] [postcss] /vercel/path0/src/styles/auth-elite.css:816:3: Unexpected }[31m
-[17:05:42.804] file: [36m/vercel/path0/src/styles/auth-elite.css:816:2[31m
-[17:05:42.805]     at Input.error (/vercel/path0/node_modules/postcss/lib/input.js:135:16)
-[17:05:42.805]     at Parser.unexpectedClose (/vercel/path0/node_modules/postcss/lib/parser.js:587:22)
-[17:05:42.805]     at Parser.end (/vercel/path0/node_modules/postcss/lib/parser.js:330:12)
-[17:05:42.806]     at Parser.parse (/vercel/path0/node_modules/postcss/lib/parser.js:456:16)
-[17:05:42.806]     at parse (/vercel/path0/node_modules/postcss/lib/parse.js:11:12)
-[17:05:42.806]     at new LazyResult (/vercel/path0/node_modules/postcss/lib/lazy-result.js:165:16)
-[17:05:42.806]     at Processor.process (/vercel/path0/node_modules/postcss/lib/processor.js:53:14)
-[17:05:42.807]     at runPostCSS (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:43824:52)
-[17:05:42.807]     at async compilePostCSS (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:43794:18)
-[17:05:42.807]     at async compileCSS (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:43649:27)[39m
-[17:05:42.856] Error: Command "npm run build" exited with 1
-[17:05:43.066] 
-[17:05:47.241] Exiting build container
+[20:50:36.475] Running build in Washington, D.C., USA (East) – iad1
+[20:50:36.482] Build machine configuration: 2 cores, 8 GB
+[20:50:36.504] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 342c8dc)
+[20:50:37.175] Cloning completed: 671.000ms
+[20:50:37.382] Restored build cache from previous deployment (D3hvk6d1V36NSCvYm7rDeNG9WNBv)
+[20:50:38.346] Running "vercel build"
+[20:50:39.430] Vercel CLI 44.6.4
+[20:50:40.837] Installing dependencies...
+[20:50:42.004] 
+[20:50:42.005] up to date in 901ms
+[20:50:42.005] 
+[20:50:42.006] 75 packages are looking for funding
+[20:50:42.006]   run `npm fund` for details
+[20:50:42.153] 
+[20:50:42.153] > journey-log-compass@0.0.0 build
+[20:50:42.154] > vite build
+[20:50:42.154] 
+[20:50:42.974] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[20:50:43.021] [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
+[20:50:43.395] transforming...
+[20:50:44.703] [32m✓[39m 88 modules transformed.
+[20:50:44.705] [31m✗[39m Build failed in 1.69s
+[20:50:44.707] [31merror during build:
+[20:50:44.708] [31m[vite:esbuild] Transform failed with 1 error:
+[20:50:44.708] /vercel/path0/src/pages/compare/DevLogVsNotion.jsx:392:18: ERROR: Expected identifier but found "1"[31m
+[20:50:44.708] file: [36m/vercel/path0/src/pages/compare/DevLogVsNotion.jsx:392:18[31m
+[20:50:44.708] [33m
+[20:50:44.709] [33mExpected identifier but found "1"[33m
+[20:50:44.709] 390|                </h3>
+[20:50:44.709] 391|                <p className="text-gray-400 mb-4">
+[20:50:44.709] 392|                  < 1 second load times. No waiting for servers. Instant search across 
+[20:50:44.709]    |                    ^
+[20:50:44.709] 393|                  thousands of documents.
+[20:50:44.709] 394|                </p>
+[20:50:44.710] [31m
+[20:50:44.710]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
+[20:50:44.710]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
+[20:50:44.710]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
+[20:50:44.710]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
+[20:50:44.710]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
+[20:50:44.710]     at Socket.emit (node:events:518:28)
+[20:50:44.710]     at addChunk (node:internal/streams/readable:561:12)
+[20:50:44.711]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[20:50:44.711]     at Readable.push (node:internal/streams/readable:392:5)
+[20:50:44.711]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
+[20:50:44.765] Error: Command "npm run build" exited with 1
+[20:50:44.967] 
+[20:50:47.684] Exiting build container

@@ -23,6 +23,10 @@ npm run lint
 
 # Preview production build
 npm run preview
+
+# Run tests (if available - currently no test runner configured in package.json)
+# Tests are configured with Vitest but no npm script exists
+npx vitest
 ```
 
 ## High-Level Architecture
@@ -672,12 +676,14 @@ Based on developer conversion research, redesigned landing page to focus on:
    - Vercel is connected to the GitHub repository
    - When user pushes to GitHub, Vercel automatically deploys frontend changes
    - No manual deployment steps needed for frontend
+   - Configuration in `vercel.json` handles SPA routing and security headers
 
 4. **Supabase database changes**
    - I provide SQL queries or step-by-step instructions
    - User executes these manually in the Supabase dashboard
    - I should NEVER attempt to run migrations directly
    - All database changes must be provided as SQL scripts with clear instructions
+   - Migration files are in `supabase/migrations/` for reference
 
 5. **What I should NEVER do**
    - Push to GitHub directly
@@ -697,13 +703,31 @@ Based on developer conversion research, redesigned landing page to focus on:
 
 ## Important Commands to Run
 
-Always run these before committing (if available):
+Always run these before committing:
 ```bash
 npm run lint        # Check for code issues
-npm run typecheck   # Check TypeScript types (if applicable)
 ```
 
-If these commands are not available, ask the user for the correct commands and update this file.
+Note: No TypeScript is used in this project (pure JavaScript)
+
+## Testing
+
+The project uses Vitest for testing but currently has limited test coverage:
+- Test configuration: `vitest.config.js`
+- Test files: `src/utils/__tests__/`
+- To run tests: `npx vitest` (no npm script configured)
+
+## Sentry Integration
+
+Error monitoring is configured via Sentry:
+- Configuration in `vite.config.js` and `src/instrument.js`
+- Environment variables needed:
+  - `SENTRY_ORG`
+  - `SENTRY_PROJECT`
+  - `SENTRY_AUTH_TOKEN`
+  - `SENTRY_DSN` (for runtime)
+- Source maps are uploaded during build
+- Release tracking integrated with Vercel deployments
 
 ## 🚨 CRITICAL: PRODUCTION DEPLOYMENT SAFETY
 

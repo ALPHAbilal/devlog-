@@ -96,8 +96,34 @@ class GlobalAutoSaveManager {
    * Update the interval
    */
   updateInterval(intervalSeconds) {
+    const newIntervalMs = intervalSeconds * 1000;
+    
+    // No change needed
+    if (this.intervalMs === newIntervalMs && this.isRunning) {
+      return;
+    }
+    
+    // If just starting for the first time, use normal start
+    if (!this.isRunning) {
+      this.start(intervalSeconds);
+      return;
+    }
+    
+    // Otherwise update silently
     this.stop();
-    this.start(intervalSeconds);
+    this.intervalMs = newIntervalMs;
+    
+    if (intervalSeconds <= 0) {
+      console.log('Auto-save disabled (interval: 0)');
+      return;
+    }
+    
+    // Don't log when just updating interval
+    this.intervalId = setInterval(() => {
+      this.performAutoSave();
+    }, this.intervalMs);
+    
+    this.isRunning = true;
   }
 
   /**

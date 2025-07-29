@@ -283,6 +283,37 @@
     );
 }
 
+/* Section spacing for seamless flow - no harsh transitions */
+.gradient-hero {
+  padding-bottom: 8rem;
+}
+
+.gradient-problem,
+.gradient-video,
+.gradient-features,
+.gradient-pricing,
+.gradient-cta {
+  margin-top: -4rem;
+  padding-top: 6rem;
+  position: relative;
+}
+
+/* Ensure sections blend smoothly */
+.gradient-problem::before,
+.gradient-video::before,
+.gradient-features::before,
+.gradient-pricing::before,
+.gradient-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rem;
+  background: linear-gradient(to bottom, transparent, var(--dark-base));
+  pointer-events: none;
+}
+
 /* Responsive Gradient Adjustments */
 @media (max-width: 768px) {
   :root {

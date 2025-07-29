@@ -10,14 +10,7 @@ import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover, featureReveal, tiltEffect } from '../utils/animations';
 import NoiseOverlay from '../components/NoiseOverlay';
-import {
-  HeroToProblemTransition,
-  ProblemToVideoTransition,
-  VideoToFeaturesTransition,
-  FeaturesToPricingTransition,
-  PricingToCTATransition,
-  CTAToFooterTransition
-} from '../components/SectionTransitions';
+// Removed section transitions for cleaner, uninterrupted flow
 
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
@@ -294,20 +287,11 @@ function LandingContent() {
       {/* New Hero Section */}
       <HeroSectionV3 />
 
-      {/* Hero to Problem Transition */}
-      <HeroToProblemTransition variant="wave" />
-
       {/* Problem Section */}
       <ProblemSection />
       
-      {/* Problem to Video Transition */}
-      <ProblemToVideoTransition variant="flow" />
-      
       {/* How It Works - Video Showcase */}
       <HowItWorksVideo />
-
-      {/* Video to Features Transition */}
-      <VideoToFeaturesTransition variant="geometric" />
 
       {/* Features Grid */}
       <section className="py-16 md:py-20 px-4 md:px-6 gradient-features relative">
@@ -351,16 +335,10 @@ function LandingContent() {
         </div>
       </section>
 
-      {/* Features to Pricing Transition */}
-      <FeaturesToPricingTransition variant="premium" />
-
       {/* Pricing */}
       <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading pricing...</div></div>}>
         <PricingSection />
       </Suspense>
-
-      {/* Pricing to CTA Transition */}
-      <PricingToCTATransition variant="energy" />
 
       {/* CTA Section */}
       <section className="py-16 md:py-20 px-4 md:px-6 gradient-cta relative">
@@ -429,9 +407,6 @@ function LandingContent() {
         </div>
         
       </section>
-
-      {/* CTA to Footer Transition */}
-      <CTAToFooterTransition variant="fade" />
 
       {/* Footer */}
       <footer className="py-8 px-4 md:px-6 gradient-footer relative">

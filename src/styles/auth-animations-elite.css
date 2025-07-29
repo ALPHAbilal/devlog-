@@ -1,0 +1,450 @@
+/* =====================================================
+   Auth Elite Animations - Premium Motion Design
+   Spring physics, liquid morphing, and micro-interactions
+   ===================================================== */
+
+/* Keyframe Animations */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 20px var(--auth-elite-accent-glow));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 30px var(--auth-elite-accent-glow));
+  }
+}
+
+@keyframes blink {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Particle animations */
+@keyframes float-up {
+  from {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes float-diagonal {
+  from {
+    transform: translate(-100vw, 100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.5;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  to {
+    transform: translate(100vw, -100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+/* Gradient orb animations */
+@keyframes orb-float-1 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+@keyframes orb-float-2 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-40px, 20px) scale(0.9);
+  }
+  66% {
+    transform: translate(20px, -40px) scale(1.1);
+  }
+}
+
+@keyframes orb-float-3 {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(20px, 30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-30px, -20px) scale(0.95);
+  }
+}
+
+/* Transition Wrapper Animations */
+.auth-transition-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-transition-layer {
+  position: absolute;
+  inset: 0;
+  background: var(--auth-elite-accent);
+  transform-origin: center;
+  transform: scaleX(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.auth-transition-wrapper.transitioning .auth-transition-layer-1 {
+  animation: sweep-right 0.6s ease-in-out;
+}
+
+.auth-transition-wrapper.transitioning .auth-transition-layer-2 {
+  animation: sweep-right 0.6s ease-in-out 0.1s;
+}
+
+.auth-transition-wrapper.transitioning .auth-transition-layer-3 {
+  animation: sweep-right 0.6s ease-in-out 0.2s;
+}
+
+@keyframes sweep-right {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleX(1);
+    transform-origin: left;
+    opacity: 0.2;
+  }
+  51% {
+    transform-origin: right;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right;
+    opacity: 0;
+  }
+}
+
+.auth-transition-content {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-transition-wrapper.transitioning .auth-transition-content {
+  animation: content-fade 0.6s ease-in-out;
+}
+
+@keyframes content-fade {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+}
+
+/* Gradient Mesh Background */
+.auth-gradient-mesh {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.auth-gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.auth-gradient-orb-1 {
+  top: 20%;
+  left: 10%;
+  width: 40vw;
+  height: 40vw;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.4) 0%, transparent 70%);
+  animation: orb-float-1 20s infinite;
+}
+
+.auth-gradient-orb-2 {
+  bottom: 20%;
+  right: 10%;
+  width: 35vw;
+  height: 35vw;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+  animation: orb-float-2 25s infinite;
+}
+
+.auth-gradient-orb-3 {
+  top: 50%;
+  left: 50%;
+  width: 30vw;
+  height: 30vw;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+  animation: orb-float-3 30s infinite;
+  transform: translate(-50%, -50%);
+}
+
+/* Particles Overlay */
+.auth-elite-particles {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.auth-elite-particles::before,
+.auth-elite-particles::after {
+  content: '';
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--auth-elite-accent);
+  border-radius: 50%;
+  opacity: 0.3;
+}
+
+.auth-elite-particles::before {
+  animation: float-up 15s linear infinite;
+  left: 10%;
+}
+
+.auth-elite-particles::after {
+  animation: float-diagonal 20s linear infinite;
+  right: 10%;
+  animation-delay: 5s;
+}
+
+/* Hover Effects */
+.auth-oauth-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-oauth-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.auth-oauth-button:hover::before {
+  width: 300%;
+  height: 300%;
+}
+
+/* Focus Effects */
+.auth-field-group input:focus {
+  animation: focus-pulse 0.3s ease-out;
+}
+
+@keyframes focus-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--auth-elite-accent-glow);
+  }
+  100% {
+    box-shadow: 0 0 0 3px var(--auth-elite-accent-glow);
+  }
+}
+
+/* Loading States */
+.auth-loading-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 10, 21, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.auth-loading-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.auth-loading-spinner {
+  width: 48px;
+  height: 48px;
+  border: 3px solid var(--auth-elite-surface-2);
+  border-top-color: var(--auth-elite-accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Success Animation */
+.auth-success-checkmark {
+  width: 48px;
+  height: 48px;
+  position: relative;
+}
+
+.auth-success-checkmark::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 20px;
+  width: 8px;
+  height: 16px;
+  border: solid var(--auth-elite-success);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+  animation: checkmark 0.4s ease-out;
+}
+
+@keyframes checkmark {
+  0% {
+    transform: rotate(45deg) scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: rotate(45deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(45deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Mobile Touch Feedback */
+@media (hover: none) {
+  .auth-oauth-button:active,
+  .auth-submit-button:active {
+    transform: scale(0.95);
+  }
+  
+  .auth-field-group input:active {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .auth-gradient-orb {
+    animation: none !important;
+  }
+  
+  .auth-elite-particles::before,
+  .auth-elite-particles::after {
+    display: none;
+  }
+}

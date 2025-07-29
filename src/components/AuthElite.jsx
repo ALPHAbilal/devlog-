@@ -1,0 +1,233 @@
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { supabase } from '../lib/supabaseOptimized'
+import { getURL } from '../utils/auth'
+import { useNavigate } from 'react-router-dom'
+import AuthBackground from './AuthBackground'
+import AuthFormElite from './AuthFormElite'
+import AuthTransitions from './AuthTransitions'
+import { Terminal, GitBranch, Zap, Shield, Code2, Database, Sparkles } from 'lucide-react'
+import '../styles/auth-elite.css'
+import '../styles/auth-animations-elite.css'
+
+const AuthElite = () => {
+  const [authView, setAuthView] = useState('sign_in')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isTransitioning, setIsTransitioning] = useState(false)
+  const containerRef = useRef(null)
+  const navigate = useNavigate()
+
+  // Live typing animation for taglines
+  const taglines = [
+    "Never lose a solution again",
+    "Your code snippets, forever searchable",
+    "Where debugging sessions become documentation",
+    "Building your developer knowledge graph"
+  ]
+  const [currentTagline, setCurrentTagline] = useState('')
+  const [taglineIndex, setTaglineIndex] = useState(0)
+  const [isTyping, setIsTyping] = useState(true)
+
+  // Developer statistics ticker
+  const stats = [
+    { value: '12,847', label: 'developers', icon: Code2 },
+    { value: '3.2M', label: 'snippets saved', icon: Database },
+    { value: '847K', label: 'bugs solved', icon: Zap },
+    { value: '99.9%', label: 'uptime', icon: Shield }
+  ]
+
+  // Mouse parallax effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const x = (e.clientX - rect.left - rect.width / 2) / rect.width
+        const y = (e.clientY - rect.top - rect.height / 2) / rect.height
+        setMousePosition({ x, y })
+      }
+    }
+
+    window.addEventListener('mousemove', handleMouseMove)
+    return () => window.removeEventListener('mousemove', handleMouseMove)
+  }, [])
+
+  // Typing animation effect
+  useEffect(() => {
+    const currentText = taglines[taglineIndex]
+    let charIndex = 0
+    let typingTimeout
+
+    const typeChar = () => {
+      if (isTyping && charIndex <= currentText.length) {
+        setCurrentTagline(currentText.slice(0, charIndex))
+        charIndex++
+        typingTimeout = setTimeout(typeChar, 50 + Math.random() * 50)
+      } else if (isTyping) {
+        // Finished typing, wait then move to next
+        setTimeout(() => {
+          setIsTyping(false)
+          setTimeout(() => {
+            setTaglineIndex((prev) => (prev + 1) % taglines.length)
+            setIsTyping(true)
+          }, 500)
+        }, 2000)
+      }
+    }
+
+    if (isTyping) {
+      typeChar()
+    }
+
+    return () => clearTimeout(typingTimeout)
+  }, [isTyping, taglineIndex])
+
+  // Handle view transitions with animation
+  const handleViewChange = useCallback((newView) => {
+    if (newView !== authView) {
+      setIsTransitioning(true)
+      setTimeout(() => {
+        setAuthView(newView)
+        setError(null)
+        setSuccessMessage(null)
+        setTimeout(() => setIsTransitioning(false), 50)
+      }, 300)
+    }
+  }, [authView])
+
+  // Handle authentication
+  const handleAuth = async (type, credentials) => {
+    setIsLoading(true)
+    setError(null)
+    setSuccessMessage(null)
+
+    try {
+      let result
+      if (type === 'sign_in') {
+        result = await supabase.auth.signInWithPassword(credentials)
+      } else if (type === 'sign_up') {
+        result = await supabase.auth.signUp({
+          ...credentials,
+          options: {
+            emailRedirectTo: getURL() + 'auth/callback',
+          }
+        })
+      } else if (type === 'provider') {
+        result = await supabase.auth.signInWithOAuth({
+          provider: credentials.provider,
+          options: {
+            redirectTo: getURL() + 'auth/callback',
+          }
+        })
+        return // OAuth redirects, no need to handle response
+      }
+
+      if (result.error) {
+        throw result.error
+      }
+
+      if (type === 'sign_up') {
+        setSuccessMessage('🎉 Check your email to confirm your account!')
+      } else {
+        setSuccessMessage('✨ Welcome back! Redirecting...')
+        setTimeout(() => navigate('/'), 1500)
+      }
+    } catch (err) {
+      console.error('Auth error:', err)
+      setError(err.message || 'An error occurred during authentication')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div className="auth-elite-container" ref={containerRef}>
+      {/* Dynamic animated background */}
+      <AuthBackground mousePosition={mousePosition} />
+
+      {/* Main content wrapper with parallax */}
+      <div className="auth-elite-content">
+        {/* Left side - Branding */}
+        <div 
+          className="auth-elite-branding"
+          style={{
+            transform: `translate(${mousePosition.x * 20}px, ${mousePosition.y * 20}px)`,
+          }}
+        >
+          <div className="auth-elite-logo-group">
+            <Terminal className="auth-elite-logo" size={48} />
+            <h1 className="auth-elite-brand">Devlog</h1>
+          </div>
+
+          <div className="auth-elite-tagline-container">
+            <h2 className="auth-elite-tagline">
+              <span className="auth-elite-prompt">$</span>
+              <span className="auth-elite-typing">
+                {currentTagline}
+                <span className="auth-elite-cursor">_</span>
+              </span>
+            </h2>
+          </div>
+
+          <div className="auth-elite-features">
+            <div className="auth-elite-feature">
+              <GitBranch size={20} />
+              <span>Version control for your knowledge</span>
+            </div>
+            <div className="auth-elite-feature">
+              <Sparkles size={20} />
+              <span>AI conversations preserved forever</span>
+            </div>
+            <div className="auth-elite-feature">
+              <Database size={20} />
+              <span>Your personal developer database</span>
+            </div>
+          </div>
+
+          {/* Developer stats ticker */}
+          <div className="auth-elite-stats">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon
+              return (
+                <div 
+                  key={index} 
+                  className="auth-elite-stat"
+                  style={{ animationDelay: `${index * 0.2}s` }}
+                >
+                  <Icon size={16} />
+                  <span className="auth-elite-stat-value">{stat.value}</span>
+                  <span className="auth-elite-stat-label">{stat.label}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Right side - Auth form */}
+        <div 
+          className="auth-elite-form-section"
+          style={{
+            transform: `translate(${-mousePosition.x * 10}px, ${-mousePosition.y * 10}px)`,
+          }}
+        >
+          <AuthTransitions isTransitioning={isTransitioning}>
+            <AuthFormElite
+              authView={authView}
+              onViewChange={handleViewChange}
+              onAuth={handleAuth}
+              isLoading={isLoading}
+              error={error}
+              successMessage={successMessage}
+            />
+          </AuthTransitions>
+        </div>
+      </div>
+
+      {/* Floating particles overlay */}
+      <div className="auth-elite-particles" />
+    </div>
+  )
+}
+
+export default AuthElite

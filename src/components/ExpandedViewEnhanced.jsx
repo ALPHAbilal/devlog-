@@ -16,6 +16,7 @@ import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import MobileFloatingActions from './MobileFloatingActions';
 import ScrollToTop from './ScrollToTop';
+import MobileBottomSheet from './MobileBottomSheet';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
@@ -1158,7 +1159,92 @@ const ExpandedView = forwardRef((props, ref) => {
       )}
       </div>
 
-      {/* Delete Confirmation Modal - Mobile-optimized */}
+      {/* Delete Confirmation - Mobile Bottom Sheet */}
+      {showDeleteConfirm && isMobileView && (
+        <MobileBottomSheet
+          isOpen={showDeleteConfirm}
+          onClose={() => setShowDeleteConfirm(false)}
+          title="Delete Document?"
+          height="auto"
+        >
+          <div className="p-6 space-y-6">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
+                <Trash2 className="w-8 h-8 text-red-500" />
+              </div>
+              <p className="text-text-secondary text-lg">
+                Are you sure you want to delete "{title}"?
+              </p>
+              <p className="text-text-secondary/60 text-sm">
+                This action cannot be undone.
+              </p>
+            </div>
+            
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={async () => {
+                  if (isDeleting) return;
+                  
+                  try {
+                    setIsDeleting(true);
+                    console.log('Starting document deletion for:', entry.id);
+                    
+                    // Clear from session cache first
+                    sessionCache.clearDocument(entry.id);
+                    console.log('Cleared from session cache');
+                    
+                    // Delete from storage using the proper delete method
+                    await storageWrapper.deleteEntry(entry.id);
+                    console.log('Successfully deleted document from storage');
+                    
+                    // Close the delete confirmation modal
+                    setShowDeleteConfirm(false);
+                    
+                    // Notify parent component to update the list
+                    if (onUpdate) {
+                      onUpdate(entry.id, null);
+                    }
+                  } catch (error) {
+                    console.error('Error deleting document:', error);
+                    const errorMessage = error?.message || 'Unknown error';
+                    alert(`Failed to delete document: ${errorMessage}`);
+                    setIsDeleting(false);
+                  }
+                }}
+                disabled={isDeleting}
+                className="w-full h-12 bg-red-500 hover:bg-red-600 active:bg-red-700
+                         text-white rounded-xl font-medium transition-all
+                         disabled:opacity-50 disabled:cursor-not-allowed
+                         flex items-center justify-center gap-2
+                         active:scale-[0.98]"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={18} />
+                    Delete Document
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="w-full h-12 bg-dark-secondary hover:bg-dark-secondary/80
+                         text-text-primary rounded-xl font-medium transition-all
+                         active:scale-[0.98]"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </MobileBottomSheet>
+      )}
+
+      {/* Delete Confirmation Modal - Desktop */}
       {showDeleteConfirm && !isMobileView && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50"
              onClick={() => setShowDeleteConfirm(false)}>

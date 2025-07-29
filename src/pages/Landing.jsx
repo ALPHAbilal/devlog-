@@ -92,10 +92,7 @@ function FeatureCard({ feature, index }) {
               <span className="feature-particle" />
             </div>
             <span style={{ 
-              color: feature.color === 'blue' ? '#3b82f6' : 
-                     feature.color === 'green' ? '#10b981' : 
-                     feature.color === 'indigo' ? '#6366f1' : 
-                     '#06b6d4' 
+              color: `rgba(255, 255, 255, ${feature.opacity || 0.9})` 
             }}>
               {feature.icon}
             </span>
@@ -141,28 +138,28 @@ function LandingContent() {
       icon: <Code2 size={32} />,
       title: 'Document in 30 seconds',
       description: 'Paste code, add context, done. No formatting needed.',
-      color: 'blue',
+      opacity: 0.9,
       dataFeature: 'document'
     },
     {
       icon: <Link2 size={32} />,
       title: 'Everything connected',
       description: 'Organize with projects and folders. Share knowledge easily.',
-      color: 'green',
+      opacity: 0.7,
       dataFeature: 'connect'
     },
     {
       icon: <Search size={32} />,
       title: 'Find anything in 2 seconds',
       description: 'Remember that fix from last year? It\'s one search away.',
-      color: 'indigo',
+      opacity: 0.5,
       dataFeature: 'search'
     },
     {
       icon: <GitBranch size={32} />,
       title: 'Never lose context',
       description: 'See how your code evolved and why you made those changes.',
-      color: 'cyan',
+      opacity: 0.3,
       dataFeature: 'context'
     }
   ];
@@ -371,13 +368,13 @@ function LandingContent() {
         <div className="noise-overlay" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 
-                          rounded-full text-sm font-medium mb-6"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
+                          text-accent-green rounded-full text-sm font-medium mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <span className="inline-block w-2 h-2 bg-red-400 rounded-full animate-pulse"></span>
+            <span className="inline-block w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
             Launch pricing ends Friday at midnight
           </motion.div>
           

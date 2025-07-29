@@ -11,7 +11,7 @@ const showcaseItems = [
     videoUrl: '/videos/capture-demo.mp4', // Replace with actual video URL
     gifUrl: '/gifs/capture-demo.gif', // Fallback GIF
     posterUrl: '/images/capture-poster.jpg', // Video poster
-    accentColor: 'rgba(16, 185, 129, 0.1)', // Subtle green tint
+    accentColor: 'rgba(255, 255, 255, 0.03)', // Subtle mono accent
   },
   {
     id: 'connect',
@@ -20,7 +20,7 @@ const showcaseItems = [
     videoUrl: '/videos/connect-demo.mp4',
     gifUrl: '/gifs/connect-demo.gif',
     posterUrl: '/images/connect-poster.jpg',
-    accentColor: 'rgba(59, 130, 246, 0.1)', // Subtle blue tint
+    accentColor: 'rgba(255, 255, 255, 0.04)', // Subtle mono accent
   },
   {
     id: 'search',
@@ -29,7 +29,7 @@ const showcaseItems = [
     videoUrl: '/videos/search-demo.mp4',
     gifUrl: '/gifs/search-demo.gif',
     posterUrl: '/images/search-poster.jpg',
-    accentColor: 'rgba(168, 85, 247, 0.1)', // Subtle purple tint
+    accentColor: 'rgba(255, 255, 255, 0.05)', // Subtle mono accent
   }
 ];
 

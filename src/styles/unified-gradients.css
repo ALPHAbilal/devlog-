@@ -1,59 +1,73 @@
 /* =====================================================
    UNIFIED GRADIENT SYSTEM - DEVLOG LANDING PAGE
    
-   Color Psychology Flow:
-   - Hero: Dark neural (#0a0f14) - mystery/innovation
-   - Problem: Warmer darks (#0f0a14) - pain acknowledgment  
-   - Video: Cool blues (#0a1428) - solution clarity
-   - Features: Balanced spectrum - capability showcase
-   - Pricing: Premium purples (#140a1a) - value perception
-   - CTA: Energetic greens (#0a1410) - action motivation
+   Mature Monochromatic Design System:
+   - Sophisticated dark base throughout
+   - Depth through opacity and layering
+   - Minimal green accent for CTAs only
+   - Premium feel like Vercel/Linear/Stripe
    ===================================================== */
 
 :root {
-  /* Base Colors - Progressive Journey */
-  --gradient-hero-primary: #0a0f14;
-  --gradient-hero-secondary: #0d1117;
-  --gradient-hero-accent: rgba(16, 185, 129, 0.15);
+  /* Core Dark Palette - Used Throughout */
+  --dark-base: #0a0f14;
+  --dark-primary: #0d1117;
+  --dark-secondary: #0f1419;
+  --dark-accent: #111922;
   
-  --gradient-problem-primary: #0f0a14;
-  --gradient-problem-secondary: #110d14;
-  --gradient-problem-accent: rgba(239, 68, 68, 0.08);
+  /* Universal Gradient Colors - No Section Variations */
+  --gradient-primary: #0a0f14;
+  --gradient-secondary: #0d1117;
+  --gradient-accent: rgba(16, 185, 129, 0.08);
   
-  --gradient-video-primary: #0a1428;
-  --gradient-video-secondary: #0d1720;
-  --gradient-video-accent: rgba(59, 130, 246, 0.1);
+  /* All sections use the same base */
+  --gradient-hero-primary: var(--gradient-primary);
+  --gradient-hero-secondary: var(--gradient-secondary);
+  --gradient-hero-accent: var(--gradient-accent);
   
-  --gradient-features-primary: #0f1420;
-  --gradient-features-secondary: #121825;
-  --gradient-features-accent: rgba(99, 102, 241, 0.08);
+  --gradient-problem-primary: var(--gradient-primary);
+  --gradient-problem-secondary: var(--gradient-secondary);
+  --gradient-problem-accent: rgba(255, 255, 255, 0.02);
   
-  --gradient-pricing-primary: #140a1a;
-  --gradient-pricing-secondary: #180e1e;
-  --gradient-pricing-accent: rgba(147, 51, 234, 0.08);
+  --gradient-video-primary: var(--gradient-primary);
+  --gradient-video-secondary: var(--gradient-secondary);
+  --gradient-video-accent: rgba(255, 255, 255, 0.03);
   
-  --gradient-cta-primary: #0a1410;
-  --gradient-cta-secondary: #0e1814;
-  --gradient-cta-accent: rgba(16, 185, 129, 0.12);
+  --gradient-features-primary: var(--gradient-primary);
+  --gradient-features-secondary: var(--gradient-secondary);
+  --gradient-features-accent: rgba(255, 255, 255, 0.02);
+  
+  --gradient-pricing-primary: var(--gradient-primary);
+  --gradient-pricing-secondary: var(--gradient-secondary);
+  --gradient-pricing-accent: rgba(16, 185, 129, 0.05);
+  
+  --gradient-cta-primary: var(--gradient-primary);
+  --gradient-cta-secondary: var(--gradient-secondary);
+  --gradient-cta-accent: rgba(16, 185, 129, 0.1);
   
   --gradient-footer-primary: #080a0d;
   --gradient-footer-secondary: #0a0c0f;
   
-  /* Transition Colors - Smooth Blending */
-  --blend-hero-problem: #0d0c14;
-  --blend-problem-video: #0c0f1e;
-  --blend-video-features: #0c1622;
-  --blend-features-pricing: #12101f;
-  --blend-pricing-cta: #0f0f17;
-  --blend-cta-footer: #090f11;
+  /* Subtle Transition Blends */
+  --blend-hero-problem: #0b1015;
+  --blend-problem-video: #0c1116;
+  --blend-video-features: #0c1117;
+  --blend-features-pricing: #0d1218;
+  --blend-pricing-cta: #0d1217;
+  --blend-cta-footer: #090e12;
   
-  /* Accent Evolution */
-  --accent-neural: rgba(16, 185, 129, 0.15);
-  --accent-warm: rgba(251, 146, 60, 0.1);
-  --accent-cool: rgba(59, 130, 246, 0.1);
-  --accent-balanced: rgba(99, 102, 241, 0.08);
-  --accent-premium: rgba(147, 51, 234, 0.08);
-  --accent-energy: rgba(16, 185, 129, 0.2);
+  /* Minimal Accent System */
+  --accent-green: rgba(16, 185, 129, 0.15);
+  --accent-green-bright: #00ff88;
+  --accent-mono-light: rgba(255, 255, 255, 0.05);
+  --accent-mono-medium: rgba(255, 255, 255, 0.08);
+  --accent-mono-dark: rgba(0, 0, 0, 0.2);
+  
+  /* Text Colors */
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --border-subtle: rgba(255, 255, 255, 0.1);
   
   /* Noise Texture Opacity */
   --noise-opacity: 0.015;
@@ -93,7 +107,7 @@
     ),
     radial-gradient(
       circle at 80% 90%,
-      var(--accent-warm) 0%,
+      var(--accent-mono-light) 0%,
       transparent 40%
     ),
     linear-gradient(
@@ -113,7 +127,7 @@
     ),
     radial-gradient(
       circle at 10% 50%,
-      var(--accent-cool) 0%,
+      var(--accent-mono-light) 0%,
       transparent 40%
     ),
     linear-gradient(
@@ -133,7 +147,7 @@
     ),
     radial-gradient(
       circle 1000px at 30% 70%,
-      var(--accent-balanced) 0%,
+      var(--accent-mono-medium) 0%,
       transparent 50%
     ),
     linear-gradient(
@@ -153,7 +167,7 @@
     ),
     radial-gradient(
       circle at 90% 80%,
-      var(--accent-premium) 0%,
+      var(--accent-mono-light) 0%,
       transparent 40%
     ),
     linear-gradient(
@@ -173,12 +187,12 @@
     ),
     radial-gradient(
       circle at 20% 20%,
-      var(--accent-energy) 0%,
+      var(--accent-green) 0%,
       transparent 40%
     ),
     radial-gradient(
       circle at 80% 80%,
-      var(--accent-energy) 0%,
+      var(--accent-green) 0%,
       transparent 40%
     ),
     linear-gradient(
@@ -230,13 +244,13 @@
   background: 
     radial-gradient(
       circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(99, 102, 241, 0.15) 0%,
+      var(--accent-mono-medium) 0%,
       transparent 50%
     ),
     linear-gradient(
       135deg,
-      rgba(15, 20, 32, 0.8) 0%,
-      rgba(18, 24, 37, 0.9) 100%
+      rgba(10, 15, 20, 0.8) 0%,
+      rgba(13, 17, 23, 0.9) 100%
     );
 }
 
@@ -245,13 +259,13 @@
   background: 
     radial-gradient(
       circle at 50% -20%,
-      var(--accent-premium) 0%,
+      var(--accent-mono-light) 0%,
       transparent 60%
     ),
     linear-gradient(
       135deg,
-      rgba(20, 10, 26, 0.9) 0%,
-      rgba(24, 14, 30, 0.95) 100%
+      rgba(10, 15, 20, 0.9) 0%,
+      rgba(15, 20, 25, 0.95) 100%
     );
 }
 
@@ -259,13 +273,13 @@
   background: 
     radial-gradient(
       circle at 50% -20%,
-      rgba(16, 185, 129, 0.1) 0%,
+      var(--accent-green) 0%,
       transparent 60%
     ),
     linear-gradient(
       135deg,
-      rgba(10, 20, 16, 0.95) 0%,
-      rgba(14, 24, 20, 0.98) 100%
+      rgba(10, 15, 20, 0.95) 0%,
+      rgba(13, 18, 23, 0.98) 100%
     );
 }
 

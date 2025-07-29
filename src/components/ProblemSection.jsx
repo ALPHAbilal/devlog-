@@ -9,29 +9,25 @@ const problems = [
     icon: <BookOpen size={24} />,
     title: 'No time to document',
     description: 'You solve problems daily but never capture the solutions properly',
-    color: 'red',
-    colorHex: '#ef4444'
+    opacity: 0.9
   },
   {
     icon: <MessageSquare size={24} />,
     title: 'Knowledge scattered everywhere',
     description: 'Solutions in Slack, notes in Notion, code in GitHub - nothing connected',
-    color: 'orange',
-    colorHex: '#fb923c'
+    opacity: 0.7
   },
   {
     icon: <Brain size={24} />,
     title: 'Context evaporates',
     description: 'Three months later, you can\'t remember why that solution worked',
-    color: 'yellow',
-    colorHex: '#fbbf24'
+    opacity: 0.5
   },
   {
     icon: <Search size={24} />,
     title: 'Can\'t find what you wrote',
     description: 'You documented it somewhere, but good luck finding it when you need it',
-    color: 'purple',
-    colorHex: '#9333ea'
+    opacity: 0.3
   }
 ];
 
@@ -85,7 +81,7 @@ function ProblemCard({ problem, index }) {
       custom={index}
     >
       {/* Gradient orbs */}
-      <div className={`gradient-orb gradient-orb-${problem.color}`} />
+      <div className="gradient-orb" style={{ opacity: problem.opacity * 0.3 }} />
       
       <motion.div 
         className="problem-card"
@@ -95,10 +91,10 @@ function ProblemCard({ problem, index }) {
         }}
       >
         {/* Card glow effect */}
-        <div className={`card-glow card-glow-${problem.color}`} />
+        <div className="card-glow" style={{ opacity: problem.opacity * 0.2 }} />
         
         {/* Animated gradient border */}
-        <div className={`card-border-gradient card-border-gradient-${problem.color} ${isHovered ? 'card-border-gradient-animated' : ''}`} />
+        <div className={`card-border-gradient ${isHovered ? 'card-border-gradient-animated' : ''}`} style={{ opacity: problem.opacity * 0.5 }} />
         
         {/* Card content */}
         <div className="card-content">
@@ -109,8 +105,8 @@ function ProblemCard({ problem, index }) {
               initial="rest"
               whileHover="hover"
             >
-              <div className={`icon-glow icon-glow-${problem.color}`} />
-              <span style={{ color: problem.colorHex }}>
+              <div className="icon-glow" style={{ opacity: problem.opacity * 0.4 }} />
+              <span style={{ color: `rgba(255, 255, 255, ${problem.opacity})` }}>
                 {problem.icon}
               </span>
             </motion.div>
@@ -126,7 +122,9 @@ function ProblemCard({ problem, index }) {
           </div>
           
           {/* Progress indicator */}
-          <div className={`card-indicator card-indicator-${problem.color}`} />
+          <div className="card-indicator" style={{ 
+            background: `linear-gradient(to right, rgba(255, 255, 255, ${problem.opacity * 0.1}), rgba(255, 255, 255, ${problem.opacity * 0.05}))` 
+          }} />
         </div>
         
         {/* Noise texture */}

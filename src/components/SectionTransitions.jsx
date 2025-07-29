@@ -44,11 +44,11 @@ export const HeroToProblemTransition = ({
         <defs>
           <linearGradient id="heroToProblem" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#0a0f14" />
-            <stop offset="50%" stopColor="#0d0c14" />
-            <stop offset="100%" stopColor="#0f0a14" />
+            <stop offset="50%" stopColor="#0b1015" />
+            <stop offset="100%" stopColor="#0a0f14" />
           </linearGradient>
           <radialGradient id="heroToProblemAccent" cx="50%" cy="0%" r="100%">
-            <stop offset="0%" stopColor="rgba(16, 185, 129, 0.1)" />
+            <stop offset="0%" stopColor="rgba(255, 255, 255, 0.02)" />
             <stop offset="100%" stopColor="transparent" />
           </radialGradient>
         </defs>
@@ -74,7 +74,7 @@ export const HeroToProblemTransition = ({
         <defs>
           <linearGradient id="heroToProblemCurve" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#0a0f14" />
-            <stop offset="100%" stopColor="#0f0a14" />
+            <stop offset="100%" stopColor="#0a0f14" />
           </linearGradient>
         </defs>
         <path
@@ -86,14 +86,14 @@ export const HeroToProblemTransition = ({
     neural: (
       <div style={{ 
         height: '100%', 
-        background: `linear-gradient(to bottom, #0a0f14 0%, #0d0c14 50%, #0f0a14 100%)`,
+        background: `linear-gradient(to bottom, #0a0f14 0%, #0b1015 50%, #0a0f14 100%)`,
         position: 'relative'
       }}>
         <div style={{
           position: 'absolute',
           inset: 0,
-          background: `radial-gradient(ellipse at 30% 0%, rgba(16, 185, 129, 0.1) 0%, transparent 50%),
-                       radial-gradient(ellipse at 70% 100%, rgba(239, 68, 68, 0.05) 0%, transparent 50%)`
+          background: `radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+                       radial-gradient(ellipse at 70% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 50%)`
         }} />
       </div>
     )

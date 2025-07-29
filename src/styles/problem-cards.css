@@ -2,17 +2,13 @@
 
 /* CSS Variables for dynamic effects */
 :root {
-  /* Gradient color sets - simplified to 2 stops */
-  --gradient-red: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  --gradient-orange: linear-gradient(135deg, #fb923c 0%, #ea580c 100%);
-  --gradient-yellow: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
-  --gradient-purple: linear-gradient(135deg, #9333ea 0%, #6d28d9 100%);
+  /* Monochromatic gradient system */
+  --gradient-mono: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
   
-  /* Glow colors */
-  --glow-red: rgba(239, 68, 68, 0.4);
-  --glow-orange: rgba(251, 146, 60, 0.4);
-  --glow-yellow: rgba(251, 191, 36, 0.4);
-  --glow-purple: rgba(147, 51, 234, 0.4);
+  /* Mono glow system */
+  --glow-mono-light: rgba(255, 255, 255, 0.1);
+  --glow-mono-medium: rgba(255, 255, 255, 0.15);
+  --glow-mono-heavy: rgba(255, 255, 255, 0.2);
   
   /* Shadow depths - reusable */
   --card-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12), 0 16px 64px rgba(0, 0, 0, 0.16);
@@ -39,36 +35,9 @@
   contain: strict;
 }
 
-.gradient-orb-red {
-  width: 200px;
-  height: 200px;
-  background: var(--gradient-red);
-  top: -50px;
-  right: -50px;
-}
-
-.gradient-orb-orange {
-  width: 180px;
-  height: 180px;
-  background: var(--gradient-orange);
-  top: -40px;
-  left: -40px;
-}
-
-.gradient-orb-yellow {
-  width: 220px;
-  height: 220px;
-  background: var(--gradient-yellow);
-  bottom: -60px;
-  right: -60px;
-}
-
-.gradient-orb-purple {
-  width: 200px;
-  height: 200px;
-  background: var(--gradient-purple);
-  bottom: -50px;
-  left: -50px;
+/* Single gradient orb style with variations via inline styles */
+.gradient-orb {
+  background: var(--gradient-mono);
 }
 
 .problem-card-wrapper:hover .gradient-orb {
@@ -117,10 +86,9 @@
   transform: translateZ(0);
 }
 
-.card-border-gradient-red { --border-color: #ef4444; }
-.card-border-gradient-orange { --border-color: #fb923c; }
-.card-border-gradient-yellow { --border-color: #fbbf24; }
-.card-border-gradient-purple { --border-color: #9333ea; }
+.card-border-gradient {
+  --border-color: rgba(255, 255, 255, 0.2);
+}
 
 .card-border-gradient-animated {
   opacity: 1;
@@ -196,10 +164,10 @@
   contain: strict;
 }
 
-.card-indicator-red { --indicator-color: #ef4444; }
-.card-indicator-orange { --indicator-color: #fb923c; }
-.card-indicator-yellow { --indicator-color: #fbbf24; }
-.card-indicator-purple { --indicator-color: #9333ea; }
+.card-indicator {
+  --indicator-color: rgba(255, 255, 255, 0.1);
+}
+/* Color-specific classes removed - using monochromatic system */
 
 .problem-card:hover .card-indicator {
   transform: scaleX(1);

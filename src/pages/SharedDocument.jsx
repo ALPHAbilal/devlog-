@@ -28,10 +28,27 @@ export default function SharedDocument() {
   const [accessCheck, setAccessCheck] = useState(null);
   const [password, setPassword] = useState('');
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isHeaderHovered, setIsHeaderHovered] = useState(false);
 
   useEffect(() => {
     checkAccess();
   }, [shareCode]);
+
+  // Handle scroll for header transformation
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 100);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // Check initial scroll position
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const checkAccess = async (providedPassword = null) => {
     setLoading(true);
@@ -205,82 +222,141 @@ export default function SharedDocument() {
 
   return (
     <div className="h-screen bg-dark-primary overflow-y-auto">
-      {/* Premium Header with Enhanced Glass Morphism */}
-      <div className="bg-dark-lighter/60 backdrop-blur-2xl border-b border-gray-700/30 sticky top-0 z-40 shadow-2xl">
-        <div className="max-w-6xl mx-auto px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-5">
-              {/* Premium Icon Container */}
-              <div className="p-3 bg-dark-primary/40 backdrop-blur-sm rounded-xl border border-gray-700/40 shadow-lg">
-                <Share2 className="w-6 h-6 text-blue-400" />
-              </div>
-              
-              {/* Document Info */}
-              <div className="flex flex-col gap-2">
-                <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
-                  {document.title}
-                </h1>
-                
-                {/* Enhanced Metadata Badges */}
-                <div className="flex items-center gap-2 flex-wrap">
-                  <div className="flex items-center gap-1.5 px-3 py-1 bg-dark-primary/30 backdrop-blur-sm rounded-lg border border-gray-700/30">
-                    <User className="w-3.5 h-3.5 text-text-secondary/70" />
-                    <span className="text-xs text-text-secondary font-medium">
-                      {document.profiles?.display_name || document.profiles?.username || 'Anonymous'}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5 px-3 py-1 bg-dark-primary/30 backdrop-blur-sm rounded-lg border border-gray-700/30">
-                    <Clock className="w-3.5 h-3.5 text-text-secondary/70" />
-                    <span className="text-xs text-text-secondary font-medium">
-                      {new Date(document.updated_at).toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric', 
-                        year: 'numeric' 
-                      })}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-1.5 px-3 py-1 bg-accent-green/10 backdrop-blur-sm rounded-lg border border-accent-green/20">
-                    <Eye className="w-3.5 h-3.5 text-accent-green" />
-                    <span className="text-xs text-accent-green font-medium capitalize">
-                      {permissions.join(', ')} Access
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Enhanced Action Buttons */}
-            <div className="flex items-center gap-3">
-              {canDownload && (
-                <button
-                  onClick={() => handleAction('download')}
-                  className="group p-3 bg-dark-primary/40 hover:bg-dark-primary/60 
-                           backdrop-blur-sm rounded-xl transition-all duration-200
-                           border border-gray-700/40 hover:border-gray-600/50
-                           shadow-lg hover:shadow-xl"
-                  title="Download Document"
-                >
-                  <Download className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
-                </button>
+      {/* Side-Sliding Header with Premium Glass Morphism */}
+      <div 
+        className={`fixed z-50 transition-all duration-[400ms] ease-out ${
+          isScrolled && !isHeaderHovered 
+            ? 'top-6 left-6 cursor-pointer' 
+            : 'top-0 left-0 right-0'
+        }`}
+        onMouseEnter={() => setIsHeaderHovered(true)}
+        onMouseLeave={() => setIsHeaderHovered(false)}
+      >
+        <div 
+          className={`bg-dark-lighter/70 backdrop-blur-2xl border border-gray-700/30 shadow-2xl transition-all duration-[400ms] ease-out ${
+            isScrolled && !isHeaderHovered 
+              ? 'rounded-2xl' 
+              : 'rounded-none border-x-0 border-t-0'
+          }`}
+          style={{
+            boxShadow: isScrolled && !isHeaderHovered 
+              ? '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 50px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+              : '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+          }}
+        >
+          <div className={`transition-all duration-[400ms] ease-out ${
+            isScrolled && !isHeaderHovered 
+              ? 'px-3 py-3' 
+              : 'max-w-6xl mx-auto px-6 py-5'
+          }`}>
+            <div className={`flex items-center ${
+              isScrolled && !isHeaderHovered 
+                ? 'gap-3' 
+                : 'justify-between'
+            }`}>
+              {/* Compact Mode Content */}
+              {isScrolled && !isHeaderHovered ? (
+                <div className="flex items-center gap-3">
+                  {/* Compact Icon */}
+                  <div className="p-2.5 bg-dark-primary/50 backdrop-blur-sm rounded-xl border border-gray-700/40 shadow-lg flex-shrink-0">
+                    <Share2 className="w-5 h-5 text-blue-400" />
+                  </div>
+                  
+                  {/* Abbreviated Title with subtle animation */}
+                  <div className="flex flex-col">
+                    <span className="text-sm font-semibold text-text-primary truncate max-w-[180px]">
+                      {document.title.length > 25 
+                        ? document.title.substring(0, 25) + '...' 
+                        : document.title}
+                    </span>
+                    <span className="text-xs text-text-secondary/60">Shared document</span>
+                  </div>
+                  
+                  {/* Pulse indicator */}
+                  <div className="w-2 h-2 bg-accent-green rounded-full animate-pulse" />
+                </div>
+              ) : (
+                <>
+                  {/* Full Mode Content */}
+                  <div className="flex items-center gap-5">
+                    {/* Premium Icon Container */}
+                    <div className="p-3 bg-dark-primary/40 backdrop-blur-sm rounded-xl border border-gray-700/40 shadow-lg transform transition-transform duration-300 hover:scale-105">
+                      <Share2 className="w-6 h-6 text-blue-400" />
+                    </div>
+                    
+                    {/* Document Info */}
+                    <div className="flex flex-col gap-2 transition-all duration-[400ms]">
+                      <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
+                        {document.title}
+                      </h1>
+                      
+                      {/* Enhanced Metadata Badges */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-dark-primary/30 backdrop-blur-sm rounded-lg border border-gray-700/30">
+                          <User className="w-3.5 h-3.5 text-text-secondary/70" />
+                          <span className="text-xs text-text-secondary font-medium">
+                            {document.profiles?.display_name || document.profiles?.username || 'Anonymous'}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-dark-primary/30 backdrop-blur-sm rounded-lg border border-gray-700/30">
+                          <Clock className="w-3.5 h-3.5 text-text-secondary/70" />
+                          <span className="text-xs text-text-secondary font-medium">
+                            {new Date(document.updated_at).toLocaleDateString('en-US', { 
+                              month: 'short', 
+                              day: 'numeric', 
+                              year: 'numeric' 
+                            })}
+                          </span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-accent-green/10 backdrop-blur-sm rounded-lg border border-accent-green/20">
+                          <Eye className="w-3.5 h-3.5 text-accent-green" />
+                          <span className="text-xs text-accent-green font-medium capitalize">
+                            {permissions.join(', ')} Access
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Enhanced Action Buttons */}
+                  <div className="flex items-center gap-3 transition-all duration-[400ms]">
+                    {canDownload && (
+                      <button
+                        onClick={() => handleAction('download')}
+                        className="group p-3 bg-dark-primary/40 hover:bg-dark-primary/60 
+                                 backdrop-blur-sm rounded-xl transition-all duration-200
+                                 border border-gray-700/40 hover:border-gray-600/50
+                                 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                        title="Download Document"
+                      >
+                        <Download className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleAction('copy')}
+                      className="group flex items-center gap-2 px-4 py-2.5 
+                               bg-blue-500/10 hover:bg-blue-500/20 
+                               backdrop-blur-sm rounded-xl transition-all duration-200
+                               border border-blue-500/20 hover:border-blue-500/30
+                               shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                      title="Copy share link"
+                    >
+                      <Share2 className="w-5 h-5 text-blue-400" />
+                      <span className="text-sm font-medium text-blue-400">Share Link</span>
+                    </button>
+                  </div>
+                </>
               )}
-              <button
-                onClick={() => handleAction('copy')}
-                className="group flex items-center gap-2 px-4 py-2.5 
-                         bg-blue-500/10 hover:bg-blue-500/20 
-                         backdrop-blur-sm rounded-xl transition-all duration-200
-                         border border-blue-500/20 hover:border-blue-500/30
-                         shadow-lg hover:shadow-xl"
-                title="Copy share link"
-              >
-                <Share2 className="w-5 h-5 text-blue-400" />
-                <span className="text-sm font-medium text-blue-400">Share Link</span>
-              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Spacer for header when not scrolled */}
+      {!isScrolled && <div className="h-[88px]" />}
 
       {/* Enhanced Security Notice */}
       {shareSettings.watermark && (

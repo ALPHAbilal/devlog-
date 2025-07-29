@@ -190,8 +190,11 @@ export default function HowItWorksVideo() {
   };
 
   return (
-    <section className="how-it-works-video">
-      <div className="container-wrapper">
+    <section className="how-it-works-video gradient-video relative">
+      {/* Noise overlay for premium texture */}
+      <div className="noise-overlay" />
+      
+      <div className="container-wrapper relative z-10">
         <motion.div 
           className="section-header"
           initial={{ opacity: 0, y: 20 }}

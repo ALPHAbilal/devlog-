@@ -10,6 +10,14 @@ import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover, featureReveal, tiltEffect } from '../utils/animations';
 import NoiseOverlay from '../components/NoiseOverlay';
+import {
+  HeroToProblemTransition,
+  ProblemToVideoTransition,
+  VideoToFeaturesTransition,
+  FeaturesToPricingTransition,
+  PricingToCTATransition,
+  CTAToFooterTransition
+} from '../components/SectionTransitions';
 
 // Lazy load heavy components
 const PricingSection = lazy(() => import('../components/PricingSection'));
@@ -289,15 +297,26 @@ function LandingContent() {
       {/* New Hero Section */}
       <HeroSectionV3 />
 
+      {/* Hero to Problem Transition */}
+      <HeroToProblemTransition variant="wave" />
+
       {/* Problem Section */}
       <ProblemSection />
+      
+      {/* Problem to Video Transition */}
+      <ProblemToVideoTransition variant="flow" />
       
       {/* How It Works - Video Showcase */}
       <HowItWorksVideo />
 
+      {/* Video to Features Transition */}
+      <VideoToFeaturesTransition variant="geometric" />
+
       {/* Features Grid */}
-      <section className="py-16 md:py-20 px-4 md:px-6">
-        <div className="max-w-6xl mx-auto">
+      <section className="py-16 md:py-20 px-4 md:px-6 gradient-features relative">
+        {/* Noise overlay for premium texture */}
+        <div className="noise-overlay" />
+        <div className="max-w-6xl mx-auto relative z-10">
           <motion.div className="text-center mb-8 md:mb-16">
             <motion.h3 
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
@@ -335,18 +354,22 @@ function LandingContent() {
         </div>
       </section>
 
-
+      {/* Features to Pricing Transition */}
+      <FeaturesToPricingTransition variant="premium" />
 
       {/* Pricing */}
       <Suspense fallback={<div className="h-96 flex items-center justify-center"><div className="text-text-secondary">Loading pricing...</div></div>}>
         <PricingSection />
       </Suspense>
 
-
+      {/* Pricing to CTA Transition */}
+      <PricingToCTATransition variant="energy" />
 
       {/* CTA Section */}
-      <section className="py-16 md:py-20 px-4 md:px-6 relative">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="py-16 md:py-20 px-4 md:px-6 gradient-cta relative">
+        {/* Noise overlay for premium texture */}
+        <div className="noise-overlay" />
+        <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.div 
             className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-400 
                           rounded-full text-sm font-medium mb-6"
@@ -410,9 +433,14 @@ function LandingContent() {
         
       </section>
 
+      {/* CTA to Footer Transition */}
+      <CTAToFooterTransition variant="fade" />
+
       {/* Footer */}
-      <footer className="py-8 px-4 md:px-6 border-t border-dark-secondary/20">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="py-8 px-4 md:px-6 gradient-footer relative">
+        {/* Noise overlay for premium texture */}
+        <div className="noise-overlay" />
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
           <div className="flex items-center gap-2">
             <LogoMinimal size={20} className="md:hidden" />
             <LogoMinimal size={24} className="hidden md:block" />

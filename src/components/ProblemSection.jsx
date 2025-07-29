@@ -147,37 +147,8 @@ export default function ProblemSection() {
   return (
     <section 
       id="problem-section" 
-      className="py-16 md:py-20 px-4 md:px-6 overflow-hidden relative" 
+      className="py-16 md:py-20 px-4 md:px-6 overflow-hidden gradient-problem relative" 
       ref={ref}
-      style={{
-        // Gradient background that continues from hero section
-        background: `
-          radial-gradient(
-            ellipse 1200px 800px at 50% -200px,
-            rgba(16, 185, 129, 0.06) 0%,
-            transparent 60%
-          ),
-          radial-gradient(
-            circle at 20% 80%,
-            rgba(16, 185, 129, 0.08) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 80% 20%,
-            rgba(5, 150, 105, 0.05) 0%,
-            transparent 40%
-          ),
-          linear-gradient(
-            to bottom,
-            rgba(10, 15, 20, 0.95) 0%,
-            rgba(13, 17, 23, 0.98) 50%,
-            rgba(10, 15, 20, 1) 100%
-          )
-        `,
-        // Ensure text remains readable
-        position: 'relative',
-        zIndex: 1
-      }}
     >
       {/* Subtle noise texture overlay for premium feel */}
       <div

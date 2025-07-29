@@ -32,7 +32,7 @@ export default function HeroSectionV3() {
   };
 
   return (
-    <section className="hero-container relative min-h-screen flex items-center py-16 md:py-20 overflow-hidden">
+    <section className="hero-container gradient-hero relative min-h-screen flex items-center py-16 md:py-20 overflow-hidden">
       {/* Premium background effects */}
       <GradientMesh />
       <ParticleField count={30} />

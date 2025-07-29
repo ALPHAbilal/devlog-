@@ -138,8 +138,11 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-16 md:py-20 px-4 md:px-6 bg-dark-secondary/20">
-      <div className="max-w-6xl mx-auto">
+    <section id="pricing" className="py-16 md:py-20 px-4 md:px-6 gradient-pricing relative">
+      {/* Noise overlay for premium texture */}
+      <div className="noise-overlay" />
+      
+      <div className="max-w-6xl mx-auto relative z-10">
         <motion.div 
           className="text-center mb-8 md:mb-12"
           initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}
@@ -220,11 +223,11 @@ export default function PricingSection() {
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              className={`relative bg-dark-secondary rounded-lg border transition-all hover:border-accent-green/30 ${
+              className={`relative rounded-lg border transition-all hover:border-accent-green/30 ${
                 plan.popular
-                  ? 'border-accent-green shadow-lg shadow-accent-green/10'
-                  : 'border-dark-secondary/50'
-              }`}
+                  ? 'border-accent-green shadow-lg shadow-accent-green/10 pricing-card-popular'
+                  : 'border-dark-secondary/50 pricing-card-gradient'
+              } glass-overlay`}
               variants={isMobile ? {} : staggerItem}
               style={isMobile ? { opacity: 1 } : {}}
             >

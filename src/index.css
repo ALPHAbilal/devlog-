@@ -16,6 +16,8 @@
 @import './styles/MemoryErosion.css';
 @import './styles/MemoryErosionEnhanced.css';
 @import './styles/mobile-optimizations.css';
+@import './styles/unified-gradients.css';
+@import './styles/section-transitions.css';
 
 @tailwind base;
 @tailwind components;

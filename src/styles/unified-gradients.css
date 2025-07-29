@@ -1,0 +1,308 @@
+/* =====================================================
+   UNIFIED GRADIENT SYSTEM - DEVLOG LANDING PAGE
+   
+   Color Psychology Flow:
+   - Hero: Dark neural (#0a0f14) - mystery/innovation
+   - Problem: Warmer darks (#0f0a14) - pain acknowledgment  
+   - Video: Cool blues (#0a1428) - solution clarity
+   - Features: Balanced spectrum - capability showcase
+   - Pricing: Premium purples (#140a1a) - value perception
+   - CTA: Energetic greens (#0a1410) - action motivation
+   ===================================================== */
+
+:root {
+  /* Base Colors - Progressive Journey */
+  --gradient-hero-primary: #0a0f14;
+  --gradient-hero-secondary: #0d1117;
+  --gradient-hero-accent: rgba(16, 185, 129, 0.15);
+  
+  --gradient-problem-primary: #0f0a14;
+  --gradient-problem-secondary: #110d14;
+  --gradient-problem-accent: rgba(239, 68, 68, 0.08);
+  
+  --gradient-video-primary: #0a1428;
+  --gradient-video-secondary: #0d1720;
+  --gradient-video-accent: rgba(59, 130, 246, 0.1);
+  
+  --gradient-features-primary: #0f1420;
+  --gradient-features-secondary: #121825;
+  --gradient-features-accent: rgba(99, 102, 241, 0.08);
+  
+  --gradient-pricing-primary: #140a1a;
+  --gradient-pricing-secondary: #180e1e;
+  --gradient-pricing-accent: rgba(147, 51, 234, 0.08);
+  
+  --gradient-cta-primary: #0a1410;
+  --gradient-cta-secondary: #0e1814;
+  --gradient-cta-accent: rgba(16, 185, 129, 0.12);
+  
+  --gradient-footer-primary: #080a0d;
+  --gradient-footer-secondary: #0a0c0f;
+  
+  /* Transition Colors - Smooth Blending */
+  --blend-hero-problem: #0d0c14;
+  --blend-problem-video: #0c0f1e;
+  --blend-video-features: #0c1622;
+  --blend-features-pricing: #12101f;
+  --blend-pricing-cta: #0f0f17;
+  --blend-cta-footer: #090f11;
+  
+  /* Accent Evolution */
+  --accent-neural: rgba(16, 185, 129, 0.15);
+  --accent-warm: rgba(251, 146, 60, 0.1);
+  --accent-cool: rgba(59, 130, 246, 0.1);
+  --accent-balanced: rgba(99, 102, 241, 0.08);
+  --accent-premium: rgba(147, 51, 234, 0.08);
+  --accent-energy: rgba(16, 185, 129, 0.2);
+  
+  /* Noise Texture Opacity */
+  --noise-opacity: 0.015;
+  --noise-opacity-heavy: 0.025;
+  
+  /* GPU Acceleration Hints */
+  --transform-gpu: translateZ(0);
+  --will-change-safe: transform;
+}
+
+/* Section Background Gradients */
+.gradient-hero {
+  background: 
+    radial-gradient(
+      ellipse 2000px 1200px at 50% -20%,
+      var(--gradient-hero-accent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      var(--accent-neural) 0%,
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      var(--gradient-hero-primary) 0%,
+      var(--gradient-hero-secondary) 100%
+    );
+}
+
+.gradient-problem {
+  background: 
+    radial-gradient(
+      ellipse 1600px 900px at 50% -10%,
+      var(--gradient-problem-accent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 90%,
+      var(--accent-warm) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--blend-hero-problem) 0%,
+      var(--gradient-problem-primary) 20%,
+      var(--gradient-problem-secondary) 100%
+    );
+}
+
+.gradient-video {
+  background: 
+    radial-gradient(
+      ellipse 1800px 1000px at 50% 50%,
+      var(--gradient-video-accent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 10% 50%,
+      var(--accent-cool) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--blend-problem-video) 0%,
+      var(--gradient-video-primary) 30%,
+      var(--gradient-video-secondary) 100%
+    );
+}
+
+.gradient-features {
+  background: 
+    radial-gradient(
+      circle 1200px at 70% 30%,
+      var(--gradient-features-accent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle 1000px at 30% 70%,
+      var(--accent-balanced) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--blend-video-features) 0%,
+      var(--gradient-features-primary) 25%,
+      var(--gradient-features-secondary) 100%
+    );
+}
+
+.gradient-pricing {
+  background: 
+    radial-gradient(
+      ellipse 2000px 1200px at 50% 20%,
+      var(--gradient-pricing-accent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      var(--accent-premium) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--blend-features-pricing) 0%,
+      var(--gradient-pricing-primary) 30%,
+      var(--gradient-pricing-secondary) 100%
+    );
+}
+
+.gradient-cta {
+  background: 
+    radial-gradient(
+      ellipse 2400px 1000px at 50% 50%,
+      var(--gradient-cta-accent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 20% 20%,
+      var(--accent-energy) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      var(--accent-energy) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--blend-pricing-cta) 0%,
+      var(--gradient-cta-primary) 30%,
+      var(--gradient-cta-secondary) 100%
+    );
+}
+
+.gradient-footer {
+  background: 
+    linear-gradient(
+      to bottom,
+      var(--blend-cta-footer) 0%,
+      var(--gradient-footer-primary) 50%,
+      var(--gradient-footer-secondary) 100%
+    );
+}
+
+/* Noise Overlay Styles */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: var(--noise-opacity);
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  will-change: opacity;
+  transform: var(--transform-gpu);
+}
+
+.noise-overlay-heavy {
+  opacity: var(--noise-opacity-heavy);
+}
+
+/* Glassmorphism Enhancement for Sections */
+.glass-overlay {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(100px);
+  -webkit-backdrop-filter: blur(100px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Feature Card Gradients */
+.feature-gradient-base {
+  background: 
+    radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(99, 102, 241, 0.15) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(15, 20, 32, 0.8) 0%,
+      rgba(18, 24, 37, 0.9) 100%
+    );
+}
+
+/* Pricing Card Premium Gradients */
+.pricing-card-gradient {
+  background: 
+    radial-gradient(
+      circle at 50% -20%,
+      var(--accent-premium) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(20, 10, 26, 0.9) 0%,
+      rgba(24, 14, 30, 0.95) 100%
+    );
+}
+
+.pricing-card-popular {
+  background: 
+    radial-gradient(
+      circle at 50% -20%,
+      rgba(16, 185, 129, 0.1) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(10, 20, 16, 0.95) 0%,
+      rgba(14, 24, 20, 0.98) 100%
+    );
+}
+
+/* Responsive Gradient Adjustments */
+@media (max-width: 768px) {
+  :root {
+    --noise-opacity: 0.01;
+    --noise-opacity-heavy: 0.02;
+  }
+  
+  /* Simplify gradients on mobile for performance */
+  .gradient-hero,
+  .gradient-problem,
+  .gradient-video,
+  .gradient-features,
+  .gradient-pricing,
+  .gradient-cta {
+    background-attachment: scroll;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .noise-overlay {
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Enhancement (if needed) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --noise-opacity: 0.02;
+  }
+}

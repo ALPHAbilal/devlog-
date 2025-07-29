@@ -1,0 +1,360 @@
+/* Quantum Documentation Field - Elite GSAP Animation Styles */
+
+.quantum-field-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: auto;
+  contain: layout style paint;
+}
+
+/* Quantum Particles */
+.quantum-particle {
+  position: absolute;
+  width: var(--particle-size, 60px);
+  height: var(--particle-size, 60px);
+  pointer-events: auto;
+  will-change: transform;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+}
+
+/* Particle Core */
+.quantum-particle__core {
+  position: absolute;
+  inset: 20%;
+  background: radial-gradient(
+    circle at center,
+    var(--particle-color) 0%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.8;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Particle Glow */
+.quantum-particle__glow {
+  position: absolute;
+  inset: -50%;
+  background: radial-gradient(
+    circle at center,
+    var(--particle-color) 0%,
+    transparent 50%
+  );
+  opacity: 0.3;
+  filter: blur(20px);
+  animation: quantum-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes quantum-pulse {
+  0%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+/* Particle Icon */
+.quantum-particle__icon {
+  position: absolute;
+  inset: 35%;
+  background: var(--particle-color);
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+/* Icon Masks by Type */
+.quantum-particle--code .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpolyline points='16 18 22 12 16 6'%3E%3C/polyline%3E%3Cpolyline points='8 6 2 12 8 18'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.quantum-particle--text .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3E%3C/path%3E%3Cpolyline points='14 2 14 8 20 8'%3E%3C/polyline%3E%3Cline x1='16' y1='13' x2='8' y2='13'%3E%3C/line%3E%3Cline x1='16' y1='17' x2='8' y2='17'%3E%3C/line%3E%3C/svg%3E");
+}
+
+.quantum-particle--ai .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.quantum-particle--version .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cline x1='6' y1='3' x2='6' y2='15'%3E%3C/line%3E%3Ccircle cx='18' cy='6' r='3'%3E%3C/circle%3E%3Ccircle cx='6' cy='18' r='3'%3E%3C/circle%3E%3Cpath d='M18 9a9 9 0 0 1-9 9'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.quantum-particle--tag .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cline x1='4' y1='9' x2='20' y2='9'%3E%3C/line%3E%3Cline x1='4' y1='15' x2='20' y2='15'%3E%3C/line%3E%3Cline x1='10' y1='3' x2='8' y2='21'%3E%3C/line%3E%3Cline x1='16' y1='3' x2='14' y2='21'%3E%3C/line%3E%3C/svg%3E");
+}
+
+.quantum-particle--table .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.quantum-particle--folder .quantum-particle__icon {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2'%3E%3Cpath d='M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+/* Particle Metadata */
+.quantum-particle__metadata {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.8);
+  background: rgba(10, 22, 40, 0.9);
+  border: 1px solid var(--particle-color);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--particle-color);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.quantum-particle__metadata span {
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hover States */
+.quantum-particle:hover .quantum-particle__core {
+  filter: blur(1px);
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.quantum-particle:hover .quantum-particle__glow {
+  opacity: 0.6;
+  animation-duration: 2s;
+}
+
+.quantum-particle:hover .quantum-particle__icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Ripple Effect */
+.quantum-ripple {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px solid var(--ripple-color);
+  background: radial-gradient(
+    circle at center,
+    transparent 30%,
+    var(--ripple-color) 50%,
+    transparent 70%
+  );
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+/* Merge Effect */
+.quantum-merge {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.quantum-merge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    var(--merge-color) 0%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  filter: blur(10px);
+  opacity: 0.8;
+}
+
+.quantum-merge::after {
+  content: '';
+  position: absolute;
+  inset: 20%;
+  background: var(--merge-color);
+  border-radius: 50%;
+  filter: blur(5px);
+  animation: merge-pulse 0.5s ease-out;
+}
+
+@keyframes merge-pulse {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Particle Type Variations */
+.quantum-particle--code {
+  animation: code-float 15s ease-in-out infinite;
+}
+
+.quantum-particle--ai {
+  animation: ai-float 18s ease-in-out infinite;
+}
+
+.quantum-particle--text {
+  animation: text-float 20s ease-in-out infinite;
+}
+
+@keyframes code-float {
+  0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+  25% { transform: translate(-50%, -50%) rotate(5deg); }
+  75% { transform: translate(-50%, -50%) rotate(-5deg); }
+}
+
+@keyframes ai-float {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.05); }
+}
+
+@keyframes text-float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-5px); }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .quantum-particle,
+  .quantum-particle__glow,
+  .quantum-particle__core,
+  .quantum-particle__icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .quantum-particle {
+    --particle-size: 40px !important;
+  }
+  
+  .quantum-particle__glow {
+    filter: blur(15px);
+    opacity: 0.2;
+  }
+  
+  .quantum-particle__metadata {
+    display: none;
+  }
+  
+  .quantum-ripple,
+  .quantum-merge {
+    display: none;
+  }
+  
+  @keyframes code-float,
+  @keyframes ai-float,
+  @keyframes text-float {
+    0%, 100% { transform: translate(-50%, -50%); }
+  }
+}
+
+/* High Performance Mode */
+@media (hover: hover) and (min-width: 1024px) {
+  .quantum-particle {
+    transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  
+  .quantum-particle__core {
+    box-shadow: 
+      0 0 20px var(--particle-color),
+      inset 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  
+  .quantum-particle__glow {
+    filter: blur(30px) saturate(1.5);
+  }
+  
+  /* Advanced glow effect on hover */
+  .quantum-particle:hover::before {
+    content: '';
+    position: absolute;
+    inset: -100%;
+    background: radial-gradient(
+      circle at center,
+      var(--particle-color) 0%,
+      transparent 40%
+    );
+    opacity: 0;
+    filter: blur(40px);
+    animation: hover-glow 0.5s ease-out forwards;
+    pointer-events: none;
+  }
+  
+  @keyframes hover-glow {
+    to {
+      opacity: 0.3;
+      transform: scale(1.5);
+    }
+  }
+}
+
+/* Reduced Data Mode */
+@media (prefers-reduced-data: reduce) {
+  .quantum-particle__glow,
+  .quantum-ripple,
+  .quantum-merge {
+    display: none;
+  }
+  
+  .quantum-particle__core {
+    filter: none;
+    background: var(--particle-color);
+    opacity: 0.5;
+  }
+}
+
+/* Dark theme integration */
+.quantum-field-container {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(16, 185, 129, 0.02) 0%,
+    transparent 50%
+  );
+}
+
+/* Accessibility */
+@media (prefers-contrast: high) {
+  .quantum-particle__core {
+    opacity: 1;
+    filter: none;
+  }
+  
+  .quantum-particle__metadata {
+    background: #000;
+    color: #fff;
+    border-width: 2px;
+  }
+}

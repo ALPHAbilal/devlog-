@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import './index.css'
+import './styles/hero-quantum-field.css'
 import App from './App.jsx'
 
 // Initialize global auto-save manager immediately

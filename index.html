@@ -2,7 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/devlog-favicon.svg" />
+    
+    <!-- Essential favicon formats for Google search results -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    
+    <!-- Keep SVG for modern browsers -->
+    <link rel="icon" type="image/svg+xml" href="/devlog-favicon.svg">
+    
+    <!-- Apple devices -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover" />
     
     <!-- Mobile specific meta tags -->
@@ -185,6 +198,9 @@
   <body>
     <div id="root"></div>
     <div id="portal-root"></div>
+    <!-- GSAP for Quantum Documentation Field Animation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
     <script src="/manifest-loader.js"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>

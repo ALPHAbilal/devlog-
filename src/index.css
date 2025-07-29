@@ -13,6 +13,8 @@
 @import './styles/hero-background-animation.css';
 @import './styles/hero-quantum-field.css';
 @import './styles/hero-knowledge-constellation.css';
+@import './styles/MemoryErosion.css';
+@import './styles/MemoryErosionEnhanced.css';
 @import './styles/mobile-optimizations.css';
 
 @tailwind base;

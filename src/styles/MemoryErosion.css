@@ -1,0 +1,383 @@
+/* Memory Erosion - Award-Winning CSS */
+
+.memory-erosion-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #0a0a0a;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(20, 20, 40, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(40, 20, 40, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(20, 40, 40, 0.3) 0%, transparent 50%);
+  perspective: 1000px;
+  cursor: none;
+}
+
+/* Custom cursor restoration field */
+.restoration-field {
+  position: fixed;
+  width: 300px;
+  height: 300px;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(
+    circle,
+    rgba(0, 255, 136, 0.1) 0%,
+    rgba(0, 255, 136, 0.05) 30%,
+    transparent 70%
+  );
+  filter: blur(20px);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease;
+  mix-blend-mode: screen;
+  z-index: 1000;
+}
+
+.memory-erosion-container:hover .restoration-field {
+  opacity: 1;
+  left: var(--cursor-x);
+  top: var(--cursor-y);
+}
+
+/* Erosion instructions */
+.erosion-instructions {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.erosion-title {
+  font-size: 4rem;
+  font-weight: 100;
+  letter-spacing: 0.2em;
+  color: #ffffff;
+  margin: 0;
+  opacity: 0.9;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  animation: titleGlow 3s ease-in-out infinite alternate;
+}
+
+.erosion-subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 10px;
+  letter-spacing: 0.1em;
+}
+
+@keyframes titleGlow {
+  from { text-shadow: 0 0 30px rgba(255, 255, 255, 0.5); }
+  to { text-shadow: 0 0 50px rgba(255, 255, 255, 0.8), 0 0 100px rgba(0, 255, 136, 0.3); }
+}
+
+/* Memory fragments base styles */
+.memory-fragment {
+  position: absolute;
+  padding: 20px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, filter, opacity;
+  transform-style: preserve-3d;
+  max-width: 400px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* Erosion overlay effect */
+.erosion-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(0, 0, 0, 0.1) 10px,
+      rgba(0, 0, 0, 0.1) 20px
+    ),
+    url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" /></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.4"/></svg>');
+  mix-blend-mode: multiply;
+  border-radius: inherit;
+}
+
+/* Code block styling */
+.code-block {
+  margin: 0;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #e0e0e0;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.code-block code {
+  display: block;
+  white-space: pre;
+}
+
+/* Error block styling */
+.error-block {
+  color: #ff6b6b;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.error-icon {
+  font-size: 20px;
+  margin-right: 10px;
+  filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.5));
+}
+
+/* Chat bubble styling */
+.chat-bubble {
+  background: linear-gradient(135deg, rgba(64, 0, 255, 0.1), rgba(0, 128, 255, 0.1));
+  border: 1px solid rgba(64, 0, 255, 0.3);
+  padding: 15px 20px;
+  border-radius: 20px;
+  position: relative;
+  color: #e0e0ff;
+  max-width: 350px;
+}
+
+.ai-avatar {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  font-size: 30px;
+  filter: drop-shadow(0 0 10px rgba(64, 0, 255, 0.5));
+}
+
+/* Stack Overflow styling */
+.stackoverflow-block {
+  display: flex;
+  gap: 15px;
+  background: rgba(255, 140, 0, 0.05);
+  border: 1px solid rgba(255, 140, 0, 0.2);
+  padding: 15px;
+  border-radius: 6px;
+  color: #ffd4a3;
+}
+
+.vote-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.vote-count .arrow {
+  color: #ff8c00;
+  font-size: 20px;
+}
+
+.vote-count .votes {
+  font-weight: bold;
+  font-size: 18px;
+  color: #ff8c00;
+}
+
+/* Terminal styling */
+.terminal-block {
+  background: #1e1e1e;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'SF Mono', monospace;
+  font-size: 13px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.terminal-header {
+  background: #2d2d2d;
+  padding: 8px 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.terminal-header .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.terminal-block pre {
+  margin: 0;
+  padding: 15px;
+  color: #00ff00;
+  background: transparent;
+  white-space: pre;
+}
+
+/* Documentation styling */
+.docs-block {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 140, 0, 0.05));
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  padding: 20px;
+  border-radius: 8px;
+  color: #ffe4b5;
+  position: relative;
+}
+
+.docs-icon {
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  font-size: 30px;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+}
+
+/* Restored state */
+.memory-fragment.restored {
+  animation: pulseGlow 2s ease-in-out infinite;
+  border-color: rgba(0, 255, 136, 0.5);
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(0, 255, 136, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.3),
+      0 0 40px rgba(0, 255, 136, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Crystallizing animation */
+.memory-fragment.crystallizing {
+  animation: crystallize 0.5s ease-out forwards;
+}
+
+@keyframes crystallize {
+  0% {
+    transform: scale(1) rotateX(0) rotateY(0);
+    filter: brightness(1) hue-rotate(0deg);
+  }
+  50% {
+    transform: scale(1.2) rotateX(5deg) rotateY(5deg);
+    filter: brightness(1.5) hue-rotate(180deg);
+  }
+  100% {
+    transform: scale(1.1) rotateX(0) rotateY(0);
+    filter: brightness(1.2) hue-rotate(360deg);
+  }
+}
+
+/* Crystallized state */
+.memory-fragment.crystallized {
+  background: 
+    linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%),
+    linear-gradient(45deg, 
+      rgba(0, 255, 136, 0.1) 0%, 
+      rgba(0, 180, 255, 0.1) 50%, 
+      rgba(255, 0, 180, 0.1) 100%);
+  border: 2px solid transparent;
+  border-image: linear-gradient(
+    45deg,
+    #00ff88,
+    #00b4ff,
+    #ff00b4,
+    #00ff88
+  ) 1;
+  animation: 
+    rainbowBorder 3s linear infinite,
+    floatCrystal 6s ease-in-out infinite;
+  position: relative;
+  overflow: visible;
+}
+
+.memory-fragment.crystallized::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg,
+      rgba(0, 255, 136, 0.1) 5deg,
+      transparent 10deg
+    );
+  border-radius: inherit;
+  animation: rotatePrism 10s linear infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes rainbowBorder {
+  0% { border-image-source: linear-gradient(45deg, #00ff88, #00b4ff, #ff00b4, #00ff88); }
+  33% { border-image-source: linear-gradient(45deg, #00b4ff, #ff00b4, #00ff88, #00b4ff); }
+  66% { border-image-source: linear-gradient(45deg, #ff00b4, #00ff88, #00b4ff, #ff00b4); }
+  100% { border-image-source: linear-gradient(45deg, #00ff88, #00b4ff, #ff00b4, #00ff88); }
+}
+
+@keyframes floatCrystal {
+  0%, 100% { transform: translateY(0) scale(1.1); }
+  50% { transform: translateY(-10px) scale(1.1); }
+}
+
+@keyframes rotatePrism {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Performance optimizations */
+.memory-fragment {
+  contain: layout style paint;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .erosion-title {
+    font-size: 2.5rem;
+  }
+  
+  .memory-fragment {
+    max-width: 300px;
+    padding: 15px;
+    font-size: 0.9em;
+  }
+  
+  .restoration-field {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .memory-fragment {
+    animation: none !important;
+  }
+  
+  .memory-fragment.crystallized::before {
+    animation: none !important;
+  }
+}

@@ -1,2 +1,2 @@
-// Export the Knowledge Constellation component
-export { default } from './KnowledgeConstellation';
+// Export the Memory Erosion component (Enhanced version for best quality)
+export { default } from './MemoryErosionEnhanced';

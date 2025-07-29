@@ -27,6 +27,8 @@ const SentryRoutes = Sentry.withSentryRouting(Routes);
 // Lazy load SEO pages
 const AIConversationSaver = lazy(() => import('./pages/features/AIConversationSaver'));
 const NotionAlternative = lazy(() => import('./pages/compare/NotionAlternative'));
+const AIConversationManagement = lazy(() => import('./pages/guides/AIConversationManagement'));
+const DevLogVsNotion = lazy(() => import('./pages/compare/DevLogVsNotion'));
 
 // Initialize monitoring
 initMonitoring();
@@ -122,6 +124,23 @@ function AppContent() {
             <div className="text-gray-400">Loading...</div>
           </div>}>
             <NotionAlternative />
+          </Suspense>
+        } />
+        
+        <Route path="/compare/devlog-vs-notion" element={
+          <Suspense fallback={<div className="min-h-screen bg-dark-primary flex items-center justify-center">
+            <div className="text-gray-400">Loading...</div>
+          </div>}>
+            <DevLogVsNotion />
+          </Suspense>
+        } />
+        
+        {/* Guide Pages */}
+        <Route path="/guides/ai-conversation-management" element={
+          <Suspense fallback={<div className="min-h-screen bg-dark-primary flex items-center justify-center">
+            <div className="text-gray-400">Loading...</div>
+          </div>}>
+            <AIConversationManagement />
           </Suspense>
         } />
         

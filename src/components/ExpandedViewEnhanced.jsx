@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition, forwardRef, useImperativeHandle } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
 import Block from './Block';
@@ -19,7 +19,7 @@ import ScrollToTop from './ScrollToTop';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
-export default function ExpandedView({ 
+const ExpandedView = forwardRef(({ 
   entry, 
   onClose, 
   onUpdate, 
@@ -27,7 +27,7 @@ export default function ExpandedView({
   isMobileView = false,
   scrollContainerRef: externalScrollRef = null,
   onShowBlockSelector 
-}) {
+}, ref) {
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
   
@@ -91,6 +91,23 @@ export default function ExpandedView({
   const [saveStatus, setSaveStatus] = useState(null);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
   const saveStatusTimeoutRef = useRef(null);
+
+  // Expose methods to parent component via ref
+  useImperativeHandle(ref, () => ({
+    handleShare: () => {
+      setShowShareDialog(true);
+    },
+    handleDelete: () => {
+      setShowDeleteConfirm(true);
+    },
+    handleViewModeChange: (mode) => {
+      if (mode === 'toggle') {
+        setViewMode(prev => prev === 'blocks' ? 'lines' : 'blocks');
+      } else {
+        setViewMode(mode);
+      }
+    }
+  }));
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
   useEffect(() => {
@@ -1249,4 +1266,8 @@ export default function ExpandedView({
       <ScrollToTop scrollContainerRef={scrollContainerRef} />
     </>
   );
-}
+});
+
+ExpandedView.displayName = 'ExpandedView';
+
+export default ExpandedView;

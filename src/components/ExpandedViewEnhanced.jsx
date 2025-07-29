@@ -25,7 +25,7 @@ const ExpandedView = forwardRef(({
   onUpdate, 
   allEntries = [],
   isMobileView = false,
-  scrollContainerRef: externalScrollRef = null,
+  scrollContainerRef: externalScrollRef,
   onShowBlockSelector 
 }, ref) {
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)

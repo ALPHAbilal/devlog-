@@ -1,2 +1,2 @@
-// Export the Memory Erosion component optimized for hero background
-export { default } from './MemoryErosionHero';
+// Export the Vanishing Solution component - minimalist and clear
+export { default } from './VanishingSolution';

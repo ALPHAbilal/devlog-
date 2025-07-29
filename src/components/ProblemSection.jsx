@@ -145,7 +145,7 @@ export default function ProblemSection() {
   return (
     <section 
       id="problem-section" 
-      className="py-16 md:py-20 px-4 md:px-6 overflow-hidden gradient-problem relative" 
+      className="px-4 md:px-6 overflow-hidden gradient-problem relative" 
       ref={ref}
     >
       {/* Subtle noise texture overlay for premium feel */}
@@ -158,7 +158,7 @@ export default function ProblemSection() {
         }}
       />
       
-      <div className="max-w-6xl mx-auto relative">
+      <div className="max-w-6xl mx-auto relative py-16 md:py-20">
         <motion.div 
           className="text-center mb-12 md:mb-16"
           initial={{ opacity: 0, y: 20 }}

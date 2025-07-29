@@ -32,7 +32,7 @@ export default function HeroSectionV3() {
   };
 
   return (
-    <section className="hero-container gradient-hero relative min-h-screen flex items-center py-16 md:py-20 overflow-hidden">
+    <section className="hero-container gradient-hero relative min-h-screen flex items-center overflow-hidden">
       {/* Premium background effects */}
       <GradientMesh />
       <ParticleField count={30} />
@@ -41,7 +41,7 @@ export default function HeroSectionV3() {
       {/* New sophisticated background animation */}
       <HeroBackgroundAnimation />
       
-      <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10 py-16 md:py-20">
         {/* Enhanced Urgency Badge */}
         <motion.div
           className="hero-badge mb-6"

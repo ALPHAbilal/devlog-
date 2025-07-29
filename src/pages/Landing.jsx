@@ -294,10 +294,10 @@ function LandingContent() {
       <HowItWorksVideo />
 
       {/* Features Grid */}
-      <section className="py-16 md:py-20 px-4 md:px-6 gradient-features relative">
+      <section className="px-4 md:px-6 gradient-features relative">
         {/* Noise overlay for premium texture */}
         <div className="noise-overlay" />
-        <div className="max-w-6xl mx-auto relative z-10">
+        <div className="max-w-6xl mx-auto relative z-10 py-16 md:py-20">
           <motion.div className="text-center mb-8 md:mb-16">
             <motion.h3 
               className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
@@ -341,10 +341,10 @@ function LandingContent() {
       </Suspense>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-20 px-4 md:px-6 gradient-cta relative">
+      <section className="px-4 md:px-6 gradient-cta relative">
         {/* Noise overlay for premium texture */}
         <div className="noise-overlay" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
+        <div className="max-w-4xl mx-auto text-center relative z-10 py-16 md:py-20">
           <motion.div 
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
                           text-accent-green rounded-full text-sm font-medium mb-6"
@@ -409,10 +409,10 @@ function LandingContent() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 px-4 md:px-6 gradient-footer relative">
+      <footer className="px-4 md:px-6 gradient-footer relative">
         {/* Noise overlay for premium texture */}
         <div className="noise-overlay" />
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 relative z-10">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 py-8">
           <div className="flex items-center gap-2">
             <LogoMinimal size={20} className="md:hidden" />
             <LogoMinimal size={24} className="hidden md:block" />

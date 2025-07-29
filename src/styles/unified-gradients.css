@@ -48,13 +48,13 @@
   --gradient-footer-primary: #080a0d;
   --gradient-footer-secondary: #0a0c0f;
   
-  /* Subtle Transition Blends */
-  --blend-hero-problem: #0b1015;
-  --blend-problem-video: #0c1116;
-  --blend-video-features: #0c1117;
-  --blend-features-pricing: #0d1218;
-  --blend-pricing-cta: #0d1217;
-  --blend-cta-footer: #090e12;
+  /* Removed transition blends - sections connect directly */
+  --blend-hero-problem: var(--gradient-primary);
+  --blend-problem-video: var(--gradient-primary);
+  --blend-video-features: var(--gradient-primary);
+  --blend-features-pricing: var(--gradient-primary);
+  --blend-pricing-cta: var(--gradient-primary);
+  --blend-cta-footer: var(--gradient-primary);
   
   /* Minimal Accent System */
   --accent-green: rgba(16, 185, 129, 0.15);
@@ -112,8 +112,7 @@
     ),
     linear-gradient(
       to bottom,
-      var(--blend-hero-problem) 0%,
-      var(--gradient-problem-primary) 20%,
+      var(--gradient-problem-primary) 0%,
       var(--gradient-problem-secondary) 100%
     );
 }
@@ -132,8 +131,7 @@
     ),
     linear-gradient(
       to bottom,
-      var(--blend-problem-video) 0%,
-      var(--gradient-video-primary) 30%,
+      var(--gradient-video-primary) 0%,
       var(--gradient-video-secondary) 100%
     );
 }
@@ -152,8 +150,7 @@
     ),
     linear-gradient(
       to bottom,
-      var(--blend-video-features) 0%,
-      var(--gradient-features-primary) 25%,
+      var(--gradient-features-primary) 0%,
       var(--gradient-features-secondary) 100%
     );
 }
@@ -172,8 +169,7 @@
     ),
     linear-gradient(
       to bottom,
-      var(--blend-features-pricing) 0%,
-      var(--gradient-pricing-primary) 30%,
+      var(--gradient-pricing-primary) 0%,
       var(--gradient-pricing-secondary) 100%
     );
 }
@@ -197,8 +193,7 @@
     ),
     linear-gradient(
       to bottom,
-      var(--blend-pricing-cta) 0%,
-      var(--gradient-cta-primary) 30%,
+      var(--gradient-cta-primary) 0%,
       var(--gradient-cta-secondary) 100%
     );
 }
@@ -207,8 +202,7 @@
   background: 
     linear-gradient(
       to bottom,
-      var(--blend-cta-footer) 0%,
-      var(--gradient-footer-primary) 50%,
+      var(--gradient-footer-primary) 0%,
       var(--gradient-footer-secondary) 100%
     );
 }
@@ -283,35 +277,62 @@
     );
 }
 
-/* Section spacing for seamless flow - no harsh transitions */
-.gradient-hero {
-  padding-bottom: 8rem;
-}
-
+/* ZERO spacing between sections - sections flow directly into each other */
+.gradient-hero,
 .gradient-problem,
 .gradient-video,
 .gradient-features,
 .gradient-pricing,
-.gradient-cta {
-  margin-top: -4rem;
-  padding-top: 6rem;
-  position: relative;
+.gradient-cta,
+.gradient-footer {
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
-/* Ensure sections blend smoothly */
+/* Remove all section transitions */
 .gradient-problem::before,
 .gradient-video::before,
 .gradient-features::before,
 .gradient-pricing::before,
 .gradient-cta::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4rem;
-  background: linear-gradient(to bottom, transparent, var(--dark-base));
-  pointer-events: none;
+  display: none !important;
+}
+
+/* Ensure sections connect seamlessly */
+section + section {
+  margin-top: 0 !important;
+}
+
+/* Force sections to connect */
+.hero-container {
+  margin-bottom: 0 !important;
+}
+
+.how-it-works-video {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove any default spacing on sections */
+section {
+  margin: 0 !important;
+}
+
+/* Ensure main container has no gaps */
+#root > div > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Force adjacent sections to connect */
+.gradient-hero + *,
+.gradient-problem + *,
+.gradient-video + *,
+.gradient-features + *,
+.gradient-pricing + *,
+.gradient-cta + * {
+  margin-top: 0 !important;
 }
 
 /* Responsive Gradient Adjustments */

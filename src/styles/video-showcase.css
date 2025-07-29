@@ -20,7 +20,7 @@
 
 .how-it-works-video {
   position: relative;
-  padding: var(--space-5xl) 0;
+  padding: 0 !important;
   background: linear-gradient(180deg, 
     rgba(10, 22, 40, 0) 0%, 
     rgba(16, 185, 129, 0.02) 50%, 
@@ -31,20 +31,32 @@
 
 @media (max-width: 968px) {
   .how-it-works-video {
-    padding: var(--space-4xl) 0;
+    padding: 0 !important;
   }
 }
 
 @media (max-width: 768px) {
   .how-it-works-video {
-    padding: var(--space-3xl) 0;
+    padding: 0 !important;
   }
 }
 
 .container-wrapper {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: var(--space-5xl) 24px;
+}
+
+@media (max-width: 968px) {
+  .container-wrapper {
+    padding: var(--space-4xl) 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container-wrapper {
+    padding: var(--space-3xl) 24px;
+  }
 }
 
 /* Section Header */

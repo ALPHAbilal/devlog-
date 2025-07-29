@@ -138,11 +138,11 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="py-16 md:py-20 px-4 md:px-6 gradient-pricing relative">
+    <section id="pricing" className="px-4 md:px-6 gradient-pricing relative">
       {/* Noise overlay for premium texture */}
       <div className="noise-overlay" />
       
-      <div className="max-w-6xl mx-auto relative z-10">
+      <div className="max-w-6xl mx-auto relative z-10 py-16 md:py-20">
         <motion.div 
           className="text-center mb-8 md:mb-12"
           initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}

@@ -1,0 +1,223 @@
+/* Gradient Transitions - Premium smooth transitions between sections */
+
+/* Base transition styles */
+.gradient-transition {
+  position: relative;
+  width: 100%;
+  contain: layout style paint;
+  will-change: transform;
+  transform: translateZ(0); /* Force GPU acceleration */
+}
+
+/* Prevent white lines between sections */
+.gradient-transition::before,
+.gradient-transition::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+}
+
+.gradient-transition::before {
+  top: -1px;
+  background: inherit;
+}
+
+.gradient-transition::after {
+  bottom: -1px;
+  background: inherit;
+}
+
+/* Wave variant animations */
+.gradient-transition-wave {
+  animation: waveMotion 20s ease-in-out infinite;
+}
+
+@keyframes waveMotion {
+  0%, 100% {
+    transform: translateX(0) translateZ(0);
+  }
+  50% {
+    transform: translateX(-10px) translateZ(0);
+  }
+}
+
+/* Curve variant smooth morphing */
+.gradient-transition-curve svg path {
+  transition: d 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Fade variant optimizations */
+.gradient-transition-fade {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Angular variant sharp edges */
+.gradient-transition-angular {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+/* S-curve variant flow */
+.gradient-transition-scurve {
+  animation: flowMotion 25s ease-in-out infinite;
+}
+
+@keyframes flowMotion {
+  0%, 100% {
+    transform: scaleX(1) translateZ(0);
+  }
+  50% {
+    transform: scaleX(1.02) translateZ(0);
+  }
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .gradient-transition-wave,
+  .gradient-transition-scurve {
+    animation: none !important;
+  }
+  
+  .gradient-transition-curve svg path {
+    transition: none !important;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .gradient-transition {
+    /* Reduce complexity on mobile */
+    filter: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  
+  /* Simplify animations */
+  .gradient-transition-wave,
+  .gradient-transition-scurve {
+    animation-duration: 30s;
+  }
+}
+
+/* High DPI screen optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .gradient-transition svg {
+    shape-rendering: geometricPrecision;
+  }
+}
+
+/* Updated Problem Section integration */
+.problem-section-with-gradient {
+  position: relative;
+  isolation: isolate; /* Create stacking context */
+}
+
+/* Smooth color flow from hero through transition to problem */
+.hero-to-problem-flow {
+  --flow-start: #0a0f14;
+  --flow-mid: rgba(13, 17, 23, 0.98);
+  --flow-end: rgba(10, 15, 20, 1);
+  
+  background: linear-gradient(
+    to bottom,
+    var(--flow-start) 0%,
+    var(--flow-mid) 50%,
+    var(--flow-end) 100%
+  );
+}
+
+/* Premium glass effect for problem cards with gradient background */
+.problem-card {
+  background: rgba(26, 35, 50, 0.3) !important; /* More transparent */
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(16, 185, 129, 0.1);
+}
+
+/* Enhanced card hover with gradient background */
+.problem-card:hover {
+  background: rgba(26, 35, 50, 0.4) !important;
+  border-color: rgba(16, 185, 129, 0.2);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.1),
+    0 8px 24px rgba(0, 0, 0, 0.15),
+    0 16px 48px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(16, 185, 129, 0.1) inset;
+}
+
+/* Ensure text contrast on gradient backgrounds */
+.problem-section-content {
+  position: relative;
+  z-index: 2;
+}
+
+.problem-section-content h2,
+.problem-section-content h3 {
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.problem-section-content p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Subtle parallax effect for depth */
+@supports (transform: translate3d(0, 0, 0)) {
+  .gradient-transition {
+    transform: translate3d(0, 0, 0);
+  }
+  
+  .gradient-transition-wave {
+    animation: waveMotion3D 20s ease-in-out infinite;
+  }
+  
+  @keyframes waveMotion3D {
+    0%, 100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(-10px, 0, 0);
+    }
+  }
+}
+
+/* Loading state for smooth transitions */
+.gradient-transition-loading {
+  opacity: 0;
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar that matches gradient theme */
+.problem-section-with-gradient::-webkit-scrollbar {
+  width: 8px;
+}
+
+.problem-section-with-gradient::-webkit-scrollbar-track {
+  background: rgba(10, 15, 20, 0.5);
+}
+
+.problem-section-with-gradient::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    to bottom,
+    rgba(16, 185, 129, 0.3),
+    rgba(16, 185, 129, 0.1)
+  );
+  border-radius: 4px;
+}
+
+.problem-section-with-gradient::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    to bottom,
+    rgba(16, 185, 129, 0.5),
+    rgba(16, 185, 129, 0.2)
+  );
+}

@@ -810,31 +810,6 @@
     max-height: calc(100vh - 2rem);
   }
 }
-    padding: 0.5rem;
-    font-size: 0.75rem;
-    margin-bottom: 0.5rem;
-  }
-  
-  .auth-oauth-button {
-    padding: 0.5rem;
-    font-size: 0.75rem;
-  }
-  
-  .auth-field-group label {
-    font-size: 0.75rem;
-    margin-bottom: 0.25rem;
-  }
-  
-  .auth-field-group input {
-    padding: 0.5rem 0.75rem 0.5rem 2.5rem;
-    font-size: 0.875rem;
-  }
-  
-  .auth-submit-button {
-    padding: 0.75rem 1rem;
-    margin-top: 0.5rem;
-  }
-}
 
 /* Landscape orientation adjustments */
 @media (orientation: landscape) and (max-height: 500px) {

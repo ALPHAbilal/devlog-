@@ -67,7 +67,7 @@ export default function ApiKeysPage() {
       const { data: newKey, error } = await supabase
         .from('api_keys')
         .insert({
-          user_id: user!.id,
+          user_id: user.id,
           name: newKeyName.trim(),
           key_hash: keyHash,
           key_preview: apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4)

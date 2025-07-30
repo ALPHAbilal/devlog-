@@ -64,6 +64,7 @@ export default function SettingsClaude() {
   // Navigation sections
   const sections = [
     { id: 'account', label: 'Account' },
+    { id: 'api', label: 'API Keys' },
     { id: 'data', label: 'Data & Privacy' },
   ];
 
@@ -271,6 +272,52 @@ export default function SettingsClaude() {
                   >
                     Delete Account
                   </Button>
+                </div>
+              </SettingGroup>
+            </div>
+          )}
+
+          {/* API Keys Section */}
+          {activeSection === 'api' && (
+            <div className="content-section">
+              <h2 className="section-title">API Keys</h2>
+              
+              <SettingGroup title="Manage API Keys">
+                <div className="setting-item">
+                  <div className="setting-content">
+                    <p className="setting-description">
+                      API keys allow you to connect Journey Log to your AI tools like Claude Desktop, Cursor, and VS Code.
+                    </p>
+                  </div>
+                </div>
+                <div className="api-keys-link">
+                  <Button 
+                    onClick={() => navigate('/settings/api')}
+                    variant="primary"
+                  >
+                    Manage API Keys
+                  </Button>
+                </div>
+              </SettingGroup>
+
+              <SettingGroup title="Quick Setup">
+                <div className="setup-instructions">
+                  <ol className="setup-steps">
+                    <li>Create an API key using the button above</li>
+                    <li>Install the MCP server: <code>npm install -g @journey-log/mcp-server</code></li>
+                    <li>Configure your AI tool with the API key</li>
+                    <li>Start documenting your journey!</li>
+                  </ol>
+                  <div className="setup-link">
+                    <a 
+                      href="https://github.com/journey-log/mcp-server" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="external-link"
+                    >
+                      View full installation guide →
+                    </a>
+                  </div>
                 </div>
               </SettingGroup>
             </div>

@@ -1,3 +1,4 @@
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
@@ -18,8 +19,11 @@ import Terms from './pages/Terms';
 import SharedDocument from './pages/SharedDocument';
 import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
+
+// Lazy load the API settings page
+const ApiSettingsPage = lazy(() => import('./pages/settings/api'));
 import { ToastProvider } from './hooks/useToast';
-import { useEffect, Suspense, lazy } from 'react';
+import { useEffect } from 'react';
 
 // Create Sentry-enhanced routing component
 const SentryRoutes = Sentry.withSentryRouting(Routes);
@@ -160,6 +164,11 @@ function AppContent() {
         </Layout>
       } />
       <Route path="/settings" element={<SettingsClaude />} />
+      <Route path="/settings/api" element={
+        <Suspense fallback={<div className="loading-spinner">Loading...</div>}>
+          <ApiSettingsPage />
+        </Suspense>
+      } />
       <Route path="/shared/:shareCode" element={
         <Layout>
           <SharedDocument />

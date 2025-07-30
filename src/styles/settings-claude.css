@@ -732,3 +732,52 @@
     min-height: 48px;
   }
 }
+
+/* API Keys Section */
+.api-keys-link {
+  margin-top: var(--space-4);
+}
+
+.setup-instructions {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.setup-steps {
+  list-style: decimal;
+  padding-left: var(--space-6);
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.setup-steps li {
+  margin-bottom: var(--space-2);
+}
+
+.setup-steps code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+  color: var(--brand-primary);
+}
+
+.setup-link {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.external-link {
+  color: var(--brand-primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color var(--transition);
+}
+
+.external-link:hover {
+  color: var(--brand-primary-hover);
+  text-decoration: underline;
+}

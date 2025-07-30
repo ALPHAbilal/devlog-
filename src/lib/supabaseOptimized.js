@@ -96,7 +96,10 @@ class OptimizedSupabaseClient {
         global: {
           headers: {
             'x-client-info': 'journey-log-compass',
-            'x-connection-pooling': 'session'
+            'x-connection-pooling': 'session',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
           }
         },
         db: {

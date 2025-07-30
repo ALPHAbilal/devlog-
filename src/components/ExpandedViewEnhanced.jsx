@@ -400,7 +400,7 @@ const ExpandedView = forwardRef((props, ref) => {
 
   const handleDragLeave = (e) => {
     // Only clear if leaving the entire block area
-    if (e.relatedTarget && e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+    if (e.relatedTarget && e.currentTarget && e.relatedTarget instanceof Node && !e.currentTarget.contains(e.relatedTarget)) {
       setDropTargetId(null);
     } else if (!e.relatedTarget) {
       // If relatedTarget is null (mouse left the document), clear the drop target

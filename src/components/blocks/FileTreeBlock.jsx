@@ -242,7 +242,7 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
 
   const handleDragLeave = (e) => {
     // Only clear if we're actually leaving the element
-    if (e.relatedTarget && e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+    if (e.relatedTarget && e.currentTarget && e.relatedTarget instanceof Node && !e.currentTarget.contains(e.relatedTarget)) {
       setDragOver(false);
       setDragOverPosition(null);
     } else if (!e.relatedTarget) {
@@ -664,7 +664,7 @@ export default function FileTreeBlock({ block, onUpdate }) {
   };
 
   const handleRootDragLeave = (e) => {
-    if (e.relatedTarget && e.currentTarget && !e.currentTarget.contains(e.relatedTarget)) {
+    if (e.relatedTarget && e.currentTarget && e.relatedTarget instanceof Node && !e.currentTarget.contains(e.relatedTarget)) {
       setRootDragOver(false);
       setRootDropPosition(null);
     } else if (!e.relatedTarget) {

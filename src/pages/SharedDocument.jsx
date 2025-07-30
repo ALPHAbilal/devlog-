@@ -11,7 +11,7 @@ import {
   Lock, Eye, Download, MessageSquare, Share2, 
   AlertCircle, Shield, Clock, User, FileText
 } from 'lucide-react';
-import { shareService } from '../services/shareService';
+import { sophisticatedShareService } from '../services/sophisticatedShareService';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import Block from '../components/Block';
 import { useToast } from '../hooks/useToast';
@@ -55,30 +55,25 @@ export default function SharedDocument() {
     setError(null);
 
     try {
-      const access = await shareService.checkShareAccess(shareCode, providedPassword);
-      setAccessCheck(access);
+      const result = await sophisticatedShareService.accessSharedDocument(shareCode, {
+        password: providedPassword,
+        userEmail: user?.email || null
+      });
 
-      if (access.has_access) {
-        // Access granted, load document
-        const sharedDoc = await shareService.getSharedDocument(shareCode, providedPassword);
-        setDocument(sharedDoc.document);
-      } else if (access.requires_password) {
+      if (result.success) {
+        // Access granted, set document
+        setDocument(result.document);
+      } else if (result.requiresPassword) {
         setShowPasswordPrompt(true);
-      } else if (access.message === 'Authentication required' && !user) {
+      } else if (result.requiresAuth && !user) {
         // Redirect to login with return URL
         navigate(`/auth?redirect=/shared/${shareCode}`);
       } else {
-        setError(access.message || 'Access denied');
+        setError(result.error || 'Access denied');
       }
     } catch (err) {
       console.error('Share access error:', err);
-      if (err.message && err.message.includes('not found')) {
-        setError('This document no longer exists or has been deleted.');
-      } else if (err.message) {
-        setError(err.message);
-      } else {
-        setError('Failed to load shared document');
-      }
+      setError('Failed to load shared document');
     } finally {
       setLoading(false);
     }
@@ -215,7 +210,7 @@ export default function SharedDocument() {
 
   if (!document) return null;
 
-  const { permissions = [], shareSettings = {} } = document;
+  const { permissions = [], shareSettings = {}, shareMode = 'public' } = document;
   const canComment = permissions.includes('comment');
   const canEdit = permissions.includes('edit');
   const canDownload = permissions.includes('download');
@@ -270,7 +265,7 @@ export default function SharedDocument() {
                         ? document.title.substring(0, 25) + '...' 
                         : document.title}
                     </span>
-                    <span className="text-xs text-text-secondary/60">Shared document</span>
+                    <span className="text-xs text-text-secondary/60">{shareMode} share</span>
                   </div>
                   
                   {/* Pulse indicator */}
@@ -317,6 +312,19 @@ export default function SharedDocument() {
                             {permissions.join(', ')} Access
                           </span>
                         </div>
+                        
+                        {shareMode !== 'public' && (
+                          <div className="flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 backdrop-blur-sm rounded-lg border border-purple-500/20">
+                            {shareMode === 'team' ? (
+                              <Building className="w-3.5 h-3.5 text-purple-400" />
+                            ) : (
+                              <User className="w-3.5 h-3.5 text-purple-400" />
+                            )}
+                            <span className="text-xs text-purple-400 font-medium capitalize">
+                              {shareMode} Access
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -11,7 +11,7 @@ import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { autoSaveManager } from '../utils/autoSaveManager';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
-import { ShareDialogElite } from './ShareDialogElite';
+import EnhancedShareDialog from './EnhancedShareDialog';
 import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
@@ -1324,7 +1324,7 @@ const ExpandedView = forwardRef((props, ref) => {
 
       {/* Share Dialog */}
       {showShareDialog && (
-        <ShareDialogElite 
+        <EnhancedShareDialog 
           document={{
             id: entry.id,
             title: title,

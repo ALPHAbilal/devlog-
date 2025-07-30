@@ -147,7 +147,7 @@ export class ShareService {
       // we can simplify this to just check if password is required
       const { data: share, error: shareError } = await supabase
         .from('document_shares')
-        .select('password_hash, is_active')
+        .select('password_hash,is_active')
         .eq('share_code', shareCode)
         .single();
 
@@ -551,7 +551,7 @@ export class ShareService {
       // Get share ID from share code
       const { data: share } = await supabase
         .from('document_shares')
-        .select('id, document_id')
+        .select('id,document_id')
         .eq('share_code', shareCode)
         .single();
       

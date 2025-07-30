@@ -288,15 +288,10 @@ export class ShareService {
    */
   async getDocumentShares(documentId) {
     try {
+      // Simple query without join to avoid RLS issues
       const { data, error } = await supabase
         .from('document_shares')
-        .select(`
-          *,
-          document_share_users(
-            email,
-            accepted_at
-          )
-        `)
+        .select('*')
         .eq('document_id', documentId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });

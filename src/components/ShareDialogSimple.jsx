@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Copy, Check, ChevronDown, Lock, Calendar } from 'lucide-react';
+import { X, Copy, Check } from 'lucide-react';
 import { shareService } from '../services/shareService';
 import { useToast } from '../hooks/useToast';
 
@@ -7,12 +7,6 @@ export function ShareDialogSimple({ document, isOpen, onClose }) {
   const [shareUrl, setShareUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [permission, setPermission] = useState('view');
-  
-  // Advanced options
-  const [password, setPassword] = useState('');
-  const [expiresIn, setExpiresIn] = useState('');
   
   const dialogRef = useRef(null);
   const linkInputRef = useRef(null);
@@ -90,25 +84,6 @@ export function ShareDialogSimple({ document, isOpen, onClose }) {
     }
   };
 
-  const handleUpdateShare = async () => {
-    setLoading(true);
-    try {
-      // Create a new share with updated settings
-      const result = await shareService.createShareLink(document.id, {
-        permissions: [permission],
-        password: password || null,
-        expiresIn: expiresIn || null
-      });
-      
-      setShareUrl(result.shareUrl);
-      showToast('Share settings updated', 'success');
-      setShowOptions(false);
-    } catch (error) {
-      showToast('Failed to update share settings', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -157,12 +132,18 @@ export function ShareDialogSimple({ document, isOpen, onClose }) {
         `}</style>
         {/* Header */}
         <div className="relative flex items-center justify-between p-6 border-b border-gray-700/30">
-          <h2 className="text-xl font-semibold text-text-primary tracking-tight">
-            Share "{document.title}"
-          </h2>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-text-secondary/80 tracking-wide">Share</p>
+            <h2 className="text-xl font-semibold text-text-primary tracking-tight leading-tight">
+              {document.title.length > 40 
+                ? document.title.substring(0, 40) + '...'
+                : document.title
+              }
+            </h2>
+          </div>
           <button
             onClick={onClose}
-            className="group p-2 hover:bg-dark-lighter/30 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
+            className="group p-2 hover:bg-dark-lighter/30 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95 self-start"
           >
             <X className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
           </button>
@@ -220,128 +201,9 @@ export function ShareDialogSimple({ document, isOpen, onClose }) {
           <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500/10 to-blue-600/5 rounded-xl border border-blue-500/20">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
             <span className="text-sm text-blue-300 font-medium">
-              Anyone with this link can {permission === 'edit' ? 'edit' : 'view'} this document
+              Anyone with this link can view this document
             </span>
           </div>
-
-          {/* Options Toggle */}
-          <button
-            onClick={() => setShowOptions(!showOptions)}
-            className="w-full flex items-center justify-between px-4 py-3 
-                     text-sm text-text-secondary hover:text-text-primary
-                     bg-dark-primary/30 hover:bg-dark-primary/50 rounded-xl 
-                     transition-all duration-200 border border-gray-700/30 hover:border-gray-600/40
-                     group"
-          >
-            <span className="font-medium">Advanced Options</span>
-            <ChevronDown className={`w-4 h-4 transition-transform duration-300 group-hover:text-blue-400 ${
-              showOptions ? 'rotate-180' : ''
-            }`} />
-          </button>
-
-          {/* Advanced Options */}
-          {showOptions && (
-            <div className="space-y-4 pt-4 mt-2 border-t border-gray-700/30 animate-slideDown">
-              <style jsx>{`
-                @keyframes slideDown {
-                  from {
-                    opacity: 0;
-                    transform: translateY(-10px);
-                  }
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                  }
-                }
-                
-                .animate-slideDown {
-                  animation: slideDown 0.3s ease-out;
-                }
-              `}</style>
-              
-              {/* Permission Selector */}
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Permission Level
-                </label>
-                <select
-                  value={permission}
-                  onChange={(e) => setPermission(e.target.value)}
-                  className="w-full px-4 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
-                           border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
-                           text-sm transition-all duration-200 hover:border-gray-600/50 cursor-pointer"
-                >
-                  <option value="view">👁️ &nbsp; Can view</option>
-                  <option value="edit">✏️ &nbsp; Can edit</option>
-                </select>
-              </div>
-
-              {/* Password Protection */}
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Password Protection
-                </label>
-                <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 group-focus-within:text-blue-400 transition-colors" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Add password for extra security"
-                    className="w-full pl-12 pr-4 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
-                             border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
-                             text-sm placeholder-text-secondary/50 transition-all duration-200 hover:border-gray-600/50"
-                  />
-                </div>
-              </div>
-
-              {/* Expiration */}
-              <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">
-                  Link Expiration
-                </label>
-                <div className="relative group">
-                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 group-focus-within:text-blue-400 transition-colors" />
-                  <select
-                    value={expiresIn}
-                    onChange={(e) => setExpiresIn(e.target.value)}
-                    className="w-full pl-12 pr-10 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
-                             border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
-                             text-sm appearance-none transition-all duration-200 hover:border-gray-600/50 cursor-pointer"
-                  >
-                    <option value="">Never expires</option>
-                    <option value="1d">Expires in 1 day</option>
-                    <option value="7d">Expires in 7 days</option>
-                    <option value="30d">Expires in 30 days</option>
-                  </select>
-                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Update Button */}
-              <button
-                onClick={handleUpdateShare}
-                disabled={loading}
-                className="w-full px-5 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white
-                         rounded-xl font-semibold transition-all duration-300 disabled:from-gray-600 disabled:to-gray-700
-                         disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]
-                         shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40
-                         relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  {loading ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Updating...
-                    </>
-                  ) : (
-                    'Update Share Settings'
-                  )}
-                </span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>

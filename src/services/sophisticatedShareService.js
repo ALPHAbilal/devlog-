@@ -198,44 +198,75 @@ export class SophisticatedShareService {
    */
   async getDocumentShares(documentId) {
     try {
-      const { data, error } = await supabase
+      // First, get the base shares without joins to avoid RLS recursion
+      const { data: shares, error: sharesError } = await supabase
         .from('document_shares')
-        .select(`
-          *,
-          team_shares(
-            team_id,
-            team_name,
-            team_domain
-          ),
-          share_recipients(
-            email,
-            user_id,
-            accepted_at,
-            personal_permissions
-          )
-        `)
+        .select('*')
         .eq('document_id', documentId)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (sharesError) throw sharesError;
+      if (!shares || shares.length === 0) return [];
 
-      return data.map(share => ({
-        ...share,
-        shareUrl: `${window.location.origin}/shared/${share.share_code}`,
-        isExpired: share.expires_at && new Date(share.expires_at) < new Date(),
-        viewsRemaining: share.max_views ? share.max_views - share.view_count : null,
+      // Get share IDs for subsequent queries
+      const shareIds = shares.map(s => s.id);
+
+      // Fetch team shares separately
+      const { data: teamShares } = await supabase
+        .from('team_shares')
+        .select('share_id, team_id, team_name, team_domain')
+        .in('share_id', shareIds);
+
+      // Fetch recipients separately
+      const { data: recipients } = await supabase
+        .from('share_recipients')
+        .select('share_id, email, user_id, accepted_at, personal_permissions')
+        .in('share_id', shareIds);
+
+      // Build a map for efficient lookup
+      const teamSharesMap = {};
+      const recipientsMap = {};
+
+      if (teamShares) {
+        teamShares.forEach(ts => {
+          if (!teamSharesMap[ts.share_id]) {
+            teamSharesMap[ts.share_id] = [];
+          }
+          teamSharesMap[ts.share_id].push(ts);
+        });
+      }
+
+      if (recipients) {
+        recipients.forEach(r => {
+          if (!recipientsMap[r.share_id]) {
+            recipientsMap[r.share_id] = [];
+          }
+          recipientsMap[r.share_id].push(r);
+        });
+      }
+
+      // Combine the data
+      return shares.map(share => {
+        const shareRecipients = recipientsMap[share.id] || [];
         
-        // Mode-specific data
-        teams: share.team_shares || [],
-        recipients: share.share_recipients || [],
-        
-        // Stats
-        totalRecipients: share.share_mode === 'private' ? share.share_recipients?.length || 0 : null,
-        acceptedRecipients: share.share_mode === 'private' 
-          ? share.share_recipients?.filter(r => r.accepted_at).length || 0 
-          : null
-      }));
+        return {
+          ...share,
+          shareUrl: `${window.location.origin}/shared/${share.share_code}`,
+          isExpired: share.expires_at && new Date(share.expires_at) < new Date(),
+          viewsRemaining: share.max_views ? share.max_views - share.view_count : null,
+          
+          // Mode-specific data
+          teams: teamSharesMap[share.id] || [],
+          recipients: shareRecipients,
+          
+          // Stats
+          totalRecipients: share.share_mode === 'private' ? shareRecipients.length : null,
+          acceptedRecipients: share.share_mode === 'private' 
+            ? shareRecipients.filter(r => r.accepted_at).length
+            : null
+        };
+      });
     } catch (error) {
       logError(error, { context: 'getDocumentShares', documentId });
       throw error;

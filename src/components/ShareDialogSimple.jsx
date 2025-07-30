@@ -113,140 +113,208 @@ export function ShareDialogSimple({ document, isOpen, onClose }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
       <div 
         ref={dialogRef}
-        className="bg-dark-secondary rounded-lg w-full max-w-md shadow-xl"
+        className="bg-gradient-to-b from-dark-secondary/95 to-dark-secondary/90 backdrop-blur-xl rounded-2xl w-full max-w-md shadow-2xl border border-gray-700/40 transform animate-scaleIn relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
+        style={{
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 100px rgba(59, 130, 246, 0.1)',
+        }}
       >
+        {/* Animated gradient overlay */}
+        <div 
+          className="absolute inset-0 opacity-5 pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
+          }}
+        />
+        
+        <style jsx>{`
+          @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+          }
+          
+          @keyframes scaleIn {
+            from { 
+              opacity: 0;
+              transform: scale(0.9);
+            }
+            to { 
+              opacity: 1;
+              transform: scale(1);
+            }
+          }
+          
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+          }
+          
+          .animate-scaleIn {
+            animation: scaleIn 0.3s ease-out;
+          }
+        `}</style>
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-dark-lighter/30">
-          <h2 className="text-lg font-medium text-text-primary">
+        <div className="relative flex items-center justify-between p-6 border-b border-gray-700/30">
+          <h2 className="text-xl font-semibold text-text-primary tracking-tight">
             Share "{document.title}"
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-dark-lighter/50 rounded-lg transition-colors"
+            className="group p-2 hover:bg-dark-lighter/30 rounded-xl transition-all duration-200 hover:scale-105 active:scale-95"
           >
-            <X className="w-5 h-5 text-text-secondary" />
+            <X className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 space-y-4">
+        <div className="relative p-6 space-y-5">
           {/* Share Link */}
-          <div className="flex gap-2">
-            <input
-              ref={linkInputRef}
-              type="text"
-              value={shareUrl}
-              readOnly
-              className="flex-1 px-3 py-2 bg-dark-primary/50 text-text-primary rounded-lg
-                       border border-dark-lighter/30 focus:outline-none focus:border-blue-500/50
-                       text-sm font-mono"
-              placeholder={loading ? "Creating link..." : ""}
-            />
+          <div className="flex gap-3">
+            <div className="relative flex-1">
+              <input
+                ref={linkInputRef}
+                type="text"
+                value={shareUrl}
+                readOnly
+                className="w-full px-4 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
+                         border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
+                         text-sm font-mono transition-all duration-200 hover:border-gray-600/50"
+                placeholder={loading ? "Creating link..." : ""}
+              />
+              {loading && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin" />
+                </div>
+              )}
+            </div>
             <button
               onClick={handleCopy}
               disabled={!shareUrl || loading}
-              className={`px-4 py-2 rounded-lg font-medium transition-all
-                       flex items-center gap-2 ${
+              className={`relative px-5 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95
+                       flex items-center gap-2.5 overflow-hidden ${
                 copied
-                  ? 'bg-green-500 text-white'
-                  : 'bg-blue-500 hover:bg-blue-600 text-white disabled:bg-gray-600 disabled:cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30'
+                  : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40'
               }`}
             >
+              <div className={`absolute inset-0 bg-white/20 transition-transform duration-500 ${
+                copied ? 'translate-x-0' : '-translate-x-full'
+              }`} />
               {copied ? (
                 <>
-                  <Check className="w-4 h-4" />
-                  Copied
+                  <Check className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10">Copied!</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4" />
-                  Copy
+                  <Copy className="w-4 h-4 relative z-10" />
+                  <span className="relative z-10">Copy</span>
                 </>
               )}
             </button>
           </div>
 
           {/* Permission Notice */}
-          <div className="text-sm text-text-secondary">
-            Anyone with this link can {permission === 'edit' ? 'edit' : 'view'} this document
+          <div className="flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500/10 to-blue-600/5 rounded-xl border border-blue-500/20">
+            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+            <span className="text-sm text-blue-300 font-medium">
+              Anyone with this link can {permission === 'edit' ? 'edit' : 'view'} this document
+            </span>
           </div>
 
           {/* Options Toggle */}
           <button
             onClick={() => setShowOptions(!showOptions)}
-            className="w-full flex items-center justify-between px-3 py-2 
+            className="w-full flex items-center justify-between px-4 py-3 
                      text-sm text-text-secondary hover:text-text-primary
-                     hover:bg-dark-lighter/30 rounded-lg transition-all"
+                     bg-dark-primary/30 hover:bg-dark-primary/50 rounded-xl 
+                     transition-all duration-200 border border-gray-700/30 hover:border-gray-600/40
+                     group"
           >
-            <span>Options</span>
-            <ChevronDown className={`w-4 h-4 transition-transform ${
+            <span className="font-medium">Advanced Options</span>
+            <ChevronDown className={`w-4 h-4 transition-transform duration-300 group-hover:text-blue-400 ${
               showOptions ? 'rotate-180' : ''
             }`} />
           </button>
 
           {/* Advanced Options */}
           {showOptions && (
-            <div className="space-y-3 pt-2 border-t border-dark-lighter/30">
+            <div className="space-y-4 pt-4 mt-2 border-t border-gray-700/30 animate-slideDown">
+              <style jsx>{`
+                @keyframes slideDown {
+                  from {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                  }
+                  to {
+                    opacity: 1;
+                    transform: translateY(0);
+                  }
+                }
+                
+                .animate-slideDown {
+                  animation: slideDown 0.3s ease-out;
+                }
+              `}</style>
+              
               {/* Permission Selector */}
               <div>
-                <label className="block text-sm text-text-secondary mb-1.5">
-                  Permission
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Permission Level
                 </label>
                 <select
                   value={permission}
                   onChange={(e) => setPermission(e.target.value)}
-                  className="w-full px-3 py-2 bg-dark-primary/50 text-text-primary rounded-lg
-                           border border-dark-lighter/30 focus:outline-none focus:border-blue-500/50
-                           text-sm"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
+                           border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
+                           text-sm transition-all duration-200 hover:border-gray-600/50 cursor-pointer"
                 >
-                  <option value="view">Can view</option>
-                  <option value="edit">Can edit</option>
+                  <option value="view">👁️ &nbsp; Can view</option>
+                  <option value="edit">✏️ &nbsp; Can edit</option>
                 </select>
               </div>
 
               {/* Password Protection */}
               <div>
-                <label className="block text-sm text-text-secondary mb-1.5">
-                  Password (optional)
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Password Protection
                 </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50" />
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 group-focus-within:text-blue-400 transition-colors" />
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Add password"
-                    className="w-full pl-10 pr-3 py-2 bg-dark-primary/50 text-text-primary rounded-lg
-                             border border-dark-lighter/30 focus:outline-none focus:border-blue-500/50
-                             text-sm placeholder-text-secondary/50"
+                    placeholder="Add password for extra security"
+                    className="w-full pl-12 pr-4 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
+                             border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
+                             text-sm placeholder-text-secondary/50 transition-all duration-200 hover:border-gray-600/50"
                   />
                 </div>
               </div>
 
               {/* Expiration */}
               <div>
-                <label className="block text-sm text-text-secondary mb-1.5">
-                  Expires after
+                <label className="block text-sm font-medium text-text-secondary mb-2">
+                  Link Expiration
                 </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50" />
+                <div className="relative group">
+                  <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 group-focus-within:text-blue-400 transition-colors" />
                   <select
                     value={expiresIn}
                     onChange={(e) => setExpiresIn(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 bg-dark-primary/50 text-text-primary rounded-lg
-                             border border-dark-lighter/30 focus:outline-none focus:border-blue-500/50
-                             text-sm appearance-none"
+                    className="w-full pl-12 pr-10 py-3 bg-gradient-to-r from-dark-primary/60 to-dark-primary/40 text-text-primary rounded-xl
+                             border border-gray-700/40 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
+                             text-sm appearance-none transition-all duration-200 hover:border-gray-600/50 cursor-pointer"
                   >
-                    <option value="">Never</option>
-                    <option value="1d">1 day</option>
-                    <option value="7d">7 days</option>
-                    <option value="30d">30 days</option>
+                    <option value="">Never expires</option>
+                    <option value="1d">Expires in 1 day</option>
+                    <option value="7d">Expires in 7 days</option>
+                    <option value="30d">Expires in 30 days</option>
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 pointer-events-none" />
+                  <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary/50 pointer-events-none" />
                 </div>
               </div>
 
@@ -254,11 +322,23 @@ export function ShareDialogSimple({ document, isOpen, onClose }) {
               <button
                 onClick={handleUpdateShare}
                 disabled={loading}
-                className="w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white
-                         rounded-lg font-medium transition-colors disabled:bg-gray-600
-                         disabled:cursor-not-allowed"
+                className="w-full px-5 py-3.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white
+                         rounded-xl font-semibold transition-all duration-300 disabled:from-gray-600 disabled:to-gray-700
+                         disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]
+                         shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40
+                         relative overflow-hidden group"
               >
-                Update Share Settings
+                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Share Settings'
+                  )}
+                </span>
               </button>
             </div>
           )}

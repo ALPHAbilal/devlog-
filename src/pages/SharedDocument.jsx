@@ -229,27 +229,52 @@ export default function SharedDocument() {
         className={`fixed z-50 transition-all duration-[400ms] ease-out ${
           isScrolled && !isHeaderHovered 
             ? 'top-6 left-6 cursor-pointer' 
-            : 'top-0 left-0 right-0'
+            : 'top-6 left-0 right-0'
         }`}
         onMouseEnter={() => setIsHeaderHovered(true)}
         onMouseLeave={() => setIsHeaderHovered(false)}
       >
         <div 
-          className={`bg-dark-lighter/70 backdrop-blur-2xl border border-gray-700/30 shadow-2xl transition-all duration-[400ms] ease-out ${
+          className={`transition-all duration-[400ms] ease-out ${
             isScrolled && !isHeaderHovered 
-              ? 'rounded-2xl' 
-              : 'rounded-none border-x-0 border-t-0'
+              ? '' 
+              : 'max-w-5xl mx-auto px-6'
           }`}
-          style={{
-            boxShadow: isScrolled && !isHeaderHovered 
-              ? '0 10px 30px rgba(0, 0, 0, 0.5), 0 0 50px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-              : '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
-          }}
         >
-          <div className={`transition-all duration-[400ms] ease-out ${
+          <div 
+            className={`bg-dark-lighter/80 backdrop-blur-3xl border border-gray-700/40 shadow-2xl transition-all duration-[400ms] ease-out relative overflow-hidden ${
+              isScrolled && !isHeaderHovered 
+                ? 'rounded-2xl' 
+                : 'rounded-3xl'
+            }`}
+            style={{
+              boxShadow: isScrolled && !isHeaderHovered 
+                ? '0 10px 30px rgba(0, 0, 0, 0.6), 0 0 50px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+                : '0 20px 40px rgba(0, 0, 0, 0.5), 0 0 80px rgba(59, 130, 246, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+              background: isScrolled && !isHeaderHovered
+                ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%)'
+                : 'linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0.8) 100%)'
+            }}
+          >
+            {/* Animated gradient overlay */}
+            <div 
+              className="absolute inset-0 opacity-10"
+              style={{
+                background: 'linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.1) 50%, transparent 70%)',
+                animation: 'shimmer 3s infinite',
+              }}
+            />
+            
+            <style jsx>{`
+              @keyframes shimmer {
+                0% { transform: translateX(-100%); }
+                100% { transform: translateX(100%); }
+              }
+            `}</style>
+          <div className={`transition-all duration-[400ms] ease-out relative z-10 ${
             isScrolled && !isHeaderHovered 
               ? 'px-3 py-3' 
-              : 'max-w-6xl mx-auto px-6 py-5'
+              : 'px-8 py-6'
           }`}>
             <div className={`flex items-center ${
               isScrolled && !isHeaderHovered 
@@ -260,49 +285,55 @@ export default function SharedDocument() {
               {isScrolled && !isHeaderHovered ? (
                 <div className="flex items-center gap-3">
                   {/* Compact Icon */}
-                  <div className="p-2.5 bg-dark-primary/50 backdrop-blur-sm rounded-xl border border-gray-700/40 shadow-lg flex-shrink-0">
+                  <div className="p-2.5 bg-gradient-to-br from-blue-500/20 to-blue-600/10 backdrop-blur-sm rounded-xl border border-blue-500/30 shadow-lg flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
                     <Share2 className="w-5 h-5 text-blue-400" />
                   </div>
                   
                   {/* Abbreviated Title with subtle animation */}
                   <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-text-primary truncate max-w-[180px]">
+                    <span className="text-sm font-semibold text-text-primary truncate max-w-[180px] tracking-tight">
                       {document.title.length > 25 
                         ? document.title.substring(0, 25) + '...' 
                         : document.title}
                     </span>
-                    <span className="text-xs text-text-secondary/60">shared</span>
+                    <span className="text-xs text-text-secondary/60 font-medium">shared document</span>
                   </div>
                   
                   {/* Pulse indicator */}
-                  <div className="w-2 h-2 bg-accent-green rounded-full animate-pulse" />
+                  <div className="relative">
+                    <div className="w-2 h-2 bg-accent-green rounded-full animate-pulse" />
+                    <div className="absolute inset-0 w-2 h-2 bg-accent-green rounded-full animate-ping opacity-75" />
+                  </div>
                 </div>
               ) : (
                 <>
                   {/* Full Mode Content */}
                   <div className="flex items-center gap-5">
                     {/* Premium Icon Container */}
-                    <div className="p-3 bg-dark-primary/40 backdrop-blur-sm rounded-xl border border-gray-700/40 shadow-lg transform transition-transform duration-300 hover:scale-105">
-                      <Share2 className="w-6 h-6 text-blue-400" />
+                    <div className="relative group">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 transition duration-300" />
+                      <div className="relative p-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 backdrop-blur-sm rounded-2xl border border-blue-500/20 shadow-lg transform transition-all duration-300 hover:scale-105 hover:border-blue-400/30">
+                        <Share2 className="w-7 h-7 text-blue-400" />
+                      </div>
                     </div>
                     
                     {/* Document Info */}
-                    <div className="flex flex-col gap-2 transition-all duration-[400ms]">
-                      <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
+                    <div className="flex flex-col gap-3 transition-all duration-[400ms]">
+                      <h1 className="text-3xl font-bold text-text-primary tracking-tight bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text">
                         {document.title}
                       </h1>
                       
                       {/* Enhanced Metadata Badges */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-dark-primary/30 backdrop-blur-sm rounded-lg border border-gray-700/30">
-                          <User className="w-3.5 h-3.5 text-text-secondary/70" />
+                      <div className="flex items-center gap-2.5 flex-wrap">
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-dark-primary/40 to-dark-primary/30 backdrop-blur-sm rounded-xl border border-gray-700/40 hover:border-gray-600/50 transition-all duration-200 hover:shadow-lg">
+                          <User className="w-4 h-4 text-blue-400/80" />
                           <span className="text-xs text-text-secondary font-medium">
                             {document.profiles?.display_name || document.profiles?.username || 'Anonymous'}
                           </span>
                         </div>
                         
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-dark-primary/30 backdrop-blur-sm rounded-lg border border-gray-700/30">
-                          <Clock className="w-3.5 h-3.5 text-text-secondary/70" />
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-dark-primary/40 to-dark-primary/30 backdrop-blur-sm rounded-xl border border-gray-700/40 hover:border-gray-600/50 transition-all duration-200 hover:shadow-lg">
+                          <Clock className="w-4 h-4 text-blue-400/80" />
                           <span className="text-xs text-text-secondary font-medium">
                             {new Date(document.updated_at).toLocaleDateString('en-US', { 
                               month: 'short', 
@@ -312,9 +343,9 @@ export default function SharedDocument() {
                           </span>
                         </div>
                         
-                        <div className="flex items-center gap-1.5 px-3 py-1 bg-accent-green/10 backdrop-blur-sm rounded-lg border border-accent-green/20">
-                          <Eye className="w-3.5 h-3.5 text-accent-green" />
-                          <span className="text-xs text-accent-green font-medium capitalize">
+                        <div className="flex items-center gap-2 px-3.5 py-1.5 bg-gradient-to-r from-accent-green/15 to-accent-green/10 backdrop-blur-sm rounded-xl border border-accent-green/30 hover:border-accent-green/40 transition-all duration-200 hover:shadow-lg hover:shadow-accent-green/10">
+                          <Eye className="w-4 h-4 text-accent-green" />
+                          <span className="text-xs text-accent-green font-semibold capitalize">
                             {permissions.join(', ')} Access
                           </span>
                         </div>
@@ -327,37 +358,40 @@ export default function SharedDocument() {
                     {canDownload && (
                       <button
                         onClick={() => handleAction('download')}
-                        className="group p-3 bg-dark-primary/40 hover:bg-dark-primary/60 
-                                 backdrop-blur-sm rounded-xl transition-all duration-200
+                        className="group relative p-3.5 bg-gradient-to-r from-dark-primary/50 to-dark-primary/40 hover:from-dark-primary/60 hover:to-dark-primary/50 
+                                 backdrop-blur-sm rounded-xl transition-all duration-300
                                  border border-gray-700/40 hover:border-gray-600/50
-                                 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                 shadow-lg hover:shadow-xl hover:shadow-black/30 transform hover:scale-105 active:scale-95"
                         title="Download Document"
                       >
-                        <Download className="w-5 h-5 text-text-secondary group-hover:text-text-primary transition-colors" />
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-blue-600/0 hover:from-blue-500/10 hover:to-blue-600/10 transition-all duration-300" />
+                        <Download className="w-5 h-5 text-text-secondary group-hover:text-blue-400 transition-colors relative z-10" />
                       </button>
                     )}
                     <button
                       onClick={() => handleAction('copy')}
-                      className="group flex items-center gap-2 px-4 py-2.5 
-                               bg-blue-500/10 hover:bg-blue-500/20 
-                               backdrop-blur-sm rounded-xl transition-all duration-200
-                               border border-blue-500/20 hover:border-blue-500/30
-                               shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                      className="group relative flex items-center gap-2.5 px-5 py-3 overflow-hidden
+                               bg-gradient-to-r from-blue-500/15 to-blue-600/10 hover:from-blue-500/25 hover:to-blue-600/20 
+                               backdrop-blur-sm rounded-xl transition-all duration-300
+                               border border-blue-500/30 hover:border-blue-400/50
+                               shadow-lg hover:shadow-xl hover:shadow-blue-500/20 transform hover:scale-105 active:scale-95"
                       title="Copy share link"
                     >
-                      <Share2 className="w-5 h-5 text-blue-400" />
-                      <span className="text-sm font-medium text-blue-400">Share Link</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
+                      <Share2 className="w-5 h-5 text-blue-400 relative z-10" />
+                      <span className="text-sm font-semibold text-blue-400 relative z-10">Share Link</span>
                     </button>
                   </div>
                 </>
               )}
             </div>
           </div>
+          </div>
         </div>
       </div>
 
       {/* Spacer for header when not scrolled */}
-      {!isScrolled && <div className="h-[88px]" />}
+      {!isScrolled && <div className="h-[120px]" />}
 
       {/* Enhanced Security Notice */}
       {shareSettings.watermark && (

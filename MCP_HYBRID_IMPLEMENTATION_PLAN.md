@@ -629,3 +629,45 @@ The hybrid approach (local MCP + API endpoints) is:
   2. Next: Run SQL in Supabase
   3. Later: Publish MCP server to NPM
   4. Then: Announce feature to users
+
+  -----------------
+  
+  I've fixed the Vercel build errors:
+
+  1. Fixed TypeScript/Next.js Issues
+
+  - Converted api.tsx to api.jsx (removed TypeScript)
+  - Changed from next/router to react-router-dom
+  - Updated imports to use Lucide icons instead of react-icons
+
+  2. Restructured API for Vercel Functions
+
+  - Moved API files from /src/pages/api/ to /api/ (root level)
+  - This is the correct location for Vercel Functions in a Vite project
+  - Updated vercel.json to handle API routes properly
+
+  3. Simplified API Structure
+
+  - Created a simple health endpoint without authentication for now
+  - The full API implementation would need to be adapted for Vercel Functions format
+
+  What Happens Now:
+
+  1. You commit and push - The build should succeed
+  2. Vercel deploys - Your site goes live with the new settings page
+  3. API Note - The MCP API endpoints need more work to be fully functional as Vercel Functions
+
+  For Full MCP API Implementation:
+
+  Since we're using Vercel Functions (not Next.js), each API file needs to:
+  - Export a default function handler
+  - Not use Next.js specific imports
+  - Handle authentication differently
+
+  The current setup gives you:
+  - ✅ Working settings page with API Keys section
+  - ✅ API key management UI ready
+  - ✅ Database tables created
+  - ⚠️ API endpoints need conversion to Vercel Functions format
+
+  You can now push your changes and the build should succeed! 🚀

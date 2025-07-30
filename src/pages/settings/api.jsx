@@ -1,36 +1,28 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
-import { useUser } from '@supabase/auth-helpers-react'
-import { supabase } from '@/lib/supabase'
-import { toast } from 'react-hot-toast'
-import Layout from '@/components/Layout'
-import { FiKey, FiCopy, FiTrash2, FiPlus } from 'react-icons/fi'
-
-interface ApiKey {
-  id: string
-  name: string
-  key_preview: string
-  created_at: string
-  last_used_at: string | null
-  is_active: boolean
-}
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContextOptimized'
+import { supabase } from '../../lib/supabase'
+import { useToast } from '../../hooks/useToast'
+import Layout from '../../components/Layout'
+import { Key, Copy, Trash2, Plus } from 'lucide-react'
 
 export default function ApiKeysPage() {
-  const user = useUser()
-  const router = useRouter()
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const toast = useToast()
+  const [apiKeys, setApiKeys] = useState([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
-  const [newApiKey, setNewApiKey] = useState<string | null>(null)
+  const [newApiKey, setNewApiKey] = useState(null)
 
   useEffect(() => {
     if (!user) {
-      router.push('/login')
+      navigate('/auth')
       return
     }
     loadApiKeys()
-  }, [user])
+  }, [user, navigate])
 
   const loadApiKeys = async () => {
     try {
@@ -41,7 +33,7 @@ export default function ApiKeysPage() {
 
       if (error) throw error
       setApiKeys(data || [])
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to load API keys')
       console.error('Error loading API keys:', error)
     } finally {
@@ -90,7 +82,7 @@ export default function ApiKeysPage() {
       setApiKeys([newKey, ...apiKeys])
       setNewKeyName('')
       toast.success('API key created successfully')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to create API key')
       console.error('Error creating API key:', error)
     } finally {
@@ -98,7 +90,7 @@ export default function ApiKeysPage() {
     }
   }
 
-  const deleteApiKey = async (id: string) => {
+  const deleteApiKey = async (id) => {
     if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) {
       return
     }
@@ -113,13 +105,13 @@ export default function ApiKeysPage() {
 
       setApiKeys(apiKeys.filter(key => key.id !== id))
       toast.success('API key deleted')
-    } catch (error: any) {
+    } catch (error) {
       toast.error('Failed to delete API key')
       console.error('Error deleting API key:', error)
     }
   }
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard')
   }
@@ -155,7 +147,7 @@ export default function ApiKeysPage() {
                     onClick={() => copyToClipboard(newApiKey)}
                     className="p-2 text-green-700 hover:bg-green-100 rounded transition-colors"
                   >
-                    <FiCopy className="w-5 h-5" />
+                    <Copy className="w-5 h-5" />
                   </button>
                 </div>
               </div>
@@ -186,7 +178,7 @@ export default function ApiKeysPage() {
               disabled={creating || !newKeyName.trim()}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors"
             >
-              <FiPlus className="w-4 h-4" />
+              <Plus className="w-4 h-4" />
               <span>Create Key</span>
             </button>
           </div>
@@ -202,7 +194,7 @@ export default function ApiKeysPage() {
             </div>
           ) : apiKeys.length === 0 ? (
             <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-              <FiKey className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <Key className="w-12 h-12 mx-auto mb-3 text-gray-400" />
               <p>No API keys yet. Create one to get started!</p>
             </div>
           ) : (
@@ -215,7 +207,7 @@ export default function ApiKeysPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <FiKey className="w-5 h-5 text-gray-400" />
+                        <Key className="w-5 h-5 text-gray-400" />
                         <h3 className="font-semibold">{key.name}</h3>
                         <code className="text-sm text-gray-500 font-mono">
                           {key.key_preview}
@@ -235,7 +227,7 @@ export default function ApiKeysPage() {
                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete API key"
                     >
-                      <FiTrash2 className="w-5 h-5" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

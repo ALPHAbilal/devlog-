@@ -1,30 +1,23 @@
-import type { NextApiResponse } from 'next';
-import { withApiAuth, AuthenticatedRequest, checkRateLimit } from '@/lib/api-auth';
-import { createClient } from '@supabase/supabase-js';
+import { authenticateRequest, checkRateLimit } from '../../_utils/auth.js';
 
-interface ConversationMessage {
-  role: 'user' | 'assistant';
-  content: string;
-}
-
-interface CodeChange {
-  file: string;
-  before: string;
-  after: string;
-  description: string;
-}
-
-async function handler(
-  req: AuthenticatedRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Authenticate request
+  const { user, supabase, error: authError } = await authenticateRequest(req);
+  
+  if (authError) {
+    return res.status(authError.status).json({ 
+      error: 'Unauthorized',
+      message: authError.message 
+    });
+  }
+
   // Rate limiting (lower limit for conversation captures)
-  if (!checkRateLimit(req.user!.id, 50)) {
+  if (!checkRateLimit(user.id, 50)) {
     return res.status(429).json({ 
       error: 'Rate limit exceeded',
       message: 'Too many requests. Please try again later.'
@@ -71,18 +64,12 @@ async function handler(
   }
 
   try {
-    // Create admin Supabase client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
     // Verify document ownership
     const { data: doc, error: docError } = await supabase
       .from('documents')
       .select('id, title')
       .eq('id', document_id)
-      .eq('user_id', req.user!.id)
+      .eq('user_id', user.id)
       .is('deleted_at', null)
       .single();
 
@@ -94,10 +81,10 @@ async function handler(
     }
 
     // Process the conversation
-    const processedMessages = conversation.map((msg: ConversationMessage, index: number) => ({
+    const processedMessages = conversation.map((msg, index) => ({
       role: msg.role,
       content: msg.content,
-      timestamp: new Date(Date.now() + index).toISOString() // Ensure unique timestamps
+      timestamp: new Date(Date.now() + index).toISOString()
     }));
 
     // Generate summary if not provided
@@ -158,30 +145,6 @@ async function handler(
       });
     }
 
-    // If there are code changes, create additional code blocks
-    if (code_changes && Array.isArray(code_changes) && code_changes.length > 0) {
-      let nextPosition = position + 1;
-      
-      for (const change of code_changes) {
-        const codeContent = formatCodeChange(change);
-        
-        await supabase
-          .from('blocks')
-          .insert({
-            document_id,
-            type: 'code',
-            content: codeContent,
-            metadata: {
-              language: detectLanguage(change.file),
-              is_diff: true,
-              file_path: change.file,
-              created_via: 'mcp'
-            },
-            position: nextPosition++
-          });
-      }
-    }
-
     // Update document's updated_at timestamp
     await supabase
       .from('documents')
@@ -207,7 +170,7 @@ async function handler(
 }
 
 // Helper functions
-function generateSummary(conversation: ConversationMessage[]): string {
+function generateSummary(conversation) {
   if (conversation.length === 0) return '';
   
   const firstUserMsg = conversation.find(m => m.role === 'user');
@@ -219,9 +182,9 @@ function generateSummary(conversation: ConversationMessage[]): string {
     : preview;
 }
 
-function extractInsights(conversation: ConversationMessage[]) {
+function extractInsights(conversation) {
   const insights = {
-    topics: [] as string[],
+    topics: [],
     questions_asked: 0,
     solutions_provided: 0,
     code_blocks: 0
@@ -242,10 +205,7 @@ function extractInsights(conversation: ConversationMessage[]) {
   return insights;
 }
 
-function formatConversationDisplay(
-  conversation: ConversationMessage[], 
-  summary: string
-): string {
+function formatConversationDisplay(conversation, summary) {
   let display = `## AI Conversation Summary\n\n${summary}\n\n---\n\n`;
   
   conversation.forEach((msg, index) => {
@@ -259,53 +219,3 @@ function formatConversationDisplay(
   
   return display;
 }
-
-function formatCodeChange(change: CodeChange): string {
-  return `### File: ${change.file}
-
-${change.description}
-
-**Before:**
-\`\`\`
-${change.before}
-\`\`\`
-
-**After:**
-\`\`\`
-${change.after}
-\`\`\``;
-}
-
-function detectLanguage(filePath: string): string {
-  const ext = filePath.split('.').pop()?.toLowerCase();
-  const languageMap: Record<string, string> = {
-    'js': 'javascript',
-    'jsx': 'javascript',
-    'ts': 'typescript',
-    'tsx': 'typescript',
-    'py': 'python',
-    'rb': 'ruby',
-    'go': 'go',
-    'rs': 'rust',
-    'java': 'java',
-    'cpp': 'cpp',
-    'c': 'c',
-    'cs': 'csharp',
-    'php': 'php',
-    'swift': 'swift',
-    'kt': 'kotlin',
-    'sql': 'sql',
-    'sh': 'bash',
-    'yaml': 'yaml',
-    'yml': 'yaml',
-    'json': 'json',
-    'xml': 'xml',
-    'html': 'html',
-    'css': 'css',
-    'md': 'markdown'
-  };
-
-  return languageMap[ext || ''] || 'plaintext';
-}
-
-export default withApiAuth(handler);

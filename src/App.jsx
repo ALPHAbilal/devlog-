@@ -21,7 +21,7 @@ import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
 
 // Lazy load the API settings page
-const ApiSettingsPage = lazy(() => import('./pages/settings/api'));
+const ApiSettingsPage = lazy(() => import('./pages/settings/api.jsx'));
 import { ToastProvider } from './hooks/useToast';
 import { useEffect } from 'react';
 

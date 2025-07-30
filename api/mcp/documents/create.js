@@ -1,24 +1,30 @@
-import type { NextApiResponse } from 'next';
-import { withApiAuth, AuthenticatedRequest, checkRateLimit } from '@/lib/api-auth';
-import { createClient } from '@supabase/supabase-js';
+import { authenticateRequest, checkRateLimit } from '../../_utils/auth.js';
 
-async function handler(
-  req: AuthenticatedRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Authenticate request
+  const { user, supabase, error: authError } = await authenticateRequest(req);
+  
+  if (authError) {
+    return res.status(authError.status).json({ 
+      error: 'Unauthorized',
+      message: authError.message 
+    });
+  }
+
   // Rate limiting
-  if (!checkRateLimit(req.user!.id, 100)) {
+  if (!checkRateLimit(user.id, 100)) {
     return res.status(429).json({ 
       error: 'Rate limit exceeded',
       message: 'Too many requests. Please try again later.'
     });
   }
 
+  // Parse request body
   const { title, content, tags, metadata } = req.body;
 
   // Validate input
@@ -37,17 +43,11 @@ async function handler(
   }
 
   try {
-    // Create admin Supabase client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
     // Create document
     const { data: document, error: docError } = await supabase
       .from('documents')
       .insert({
-        user_id: req.user!.id,
+        user_id: user.id,
         title: title.trim(),
         tags: tags || [],
         metadata: {
@@ -70,7 +70,7 @@ async function handler(
 
     // Create initial block if content provided
     if (content && typeof content === 'string' && content.trim().length > 0) {
-      const { error: blockError } = await supabase
+      await supabase
         .from('blocks')
         .insert({
           document_id: document.id,
@@ -79,11 +79,6 @@ async function handler(
           position: 0,
           metadata: {}
         });
-
-      if (blockError) {
-        console.error('Initial block creation error:', blockError);
-        // Don't fail the whole request if block creation fails
-      }
     }
 
     // Return success response
@@ -103,5 +98,3 @@ async function handler(
     });
   }
 }
-
-export default withApiAuth(handler);

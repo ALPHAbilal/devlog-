@@ -1,20 +1,25 @@
-import type { NextApiResponse } from 'next';
-import { withApiAuth, AuthenticatedRequest, checkRateLimit } from '@/lib/api-auth';
-import { createClient } from '@supabase/supabase-js';
+import { authenticateRequest, checkRateLimit } from '../../_utils/auth.js';
 
 const VALID_BLOCK_TYPES = ['text', 'code', 'heading', 'list', 'checkbox', 'ai_conversation', 'diagram'];
 
-async function handler(
-  req: AuthenticatedRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req, res) {
   // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Authenticate request
+  const { user, supabase, error: authError } = await authenticateRequest(req);
+  
+  if (authError) {
+    return res.status(authError.status).json({ 
+      error: 'Unauthorized',
+      message: authError.message 
+    });
+  }
+
   // Rate limiting
-  if (!checkRateLimit(req.user!.id, 200)) {
+  if (!checkRateLimit(user.id, 200)) {
     return res.status(429).json({ 
       error: 'Rate limit exceeded',
       message: 'Too many requests. Please try again later.'
@@ -46,18 +51,12 @@ async function handler(
   }
 
   try {
-    // Create admin Supabase client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
     // Verify document ownership
     const { data: doc, error: docError } = await supabase
       .from('documents')
       .select('id, title')
       .eq('id', document_id)
-      .eq('user_id', req.user!.id)
+      .eq('user_id', user.id)
       .is('deleted_at', null)
       .single();
 
@@ -140,5 +139,3 @@ async function handler(
     });
   }
 }
-
-export default withApiAuth(handler);

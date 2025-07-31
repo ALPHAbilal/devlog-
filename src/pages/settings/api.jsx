@@ -272,11 +272,10 @@ export default function ApiKeysPage() {
 
       <div className="settings-content api-content">
         <div className="content-section">
-          {/* Page Title & Description */}
+          {/* Page Description */}
           <div className="page-header">
-            <h2 className="section-title">API Keys</h2>
             <p className="section-description">
-              Connect Journey Log to your AI coding assistants and development tools
+              Connect your AI tools to Journey Log with secure API keys
             </p>
           </div>
 
@@ -318,7 +317,7 @@ export default function ApiKeysPage() {
           <SettingGroup title="Create API Key">
             <div className="create-key-section">
               <p className="setting-description">
-                Generate a new API key to connect Journey Log to your development environment
+                Create a key to connect your AI tools to Journey Log
               </p>
               {isMobile ? (
                 <Button 
@@ -383,7 +382,7 @@ export default function ApiKeysPage() {
           <SettingGroup title="Quick Setup Guide">
             <div className="setup-guide">
               <p className="setup-intro">
-                Choose your AI assistant below for installation instructions:
+                Pick your AI tool to see simple setup steps:
               </p>
 
               <SetupAccordion
@@ -438,19 +437,21 @@ export default function ApiKeysPage() {
 
               <SetupAccordion
                 title="VS Code & Cursor"
-                description="Integrate with your code editor"
+                description="Connect via MCP server"
               >
                 <div className="setup-content">
                   <div className="setup-step">
                     <div className="step-number">1</div>
                     <div className="step-content">
-                      <p>Install the Journey Log extension</p>
+                      <p>Install the MCP server (connects AI tools to Journey Log)</p>
+                      <code className="setup-code">npm install -g @journey-log/mcp-server</code>
                     </div>
                   </div>
                   <div className="setup-step">
                     <div className="step-number">2</div>
                     <div className="step-content">
-                      <p>Add your API key in the extension settings</p>
+                      <p>Add your API key to VS Code or Cursor settings</p>
+                      <p className="text-xs text-secondary mt-1">Check docs for your editor's setup guide</p>
                     </div>
                   </div>
                 </div>
@@ -493,7 +494,7 @@ export default function ApiKeysPage() {
                 required
               />
               <p className="field-hint">
-                Choose a descriptive name to identify where you'll use this key
+                Name this key (e.g., Claude Code)
               </p>
             </div>
             

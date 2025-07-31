@@ -1,0 +1,25 @@
+# Claude Code Installation Commands
+
+## Basic Installation (Recommended)
+claude mcp add journey-log -s user -e JOURNEY_LOG_API_KEY="your_api_key_here" -- npx -y @journey-log/mcp-server
+
+## Windows (non-WSL)
+claude mcp add journey-log -s user -e JOURNEY_LOG_API_KEY="your_api_key_here" -- cmd /c npx -y @journey-log/mcp-server
+
+## Advanced Configuration
+claude mcp add-json journey-log -s user '{
+  "command": "npx",
+  "args": ["-y", "@journey-log/mcp-server"],
+  "env": {
+    "JOURNEY_LOG_API_KEY": "your_api_key_here",
+    "JOURNEY_LOG_BASE_URL": "https://api.devlog.design"
+  }
+}'
+
+## Management Commands
+claude mcp list                    # List all MCP servers
+claude mcp get journey-log         # View server details
+claude mcp remove journey-log      # Remove the server
+
+## In Claude Code
+/mcp                              # Check MCP status

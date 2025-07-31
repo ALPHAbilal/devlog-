@@ -3,8 +3,131 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContextOptimized'
 import { supabase } from '../../lib/supabase'
 import { useToast } from '../../hooks/useToast'
-import Layout from '../../components/Layout'
-import { Key, Copy, Trash2, Plus } from 'lucide-react'
+import { Key, Copy, Trash2, Plus, ChevronLeft, Shield, Sparkles, Code2, Terminal, ChevronDown, ChevronUp, ExternalLink, CheckCircle } from 'lucide-react'
+import MobileBottomSheet from '../../components/MobileBottomSheet'
+import '../../styles/settings-claude.css'
+
+// Reusable components from main settings
+const SettingGroup = ({ title, children }) => (
+  <div className="setting-group">
+    {title && <h3 className="setting-group-title">{title}</h3>}
+    {children}
+  </div>
+)
+
+const Button = ({ variant = 'primary', size = 'medium', children, icon: Icon, ...props }) => (
+  <button 
+    className={`btn btn-${variant} btn-${size}`}
+    {...props}
+  >
+    {Icon && <Icon size={18} />}
+    {children}
+  </button>
+)
+
+// Custom components for API page
+const ApiKeyCard = ({ apiKey, onDelete, onCopy }) => {
+  const [showConfirm, setShowConfirm] = useState(false)
+  
+  return (
+    <div className="api-key-card">
+      <div className="api-key-header">
+        <div className="api-key-icon">
+          <Key size={20} />
+        </div>
+        <div className="api-key-info">
+          <h4 className="api-key-name">{apiKey.name}</h4>
+          <code className="api-key-preview">{apiKey.key_preview}</code>
+        </div>
+      </div>
+      
+      <div className="api-key-meta">
+        <span className="api-key-date">
+          Created {new Date(apiKey.created_at).toLocaleDateString()}
+        </span>
+        {apiKey.last_used_at && (
+          <span className="api-key-date">
+            Last used {new Date(apiKey.last_used_at).toLocaleDateString()}
+          </span>
+        )}
+      </div>
+      
+      <div className="api-key-actions">
+        {showConfirm ? (
+          <>
+            <span className="confirm-text">Delete this key?</span>
+            <Button 
+              variant="secondary" 
+              size="small"
+              onClick={() => setShowConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="danger" 
+              size="small"
+              onClick={() => onDelete(apiKey.id)}
+            >
+              Delete
+            </Button>
+          </>
+        ) : (
+          <button
+            onClick={() => setShowConfirm(true)}
+            className="delete-button"
+            title="Delete API key"
+          >
+            <Trash2 size={18} />
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+const CodeBlock = ({ code, onCopy }) => (
+  <div className="code-block">
+    <pre>{code}</pre>
+    <button 
+      className="code-copy-button"
+      onClick={() => onCopy(code)}
+      title="Copy to clipboard"
+    >
+      <Copy size={16} />
+    </button>
+  </div>
+)
+
+const SetupAccordion = ({ title, description, isRecommended, children, defaultOpen = false }) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
+  
+  return (
+    <div className={`setup-accordion ${isOpen ? 'open' : ''}`}>
+      <button 
+        className="setup-accordion-header"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="setup-accordion-title">
+          {isRecommended && (
+            <span className="recommended-badge">
+              <Sparkles size={14} />
+              Recommended
+            </span>
+          )}
+          <h4>{title}</h4>
+          <p>{description}</p>
+        </div>
+        {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+      </button>
+      
+      {isOpen && (
+        <div className="setup-accordion-content">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function ApiKeysPage() {
   const { user } = useAuth()
@@ -15,6 +138,9 @@ export default function ApiKeysPage() {
   const [creating, setCreating] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
   const [newApiKey, setNewApiKey] = useState(null)
+  const [showCreateSheet, setShowCreateSheet] = useState(false)
+  const [copiedKey, setCopiedKey] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   useEffect(() => {
     if (!user) {
@@ -23,6 +149,14 @@ export default function ApiKeysPage() {
     }
     loadApiKeys()
   }, [user, navigate])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const loadApiKeys = async () => {
     try {
@@ -81,7 +215,8 @@ export default function ApiKeysPage() {
       setNewApiKey(apiKey)
       setApiKeys([newKey, ...apiKeys])
       setNewKeyName('')
-      toast.success('API key created successfully')
+      setShowCreateSheet(false)
+      setCopiedKey(false)
     } catch (error) {
       toast.error('Failed to create API key')
       console.error('Error creating API key:', error)
@@ -91,10 +226,6 @@ export default function ApiKeysPage() {
   }
 
   const deleteApiKey = async (id) => {
-    if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) {
-      return
-    }
-
     try {
       const { error } = await supabase
         .from('api_keys')
@@ -116,152 +247,809 @@ export default function ApiKeysPage() {
     toast.success('Copied to clipboard')
   }
 
+  const copyApiKey = (key) => {
+    copyToClipboard(key)
+    setCopiedKey(true)
+    setTimeout(() => setCopiedKey(false), 2000)
+  }
+
   if (!user) return null
 
   return (
-    <Layout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">API Keys</h1>
-          <p className="text-gray-600">
-            Manage API keys for accessing Journey Log from your AI tools and integrations.
-          </p>
-        </div>
+    <div className="settings-page">
+      {/* Header */}
+      <header className="api-header">
+        <button 
+          className="back-button"
+          onClick={() => navigate('/settings')}
+        >
+          <ChevronLeft size={20} />
+          <span>Settings</span>
+        </button>
+        <h1>API Keys</h1>
+        <div className="header-spacer" />
+      </header>
 
-        {/* New API Key Display */}
-        {newApiKey && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-green-800 mb-1">
-                  Your new API key has been created!
-                </h3>
-                <p className="text-sm text-green-700 mb-3">
-                  Make sure to copy it now. You won't be able to see it again.
-                </p>
-                <div className="flex items-center space-x-2">
-                  <code className="flex-1 p-2 bg-white border border-green-300 rounded text-sm font-mono break-all">
-                    {newApiKey}
-                  </code>
-                  <button
-                    onClick={() => copyToClipboard(newApiKey)}
-                    className="p-2 text-green-700 hover:bg-green-100 rounded transition-colors"
-                  >
-                    <Copy className="w-5 h-5" />
-                  </button>
+      <div className="settings-content api-content">
+        <div className="content-section">
+          {/* Page Title & Description */}
+          <div className="page-header">
+            <h2 className="section-title">API Keys</h2>
+            <p className="section-description">
+              Connect Journey Log to your AI coding assistants and development tools
+            </p>
+          </div>
+
+          {/* New API Key Success */}
+          {newApiKey && (
+            <div className="api-key-success">
+              <div className="success-header">
+                <div className="success-icon">
+                  <CheckCircle size={24} />
+                </div>
+                <div className="success-content">
+                  <h3>Your new API key is ready!</h3>
+                  <p>Make sure to copy it now. You won't be able to see it again.</p>
                 </div>
               </div>
+              
+              <div className="api-key-display">
+                <code className="api-key-full">{newApiKey}</code>
+                <Button
+                  variant={copiedKey ? "secondary" : "primary"}
+                  size="small"
+                  onClick={() => copyApiKey(newApiKey)}
+                  icon={copiedKey ? CheckCircle : Copy}
+                >
+                  {copiedKey ? "Copied!" : "Copy"}
+                </Button>
+              </div>
+              
               <button
                 onClick={() => setNewApiKey(null)}
-                className="ml-4 text-green-700 hover:text-green-800"
+                className="close-success"
               >
                 ×
               </button>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Create New Key */}
-        <div className="mb-8 p-6 bg-white rounded-lg shadow-sm border">
-          <h2 className="text-xl font-semibold mb-4">Create New API Key</h2>
-          <div className="flex space-x-3">
-            <input
-              type="text"
-              value={newKeyName}
-              onChange={(e) => setNewKeyName(e.target.value)}
-              placeholder="Key name (e.g., MCP Server, VS Code)"
-              className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={creating}
-            />
-            <button
-              onClick={createApiKey}
-              disabled={creating || !newKeyName.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Create Key</span>
-            </button>
-          </div>
-        </div>
-
-        {/* API Keys List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Your API Keys</h2>
-          
-          {loading ? (
-            <div className="text-center py-8 text-gray-500">
-              Loading API keys...
-            </div>
-          ) : apiKeys.length === 0 ? (
-            <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
-              <Key className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-              <p>No API keys yet. Create one to get started!</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {apiKeys.map((key) => (
-                <div
-                  key={key.id}
-                  className="p-4 bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
+          {/* Create New Key */}
+          <SettingGroup title="Create API Key">
+            <div className="create-key-section">
+              <p className="setting-description">
+                Generate a new API key to connect Journey Log to your development environment
+              </p>
+              {isMobile ? (
+                <Button 
+                  variant="primary" 
+                  onClick={() => setShowCreateSheet(true)}
+                  icon={Plus}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
-                        <Key className="w-5 h-5 text-gray-400" />
-                        <h3 className="font-semibold">{key.name}</h3>
-                        <code className="text-sm text-gray-500 font-mono">
-                          {key.key_preview}
-                        </code>
-                      </div>
-                      <div className="mt-1 text-sm text-gray-500">
-                        Created {new Date(key.created_at).toLocaleDateString()}
-                        {key.last_used_at && (
-                          <span>
-                            {' • '}Last used {new Date(key.last_used_at).toLocaleDateString()}
-                          </span>
-                        )}
-                      </div>
+                  Create New Key
+                </Button>
+              ) : (
+                <div className="create-key-inline">
+                  <input
+                    type="text"
+                    value={newKeyName}
+                    onChange={(e) => setNewKeyName(e.target.value)}
+                    placeholder="Key name (e.g., Claude Code, VS Code)"
+                    className="key-name-input"
+                    disabled={creating}
+                  />
+                  <Button
+                    onClick={createApiKey}
+                    disabled={creating || !newKeyName.trim()}
+                    icon={Plus}
+                  >
+                    Create Key
+                  </Button>
+                </div>
+              )}
+            </div>
+          </SettingGroup>
+
+          {/* Active Keys */}
+          <SettingGroup title="Active Keys">
+            {loading ? (
+              <div className="loading-state">
+                <div className="loading-spinner" />
+                <p>Loading API keys...</p>
+              </div>
+            ) : apiKeys.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">
+                  <Shield size={48} />
+                </div>
+                <h3>No API keys yet</h3>
+                <p>Create your first API key to start documenting your coding journey</p>
+              </div>
+            ) : (
+              <div className="api-keys-list">
+                {apiKeys.map((key) => (
+                  <ApiKeyCard
+                    key={key.id}
+                    apiKey={key}
+                    onDelete={deleteApiKey}
+                    onCopy={copyToClipboard}
+                  />
+                ))}
+              </div>
+            )}
+          </SettingGroup>
+
+          {/* Quick Setup Guide */}
+          <SettingGroup title="Quick Setup Guide">
+            <div className="setup-guide">
+              <p className="setup-intro">
+                Choose your AI assistant below for installation instructions:
+              </p>
+
+              <SetupAccordion
+                title="Claude Code"
+                description="One-command setup for Claude's official CLI"
+                isRecommended={true}
+                defaultOpen={true}
+              >
+                <div className="setup-content">
+                  <div className="setup-step">
+                    <div className="step-number">1</div>
+                    <div className="step-content">
+                      <p>Run this command in your terminal:</p>
+                      <CodeBlock
+                        code={`claude mcp add journey-log -s user -e JOURNEY_LOG_API_KEY="${newApiKey || 'your_api_key'}" -- npx -y @journey-log/mcp-server`}
+                        onCopy={copyToClipboard}
+                      />
                     </div>
-                    <button
-                      onClick={() => deleteApiKey(key.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete API key"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                  </div>
+                  <div className="setup-step">
+                    <div className="step-number">2</div>
+                    <div className="step-content">
+                      <p>Restart Claude Code and you're ready to go!</p>
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </SetupAccordion>
 
-        {/* MCP Installation Guide */}
-        <div className="mt-12 p-6 bg-blue-50 rounded-lg border border-blue-200">
-          <h2 className="text-xl font-semibold mb-3">Quick Setup Guide</h2>
-          <div className="space-y-3 text-sm">
-            <p className="text-gray-700">
-              To use Journey Log with your AI tools:
-            </p>
-            <ol className="list-decimal list-inside space-y-2 text-gray-700">
-              <li>Create an API key above</li>
-              <li>Install the MCP server: <code className="bg-white px-2 py-1 rounded">npm install -g @journey-log/mcp-server</code></li>
-              <li>Configure your AI tool with the API key</li>
-              <li>Start documenting your journey!</li>
-            </ol>
-            <p className="mt-3">
+              <SetupAccordion
+                title="Claude Desktop"
+                description="Configure the desktop app with MCP"
+              >
+                <div className="setup-content">
+                  <div className="setup-step">
+                    <div className="step-number">1</div>
+                    <div className="step-content">
+                      <p>Install the MCP server globally:</p>
+                      <CodeBlock
+                        code="npm install -g @journey-log/mcp-server"
+                        onCopy={copyToClipboard}
+                      />
+                    </div>
+                  </div>
+                  <div className="setup-step">
+                    <div className="step-number">2</div>
+                    <div className="step-content">
+                      <p>Configure Claude Desktop with your API key</p>
+                    </div>
+                  </div>
+                </div>
+              </SetupAccordion>
+
+              <SetupAccordion
+                title="VS Code & Cursor"
+                description="Integrate with your code editor"
+              >
+                <div className="setup-content">
+                  <div className="setup-step">
+                    <div className="step-number">1</div>
+                    <div className="step-content">
+                      <p>Install the Journey Log extension</p>
+                    </div>
+                  </div>
+                  <div className="setup-step">
+                    <div className="step-number">2</div>
+                    <div className="step-content">
+                      <p>Add your API key in the extension settings</p>
+                    </div>
+                  </div>
+                </div>
+              </SetupAccordion>
+
               <a
                 href="https://github.com/journey-log/mcp-server"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 underline"
+                className="docs-link"
               >
-                View full installation guide →
+                <Code2 size={18} />
+                View full documentation
+                <ExternalLink size={16} />
               </a>
-            </p>
-          </div>
+            </div>
+          </SettingGroup>
         </div>
       </div>
-    </Layout>
+
+      {/* Mobile Create Key Sheet */}
+      {isMobile && (
+        <MobileBottomSheet
+          isOpen={showCreateSheet}
+          onClose={() => {
+            setShowCreateSheet(false)
+            setNewKeyName('')
+          }}
+          title="Create API Key"
+        >
+          <div className="mobile-create-content">
+            <div className="form-field">
+              <label htmlFor="key-name-mobile">Key Name</label>
+              <input
+                id="key-name-mobile"
+                type="text"
+                value={newKeyName}
+                onChange={(e) => setNewKeyName(e.target.value)}
+                placeholder="e.g., Claude Code, VS Code"
+                required
+              />
+              <p className="field-hint">
+                Choose a descriptive name to identify where you'll use this key
+              </p>
+            </div>
+            
+            <div className="mobile-actions">
+              <Button 
+                variant="secondary"
+                onClick={() => {
+                  setShowCreateSheet(false)
+                  setNewKeyName('')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                variant="primary"
+                onClick={createApiKey}
+                disabled={creating || !newKeyName.trim()}
+              >
+                {creating ? 'Creating...' : 'Create Key'}
+              </Button>
+            </div>
+          </div>
+        </MobileBottomSheet>
+      )}
+
+      <style jsx>{`
+        /* API Page Specific Styles */
+        .api-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: var(--space-6);
+          background: var(--bg-secondary);
+          border-bottom: 1px solid var(--border-color);
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 100;
+          height: 80px;
+        }
+
+        .api-header h1 {
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin: 0;
+        }
+
+        .header-spacer {
+          width: 120px;
+        }
+
+        .api-content {
+          padding-top: 80px;
+          height: 100vh;
+          overflow-y: auto;
+        }
+
+        .page-header {
+          margin-bottom: var(--space-8);
+        }
+
+        .section-description {
+          font-size: 1.125rem;
+          color: var(--text-secondary);
+          margin-top: var(--space-2);
+        }
+
+        /* API Key Success */
+        .api-key-success {
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          border-radius: 12px;
+          padding: var(--space-6);
+          margin-bottom: var(--space-6);
+          position: relative;
+        }
+
+        .success-header {
+          display: flex;
+          gap: var(--space-4);
+          margin-bottom: var(--space-4);
+        }
+
+        .success-icon {
+          color: var(--brand-primary);
+          flex-shrink: 0;
+        }
+
+        .success-content h3 {
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-1) 0;
+          color: var(--text-primary);
+        }
+
+        .success-content p {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .api-key-display {
+          display: flex;
+          gap: var(--space-3);
+          align-items: center;
+          background: var(--bg-primary);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          padding: var(--space-3);
+        }
+
+        .api-key-full {
+          flex: 1;
+          font-family: 'Monaco', 'Menlo', monospace;
+          font-size: 0.875rem;
+          color: var(--brand-primary);
+          word-break: break-all;
+          background: none;
+          padding: 0;
+        }
+
+        .close-success {
+          position: absolute;
+          top: var(--space-4);
+          right: var(--space-4);
+          background: none;
+          border: none;
+          color: var(--text-secondary);
+          font-size: 1.5rem;
+          cursor: pointer;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          transition: all var(--transition);
+        }
+
+        .close-success:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: var(--text-primary);
+        }
+
+        /* Create Key Section */
+        .create-key-section {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-4);
+        }
+
+        .create-key-inline {
+          display: flex;
+          gap: var(--space-3);
+        }
+
+        .key-name-input {
+          flex: 1;
+          padding: var(--space-3) var(--space-4);
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          color: var(--text-primary);
+          font-size: 1rem;
+          font-family: inherit;
+          transition: all var(--transition);
+        }
+
+        .key-name-input:focus {
+          outline: 2px solid var(--brand-primary);
+          outline-offset: 2px;
+        }
+
+        .key-name-input::placeholder {
+          color: var(--text-disabled);
+        }
+
+        /* API Key Card */
+        .api-key-card {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          padding: var(--space-4);
+          margin-bottom: var(--space-3);
+          transition: all var(--transition);
+        }
+
+        .api-key-card:hover {
+          border-color: rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .api-key-header {
+          display: flex;
+          align-items: center;
+          gap: var(--space-3);
+          margin-bottom: var(--space-3);
+        }
+
+        .api-key-icon {
+          width: 40px;
+          height: 40px;
+          background: rgba(16, 185, 129, 0.1);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: var(--brand-primary);
+        }
+
+        .api-key-info {
+          flex: 1;
+        }
+
+        .api-key-name {
+          font-size: 1rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-1) 0;
+          color: var(--text-primary);
+        }
+
+        .api-key-preview {
+          font-family: 'Monaco', 'Menlo', monospace;
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          background: rgba(255, 255, 255, 0.05);
+          padding: 2px 8px;
+          border-radius: 4px;
+        }
+
+        .api-key-meta {
+          display: flex;
+          gap: var(--space-4);
+          margin-bottom: var(--space-3);
+          padding-left: calc(40px + var(--space-3));
+        }
+
+        .api-key-date {
+          font-size: 0.875rem;
+          color: var(--text-disabled);
+        }
+
+        .api-key-actions {
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          gap: var(--space-2);
+          min-height: 32px;
+        }
+
+        .confirm-text {
+          font-size: 0.875rem;
+          color: var(--color-error);
+          margin-right: var(--space-2);
+        }
+
+        .delete-button {
+          background: rgba(239, 68, 68, 0.1);
+          border: none;
+          color: var(--color-error);
+          width: 36px;
+          height: 36px;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all var(--transition);
+        }
+
+        .delete-button:hover {
+          background: rgba(239, 68, 68, 0.2);
+          transform: scale(1.05);
+        }
+
+        /* Empty & Loading States */
+        .empty-state, .loading-state {
+          text-align: center;
+          padding: var(--space-8) var(--space-4);
+        }
+
+        .empty-icon {
+          margin: 0 auto var(--space-4);
+          color: var(--text-disabled);
+        }
+
+        .empty-state h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-2) 0;
+          color: var(--text-primary);
+        }
+
+        .empty-state p {
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .loading-spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid var(--border-color);
+          border-top-color: var(--brand-primary);
+          border-radius: 50%;
+          margin: 0 auto var(--space-4);
+          animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+
+        .loading-state p {
+          color: var(--text-secondary);
+        }
+
+        /* Setup Guide */
+        .setup-guide {
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 12px;
+          padding: var(--space-6);
+        }
+
+        .setup-intro {
+          font-size: 1rem;
+          color: var(--text-secondary);
+          margin-bottom: var(--space-4);
+        }
+
+        /* Setup Accordion */
+        .setup-accordion {
+          background: var(--bg-secondary);
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          margin-bottom: var(--space-3);
+          overflow: hidden;
+          transition: all var(--transition);
+        }
+
+        .setup-accordion.open {
+          border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .setup-accordion-header {
+          width: 100%;
+          padding: var(--space-4);
+          background: none;
+          border: none;
+          color: var(--text-primary);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          text-align: left;
+          transition: all var(--transition);
+        }
+
+        .setup-accordion-header:hover {
+          background: rgba(255, 255, 255, 0.02);
+        }
+
+        .setup-accordion-title h4 {
+          font-size: 1.125rem;
+          font-weight: 600;
+          margin: 0 0 var(--space-1) 0;
+        }
+
+        .setup-accordion-title p {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          margin: 0;
+        }
+
+        .recommended-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-1);
+          background: rgba(16, 185, 129, 0.1);
+          color: var(--brand-primary);
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.75rem;
+          font-weight: 600;
+          margin-bottom: var(--space-2);
+        }
+
+        .setup-accordion-content {
+          padding: 0 var(--space-4) var(--space-4);
+          border-top: 1px solid var(--border-color);
+        }
+
+        .setup-content {
+          padding-top: var(--space-4);
+        }
+
+        .setup-step {
+          display: flex;
+          gap: var(--space-3);
+          margin-bottom: var(--space-4);
+        }
+
+        .step-number {
+          width: 28px;
+          height: 28px;
+          background: var(--brand-primary);
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 0.875rem;
+          flex-shrink: 0;
+        }
+
+        .step-content {
+          flex: 1;
+        }
+
+        .step-content p {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          margin: 0 0 var(--space-2) 0;
+        }
+
+        /* Code Block */
+        .code-block {
+          position: relative;
+          background: var(--bg-primary);
+          border: 1px solid var(--border-color);
+          border-radius: 8px;
+          padding: var(--space-3);
+          margin-top: var(--space-2);
+        }
+
+        .code-block pre {
+          margin: 0;
+          font-family: 'Monaco', 'Menlo', monospace;
+          font-size: 0.875rem;
+          color: var(--text-primary);
+          overflow-x: auto;
+          white-space: pre-wrap;
+          word-break: break-word;
+        }
+
+        .code-copy-button {
+          position: absolute;
+          top: var(--space-2);
+          right: var(--space-2);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid var(--border-color);
+          color: var(--text-secondary);
+          padding: var(--space-2);
+          border-radius: 6px;
+          cursor: pointer;
+          transition: all var(--transition);
+        }
+
+        .code-copy-button:hover {
+          background: rgba(255, 255, 255, 0.1);
+          color: var(--text-primary);
+        }
+
+        /* Docs Link */
+        .docs-link {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--space-2);
+          color: var(--brand-primary);
+          text-decoration: none;
+          font-size: 0.875rem;
+          font-weight: 500;
+          margin-top: var(--space-4);
+          padding: var(--space-2) var(--space-3);
+          border-radius: 8px;
+          transition: all var(--transition);
+        }
+
+        .docs-link:hover {
+          background: rgba(16, 185, 129, 0.1);
+          text-decoration: none;
+        }
+
+        /* Mobile Specific */
+        .mobile-create-content {
+          padding: var(--space-6) var(--space-4);
+        }
+
+        .field-hint {
+          font-size: 0.875rem;
+          color: var(--text-secondary);
+          margin-top: var(--space-2);
+        }
+
+        @media (max-width: 768px) {
+          .api-header {
+            padding: var(--space-4);
+            height: 60px;
+          }
+
+          .api-header h1 {
+            font-size: 1.125rem;
+          }
+
+          .header-spacer {
+            display: none;
+          }
+
+          .api-content {
+            padding-top: 60px;
+          }
+
+          .content-section {
+            padding: var(--space-4);
+          }
+
+          .section-title {
+            font-size: 1.5rem;
+          }
+
+          .api-key-success {
+            padding: var(--space-4);
+          }
+
+          .api-key-display {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .api-key-full {
+            padding: var(--space-2);
+            margin-bottom: var(--space-2);
+          }
+
+          .setup-guide {
+            padding: var(--space-4);
+          }
+
+          .api-key-meta {
+            flex-direction: column;
+            gap: var(--space-1);
+          }
+
+          .api-keys-list {
+            margin: 0 calc(-1 * var(--space-2));
+          }
+
+          .api-key-card {
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            margin-bottom: 1px;
+          }
+        }
+      `}</style>
+    </div>
   )
 }

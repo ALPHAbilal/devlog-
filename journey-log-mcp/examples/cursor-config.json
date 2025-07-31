@@ -1,0 +1,11 @@
+{
+  "mcp.servers": {
+    "journey-log": {
+      "command": "npx",
+      "args": ["-y", "@journey-log/mcp-server"],
+      "env": {
+        "JOURNEY_LOG_API_KEY": "jl_your-api-key-here"
+      }
+    }
+  }
+}

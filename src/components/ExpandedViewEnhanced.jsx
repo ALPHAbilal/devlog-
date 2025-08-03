@@ -515,6 +515,7 @@ const ExpandedView = forwardRef((props, ref) => {
         milestone: '',
         issues: []
       };
+      newBlock.content = ''; // Add empty content to prevent undefined errors
     }
 
     let updatedBlocks;

@@ -954,7 +954,7 @@ export class SupabaseAdapter {
     const baseBlock = {
       id: block.id,
       type: block.type,
-      content: block.content
+      content: block.content || ''
     };
 
     // Add type-specific fields
@@ -1022,7 +1022,7 @@ export class SupabaseAdapter {
       document_id: documentId,
       user_id: this.userId, // Add user_id for RLS policy
       type: block.type,
-      content: block.content,
+      content: block.content || '',
       position: position,
       metadata: {}
     };

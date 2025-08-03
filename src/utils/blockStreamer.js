@@ -192,7 +192,7 @@ export class BlockStreamer {
     const baseBlock = {
       id: block.id,
       type: block.type,
-      content: block.content,
+      content: block.content || '',
       position: block.position
     };
 

@@ -203,8 +203,8 @@ export class BlockStreamer {
       baseBlock.versionOf = block.version_of;
     }
 
-    // For blocks that use 'data' property (table, todo, template), restore it from metadata
-    if (block.type === 'table' || block.type === 'todo' || block.type === 'template') {
+    // For blocks that use 'data' property (table, todo, template, version-track), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track') {
       baseBlock.data = block.metadata || {};
     } else if (block.metadata) {
       // For other blocks, merge metadata properties directly

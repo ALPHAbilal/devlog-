@@ -179,8 +179,8 @@ export class OptimizedBlockLoader {
       baseBlock.versionOf = block.version_of;
     }
 
-    // For blocks that use 'data' property (table, todo, template), restore it from metadata
-    if (block.type === 'table' || block.type === 'todo' || block.type === 'template') {
+    // For blocks that use 'data' property (table, todo, template, version-track), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track') {
       baseBlock.data = block.metadata || {};
       // console.log(`🔵 OptimizedBlockLoader: Restoring data for ${block.type} block:`, {
       //   blockId: block.id,

@@ -1,0 +1,200 @@
+/* Issue Tracker Block Styles */
+
+/* Smooth animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.3s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Custom scrollbar for code blocks */
+.issue-tracker-code::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.issue-tracker-code::-webkit-scrollbar-track {
+  background: rgba(31, 41, 55, 0.5);
+  border-radius: 3px;
+}
+
+.issue-tracker-code::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.5);
+  border-radius: 3px;
+}
+
+.issue-tracker-code::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.7);
+}
+
+/* Smooth transitions for interactive elements */
+.issue-tracker-transition {
+  transition: all 0.2s ease-in-out;
+}
+
+/* Focus styles for accessibility */
+.issue-tracker-focus:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+  .issue-tracker-mobile-menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1f2937;
+    border-top: 1px solid #374151;
+    padding: 0.5rem;
+    z-index: 10;
+  }
+}
+
+/* Empty state illustration */
+.issue-tracker-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+.issue-tracker-empty svg {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+/* Connection line improvements */
+.issue-connection-line {
+  background: linear-gradient(180deg, #374151 0%, transparent 100%);
+}
+
+/* Status indicator glow effects */
+.status-active {
+  filter: drop-shadow(0 0 4px rgba(249, 115, 22, 0.5));
+}
+
+.status-progress {
+  filter: drop-shadow(0 0 4px rgba(96, 165, 250, 0.5));
+}
+
+.status-failed {
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5));
+}
+
+.status-success {
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.5));
+}
+
+/* Hover effects for better interactivity */
+.issue-hover-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.issue-hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Loading skeleton animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.issue-skeleton {
+  background: linear-gradient(
+    90deg,
+    #374151 0px,
+    #4b5563 40px,
+    #374151 80px
+  );
+  background-size: 200px 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+}
+
+/* Smooth transitions for all interactive elements */
+.issue-tracker-block button,
+.issue-tracker-block input,
+.issue-tracker-block textarea,
+.issue-tracker-block select {
+  transition: all 0.2s ease;
+}
+
+/* Enhanced focus states */
+.issue-tracker-block input:focus,
+.issue-tracker-block textarea:focus,
+.issue-tracker-block select:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Button hover effects */
+.issue-tracker-block button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.issue-tracker-block button:active:not(:disabled) {
+  transform: translateY(0);
+}

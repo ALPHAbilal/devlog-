@@ -340,6 +340,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragStartPan, setDragStartPan] = useState({ x: 0, y: 0 }); // Store initial pan when drag starts
   const [activeFile, setActiveFile] = useState(repository.activeFile || '');
   const [showFileTree, setShowFileTree] = useState(true);
   const [expandedDirs, setExpandedDirs] = useState(new Set());
@@ -865,19 +866,32 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
       }
     };
     
-    // Add wheel zoom support
+    // Add wheel zoom support with zoom-to-cursor
     const handleWheel = (e) => {
       // Check if the wheel event is over the canvas
       if (!canvasRef.current || !canvasRef.current.contains(e.target)) return;
       
       e.preventDefault();
       
+      const rect = canvasRef.current.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
       const zoomSpeed = 0.1;
       const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
       
       setZoom(prev => {
         const newZoom = prev * (1 + delta);
-        return Math.max(0.5, Math.min(3, newZoom));
+        const clampedZoom = Math.max(0.5, Math.min(3, newZoom));
+        const zoomRatio = clampedZoom / prev;
+        
+        // Adjust pan to zoom towards mouse position
+        setPan(prevPan => ({
+          x: mouseX - (mouseX - prevPan.x) * zoomRatio,
+          y: mouseY - (mouseY - prevPan.y) * zoomRatio
+        }));
+        
+        return clampedZoom;
       });
     };
 
@@ -942,15 +956,15 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     
     if (isDragging) {
       e.preventDefault(); // Prevent text selection and other browser defaults
+      // Calculate delta from the original drag start position
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
-      // Update pan directly from original drag start, not accumulating
-      setPan(prevPan => ({ 
-        x: prevPan.x + dx, 
-        y: prevPan.y + dy 
-      }));
-      // Update drag start to current position for next frame
-      setDragStart({ x: e.clientX, y: e.clientY });
+      // Set pan to the initial pan plus the delta (not accumulating)
+      setPan({ 
+        x: dragStartPan.x + dx, 
+        y: dragStartPan.y + dy 
+      });
+      // Don't update dragStart - keep it fixed during the entire drag
       return;
     }
     
@@ -1963,6 +1977,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
               e.preventDefault(); // Prevent text selection
               setIsDragging(true);
               setDragStart({ x: e.clientX, y: e.clientY });
+              setDragStartPan({ x: pan.x, y: pan.y }); // Capture current pan position
             }
           }}
           onMouseUp={(e) => {

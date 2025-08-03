@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Plus, X, Check, AlertCircle, Clock, Code } from 'lucide-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Highlight, themes } from 'prism-react-renderer';
 
 // Status indicators as React components
 const StatusIndicator = ({ status, className = '' }) => {
@@ -144,18 +143,35 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
               
               {code && (
                 <div className="mt-2">
-                  <SyntaxHighlighter
+                  <Highlight
+                    theme={themes.nightOwl}
+                    code={code}
                     language="javascript"
-                    style={vscDarkPlus}
-                    customStyle={{
-                      background: 'rgb(31, 41, 55)',
-                      padding: '8px',
-                      borderRadius: '4px',
-                      fontSize: '12px'
-                    }}
                   >
-                    {code}
-                  </SyntaxHighlighter>
+                    {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                      <pre 
+                        className={className}
+                        style={{
+                          ...style,
+                          background: 'rgb(31, 41, 55)',
+                          padding: '8px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          overflow: 'auto'
+                        }}
+                      >
+                        <code>
+                          {tokens.map((line, i) => (
+                            <div key={i} {...getLineProps({ line, key: i })}>
+                              {line.map((token, key) => (
+                                <span key={key} {...getTokenProps({ token, key })} />
+                              ))}
+                            </div>
+                          ))}
+                        </code>
+                      </pre>
+                    )}
+                  </Highlight>
                 </div>
               )}
             </div>
@@ -324,18 +340,35 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                 
                 {code && (
                   <div className="mt-2 ml-6">
-                    <SyntaxHighlighter
+                    <Highlight
+                      theme={themes.nightOwl}
+                      code={code}
                       language="javascript"
-                      style={vscDarkPlus}
-                      customStyle={{
-                        background: 'rgb(31, 41, 55)',
-                        padding: '8px',
-                        borderRadius: '4px',
-                        fontSize: '12px'
-                      }}
                     >
-                      {code}
-                    </SyntaxHighlighter>
+                      {({ className, style, tokens, getLineProps, getTokenProps }) => (
+                        <pre 
+                          className={className}
+                          style={{
+                            ...style,
+                            background: 'rgb(31, 41, 55)',
+                            padding: '8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            overflow: 'auto'
+                          }}
+                        >
+                          <code>
+                            {tokens.map((line, i) => (
+                              <div key={i} {...getLineProps({ line, key: i })}>
+                                {line.map((token, key) => (
+                                  <span key={key} {...getTokenProps({ token, key })} />
+                                ))}
+                              </div>
+                            ))}
+                          </code>
+                        </pre>
+                      )}
+                    </Highlight>
                   </div>
                 )}
               </div>

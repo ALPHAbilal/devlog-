@@ -141,11 +141,11 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                 )}
               </div>
               
-              {code && (
+              {code && code.trim() && (
                 <div className="mt-2">
                   <Highlight
                     theme={themes.nightOwl}
-                    code={code}
+                    code={code.trim()}
                     language="javascript"
                   >
                     {({ className, style, tokens, getLineProps, getTokenProps }) => (
@@ -161,13 +161,17 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                         }}
                       >
                         <code>
-                          {tokens.map((line, i) => (
-                            <div key={i} {...getLineProps({ line, key: i })}>
-                              {line.map((token, key) => (
-                                <span key={key} {...getTokenProps({ token, key })} />
-                              ))}
-                            </div>
-                          ))}
+                          {tokens && tokens.length > 0 ? (
+                            tokens.map((line, i) => (
+                              <div key={i} {...getLineProps({ line, key: i })}>
+                                {line && line.map ? line.map((token, key) => (
+                                  <span key={key} {...getTokenProps({ token, key })} />
+                                )) : null}
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-gray-500">No code</span>
+                          )}
                         </code>
                       </pre>
                     )}
@@ -338,11 +342,11 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                   <p className="text-sm text-gray-400 mt-1 ml-6">{description}</p>
                 )}
                 
-                {code && (
+                {code && code.trim() && (
                   <div className="mt-2 ml-6">
                     <Highlight
                       theme={themes.nightOwl}
-                      code={code}
+                      code={code.trim()}
                       language="javascript"
                     >
                       {({ className, style, tokens, getLineProps, getTokenProps }) => (
@@ -358,13 +362,17 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                           }}
                         >
                           <code>
-                            {tokens.map((line, i) => (
-                              <div key={i} {...getLineProps({ line, key: i })}>
-                                {line.map((token, key) => (
-                                  <span key={key} {...getTokenProps({ token, key })} />
-                                ))}
-                              </div>
-                            ))}
+                            {tokens && tokens.length > 0 ? (
+                              tokens.map((line, i) => (
+                                <div key={i} {...getLineProps({ line, key: i })}>
+                                  {line && line.map ? line.map((token, key) => (
+                                    <span key={key} {...getTokenProps({ token, key })} />
+                                  )) : null}
+                                </div>
+                              ))
+                            ) : (
+                              <span className="text-gray-500">No code</span>
+                            )}
                           </code>
                         </pre>
                       )}
@@ -404,8 +412,15 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
 
 // Main IssueTrackerBlock Component
 const IssueTrackerBlock = ({ block, onUpdate }) => {
-  const [milestone, setMilestone] = useState(block.data?.milestone || '');
-  const [issues, setIssues] = useState(block.data?.issues || []);
+  // Ensure block has proper structure
+  if (!block) {
+    return <div className="bg-gray-900 rounded-lg p-4">Loading...</div>;
+  }
+  
+  // Initialize with proper defaults
+  const blockData = block.data || {};
+  const [milestone, setMilestone] = useState(blockData.milestone || '');
+  const [issues, setIssues] = useState(blockData.issues || []);
   const [isEditingMilestone, setIsEditingMilestone] = useState(false);
   const saveTimeoutRef = useRef(null);
 

@@ -509,6 +509,12 @@ const ExpandedView = forwardRef((props, ref) => {
     // Initialize block based on type
     if (type === 'heading') {
       newBlock.level = 2;
+    } else if (type === 'issue-tracker') {
+      // Initialize issue-tracker with proper data structure
+      newBlock.data = {
+        milestone: '',
+        issues: []
+      };
     }
 
     let updatedBlocks;

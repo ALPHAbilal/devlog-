@@ -823,27 +823,29 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     };
   }, [drawMetroMap]);
 
-  // Keyboard navigation
+  // Keyboard navigation and wheel zoom
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       
+      const panSpeed = e.shiftKey ? 100 : 50; // Hold shift for faster panning
+      
       switch(e.key) {
         case 'ArrowLeft':
           e.preventDefault();
-          setPan(prev => ({ ...prev, x: prev.x + 50 }));
+          setPan(prev => ({ ...prev, x: prev.x + panSpeed }));
           break;
         case 'ArrowRight':
           e.preventDefault();
-          setPan(prev => ({ ...prev, x: prev.x - 50 }));
+          setPan(prev => ({ ...prev, x: prev.x - panSpeed }));
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setPan(prev => ({ ...prev, y: prev.y + 50 }));
+          setPan(prev => ({ ...prev, y: prev.y + panSpeed }));
           break;
         case 'ArrowDown':
           e.preventDefault();
-          setPan(prev => ({ ...prev, y: prev.y - 50 }));
+          setPan(prev => ({ ...prev, y: prev.y - panSpeed }));
           break;
         case '+':
         case '=':
@@ -862,9 +864,30 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
           break;
       }
     };
+    
+    // Add wheel zoom support
+    const handleWheel = (e) => {
+      // Check if the wheel event is over the canvas
+      if (!canvasRef.current || !canvasRef.current.contains(e.target)) return;
+      
+      e.preventDefault();
+      
+      const zoomSpeed = 0.1;
+      const delta = e.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+      
+      setZoom(prev => {
+        const newZoom = prev * (1 + delta);
+        return Math.max(0.5, Math.min(3, newZoom));
+      });
+    };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('wheel', handleWheel);
+    };
   }, []);
 
   // Handle canvas interactions with visual feedback
@@ -907,13 +930,8 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
         setEditingCode('');
       }
       
-      // Subtle visual feedback with smooth transition
-      const canvas = canvasRef.current;
-      canvas.style.transition = 'transform 0.15s ease';
-      canvas.style.transform = 'scale(0.98)';
-      setTimeout(() => {
-        canvas.style.transform = 'scale(1)';
-      }, 150);
+      // Visual feedback without affecting drag behavior
+      // Animation removed to prevent interference with drag operations
     }
   };
 
@@ -923,11 +941,16 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     const y = (e.clientY - rect.top - pan.y) / zoom;
     
     if (isDragging) {
+      e.preventDefault(); // Prevent text selection and other browser defaults
       const dx = e.clientX - dragStart.x;
       const dy = e.clientY - dragStart.y;
-      setPan(prevPan => ({ x: prevPan.x + dx, y: prevPan.y + dy }));
+      // Update pan directly from original drag start, not accumulating
+      setPan(prevPan => ({ 
+        x: prevPan.x + dx, 
+        y: prevPan.y + dy 
+      }));
+      // Update drag start to current position for next frame
       setDragStart({ x: e.clientX, y: e.clientY });
-      canvasRef.current.style.cursor = 'grabbing';
       return;
     }
     
@@ -985,7 +1008,7 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
       setHoveredNodeDetails(null);
     }
     
-    canvasRef.current.style.cursor = foundNode ? 'pointer' : isDragging ? 'grabbing' : 'grab';
+    // Cursor is now controlled via inline style on the canvas element
   };
 
   // Create new version (commit)
@@ -1927,19 +1950,24 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
       <div className="relative bg-dark-primary h-48 overflow-hidden flex-shrink-0 border-b-2 border-dark-secondary">
         <canvas
           ref={canvasRef}
-          className="w-full h-full transition-transform duration-150"
-          style={{ imageRendering: 'auto' }}
+          className="w-full h-full"
+          style={{ 
+            imageRendering: 'auto',
+            cursor: isDragging ? 'grabbing' : (hoveredNode ? 'pointer' : 'grab'),
+            userSelect: 'none',
+            touchAction: 'none'
+          }}
           onClick={handleCanvasClick}
           onMouseDown={(e) => {
             if (!hoveredNode) {
+              e.preventDefault(); // Prevent text selection
               setIsDragging(true);
               setDragStart({ x: e.clientX, y: e.clientY });
-              canvasRef.current.style.cursor = 'grabbing';
             }
           }}
-          onMouseUp={() => {
+          onMouseUp={(e) => {
+            e.preventDefault();
             setIsDragging(false);
-            canvasRef.current.style.cursor = hoveredNode ? 'pointer' : 'grab';
           }}
           onMouseMove={handleCanvasMouseMove}
           onMouseLeave={() => {
@@ -1948,6 +1976,11 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
             setIsDragging(false);
           }}
         />
+        
+        {/* Controls hint */}
+        <div className="absolute bottom-2 left-2 text-[10px] text-text-secondary/50 pointer-events-none">
+          Drag to pan • Scroll to zoom • Arrow keys to navigate
+        </div>
         
         {/* Zoom controls - enhanced visibility */}
         <div className="absolute top-3 right-3 flex flex-col gap-1 bg-dark-secondary rounded-lg p-1 border border-dark-secondary/50 shadow-lg">

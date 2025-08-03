@@ -964,8 +964,8 @@ export class SupabaseAdapter {
       baseBlock.versionOf = block.version_of;
     }
 
-    // For blocks that use 'data' property (table, todo, template, version-track), restore it from metadata
-    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track') {
+    // For blocks that use 'data' property (table, todo, template, version-track, issue-tracker), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track' || block.type === 'issue-tracker') {
       baseBlock.data = block.metadata || {};
       // console.log(`🟧 SupabaseAdapter: Restoring data property for ${block.type} block:`, {
       //   blockId: block.id,

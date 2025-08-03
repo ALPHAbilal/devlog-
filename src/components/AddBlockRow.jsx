@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, GitBranch } from 'lucide-react';
+import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, GitBranch, AlertCircle } from 'lucide-react';
 import MobileAddBlockRow from './MobileAddBlockRow';
 import { useResponsive } from '../hooks/useResponsive';
 
@@ -12,6 +12,7 @@ const blockTypes = [
   { type: 'ai', label: 'AI interaction', icon: MessageSquare },
   { type: 'filetree', label: 'file tree', icon: Folder },
   { type: 'version-track', label: 'version track', icon: GitBranch },
+  { type: 'issue-tracker', label: 'issue tracker', icon: AlertCircle },
 ];
 
 export default function AddBlockRow({ onSelect, onClose, show, isMobileView }) {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Type, Code, MessageSquare, Heading, Folder, Table, Image, GitBranch, X } from 'lucide-react';
+import { Type, Code, MessageSquare, Heading, Folder, Table, Image, GitBranch, AlertCircle, X } from 'lucide-react';
 import MobileBottomSheet from './MobileBottomSheet';
 
 const blockTypes = [
@@ -11,6 +11,7 @@ const blockTypes = [
   { type: 'ai', label: 'AI Chat', icon: MessageSquare, description: 'AI conversation' },
   { type: 'filetree', label: 'File Tree', icon: Folder, description: 'Project structure' },
   { type: 'version-track', label: 'Version', icon: GitBranch, description: 'Track code versions' },
+  { type: 'issue-tracker', label: 'Issues', icon: AlertCircle, description: 'Track problems & solutions' },
 ];
 
 export default function MobileAddBlockRow({ onSelect, onClose, show }) {

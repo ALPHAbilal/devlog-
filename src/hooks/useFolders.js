@@ -39,33 +39,10 @@ export function useFolders() {
     try {
       setLoading(true);
       
-      // Ensure we have a valid session before querying
-      try {
-        await ensureAuthenticated();
-        // Reset retry count on successful auth
-        authRetryCountRef.current = 0;
-      } catch (authError) {
-        // Prevent spam - only log once per minute
-        const now = Date.now();
-        if (!lastAuthErrorRef.current || now - lastAuthErrorRef.current > 60000) {
-          console.error('Authentication required for folders:', authError.message);
-          lastAuthErrorRef.current = now;
-        }
-        
-        // Clear cache on auth failure
-        foldersCache = null;
-        lastFetchTime = null;
-        setFolders([]);
-        setLoading(false);
-        
-        // Show toast only on first failure or after a long gap
-        if (authRetryCountRef.current === 0) {
-          toast.error('Please sign in to access your folders');
-        }
-        
-        authRetryCountRef.current++;
-        return;
-      }
+      // Skip the ensureAuthenticated call if we already have a user
+      // The RLS policies will handle authentication at the database level
+      // This prevents the rate limiting issue
+      console.log('Loading folders for user:', user.id);
       
       const { data, error } = await supabase
         .from('folders')
@@ -82,21 +59,50 @@ export function useFolders() {
           status: error.status
         });
         
-        // Handle 401 specifically
+        // Handle 401 specifically - retry once with session refresh
         if (error.status === 401 || error.code === 'PGRST301') {
-          console.error('Authentication error when fetching folders. User ID:', user.id);
-          toast.error('Authentication error. Please refresh the page.');
+          console.log('Auth error on folders query, attempting session refresh...');
+          
+          // Try to refresh the session
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            // Retry the query once
+            const { data: retryData, error: retryError } = await supabase
+              .from('folders')
+              .select('*')
+              .eq('user_id', user.id)
+              .order('position', { ascending: true });
+            
+            if (!retryError) {
+              data = retryData;
+              error = null;
+              console.log('Folders loaded successfully after session refresh');
+            } else {
+              console.error('Folders query failed after retry:', retryError);
+              toast.error('Failed to load folders. Please refresh the page.');
+              throw retryError;
+            }
+          } else {
+            console.error('No session available for folders query');
+            toast.error('Please sign in to access your folders.');
+            throw error;
+          }
+        } else {
+          // Non-auth errors
+          throw error;
         }
-        
-        throw error;
       }
+      
+      // Handle successful data
+      const foldersData = data || [];
 
       // Build tree structure
       const folderMap = new Map();
       const rootFolders = [];
 
       // First pass: create all folder objects
-      data.forEach(folder => {
+      foldersData.forEach(folder => {
         folderMap.set(folder.id, {
           ...folder,
           children: []
@@ -104,7 +110,7 @@ export function useFolders() {
       });
 
       // Second pass: build hierarchy
-      data.forEach(folder => {
+      foldersData.forEach(folder => {
         if (folder.parent_id) {
           const parent = folderMap.get(folder.parent_id);
           if (parent) {
@@ -114,6 +120,8 @@ export function useFolders() {
           rootFolders.push(folderMap.get(folder.id));
         }
       });
+      
+      console.log(`Loaded ${foldersData.length} folders (${rootFolders.length} root folders)`);
 
       // Update cache
       foldersCache = rootFolders;
@@ -124,7 +132,15 @@ export function useFolders() {
       }
     } catch (error) {
       console.error('Error loading folders:', error);
-      toast.error('Failed to load folders');
+      
+      // Don't clear cache on error - keep using stale data if available
+      if (foldersCache) {
+        console.log('Using cached folders after error');
+        setFolders(foldersCache);
+      } else {
+        setFolders([]);
+        toast.error('Failed to load folders');
+      }
     } finally {
       if (isMounted.current) {
         setLoading(false);

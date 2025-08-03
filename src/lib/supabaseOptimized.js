@@ -382,14 +382,15 @@ export const setInactivityTimeout = (minutes) => optimizedSupabase.setInactivity
 
 // Track last auth check to prevent rapid retries
 let lastAuthCheckTime = 0;
-const MIN_AUTH_CHECK_INTERVAL = 1000; // 1 second minimum between checks
+const MIN_AUTH_CHECK_INTERVAL = 500; // 500ms minimum between checks (reduced from 1000ms)
 
 // Helper to ensure authenticated session before operations
 export const ensureAuthenticated = async () => {
-  // Rate limit auth checks
+  // Rate limit auth checks - but be more lenient
   const now = Date.now();
   if (now - lastAuthCheckTime < MIN_AUTH_CHECK_INTERVAL) {
-    throw new Error('Authentication check rate limited');
+    // Instead of throwing, just wait a bit and continue
+    await new Promise(resolve => setTimeout(resolve, MIN_AUTH_CHECK_INTERVAL));
   }
   lastAuthCheckTime = now;
   

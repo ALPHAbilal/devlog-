@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Plus, X, Check, AlertCircle, Clock, Code, Target } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, X, Check, AlertCircle, Clock, Code, Target, Trash2 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
+import './IssueTrackerBlock.css';
 
 // Minimalist status indicators using simple dots with subtle glow
 const StatusIndicator = ({ status, size = 'md' }) => {
@@ -110,8 +111,9 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                   onClick={onDelete}
                   className="px-2 py-1.5 text-text-secondary hover:text-red-400 
                            hover:bg-red-400/10 rounded-lg transition-all duration-200"
+                  aria-label="Delete attempt"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
               
@@ -192,7 +194,7 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
   );
 };
 
-// Issue Item Component
+// Issue Item Component  
 const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -315,8 +317,9 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                   onClick={onDelete}
                   className="px-2 py-1.5 text-text-secondary hover:text-red-400 
                            hover:bg-red-400/10 rounded-lg transition-all duration-200"
+                  aria-label="Delete attempt"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
               
@@ -508,7 +511,7 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
   };
 
   return (
-    <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-primary/50">
+    <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-primary/50 max-h-[600px] flex flex-col">
       {/* Milestone Header - Minimal when empty */}
       {(milestone || isEditingMilestone) && (
         <div className="mb-6">
@@ -567,23 +570,25 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
       )}
 
       {/* Issues List */}
-      {issues.length > 0 ? (
-        <div className="space-y-2">
-          {issues.map((issue, idx) => (
-            <IssueItem
-              key={issue.id}
-              issue={issue}
-              onUpdate={(updates) => handleUpdateIssue(issue.id, updates)}
-              onDelete={() => handleDeleteIssue(issue.id)}
-              isLast={idx === issues.length - 1}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-6 text-text-secondary/30 text-sm">
-          Track issues and debugging attempts
-        </div>
-      )}
+      <div className="flex-1 overflow-y-auto issue-tracker-scroll pr-2">
+        {issues.length > 0 ? (
+          <div className="space-y-2 pb-2">
+            {issues.map((issue, idx) => (
+              <IssueItem
+                key={issue.id}
+                issue={issue}
+                onUpdate={(updates) => handleUpdateIssue(issue.id, updates)}
+                onDelete={() => handleDeleteIssue(issue.id)}
+                isLast={idx === issues.length - 1}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6 text-text-secondary/30 text-sm">
+            Track issues and debugging attempts
+          </div>
+        )}
+      </div>
 
       {/* Add Issue Button - Always visible but subtle */}
       <button

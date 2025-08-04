@@ -24,6 +24,37 @@
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
 }
 
+/* Custom scrollbar styling for issue list */
+.issue-tracker-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.issue-tracker-scroll::-webkit-scrollbar-track {
+  background: rgba(30, 58, 95, 0.1);
+  border-radius: 3px;
+}
+
+.issue-tracker-scroll::-webkit-scrollbar-thumb {
+  background: rgba(30, 58, 95, 0.4);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.issue-tracker-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(30, 58, 95, 0.6);
+}
+
+/* Hide scrollbar when not hovering (for cleaner look) */
+.issue-tracker-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s;
+}
+
+.issue-tracker-scroll:hover {
+  scrollbar-color: rgba(30, 58, 95, 0.4) rgba(30, 58, 95, 0.1);
+}
+
 /* Mobile-specific optimizations */
 @media (max-width: 640px) {
   /* Ensure touch targets are adequate on mobile */
@@ -35,5 +66,10 @@
   /* Optimize spacing for mobile */
   .issue-tracker-block {
     padding: 1rem;
+  }
+  
+  /* Adjust max height for mobile */
+  .issue-tracker-block {
+    max-height: 70vh;
   }
 }

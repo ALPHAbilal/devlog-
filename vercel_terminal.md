@@ -1,39 +1,47 @@
-[21:50:41.020] Running build in Washington, D.C., USA (East) – iad1
-[21:50:41.020] Build machine configuration: 2 cores, 8 GB
-[21:50:41.060] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 01d3958)
-[21:50:41.764] Cloning completed: 703.000ms
-[21:50:41.920] Restored build cache from previous deployment (5SS1V9iGZnHVoLGwBRHeqxG2DsaV)
-[21:50:44.063] Running "vercel build"
-[21:50:44.549] Vercel CLI 44.6.4
-[21:50:45.304] Installing dependencies...
-[21:50:46.406] 
-[21:50:46.408] up to date in 859ms
-[21:50:46.408] 
-[21:50:46.409] 75 packages are looking for funding
-[21:50:46.409]   run `npm fund` for details
-[21:50:46.548] 
-[21:50:46.549] > journey-log-compass@0.0.0 build
-[21:50:46.549] > vite build
-[21:50:46.550] 
-[21:50:47.218] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
-[21:50:47.555] [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
-[21:50:47.627] transforming...
-[21:50:51.545] [32m✓[39m 2217 modules transformed.
-[21:50:51.550] [31m✗[39m Build failed in 4.00s
-[21:50:51.551] [31merror during build:
-[21:50:51.552] [31m[vite]: Rollup failed to resolve import "react-syntax-highlighter" from "/vercel/path0/src/components/blocks/IssueTrackerBlock.jsx".
-[21:50:51.553] This is most likely unintended because it can break your application at runtime.
-[21:50:51.553] If you do want to externalize this module explicitly add it to
-[21:50:51.553] `build.rollupOptions.external`[31m
-[21:50:51.553]     at viteLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
-[21:50:51.554]     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46403:18
-[21:50:51.554]     at onwarn (file:///vercel/path0/node_modules/@vitejs/plugin-react/dist/index.mjs:104:9)
-[21:50:51.554]     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46401:7
-[21:50:51.555]     at onRollupLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46393:5)
-[21:50:51.555]     at onLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
-[21:50:51.555]     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:20803:32
-[21:50:51.555]     at Object.logger [as onLog] (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:22683:9)
-[21:50:51.556]     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21429:26)
-[21:50:51.556]     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21387:26[39m
-[21:50:51.613] Error: Command "npm run build" exited with 1
-[21:50:55.481] Exiting build container
+[23:46:32.184] Running build in Washington, D.C., USA (East) – iad1
+[23:46:32.185] Build machine configuration: 2 cores, 8 GB
+[23:46:32.199] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: ab7108d)
+[23:46:33.029] Cloning completed: 830.000ms
+[23:46:33.179] Restored build cache from previous deployment (B8PbAxWVf7R75HqNgo63QicFP88i)
+[23:46:33.653] Running "vercel build"
+[23:46:34.614] Vercel CLI 44.6.4
+[23:46:36.232] Installing dependencies...
+[23:46:37.429] 
+[23:46:37.430] up to date in 950ms
+[23:46:37.430] 
+[23:46:37.431] 75 packages are looking for funding
+[23:46:37.431]   run `npm fund` for details
+[23:46:37.578] 
+[23:46:37.579] > journey-log-compass@0.0.0 build
+[23:46:37.579] > vite build
+[23:46:37.580] 
+[23:46:38.261] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[23:46:38.307] [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
+[23:46:38.693] transforming...
+[23:46:42.719] [32m✓[39m 2194 modules transformed.
+[23:46:42.722] [31m✗[39m Build failed in 4.42s
+[23:46:42.722] [31merror during build:
+[23:46:42.723] [31m[vite:esbuild] Transform failed with 1 error:
+[23:46:42.723] /vercel/path0/src/components/blocks/IssueTrackerBlock.jsx:196:10: ERROR: Unterminated regular expression[31m
+[23:46:42.724] file: [36m/vercel/path0/src/components/blocks/IssueTrackerBlock.jsx:196:10[31m
+[23:46:42.724] [33m
+[23:46:42.724] [33mUnterminated regular expression[33m
+[23:46:42.725] 194|          </div>
+[23:46:42.725] 195|        </div>
+[23:46:42.725] 196|      </div>
+[23:46:42.726]    |            ^
+[23:46:42.726] 197|    );
+[23:46:42.726] 198|  };
+[23:46:42.727] [31m
+[23:46:42.727]     at failureErrorWithLog (/vercel/path0/node_modules/esbuild/lib/main.js:1463:15)
+[23:46:42.727]     at /vercel/path0/node_modules/esbuild/lib/main.js:734:50
+[23:46:42.728]     at responseCallbacks.<computed> (/vercel/path0/node_modules/esbuild/lib/main.js:601:9)
+[23:46:42.728]     at handleIncomingPacket (/vercel/path0/node_modules/esbuild/lib/main.js:656:12)
+[23:46:42.728]     at Socket.readFromStdout (/vercel/path0/node_modules/esbuild/lib/main.js:579:7)
+[23:46:42.729]     at Socket.emit (node:events:518:28)
+[23:46:42.729]     at addChunk (node:internal/streams/readable:561:12)
+[23:46:42.729]     at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+[23:46:42.730]     at Readable.push (node:internal/streams/readable:392:5)
+[23:46:42.730]     at Pipe.onStreamRead (node:internal/stream_base_commons:189:23)[39m
+[23:46:42.788] Error: Command "npm run build" exited with 1
+[23:46:46.375] Exiting build container

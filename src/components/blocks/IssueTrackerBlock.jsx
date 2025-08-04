@@ -191,7 +191,6 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
               )}
             </div>
           )}
-        </div>
       </div>
     </div>
   );
@@ -444,7 +443,6 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
               )}
             </div>
           )}
-        </div>
       </div>
     </div>
   );

@@ -249,9 +249,9 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
     <div className="relative flex mb-6">
       {/* Timeline column */}
       <div className="w-12 relative flex-shrink-0">
-        {/* Vertical timeline line */}
+        {/* Vertical timeline line - starts below the dot */}
         {!isLast && (
-          <div className="absolute left-5 top-6 w-0.5 h-full bg-dark-secondary/40" />
+          <div className="absolute left-5 top-7 w-0.5 h-full bg-dark-secondary/40" style={{ height: 'calc(100% - 28px)' }} />
         )}
         
         {/* Timeline dot container */}

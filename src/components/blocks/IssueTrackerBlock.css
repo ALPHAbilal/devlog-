@@ -1,7 +1,52 @@
-/* Issue Tracker Block - Minimal Custom Styles */
+/* Issue Tracker Block - GitHub-Style Timeline UI */
 
-/* Most styling is now handled with Tailwind classes in the component */
-/* Only keeping essential animations that aren't available in Tailwind */
+/* Timeline structure for professional GitHub-like appearance */
+.issue-timeline-container {
+  position: relative;
+}
+
+/* Main vertical timeline line */
+.issue-timeline-line {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(30, 58, 95, 0.3);
+}
+
+/* Timeline dot styling */
+.issue-timeline-dot {
+  position: absolute;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a1628; /* dark-primary */
+  padding: 3px;
+  border-radius: 50%;
+}
+
+/* Horizontal connector from dot to content */
+.issue-timeline-connector {
+  position: absolute;
+  left: 24px;
+  height: 2px;
+  width: 16px;
+  background: rgba(30, 58, 95, 0.3);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Branch line for attempts */
+.attempt-branch-line {
+  position: absolute;
+  left: 20px;
+  width: 24px;
+  height: 2px;
+  background: rgba(30, 58, 95, 0.3);
+  top: 12px;
+}
 
 /* Custom skeleton loading animation for consistency with other blocks */
 @keyframes skeleton-shimmer {

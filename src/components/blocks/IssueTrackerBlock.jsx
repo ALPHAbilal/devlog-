@@ -3,24 +3,24 @@ import { ChevronDown, ChevronRight, Plus, X, Check, AlertCircle, Clock, Code, Ta
 import { Highlight, themes } from 'prism-react-renderer';
 import './IssueTrackerBlock.css';
 
-// Minimalist status indicators using simple dots with subtle glow
+// GitHub-style status indicators with clean design
 const StatusIndicator = ({ status, size = 'md' }) => {
   const sizeClasses = {
     sm: 'w-2 h-2',
-    md: 'w-2.5 h-2.5',
-    lg: 'w-3 h-3'
+    md: 'w-3 h-3',
+    lg: 'w-4 h-4'
   };
 
   const statusStyles = {
-    active: 'bg-red-500/80 shadow-[0_0_8px_rgba(239,68,68,0.3)]',
-    'in-progress': 'bg-blue-500/80 shadow-[0_0_8px_rgba(59,130,246,0.3)]',
-    failed: 'bg-orange-500/80 shadow-[0_0_8px_rgba(249,115,22,0.3)]',
-    success: 'bg-accent-green shadow-[0_0_8px_rgba(16,185,129,0.3)]',
-    solved: 'bg-accent-green shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+    active: 'bg-red-500',
+    'in-progress': 'bg-blue-500',
+    failed: 'bg-orange-500',
+    success: 'bg-accent-green',
+    solved: 'bg-accent-green'
   };
 
   return (
-    <div className={`${sizeClasses[size]} rounded-full ${statusStyles[status] || statusStyles.active} transition-all duration-200`} 
+    <div className={`${sizeClasses[size]} rounded-full ${statusStyles[status] || statusStyles.active} ring-2 ring-white/10 transition-all duration-200`} 
          role="img" 
          aria-label={`Status: ${status}`} />
   );
@@ -48,16 +48,19 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
   const status = result === 'success' ? 'success' : 'failed';
 
   return (
-    <div className="relative ml-6 mb-4">
-      {/* Connection line */}
-      {!isLast && (
-        <div className="absolute left-[-15px] top-3 w-px h-full bg-gradient-to-b from-dark-secondary/50 to-transparent" />
-      )}
+    <div className="relative flex mb-4">
+      {/* Timeline structure */}
+      <div className="w-12 relative flex-shrink-0">
+        {/* Branch line from main timeline */}
+        <div className="attempt-branch-line" />
+        {/* Status dot */}
+        <div className="absolute left-11 top-2">
+          <StatusIndicator status={status} size="sm" />
+        </div>
+      </div>
       
-      <div className="flex items-start gap-3">
-        <StatusIndicator status={status} size="sm" className="mt-1.5 flex-shrink-0" />
-        
-        <div className="flex-1">
+      {/* Content */}
+      <div className="flex-1 pl-2">
           {isEditing ? (
             <div className="space-y-2">
               <textarea
@@ -244,16 +247,25 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
   }, [attempts]);
 
   return (
-    <div className="relative mb-6">
-      {/* Connection line */}
-      {!isLast && (
-        <div className="absolute left-3 top-8 w-px h-full bg-gradient-to-b from-dark-secondary/30 to-transparent" />
-      )}
-      
-      <div className="flex items-start gap-3">
-        <StatusIndicator status={status} className="mt-1.5" />
+    <div className="relative flex mb-6">
+      {/* Timeline column */}
+      <div className="w-12 relative flex-shrink-0">
+        {/* Vertical timeline line */}
+        {!isLast && (
+          <div className="absolute left-5 top-6 w-0.5 h-full bg-dark-secondary/40" />
+        )}
         
-        <div className="flex-1">
+        {/* Timeline dot container */}
+        <div className="issue-timeline-dot top-2">
+          <StatusIndicator status={status} />
+        </div>
+        
+        {/* Horizontal connector */}
+        <div className="issue-timeline-connector" style={{ top: '14px' }} />
+      </div>
+      
+      {/* Content column */}
+      <div className="flex-1 pl-2">
           {isEditing ? (
             <div className="space-y-2">
               <input
@@ -347,27 +359,26 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                       e.stopPropagation();
                       setIsExpanded(!isExpanded);
                     }}
-                    className="text-text-secondary hover:text-text-primary transition-all duration-200"
-                    style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
+                    className="text-text-secondary hover:text-text-primary transition-all duration-200 -ml-1"
                   >
-                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
                   </button>
                   
-                  <h3 className="font-medium text-text-primary">
+                  <h3 className="font-medium text-text-primary flex-1">
                     {title || 'Click to add title'}
                   </h3>
                   
-                  {status === 'solved' && <Check className="w-4 h-4 text-accent-green" />}
-                  {status === 'in-progress' && <Clock className="w-4 h-4 text-blue-400" />}
-                  {status === 'active' && <AlertCircle className="w-4 h-4 text-red-400/70" />}
+                  {status === 'solved' && <Check className="w-4 h-4 text-accent-green ml-auto" />}
+                  {status === 'in-progress' && <Clock className="w-4 h-4 text-blue-400 ml-auto" />}
+                  {status === 'active' && <AlertCircle className="w-4 h-4 text-red-400/70 ml-auto" />}
                 </div>
                 
                 {description && (
-                  <p className="text-sm text-text-secondary mt-1 ml-6">{description}</p>
+                  <p className="text-sm text-text-secondary mt-1 ml-5">{description}</p>
                 )}
                 
                 {code && code.trim() && (
-                  <div className="mt-2 ml-6">
+                  <div className="mt-2 ml-5">
                     <Highlight
                       theme={themes.nightOwl}
                       code={code.trim()}
@@ -406,7 +417,7 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
               </div>
               
               {isExpanded && (
-                <div className="mt-4 ml-6 animate-in fade-in duration-200">
+                <div className="mt-4 animate-in fade-in duration-200">
                   {attempts.map((attempt, idx) => (
                     <AttemptItem
                       key={attempt.id}
@@ -417,15 +428,18 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                     />
                   ))}
                   
-                  <button
-                    onClick={handleAddAttempt}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary 
-                             hover:text-text-primary hover:bg-dark-secondary/30 rounded-lg 
-                             transition-all duration-200"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Add Attempt
-                  </button>
+                  <div className="flex">
+                    <div className="w-12 flex-shrink-0"></div>
+                    <button
+                      onClick={handleAddAttempt}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary 
+                               hover:text-text-primary hover:bg-dark-secondary/30 rounded-lg 
+                               transition-all duration-200 ml-2"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Attempt
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -569,23 +583,32 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
         </button>
       )}
 
-      {/* Issues List */}
+      {/* Issues List with Timeline */}
       <div className="flex-1 overflow-y-auto issue-tracker-scroll pr-2">
         {issues.length > 0 ? (
-          <div className="space-y-2 pb-2">
-            {issues.map((issue, idx) => (
-              <IssueItem
-                key={issue.id}
-                issue={issue}
-                onUpdate={(updates) => handleUpdateIssue(issue.id, updates)}
-                onDelete={() => handleDeleteIssue(issue.id)}
-                isLast={idx === issues.length - 1}
-              />
-            ))}
+          <div className="relative issue-timeline-container">
+            {/* Main vertical timeline line */}
+            <div className="issue-timeline-line" />
+            
+            <div className="space-y-2 pb-2">
+              {issues.map((issue, idx) => (
+                <IssueItem
+                  key={issue.id}
+                  issue={issue}
+                  onUpdate={(updates) => handleUpdateIssue(issue.id, updates)}
+                  onDelete={() => handleDeleteIssue(issue.id)}
+                  isLast={idx === issues.length - 1}
+                />
+              ))}
+            </div>
           </div>
         ) : (
-          <div className="text-center py-6 text-text-secondary/30 text-sm">
-            Track issues and debugging attempts
+          <div className="relative">
+            {/* Empty state with timeline hint */}
+            <div className="absolute left-5 top-0 w-0.5 h-12 bg-dark-secondary/20" />
+            <div className="text-center py-6 text-text-secondary/30 text-sm">
+              Track issues and debugging attempts
+            </div>
           </div>
         )}
       </div>

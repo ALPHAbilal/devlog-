@@ -507,104 +507,95 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
     setIssues(issues.filter(issue => issue.id !== issueId));
   };
 
-  // Empty state when no issues exist
-  if (issues.length === 0 && !milestone) {
-    return (
-      <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-8 border border-dark-primary/50">
-        <div className="text-center">
-          <div className="mb-4">
-            <AlertCircle className="w-12 h-12 text-text-secondary/30 mx-auto" />
-          </div>
-          <h3 className="text-lg font-medium text-text-primary mb-2">
-            Track Your Problem-Solving Journey
-          </h3>
-          <p className="text-sm text-text-secondary mb-6 max-w-md mx-auto">
-            Document issues, track solution attempts, and build a knowledge base of your debugging experience.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <button
-              onClick={() => {
-                setMilestone('New Project Milestone');
-                setIsEditingMilestone(true);
-              }}
-              className="flex items-center justify-center gap-2 px-4 py-2 text-text-primary 
-                       hover:bg-dark-secondary/50 rounded-lg transition-all duration-200
-                       border border-dark-primary/50"
-            >
-              <Target className="w-4 h-4" />
-              Set Milestone
-            </button>
-            <button
-              onClick={handleAddIssue}
-              className="flex items-center justify-center gap-2 px-4 py-2 text-text-secondary 
-                       hover:text-text-primary hover:bg-dark-secondary/50 rounded-lg 
-                       transition-all duration-200"
-            >
-              <AlertCircle className="w-4 h-4" />
-              Add First Issue
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-primary/50">
-      {/* Milestone Header */}
-      <div className="mb-6">
-        {isEditingMilestone ? (
-          <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-accent-green" />
-            <input
-              value={milestone}
-              onChange={(e) => setMilestone(e.target.value)}
-              onBlur={() => setIsEditingMilestone(false)}
-              onKeyDown={(e) => e.key === 'Enter' && setIsEditingMilestone(false)}
-              className="flex-1 px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
-                       text-text-primary placeholder-text-secondary/50
-                       focus:outline-none focus:border-accent-green/30"
-              placeholder="Enter milestone..."
-              autoFocus
-            />
-          </div>
-        ) : (
-          <div 
-            onClick={() => setIsEditingMilestone(true)}
-            className="flex items-center gap-3 cursor-pointer hover:bg-dark-secondary/20 rounded-lg p-2 -m-2 
-                     transition-all duration-200"
-          >
-            <Target className="w-5 h-5 text-accent-green" />
-            <h2 className="text-lg font-semibold text-text-primary">
-              {milestone || 'Click to set milestone'}
-            </h2>
-          </div>
-        )}
-      </div>
+      {/* Milestone Header - Minimal when empty */}
+      {(milestone || isEditingMilestone) && (
+        <div className="mb-6">
+          {isEditingMilestone ? (
+            <div className="flex items-center gap-3">
+              <Target className="w-5 h-5 text-text-secondary/50" />
+              <input
+                value={milestone}
+                onChange={(e) => setMilestone(e.target.value)}
+                onBlur={() => {
+                  if (milestone) {
+                    setIsEditingMilestone(false);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsEditingMilestone(false);
+                  } else if (e.key === 'Escape') {
+                    setMilestone('');
+                    setIsEditingMilestone(false);
+                  }
+                }}
+                className="flex-1 px-3 py-2 bg-transparent border-b border-dark-primary/30 
+                         text-text-primary placeholder-text-secondary/40
+                         focus:outline-none focus:border-accent-green/30 transition-colors"
+                placeholder="Project milestone..."
+                autoFocus
+              />
+            </div>
+          ) : (
+            <div 
+              onClick={() => setIsEditingMilestone(true)}
+              className="flex items-center gap-3 cursor-pointer hover:bg-dark-secondary/20 rounded-lg p-2 -m-2 
+                       transition-all duration-200"
+            >
+              <Target className="w-5 h-5 text-accent-green" />
+              <h2 className="text-lg font-semibold text-text-primary">
+                {milestone}
+              </h2>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Optional milestone button if not set */}
+      {!milestone && !isEditingMilestone && issues.length > 0 && (
+        <button
+          onClick={() => setIsEditingMilestone(true)}
+          className="flex items-center gap-2 px-3 py-1.5 mb-4 text-xs text-text-secondary/40 
+                   hover:text-text-secondary hover:bg-dark-secondary/20 rounded-lg 
+                   transition-all duration-200"
+        >
+          <Target className="w-3.5 h-3.5" />
+          Add milestone
+        </button>
+      )}
 
       {/* Issues List */}
-      <div className="space-y-2">
-        {issues.map((issue, idx) => (
-          <IssueItem
-            key={issue.id}
-            issue={issue}
-            onUpdate={(updates) => handleUpdateIssue(issue.id, updates)}
-            onDelete={() => handleDeleteIssue(issue.id)}
-            isLast={idx === issues.length - 1}
-          />
-        ))}
-      </div>
+      {issues.length > 0 ? (
+        <div className="space-y-2">
+          {issues.map((issue, idx) => (
+            <IssueItem
+              key={issue.id}
+              issue={issue}
+              onUpdate={(updates) => handleUpdateIssue(issue.id, updates)}
+              onDelete={() => handleDeleteIssue(issue.id)}
+              isLast={idx === issues.length - 1}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-6 text-text-secondary/30 text-sm">
+          Track issues and debugging attempts
+        </div>
+      )}
 
-      {/* Add Issue Button */}
+      {/* Add Issue Button - Always visible but subtle */}
       <button
         onClick={handleAddIssue}
-        className="flex items-center gap-2 px-4 py-2 mt-4 text-sm text-text-secondary 
+        className="flex items-center gap-2 px-3 py-2 mt-4 text-sm text-text-secondary/60 
                  hover:text-text-primary hover:bg-dark-secondary/30 rounded-lg w-full 
-                 transition-all duration-200 border border-dark-primary/30 hover:border-dark-primary/50"
+                 transition-all duration-200 border border-dashed border-dark-primary/20 
+                 hover:border-dark-primary/40"
         aria-label="Add new issue"
       >
-        <Plus className="w-4 h-4" />
-        Add Issue
+        <Plus className="w-3.5 h-3.5" />
+        {issues.length === 0 ? 'Add First Issue' : 'Add Issue'}
       </button>
     </div>
   );

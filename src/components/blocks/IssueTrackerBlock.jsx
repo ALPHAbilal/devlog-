@@ -1,63 +1,27 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { ChevronDown, ChevronRight, Plus, X, Check, AlertCircle, Clock, Code, Target, Lightbulb } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, X, Check, AlertCircle, Clock, Code, Target } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
-import './IssueTrackerBlock.css';
 
-// Status indicators as React components with proper SVG icons
-const StatusIndicator = ({ status, className = '', size = 'md' }) => {
+// Minimalist status indicators using simple dots with subtle glow
+const StatusIndicator = ({ status, size = 'md' }) => {
   const sizeClasses = {
-    sm: 'w-3 h-3',
-    md: 'w-4 h-4',
-    lg: 'w-5 h-5'
+    sm: 'w-2 h-2',
+    md: 'w-2.5 h-2.5',
+    lg: 'w-3 h-3'
   };
 
-  const indicators = {
-    active: (
-      <div className={`inline-flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-        <svg viewBox="0 0 20 20" fill="none" className="w-full h-full">
-          <circle cx="10" cy="10" r="8" stroke="#ef4444" strokeWidth="2" />
-          <circle cx="10" cy="10" r="3" fill="#ef4444" className="animate-pulse" />
-        </svg>
-      </div>
-    ),
-    'in-progress': (
-      <div className={`inline-flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-        <svg viewBox="0 0 20 20" fill="none" className="w-full h-full animate-spin-slow">
-          <circle cx="10" cy="10" r="8" stroke="#3b82f6" strokeWidth="2" strokeDasharray="4 2" />
-          <path d="M10 6 L10 10 L13 13" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </div>
-    ),
-    failed: (
-      <div className={`inline-flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-        <svg viewBox="0 0 20 20" fill="none" className="w-full h-full">
-          <circle cx="10" cy="10" r="8" stroke="#f97316" strokeWidth="2" />
-          <path d="M7 7 L13 13 M13 7 L7 13" stroke="#f97316" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      </div>
-    ),
-    success: (
-      <div className={`inline-flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-        <svg viewBox="0 0 20 20" fill="none" className="w-full h-full">
-          <circle cx="10" cy="10" r="8" fill="#10b981" />
-          <path d="M6 10 L9 13 L14 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-    ),
-    solved: (
-      <div className={`inline-flex items-center justify-center ${sizeClasses[size]} ${className}`}>
-        <svg viewBox="0 0 20 20" fill="none" className="w-full h-full">
-          <circle cx="10" cy="10" r="8" fill="#10b981" />
-          <path d="M6 10 L9 13 L14 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      </div>
-    )
+  const statusStyles = {
+    active: 'bg-red-500/80 shadow-[0_0_8px_rgba(239,68,68,0.3)]',
+    'in-progress': 'bg-blue-500/80 shadow-[0_0_8px_rgba(59,130,246,0.3)]',
+    failed: 'bg-orange-500/80 shadow-[0_0_8px_rgba(249,115,22,0.3)]',
+    success: 'bg-accent-green shadow-[0_0_8px_rgba(16,185,129,0.3)]',
+    solved: 'bg-accent-green shadow-[0_0_8px_rgba(16,185,129,0.3)]'
   };
 
   return (
-    <div role="img" aria-label={`Status: ${status}`}>
-      {indicators[status] || indicators.active}
-    </div>
+    <div className={`${sizeClasses[size]} rounded-full ${statusStyles[status] || statusStyles.active} transition-all duration-200`} 
+         role="img" 
+         aria-label={`Status: ${status}`} />
   );
 };
 
@@ -83,14 +47,14 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
   const status = result === 'success' ? 'success' : 'failed';
 
   return (
-    <div className="relative ml-3 sm:ml-6 mb-4">
+    <div className="relative ml-6 mb-4">
       {/* Connection line */}
       {!isLast && (
-        <div className="absolute left-2 top-6 w-0.5 h-full bg-gradient-to-b from-gray-600 to-transparent opacity-50" />
+        <div className="absolute left-[-15px] top-3 w-px h-full bg-gradient-to-b from-dark-secondary/50 to-transparent" />
       )}
       
-      <div className="flex items-start gap-2 sm:gap-3">
-        <StatusIndicator status={status} size="md" className="mt-1 z-10 flex-shrink-0" />
+      <div className="flex items-start gap-3">
+        <StatusIndicator status={status} size="sm" className="mt-1.5 flex-shrink-0" />
         
         <div className="flex-1">
           {isEditing ? (
@@ -98,7 +62,9 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-100"
+                className="w-full px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                         text-sm text-text-primary placeholder-text-secondary/50
+                         focus:outline-none focus:border-accent-green/30 transition-colors"
                 placeholder="Describe the attempt..."
                 rows={2}
               />
@@ -107,7 +73,8 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                 <select
                   value={result}
                   onChange={(e) => setResult(e.target.value)}
-                  className="px-3 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1.5 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                           text-sm text-text-primary focus:outline-none focus:border-accent-green/30"
                 >
                   <option value="failed">Failed</option>
                   <option value="success">Success</option>
@@ -115,31 +82,36 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                 
                 <button
                   onClick={() => setShowCode(!showCode)}
-                  className="px-3 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-700 transition-colors flex items-center gap-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary 
+                           hover:bg-dark-secondary/30 rounded-lg transition-all duration-200 
+                           flex items-center gap-1.5"
                 >
-                  <Code className="w-3 h-3" />
+                  <Code className="w-3.5 h-3.5" />
                   Code
                 </button>
                 
                 <button
                   onClick={handleSave}
-                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1.5 text-sm text-accent-green hover:bg-accent-green/10 
+                           rounded-lg transition-all duration-200"
                 >
                   Save
                 </button>
                 
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary 
+                           hover:bg-dark-secondary/30 rounded-lg transition-all duration-200"
                 >
                   Cancel
                 </button>
                 
                 <button
                   onClick={onDelete}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="px-2 py-1.5 text-text-secondary hover:text-red-400 
+                           hover:bg-red-400/10 rounded-lg transition-all duration-200"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
               
@@ -147,7 +119,9 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-100 font-mono"
+                  className="w-full px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                           text-sm text-text-primary font-mono placeholder-text-secondary/50
+                           focus:outline-none focus:border-accent-green/30"
                   placeholder="Add code snippet..."
                   rows={4}
                 />
@@ -156,18 +130,20 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
           ) : (
             <div 
               onClick={() => setIsEditing(true)}
-              className="cursor-pointer hover:bg-gray-800 rounded p-2 -m-2 transition-colors"
+              className="cursor-pointer hover:bg-dark-secondary/20 rounded-lg p-2 -m-2 transition-all duration-200"
               role="button"
               tabIndex={0}
               onKeyDown={(e) => e.key === 'Enter' && setIsEditing(true)}
               aria-label="Edit attempt"
             >
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm text-gray-300 flex-1">{description || 'Click to add description'}</span>
+                <span className="text-sm text-text-secondary flex-1">
+                  {description || 'Click to add description'}
+                </span>
                 {result === 'success' ? (
-                  <Check className="w-3 h-3 text-green-500 flex-shrink-0" aria-label="Success" />
+                  <Check className="w-3.5 h-3.5 text-accent-green" aria-label="Success" />
                 ) : (
-                  <X className="w-3 h-3 text-red-500 flex-shrink-0" aria-label="Failed" />
+                  <X className="w-3.5 h-3.5 text-red-400/70" aria-label="Failed" />
                 )}
               </div>
               
@@ -180,12 +156,12 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                   >
                     {({ className, style, tokens, getLineProps, getTokenProps }) => (
                       <pre 
-                        className={className}
+                        className={`${className} text-xs`}
                         style={{
                           ...style,
-                          background: 'rgb(31, 41, 55)',
-                          padding: '8px',
-                          borderRadius: '4px',
+                          background: 'rgba(30, 58, 95, 0.3)',
+                          padding: '8px 12px',
+                          borderRadius: '6px',
                           fontSize: '12px',
                           overflow: 'auto'
                         }}
@@ -200,7 +176,7 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
                               </div>
                             ))
                           ) : (
-                            <span className="text-gray-500">No code</span>
+                            <span className="text-text-secondary/50">No code</span>
                           )}
                         </code>
                       </pre>
@@ -269,11 +245,11 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
     <div className="relative mb-6">
       {/* Connection line */}
       {!isLast && (
-        <div className="absolute left-2 top-8 w-0.5 h-full bg-gradient-to-b from-gray-600 to-transparent" />
+        <div className="absolute left-3 top-8 w-px h-full bg-gradient-to-b from-dark-secondary/30 to-transparent" />
       )}
       
       <div className="flex items-start gap-3">
-        <StatusIndicator status={status} className="mt-1 z-10 bg-gray-900" />
+        <StatusIndicator status={status} className="mt-1.5" />
         
         <div className="flex-1">
           {isEditing ? (
@@ -281,14 +257,18 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-gray-100"
+                className="w-full px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                         text-text-primary placeholder-text-secondary/50
+                         focus:outline-none focus:border-accent-green/30 transition-colors"
                 placeholder="Issue title..."
               />
               
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-100"
+                className="w-full px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                         text-sm text-text-primary placeholder-text-secondary/50
+                         focus:outline-none focus:border-accent-green/30"
                 placeholder="Describe the issue..."
                 rows={2}
               />
@@ -297,7 +277,8 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value)}
-                  className="px-3 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-gray-100"
+                  className="px-3 py-1.5 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                           text-sm text-text-primary focus:outline-none focus:border-accent-green/30"
                 >
                   <option value="active">Active</option>
                   <option value="in-progress">In Progress</option>
@@ -306,31 +287,36 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                 
                 <button
                   onClick={() => setShowCode(!showCode)}
-                  className="px-3 py-1 bg-gray-800 border border-gray-700 rounded text-sm text-gray-400 hover:text-gray-100 flex items-center gap-1"
+                  className="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary 
+                           hover:bg-dark-secondary/30 rounded-lg transition-all duration-200 
+                           flex items-center gap-1.5"
                 >
-                  <Code className="w-3 h-3" />
+                  <Code className="w-3.5 h-3.5" />
                   Code
                 </button>
                 
                 <button
                   onClick={handleSave}
-                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="px-3 py-1.5 text-sm text-accent-green hover:bg-accent-green/10 
+                           rounded-lg transition-all duration-200"
                 >
                   Save
                 </button>
                 
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1 bg-gray-700 text-gray-300 rounded text-sm hover:bg-gray-600 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  className="px-3 py-1.5 text-sm text-text-secondary hover:text-text-primary 
+                           hover:bg-dark-secondary/30 rounded-lg transition-all duration-200"
                 >
                   Cancel
                 </button>
                 
                 <button
                   onClick={onDelete}
-                  className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="px-2 py-1.5 text-text-secondary hover:text-red-400 
+                           hover:bg-red-400/10 rounded-lg transition-all duration-200"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
               
@@ -338,7 +324,9 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded text-sm text-gray-100 font-mono"
+                  className="w-full px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                           text-sm text-text-primary font-mono placeholder-text-secondary/50
+                           focus:outline-none focus:border-accent-green/30"
                   placeholder="Add code snippet..."
                   rows={4}
                 />
@@ -348,7 +336,7 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
             <div>
               <div 
                 onClick={() => setIsEditing(true)}
-                className="cursor-pointer hover:bg-gray-800 rounded p-2 -m-2"
+                className="cursor-pointer hover:bg-dark-secondary/20 rounded-lg p-2 -m-2 transition-all duration-200"
               >
                 <div className="flex items-center gap-2">
                   <button
@@ -356,21 +344,23 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                       e.stopPropagation();
                       setIsExpanded(!isExpanded);
                     }}
-                    className="text-gray-400 hover:text-gray-100 transition-transform duration-200"
+                    className="text-text-secondary hover:text-text-primary transition-all duration-200"
                     style={{ transform: isExpanded ? 'rotate(0deg)' : 'rotate(-90deg)' }}
                   >
                     {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                   </button>
                   
-                  <h3 className="font-medium text-gray-100">{title || 'Click to add title'}</h3>
+                  <h3 className="font-medium text-text-primary">
+                    {title || 'Click to add title'}
+                  </h3>
                   
-                  {status === 'solved' && <Check className="w-4 h-4 text-green-500" />}
-                  {status === 'in-progress' && <Clock className="w-4 h-4 text-blue-500" />}
-                  {status === 'active' && <AlertCircle className="w-4 h-4 text-red-500" />}
+                  {status === 'solved' && <Check className="w-4 h-4 text-accent-green" />}
+                  {status === 'in-progress' && <Clock className="w-4 h-4 text-blue-400" />}
+                  {status === 'active' && <AlertCircle className="w-4 h-4 text-red-400/70" />}
                 </div>
                 
                 {description && (
-                  <p className="text-sm text-gray-400 mt-1 ml-6">{description}</p>
+                  <p className="text-sm text-text-secondary mt-1 ml-6">{description}</p>
                 )}
                 
                 {code && code.trim() && (
@@ -382,12 +372,12 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                     >
                       {({ className, style, tokens, getLineProps, getTokenProps }) => (
                         <pre 
-                          className={className}
+                          className={`${className} text-xs`}
                           style={{
                             ...style,
-                            background: 'rgb(31, 41, 55)',
-                            padding: '8px',
-                            borderRadius: '4px',
+                            background: 'rgba(30, 58, 95, 0.3)',
+                            padding: '8px 12px',
+                            borderRadius: '6px',
                             fontSize: '12px',
                             overflow: 'auto'
                           }}
@@ -402,7 +392,7 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                                 </div>
                               ))
                             ) : (
-                              <span className="text-gray-500">No code</span>
+                              <span className="text-text-secondary/50">No code</span>
                             )}
                           </code>
                         </pre>
@@ -413,7 +403,7 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
               </div>
               
               {isExpanded && (
-                <div className="mt-4 ml-6 animate-fade-in">
+                <div className="mt-4 ml-6 animate-in fade-in duration-200">
                   {attempts.map((attempt, idx) => (
                     <AttemptItem
                       key={attempt.id}
@@ -426,9 +416,11 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                   
                   <button
                     onClick={handleAddAttempt}
-                    className="flex items-center gap-2 px-3 py-1 text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded transition-all hover:shadow-md"
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-text-secondary 
+                             hover:text-text-primary hover:bg-dark-secondary/30 rounded-lg 
+                             transition-all duration-200"
                   >
-                    <Plus className="w-3 h-3" />
+                    <Plus className="w-3.5 h-3.5" />
                     Add Attempt
                   </button>
                 </div>
@@ -446,11 +438,13 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
   // Ensure block has proper structure
   if (!block) {
     return (
-      <div className="bg-gray-900 rounded-lg p-4">
-        <div className="issue-skeleton h-8 w-48 rounded mb-4"></div>
-        <div className="issue-skeleton h-20 w-full rounded mb-2"></div>
-        <div className="issue-skeleton h-20 w-full rounded mb-2"></div>
-        <div className="issue-skeleton h-12 w-32 rounded"></div>
+      <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-primary/50">
+        <div className="animate-pulse">
+          <div className="h-6 w-48 bg-dark-primary/50 rounded mb-4"></div>
+          <div className="h-20 w-full bg-dark-primary/30 rounded mb-2"></div>
+          <div className="h-20 w-full bg-dark-primary/30 rounded mb-2"></div>
+          <div className="h-10 w-32 bg-dark-primary/30 rounded"></div>
+        </div>
       </div>
     );
   }
@@ -516,42 +510,39 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
   // Empty state when no issues exist
   if (issues.length === 0 && !milestone) {
     return (
-      <div className="bg-gray-900 rounded-lg p-4">
-        <div className="issue-tracker-empty">
-          <svg viewBox="0 0 120 120" fill="none">
-            <circle cx="60" cy="60" r="50" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
-            <path d="M40 60 L50 70 L80 40" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" opacity="0.5"/>
-            <circle cx="30" cy="30" r="4" fill="currentColor" opacity="0.4"/>
-            <circle cx="90" cy="30" r="4" fill="currentColor" opacity="0.4"/>
-            <circle cx="30" cy="90" r="4" fill="currentColor" opacity="0.4"/>
-            <circle cx="90" cy="90" r="4" fill="currentColor" opacity="0.4"/>
-          </svg>
-          <h3 className="text-lg font-medium text-gray-100 mb-2">Track Your Problem-Solving Journey</h3>
-          <p className="text-sm text-gray-400 mb-4 max-w-md">
+      <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-8 border border-dark-primary/50">
+        <div className="text-center">
+          <div className="mb-4">
+            <AlertCircle className="w-12 h-12 text-text-secondary/30 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-text-primary mb-2">
+            Track Your Problem-Solving Journey
+          </h3>
+          <p className="text-sm text-text-secondary mb-6 max-w-md mx-auto">
             Document issues, track solution attempts, and build a knowledge base of your debugging experience.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => {
-                setMilestone('New Project');
+                setMilestone('New Project Milestone');
                 setIsEditingMilestone(true);
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-text-primary 
+                       hover:bg-dark-secondary/50 rounded-lg transition-all duration-200
+                       border border-dark-primary/50"
             >
               <Target className="w-4 h-4" />
               Set Milestone
             </button>
             <button
               onClick={handleAddIssue}
-              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-gray-100 rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-text-secondary 
+                       hover:text-text-primary hover:bg-dark-secondary/50 rounded-lg 
+                       transition-all duration-200"
             >
               <AlertCircle className="w-4 h-4" />
               Add First Issue
             </button>
-          </div>
-          <div className="mt-6 flex items-center gap-2 text-xs text-gray-500">
-            <Lightbulb className="w-3 h-3" />
-            <span>Tip: Start by setting a milestone for your project or feature</span>
           </div>
         </div>
       </div>
@@ -559,18 +550,20 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
   }
 
   return (
-    <div className="bg-gray-900 rounded-lg p-4 issue-tracker-block">
+    <div className="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-primary/50">
       {/* Milestone Header */}
       <div className="mb-6">
         {isEditingMilestone ? (
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🎯</span>
+          <div className="flex items-center gap-3">
+            <Target className="w-5 h-5 text-accent-green" />
             <input
               value={milestone}
               onChange={(e) => setMilestone(e.target.value)}
               onBlur={() => setIsEditingMilestone(false)}
               onKeyDown={(e) => e.key === 'Enter' && setIsEditingMilestone(false)}
-              className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded text-gray-100"
+              className="flex-1 px-3 py-2 bg-dark-secondary/50 border border-dark-primary/50 rounded-lg 
+                       text-text-primary placeholder-text-secondary/50
+                       focus:outline-none focus:border-accent-green/30"
               placeholder="Enter milestone..."
               autoFocus
             />
@@ -578,10 +571,11 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
         ) : (
           <div 
             onClick={() => setIsEditingMilestone(true)}
-            className="flex items-center gap-2 cursor-pointer hover:bg-gray-800 rounded p-2 -m-2"
+            className="flex items-center gap-3 cursor-pointer hover:bg-dark-secondary/20 rounded-lg p-2 -m-2 
+                     transition-all duration-200"
           >
-            <span className="text-xl">🎯</span>
-            <h2 className="text-lg font-semibold text-gray-100">
+            <Target className="w-5 h-5 text-accent-green" />
+            <h2 className="text-lg font-semibold text-text-primary">
               {milestone || 'Click to set milestone'}
             </h2>
           </div>
@@ -604,7 +598,9 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
       {/* Add Issue Button */}
       <button
         onClick={handleAddIssue}
-        className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-gray-100 hover:bg-gray-800 rounded-lg w-full transition-all hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gray-500"
+        className="flex items-center gap-2 px-4 py-2 mt-4 text-sm text-text-secondary 
+                 hover:text-text-primary hover:bg-dark-secondary/30 rounded-lg w-full 
+                 transition-all duration-200 border border-dark-primary/30 hover:border-dark-primary/50"
         aria-label="Add new issue"
       >
         <Plus className="w-4 h-4" />

@@ -1,322 +1,346 @@
-/* Issue Tracker Block - Modern 2025 Timeline UI */
+/* Issue Tracker Block - Minimal Timeline UI */
+/* Inspired by subway maps and circuit diagrams for maximum clarity */
 
-/* Timeline structure with enhanced visual hierarchy */
-.issue-timeline-container {
-  position: relative;
-  --timeline-line-color: rgba(255, 255, 255, 0.05);
-  --timeline-line-active: rgba(89, 255, 211, 0.3);
-  --timeline-dot-bg: rgba(10, 22, 40, 0.95);
-  --timeline-glow: rgba(89, 255, 211, 0.4);
+/* CSS Custom Properties for consistent theming */
+:root {
+  --timeline-bg: #0a1628;
+  --timeline-surface: #1a2638;
+  --timeline-text-primary: #e8e8e8;
+  --timeline-text-secondary: rgba(255, 255, 255, 0.6);
+  --timeline-line: #2a3648;
+  --timeline-dot-bg: #1a2638;
+  --timeline-dot-border: #3a4658;
+  
+  /* Status colors - muted for dark theme */
+  --status-active: #ef4444;
+  --status-progress: #3b82f6;
+  --status-failed: #f59e0b;
+  --status-success: #10b981;
+  
+  /* Spacing */
+  --timeline-spacing: 1.5rem;
+  --timeline-line-width: 2px;
+  --timeline-dot-size: 12px;
+  --timeline-dot-size-sm: 8px;
 }
 
-/* Main vertical timeline with gradient fade */
+/* Main timeline container using CSS Grid */
+.issue-timeline-container {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--timeline-spacing);
+  position: relative;
+  padding: 1rem 0;
+}
+
+/* Vertical timeline line */
 .issue-timeline-line {
   position: absolute;
-  left: 24px;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    var(--timeline-line-color) 5%,
-    var(--timeline-line-color) 95%,
-    transparent 100%
-  );
-  z-index: 1;
+  left: 12px;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  width: var(--timeline-line-width);
+  background: var(--timeline-line);
+  transform: translateX(-50%);
 }
 
-/* Active segment indicator */
-.issue-timeline-line::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    var(--timeline-line-active) 20%,
-    transparent 60%
-  );
-  opacity: 0;
-  animation: timeline-pulse 3s ease-in-out infinite;
+/* Issue wrapper with grid layout */
+.issue-wrapper {
+  display: contents;
 }
 
-/* Timeline dot with modern styling */
-.issue-timeline-dot {
-  position: absolute;
-  left: 16px;
-  width: 18px;
-  height: 18px;
+/* Timeline markers column */
+.timeline-marker {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  background: var(--timeline-dot-bg);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  padding-top: 0.5rem;
+}
+
+/* Issue status dot */
+.timeline-dot {
+  width: var(--timeline-dot-size);
+  height: var(--timeline-dot-size);
   border-radius: 50%;
-  z-index: 10;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 
-    0 0 0 0 transparent,
-    0 4px 12px -2px rgba(0, 0, 0, 0.3);
+  background: var(--timeline-dot-bg);
+  border: 2px solid var(--timeline-dot-border);
+  position: relative;
+  z-index: 2;
 }
 
-/* Hover state for timeline dots */
-.issue-timeline-dot:hover {
-  transform: scale(1.1);
-  border-color: var(--timeline-glow);
-  box-shadow: 
-    0 0 0 8px rgba(89, 255, 211, 0.1),
-    0 8px 24px -4px rgba(89, 255, 211, 0.3);
+/* Status-specific dot colors */
+.timeline-dot.status-active {
+  border-color: var(--status-active);
 }
 
-/* Dot inner indicator styling */
-.issue-timeline-dot > div {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.timeline-dot.status-in-progress {
+  border-color: var(--status-progress);
 }
 
-.issue-timeline-dot:hover > div {
-  transform: scale(1.2);
+.timeline-dot.status-solved {
+  border-color: var(--status-success);
+  background: var(--status-success);
 }
 
-/* Modern connector with gradient */
-.issue-timeline-connector {
-  position: absolute;
-  left: 34px;
-  height: 2px;
-  width: 0;
-  background: linear-gradient(
-    90deg,
-    var(--timeline-line-active),
-    transparent
-  );
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 1;
-  opacity: 0;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* Issue content */
+.issue-content {
+  padding: 0;
+  min-height: 3rem;
 }
 
-/* Show connector on hover */
-.issue-timeline-dot:hover ~ .issue-timeline-connector,
-.issue-item:hover .issue-timeline-connector {
-  width: 24px;
-  opacity: 1;
+/* Attempts container with sub-grid */
+.attempts-container {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  margin-left: -40px;
+  padding-left: 40px;
+  position: relative;
 }
 
-/* Branch line for attempts with smooth curves */
-.attempt-branch-line {
-  position: absolute;
-  left: 25px;
-  width: 30px;
-  height: 20px;
-  top: -5px;
-  z-index: 1;
-  overflow: visible;
+/* Horizontal branch line for attempts */
+.attempt-branch {
+  position: relative;
 }
 
-.attempt-branch-line::before {
+.attempt-branch::before {
   content: '';
   position: absolute;
-  top: 15px;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: var(--timeline-line-color);
-  border-radius: 1px;
-}
-
-/* Curved connection for attempts */
-.attempt-branch-line::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 15px;
-  height: 15px;
-  border-left: 2px solid var(--timeline-line-color);
-  border-bottom: 2px solid var(--timeline-line-color);
+  left: -28px;
+  top: 0.5rem;
+  width: 28px;
+  height: calc(100% - 0.5rem);
+  border-left: var(--timeline-line-width) solid var(--timeline-line);
+  border-bottom: var(--timeline-line-width) solid var(--timeline-line);
   border-bottom-left-radius: 8px;
 }
 
-/* Active state animations */
-@keyframes timeline-pulse {
-  0%, 100% { opacity: 0; transform: translateY(-100%); }
-  50% { opacity: 0.6; transform: translateY(100%); }
+/* Last attempt doesn't need vertical line */
+.attempt-branch:last-child::before {
+  height: 0.5rem;
 }
 
-/* Smooth entry animations */
-.issue-timeline-dot {
-  animation: dot-entry 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+/* Attempt status dot */
+.attempt-dot {
+  width: var(--timeline-dot-size-sm);
+  height: var(--timeline-dot-size-sm);
+  border-radius: 50%;
+  background: var(--timeline-dot-bg);
+  border: 2px solid var(--timeline-dot-border);
+  margin-top: 0.5rem;
 }
 
-@keyframes dot-entry {
-  from {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.attempt-dot.status-success {
+  border-color: var(--status-success);
+  background: var(--status-success);
 }
 
-/* Enhanced status indicators with modern colors */
-.status-active .issue-timeline-dot {
-  border-color: rgba(239, 68, 68, 0.5);
+.attempt-dot.status-failed {
+  border-color: var(--status-failed);
 }
 
-.status-active .issue-timeline-dot:hover {
-  box-shadow: 
-    0 0 0 8px rgba(239, 68, 68, 0.1),
-    0 8px 24px -4px rgba(239, 68, 68, 0.3);
+/* Content styling */
+.timeline-content {
+  background: var(--timeline-surface);
+  border: 1px solid var(--timeline-dot-border);
+  border-radius: 8px;
+  padding: 1rem;
 }
 
-.status-in-progress .issue-timeline-dot {
-  border-color: rgba(59, 130, 246, 0.5);
+.timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
 }
 
-.status-in-progress .issue-timeline-dot:hover {
-  box-shadow: 
-    0 0 0 8px rgba(59, 130, 246, 0.1),
-    0 8px 24px -4px rgba(59, 130, 246, 0.3);
+.timeline-title {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--timeline-text-primary);
+  margin: 0;
+  flex: 1;
 }
 
-.status-solved .issue-timeline-dot {
-  border-color: rgba(89, 255, 211, 0.5);
+.timeline-status-icon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--timeline-text-secondary);
 }
 
-.status-solved .issue-timeline-dot:hover {
-  box-shadow: 
-    0 0 0 8px rgba(89, 255, 211, 0.1),
-    0 8px 24px -4px rgba(89, 255, 211, 0.3);
+.timeline-description {
+  color: var(--timeline-text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  line-height: 1.5;
 }
 
-/* Modern vertical line segments between issues */
-.issue-vertical-segment {
-  position: absolute;
-  left: 25px;
-  width: 2px;
-  background: var(--timeline-line-color);
-  transition: background 0.3s ease;
+/* Attempt content */
+.attempt-content {
+  background: var(--timeline-surface);
+  border: 1px solid var(--timeline-dot-border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
 }
 
-.issue-vertical-segment.active {
-  background: var(--timeline-line-active);
+/* Code blocks */
+.code-snippet {
+  background: var(--timeline-bg);
+  border: 1px solid var(--timeline-line);
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  font-family: monospace;
+  font-size: 0.75rem;
+  overflow-x: auto;
 }
 
-/* Modern skeleton loading with subtle animation */
-@keyframes skeleton-shimmer {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
+/* Form elements */
+.timeline-input,
+.timeline-textarea,
+.timeline-select {
+  background: var(--timeline-bg);
+  border: 1px solid var(--timeline-dot-border);
+  border-radius: 4px;
+  color: var(--timeline-text-primary);
+  padding: 0.5rem;
+  width: 100%;
+  font-size: 0.875rem;
 }
 
-.issue-tracker-skeleton {
-  background: linear-gradient(
-    90deg,
-    rgba(30, 58, 95, 0.3) 0px,
-    rgba(30, 58, 95, 0.5) 40px,
-    rgba(30, 58, 95, 0.3) 80px
-  );
-  background-size: 200px 100%;
-  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+.timeline-input:focus,
+.timeline-textarea:focus,
+.timeline-select:focus {
+  outline: none;
+  border-color: var(--status-progress);
 }
 
-/* Modern content transitions */
-.issue-content-wrapper {
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Buttons */
+.timeline-button {
+  background: transparent;
+  border: 1px solid var(--timeline-dot-border);
+  border-radius: 4px;
+  color: var(--timeline-text-secondary);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: none;
 }
 
-.issue-content-wrapper:hover {
-  transform: translateX(4px);
+.timeline-button:hover {
+  color: var(--timeline-text-primary);
+  border-color: var(--timeline-text-secondary);
 }
 
-/* Attempt item modern styling */
-.attempt-item {
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.timeline-button-primary {
+  background: var(--status-progress);
+  border-color: var(--status-progress);
+  color: white;
 }
 
-.attempt-item:hover {
-  transform: translateX(2px);
+.timeline-button-primary:hover {
+  background: var(--status-progress);
+  opacity: 0.9;
 }
 
-/* Modern focus states */
-.issue-timeline-dot:focus-visible {
-  outline: 2px solid var(--timeline-glow);
-  outline-offset: 4px;
+/* Add issue button */
+.add-issue-button {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: transparent;
+  border: 1px dashed var(--timeline-dot-border);
+  border-radius: 8px;
+  color: var(--timeline-text-secondary);
+  cursor: pointer;
+  font-size: 0.875rem;
 }
 
-/* Smooth collapse/expand animations */
-.issue-collapse-content {
-  overflow: hidden;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.2s ease-out;
+.add-issue-button:hover {
+  border-color: var(--timeline-text-secondary);
+  color: var(--timeline-text-primary);
 }
 
-.issue-collapse-content.collapsed {
-  max-height: 0;
-  opacity: 0;
+/* Empty state */
+.timeline-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--timeline-text-secondary);
+  padding: 3rem 1rem;
+  font-size: 0.875rem;
 }
 
-.issue-collapse-content.expanded {
-  max-height: 2000px;
-  opacity: 1;
+/* Scrollbar styling */
+.issue-tracker-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--timeline-line) transparent;
 }
 
-/* Custom scrollbar styling for issue list */
 .issue-tracker-scroll::-webkit-scrollbar {
   width: 6px;
 }
 
 .issue-tracker-scroll::-webkit-scrollbar-track {
-  background: rgba(30, 58, 95, 0.1);
-  border-radius: 3px;
+  background: transparent;
 }
 
 .issue-tracker-scroll::-webkit-scrollbar-thumb {
-  background: rgba(30, 58, 95, 0.4);
+  background: var(--timeline-line);
   border-radius: 3px;
-  transition: background 0.2s;
 }
 
-.issue-tracker-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgba(30, 58, 95, 0.6);
-}
-
-/* Hide scrollbar when not hovering (for cleaner look) */
-.issue-tracker-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.2s;
-}
-
-.issue-tracker-scroll:hover {
-  scrollbar-color: rgba(30, 58, 95, 0.4) rgba(30, 58, 95, 0.1);
-}
-
-/* Mobile-specific optimizations */
+/* Responsive design */
 @media (max-width: 640px) {
-  /* Ensure touch targets are adequate on mobile */
-  .issue-tracker-block button {
-    min-height: 36px;
-    min-width: 36px;
+  .issue-timeline-container {
+    grid-template-columns: 20px 1fr;
+    gap: 0.75rem;
   }
   
-  /* Optimize spacing for mobile */
-  .issue-tracker-block {
-    padding: 1rem;
+  .attempts-container {
+    grid-template-columns: 32px 1fr;
+    margin-left: -32px;
+    padding-left: 32px;
   }
   
-  /* Adjust max height for mobile */
-  .issue-tracker-block {
-    max-height: 70vh;
+  .attempt-branch::before {
+    left: -20px;
+    width: 20px;
+  }
+  
+  .timeline-content,
+  .attempt-content {
+    padding: 0.75rem;
+  }
+}
+
+/* Focus states for accessibility */
+.timeline-header:focus {
+  outline: 2px solid var(--status-progress);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.timeline-button:focus,
+.timeline-input:focus,
+.timeline-textarea:focus,
+.timeline-select:focus {
+  outline: 2px solid var(--status-progress);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --timeline-line: #4a5668;
+    --timeline-dot-border: #5a6678;
+    --timeline-text-secondary: rgba(255, 255, 255, 0.8);
   }
 }

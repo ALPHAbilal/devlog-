@@ -96,6 +96,11 @@
   position: relative;
 }
 
+/* SVG branch container positioning */
+.attempts-container > svg {
+  z-index: 1;
+}
+
 /* Attempt branch layout */
 .attempt-branch {
   display: grid;
@@ -103,28 +108,6 @@
   gap: 0.75rem;
   margin-bottom: 0.75rem;
   position: relative;
-}
-
-/* Horizontal branch line */
-.attempt-branch::before {
-  content: '';
-  position: absolute;
-  left: -16px;
-  top: 0.5rem;
-  width: 40px;
-  height: 2px;
-  background: var(--timeline-line);
-}
-
-/* Vertical connection for multiple attempts */
-.attempt-branch:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: -16px;
-  top: 0.5rem;
-  bottom: -0.75rem;
-  width: 2px;
-  background: var(--timeline-line);
 }
 
 /* Attempt status dot */
@@ -317,16 +300,9 @@
   
   .attempt-branch {
     grid-template-columns: 32px 1fr;
+    gap: 0.5rem;
   }
   
-  .attempt-branch::before {
-    left: -12px;
-    width: 32px;
-  }
-  
-  .attempt-branch::after {
-    left: -12px;
-  }
   
   .timeline-content,
   .attempt-content {

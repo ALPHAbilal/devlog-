@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, X, Check, AlertCircle, Clock, Code, Target, Trash2 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
+import TimelineBranch, { VerticalConnector } from './TimelineBranch';
 import './IssueTrackerBlock.css';
 
 // Minimal status indicators - clean and functional
@@ -18,7 +19,7 @@ const StatusIndicator = ({ status, size = 'md' }) => {
 };
 
 // Attempt Item Component
-const AttemptItem = ({ attempt, onUpdate, onDelete }) => {
+const AttemptItem = ({ attempt, onUpdate, onDelete, index, isLast }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(attempt.description || '');
   const [code, setCode] = useState(attempt.code || '');
@@ -314,13 +315,34 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
           <div className="mt-3">
             {attempts.length > 0 && (
               <div className="attempts-container">
-                {attempts.map((attempt) => (
-                  <AttemptItem
-                    key={attempt.id}
-                    attempt={attempt}
-                    onUpdate={(updates) => handleUpdateAttempt(attempt.id, updates)}
-                    onDelete={() => handleDeleteAttempt(attempt.id)}
-                  />
+                {/* SVG branch from main timeline to attempts */}
+                <TimelineBranch 
+                  startX={-16}
+                  startY={-8}
+                  endX={24}
+                  endY={20}
+                  curveRadius={12}
+                />
+                
+                {attempts.map((attempt, idx) => (
+                  <div key={attempt.id} className="relative">
+                    {/* Vertical connector between attempts */}
+                    {idx > 0 && (
+                      <VerticalConnector
+                        x={24}
+                        startY={-12}
+                        endY={0}
+                      />
+                    )}
+                    
+                    <AttemptItem
+                      attempt={attempt}
+                      index={idx}
+                      isLast={idx === attempts.length - 1}
+                      onUpdate={(updates) => handleUpdateAttempt(attempt.id, updates)}
+                      onDelete={() => handleDeleteAttempt(attempt.id)}
+                    />
+                  </div>
                 ))}
               </div>
             )}

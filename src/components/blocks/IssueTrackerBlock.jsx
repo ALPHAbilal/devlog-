@@ -67,7 +67,7 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, isLast }) => {
         </div>
       </div>
       
-      {/* Content */>
+      {/* Content */}
       <div className="flex-1 pl-1">
           {isEditing ? (
             <div className="space-y-2">

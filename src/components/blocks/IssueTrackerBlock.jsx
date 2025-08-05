@@ -109,25 +109,25 @@ const AttemptItem = ({ attempt, onUpdate, onDelete }) => {
         ) : (
           <div 
             onClick={() => setIsEditing(true)}
-            className="cursor-pointer"
+            className="cursor-pointer w-full"
             role="button"
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && setIsEditing(true)}
             aria-label="Edit attempt"
           >
-            <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center justify-between">
               <span className="text-sm">
                 {description || 'Click to add description'}
               </span>
               {result === 'success' ? (
-                <Check className="w-3.5 h-3.5 text-green-500" aria-label="Success" />
+                <Check className="w-3.5 h-3.5 text-green-500 ml-2 flex-shrink-0" aria-label="Success" />
               ) : (
-                <X className="w-3.5 h-3.5 text-red-500" aria-label="Failed" />
+                <X className="w-3.5 h-3.5 text-red-500 ml-2 flex-shrink-0" aria-label="Failed" />
               )}
             </div>
             
             {code && code.trim() && (
-              <div className="code-snippet">
+              <div className="code-snippet mt-2">
                 <code>{code.trim()}</code>
               </div>
             )}

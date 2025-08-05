@@ -24,11 +24,8 @@
   --timeline-dot-size-sm: 8px;
 }
 
-/* Main timeline container using CSS Grid */
+/* Main timeline container */
 .issue-timeline-container {
-  display: grid;
-  grid-template-columns: 24px 1fr;
-  gap: var(--timeline-spacing);
   position: relative;
   padding: 1rem 0;
 }
@@ -44,18 +41,21 @@
   transform: translateX(-50%);
 }
 
-/* Issue wrapper with grid layout */
+/* Issue wrapper */
 .issue-wrapper {
-  display: contents;
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  gap: var(--timeline-spacing);
+  margin-bottom: 2rem;
+  position: relative;
 }
 
 /* Timeline markers column */
 .timeline-marker {
-  position: relative;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 0.5rem;
+  padding-top: 0.25rem;
 }
 
 /* Issue status dot */
@@ -89,37 +89,42 @@
   min-height: 3rem;
 }
 
-/* Attempts container with sub-grid */
+/* Attempts container */
 .attempts-container {
+  margin-top: 1rem;
+  margin-left: 1.5rem;
+  position: relative;
+}
+
+/* Attempt branch layout */
+.attempt-branch {
   display: grid;
   grid-template-columns: 40px 1fr;
   gap: 0.75rem;
-  margin-top: 0.75rem;
-  margin-left: -40px;
-  padding-left: 40px;
+  margin-bottom: 0.75rem;
   position: relative;
 }
 
-/* Horizontal branch line for attempts */
-.attempt-branch {
-  position: relative;
-}
-
+/* Horizontal branch line */
 .attempt-branch::before {
   content: '';
   position: absolute;
-  left: -28px;
+  left: -16px;
   top: 0.5rem;
-  width: 28px;
-  height: calc(100% - 0.5rem);
-  border-left: var(--timeline-line-width) solid var(--timeline-line);
-  border-bottom: var(--timeline-line-width) solid var(--timeline-line);
-  border-bottom-left-radius: 8px;
+  width: 40px;
+  height: 2px;
+  background: var(--timeline-line);
 }
 
-/* Last attempt doesn't need vertical line */
-.attempt-branch:last-child::before {
-  height: 0.5rem;
+/* Vertical connection for multiple attempts */
+.attempt-branch:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 0.5rem;
+  bottom: -0.75rem;
+  width: 2px;
+  background: var(--timeline-line);
 }
 
 /* Attempt status dot */
@@ -129,7 +134,9 @@
   border-radius: 50%;
   background: var(--timeline-dot-bg);
   border: 2px solid var(--timeline-dot-border);
-  margin-top: 0.5rem;
+  margin-top: 0.25rem;
+  position: relative;
+  z-index: 2;
 }
 
 .attempt-dot.status-success {
@@ -299,25 +306,35 @@
 
 /* Responsive design */
 @media (max-width: 640px) {
-  .issue-timeline-container {
+  .issue-wrapper {
     grid-template-columns: 20px 1fr;
     gap: 0.75rem;
   }
   
   .attempts-container {
+    margin-left: 1rem;
+  }
+  
+  .attempt-branch {
     grid-template-columns: 32px 1fr;
-    margin-left: -32px;
-    padding-left: 32px;
   }
   
   .attempt-branch::before {
-    left: -20px;
-    width: 20px;
+    left: -12px;
+    width: 32px;
+  }
+  
+  .attempt-branch::after {
+    left: -12px;
   }
   
   .timeline-content,
   .attempt-content {
     padding: 0.75rem;
+  }
+  
+  .issue-timeline-line {
+    left: 10px;
   }
 }
 

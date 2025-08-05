@@ -1,58 +1,213 @@
-/* Issue Tracker Block - GitHub-Style Timeline UI */
+/* Issue Tracker Block - Modern 2025 Timeline UI */
 
-/* Timeline structure for professional GitHub-like appearance */
+/* Timeline structure with enhanced visual hierarchy */
 .issue-timeline-container {
   position: relative;
+  --timeline-line-color: rgba(255, 255, 255, 0.05);
+  --timeline-line-active: rgba(89, 255, 211, 0.3);
+  --timeline-dot-bg: rgba(10, 22, 40, 0.95);
+  --timeline-glow: rgba(89, 255, 211, 0.4);
 }
 
-/* Main vertical timeline line */
+/* Main vertical timeline with gradient fade */
 .issue-timeline-line {
   position: absolute;
-  left: 20px;
+  left: 24px;
   top: 0;
   bottom: 0;
   width: 2px;
-  background: rgba(30, 58, 95, 0.3);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    var(--timeline-line-color) 5%,
+    var(--timeline-line-color) 95%,
+    transparent 100%
+  );
   z-index: 1;
 }
 
-/* Timeline dot styling */
+/* Active segment indicator */
+.issue-timeline-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    var(--timeline-line-active) 20%,
+    transparent 60%
+  );
+  opacity: 0;
+  animation: timeline-pulse 3s ease-in-out infinite;
+}
+
+/* Timeline dot with modern styling */
 .issue-timeline-dot {
   position: absolute;
-  left: 17px;
+  left: 16px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0a1628; /* dark-primary */
-  padding: 3px;
+  background: var(--timeline-dot-bg);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
-  z-index: 2; /* Ensure dots appear above lines */
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 0 0 0 transparent,
+    0 4px 12px -2px rgba(0, 0, 0, 0.3);
 }
 
-/* Horizontal connector from dot to content */
+/* Hover state for timeline dots */
+.issue-timeline-dot:hover {
+  transform: scale(1.1);
+  border-color: var(--timeline-glow);
+  box-shadow: 
+    0 0 0 8px rgba(89, 255, 211, 0.1),
+    0 8px 24px -4px rgba(89, 255, 211, 0.3);
+}
+
+/* Dot inner indicator styling */
+.issue-timeline-dot > div {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.issue-timeline-dot:hover > div {
+  transform: scale(1.2);
+}
+
+/* Modern connector with gradient */
 .issue-timeline-connector {
   position: absolute;
-  left: 28px;
+  left: 34px;
   height: 2px;
-  width: 12px;
-  background: rgba(30, 58, 95, 0.3);
+  width: 0;
+  background: linear-gradient(
+    90deg,
+    var(--timeline-line-active),
+    transparent
+  );
   top: 50%;
   transform: translateY(-50%);
   z-index: 1;
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Branch line for attempts */
+/* Show connector on hover */
+.issue-timeline-dot:hover ~ .issue-timeline-connector,
+.issue-item:hover .issue-timeline-connector {
+  width: 24px;
+  opacity: 1;
+}
+
+/* Branch line for attempts with smooth curves */
 .attempt-branch-line {
   position: absolute;
-  left: 21px;
-  width: 23px;
-  height: 2px;
-  background: rgba(30, 58, 95, 0.3);
-  top: 10px;
+  left: 25px;
+  width: 30px;
+  height: 20px;
+  top: -5px;
   z-index: 1;
+  overflow: visible;
 }
 
-/* Custom skeleton loading animation for consistency with other blocks */
+.attempt-branch-line::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--timeline-line-color);
+  border-radius: 1px;
+}
+
+/* Curved connection for attempts */
+.attempt-branch-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 15px;
+  height: 15px;
+  border-left: 2px solid var(--timeline-line-color);
+  border-bottom: 2px solid var(--timeline-line-color);
+  border-bottom-left-radius: 8px;
+}
+
+/* Active state animations */
+@keyframes timeline-pulse {
+  0%, 100% { opacity: 0; transform: translateY(-100%); }
+  50% { opacity: 0.6; transform: translateY(100%); }
+}
+
+/* Smooth entry animations */
+.issue-timeline-dot {
+  animation: dot-entry 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes dot-entry {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Enhanced status indicators with modern colors */
+.status-active .issue-timeline-dot {
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.status-active .issue-timeline-dot:hover {
+  box-shadow: 
+    0 0 0 8px rgba(239, 68, 68, 0.1),
+    0 8px 24px -4px rgba(239, 68, 68, 0.3);
+}
+
+.status-in-progress .issue-timeline-dot {
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.status-in-progress .issue-timeline-dot:hover {
+  box-shadow: 
+    0 0 0 8px rgba(59, 130, 246, 0.1),
+    0 8px 24px -4px rgba(59, 130, 246, 0.3);
+}
+
+.status-solved .issue-timeline-dot {
+  border-color: rgba(89, 255, 211, 0.5);
+}
+
+.status-solved .issue-timeline-dot:hover {
+  box-shadow: 
+    0 0 0 8px rgba(89, 255, 211, 0.1),
+    0 8px 24px -4px rgba(89, 255, 211, 0.3);
+}
+
+/* Modern vertical line segments between issues */
+.issue-vertical-segment {
+  position: absolute;
+  left: 25px;
+  width: 2px;
+  background: var(--timeline-line-color);
+  transition: background 0.3s ease;
+}
+
+.issue-vertical-segment.active {
+  background: var(--timeline-line-active);
+}
+
+/* Modern skeleton loading with subtle animation */
 @keyframes skeleton-shimmer {
   0% {
     background-position: -200px 0;
@@ -71,6 +226,49 @@
   );
   background-size: 200px 100%;
   animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+/* Modern content transitions */
+.issue-content-wrapper {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.issue-content-wrapper:hover {
+  transform: translateX(4px);
+}
+
+/* Attempt item modern styling */
+.attempt-item {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.attempt-item:hover {
+  transform: translateX(2px);
+}
+
+/* Modern focus states */
+.issue-timeline-dot:focus-visible {
+  outline: 2px solid var(--timeline-glow);
+  outline-offset: 4px;
+}
+
+/* Smooth collapse/expand animations */
+.issue-collapse-content {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease-out;
+}
+
+.issue-collapse-content.collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+.issue-collapse-content.expanded {
+  max-height: 2000px;
+  opacity: 1;
 }
 
 /* Custom scrollbar styling for issue list */

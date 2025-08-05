@@ -272,7 +272,7 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
         <div className="issue-timeline-connector" />
       </div>
       
-      {/* Content column with modern wrapper */>
+      {/* Content column with modern wrapper */}
       <div className="flex-1 pl-1">
         <div className="issue-content-wrapper">
           {isEditing ? (

@@ -9,7 +9,7 @@ import TodoBlock from './blocks/TodoBlock';
 import ImageBlock from './blocks/ImageBlock';
 import InlineImageBlock from './blocks/InlineImageBlock';
 import VersionTrackBlock from './blocks/VersionTrackBlock';
-import IssueTrackerBlock from './blocks/IssueTrackerBlock';
+import IssueTrackerBlockVis from './blocks/IssueTrackerBlockVis';
 import BlockDivider from './BlockDivider';
 import InlineActionBar from './InlineActionBar';
 import MobileBlockControls from './MobileBlockControls';
@@ -26,7 +26,7 @@ const blockComponents = {
   image: ImageBlock,
   'inline-image': InlineImageBlock,
   'version-track': VersionTrackBlock,
-  'issue-tracker': IssueTrackerBlock,
+  'issue-tracker': IssueTrackerBlockVis,
 };
 
 export default function Block({ 

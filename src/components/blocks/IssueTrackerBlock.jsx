@@ -321,7 +321,6 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
                   startY={-8}
                   endX={24}
                   endY={20}
-                  curveRadius={12}
                 />
                 
                 {attempts.map((attempt, idx) => (

@@ -1,4 +1,5 @@
 import React from 'react';
+import { calculateBranchControlPoints, snapToPixel } from '../../utils/timelineMath';
 
 // SVG component for smooth timeline branch connections
 const TimelineBranch = ({ 
@@ -6,21 +7,30 @@ const TimelineBranch = ({
   startY = 0, 
   endX = 80, 
   endY = 32,
-  curveRadius = 16,
   strokeWidth = 2,
   strokeColor = 'var(--timeline-line, #2a3648)',
   className = ''
 }) => {
-  // Calculate the path data for smooth branch line
-  // M = Move to start
-  // L = Line to curve start
-  // Q = Quadratic bezier curve
-  // L = Line to end
+  // Snap coordinates to pixel grid for crisp rendering
+  const start = {
+    x: snapToPixel(startX),
+    y: snapToPixel(startY)
+  };
+  
+  const end = {
+    x: snapToPixel(endX),
+    y: snapToPixel(endY)
+  };
+  
+  // Calculate control points for cubic bezier curve
+  // Direction vector for horizontal branching
+  const direction = { x: 1, y: 0 };
+  const { cp1, cp2 } = calculateBranchControlPoints(start, end, direction);
+  
+  // Generate cubic bezier path for smooth curve
   const pathData = `
-    M ${startX} ${startY}
-    L ${startX} ${endY - curveRadius}
-    Q ${startX} ${endY} ${startX + curveRadius} ${endY}
-    L ${endX} ${endY}
+    M ${start.x},${start.y}
+    C ${snapToPixel(cp1.x)},${snapToPixel(cp1.y)} ${snapToPixel(cp2.x)},${snapToPixel(cp2.y)} ${end.x},${end.y}
   `.trim();
 
   return (
@@ -41,6 +51,7 @@ const TimelineBranch = ({
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
+        shapeRendering="geometricPrecision"
       />
     </svg>
   );
@@ -54,14 +65,20 @@ export const VerticalConnector = ({
   strokeWidth = 2,
   strokeColor = 'var(--timeline-line, #2a3648)'
 }) => {
+  // Snap to pixel grid for crisp lines
+  const snappedX = snapToPixel(x);
+  const snappedStartY = snapToPixel(startY);
+  const snappedEndY = snapToPixel(endY);
+  const height = snappedEndY - snappedStartY;
+  
   return (
     <svg 
       className="absolute pointer-events-none"
       style={{
-        left: `${x}px`,
-        top: `${startY}px`,
+        left: `${snappedX}px`,
+        top: `${snappedStartY}px`,
         width: `${strokeWidth + 4}px`,
-        height: `${endY - startY}px`,
+        height: `${height}px`,
         overflow: 'visible'
       }}
     >
@@ -69,10 +86,11 @@ export const VerticalConnector = ({
         x1={strokeWidth / 2}
         y1="0"
         x2={strokeWidth / 2}
-        y2={endY - startY}
+        y2={height}
         stroke={strokeColor}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
+        shapeRendering="crispEdges"
       />
     </svg>
   );

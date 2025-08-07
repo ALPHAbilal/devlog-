@@ -337,3 +337,28 @@
     --timeline-text-secondary: rgba(255, 255, 255, 0.8);
   }
 }
+
+/* SVG optimization for smooth branching lines */
+.issue-timeline-container svg {
+  /* Ensure pixel-perfect rendering */
+  shape-rendering: geometricPrecision;
+  /* Prevent aliasing on retina displays */
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Timeline branch hover effect */
+.attempts-container svg path {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.attempts-container:hover svg path {
+  stroke: var(--status-progress);
+  stroke-width: 2.5px;
+}
+
+/* Ensure crisp vertical lines */
+.issue-timeline-line {
+  /* Round position to avoid sub-pixel blur */
+  transform: translateX(-50%) translateZ(0);
+  backface-visibility: hidden;
+}

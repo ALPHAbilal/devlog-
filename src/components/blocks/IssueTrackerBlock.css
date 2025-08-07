@@ -362,3 +362,19 @@
   transform: translateX(-50%) translateZ(0);
   backface-visibility: hidden;
 }
+
+/* GitGraph branching overlay styles */
+.gitgraph-branching-overlay {
+  /* Ensure it doesn't interfere with interactions */
+  pointer-events: none;
+}
+
+.gitgraph-branching-overlay canvas {
+  /* Match the dark theme background */
+  background: transparent !important;
+}
+
+/* Hide old SVG branching when GitGraph is active */
+.issue-timeline-container .attempts-container > svg {
+  display: none;
+}

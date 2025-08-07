@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, X, Check, AlertCircle, Clock, Code, Target, Trash2 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 import TimelineBranch, { VerticalConnector } from './TimelineBranch';
+import GitGraphBranching from './GitGraphBranching';
 import './IssueTrackerBlock.css';
 
 // Minimal status indicators - clean and functional
@@ -315,24 +316,24 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
           <div className="mt-3">
             {attempts.length > 0 && (
               <div className="attempts-container">
-                {/* SVG branch from main timeline to attempts */}
-                <TimelineBranch 
+                {/* Old SVG branches hidden - now using GitGraphBranching */}
+                {/* <TimelineBranch 
                   startX={-16}
                   startY={-8}
                   endX={24}
                   endY={20}
-                />
+                /> */}
                 
                 {attempts.map((attempt, idx) => (
                   <div key={attempt.id} className="relative">
-                    {/* Vertical connector between attempts */}
-                    {idx > 0 && (
+                    {/* Vertical connector between attempts - hidden, GitGraph handles this */}
+                    {/* {idx > 0 && (
                       <VerticalConnector
                         x={24}
                         startY={-12}
                         endY={0}
                       />
-                    )}
+                    )} */}
                     
                     <AttemptItem
                       attempt={attempt}
@@ -494,6 +495,9 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
           <div className="issue-timeline-container">
             {/* Main vertical timeline line */}
             <div className="issue-timeline-line" aria-hidden="true" />
+            
+            {/* GitGraph branching overlay for smooth curves */}
+            <GitGraphBranching issues={issues} />
             
             {issues.map((issue, idx) => (
               <IssueItem

@@ -3,7 +3,7 @@ import { Gitgraph, templateExtend } from '@gitgraph/react';
 
 // Custom dark theme that matches the existing timeline colors
 const darkTimelineTheme = templateExtend('metro', {
-  colors: ['#3a4658', '#4a5668', '#5a6678', '#6a7688'], // Branch colors
+  colors: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'], // Bright colors: blue, red, green, amber
   branch: {
     lineWidth: 2,
     spacing: 40, // Horizontal spacing between branches
@@ -43,7 +43,7 @@ const GitGraphBranching = ({ issues = [] }) => {
       const timeline = gitgraph.branch({
         name: 'timeline',
         style: {
-          color: '#2a3648', // Main timeline color
+          color: '#3b82f6', // Bright blue for main timeline
         },
       });
       

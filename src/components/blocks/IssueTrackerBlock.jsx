@@ -111,14 +111,14 @@ const AttemptItem = ({ attempt, onUpdate, onDelete, index, isLast }) => {
         ) : (
           <div 
             onClick={() => setIsEditing(true)}
-            className="cursor-pointer w-full"
+            className="cursor-pointer w-full hover:opacity-80 transition-opacity"
             role="button"
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && setIsEditing(true)}
             aria-label="Edit attempt"
           >
             <div className="flex items-center justify-between">
-              <span className="text-sm">
+              <span className="text-sm text-white">
                 {description || 'Click to add description'}
               </span>
               {result === 'success' ? (

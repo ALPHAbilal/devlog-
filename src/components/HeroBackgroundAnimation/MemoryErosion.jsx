@@ -85,7 +85,7 @@ const MemoryErosion = () => {
 
       container.appendChild(fragment);
       
-      // Store fragment data
+      // Store fragment data with performance optimizations
       fragments.push({
         element: fragment,
         originalContent: memory.content,
@@ -95,7 +95,10 @@ const MemoryErosion = () => {
         velocity: {
           x: (Math.random() - 0.5) * 0.5,
           y: (Math.random() - 0.5) * 0.5
-        }
+        },
+        // Performance: Cache for getBoundingClientRect
+        cachedRect: null,
+        lastRectUpdate: 0
       });
     });
 
@@ -106,15 +109,28 @@ const MemoryErosion = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Animation loop
-    const animate = () => {
+    // Performance optimization: Track frame timing
+    let lastFrameTime = 0;
+    const targetFPS = 30; // Limit to 30 FPS for better performance
+    const frameInterval = 1000 / targetFPS;
+
+    // Animation loop with frame limiting
+    const animate = (currentTime) => {
+      // Skip frame if too soon
+      if (currentTime - lastFrameTime < frameInterval) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      
+      lastFrameTime = currentTime;
+      
       fragments.forEach(fragment => {
         updateFragment(fragment, cursorRef.current);
       });
       animationFrameRef.current = requestAnimationFrame(animate);
     };
 
-    animate();
+    animate(0);
     setIsInitialized(true);
 
     return () => {
@@ -252,7 +268,13 @@ const MemoryErosion = () => {
   };
 
   const updateFragment = (fragment, cursor) => {
-    const rect = fragment.element.getBoundingClientRect();
+    // Cache bounding rect to avoid expensive reflow
+    if (!fragment.cachedRect || Date.now() - fragment.lastRectUpdate > 1000) {
+      fragment.cachedRect = fragment.element.getBoundingClientRect();
+      fragment.lastRectUpdate = Date.now();
+    }
+    
+    const rect = fragment.cachedRect;
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
     

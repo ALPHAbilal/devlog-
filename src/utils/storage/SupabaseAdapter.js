@@ -579,6 +579,8 @@ export class SupabaseAdapter {
         docError = error;
       } else {
         // For existing documents, use update to respect RLS policies
+        // Note: Supabase update with multiple conditions can cause 406 errors
+        // We'll use a simpler approach with just id and user_id
         const { data, error } = await supabase
           .from('documents')
           .update({
@@ -592,7 +594,6 @@ export class SupabaseAdapter {
           })
           .eq('id', documentToSave.id)
           .eq('user_id', this.userId)
-          .is('deleted_at', null) // Only update non-deleted documents
           .select()
           .single();
         
@@ -608,8 +609,18 @@ export class SupabaseAdapter {
         details: docError.details,
         hint: docError.hint,
         status: docError.status,
-        statusText: docError.statusText
+        statusText: docError.statusText,
+        // Additional debugging info for 406 errors
+        documentId: documentToSave.id,
+        userId: this.userId,
+        isNewDocument: isNewDocumentForSave
       });
+      
+      // Special handling for 406 errors
+      if (docError.status === 406) {
+        console.error('406 Error - This usually indicates a content negotiation issue or invalid query syntax');
+      }
+      
       throw docError;
     }
     

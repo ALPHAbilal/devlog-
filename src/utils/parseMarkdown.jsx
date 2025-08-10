@@ -321,6 +321,7 @@ export function parseMarkdown(text) {
             rel="noopener noreferrer"
             className="text-accent-green hover:text-accent-green/80 underline decoration-1 
                        underline-offset-2 transition-colors inline-flex items-center gap-1"
+            style={{ wordBreak: 'break-all' }}
             onClick={(e) => e.stopPropagation()}
           >
             {match.text}
@@ -339,6 +340,7 @@ export function parseMarkdown(text) {
             rel="noopener noreferrer"
             className="text-accent-green hover:text-accent-green/80 underline decoration-1 
                        underline-offset-2 transition-colors inline-flex items-center gap-1"
+            style={{ wordBreak: 'break-all' }}
             onClick={(e) => e.stopPropagation()}
           >
             {match.displayUrl}
@@ -414,13 +416,13 @@ export function processLineBreaksAndLists(text) {
       if (leadingWhitespace.length > 0) {
         // Preserve indentation (both spaces and tabs)
         elements.push(
-          <div key={index} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          <div key={index} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
             <span style={{ whiteSpace: 'pre' }}>{leadingWhitespace}</span>
             {parseMarkdown(content)}
           </div>
         );
       } else {
-        elements.push(<div key={index}>{parseMarkdown(line)}</div>);
+        elements.push(<div key={index} style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>{parseMarkdown(line)}</div>);
       }
     }
   });

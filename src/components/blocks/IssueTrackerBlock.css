@@ -190,6 +190,12 @@
   overflow-x: auto;
 }
 
+/* Milestone specific styling for better visibility */
+.timeline-milestone {
+  color: var(--timeline-text-primary);
+  font-weight: 600;
+}
+
 /* Form elements */
 .timeline-input,
 .timeline-textarea,

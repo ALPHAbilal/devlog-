@@ -467,10 +467,10 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
           ) : (
             <div 
               onClick={() => setIsEditingMilestone(true)}
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             >
               <Target className="w-5 h-5 text-green-500" />
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold text-white">
                 {milestone}
               </h2>
             </div>

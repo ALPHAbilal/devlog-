@@ -535,10 +535,13 @@ export class SupabaseAdapter {
       }
     }
     
+    // Declare documentToSave at function scope to avoid ReferenceError
+    let documentToSave = null;
+    
     // If we haven't saved the document yet (either it's not new with folder, or it already exists)
     if (!savedDoc && !docError) {
       // Use regular upsert for updates or documents without folders
-      const documentToSave = {
+      documentToSave = {
         id: docData.id,
         user_id: this.userId,
         title: docData.title,
@@ -594,6 +597,7 @@ export class SupabaseAdapter {
           })
           .eq('id', documentToSave.id)
           .eq('user_id', this.userId)
+          .is('deleted_at', null)
           .select()
           .single();
         
@@ -611,7 +615,7 @@ export class SupabaseAdapter {
         status: docError.status,
         statusText: docError.statusText,
         // Additional debugging info for 406 errors
-        documentId: documentToSave.id,
+        documentId: documentToSave?.id || docData.id,
         userId: this.userId,
         isNewDocument: isNewDocumentForSave
       });

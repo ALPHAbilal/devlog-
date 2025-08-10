@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
 import MobileDocumentViewer from '../components/MobileDocumentViewer';
@@ -44,6 +44,7 @@ import { restrictToWindowEdges, snapCenterToCursor } from '@dnd-kit/modifiers';
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { documentId } = useParams();
   const { user, signOut, trialStatus } = useAuth();
   const [entries, setEntries] = useState([]);
   const [expandedEntry, setExpandedEntry] = useState(null);
@@ -138,7 +139,10 @@ export default function Dashboard() {
       blocks: undefined // Force block loader to fetch all blocks
     };
     setExpandedEntry(documentForEdit);
-  }, []);
+    
+    // Update URL to reflect the opened document
+    navigate(`/dashboard/${document.id}`, { replace: true });
+  }, [navigate]);
 
   // Update storage info
   const updateStorageInfo = useCallback(async () => {
@@ -448,6 +452,18 @@ export default function Dashboard() {
     };
   }, [loadEntries]);
   
+  // Sync URL with document state
+  useEffect(() => {
+    if (documentId && entries.length > 0) {
+      const doc = entries.find(e => e.id === documentId);
+      if (doc && !expandedEntry) {
+        setExpandedEntry(doc);
+      } else if (!doc && documentId) {
+        // Document not found, redirect to dashboard
+        navigate('/dashboard', { replace: true });
+      }
+    }
+  }, [documentId, entries, expandedEntry, navigate]);
 
 
   // Update entry
@@ -1177,11 +1193,15 @@ export default function Dashboard() {
         <main className="flex flex-col min-w-0 overflow-hidden lg:col-start-2">
           <MobileDocumentViewer 
             entry={expandedEntry} 
-            onClose={() => setExpandedEntry(null)}
+            onClose={() => {
+              setExpandedEntry(null);
+              navigate('/dashboard', { replace: true });
+            }}
             onUpdate={updateEntry}
             allEntries={entries}
             onNavigateToDocument={(newEntry) => {
               setExpandedEntry(newEntry);
+              navigate(`/dashboard/${newEntry.id}`, { replace: true });
             }}
           />
         </main>

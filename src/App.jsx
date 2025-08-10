@@ -163,6 +163,11 @@ function AppContent() {
           <Dashboard />
         </Layout>
       } />
+      <Route path="/dashboard/:documentId" element={
+        <Layout>
+          <Dashboard />
+        </Layout>
+      } />
       <Route path="/settings" element={<SettingsClaude />} />
       <Route path="/settings/api" element={
         <Suspense fallback={<div className="loading-spinner">Loading...</div>}>

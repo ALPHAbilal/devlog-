@@ -62,6 +62,10 @@
   --sab: env(safe-area-inset-bottom, 0);
   --sal: env(safe-area-inset-left, 0);
   --sar: env(safe-area-inset-right, 0);
+  
+  /* Scrollbar width calculation */
+  --scrollbar-width: calc(100vw - 100%);
+  
     /* Fluid font sizes using clamp() */
     --font-size-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
     --font-size-sm: clamp(0.875rem, 0.825rem + 0.25vw, 1rem);
@@ -239,6 +243,12 @@ body:has(.dashboard-container) {
 
 .mobile-menu-enter {
   animation: slideInRight 0.3s ease-out;
+}
+
+/* Navigation scrollbar fix */
+.nav-with-scrollbar {
+  width: calc(100% - var(--scrollbar-width, 0px));
+  left: 0;
 }
 
 /* Custom animations */

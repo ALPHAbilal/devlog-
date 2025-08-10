@@ -3,10 +3,11 @@
 
 /* CSS Custom Properties for consistent theming */
 :root {
-  --timeline-bg: #0a1628;
+  --timeline-bg: #0f1729;
   --timeline-surface: #1a2638;
-  --timeline-text-primary: #e8e8e8;
-  --timeline-text-secondary: rgba(255, 255, 255, 0.6);
+  --timeline-input-bg: #0d1a2d;
+  --timeline-text-primary: #f3f4f6;
+  --timeline-text-secondary: rgba(255, 255, 255, 0.7);
   --timeline-line: #2a3648;
   --timeline-dot-bg: #1a2638;
   --timeline-dot-border: #3a4658;
@@ -193,20 +194,30 @@
 .timeline-input,
 .timeline-textarea,
 .timeline-select {
-  background: var(--timeline-bg);
-  border: 1px solid var(--timeline-dot-border);
+  background: var(--timeline-input-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 4px;
   color: var(--timeline-text-primary);
-  padding: 0.5rem;
+  padding: 0.625rem;
   width: 100%;
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: border-color 0.2s ease;
 }
 
 .timeline-input:focus,
 .timeline-textarea:focus,
 .timeline-select:focus {
   outline: none;
-  border-color: var(--status-progress);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--timeline-bg);
+}
+
+/* Placeholder styling for better readability */
+.timeline-input::placeholder,
+.timeline-textarea::placeholder {
+  color: var(--timeline-text-secondary);
+  opacity: 0.5;
 }
 
 /* Buttons */
@@ -334,7 +345,9 @@
   :root {
     --timeline-line: #4a5668;
     --timeline-dot-border: #5a6678;
-    --timeline-text-secondary: rgba(255, 255, 255, 0.8);
+    --timeline-text-secondary: rgba(255, 255, 255, 0.85);
+    --timeline-input-bg: #1a2638;
+    --timeline-text-primary: #ffffff;
   }
 }
 

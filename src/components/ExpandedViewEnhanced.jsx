@@ -16,6 +16,7 @@ import SaveIndicator from './SaveIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
 import MobileBottomSheet from './MobileBottomSheet';
+import BlockErrorBoundary from './BlockErrorBoundary';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
@@ -179,6 +180,12 @@ const ExpandedView = forwardRef((props, ref) => {
 
 
   const updateBlock = (blockId, updates) => {
+    // Add defensive check for blockId
+    if (!blockId || !updates) {
+      console.warn('updateBlock called with invalid parameters:', { blockId, updates });
+      return;
+    }
+    
     // Debug AI blocks specifically
     const block = blocks.find(b => b.id === blockId);
     if (block && block.type === 'ai') {
@@ -188,7 +195,7 @@ const ExpandedView = forwardRef((props, ref) => {
         updates,
         hasMessages: 'messages' in updates,
         messageCount: updates.messages?.length || 0,
-        currentMessageCount: block.messages?.length || 0
+        currentMessageCount: block?.messages?.length || 0
       });
     }
     
@@ -223,6 +230,7 @@ const ExpandedView = forwardRef((props, ref) => {
     if (needsSave && !isInitialLoadRef.current) {
       // Get the updated blocks for auto-save
       const updatedBlocks = blocks.map(block => {
+        if (!block) return null; // Defensive check for undefined blocks
         if (block.id === blockId) {
           // Remove isNew flag when updating a block (user has interacted with it)
           const { isNew, ...blockWithoutNew } = block;
@@ -240,7 +248,7 @@ const ExpandedView = forwardRef((props, ref) => {
           return updatedBlock;
         }
         return block;
-      });
+      }).filter(Boolean); // Remove any null blocks
       
       // console.log('🟩 ExpandedViewEnhanced: Passing to autoSaveManager:', {
       //   entryId: entry.id,
@@ -286,11 +294,17 @@ const ExpandedView = forwardRef((props, ref) => {
   };
 
   const deleteBlock = (blockId) => {
+    // Defensive check
+    if (!blockId) {
+      console.warn('deleteBlock called with invalid blockId:', blockId);
+      return;
+    }
+    
     // Use the loader's removeBlock method
     removeBlock(blockId);
     
     // Get updated blocks for the parent update
-    const updatedBlocks = blocks.filter(block => block.id !== blockId);
+    const updatedBlocks = blocks.filter(block => block && block.id !== blockId);
     if (onUpdate) {
       setIsInternalUpdate(true);
       onUpdate(entry.id, { blocks: updatedBlocks });
@@ -903,27 +917,31 @@ const ExpandedView = forwardRef((props, ref) => {
               setFocusedBlockId(null);
             }
           }}>
-          {blocks.filter(block => block !== null).map((block, index) => (
-            <div key={block.id} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
-              {block.isLoading ? (
+          {blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
+            <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
+              {block?.isLoading ? (
                 <OptimizedBlockSkeleton 
                   type={block.type} 
                   estimatedHeight={block.estimatedHeight || 100}
                 />
               ) : (
                 <>
-                  <Block
-                    block={block}
-                    index={index}
-                    onUpdate={updateBlock}
-                    onDelete={deleteBlock}
-                    onDuplicate={duplicateBlock}
-                    onMoveUp={(id) => moveBlock(id, 'up')}
-                    onMoveDown={(id) => moveBlock(id, 'down')}
-                    canMoveUp={index > 0}
-                    canMoveDown={index < blocks.length - 1}
-                    isMobileView={isMobileView}
-                    onAddBelow={(data) => {
+                  <BlockErrorBoundary 
+                    blockType={block?.type} 
+                    blockId={block?.id}
+                  >
+                    <Block
+                      block={block}
+                      index={index}
+                      onUpdate={updateBlock}
+                      onDelete={deleteBlock}
+                      onDuplicate={duplicateBlock}
+                      onMoveUp={(id) => moveBlock(id, 'up')}
+                      onMoveDown={(id) => moveBlock(id, 'down')}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < blocks.length - 1}
+                      isMobileView={isMobileView}
+                      onAddBelow={(data) => {
                       if (typeof data === 'object' && data.type) {
                         // Direct block creation from TextBlock
                         const newBlock = {
@@ -958,6 +976,7 @@ const ExpandedView = forwardRef((props, ref) => {
                     dropTargetId={dropTargetId}
                     dropPosition={dropPosition}
                   />
+                  </BlockErrorBoundary>
                   <AddBlockRow
                     show={showBlockSelector && selectorPosition === block.id}
                     onSelect={(type) => addBlock(type, block.id)}

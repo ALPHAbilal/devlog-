@@ -69,7 +69,7 @@ export default function CompactBlockLine({ block, index, onClick, isSelected }) 
         return `${block.language || 'code'}: ${(block.content || '').substring(0, 80).replace(/\n/g, ' ')}`;
       case 'ai':
         const lastMessage = block.messages?.[block.messages.length - 1];
-        if (lastMessage) {
+        if (lastMessage && lastMessage.content) {
           const cleanedAIContent = cleanMarkdown(lastMessage.content);
           return `${lastMessage.role}: ${cleanedAIContent.substring(0, 80)}`;
         }

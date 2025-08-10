@@ -168,9 +168,9 @@ function LandingContent() {
           isScrolled ? 'glassmorphism-nav' : ''
         }`}
         style={{
-          backgroundColor: !isScrolled ? 'rgba(10, 22, 40, 0.8)' : undefined,
+          backgroundColor: !isScrolled ? 'rgba(13, 17, 23, 0.75)' : undefined,
           backdropFilter: !isScrolled ? 'blur(12px)' : undefined,
-          borderBottom: !isScrolled ? '1px solid rgba(30, 41, 59, 0.2)' : undefined,
+          borderBottom: !isScrolled ? '1px solid rgba(255, 255, 255, 0.05)' : undefined,
           boxShadow: !isScrolled ? 'none' : undefined
         }}
       >

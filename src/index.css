@@ -247,8 +247,23 @@ body:has(.dashboard-container) {
 
 /* Navigation scrollbar fix */
 .nav-with-scrollbar {
-  width: calc(100% - var(--scrollbar-width, 0px));
   left: 0;
+  right: 0;
+  padding-right: 17px; /* Account for scrollbar */
+}
+
+/* On systems with overlay scrollbars (Mac), reduce padding */
+@supports (scrollbar-width: none) or (-webkit-scrollbar-width: none) {
+  .nav-with-scrollbar {
+    padding-right: 0;
+  }
+}
+
+/* Remove padding on touch devices (mobile/tablet) */
+@media (pointer: coarse) {
+  .nav-with-scrollbar {
+    padding-right: 0;
+  }
 }
 
 /* Custom animations */

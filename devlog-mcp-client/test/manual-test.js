@@ -8,7 +8,7 @@
 import { spawn } from 'child_process';
 import readline from 'readline';
 
-const bridge = spawn('node', ['../src/index.js'], {
+const bridge = spawn('node', ['./src/index.js'], {
   env: {
     ...process.env,
     DEVLOG_API_KEY: process.env.DEVLOG_API_KEY || 'dvlg_sk_test_123',
@@ -86,16 +86,18 @@ async function runTests() {
       },
     });
     
-    console.log('\n✅ Tests completed! Press Ctrl+C to exit.');
+    console.log('\n✅ Tests completed!');
+    
+    // Exit successfully after tests
+    bridge.kill();
+    process.exit(0);
     
   } catch (error) {
     console.error('\n❌ Test error:', error);
+    bridge.kill();
     process.exit(1);
   }
 }
 
 // Start tests after a short delay
 setTimeout(runTests, 1000);
-
-// Keep process alive
-process.stdin.resume();

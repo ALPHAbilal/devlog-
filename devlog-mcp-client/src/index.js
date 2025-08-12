@@ -9,9 +9,19 @@ import fetch from 'node-fetch';
 
 class DevlogMCPBridge {
   constructor() {
-    this.remoteUrl = process.env.DEVLOG_REMOTE_URL || 'https://devlog-mcp.bilal-kosika.workers.dev';
+    this.remoteUrl = process.env.DEVLOG_REMOTE_URL || 'https://devlog-mcp-production.bilal-kosika.workers.dev';
     this.apiKey = process.env.DEVLOG_API_KEY;
     this.debug = process.env.DEVLOG_DEBUG === 'true';
+    this.sessionId = null;
+    
+    // Debug: Log environment state at initialization
+    if (this.debug) {
+      console.error('[INDEX DEBUG] MCP Bridge initialized with:', {
+        remoteUrl: this.remoteUrl,
+        apiKey: this.apiKey ? 'PROVIDED' : 'MISSING',
+        debug: this.debug
+      });
+    }
     
     if (!this.apiKey) {
       console.error('Error: DEVLOG_API_KEY environment variable is required');
@@ -35,6 +45,62 @@ class DevlogMCPBridge {
     this.setupHandlers();
   }
 
+  /**
+   * Initialize MCP session with the remote server
+   */
+  async initializeMCPSession() {
+    try {
+      this.log('Initializing MCP session with remote server...');
+      this.log(`Using URL: ${this.remoteUrl}/mcp`);
+      this.log(`API Key status: ${this.apiKey ? 'PROVIDED' : 'MISSING'}`);
+      
+      const response = await fetch(`${this.remoteUrl}/mcp`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'initialize',
+          params: {
+            protocolVersion: '2025-06-18',  // Updated to latest version
+            capabilities: {},
+            clientInfo: {
+              name: 'devlog-mcp-client',
+              version: '1.0.7'
+            }
+          },
+          id: 1
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        this.log(`Response status: ${response.status}`);
+        this.log(`Response body: ${errorText}`);
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      // Extract session ID from headers
+      this.sessionId = response.headers.get('Mcp-Session-Id');
+      const result = await response.json();
+      
+      if (result.error) {
+        throw new Error(`MCP initialization failed: ${result.error.message}`);
+      }
+
+      this.log('MCP session initialized successfully');
+      this.log('Session ID:', this.sessionId);
+      this.log('Server info:', result.result.serverInfo);
+      
+    } catch (error) {
+      console.error('Failed to initialize MCP session:', error.message);
+      throw error;
+    }
+  }
+
   log(...args) {
     if (this.debug) {
       console.error('[DEBUG]', ...args);
@@ -47,8 +113,8 @@ class DevlogMCPBridge {
       this.log('Handling tools/list request');
       
       try {
-        const response = await this.callRemote('/api/tools', {});
-        return { tools: response.tools || [] };
+        const response = await this.callMCPMethod('tools/list', {});
+        return { tools: response.result.tools || [] };
       } catch (error) {
         this.log('Error fetching tools:', error.message);
         // Return default tools if remote fails
@@ -169,17 +235,17 @@ class DevlogMCPBridge {
       this.log(`Handling tool call: ${name}`, args);
       
       try {
-        const response = await this.callRemote('/api/execute', {
-          tool: name,
+        const response = await this.callMCPMethod('tools/call', {
+          name: name,
           arguments: args,
         });
         
         if (response.error) {
-          throw new Error(response.error);
+          throw new Error(response.error.message || response.error);
         }
         
         return {
-          content: response.result || [{
+          content: response.result.content || [{
             type: 'text',
             text: JSON.stringify(response, null, 2),
           }],
@@ -201,6 +267,9 @@ class DevlogMCPBridge {
     try {
       this.log('Starting Devlog MCP Bridge...');
       
+      // Initialize MCP session
+      await this.initializeMCPSession();
+      
       // Use stdio transport to communicate with Claude
       const transport = new StdioServerTransport();
       
@@ -214,6 +283,7 @@ class DevlogMCPBridge {
       console.error('✓ Devlog MCP Bridge connected successfully');
       console.error(`✓ Remote URL: ${this.remoteUrl}`);
       console.error(`✓ Debug mode: ${this.debug ? 'enabled' : 'disabled'}`);
+      console.error(`✓ Session ID: ${this.sessionId || 'Not established'}`);
       
       // Keep the process alive
       process.stdin.resume();
@@ -224,6 +294,44 @@ class DevlogMCPBridge {
     }
   }
 
+  /**
+   * Call MCP method using proper JSON-RPC 2.0 protocol
+   */
+  async callMCPMethod(method, params) {
+    this.log(`Calling MCP method: ${method}`);
+    
+    const headers = {
+      'Authorization': `Bearer ${this.apiKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    if (this.sessionId) {
+      headers['Mcp-Session-Id'] = this.sessionId;
+    }
+    
+    const response = await fetch(`${this.remoteUrl}/mcp`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method,
+        params,
+        id: Date.now()
+      })
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Remote server error (${response.status}): ${text}`);
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Legacy REST API call (kept for backward compatibility)
+   */
   async callRemote(endpoint, data) {
     const url = new URL(endpoint, this.remoteUrl);
     this.log(`Calling remote: ${url}`);

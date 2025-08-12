@@ -1,11 +1,11 @@
 {
   "name": "devlog-mcp",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "Connect AI assistants to Devlog using Model Context Protocol (MCP)",
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "devlog-mcp": "./src/cli.js"
+    "devlog-mcp": "./bin/devlog-mcp.cjs"
   },
   "scripts": {
     "test": "node --test",
@@ -39,6 +39,7 @@
   },
   "files": [
     "src/**/*",
+    "bin/**/*",
     "README.md"
   ]
 }

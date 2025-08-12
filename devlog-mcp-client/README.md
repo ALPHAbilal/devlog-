@@ -1,26 +1,33 @@
 # Devlog MCP Client
 
-Connect AI assistants like Claude Desktop and VS Code to your Devlog knowledge base using the Model Context Protocol (MCP).
-
-> **Note**: This is a beta version. API key management is coming soon to the Devlog app. For now, use test API keys.
+Connect AI assistants like Claude Code, Claude Desktop, and VS Code to your Devlog knowledge base using the Model Context Protocol (MCP).
 
 ## Features
 
-- 🚀 **One-line setup** - Get connected in seconds
-- 🌐 **Remote server** - No local resources needed
-- 🔒 **Secure** - API key authentication
+- 🚀 **One-command setup** - Get connected instantly with Claude CLI
+- 🌐 **Production ready** - Deployed on Cloudflare global network
+- 🔒 **Secure** - API key authentication with Row Level Security
 - ⚡ **Fast** - Semantic snapshots reduce data by 90%
-- 🎯 **All 11 block types** - Full Devlog feature support
+- 🎯 **Complete coverage** - All 13+ block types supported
+- 🔄 **Protocol compliant** - Follows MCP 2025-03-26 specification
 
 ## Quick Start
 
 ### 1. Get Your API Key
 
-**For Beta Testing**: Use any test API key in this format: `dvlg_sk_test_anything`
+Visit your **Devlog platform** → **Settings** → **API Keys** and generate a production API key.
 
-**Coming Soon**: Visit your Devlog app settings to create production API keys.
+Your key will look like: `dvlg_sk_prod_xxxxxxxxx...`
 
-### 2. Install for Claude Desktop
+### 2. Add to Claude Code (Recommended)
+
+```bash
+claude mcp add devlog -s user -e DEVLOG_API_KEY="your_production_api_key_here" -- npx -y devlog-mcp
+```
+
+That's it! 🎉
+
+### 3. Alternative: Claude Desktop
 
 Add to your Claude Desktop configuration file:
 
@@ -29,9 +36,9 @@ Add to your Claude Desktop configuration file:
   "mcpServers": {
     "devlog": {
       "command": "npx",
-      "args": ["-y", "devlog-mcp"],
+      "args": ["-y", "devlog-mcp@latest"],
       "env": {
-        "DEVLOG_API_KEY": "dvlg_sk_test_anything"
+        "DEVLOG_API_KEY": "your_production_api_key_here"
       }
     }
   }
@@ -40,20 +47,19 @@ Add to your Claude Desktop configuration file:
 
 **Config file locations:**
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Windows: `%APPDATA%\\Claude\\claude_desktop_config.json`
 - Linux: `~/.config/Claude/claude_desktop_config.json`
 
-### 3. Install for VS Code/Cursor
+### 4. Alternative: VS Code/Cursor
 
-```bash
-# Add to settings.json
+```json
 {
   "mcp.servers": {
     "devlog": {
       "command": "npx",
-      "args": ["-y", "devlog-mcp"],
+      "args": ["-y", "devlog-mcp@latest"],
       "env": {
-        "DEVLOG_API_KEY": "dvlg_sk_test_anything"
+        "DEVLOG_API_KEY": "your_production_api_key_here"
       }
     }
   }
@@ -64,109 +70,150 @@ Add to your Claude Desktop configuration file:
 
 Once connected, you can ask your AI assistant to:
 
-- **Create documents**: "Create a new Devlog document about React hooks"
-- **Add blocks**: "Add a code block with this TypeScript example"
-- **Search documents**: "Show me all my documents tagged with 'api'"
-- **Analyze code**: "Analyze the filetree structure in my project docs"
-- **Manage todos**: "List all todos from my sprint planning document"
-- **Capture conversations**: "Save this conversation to my AI learnings document"
+### Document Management
+- **"Create a new document called 'API Integration Guide'"**
+- **"Get document ID abc123-xyz789"**
+- **"Search my documents for 'React hooks'"**
+- **"Update document 'Project Notes' with new content"**
+- **"Delete document 'Old Draft'"**
+
+### Content Operations
+- **"Add a code block with this TypeScript example"**
+- **"Create a table showing API endpoints"**
+- **"Add a filetree showing project structure"**
+- **"Create todos for sprint planning"**
+- **"Save this AI conversation to my notes"**
+
+### Smart Features
+- **"Get document in semantic mode for faster processing"**
+- **"Search documents tagged with 'architecture'"**
+- **"Find all documents updated this week"**
 
 ## Supported Block Types
 
-All 11 Devlog block types are supported:
+All 13+ Devlog block types are fully supported:
 
-- 📝 **text** - Markdown with inline tags
-- 💻 **code** - Syntax highlighting with file paths
-- 🤖 **ai** - AI conversation preservation
-- 📑 **heading** - Document structure
-- 📁 **filetree** - Visual project structure
-- 📊 **table** - Dynamic tables
-- ✅ **todo** - Task lists
-- 🖼️ **image** - Image galleries
-- 🏞️ **inline-image** - Embedded images
-- 🔄 **version-track** - Code version tracking
-- 🐛 **issue-tracker** - Issue management
+| Type | Description | Use Case |
+|------|-------------|----------|
+| 📝 **text** | Markdown with inline tags | Notes, documentation |
+| 💻 **code** | Syntax highlighting + file paths | Code snippets, examples |
+| 🤖 **ai** | AI conversation preservation | Chat logs, AI insights |
+| 📑 **heading** | Document structure | Section headers, TOCs |
+| 📁 **filetree** | Visual project structure | Project overviews |
+| 📊 **table** | Dynamic data tables | API docs, comparisons |
+| ✅ **todo** | Interactive task lists | Sprint planning, checklists |
+| 🖼️ **image** | Multi-image galleries | Screenshots, diagrams |
+| 🏞️ **inline-image** | Images within text | Embedded visuals |
+| 📐 **template** | Reusable templates | Project scaffolds |
+| 🧮 **math** | LaTeX mathematical expressions | Formulas, equations |
+| 🔄 **version-track** | Code version tracking | Git-like versioning |
+| 🐛 **issue-tracker** | Issue management | Bug tracking, features |
 
-## Advanced Features
+## Architecture
 
-### Semantic Mode
+```
+Claude Code ↔ MCP Client (Bridge) ↔ MCP Server (Cloudflare) ↔ Supabase Database
+```
 
-For faster AI operations, use semantic mode which reduces data by 90%:
+- **MCP Client**: Local bridge handling stdio ↔ HTTP translation
+- **MCP Server**: Global Cloudflare Workers deployment
+- **Database**: Supabase PostgreSQL with Row Level Security
+- **Protocol**: JSON-RPC 2.0 over HTTP (MCP 2025-03-26 compliant)
 
+## Advanced Configuration
+
+### Enable Debug Mode
+
+```bash
+claude mcp add devlog -s user -e DEVLOG_API_KEY="your_key" -e DEVLOG_DEBUG="true" -- npx -y devlog-mcp
+```
+
+### Custom Remote URL
+
+```bash
+claude mcp add devlog -s user -e DEVLOG_API_KEY="your_key" -e DEVLOG_REMOTE_URL="https://custom-server.com" -- npx -y devlog-mcp
+```
+
+### Semantic Mode (90% Data Reduction)
+
+When requesting documents, add "in semantic mode":
 ```
 "Get my React tutorial document in semantic mode"
 ```
 
-### Direct Connection (Advanced)
-
-Skip the NPX wrapper and connect directly:
-
-```json
-{
-  "mcpServers": {
-    "devlog": {
-      "uri": "https://devlog-mcp.bilal-kosika.workers.dev/sse",
-      "transport": "sse",
-      "headers": {
-        "Authorization": "Bearer dvlg_sk_test_anything"
-      }
-    }
-  }
-}
-```
-
 ## Troubleshooting
+
+### 404 Errors (Fixed in v1.0.3+)
+
+If you see "Remote server error (404): Not found":
+
+1. **Update to latest version**:
+   ```bash
+   claude mcp remove devlog
+   claude mcp add devlog -s user -e DEVLOG_API_KEY="your_key" -- npx -y devlog-mcp@latest
+   ```
+
+2. **Verify API key** is production key (`dvlg_sk_prod_...`)
+
+3. **Check server status**: https://devlog-mcp-production.bilal-kosika.workers.dev/health
 
 ### Connection Issues
 
-1. Verify your API key is valid
-2. Check your internet connection
-3. Ensure you're using the latest client: `npx devlog-mcp@latest`
-
-### MCP Connection Failed
-
-If you see "Connection closed" errors:
-
-1. **Enable debug mode** to see detailed logs:
-   ```json
-   {
-     "mcpServers": {
-       "devlog": {
-         "command": "npx",
-         "args": ["-y", "devlog-mcp@latest"],
-         "env": {
-           "DEVLOG_API_KEY": "your-api-key",
-           "DEVLOG_DEBUG": "true"
-         }
-       }
-     }
-   }
-   ```
-
-2. **Test manually** to diagnose issues:
+1. **Test manually**:
    ```bash
-   DEVLOG_API_KEY=your-api-key DEVLOG_DEBUG=true npx devlog-mcp@latest
+   DEVLOG_API_KEY=your_key DEVLOG_DEBUG=true npx devlog-mcp@latest
    ```
 
-3. **Check Claude logs** for detailed error messages
+2. **Check Claude logs** for detailed error messages
 
-### Rate Limits
+3. **Verify internet connection** and firewall settings
 
-- Free: 10 requests/minute
-- Pro: 100 requests/minute
-- Team: 500 requests/minute
-- Enterprise: 1000 requests/minute
+### Authentication Errors
 
-### Debug Mode
+- Ensure API key starts with `dvlg_sk_prod_`
+- Regenerate API key if needed
+- Check key hasn't been revoked in Devlog settings
 
-Set `DEVLOG_DEBUG=true` in your environment for detailed logs.
+## Rate Limits & Performance
 
-## Support
+| Tier | Requests/Minute | Use Case |
+|------|----------------|----------|
+| **Free** | 10/min | Personal projects |
+| **Pro** | 100/min | Professional use |
+| **Team** | 500/min | Team collaboration |
+| **Enterprise** | 1000/min | Large organizations |
 
-- Documentation: Coming soon
-- Issues: [github.com/ALPHAbilal/devlog-mcp-client/issues](https://github.com/ALPHAbilal/devlog-mcp-client/issues)
-- Server Status: [devlog-mcp.bilal-kosika.workers.dev/health](https://devlog-mcp.bilal-kosika.workers.dev/health)
+## Testing
+
+Run the test suite:
+
+```bash
+npm test
+```
+
+Run manual integration test:
+```bash
+DEVLOG_API_KEY=your_key npm run test:manual
+```
+
+## API Status
+
+- **Health Check**: https://devlog-mcp-production.bilal-kosika.workers.dev/health
+- **Server Info**: https://devlog-mcp-production.bilal-kosika.workers.dev/info
+- **Protocol Version**: MCP 2025-03-26
+- **Uptime**: 99.99% (Cloudflare SLA)
+
+## Support & Contributing
+
+- **Issues**: [GitHub Issues](https://github.com/ALPHAbilal/devlog-mcp-client/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ALPHAbilal/devlog-mcp-client/discussions)
+- **Documentation**: [MCP Complete Explanation](https://github.com/ALPHAbilal/devlog/blob/main/MCP_COMPLETE_EXPLANATION.md)
+- **Status Page**: [Server Status](https://devlog-mcp-production.bilal-kosika.workers.dev/health)
 
 ## License
 
-MIT © Devlog Team
+MIT © [Bilal Koşika](https://github.com/ALPHAbilal)
+
+---
+
+🚀 **Ready to connect your Devlog to AI? Run the quick start command above!**

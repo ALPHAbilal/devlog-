@@ -1,232 +1,254 @@
-I'll research the latest information about MCP (Model Context Protocol) implementation issues, particularly focusing on stdio transport and bridge clients. Let me search for the most current information about this specific error and the correct implementation patterns.Let me search for more specific information about NPX bridge implementations and stdio handling issues.Now let me search for specific information about the StdioServerTransport and StdioClientTransport usage patterns in the latest SDK versions.Let me search for more specific information about the error handling and debugging approaches for NPX-based MCP bridge implementations.Based on my research of the latest MCP SDK documentation and community issues, I can provide you with a comprehensive solution to your MCP bridge client error. The issue you're experiencing is related to how stdio streams are handled when the MCP client is launched via NPX.
+I'll conduct thorough research to diagnose why your NPM package fails while direct calls work perfectly. This is a critical issue affecting the NPX execution context specifically in December 2025.Based on my research, I've identified the root cause of your issue. The problem is a **critical environment variable and execution context issue** that occurs when NPX executes your package versus direct Node.js execution.
 
 ## Root Cause Analysis
 
-The error "TypeError: Cannot read properties of undefined (reading 'stderr')" occurs when the StdioClientTransport attempts to access stdio streams that aren't properly initialized when launched via NPX. This is a common issue when building MCP bridge/proxy implementations.
+The 404 error occurs because **environment variables are not being properly passed through the NPX execution chain** to your MCP client code. Here's what's happening:
 
-## Correct Solution for MCP Bridge Implementation
+1. **NPX creates a new process context** that doesn't inherit all environment variables
+2. MCP servers inherit only a subset of environment variables automatically, like USER, HOME, and PATH
+3. Your `DEVLOG_API_KEY` environment variable is likely not reaching your actual code when executed via NPX
 
-Here's the proper way to implement an MCP bridge client that works with NPX and forwards to a remote Cloudflare Worker:
+## The Critical Issue
 
-### 1. **Server-Side Bridge Implementation (Recommended Approach)**
+When you run:
+```bash
+DEVLOG_API_KEY="API_KEY" npx devlog-mcp@latest
+```
 
-Instead of using `StdioClientTransport` (which is for connecting TO another server), you should use `StdioServerTransport` for your local bridge server:
+The environment variable is set for the NPX process, but **NPX spawns a child process** to execute your package, and the environment variable may not be passed through properly, especially with ESM modules.
 
-```typescript
-// devlog-mcp/src/index.ts
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { 
-  JSONRPCMessage,
-  ListToolsRequestSchema,
-  CallToolRequestSchema,
-  // ... other schemas
-} from "@modelcontextprotocol/sdk/types.js";
+## Immediate Solutions
 
-class DevlogMCPBridge {
-  private server: Server;
-  private remoteUrl: string;
+### Solution 1: Explicit Environment Variable Passing in CLI.js
 
-  constructor(remoteUrl: string) {
-    this.remoteUrl = remoteUrl;
-    
-    // Create the local MCP server that Claude will connect to
-    this.server = new Server(
-      {
-        name: "devlog-bridge",
-        version: "1.0.0"
-      },
-      {
-        capabilities: {
-          tools: {},
-          resources: {},
-          prompts: {}
-        }
-      }
-    );
-    
-    this.setupHandlers();
-  }
+Update your `src/cli.js` to explicitly capture and pass environment variables:
 
-  private setupHandlers() {
-    // Forward tool listing requests
-    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      const response = await fetch(`${this.remoteUrl}/tools/list`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ jsonrpc: "2.0", method: "tools/list" })
-      });
-      
-      const data = await response.json();
-      return data.result || { tools: [] };
-    });
+```javascript
+#!/usr/bin/env node
 
-    // Forward tool execution requests
-    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
-      const response = await fetch(`${this.remoteUrl}/tools/call`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "tools/call",
-          params: request.params
-        })
-      });
-      
-      const data = await response.json();
-      return data.result;
-    });
-    
-    // Add more handlers as needed...
-  }
+import { MCPClient } from './index.js';
 
-  async start() {
-    // Use StdioServerTransport for stdio communication
-    const transport = new StdioServerTransport();
-    
-    // Handle transport errors properly
-    transport.onerror = (error) => {
-      console.error("Transport error:", error);
-    };
-    
-    await this.server.connect(transport);
-    console.error("Devlog MCP Bridge connected and ready");
-  }
-}
+// Debug: Log what environment variables are actually available
+console.error('Environment variables received:', {
+  DEVLOG_API_KEY: process.env.DEVLOG_API_KEY ? 'SET' : 'NOT SET',
+  DEVLOG_REMOTE_URL: process.env.DEVLOG_REMOTE_URL || 'NOT SET'
+});
 
-// Entry point for NPX
 async function main() {
-  const remoteUrl = process.env.DEVLOG_REMOTE_URL || 'https://your-worker.workers.dev';
+  // Explicitly check for required environment variables
+  const apiKey = process.env.DEVLOG_API_KEY;
+  const remoteUrl = process.env.DEVLOG_REMOTE_URL || 'https://devlog-mcp-production.bilal-kosika.workers.dev';
+  
+  if (!apiKey) {
+    console.error('ERROR: DEVLOG_API_KEY environment variable is required');
+    console.error('Please set it before running the MCP server:');
+    console.error('export DEVLOG_API_KEY="your-api-key"');
+    process.exit(1);
+  }
   
   try {
-    const bridge = new DevlogMCPBridge(remoteUrl);
-    await bridge.start();
+    const client = new MCPClient(remoteUrl, apiKey);
+    await client.run();
   } catch (error) {
-    console.error("Failed to start bridge:", error);
+    console.error('Failed to start MCP client:', error.message);
     process.exit(1);
   }
 }
 
-// Start the bridge
-main().catch(console.error);
+main().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
 ```
 
-### 2. **Alternative: Using MCP-Proxy Package**
+### Solution 2: Fix the Fetch Implementation
 
-There's an established pattern using the mcp-proxy package that can bridge between stdio and HTTP transports:
+The actual 404 might be occurring because headers are not being properly set. Update your `MCPClient` class:
 
-```typescript
-// Using existing mcp-proxy as a base
-import { proxyServer } from "mcp-proxy";
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-
-async function createBridge() {
-  // Create server that Claude connects to
-  const server = new Server({
-    name: "devlog-bridge",
-    version: "1.0.0"
-  }, {
-    capabilities: {}
-  });
-
-  // Create client that connects to your Cloudflare Worker
-  const client = new Client({
-    name: "devlog-client",
-    version: "1.0.0"
-  });
-
-  // Connect to remote Cloudflare Worker
-  const remoteTransport = new StreamableHTTPClientTransport(
-    new URL("https://your-worker.workers.dev/mcp")
-  );
+```javascript
+class MCPClient {
+  constructor(remoteUrl, apiKey) {
+    this.remoteUrl = remoteUrl;
+    this.apiKey = apiKey;
+    this.sessionId = null;
+  }
   
-  await client.connect(remoteTransport);
-
-  // Proxy between server and client
-  proxyServer({ server, client, capabilities: {} });
-
-  // Start stdio server
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+  async initializeSession() {
+    const url = `${this.remoteUrl}/mcp`;
+    
+    // Debug logging
+    console.error(`Initializing MCP session at: ${url}`);
+    console.error(`Using API key: ${this.apiKey ? 'PROVIDED' : 'MISSING'}`);
+    
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json, text/event-stream',
+      'Authorization': `Bearer ${this.apiKey}`
+    };
+    
+    // Log the actual headers being sent
+    console.error('Request headers:', JSON.stringify(headers, null, 2));
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'initialize',
+          params: {
+            protocolVersion: '2025-03-26',
+            capabilities: {},
+            clientInfo: {
+              name: 'devlog-mcp',
+              version: '1.0.6'
+            }
+          },
+          id: 1
+        })
+      });
+      
+      console.error(`Response status: ${response.status}`);
+      
+      if (!response.ok) {
+        const text = await response.text();
+        console.error(`Response body: ${text}`);
+        throw new Error(`HTTP ${response.status}: ${text}`);
+      }
+      
+      this.sessionId = response.headers.get('Mcp-Session-Id');
+      return await response.json();
+    } catch (error) {
+      console.error('Fetch error:', error);
+      throw error;
+    }
+  }
 }
 ```
 
-### 3. **NPX Package Configuration**
+### Solution 3: Use a Wrapper Script (Most Reliable)
 
-Make sure your `package.json` is properly configured:
+Create a new file `bin/devlog-mcp.js`:
+
+```javascript
+#!/usr/bin/env node
+
+// This wrapper ensures environment variables are properly passed
+const { spawn } = require('child_process');
+const path = require('path');
+
+// Preserve all environment variables
+const env = {
+  ...process.env,
+  DEVLOG_API_KEY: process.env.DEVLOG_API_KEY,
+  DEVLOG_REMOTE_URL: process.env.DEVLOG_REMOTE_URL || 'https://devlog-mcp-production.bilal-kosika.workers.dev'
+};
+
+// Path to the actual CLI script
+const cliPath = path.join(__dirname, '..', 'src', 'cli.js');
+
+// Spawn node with the CLI script
+const child = spawn('node', [cliPath], {
+  env,
+  stdio: 'inherit'
+});
+
+child.on('exit', (code) => {
+  process.exit(code);
+});
+```
+
+Update your `package.json`:
 
 ```json
 {
   "name": "devlog-mcp",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "type": "module",
   "bin": {
-    "devlog-mcp": "./dist/index.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build"
-  },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.2",
-    "node-fetch": "^3.3.2"
-  },
-  "files": [
-    "dist/**/*"
-  ]
+    "devlog-mcp": "./bin/devlog-mcp.js"
+  }
 }
 ```
 
-Add a shebang to your compiled output:
+### Solution 4: Claude Code Configuration Fix
 
-```typescript
-#!/usr/bin/env node
-// Your code here
+For Claude Code specifically, environment variables must be passed in the configuration file itself:
+
+```bash
+claude mcp add devlog --env DEVLOG_API_KEY=YOUR_KEY -- npx -y devlog-mcp@latest
 ```
 
-### 4. **Claude Desktop Configuration**
+Or directly edit the configuration:
 
 ```json
 {
   "mcpServers": {
     "devlog": {
+      "type": "stdio",
       "command": "npx",
       "args": ["-y", "devlog-mcp@latest"],
       "env": {
-        "DEVLOG_REMOTE_URL": "https://your-worker.workers.dev"
+        "DEVLOG_API_KEY": "YOUR_ACTUAL_API_KEY",
+        "DEVLOG_REMOTE_URL": "https://devlog-mcp-production.bilal-kosika.workers.dev"
       }
     }
   }
 }
 ```
 
-### 5. **Debugging Tips**
+## Protocol Version Issue
 
-To debug MCP server issues, you can use Process Explorer or run the command manually to see the actual error messages:
+Also update your protocol version. The latest MCP specification as of December 2025 is version "2025-06-18", not "2025-03-26":
 
-```bash
-# Test your bridge manually
-npx devlog-mcp
-
-# Or with environment variables
-DEVLOG_REMOTE_URL=https://your-worker.workers.dev npx devlog-mcp
+```javascript
+params: {
+  protocolVersion: '2025-06-18',  // Updated version
+  capabilities: {},
+  clientInfo: {
+    name: 'devlog-mcp',
+    version: '1.0.7'
+  }
+}
 ```
 
-### 6. **Key Differences from Your Original Approach**
+## Testing Steps
 
-1. **Use `StdioServerTransport` not `StdioClientTransport`**: Your bridge acts as a server that Claude connects to, not a client
-2. **Handle stdio properly**: The stdio streams are managed by the transport, you don't need to access them directly
-3. **Error handling**: Proper error handling prevents undefined stream access
-4. **Use Server class**: Use the Server class with request handlers to properly implement the MCP protocol
+1. **Test with debug logging**:
+```bash
+export DEVLOG_API_KEY="your-key"
+export DEBUG=1
+npx devlog-mcp@latest
+```
 
-### 7. **Breaking Changes in MCP SDK v1.17+**
+2. **Test direct node execution**:
+```bash
+DEVLOG_API_KEY="your-key" node ./node_modules/devlog-mcp/src/cli.js
+```
 
-The MCP specification now supports Streamable HTTP as the primary HTTP transport, with SSE being deprecated as of protocol version 2024-11-05. However, stdio transport remains stable and is the recommended approach for local integrations.
+3. **Test in Claude Code with explicit env**:
+```bash
+claude mcp add devlog --env DEVLOG_API_KEY=your-key -- npx -y devlog-mcp@latest
+```
 
-## Summary
+## Why This Happens
 
-The error you're experiencing occurs because `StdioClientTransport` expects to spawn a subprocess, but when your code IS the subprocess (launched via NPX), the stdio streams aren't available in the expected way. The solution is to use `StdioServerTransport` instead, which properly handles stdio communication when your process is launched by Claude.
+NPX execution in 2025 has specific behaviors with ESM modules where environment variables and module resolution can be problematic. The combination of:
+- ESM modules (`"type": "module"`)
+- NPX execution context
+- Stdio transport for MCP
+- Environment variable inheritance
 
-This pattern is well-established in the MCP ecosystem and is used by many successful MCP bridge implementations. The key insight is that your NPX package should act as an MCP server (from Claude's perspective) while internally acting as a client to your remote Cloudflare Worker.
+Creates a perfect storm where environment variables don't properly reach your code.
+
+## Verification
+
+After implementing these fixes:
+
+1. Bump your version to 1.0.7
+2. Publish to NPM
+3. Test with: `DEVLOG_API_KEY="key" npx devlog-mcp@1.0.7`
+4. Check the debug output to confirm the API key is received
+5. Verify the correct protocol version is being used
+
+The core issue is that NPX doesn't guarantee environment variable inheritance, especially with ESM modules, which is why your direct execution works but NPX execution fails.

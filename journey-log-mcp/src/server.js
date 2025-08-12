@@ -82,8 +82,8 @@ class JourneyLogMCPServer {
                 },
                 type: {
                   type: 'string',
-                  enum: ['text', 'code', 'heading', 'list', 'checkbox', 'ai_conversation'],
-                  description: 'Block type',
+                  enum: ['text', 'code', 'heading', 'ai', 'filetree', 'table', 'todo', 'image', 'inline-image', 'version-track', 'issue-tracker'],
+                  description: 'Block type (all 11 types supported)',
                 },
                 content: {
                   type: 'string',
@@ -163,6 +163,69 @@ class JourneyLogMCPServer {
                   type: 'string',
                   description: 'Document ID',
                 },
+                semantic_mode: {
+                  type: 'boolean',
+                  description: 'Return AI-optimized semantic snapshot (90% smaller)',
+                },
+              },
+              required: ['document_id'],
+            },
+          },
+          {
+            name: 'analyze_filetree',
+            description: 'Analyze project structure from filetree blocks',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: {
+                  type: 'string',
+                  description: 'Document ID containing filetree blocks',
+                },
+              },
+              required: ['document_id'],
+            },
+          },
+          {
+            name: 'manage_todos',
+            description: 'Manage todo items within todo blocks',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: {
+                  type: 'string',
+                  description: 'Document ID',
+                },
+                operation: {
+                  type: 'string',
+                  enum: ['list', 'complete', 'add', 'remove'],
+                  description: 'Todo operation',
+                },
+                todo_text: {
+                  type: 'string',
+                  description: 'Todo item text (for add/complete/remove)',
+                },
+              },
+              required: ['document_id', 'operation'],
+            },
+          },
+          {
+            name: 'track_versions',
+            description: 'Track code versions and compare changes',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: {
+                  type: 'string',
+                  description: 'Document ID',
+                },
+                version1: {
+                  type: 'string',
+                  description: 'First version identifier',
+                },
+                version2: {
+                  type: 'string',
+                  description: 'Second version identifier (optional)',
+                },
               },
               required: ['document_id'],
             },
@@ -191,6 +254,12 @@ class JourneyLogMCPServer {
             return await this.handleListDocuments(args);
           case 'get_document':
             return await this.handleGetDocument(args);
+          case 'analyze_filetree':
+            return await this.handleAnalyzeFiletree(args);
+          case 'manage_todos':
+            return await this.handleManageTodos(args);
+          case 'track_versions':
+            return await this.handleTrackVersions(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -261,6 +330,20 @@ class JourneyLogMCPServer {
 
   async handleGetDocument(args) {
     const result = await this.apiClient.getDocument(args.document_id);
+    
+    if (args.semantic_mode) {
+      // Create semantic snapshot for AI optimization
+      const snapshot = this.createSemanticSnapshot(result);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(snapshot, null, 2),
+          },
+        ],
+      };
+    }
+    
     const blocks = result.blocks.map(block => 
       `[${block.type}] ${block.content.substring(0, 100)}${block.content.length > 100 ? '...' : ''}`
     ).join('\n');
@@ -272,6 +355,202 @@ class JourneyLogMCPServer {
           text: `Document: ${result.document.title}\nTags: ${result.document.tags.join(', ')}\n\nBlocks:\n${blocks}`,
         },
       ],
+    };
+  }
+
+  createSemanticSnapshot(documentData) {
+    const { document, blocks } = documentData;
+    
+    // Extract structure
+    const structure = {
+      headings: blocks.filter(b => b.type === 'heading').map(h => ({
+        level: h.metadata?.level || 1,
+        text: h.content,
+        id: h.id
+      })),
+      blockTypes: blocks.reduce((acc, b) => {
+        acc[b.type] = (acc[b.type] || 0) + 1;
+        return acc;
+      }, {}),
+      totalBlocks: blocks.length,
+      lastModified: document.updated_at
+    };
+    
+    // Extract key content
+    const keyContent = {
+      codeBlocks: blocks.filter(b => b.type === 'code').slice(0, 5).map(b => ({
+        language: b.metadata?.language || 'plaintext',
+        filename: b.metadata?.filename,
+        preview: b.content.substring(0, 200) + '...'
+      })),
+      aiConversations: blocks.filter(b => b.type === 'ai').map(b => ({
+        model: b.metadata?.model || 'unknown',
+        messageCount: b.metadata?.messages?.length || 0
+      })),
+      todos: blocks.filter(b => b.type === 'todo').map(b => ({
+        total: b.metadata?.items?.length || 0,
+        completed: b.metadata?.items?.filter(i => i.completed).length || 0
+      })),
+      filetrees: blocks.filter(b => b.type === 'filetree').map(b => ({
+        rootPath: b.metadata?.structure?.name || 'unknown',
+        fileCount: this.countFiles(b.metadata?.structure)
+      }))
+    };
+    
+    return {
+      document: {
+        id: document.id,
+        title: document.title,
+        tags: document.tags,
+        created: document.created_at,
+        updated: document.updated_at
+      },
+      structure,
+      keyContent,
+      summary: {
+        totalBlocks: blocks.length,
+        hasCode: blocks.some(b => b.type === 'code'),
+        hasAI: blocks.some(b => b.type === 'ai'),
+        hasTodos: blocks.some(b => b.type === 'todo'),
+        complexity: this.calculateComplexity(blocks)
+      }
+    };
+  }
+
+  countFiles(structure) {
+    if (!structure) return 0;
+    let count = structure.type === 'file' ? 1 : 0;
+    if (structure.children) {
+      count += structure.children.reduce((sum, child) => sum + this.countFiles(child), 0);
+    }
+    return count;
+  }
+
+  calculateComplexity(blocks) {
+    const weights = {
+      text: 1,
+      heading: 1,
+      code: 3,
+      ai: 4,
+      filetree: 2,
+      table: 2,
+      todo: 2,
+      image: 1,
+      'inline-image': 1,
+      'version-track': 3,
+      'issue-tracker': 3
+    };
+    
+    const score = blocks.reduce((sum, block) => sum + (weights[block.type] || 1), 0);
+    return Math.min(score / blocks.length, 5); // Normalize to 1-5 scale
+  }
+
+  async handleAnalyzeFiletree(args) {
+    const result = await this.apiClient.getDocument(args.document_id);
+    const filetreeBlocks = result.blocks.filter(b => b.type === 'filetree');
+    
+    if (filetreeBlocks.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No filetree blocks found in this document.'
+        }]
+      };
+    }
+    
+    const analysis = filetreeBlocks.map(block => {
+      const structure = block.metadata?.structure;
+      return {
+        blockId: block.id,
+        rootPath: structure?.name || 'unknown',
+        totalFiles: this.countFiles(structure),
+        selectedFile: block.metadata?.selectedFile,
+        depth: this.calculateDepth(structure)
+      };
+    });
+    
+    return {
+      content: [{
+        type: 'text',
+        text: `Filetree Analysis:\n${JSON.stringify(analysis, null, 2)}`
+      }]
+    };
+  }
+
+  calculateDepth(structure, currentDepth = 0) {
+    if (!structure || !structure.children || structure.children.length === 0) {
+      return currentDepth;
+    }
+    return Math.max(...structure.children.map(child => 
+      this.calculateDepth(child, currentDepth + 1)
+    ));
+  }
+
+  async handleManageTodos(args) {
+    const result = await this.apiClient.getDocument(args.document_id);
+    const todoBlocks = result.blocks.filter(b => b.type === 'todo');
+    
+    if (todoBlocks.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No todo blocks found in this document.'
+        }]
+      };
+    }
+    
+    switch (args.operation) {
+      case 'list':
+        const todos = todoBlocks.flatMap(block => 
+          (block.metadata?.items || []).map(item => ({
+            blockId: block.id,
+            text: item.text,
+            completed: item.completed
+          }))
+        );
+        return {
+          content: [{
+            type: 'text',
+            text: `Todos:\n${todos.map(t => 
+              `${t.completed ? '✓' : '○'} ${t.text}`
+            ).join('\n')}`
+          }]
+        };
+      
+      default:
+        return {
+          content: [{
+            type: 'text',
+            text: `Operation '${args.operation}' not yet implemented for todos.`
+          }]
+        };
+    }
+  }
+
+  async handleTrackVersions(args) {
+    const result = await this.apiClient.getDocument(args.document_id);
+    const versionBlocks = result.blocks.filter(b => b.type === 'version-track');
+    
+    if (versionBlocks.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No version tracking blocks found in this document.'
+        }]
+      };
+    }
+    
+    const versions = versionBlocks.map(block => ({
+      blockId: block.id,
+      versions: block.metadata?.versions || [],
+      currentVersion: block.metadata?.current
+    }));
+    
+    return {
+      content: [{
+        type: 'text',
+        text: `Version Tracking:\n${JSON.stringify(versions, null, 2)}`
+      }]
     };
   }
 

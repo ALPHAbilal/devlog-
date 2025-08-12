@@ -123,6 +123,33 @@ Skip the NPX wrapper and connect directly:
 2. Check your internet connection
 3. Ensure you're using the latest client: `npx devlog-mcp@latest`
 
+### MCP Connection Failed
+
+If you see "Connection closed" errors:
+
+1. **Enable debug mode** to see detailed logs:
+   ```json
+   {
+     "mcpServers": {
+       "devlog": {
+         "command": "npx",
+         "args": ["-y", "devlog-mcp@latest"],
+         "env": {
+           "DEVLOG_API_KEY": "your-api-key",
+           "DEVLOG_DEBUG": "true"
+         }
+       }
+     }
+   }
+   ```
+
+2. **Test manually** to diagnose issues:
+   ```bash
+   DEVLOG_API_KEY=your-api-key DEVLOG_DEBUG=true npx devlog-mcp@latest
+   ```
+
+3. **Check Claude logs** for detailed error messages
+
 ### Rate Limits
 
 - Free: 10 requests/minute

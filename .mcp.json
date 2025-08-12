@@ -15,21 +15,3 @@
     }
   }
 }
-
-
-
-claude mcp add-json supabase '{
-    "command": "wsl",
-    "args": [
-        "npx",
-        "-y",
-        "@supabase/mcp-server-supabase@latest",
-        "--read-only",
-        "--project-ref=zqcjipwiznesnbgbocnu"
-    ],
-      
-    "env": {
-        "SUPABASE_ACCESS_TOKEN": "sbp_c308d30229f8b3bce9b985c759b6666f23251a0a"}
-}'
-
-claude mcp add supabase -s local -e SUPABASE_ACCESS_TOKEN=sbp_c308d30229f8b3bce9b985c759b6666f23251a0a -- npx -y @supabase/mcp-server-supabase@latest

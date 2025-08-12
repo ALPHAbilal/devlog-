@@ -281,6 +281,922 @@ export async function executeToolCommand(
         }];
       }
 
+      // ============================================
+      // FOLDER MANAGEMENT TOOLS
+      // ============================================
+      
+      case 'create_folder': {
+        const { name, parent_id = null, color = '#6B7280', icon = 'folder' } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for folder creation');
+        }
+        
+        if (!name) {
+          throw new Error('Folder name is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_create_folder`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_name: name,
+            p_parent_id: parent_id,
+            p_color: color,
+            p_icon: icon
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to create folder: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to create folder: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: `Folder "${name}" created successfully with ID: ${result.folder_id}`,
+        }];
+      }
+
+      case 'list_folders': {
+        const { parent_id = null, recursive = false } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for listing folders');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_list_folders`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_parent_id: parent_id,
+            p_recursive: recursive
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to list folders: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to list folders: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result.folders, null, 2),
+        }];
+      }
+
+      case 'get_folder_contents': {
+        const { folder_id = null, include_subfolders = true } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for getting folder contents');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_get_folder_contents`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_folder_id: folder_id,
+            p_include_subfolders: include_subfolders
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to get folder contents: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to get folder contents: ${result.error || 'Unknown error'}`);
+        }
+
+        const output = {
+          folder_id: result.folder_id || 'root',
+          total_folders: result.total_folders,
+          total_documents: result.total_documents,
+          folders: result.folders,
+          documents: result.documents
+        };
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(output, null, 2),
+        }];
+      }
+
+      case 'move_document': {
+        const { document_id, folder_id = null, position = null } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for moving documents');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_move_document`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_folder_id: folder_id,
+            p_position: position
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to move document: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to move document: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || 'Document moved successfully',
+        }];
+      }
+
+      case 'delete_folder': {
+        const { folder_id, recursive = false } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for deleting folders');
+        }
+        
+        if (!folder_id) {
+          throw new Error('Folder ID is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_delete_folder`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_folder_id: folder_id,
+            p_recursive: recursive
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to delete folder: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to delete folder: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || 'Folder deleted successfully',
+        }];
+      }
+
+      case 'update_folder': {
+        const { folder_id, name, color, icon, is_favorite, parent_id } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for updating folders');
+        }
+        
+        if (!folder_id) {
+          throw new Error('Folder ID is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_update_folder`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_folder_id: folder_id,
+            p_name: name,
+            p_color: color,
+            p_icon: icon,
+            p_is_favorite: is_favorite,
+            p_parent_id: parent_id
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to update folder: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to update folder: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || 'Folder updated successfully',
+        }];
+      }
+
+      // ============================================
+      // ADVANCED BLOCK MANAGEMENT TOOLS
+      // ============================================
+      
+      case 'search_blocks': {
+        const { document_id, query, block_type = null, limit = 10, offset = 0 } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for searching blocks');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_search_blocks`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_query: query || '',
+            p_block_type: block_type,
+            p_limit: limit,
+            p_offset: offset
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to search blocks: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to search blocks: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
+      case 'get_blocks_range': {
+        const { document_id, start_position, end_position } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for getting block range');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        if (start_position === undefined || end_position === undefined) {
+          throw new Error('Start and end positions are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_get_blocks_range`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_start_position: start_position,
+            p_end_position: end_position
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to get block range: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to get block range: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
+      case 'insert_blocks_at': {
+        const { document_id, position, blocks } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for inserting blocks');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        if (position === undefined) {
+          throw new Error('Position is required');
+        }
+        
+        if (!blocks || !Array.isArray(blocks)) {
+          throw new Error('Blocks array is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_insert_blocks_at`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_position: position,
+            p_blocks: JSON.stringify(blocks)
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to insert blocks: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to insert blocks: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || `Inserted ${blocks.length} blocks at position ${position}`,
+        }];
+      }
+
+      case 'update_specific_blocks': {
+        const { document_id, updates } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for updating blocks');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        if (!updates || !Array.isArray(updates)) {
+          throw new Error('Updates array is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_update_specific_blocks`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_updates: updates
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to update blocks: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to update blocks: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || 'Blocks updated successfully',
+        }];
+      }
+
+      case 'delete_blocks': {
+        const { document_id, block_ids } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for deleting blocks');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        if (!block_ids || !Array.isArray(block_ids)) {
+          throw new Error('Block IDs array is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_delete_blocks`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_block_ids: block_ids
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to delete blocks: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to delete blocks: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || 'Blocks deleted successfully',
+        }];
+      }
+
+      case 'move_blocks': {
+        const { document_id, block_ids, target_position } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for moving blocks');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        if (!block_ids || !Array.isArray(block_ids)) {
+          throw new Error('Block IDs array is required');
+        }
+        
+        if (target_position === undefined) {
+          throw new Error('Target position is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_move_blocks`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_block_ids: block_ids,
+            p_target_position: target_position
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to move blocks: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to move blocks: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: result.message || 'Blocks moved successfully',
+        }];
+      }
+
+      // ============================================
+      // SOPHISTICATED BLOCK-TYPE-AWARE EDITING
+      // ============================================
+      
+      case 'smart_edit_block': {
+        const { block_id, operation, params } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for smart block editing');
+        }
+        
+        if (!block_id) {
+          throw new Error('Block ID is required');
+        }
+        
+        if (!operation) {
+          throw new Error('Operation is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_smart_edit_block`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_operation: operation,
+            p_params: params || {}
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to edit block: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to edit block: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
+      case 'edit_text_block': {
+        const { block_id, operation, params } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for text block editing');
+        }
+        
+        if (!block_id || !operation) {
+          throw new Error('Block ID and operation are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_edit_text_block`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_operation: operation,
+            p_params: params || {}
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to edit text block: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to edit text block: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
+      case 'edit_code_block': {
+        const { block_id, operation, params } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for code block editing');
+        }
+        
+        if (!block_id || !operation) {
+          throw new Error('Block ID and operation are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_edit_code_block`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_operation: operation,
+            p_params: params || {}
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to edit code block: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to edit code block: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
+      case 'edit_table_cell': {
+        const { block_id, row, column, value } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for table editing');
+        }
+        
+        if (!block_id) {
+          throw new Error('Block ID is required');
+        }
+        
+        if (row === undefined || column === undefined) {
+          throw new Error('Row and column are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_edit_table_block`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_operation: 'update_cell',
+            p_params: { row, column, value }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to edit table cell: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to edit table cell: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: `Cell updated at row ${row}, column ${column}`,
+        }];
+      }
+
+      case 'toggle_todo_items': {
+        const { block_id, todo_ids } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for todo operations');
+        }
+        
+        if (!block_id || !todo_ids) {
+          throw new Error('Block ID and todo IDs are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_edit_todo_block`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_operation: 'bulk_update_status',
+            p_params: { 
+              todo_ids: todo_ids,
+              status: 'done'
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to toggle todos: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to toggle todos: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
+      case 'edit_ai_message': {
+        const { block_id, index, content } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for AI block editing');
+        }
+        
+        if (!block_id || index === undefined) {
+          throw new Error('Block ID and message index are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_edit_ai_block`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_operation: 'edit_message',
+            p_params: { index, content }
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to edit AI message: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to edit AI message: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: `Message ${index} updated successfully`,
+        }];
+      }
+
+      case 'transform_block_type': {
+        const { block_id, new_type, options = {} } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for block transformation');
+        }
+        
+        if (!block_id || !new_type) {
+          throw new Error('Block ID and new type are required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_transform_block_type`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_block_id: block_id,
+            p_new_type: new_type,
+            p_options: options
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to transform block: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to transform block: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: `Block transformed from ${result.old_type} to ${result.new_type}`,
+        }];
+      }
+
+      case 'duplicate_blocks': {
+        const { document_id, block_ids, target_position = null } = args;
+        
+        if (!apiKey) {
+          throw new Error('API key is required for duplicating blocks');
+        }
+        
+        if (!document_id) {
+          throw new Error('Document ID is required');
+        }
+        
+        if (!block_ids || !Array.isArray(block_ids)) {
+          throw new Error('Block IDs array is required');
+        }
+        
+        const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_duplicate_blocks`, {
+          method: 'POST',
+          headers: {
+            'apikey': env.SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation',
+          },
+          body: JSON.stringify({
+            p_api_key: apiKey,
+            p_document_id: document_id,
+            p_block_ids: block_ids,
+            p_target_position: target_position
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Failed to duplicate blocks: ${error}`);
+        }
+
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(`Failed to duplicate blocks: ${result.error || 'Unknown error'}`);
+        }
+
+        return [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2),
+        }];
+      }
+
       default:
         throw new Error(`Unknown tool: ${toolName}`);
     }

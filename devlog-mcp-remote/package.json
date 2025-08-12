@@ -23,9 +23,10 @@
   "author": "Devlog Team",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.0"
+    "@modelcontextprotocol/sdk": "^1.17.2"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250812.0",
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0",

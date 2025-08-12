@@ -32,3 +32,6 @@ dist-ssr
 .sentryclirc
 sentry.properties
 *.map
+
+# Cloudflare Worker configuration
+worker-configuration.d.ts

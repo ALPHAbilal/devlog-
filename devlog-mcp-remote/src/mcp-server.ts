@@ -1,0 +1,389 @@
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { SupabaseClient } from './supabase-client';
+import { createSemanticSnapshot } from './semantic-snapshot';
+
+export class DevlogMCPServer {
+  private server: Server;
+  private supabase: SupabaseClient;
+  private userId: string;
+  private projectId: string;
+  private env: any;
+
+  constructor(env: any, userId: string, projectId: string) {
+    this.env = env;
+    this.userId = userId;
+    this.projectId = projectId;
+    this.supabase = new SupabaseClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, userId);
+
+    this.server = new Server(
+      {
+        name: 'devlog-mcp',
+        version: '1.0.0',
+      },
+      {
+        capabilities: {
+          tools: {},
+          resources: false,
+          prompts: false,
+        },
+      }
+    );
+
+    this.setupHandlers();
+  }
+
+  async initialize(): Promise<void> {
+    // Any initialization logic
+  }
+
+  private setupHandlers(): void {
+    // Tools list handler
+    this.server.setRequestHandler('tools/list', async () => {
+      return {
+        tools: [
+          {
+            name: 'create_document',
+            description: 'Create a new Devlog document',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                title: { type: 'string', description: 'Document title' },
+                content: { type: 'string', description: 'Initial content' },
+                tags: { type: 'array', items: { type: 'string' } },
+              },
+              required: ['title'],
+            },
+          },
+          {
+            name: 'add_block',
+            description: 'Add a block to an existing document',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: { type: 'string' },
+                type: {
+                  type: 'string',
+                  enum: ['text', 'code', 'heading', 'ai', 'filetree', 'table', 'todo', 'image', 'inline-image', 'version-track', 'issue-tracker'],
+                },
+                content: { type: 'string' },
+                metadata: { type: 'object' },
+              },
+              required: ['document_id', 'type', 'content'],
+            },
+          },
+          {
+            name: 'get_document',
+            description: 'Get a document with optional semantic snapshot',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: { type: 'string' },
+                semantic_mode: { type: 'boolean', description: 'Return AI-optimized snapshot' },
+              },
+              required: ['document_id'],
+            },
+          },
+          {
+            name: 'list_documents',
+            description: 'List documents with filtering',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                limit: { type: 'number', default: 50 },
+                tags: { type: 'array', items: { type: 'string' } },
+                search: { type: 'string' },
+              },
+            },
+          },
+          {
+            name: 'analyze_filetree',
+            description: 'Analyze project structure from filetree blocks',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: { type: 'string' },
+              },
+              required: ['document_id'],
+            },
+          },
+          {
+            name: 'manage_todos',
+            description: 'Manage todo items',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: { type: 'string' },
+                operation: { type: 'string', enum: ['list', 'complete', 'add', 'remove'] },
+                todo_text: { type: 'string' },
+              },
+              required: ['document_id', 'operation'],
+            },
+          },
+          {
+            name: 'capture_conversation',
+            description: 'Capture AI conversation to a document',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: { type: 'string' },
+                conversation: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      role: { type: 'string', enum: ['user', 'assistant'] },
+                      content: { type: 'string' },
+                    },
+                  },
+                },
+                context: { type: 'string' },
+                summary: { type: 'string' },
+              },
+              required: ['document_id', 'conversation'],
+            },
+          },
+        ],
+      };
+    });
+
+    // Tool execution handler
+    this.server.setRequestHandler('tools/call', async (request) => {
+      const { name, arguments: args } = request.params;
+
+      try {
+        switch (name) {
+          case 'create_document':
+            return await this.handleCreateDocument(args);
+          case 'add_block':
+            return await this.handleAddBlock(args);
+          case 'get_document':
+            return await this.handleGetDocument(args);
+          case 'list_documents':
+            return await this.handleListDocuments(args);
+          case 'analyze_filetree':
+            return await this.handleAnalyzeFiletree(args);
+          case 'manage_todos':
+            return await this.handleManageTodos(args);
+          case 'capture_conversation':
+            return await this.handleCaptureConversation(args);
+          default:
+            throw new Error(`Unknown tool: ${name}`);
+        }
+      } catch (error: any) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error: ${error.message}`,
+            },
+          ],
+        };
+      }
+    });
+  }
+
+  async handleRequest(request: any): Promise<any> {
+    // This will be called by the transport layer
+    return this.server.handleRequest(request);
+  }
+
+  private async handleCreateDocument(args: any): Promise<any> {
+    const result = await this.supabase.createDocument(args);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Created document "${result.title}" successfully!\nID: ${result.id}`,
+        },
+      ],
+    };
+  }
+
+  private async handleAddBlock(args: any): Promise<any> {
+    const result = await this.supabase.addBlock(args);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Added ${args.type} block to document`,
+        },
+      ],
+    };
+  }
+
+  private async handleGetDocument(args: any): Promise<any> {
+    const cacheKey = `doc:${args.document_id}:${args.semantic_mode ? 'semantic' : 'full'}`;
+    
+    // Try cache first
+    const cached = await this.env.CACHE.get(cacheKey);
+    if (cached) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: cached,
+          },
+        ],
+      };
+    }
+
+    const result = await this.supabase.getDocument(args.document_id);
+    
+    let responseText: string;
+    if (args.semantic_mode) {
+      const snapshot = createSemanticSnapshot(result);
+      responseText = JSON.stringify(snapshot, null, 2);
+    } else {
+      const blocks = result.blocks.map((block: any) => 
+        `[${block.type}] ${block.content.substring(0, 100)}${block.content.length > 100 ? '...' : ''}`
+      ).join('\n');
+      responseText = `Document: ${result.document.title}\nTags: ${result.document.tags.join(', ')}\n\nBlocks:\n${blocks}`;
+    }
+
+    // Cache the result
+    await this.env.CACHE.put(cacheKey, responseText, {
+      expirationTtl: 300, // 5 minutes
+    });
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: responseText,
+        },
+      ],
+    };
+  }
+
+  private async handleListDocuments(args: any): Promise<any> {
+    const result = await this.supabase.listDocuments(args);
+    const docs = result.documents.map((doc: any) => 
+      `• ${doc.title} (${doc.tags.join(', ')}) - Created: ${new Date(doc.created_at).toLocaleDateString()}`
+    ).join('\n');
+    
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Found ${result.pagination.total} documents:\n${docs}`,
+        },
+      ],
+    };
+  }
+
+  private async handleAnalyzeFiletree(args: any): Promise<any> {
+    const result = await this.supabase.getDocument(args.document_id);
+    const filetreeBlocks = result.blocks.filter((b: any) => b.type === 'filetree');
+    
+    if (filetreeBlocks.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No filetree blocks found in this document.',
+        }],
+      };
+    }
+    
+    const analysis = filetreeBlocks.map((block: any) => {
+      const structure = block.metadata?.structure;
+      return {
+        blockId: block.id,
+        rootPath: structure?.name || 'unknown',
+        totalFiles: this.countFiles(structure),
+        selectedFile: block.metadata?.selectedFile,
+        depth: this.calculateDepth(structure),
+      };
+    });
+    
+    return {
+      content: [{
+        type: 'text',
+        text: `Filetree Analysis:\n${JSON.stringify(analysis, null, 2)}`,
+      }],
+    };
+  }
+
+  private async handleManageTodos(args: any): Promise<any> {
+    const result = await this.supabase.getDocument(args.document_id);
+    const todoBlocks = result.blocks.filter((b: any) => b.type === 'todo');
+    
+    if (todoBlocks.length === 0) {
+      return {
+        content: [{
+          type: 'text',
+          text: 'No todo blocks found in this document.',
+        }],
+      };
+    }
+    
+    switch (args.operation) {
+      case 'list':
+        const todos = todoBlocks.flatMap((block: any) => 
+          (block.metadata?.items || []).map((item: any) => ({
+            blockId: block.id,
+            text: item.text,
+            completed: item.completed,
+          }))
+        );
+        return {
+          content: [{
+            type: 'text',
+            text: `Todos:\n${todos.map((t: any) => 
+              `${t.completed ? '✓' : '○'} ${t.text}`
+            ).join('\n')}`,
+          }],
+        };
+      
+      default:
+        return {
+          content: [{
+            type: 'text',
+            text: `Operation '${args.operation}' not yet implemented for todos.`,
+          }],
+        };
+    }
+  }
+
+  private async handleCaptureConversation(args: any): Promise<any> {
+    // Create an AI block with the conversation
+    const aiBlock = {
+      document_id: args.document_id,
+      type: 'ai',
+      content: args.summary || 'AI Conversation',
+      metadata: {
+        messages: args.conversation,
+        context: args.context,
+        model: 'claude',
+      },
+    };
+
+    await this.supabase.addBlock(aiBlock);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Captured conversation with ${args.conversation.length} messages`,
+        },
+      ],
+    };
+  }
+
+  private countFiles(structure: any): number {
+    if (!structure) return 0;
+    let count = structure.type === 'file' ? 1 : 0;
+    if (structure.children) {
+      count += structure.children.reduce((sum: number, child: any) => sum + this.countFiles(child), 0);
+    }
+    return count;
+  }
+
+  private calculateDepth(structure: any, currentDepth = 0): number {
+    if (!structure || !structure.children || structure.children.length === 0) {
+      return currentDepth;
+    }
+    return Math.max(...structure.children.map((child: any) => 
+      this.calculateDepth(child, currentDepth + 1)
+    ));
+  }
+}

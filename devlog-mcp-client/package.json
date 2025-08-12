@@ -1,0 +1,44 @@
+{
+  "name": "devlog-mcp",
+  "version": "1.0.0",
+  "description": "Connect AI assistants to Devlog using Model Context Protocol (MCP)",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "devlog-mcp": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "mcp",
+    "devlog",
+    "ai",
+    "claude",
+    "model-context-protocol",
+    "knowledge-management",
+    "developer-tools"
+  ],
+  "author": "Bilal Koşika",
+  "license": "MIT",
+  "homepage": "https://github.com/ALPHAbilal/devlog-mcp-client",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ALPHAbilal/devlog-mcp-client.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "node-fetch": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "src/**/*",
+    "README.md"
+  ]
+}

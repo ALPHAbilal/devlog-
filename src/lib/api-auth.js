@@ -28,7 +28,7 @@ export function withApiAuth(handler) {
 
     const apiKey = authHeader.substring(7); // Remove 'Bearer ' prefix
     
-    if (!apiKey || !apiKey.startsWith('jl_')) {
+    if (!apiKey || (!apiKey.startsWith('jl_') && !apiKey.startsWith('dvlg_sk_'))) {
       return res.status(401).json({ 
         error: 'Unauthorized',
         message: 'Invalid API key format' 

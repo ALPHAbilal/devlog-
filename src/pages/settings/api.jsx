@@ -183,10 +183,10 @@ export default function ApiKeysPage() {
 
     setCreating(true)
     try {
-      // Generate a secure random API key
+      // Generate a secure random API key in MCP format
       const keyBytes = new Uint8Array(32)
       crypto.getRandomValues(keyBytes)
-      const apiKey = 'jl_' + Array.from(keyBytes)
+      const apiKey = 'dvlg_sk_prod_' + Array.from(keyBytes)
         .map(b => b.toString(16).padStart(2, '0'))
         .join('')
 
@@ -275,7 +275,7 @@ export default function ApiKeysPage() {
           {/* Page Description */}
           <div className="page-header">
             <p className="section-description">
-              Connect your AI tools to Journey Log with secure API keys
+              Connect Claude Desktop, VS Code, and other AI tools to Devlog with secure API keys
             </p>
           </div>
 
@@ -362,7 +362,7 @@ export default function ApiKeysPage() {
                   <Shield size={48} />
                 </div>
                 <h3>No API keys yet</h3>
-                <p>Create your first API key to start documenting your coding journey</p>
+                <p>Create your first API key to connect AI assistants to your Devlog knowledge base</p>
               </div>
             ) : (
               <div className="api-keys-list">
@@ -397,7 +397,7 @@ export default function ApiKeysPage() {
                     <div className="step-content">
                       <p>Run this command in your terminal:</p>
                       <CodeBlock
-                        code={`claude mcp add journey-log -s user -e JOURNEY_LOG_API_KEY="${newApiKey || 'your_api_key'}" -- npx -y @journey-log/mcp-server`}
+                        code={`claude mcp add devlog -s user -e DEVLOG_API_KEY="${newApiKey || 'your_api_key'}" -- npx -y devlog-mcp`}
                         onCopy={copyToClipboard}
                       />
                     </div>
@@ -419,9 +419,19 @@ export default function ApiKeysPage() {
                   <div className="setup-step">
                     <div className="step-number">1</div>
                     <div className="step-content">
-                      <p>Install the MCP server globally:</p>
+                      <p>Add this to your Claude Desktop config file:</p>
                       <CodeBlock
-                        code="npm install -g @journey-log/mcp-server"
+                        code={`{
+  "mcpServers": {
+    "devlog": {
+      "command": "npx",
+      "args": ["-y", "devlog-mcp"],
+      "env": {
+        "DEVLOG_API_KEY": "${newApiKey || 'your_api_key'}"
+      }
+    }
+  }
+}`}
                         onCopy={copyToClipboard}
                       />
                     </div>
@@ -429,7 +439,8 @@ export default function ApiKeysPage() {
                   <div className="setup-step">
                     <div className="step-number">2</div>
                     <div className="step-content">
-                      <p>Configure Claude Desktop with your API key</p>
+                      <p>Restart Claude Desktop and you're ready!</p>
+                      <p className="text-xs text-secondary mt-1">Config location: ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)</p>
                     </div>
                   </div>
                 </div>
@@ -443,28 +454,40 @@ export default function ApiKeysPage() {
                   <div className="setup-step">
                     <div className="step-number">1</div>
                     <div className="step-content">
-                      <p>Install the MCP server (connects AI tools to Journey Log)</p>
-                      <code className="setup-code">npm install -g @journey-log/mcp-server</code>
+                      <p>Add this to your VS Code or Cursor settings.json:</p>
+                      <CodeBlock
+                        code={`{
+  "mcp.servers": {
+    "devlog": {
+      "command": "npx",
+      "args": ["-y", "devlog-mcp"],
+      "env": {
+        "DEVLOG_API_KEY": "${newApiKey || 'your_api_key'}"
+      }
+    }
+  }
+}`}
+                        onCopy={copyToClipboard}
+                      />
                     </div>
                   </div>
                   <div className="setup-step">
                     <div className="step-number">2</div>
                     <div className="step-content">
-                      <p>Add your API key to VS Code or Cursor settings</p>
-                      <p className="text-xs text-secondary mt-1">Check docs for your editor's setup guide</p>
+                      <p>Restart your editor and the MCP extension will connect!</p>
                     </div>
                   </div>
                 </div>
               </SetupAccordion>
 
               <a
-                href="https://github.com/journey-log/mcp-server"
+                href="https://github.com/ALPHAbilal/devlog-mcp-client"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="docs-link"
               >
                 <Code2 size={18} />
-                View full documentation
+                View full MCP documentation
                 <ExternalLink size={16} />
               </a>
             </div>

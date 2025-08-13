@@ -163,6 +163,7 @@ export default function ApiKeysPage() {
       const { data, error } = await supabase
         .from('api_keys')
         .select('*')
+        .eq('is_active', true)
         .order('created_at', { ascending: false })
 
       if (error) throw error

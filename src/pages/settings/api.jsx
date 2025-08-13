@@ -259,7 +259,7 @@ export default function ApiKeysPage() {
   return (
     <div className="settings-page">
       {/* Header */}
-      <header className="api-header">
+      <header className="settings-header">
         <button 
           className="back-button"
           onClick={() => navigate('/settings')}
@@ -268,10 +268,9 @@ export default function ApiKeysPage() {
           <span>Settings</span>
         </button>
         <h1>API Keys</h1>
-        <div className="header-spacer" />
       </header>
 
-      <div className="settings-content api-content">
+      <div className="settings-content">
         <div className="content-section">
           {/* Page Description */}
           <div className="page-header">
@@ -546,39 +545,37 @@ export default function ApiKeysPage() {
 
       <style jsx>{`
         /* API Page Specific Styles */
-        .api-header {
+        .settings-header {
           display: flex;
           align-items: center;
-          justify-content: space-between;
-          padding: var(--space-6);
-          background: var(--bg-secondary);
-          border-bottom: 1px solid var(--border-color);
-          position: fixed;
+          justify-content: center;
+          padding: var(--space-4) var(--space-6);
+          background: var(--bg-primary);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          position: sticky;
           top: 0;
-          left: 0;
-          right: 0;
           z-index: 100;
-          height: 80px;
+          height: 72px;
+          backdrop-filter: blur(20px);
         }
 
-        .api-header h1 {
-          font-size: 1.5rem;
+        .settings-header h1 {
+          font-size: 1.25rem;
           font-weight: 600;
           margin: 0;
+          flex: 1;
+          text-align: center;
         }
 
-        .header-spacer {
-          width: 120px;
-        }
-
-        .api-content {
-          padding-top: 80px;
-          height: 100vh;
+        .settings-content {
+          padding-top: var(--space-6);
+          padding-bottom: calc(var(--space-8) * 2);
+          min-height: calc(100vh - 72px);
           overflow-y: auto;
         }
 
         .page-header {
-          margin-bottom: var(--space-8);
+          margin-bottom: var(--space-6);
         }
 
         .section-description {
@@ -589,12 +586,13 @@ export default function ApiKeysPage() {
 
         /* API Key Success */
         .api-key-success {
-          background: rgba(16, 185, 129, 0.1);
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
           border: 1px solid rgba(16, 185, 129, 0.3);
           border-radius: 12px;
           padding: var(--space-6);
           margin-bottom: var(--space-6);
           position: relative;
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
         }
 
         .success-header {
@@ -669,6 +667,10 @@ export default function ApiKeysPage() {
           display: flex;
           flex-direction: column;
           gap: var(--space-4);
+          padding: var(--space-4);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 12px;
         }
 
         .create-key-inline {
@@ -699,17 +701,36 @@ export default function ApiKeysPage() {
 
         /* API Key Card */
         .api-key-card {
-          background: var(--bg-secondary);
-          border: 1px solid var(--border-color);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 12px;
-          padding: var(--space-4);
-          margin-bottom: var(--space-3);
-          transition: all var(--transition);
+          padding: var(--space-5);
+          margin-bottom: var(--space-4);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .api-key-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+          opacity: 0;
+          transition: opacity 0.3s ease;
         }
 
         .api-key-card:hover {
-          border-color: rgba(255, 255, 255, 0.2);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          border-color: rgba(16, 185, 129, 0.3);
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .api-key-card:hover::before {
+          opacity: 1;
         }
 
         .api-key-header {
@@ -720,14 +741,17 @@ export default function ApiKeysPage() {
         }
 
         .api-key-icon {
-          width: 40px;
-          height: 40px;
-          background: rgba(16, 185, 129, 0.1);
-          border-radius: 8px;
+          width: 44px;
+          height: 44px;
+          background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+          border: 1px solid rgba(16, 185, 129, 0.2);
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
           color: var(--brand-primary);
+          position: relative;
+          z-index: 1;
         }
 
         .api-key-info {
@@ -745,16 +769,18 @@ export default function ApiKeysPage() {
           font-family: 'Monaco', 'Menlo', monospace;
           font-size: 0.875rem;
           color: var(--text-secondary);
-          background: rgba(255, 255, 255, 0.05);
-          padding: 2px 8px;
-          border-radius: 4px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 4px 10px;
+          border-radius: 6px;
+          display: inline-block;
         }
 
         .api-key-meta {
           display: flex;
           gap: var(--space-4);
           margin-bottom: var(--space-3);
-          padding-left: calc(40px + var(--space-3));
+          padding-left: calc(44px + var(--space-3));
         }
 
         .api-key-date {
@@ -767,19 +793,22 @@ export default function ApiKeysPage() {
           align-items: center;
           justify-content: flex-end;
           gap: var(--space-2);
-          min-height: 32px;
+          min-height: 36px;
+          position: relative;
+          z-index: 2;
         }
 
         .confirm-text {
           font-size: 0.875rem;
-          color: var(--color-error);
+          color: rgba(239, 68, 68, 0.9);
           margin-right: var(--space-2);
+          font-weight: 500;
         }
 
         .delete-button {
-          background: rgba(239, 68, 68, 0.1);
-          border: none;
-          color: var(--color-error);
+          background: transparent;
+          border: 1px solid rgba(239, 68, 68, 0.2);
+          color: rgba(239, 68, 68, 0.8);
           width: 36px;
           height: 36px;
           border-radius: 8px;
@@ -787,11 +816,15 @@ export default function ApiKeysPage() {
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          transition: all var(--transition);
+          transition: all 0.2s ease;
+          position: relative;
+          z-index: 1;
         }
 
         .delete-button:hover {
-          background: rgba(239, 68, 68, 0.2);
+          background: rgba(239, 68, 68, 0.1);
+          border-color: rgba(239, 68, 68, 0.4);
+          color: var(--color-error);
           transform: scale(1.05);
         }
 
@@ -799,11 +832,15 @@ export default function ApiKeysPage() {
         .empty-state, .loading-state {
           text-align: center;
           padding: var(--space-8) var(--space-4);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          border-radius: 16px;
+          margin: var(--space-4) 0;
         }
 
         .empty-icon {
           margin: 0 auto var(--space-4);
-          color: var(--text-disabled);
+          color: rgba(16, 185, 129, 0.4);
         }
 
         .empty-state h3 {
@@ -838,7 +875,8 @@ export default function ApiKeysPage() {
 
         /* Setup Guide */
         .setup-guide {
-          background: rgba(255, 255, 255, 0.02);
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           border-radius: 12px;
           padding: var(--space-6);
         }
@@ -1015,21 +1053,19 @@ export default function ApiKeysPage() {
         }
 
         @media (max-width: 768px) {
-          .api-header {
+          .settings-header {
             padding: var(--space-4);
             height: 60px;
           }
 
-          .api-header h1 {
+          .settings-header h1 {
             font-size: 1.125rem;
           }
 
-          .header-spacer {
-            display: none;
-          }
-
-          .api-content {
-            padding-top: 60px;
+          .settings-content {
+            padding-top: var(--space-4);
+            padding-bottom: calc(var(--space-6) * 2);
+            min-height: calc(100vh - 60px);
           }
 
           .content-section {
@@ -1064,14 +1100,12 @@ export default function ApiKeysPage() {
           }
 
           .api-keys-list {
-            margin: 0 calc(-1 * var(--space-2));
+            margin: 0;
           }
 
           .api-key-card {
-            border-radius: 0;
-            border-left: none;
-            border-right: none;
-            margin-bottom: 1px;
+            border-radius: 12px;
+            margin-bottom: var(--space-3);
           }
         }
       `}</style>

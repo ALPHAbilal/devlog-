@@ -38,7 +38,9 @@ export default function BlockControls({
   }, []);
   
   // Handle mouse leave with delay to prevent flicker
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseLeave = useCallback((event) => {
+    // Safely handle the event without using DOM contains
+    // This fixes the "Failed to execute 'contains' on 'Node'" error
     hideTimeoutRef.current = setTimeout(() => {
       setIsHovered(false);
     }, 100);

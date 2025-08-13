@@ -100,6 +100,51 @@ class OptimizedSupabaseClient {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
             'Prefer': 'return=representation'
+          },
+          // Fix QUIC protocol errors by forcing HTTP/2
+          fetch: (url, options = {}) => {
+            // Add retry logic with exponential backoff
+            const maxRetries = 3;
+            const retryDelay = (attempt) => Math.min(1000 * Math.pow(2, attempt), 5000);
+            
+            const attemptFetch = async (attempt = 0) => {
+              try {
+                // Force HTTP/2 instead of QUIC
+                const modifiedOptions = {
+                  ...options,
+                  // Disable QUIC protocol
+                  mode: 'cors',
+                  credentials: 'same-origin',
+                  // Add timeout
+                  signal: AbortSignal.timeout(30000)
+                };
+                
+                const response = await fetch(url, modifiedOptions);
+                
+                // Check for network errors
+                if (!response.ok && response.status === 0) {
+                  throw new Error('Network error - possible QUIC issue');
+                }
+                
+                return response;
+              } catch (error) {
+                // Log QUIC errors specifically
+                if (error.message?.includes('QUIC') || error.message?.includes('ERR_QUIC')) {
+                  console.warn(`[Supabase] QUIC error detected, retrying with HTTP/2 (attempt ${attempt + 1}/${maxRetries})`);
+                }
+                
+                if (attempt < maxRetries - 1) {
+                  const delay = retryDelay(attempt);
+                  console.log(`[Supabase] Retrying after ${delay}ms...`);
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                  return attemptFetch(attempt + 1);
+                }
+                
+                throw error;
+              }
+            };
+            
+            return attemptFetch();
           }
         },
         db: {

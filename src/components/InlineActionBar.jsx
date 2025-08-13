@@ -73,9 +73,17 @@ export default function InlineActionBar({
   }, []);
   
   const handleMouseLeave = useCallback((e) => {
-    // Don't hide if moving to dropdown
-    if (e.relatedTarget && containerRef.current && e.relatedTarget instanceof Node && containerRef.current.contains(e.relatedTarget)) {
-      return;
+    // Don't hide if moving to dropdown - with safe DOM checking
+    if (e.relatedTarget && containerRef.current) {
+      try {
+        // Ensure relatedTarget is a valid Node before calling contains
+        if (e.relatedTarget instanceof Node && containerRef.current.contains(e.relatedTarget)) {
+          return;
+        }
+      } catch (err) {
+        // Silently handle edge cases where contains might fail
+        console.debug('InlineActionBar: Safe handling of mouse leave', err);
+      }
     }
     
     hideTimeoutRef.current = setTimeout(() => {

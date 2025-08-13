@@ -9,7 +9,7 @@ export function SettingsProvider({ children }) {
   const { user } = useAuth();
   const [settings, setSettings] = useState({
     defaultCodeLanguage: 'javascript',
-    autoSaveInterval: 1,
+    autoSaveInterval: 30, // Changed from 1 to 30 seconds for production stability
     showLineNumbers: true,
     enableTextCollapse: true,
     sessionTimeout: 30 // Default 30 minutes

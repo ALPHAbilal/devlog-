@@ -12,8 +12,15 @@ export function useAutoSave() {
   const { settings } = useSettings();
 
   useEffect(() => {
-    // Use the global auto-save manager
-    globalAutoSaveManager.updateInterval(settings.autoSaveInterval || 1);
+    // Use the global auto-save manager with validation
+    // Ensure minimum interval of 3 seconds for production stability
+    const interval = Math.max(3, settings.autoSaveInterval || 30);
+    
+    if (interval !== settings.autoSaveInterval && settings.autoSaveInterval < 3) {
+      console.warn(`Auto-save interval of ${settings.autoSaveInterval}s is too low. Using minimum of 3s for stability.`);
+    }
+    
+    globalAutoSaveManager.updateInterval(interval);
 
     // Cleanup function
     return () => {

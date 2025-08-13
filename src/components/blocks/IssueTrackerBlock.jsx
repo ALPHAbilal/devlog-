@@ -391,8 +391,7 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      onUpdate({
-        ...block,
+      onUpdate(block.id, {
         data: {
           milestone,
           issues

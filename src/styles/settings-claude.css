@@ -47,7 +47,7 @@
   background: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-ui);
-  overflow: hidden;
+  overflow: auto;
 }
 
 /* Mobile Header */

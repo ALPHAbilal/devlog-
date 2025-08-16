@@ -162,6 +162,17 @@ export class SupabaseAdapterOptimized {
    * Save document with intelligent batching
    */
   async saveDocument(document) {
+    // MILESTONE 3: Check if Smart Sync is active for this document
+    if (document.blocks && window.__smartSyncManagers) {
+      const smartSyncManager = window.__smartSyncManagers.get(document.id);
+      if (smartSyncManager) {
+        console.log('SupabaseAdapterOptimized: Smart Sync is handling blocks for', document.id);
+        // Remove blocks from the save operation
+        const { blocks, ...documentWithoutBlocks } = document;
+        document = { ...documentWithoutBlocks, blocks: undefined };
+      }
+    }
+    
     // Clear relevant caches
     this.clearCache(`doc:${document.id}`);
     this.clearCache(`docs:${document.user_id}`);

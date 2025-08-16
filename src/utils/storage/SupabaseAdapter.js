@@ -378,6 +378,29 @@ export class SupabaseAdapter {
       title: document.title
     });
     
+    // MILESTONE 3: Check if Smart Sync is active for this document
+    // If Smart Sync is handling this document's blocks, skip block saves here
+    if (document.blocks && window.__smartSyncManagers) {
+      const smartSyncManager = window.__smartSyncManagers.get(document.id);
+      if (smartSyncManager) {
+        const status = smartSyncManager.getSyncStatus();
+        console.log('SupabaseAdapter: Smart Sync detected for document', {
+          documentId: document.id,
+          pending: status.pending,
+          syncing: status.syncing
+        });
+        
+        // If Smart Sync is active and we have blocks, skip the block save
+        // Still save document metadata (title, tags, etc.)
+        if (document.blocks.length > 0) {
+          console.log('SupabaseAdapter: Skipping block save - Smart Sync is handling this document');
+          // Remove blocks from the save operation
+          const { blocks, ...documentWithoutBlocks } = document;
+          document = { ...documentWithoutBlocks, blocks: undefined };
+        }
+      }
+    }
+    
     // Skip auth check if we already have userId (reduces latency)
     if (!this.userId) {
       const { data: { user }, error: authError } = await supabase.auth.getUser();

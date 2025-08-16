@@ -327,6 +327,17 @@ const ExpandedView = forwardRef((props, ref) => {
     // Use the loader's removeBlock method
     removeBlock(blockId);
     
+    // CRITICAL FIX: Call Smart Sync for delete operation
+    if (smartSyncManagerRef.current) {
+      smartSyncManagerRef.current.handleChange(
+        blockId,
+        null, // null content for delete
+        'DELETE'
+      ).catch(error => {
+        console.error('Smart Sync delete error:', error);
+      });
+    }
+    
     // Get updated blocks for the parent update
     const updatedBlocks = blocks.filter(block => block && block.id !== blockId);
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
@@ -352,6 +363,18 @@ const ExpandedView = forwardRef((props, ref) => {
     updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
     
     updateLoadedBlocks(updatedBlocks);
+    
+    // CRITICAL FIX: Call Smart Sync for duplicate (create new block)
+    if (smartSyncManagerRef.current) {
+      smartSyncManagerRef.current.handleChange(
+        duplicatedBlock.id,
+        JSON.stringify(duplicatedBlock),
+        'CREATE'
+      ).catch(error => {
+        console.error('Smart Sync duplicate error:', error);
+      });
+    }
+    
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
     // if (onUpdate && !isInitialLoadRef.current) {
     //   setIsInternalUpdate(true);
@@ -371,6 +394,18 @@ const ExpandedView = forwardRef((props, ref) => {
     updatedBlocks.splice(newIndex, 0, movedBlock);
     
     updateLoadedBlocks(updatedBlocks);
+    
+    // CRITICAL FIX: Call Smart Sync for reorder operation
+    if (smartSyncManagerRef.current && movedBlock) {
+      smartSyncManagerRef.current.handleChange(
+        movedBlock.id,
+        JSON.stringify({ ...movedBlock, position: newIndex }),
+        'REORDER'
+      ).catch(error => {
+        console.error('Smart Sync move error:', error);
+      });
+    }
+    
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
@@ -489,6 +524,17 @@ const ExpandedView = forwardRef((props, ref) => {
       // Update state with completely new array
       updateLoadedBlocks(updatedBlocks);
       
+      // CRITICAL FIX: Call Smart Sync for drag-drop reorder
+      if (smartSyncManagerRef.current && draggedBlock) {
+        smartSyncManagerRef.current.handleChange(
+          draggedBlock.id,
+          JSON.stringify({ ...draggedBlock, position: insertIndex }),
+          'REORDER'
+        ).catch(error => {
+          console.error('Smart Sync drag-drop error:', error);
+        });
+      }
+      
       // Block state update will trigger re-render automatically
       
       // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
@@ -534,6 +580,21 @@ const ExpandedView = forwardRef((props, ref) => {
     });
     
     updateLoadedBlocks(updatedBlocks);
+    
+    // CRITICAL FIX: Call Smart Sync for block type conversion
+    if (smartSyncManagerRef.current) {
+      const convertedBlock = updatedBlocks.find(b => b.id === blockId);
+      if (convertedBlock) {
+        smartSyncManagerRef.current.handleChange(
+          blockId,
+          JSON.stringify(convertedBlock),
+          'UPDATE'
+        ).catch(error => {
+          console.error('Smart Sync convert error:', error);
+        });
+      }
+    }
+    
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
@@ -570,6 +631,18 @@ const ExpandedView = forwardRef((props, ref) => {
     }
     
     updateLoadedBlocks(updatedBlocks);
+    
+    // CRITICAL FIX: Call Smart Sync for new block creation
+    if (smartSyncManagerRef.current) {
+      smartSyncManagerRef.current.handleChange(
+        newBlock.id,
+        JSON.stringify(newBlock),
+        'CREATE'
+      ).catch(error => {
+        console.error('Smart Sync add block error:', error);
+      });
+    }
+    
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
@@ -597,6 +670,18 @@ const ExpandedView = forwardRef((props, ref) => {
       updatedBlocks.splice(index + 1, 0, newBlock);
       
       updateLoadedBlocks(updatedBlocks);
+      
+      // CRITICAL FIX: Call Smart Sync for new block from paste
+      if (smartSyncManagerRef.current) {
+        smartSyncManagerRef.current.handleChange(
+          newBlock.id,
+          JSON.stringify(newBlock),
+          'CREATE'
+        ).catch(error => {
+          console.error('Smart Sync add below error:', error);
+        });
+      }
+      
       // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
       // if (onUpdate && !isInitialLoadRef.current) {
       //   onUpdate(entry.id, { blocks: updatedBlocks });
@@ -1012,6 +1097,18 @@ const ExpandedView = forwardRef((props, ref) => {
                         updatedBlocks.splice(index + 1, 0, newBlock);
                         
                         updateLoadedBlocks(updatedBlocks);
+                        
+                        // CRITICAL FIX: Call Smart Sync for inline new block
+                        if (smartSyncManagerRef.current) {
+                          smartSyncManagerRef.current.handleChange(
+                            newBlock.id,
+                            JSON.stringify(newBlock),
+                            'CREATE'
+                          ).catch(error => {
+                            console.error('Smart Sync inline add error:', error);
+                          });
+                        }
+                        
                         // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
                         // if (onUpdate && !isInitialLoadRef.current) {
                         //   onUpdate(entry.id, { blocks: updatedBlocks });

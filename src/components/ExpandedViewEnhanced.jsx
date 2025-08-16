@@ -355,12 +355,19 @@ const ExpandedView = forwardRef((props, ref) => {
     let duplicatedBlock = {
       ...blockToDuplicate,
       id: crypto.randomUUID(),
+      position: blockIndex + 1, // Set position for duplicated block
+      created_at: Date.now(), // New created_at timestamp
       isNew: false
     };
     
     // Normal duplication for all blocks
     const updatedBlocks = [...blocks];
     updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
+    
+    // Update positions for all blocks after the insertion point
+    for (let i = blockIndex + 2; i < updatedBlocks.length; i++) {
+      updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+    }
     
     updateLoadedBlocks(updatedBlocks);
     
@@ -602,10 +609,21 @@ const ExpandedView = forwardRef((props, ref) => {
   };
 
   const addBlock = (type, afterBlockId = null) => {
+    // Calculate position for the new block
+    let position;
+    if (afterBlockId) {
+      const index = blocks.findIndex(b => b.id === afterBlockId);
+      position = index + 1;
+    } else {
+      position = blocks.length;
+    }
+
     const newBlock = {
       id: crypto.randomUUID(),
       type,
       content: '',
+      position: position, // Add position field
+      created_at: Date.now(), // Add created_at timestamp
       isNew: true // Flag to trigger auto-focus
     };
 
@@ -626,6 +644,10 @@ const ExpandedView = forwardRef((props, ref) => {
       const index = blocks.findIndex(b => b.id === afterBlockId);
       updatedBlocks = [...blocks];
       updatedBlocks.splice(index + 1, 0, newBlock);
+      // Update positions for all blocks after the insertion point
+      for (let i = index + 2; i < updatedBlocks.length; i++) {
+        updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+      }
     } else {
       updatedBlocks = [...blocks, newBlock];
     }
@@ -659,15 +681,23 @@ const ExpandedView = forwardRef((props, ref) => {
       const callingBlockId = blocks.find(b => b.isNew || b.id === focusedBlockId)?.id;
       if (!callingBlockId) return;
       
+      const index = blocks.findIndex(b => b.id === callingBlockId);
+      
       const newBlock = {
         id: crypto.randomUUID(),
         ...blockIdOrData,
+        position: index + 1, // Add position field
+        created_at: Date.now(), // Add created_at timestamp
         createdAt: blockIdOrData.createdAt || new Date().toISOString()
       };
       
-      const index = blocks.findIndex(b => b.id === callingBlockId);
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(index + 1, 0, newBlock);
+      
+      // Update positions for all blocks after the insertion point
+      for (let i = index + 2; i < updatedBlocks.length; i++) {
+        updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+      }
       
       updateLoadedBlocks(updatedBlocks);
       
@@ -1090,11 +1120,18 @@ const ExpandedView = forwardRef((props, ref) => {
                         const newBlock = {
                           id: crypto.randomUUID(),
                           ...data,
+                          position: index + 1, // Add position field
+                          created_at: Date.now(), // Add created_at timestamp
                           createdAt: data.createdAt || new Date().toISOString()
                         };
                         
                         const updatedBlocks = [...blocks];
                         updatedBlocks.splice(index + 1, 0, newBlock);
+                        
+                        // Update positions for all blocks after the insertion point
+                        for (let i = index + 2; i < updatedBlocks.length; i++) {
+                          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+                        }
                         
                         updateLoadedBlocks(updatedBlocks);
                         

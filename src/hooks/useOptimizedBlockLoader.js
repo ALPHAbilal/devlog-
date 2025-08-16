@@ -44,16 +44,26 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
         // Check if blocks are already in entry AND have content
         if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
           // If blocks array exists with content, they were already loaded
-          setBlocks(entry.blocks);
+          // Ensure all blocks have positions
+          const blocksWithPositions = entry.blocks.map((block, index) => ({
+            ...block,
+            position: block.position !== undefined ? block.position : index
+          }));
+          setBlocks(blocksWithPositions);
           setIsLoading(false);
-          sessionCache.cacheBlocks(documentId, entry.blocks);
+          sessionCache.cacheBlocks(documentId, blocksWithPositions);
           return;
         }
 
         // Check session cache
         const cachedBlocks = sessionCache.getBlocks(documentId);
         if (cachedBlocks && cachedBlocks.length > 0) {
-          setBlocks(cachedBlocks);
+          // Ensure cached blocks have positions
+          const blocksWithPositions = cachedBlocks.map((block, index) => ({
+            ...block,
+            position: block.position !== undefined ? block.position : index
+          }));
+          setBlocks(blocksWithPositions);
           setIsLoading(false);
           return;
         }
@@ -79,8 +89,13 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
           if (!mountedRef.current) return;
 
-          setBlocks(result.blocks);
-          sessionCache.cacheBlocks(documentId, result.blocks);
+          // Ensure all blocks have positions
+          const blocksWithPositions = result.blocks.map((block, index) => ({
+            ...block,
+            position: block.position !== undefined ? block.position : index
+          }));
+          setBlocks(blocksWithPositions);
+          sessionCache.cacheBlocks(documentId, blocksWithPositions);
         } else {
           setBlocks([]);
         }
@@ -114,8 +129,13 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
   // Function to update blocks (for edits)
   const updateBlocks = (newBlocks) => {
-    setBlocks(newBlocks);
-    sessionCache.updateBlocks(documentId, newBlocks);
+    // Ensure all blocks have positions
+    const blocksWithPositions = newBlocks.map((block, index) => ({
+      ...block,
+      position: block.position !== undefined ? block.position : index
+    }));
+    setBlocks(blocksWithPositions);
+    sessionCache.updateBlocks(documentId, blocksWithPositions);
     optimizedBlockLoader.clearCache(documentId);
   };
 

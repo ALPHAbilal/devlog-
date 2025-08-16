@@ -61,17 +61,25 @@ function AppContent() {
   // Add beforeunload handler to save pending changes
   useEffect(() => {
     const handleBeforeUnload = async (e) => {
-      // Check if there are unsaved changes
-      const { globalAutoSaveManager } = await import('./utils/globalAutoSave');
-      
-      if (globalAutoSaveManager.hasUnsavedChanges()) {
-        // Save all pending changes
-        await globalAutoSaveManager.saveAll();
+      // Smart Sync handles saving automatically via IndexedDB
+      // Check if there are unsaved changes via the global managers
+      if (window.__smartSyncManagers) {
+        let hasUnsaved = false;
+        for (const manager of window.__smartSyncManagers.values()) {
+          const status = manager.getSyncStatus();
+          if (status.pending > 0) {
+            hasUnsaved = true;
+            // Force sync before leaving
+            manager.forceSync().catch(console.error);
+          }
+        }
         
-        // Show browser warning
-        e.preventDefault();
-        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
-        return e.returnValue;
+        if (hasUnsaved) {
+          // Show browser warning
+          e.preventDefault();
+          e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+          return e.returnValue;
+        }
       }
     };
 
@@ -79,10 +87,13 @@ function AppContent() {
     
     // Also use Page Visibility API as a more reliable alternative
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'hidden') {
-        const { globalAutoSaveManager } = await import('./utils/globalAutoSave');
-        if (globalAutoSaveManager.hasUnsavedChanges()) {
-          await globalAutoSaveManager.saveAll();
+      if (document.visibilityState === 'hidden' && window.__smartSyncManagers) {
+        // Force sync all pending changes when tab becomes hidden
+        for (const manager of window.__smartSyncManagers.values()) {
+          const status = manager.getSyncStatus();
+          if (status.pending > 0) {
+            manager.forceSync().catch(console.error);
+          }
         }
       }
     };

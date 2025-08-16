@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { deserializeBlock } from './blockSerializer';
 
 /**
  * Optimized block loader with better skeleton management
@@ -165,62 +166,29 @@ export class OptimizedBlockLoader {
    * Transform block from database format
    */
   transformBlockFromDB(block) {
-    const baseBlock = {
-      id: block.id,
-      type: block.type,
-      content: block.content || '',
-      position: block.position
-    };
-
-    // Add type-specific fields
+    // Use the deserializer to properly restore block structure
+    const deserializedBlock = deserializeBlock(block);
+    
+    // Add any additional fields that might be stored separately in the database
     if (block.type === 'code') {
-      baseBlock.language = block.language;
-      baseBlock.filePath = block.file_path;
-      baseBlock.versionOf = block.version_of;
+      deserializedBlock.language = block.language || deserializedBlock.language;
+      deserializedBlock.filePath = block.file_path || deserializedBlock.filePath;
+      deserializedBlock.versionOf = block.version_of || deserializedBlock.versionOf;
     }
-
-    // For blocks that use 'data' property (table, todo, template, version-track, issue-tracker), restore it from metadata
-    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track' || block.type === 'issue-tracker') {
-      baseBlock.data = block.metadata || {};
-      // console.log(`🔵 OptimizedBlockLoader: Restoring data for ${block.type} block:`, {
-      //   blockId: block.id,
-      //   metadata: block.metadata,
-      //   restoredData: baseBlock.data
-      // });
-    } else if (block.metadata) {
-      // For other blocks, merge metadata properties directly
-      Object.assign(baseBlock, block.metadata);
-      
-      // Debug logging for AI blocks
-      if (block.type === 'ai') {
-        console.log('🔵 AI Block Load Debug (OptimizedBlockLoader):', {
-          blockId: block.id,
-          metadataKeys: Object.keys(block.metadata || {}),
-          hasMessagesInMetadata: !!block.metadata?.messages,
-          messageCount: block.metadata?.messages?.length || 0,
-          hasMessagesInBaseBlock: !!baseBlock.messages
-        });
-      }
-      
-      // Also handle specific known properties for certain block types
-      if (block.type === 'filetree' && block.metadata.treeData) {
-        baseBlock.treeData = block.metadata.treeData;
-      }
-      if (block.type === 'ai' && block.metadata.messages) {
-        baseBlock.messages = block.metadata.messages;
-      }
-      if (block.type === 'image' && block.metadata.images) {
-        baseBlock.images = block.metadata.images;
-      }
-      if (block.type === 'inline-image') {
-        // inline-image stores properties directly in metadata
-        if (block.metadata.url) baseBlock.url = block.metadata.url;
-        if (block.metadata.alt) baseBlock.alt = block.metadata.alt;
-        if (block.metadata.dimensions) baseBlock.dimensions = block.metadata.dimensions;
-      }
+    
+    // Ensure position is set
+    deserializedBlock.position = block.position || deserializedBlock.position || 0;
+    
+    // Debug logging for complex blocks
+    if (block.type === 'ai' && deserializedBlock.messages) {
+      console.log('🔵 AI Block Load Debug (OptimizedBlockLoader):', {
+        blockId: block.id,
+        messageCount: deserializedBlock.messages.length,
+        hasMessages: true
+      });
     }
-
-    return baseBlock;
+    
+    return deserializedBlock;
   }
 
   /**

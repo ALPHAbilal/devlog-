@@ -10,6 +10,7 @@ import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
 import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
 import { getSmartSyncManager } from '../hooks/useAutoSave';
 import { sessionCache } from '../utils/sessionCache';
+import { serializeBlock } from '../utils/blockSerializer';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogSimple } from './ShareDialogSimple';
 import SaveIndicator from './SaveIndicator';
@@ -294,10 +295,13 @@ const ExpandedView = forwardRef((props, ref) => {
         // Get the specific block that was updated
         const updatedBlock = updatedBlocks.find(b => b.id === blockId);
         if (updatedBlock) {
-          // Smart Sync handles everything - just pass the change
+          // Serialize the block to normalize data structure
+          const serializedBlock = serializeBlock(updatedBlock);
+          
+          // Smart Sync handles everything - pass the normalized content
           smartSyncManagerRef.current.handleChange(
             blockId,
-            JSON.stringify(updatedBlock), // Store entire block as JSON
+            serializedBlock.content, // Send normalized content field
             'UPDATE'
           ).then(() => {
             // Update sync status will happen automatically via the interval
@@ -373,9 +377,12 @@ const ExpandedView = forwardRef((props, ref) => {
     
     // CRITICAL FIX: Call Smart Sync for duplicate (create new block)
     if (smartSyncManagerRef.current) {
+      // Serialize the block to normalize data structure
+      const serializedBlock = serializeBlock(duplicatedBlock);
+      
       smartSyncManagerRef.current.handleChange(
         duplicatedBlock.id,
-        JSON.stringify(duplicatedBlock),
+        serializedBlock.content, // Send normalized content field
         'CREATE'
       ).catch(error => {
         console.error('Smart Sync duplicate error:', error);
@@ -664,9 +671,13 @@ const ExpandedView = forwardRef((props, ref) => {
         position: newBlock.position,
         created_at: newBlock.created_at
       });
+      
+      // Serialize the block to normalize data structure
+      const serializedBlock = serializeBlock(newBlock);
+      
       smartSyncManagerRef.current.handleChange(
         newBlock.id,
-        JSON.stringify(newBlock),
+        serializedBlock.content, // Send normalized content field
         'CREATE'
       ).catch(error => {
         console.error('Smart Sync add block error:', error);
@@ -711,9 +722,12 @@ const ExpandedView = forwardRef((props, ref) => {
       
       // CRITICAL FIX: Call Smart Sync for new block from paste
       if (smartSyncManagerRef.current) {
+        // Serialize the block to normalize data structure
+        const serializedBlock = serializeBlock(newBlock);
+        
         smartSyncManagerRef.current.handleChange(
           newBlock.id,
-          JSON.stringify(newBlock),
+          serializedBlock.content, // Send normalized content field
           'CREATE'
         ).catch(error => {
           console.error('Smart Sync add below error:', error);

@@ -1,0 +1,373 @@
+/**
+ * Block Serialization Utility
+ * 
+ * Provides a robust serialization/deserialization layer for different block types
+ * to ensure consistent data storage in the Smart Sync system.
+ * 
+ * @module blockSerializer
+ */
+
+/**
+ * Serializes a block for storage in the database
+ * Normalizes all block-specific fields into a unified content structure
+ * 
+ * @param {Object} block - The block to serialize
+ * @returns {Object} The serialized block with normalized content field
+ */
+export function serializeBlock(block) {
+  if (!block || !block.type) {
+    console.warn('BlockSerializer: Invalid block provided for serialization', block);
+    return block;
+  }
+
+  // Create a copy to avoid mutating the original
+  const serialized = {
+    id: block.id,
+    type: block.type,
+    position: block.position,
+    metadata: block.metadata || {},
+    created_at: block.created_at,
+    updated_at: block.updated_at
+  };
+
+  // Serialize based on block type
+  switch (block.type) {
+    case 'text':
+    case 'heading':
+    case 'code':
+      // These blocks already use 'content' field
+      serialized.content = block.content || '';
+      break;
+
+    case 'ai':
+      // AI blocks store messages array
+      serialized.content = JSON.stringify({
+        messages: block.messages || [],
+        metadata: block.metadata || {}
+      });
+      break;
+
+    case 'image':
+      // Image blocks store images array
+      serialized.content = JSON.stringify({
+        images: block.images || [],
+        layout: block.layout || 'grid',
+        columns: block.columns || 3
+      });
+      break;
+
+    case 'table':
+      // Table blocks store structured data
+      serialized.content = JSON.stringify({
+        data: block.data || {
+          headers: ['Column 1', 'Column 2'],
+          rows: [['', '']],
+          columnAlignments: ['left', 'left']
+        }
+      });
+      break;
+
+    case 'todo':
+      // Todo blocks store items array
+      serialized.content = JSON.stringify({
+        data: block.data || { todos: [] }
+      });
+      break;
+
+    case 'issueTracker':
+    case 'issue-tracker':
+      // Issue tracker blocks store structured data
+      serialized.content = JSON.stringify({
+        data: block.data || {
+          issues: [],
+          categories: ['Bug', 'Feature', 'Enhancement'],
+          priorities: ['Low', 'Medium', 'High', 'Critical']
+        }
+      });
+      break;
+
+    case 'filetree':
+      // File tree blocks store tree structure
+      serialized.content = JSON.stringify({
+        treeData: block.treeData || [],
+        expanded: block.expanded || []
+      });
+      break;
+
+    case 'version-track':
+      // Version tracking blocks store repository data
+      serialized.content = JSON.stringify({
+        data: block.data || {
+          repository: null,
+          commits: [],
+          branches: []
+        }
+      });
+      break;
+
+    case 'inlineImage':
+      // Inline image blocks
+      serialized.content = JSON.stringify({
+        url: block.url || '',
+        alt: block.alt || '',
+        caption: block.caption || ''
+      });
+      break;
+
+    default:
+      // For unknown types, preserve all data in content
+      console.warn(`BlockSerializer: Unknown block type '${block.type}', serializing all fields`);
+      const { id, type, position, metadata, created_at, updated_at, ...rest } = block;
+      serialized.content = JSON.stringify(rest);
+  }
+
+  return serialized;
+}
+
+/**
+ * Deserializes a block from database storage
+ * Restores block-specific fields from the unified content structure
+ * 
+ * @param {Object} block - The serialized block from database
+ * @returns {Object} The deserialized block with proper field structure
+ */
+export function deserializeBlock(block) {
+  if (!block || !block.type) {
+    console.warn('BlockSerializer: Invalid block provided for deserialization', block);
+    return block;
+  }
+
+  // Create base block structure
+  const deserialized = {
+    id: block.id,
+    type: block.type,
+    position: block.position || 0,
+    metadata: block.metadata || {},
+    created_at: block.created_at,
+    updated_at: block.updated_at
+  };
+
+  // Handle content based on block type
+  try {
+    switch (block.type) {
+      case 'text':
+      case 'heading':
+      case 'code':
+        // These blocks use content directly
+        deserialized.content = block.content || '';
+        // For heading blocks, extract level from metadata if not present
+        if (block.type === 'heading' && block.metadata?.level) {
+          deserialized.level = block.metadata.level;
+        }
+        break;
+
+      case 'ai':
+        // Restore messages array
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.messages = parsed.messages || [];
+          if (parsed.metadata) {
+            deserialized.metadata = { ...deserialized.metadata, ...parsed.metadata };
+          }
+        } else {
+          deserialized.messages = [];
+        }
+        break;
+
+      case 'image':
+        // Restore images array
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.images = parsed.images || [];
+          deserialized.layout = parsed.layout || 'grid';
+          deserialized.columns = parsed.columns || 3;
+        } else {
+          deserialized.images = [];
+        }
+        break;
+
+      case 'table':
+        // Restore table data
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.data = parsed.data || {
+            headers: ['Column 1', 'Column 2'],
+            rows: [['', '']],
+            columnAlignments: ['left', 'left']
+          };
+        } else {
+          deserialized.data = {
+            headers: ['Column 1', 'Column 2'],
+            rows: [['', '']],
+            columnAlignments: ['left', 'left']
+          };
+        }
+        break;
+
+      case 'todo':
+        // Restore todo items
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.data = parsed.data || { todos: [] };
+        } else {
+          deserialized.data = { todos: [] };
+        }
+        break;
+
+      case 'issueTracker':
+      case 'issue-tracker':
+        // Restore issue tracker data
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.data = parsed.data || {
+            issues: [],
+            categories: ['Bug', 'Feature', 'Enhancement'],
+            priorities: ['Low', 'Medium', 'High', 'Critical']
+          };
+        } else {
+          deserialized.data = {
+            issues: [],
+            categories: ['Bug', 'Feature', 'Enhancement'],
+            priorities: ['Low', 'Medium', 'High', 'Critical']
+          };
+        }
+        break;
+
+      case 'filetree':
+        // Restore file tree data
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.treeData = parsed.treeData || [];
+          deserialized.expanded = parsed.expanded || [];
+        } else {
+          deserialized.treeData = [];
+          deserialized.expanded = [];
+        }
+        break;
+
+      case 'version-track':
+        // Restore version tracking data
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.data = parsed.data || {
+            repository: null,
+            commits: [],
+            branches: []
+          };
+        } else {
+          deserialized.data = {
+            repository: null,
+            commits: [],
+            branches: []
+          };
+        }
+        break;
+
+      case 'inlineImage':
+        // Restore inline image data
+        if (block.content) {
+          const parsed = typeof block.content === 'string' 
+            ? JSON.parse(block.content) 
+            : block.content;
+          deserialized.url = parsed.url || '';
+          deserialized.alt = parsed.alt || '';
+          deserialized.caption = parsed.caption || '';
+        } else {
+          deserialized.url = '';
+          deserialized.alt = '';
+        }
+        break;
+
+      default:
+        // For unknown types, try to parse content as JSON
+        if (block.content) {
+          try {
+            const parsed = typeof block.content === 'string' 
+              ? JSON.parse(block.content) 
+              : block.content;
+            Object.assign(deserialized, parsed);
+          } catch (e) {
+            // If not JSON, keep as is
+            deserialized.content = block.content;
+          }
+        }
+        console.warn(`BlockSerializer: Unknown block type '${block.type}' during deserialization`);
+    }
+  } catch (error) {
+    console.error(`BlockSerializer: Error deserializing block ${block.id}:`, error);
+    // Fallback: preserve original content
+    deserialized.content = block.content;
+  }
+
+  return deserialized;
+}
+
+/**
+ * Validates if a block has the required fields for its type
+ * 
+ * @param {Object} block - The block to validate
+ * @returns {boolean} True if valid, false otherwise
+ */
+export function validateBlock(block) {
+  if (!block || !block.id || !block.type) {
+    return false;
+  }
+
+  switch (block.type) {
+    case 'text':
+    case 'heading':
+    case 'code':
+      return typeof block.content === 'string';
+    
+    case 'ai':
+      return Array.isArray(block.messages);
+    
+    case 'image':
+      return Array.isArray(block.images);
+    
+    case 'table':
+      return block.data && 
+             Array.isArray(block.data.headers) && 
+             Array.isArray(block.data.rows);
+    
+    case 'todo':
+      return block.data && Array.isArray(block.data.todos);
+    
+    case 'issueTracker':
+    case 'issue-tracker':
+      return block.data && Array.isArray(block.data.issues);
+    
+    case 'filetree':
+      return Array.isArray(block.treeData);
+    
+    case 'version-track':
+      return block.data !== undefined;
+    
+    case 'inlineImage':
+      return typeof block.url === 'string';
+    
+    default:
+      // Unknown type, consider valid if has content
+      return block.content !== undefined;
+  }
+}
+
+export default {
+  serializeBlock,
+  deserializeBlock,
+  validateBlock
+};

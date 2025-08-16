@@ -656,6 +656,12 @@ const ExpandedView = forwardRef((props, ref) => {
     
     // CRITICAL FIX: Call Smart Sync for new block creation
     if (smartSyncManagerRef.current) {
+      console.log('ExpandedView: Calling Smart Sync for new block:', {
+        id: newBlock.id,
+        type: newBlock.type,
+        position: newBlock.position,
+        created_at: newBlock.created_at
+      });
       smartSyncManagerRef.current.handleChange(
         newBlock.id,
         JSON.stringify(newBlock),

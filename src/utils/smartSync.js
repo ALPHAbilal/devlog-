@@ -257,8 +257,25 @@ class SmartSyncManager {
     const batch = this.batchQueue.splice(0, this.BATCH_SIZE);
     
     console.log(`SmartSync: Syncing ${batch.length} changes`);
+    
+    // Log the actual changes being sent
+    console.log('SmartSync: Changes being sent:', batch.map(change => ({
+      block_id: change.blockId,
+      action: change.action,
+      timestamp: change.timestamp,
+      content_preview: change.content ? change.content.substring(0, 100) : null
+    })));
 
     try {
+      // Get current session to ensure we're authenticated
+      const { data: { session } } = await this.supabase.auth.getSession();
+      if (!session) {
+        console.error('SmartSync: No active session, cannot sync');
+        throw new Error('Not authenticated');
+      }
+      
+      console.log('SmartSync: Current user ID:', session.user.id);
+      
       // ONE API call for entire batch
       const { data, error } = await this.supabase
         .rpc('batch_sync_changes', {
@@ -272,7 +289,17 @@ class SmartSyncManager {
         });
 
       if (error) {
+        console.error('SmartSync: RPC error:', error);
         throw error;
+      }
+      
+      // Log the response from the database
+      console.log('SmartSync: RPC response:', data);
+      
+      // Check if the RPC function returned an error in the response
+      if (data && data.success === false) {
+        console.error('SmartSync: Database function returned error:', data.error);
+        throw new Error(data.error || 'Database sync failed');
       }
 
       // Mark as synced in IndexedDB

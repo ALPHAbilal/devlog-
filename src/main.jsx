@@ -6,8 +6,7 @@ import './index.css'
 import './styles/hero-knowledge-constellation.css'
 import App from './App.jsx'
 
-// Initialize global auto-save manager immediately
-import './utils/globalAutoSave'
+// Smart Sync is now initialized through useAutoSave hook
 
 const container = document.getElementById('root');
 const root = createRoot(container, {

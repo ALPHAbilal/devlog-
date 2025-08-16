@@ -301,6 +301,12 @@ class SmartSyncManager {
         console.error('SmartSync: Database function returned error:', data.error);
         throw new Error(data.error || 'Database sync failed');
       }
+      
+      // CRITICAL: Check if blocks were actually processed
+      if (data && data.processed === 0 && data.errors && data.errors.length > 0) {
+        console.error('SmartSync: Database processed 0 blocks, errors:', data.errors);
+        throw new Error(`Database sync failed: processed 0 of ${data.total} blocks`);
+      }
 
       // Mark as synced in IndexedDB
       await Promise.all(

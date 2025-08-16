@@ -104,6 +104,22 @@ export function useAutoSave() {
     getSyncStatus: (documentId) => {
       const manager = getSmartSyncManager(documentId);
       return manager ? manager.getSyncStatus() : null;
+    },
+    
+    // Backward compatibility: recover from backup (uses Smart Sync snapshots)
+    recoverFromBackup: async (documentId) => {
+      const manager = getSmartSyncManager(documentId);
+      if (manager) {
+        const snapshot = await manager.loadLatestSnapshot();
+        if (snapshot) {
+          return {
+            documentId,
+            data: { blocks: snapshot },
+            timestamp: Date.now()
+          };
+        }
+      }
+      return null;
     }
   };
 

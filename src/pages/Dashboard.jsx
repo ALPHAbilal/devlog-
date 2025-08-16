@@ -1032,88 +1032,7 @@ export default function Dashboard() {
     return 'text-gray-400';
   };
 
-  // Show skeleton UI while loading for better perceived performance
-  // Show loading skeleton only during initial load
-  if (isLoading && !isInitialized.current) {
-    return (
-      <div className="flex flex-col h-full relative bg-dark-primary">
-        {/* Floating Tags Skeleton */}
-        <div className="absolute left-3 top-24 bottom-6 z-30 max-w-[160px]">
-          <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-hidden">
-              <div className="flex flex-col gap-2">
-                {[1, 2, 3, 4].map(i => (
-                  <div
-                    key={i}
-                    className="h-10 bg-gray-800/30 rounded border border-dashed border-dark-secondary/40 animate-pulse"
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Header Skeleton */}
-        <div className="flex-shrink-0">
-          {/* Top Navigation Bar */}
-          <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
-            {/* Logo and Brand */}
-            <div className="flex items-center gap-2.5 ml-56">
-              <LogoMinimal size={32} />
-              <div className="h-7 w-16 bg-gray-800/50 rounded animate-pulse" />
-            </div>
-            
-            {/* Stats and Profile */}
-            <div className="flex items-center gap-4 mr-8">
-              <div className="flex items-center gap-3">
-                <div className="h-4 w-20 bg-gray-800/50 rounded animate-pulse" />
-                <div className="h-4 w-24 bg-gray-800/50 rounded animate-pulse" />
-              </div>
-              <div className="w-8 h-8 bg-gray-800/50 rounded-full animate-pulse" />
-            </div>
-          </div>
-
-          {/* Search and Actions Bar */}
-          <div className="px-6 py-3 ml-56">
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-10 bg-gray-800/30 rounded animate-pulse" />
-                <div className="w-20 h-10 bg-gray-800/30 rounded animate-pulse" />
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Content Skeleton with margin for tags */}
-        <div className="flex-grow overflow-hidden px-6 ml-56">
-          <div className="fluid-grid-dashboard">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-              <div key={i} className="group">
-                <div className="bg-dark-secondary/30 rounded-lg p-4 h-[140px] 
-                                border border-dark-secondary/50">
-                  {/* Title skeleton */}
-                  <div className="h-5 bg-gray-800/50 rounded w-3/4 mb-3 animate-pulse" />
-                  
-                  {/* Preview skeleton */}
-                  <div className="space-y-2 mb-3">
-                    <div className="h-3 bg-gray-800/30 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-800/30 rounded w-5/6 animate-pulse" />
-                  </div>
-                  
-                  {/* Tags skeleton */}
-                  <div className="flex gap-2 mt-auto">
-                    <div className="h-5 w-16 bg-gray-800/30 rounded-full animate-pulse" />
-                    <div className="h-5 w-20 bg-gray-800/30 rounded-full animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Check for expanded document FIRST - it has its own loading skeleton
   if (expandedEntry) {
     console.log('Dashboard: Showing ExpandedView instead of grid');
     return (
@@ -1215,6 +1134,88 @@ export default function Dashboard() {
             }}
           />
         </main>
+      </div>
+    );
+  }
+
+  // Show skeleton UI while loading for better perceived performance
+  // Show loading skeleton only during initial load
+  if (isLoading && !isInitialized.current) {
+    return (
+      <div className="flex flex-col h-full relative bg-dark-primary">
+        {/* Floating Tags Skeleton */}
+        <div className="absolute left-3 top-24 bottom-6 z-30 max-w-[160px]">
+          <div className="h-full flex flex-col">
+            <div className="flex-1 overflow-hidden">
+              <div className="flex flex-col gap-2">
+                {[1, 2, 3, 4].map(i => (
+                  <div
+                    key={i}
+                    className="h-10 bg-gray-800/30 rounded border border-dashed border-dark-secondary/40 animate-pulse"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Header Skeleton */}
+        <div className="flex-shrink-0">
+          {/* Top Navigation Bar */}
+          <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
+            {/* Logo and Brand */}
+            <div className="flex items-center gap-2.5 ml-56">
+              <LogoMinimal size={32} />
+              <div className="h-7 w-16 bg-gray-800/50 rounded animate-pulse" />
+            </div>
+            
+            {/* Stats and Profile */}
+            <div className="flex items-center gap-4 mr-8">
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-20 bg-gray-800/50 rounded animate-pulse" />
+                <div className="h-4 w-24 bg-gray-800/50 rounded animate-pulse" />
+              </div>
+              <div className="w-8 h-8 bg-gray-800/50 rounded-full animate-pulse" />
+            </div>
+          </div>
+
+          {/* Search and Actions Bar */}
+          <div className="px-6 py-3 ml-56">
+            <div className="max-w-5xl mx-auto">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 h-10 bg-gray-800/30 rounded animate-pulse" />
+                <div className="w-20 h-10 bg-gray-800/30 rounded animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content Skeleton with margin for tags */}
+        <div className="flex-grow overflow-hidden px-6 ml-56">
+          <div className="fluid-grid-dashboard">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+              <div key={i} className="group">
+                <div className="bg-dark-secondary/30 rounded-lg p-4 h-[140px] 
+                                border border-dark-secondary/50">
+                  {/* Title skeleton */}
+                  <div className="h-5 bg-gray-800/50 rounded w-3/4 mb-3 animate-pulse" />
+                  
+                  {/* Preview skeleton */}
+                  <div className="space-y-2 mb-3">
+                    <div className="h-3 bg-gray-800/30 rounded animate-pulse" />
+                    <div className="h-3 bg-gray-800/30 rounded w-5/6 animate-pulse" />
+                  </div>
+                  
+                  {/* Tags skeleton */}
+                  <div className="flex gap-2 mt-auto">
+                    <div className="h-5 w-16 bg-gray-800/30 rounded-full animate-pulse" />
+                    <div className="h-5 w-20 bg-gray-800/30 rounded-full animate-pulse" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

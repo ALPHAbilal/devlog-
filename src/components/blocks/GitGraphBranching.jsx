@@ -80,9 +80,6 @@ const GitGraphBranching = ({ issues = [] }) => {
               },
             });
           });
-
-          // Switch back to timeline for next issue
-          gitgraph.checkout(timeline);
         }
       });
     };

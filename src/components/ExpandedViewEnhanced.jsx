@@ -404,9 +404,10 @@ const ExpandedView = forwardRef((props, ref) => {
     
     // CRITICAL FIX: Call Smart Sync for reorder operation
     if (smartSyncManagerRef.current && movedBlock) {
+      // For REORDER, send just the new position as a string
       smartSyncManagerRef.current.handleChange(
         movedBlock.id,
-        JSON.stringify({ ...movedBlock, position: newIndex }),
+        String(newIndex), // Just the position as a string
         'REORDER'
       ).catch(error => {
         console.error('Smart Sync move error:', error);
@@ -533,9 +534,10 @@ const ExpandedView = forwardRef((props, ref) => {
       
       // CRITICAL FIX: Call Smart Sync for drag-drop reorder
       if (smartSyncManagerRef.current && draggedBlock) {
+        // For REORDER, send just the new position as a string
         smartSyncManagerRef.current.handleChange(
           draggedBlock.id,
-          JSON.stringify({ ...draggedBlock, position: insertIndex }),
+          String(insertIndex), // Just the position as a string
           'REORDER'
         ).catch(error => {
           console.error('Smart Sync drag-drop error:', error);

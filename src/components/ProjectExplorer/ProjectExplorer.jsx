@@ -41,6 +41,7 @@ import {
   useDraggable,
   rectIntersection,
 } from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
 import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
@@ -835,7 +836,13 @@ export default function ProjectExplorer({
         </div>
 
         {/* Drag overlay */}
-        <DragOverlay>
+        <DragOverlay
+          modifiers={[snapCenterToCursor]}
+          dropAnimation={{
+            duration: 200,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}
+        >
           {draggedItem ? (
             <div className="bg-gradient-to-br from-dark-primary to-dark-lighter text-text-primary px-3 py-2 rounded-lg shadow-2xl flex items-center gap-2 border border-accent-green/20">
               {draggedItem.type === 'folder' ? (

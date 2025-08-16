@@ -49,17 +49,20 @@ import { CSS } from '@dnd-kit/utilities';
 
 // Droppable folder component
 function DroppableFolder({ id, children, isActive }) {
-  const { isOver, setNodeRef } = useDroppable({
+  const { isOver, setNodeRef, active } = useDroppable({
     id: id,
     data: { type: 'folder' }
   });
+  
+  // Determine if this folder can accept the dragged item
+  const canDrop = active && active.id !== id;
   
   return (
     <div 
       ref={setNodeRef}
       className={`
-        ${isOver ? 'ring-2 ring-accent-green/50 bg-accent-green/10 rounded-md' : ''}
-        transition-colors duration-200
+        ${isOver && canDrop ? 'ring-2 ring-accent-green/50 bg-accent-green/10 rounded-md' : ''}
+        transition-all duration-200
       `}
     >
       {children}
@@ -127,7 +130,9 @@ export default function ProjectExplorer({
   const [renamingValue, setRenamingValue] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [dragOverFolderId, setDragOverFolderId] = useState(null);
   const scrollContainerRef = useRef(null);
+  const hoverTimerRef = useRef(null);
   
   // Use the folders hook
   const { 
@@ -471,8 +476,52 @@ export default function ProjectExplorer({
     setDraggedItem(item);
   }, [folderStructure, findItemInStructure]);
 
+  // Handle drag over - for auto-expanding folders
+  const handleDragOver = useCallback((event) => {
+    const { over, active } = event;
+    
+    if (!over || !active) {
+      // Clear any pending hover timer
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+      setDragOverFolderId(null);
+      return;
+    }
+    
+    // Check if we're over a different folder than before
+    if (over.id !== dragOverFolderId) {
+      // Clear previous timer
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+      
+      setDragOverFolderId(over.id);
+      
+      // Find the item being hovered over
+      const targetItem = findItemInStructure(folderStructure, over.id);
+      
+      // If it's a folder and not already expanded, set timer to expand
+      if (targetItem && targetItem.type === 'folder' && !expandedItems.has(over.id)) {
+        hoverTimerRef.current = setTimeout(() => {
+          setExpandedItems(prev => new Set([...prev, over.id]));
+          hoverTimerRef.current = null;
+        }, 700); // 700ms delay before auto-expanding
+      }
+    }
+  }, [dragOverFolderId, folderStructure, expandedItems, findItemInStructure]);
+
   // Handle drag end
   const handleDragEnd = useCallback(async (event) => {
+    // Clear hover timer and state
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setDragOverFolderId(null);
+    
     const { active, over } = event;
     
     if (!over || active.id === over.id) {
@@ -739,8 +788,9 @@ export default function ProjectExplorer({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={rectIntersection}
+      collisionDetection={closestCenter}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div 

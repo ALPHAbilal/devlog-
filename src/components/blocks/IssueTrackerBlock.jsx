@@ -389,8 +389,16 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
     rawBlock: block
   });
   
-  const [milestone, setMilestone] = useState(blockData.milestone || '');
-  const [issues, setIssues] = useState(blockData.issues || []);
+  // Use a ref to track if we've initialized from props
+  const hasInitialized = useRef(false);
+  
+  const [milestone, setMilestone] = useState(() => {
+    hasInitialized.current = true;
+    return blockData.milestone || '';
+  });
+  const [issues, setIssues] = useState(() => {
+    return blockData.issues || [];
+  });
   const [isEditingMilestone, setIsEditingMilestone] = useState(false);
   const saveTimeoutRef = useRef(null);
 
@@ -401,6 +409,11 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
     }
 
     saveTimeoutRef.current = setTimeout(() => {
+      console.log('🎯 IssueTrackerBlock auto-saving:', {
+        blockId: block.id,
+        milestone,
+        issuesCount: issues.length
+      });
       onUpdate(block.id, {
         data: {
           milestone,
@@ -408,11 +421,32 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
         }
       });
     }, 3000);
-  }, [block, milestone, issues, onUpdate]);
+  }, [block.id, milestone, issues, onUpdate]);
 
+  // Sync with incoming block data (but only if it's actually different)
+  useEffect(() => {
+    if (block.data && hasInitialized.current) {
+      const incomingMilestone = block.data.milestone || '';
+      const incomingIssues = block.data.issues || [];
+      
+      // Only update if actually different
+      if (incomingMilestone !== milestone && incomingMilestone !== '') {
+        console.log('🎯 IssueTrackerBlock syncing milestone from props:', incomingMilestone);
+        setMilestone(incomingMilestone);
+      }
+      
+      if (JSON.stringify(incomingIssues) !== JSON.stringify(issues) && incomingIssues.length > 0) {
+        console.log('🎯 IssueTrackerBlock syncing issues from props:', incomingIssues.length);
+        setIssues(incomingIssues);
+      }
+    }
+  }, [block.data]); // Only depend on block.data, not on state
+  
   // Trigger save when data changes
   useEffect(() => {
-    handleSave();
+    if (hasInitialized.current) {
+      handleSave();
+    }
   }, [milestone, issues, handleSave]);
 
   // Cleanup timeout on unmount

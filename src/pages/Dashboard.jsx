@@ -1344,7 +1344,7 @@ export default function Dashboard() {
       {/* Project Sidebar */}
       <div 
         className={`
-          fixed lg:relative inset-y-0 left-0 z-40 w-[280px] lg:w-auto
+          fixed lg:relative inset-y-0 left-0 z-40 w-[280px] max-w-[280px] lg:w-auto lg:max-w-[280px]
           bg-dark-primary lg:bg-transparent
           flex flex-col
           transition-all duration-300 ease-cubic

@@ -580,7 +580,7 @@ export default function ProjectExplorer({
         }}
         onContextMenu={(e) => handleContextMenu(e, item, parentId)}
       >
-        <div className="flex items-center gap-1 min-w-0">
+        <div className="flex items-center gap-1 min-w-0 flex-1">
           {/* Chevron for expandable items */}
           {(hasChildren || item.type === 'folder') && (
             <ChevronRight 
@@ -629,10 +629,11 @@ export default function ProjectExplorer({
             />
           ) : (
             <span className={`
-              text-sm truncate flex-1
+              text-sm truncate block min-w-0
               ${isActiveDocument ? 'text-accent-green font-medium' : isSelected ? 'text-text-primary' : 'text-text-secondary'}
               ${!isActiveDocument ? 'group-hover:text-text-primary' : ''}
-            `}>
+            `}
+            title={item.name}>
               {item.name}
             </span>
           )}
@@ -720,7 +721,7 @@ export default function ProjectExplorer({
   // Collapsed view
   if (isCollapsed) {
     return (
-      <div className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} ml-2 mr-2 rounded-2xl shadow-2xl overflow-hidden`}>
+      <div className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} ml-2 mr-2 rounded-2xl shadow-2xl overflow-hidden w-[80px] max-w-[80px]`}>
         <div className="px-4 py-3">
           <button
             onClick={onToggleCollapse}
@@ -743,7 +744,7 @@ export default function ProjectExplorer({
     >
       <div 
         ref={containerRef}
-        className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} overflow-hidden relative shadow-2xl`}
+        className={`bg-gradient-to-br from-dark-primary to-dark-lighter h-full flex flex-col ${className} overflow-hidden relative shadow-2xl w-full max-w-[280px]`}
         style={{ isolation: 'isolate' }}
       >
         {/* Header */}

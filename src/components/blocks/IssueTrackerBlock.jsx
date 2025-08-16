@@ -152,14 +152,15 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
   const [attempts, setAttempts] = useState(issue.attempts || []);
 
   const handleSave = () => {
-    onUpdate({
+    const updatedIssue = {
       ...issue,
       title,
       description,
       code,
       status,
       attempts
-    });
+    };
+    onUpdate(updatedIssue);
     setIsEditing(false);
   };
 
@@ -171,15 +172,45 @@ const IssueItem = ({ issue, onUpdate, onDelete, isLast }) => {
       result: 'failed',
       solution: false
     };
-    setAttempts([...attempts, newAttempt]);
+    const newAttempts = [...attempts, newAttempt];
+    setAttempts(newAttempts);
+    // Save the issue with new attempts
+    onUpdate({
+      ...issue,
+      title,
+      description,
+      code,
+      status,
+      attempts: newAttempts
+    });
   };
 
   const handleUpdateAttempt = (attemptId, updates) => {
-    setAttempts(attempts.map(a => a.id === attemptId ? updates : a));
+    const newAttempts = attempts.map(a => a.id === attemptId ? updates : a);
+    setAttempts(newAttempts);
+    // Save the issue with updated attempts
+    onUpdate({
+      ...issue,
+      title,
+      description,
+      code,
+      status,
+      attempts: newAttempts
+    });
   };
 
   const handleDeleteAttempt = (attemptId) => {
-    setAttempts(attempts.filter(a => a.id !== attemptId));
+    const newAttempts = attempts.filter(a => a.id !== attemptId);
+    setAttempts(newAttempts);
+    // Save the issue with updated attempts
+    onUpdate({
+      ...issue,
+      title,
+      description,
+      code,
+      status,
+      attempts: newAttempts
+    });
   };
 
   // Auto-update status based on attempts

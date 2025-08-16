@@ -8,7 +8,7 @@ import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
 import { getBacklinks } from '../utils/extractLinks';
 import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
 import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
-import { autoSaveManager } from '../utils/autoSaveManager';
+import { getSmartSyncManager } from '../hooks/useAutoSave';
 import { sessionCache } from '../utils/sessionCache';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogSimple } from './ShareDialogSimple';
@@ -93,6 +93,8 @@ const ExpandedView = forwardRef((props, ref) => {
   const [saveStatus, setSaveStatus] = useState(null);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
   const saveStatusTimeoutRef = useRef(null);
+  const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
+  const smartSyncManagerRef = useRef(null);
 
   // Expose methods to parent component via ref
   useImperativeHandle(ref, () => ({
@@ -125,6 +127,36 @@ const ExpandedView = forwardRef((props, ref) => {
       }
     };
   }, []);
+
+  // Initialize Smart Sync for this document
+  useEffect(() => {
+    if (!entry.id) return;
+    
+    // Get or create Smart Sync manager for this document
+    const syncManager = getSmartSyncManager(entry.id);
+    smartSyncManagerRef.current = syncManager;
+    
+    // Update sync status periodically
+    const statusInterval = setInterval(() => {
+      if (smartSyncManagerRef.current) {
+        const status = smartSyncManagerRef.current.getSyncStatus();
+        setSyncStatus(status);
+      }
+    }, 1000);
+    
+    // Load any snapshot for quick initialization
+    if (syncManager) {
+      syncManager.loadLatestSnapshot().then(snapshot => {
+        if (snapshot && isInitialLoadRef.current) {
+          console.log('SmartSync: Loaded snapshot for quick init');
+        }
+      });
+    }
+    
+    return () => {
+      clearInterval(statusInterval);
+    };
+  }, [entry.id]);
 
   // Check for unsaved changes on mount
   useEffect(() => {
@@ -257,39 +289,31 @@ const ExpandedView = forwardRef((props, ref) => {
       //   updatedBlock: updatedBlocks.find(b => b.id === blockId)
       // });
       
-      // Show saving status
-      setSaveStatus('pending');
-      
-      // Queue auto-save with debouncing
-      autoSaveManager.queueSave(entry.id, { blocks: updatedBlocks }, async (docId, updates) => {
-        setSaveStatus('saving');
-        try {
-          if (onUpdate) {
-            setIsInternalUpdate(true);
-            const result = await onUpdate(docId, updates);
-            
-            // Check if saved to cloud or locally
-            if (result?.savedToCloud === false) {
-              setSaveStatus('offline');
-            } else {
-              setSaveStatus('saved');
-            }
-          } else {
-            setSaveStatus('saved');
-          }
-          
-          // Clear status after 2 seconds
-          if (saveStatusTimeoutRef.current) {
-            clearTimeout(saveStatusTimeoutRef.current);
-          }
-          saveStatusTimeoutRef.current = setTimeout(() => {
-            setSaveStatus(null);
-          }, 2000);
-        } catch (error) {
-          console.error('Save failed:', error);
-          setSaveStatus('error');
+      // Use Smart Sync for saving
+      if (smartSyncManagerRef.current) {
+        // Get the specific block that was updated
+        const updatedBlock = updatedBlocks.find(b => b.id === blockId);
+        if (updatedBlock) {
+          // Smart Sync handles everything - just pass the change
+          smartSyncManagerRef.current.handleChange(
+            blockId,
+            JSON.stringify(updatedBlock), // Store entire block as JSON
+            'UPDATE'
+          ).then(() => {
+            // Update sync status will happen automatically via the interval
+          }).catch(error => {
+            console.error('Smart Sync error:', error);
+            setSaveStatus('error');
+            setTimeout(() => setSaveStatus(null), 3000);
+          });
         }
-      });
+      }
+      
+      // Still call onUpdate for UI updates
+      if (onUpdate) {
+        setIsInternalUpdate(true);
+        onUpdate(entry.id, { blocks: updatedBlocks });
+      }
     }
   };
 
@@ -735,8 +759,11 @@ const ExpandedView = forwardRef((props, ref) => {
         <button 
           onClick={async () => {
             // Save any pending changes before closing
-            if (autoSaveManager.hasUnsavedChanges()) {
-              await autoSaveManager.saveNow(entry.id);
+            if (smartSyncManagerRef.current) {
+              const status = smartSyncManagerRef.current.getSyncStatus();
+              if (status.pending > 0) {
+                await smartSyncManagerRef.current.forceSync();
+              }
             }
             onClose();
           }}
@@ -770,6 +797,31 @@ const ExpandedView = forwardRef((props, ref) => {
                 </div>
               )}
               
+              {/* Sync Status Indicator */}
+              <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-dark-secondary/30">
+                {!syncStatus.online ? (
+                  <span className="text-xs text-yellow-400 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                    Offline
+                  </span>
+                ) : syncStatus.syncing ? (
+                  <span className="text-xs text-blue-400 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                    Syncing
+                  </span>
+                ) : syncStatus.pending > 0 ? (
+                  <span className="text-xs text-amber-400 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-amber-400 rounded-full" />
+                    {syncStatus.pending} pending
+                  </span>
+                ) : (
+                  <span className="text-xs text-green-400 flex items-center gap-1">
+                    <span className="w-2 h-2 bg-green-400 rounded-full" />
+                    Saved
+                  </span>
+                )}
+              </div>
+
               {/* Share Button */}
               <button
                 onClick={() => setShowShareDialog(true)}

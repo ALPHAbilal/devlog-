@@ -1,213 +1,50 @@
-index-TqAuFC5_.js:26 Using optimized Supabase client
-index-TqAuFC5_.js:26 Global auto-save manager initialized with defensive wrappers
-index-TqAuFC5_.js:26 🎉 AuthFormElite Migration Success: Object
-index-TqAuFC5_.js:26 [Honeycomb] SDK initialized successfully in production mode
-index-TqAuFC5_.js:26 IndexedDB initialized successfully
-index-TqAuFC5_.js:26 Starting auto-save with interval: 30 seconds
-index-TqAuFC5_.js:26 [AuthStore] Fetching initial session...
-index-TqAuFC5_.js:26 [AuthStore] Already initialized or initializing, skipping
-index-TqAuFC5_.js:26 [AuthStore] Already initialized or initializing, skipping
-index-TqAuFC5_.js:26 SW registered: ServiceWorkerRegistration
-index-TqAuFC5_.js:26 [useRealtimeManager] Initializing for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-TqAuFC5_.js:26 [RealtimeManager] Setting up documents subscription for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-TqAuFC5_.js:26 [Honeycomb] User context set: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-TqAuFC5_.js:26 [RealtimeDebug] Subscription created for documents in RealtimeManager
-index-TqAuFC5_.js:26 [RealtimeDebug] Active subscriptions: 1
-index-TqAuFC5_.js:26 [RealtimeManager] Setting up blocks subscription
-index-TqAuFC5_.js:26 [RealtimeDebug] Subscription created for blocks in RealtimeManager
-index-TqAuFC5_.js:26 [RealtimeDebug] Active subscriptions: 2
-index-TqAuFC5_.js:26 [RealtimeManager] Successfully initialized for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel status: SUBSCRIBED
-index-TqAuFC5_.js:26 [RealtimeManager] Successfully subscribed to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel status: SUBSCRIBED
-index-TqAuFC5_.js:26 [RealtimeManager] Successfully subscribed to blocks channel
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: Object
-(anonymous) @ index-TqAuFC5_.js:26
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: Object
-(anonymous) @ index-TqAuFC5_.js:26
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: Object
-(anonymous) @ index-TqAuFC5_.js:26
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: Object
-(anonymous) @ index-TqAuFC5_.js:26
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Health check: Connection lost, attempting reconnect
-index-TqAuFC5_.js:26 [RealtimeManager] Reconnection attempt 1
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Cleaning up all subscriptions
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel status: CLOSED
-index-TqAuFC5_.js:26 [RealtimeDebug] Subscription cleaned for documents
-index-TqAuFC5_.js:26 [RealtimeDebug] Duration: 33019ms
-index-TqAuFC5_.js:26 [RealtimeDebug] Active subscriptions: 1
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel status: CLOSED
-index-TqAuFC5_.js:26 [RealtimeDebug] Subscription cleaned for blocks
-index-TqAuFC5_.js:26 [RealtimeDebug] Duration: 33023ms
-index-TqAuFC5_.js:26 [RealtimeDebug] Active subscriptions: 0
-index-TqAuFC5_.js:26 [RealtimeManager] Setting up documents subscription for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-TqAuFC5_.js:26 [RealtimeDebug] Subscription created for documents in RealtimeManager
-index-TqAuFC5_.js:26 [RealtimeDebug] Active subscriptions: 1
-index-TqAuFC5_.js:26 [RealtimeManager] Setting up blocks subscription
-index-TqAuFC5_.js:26 [RealtimeDebug] Subscription created for blocks in RealtimeManager
-index-TqAuFC5_.js:26 [RealtimeDebug] Active subscriptions: 2
-index-TqAuFC5_.js:26 [RealtimeManager] Successfully initialized for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel status: SUBSCRIBED
-index-TqAuFC5_.js:26 [RealtimeManager] Successfully subscribed to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel status: SUBSCRIBED
-index-TqAuFC5_.js:26 [RealtimeManager] Successfully subscribed to blocks channel
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Blocks channel error: {message: '{:error, "Unable to subscribe to changes with give…ters: [event: *, schema: public, table: blocks]"}', status: 'error', extension: 'postgres_changes', channel: 'blocks-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Connected to documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Disconnected from documents channel
-index-TqAuFC5_.js:26 [RealtimeManager] Documents channel error: {message: '{:error, "Unable to subscribe to changes with give…c10cbe52a32b, schema: public, table: documents]"}', status: 'error', extension: 'postgres_changes', channel: 'documents-changes'}
-(anonymous) @ index-TqAuFC5_.js:26
-(anonymous) @ index-TqAuFC5_.js:1572
-(anonymous) @ supabase-BaUPE9s7.js:3
-_trigger @ supabase-BaUPE9s7.js:3
-(anonymous) @ supabase-BaUPE9s7.js:8
-(anonymous) @ supabase-BaUPE9s7.js:8
-decode @ supabase-BaUPE9s7.js:3
-_onConnMessage @ supabase-BaUPE9s7.js:8
-conn.conn.onmessage @ supabase-BaUPE9s7.js:8
-index-TqAuFC5_.js:26 [RealtimeManager] Health check: Connection lost, attempting reconnect
-index-TqAuFC5_.js:26 [RealtimeManager] Reconnection attempt 1
+PS F:\devlog-> git add .
+warning: in the working copy of 'findings/autosave-analysis.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/comparison-with-devlog.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/data-structure.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/expert-save-coordinator.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/integration-guide.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/pattern-analysis.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/save-mechanism.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'findings/testing-checklist.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'migrations/batch_sync_changes.sql', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/DocumentEditor-SmartSync-Example.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/contexts/SupabaseContext.jsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/hooks/useSmartSync.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/utils/smartSync.js', LF will be replaced by CRLF the next time Git touches it
+error: 'study/2025-01-15-autosave-tiptap/' does not have a commit checked out
+fatal: adding files failed
+PS F:\devlog-> git commit -m "feat: Smart Sync"
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        deleted:    CLONE-AND-INTEGRATE-PLAYBOOK.md
+        deleted:    GIT-ROLLBACK-CHECKPOINTS.md
+        deleted:    database-changes-log.md
+        deleted:    database-rollback-completed.md
+        deleted:    expert-ai-context-prompt.md
+        deleted:    find-existing-solutions-prompt.md
+        deleted:    github-AI-expert.md
+        deleted:    github-ai-followup-prompt.md
+        modified:   package.json
+        deleted:    rollback-and-lessons-learned.md
+        modified:   src/components/ExpandedViewEnhanced.jsx
+        modified:   src/hooks/useAutoSave.js
+        deleted:    src/utils/autoSaveManager.js
+        deleted:    src/utils/globalAutoSave.js
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        findings/
+        migrations/batch_sync_changes.sql
+        src/components/DocumentEditor-SmartSync-Example.jsx
+        src/contexts/SupabaseContext.jsx
+        src/hooks/useSmartSync.js
+        src/utils/smartSync.js
+        study/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+PS F:\devlog-> 

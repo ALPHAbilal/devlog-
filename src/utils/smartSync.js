@@ -296,15 +296,27 @@ class SmartSyncManager {
       // Log the response from the database
       console.log('SmartSync: RPC response:', data);
       
+      // Log detailed errors if present
+      if (data && data.errors && data.errors.length > 0) {
+        console.error('SmartSync: Database errors detail:', data.errors);
+      }
+      
       // Check if the RPC function returned an error in the response
       if (data && data.success === false) {
         console.error('SmartSync: Database function returned error:', data.error);
-        throw new Error(data.error || 'Database sync failed');
+        // Include the detailed errors in the error message
+        const errorDetails = data.errors ? JSON.stringify(data.errors) : 'No details';
+        throw new Error(data.error || `Database sync failed: ${errorDetails}`);
       }
       
       // CRITICAL: Check if blocks were actually processed
-      if (data && data.processed === 0 && data.errors && data.errors.length > 0) {
+      if (data && data.processed === 0 && batch.length > 0) {
         console.error('SmartSync: Database processed 0 blocks, errors:', data.errors);
+        // Don't throw error if it's an auth issue that might be transient
+        if (data.error && data.error.includes('Not authenticated')) {
+          console.error('SmartSync: Authentication issue, will retry');
+          throw new Error('Authentication failed - will retry');
+        }
         throw new Error(`Database sync failed: processed 0 of ${data.total} blocks`);
       }
 

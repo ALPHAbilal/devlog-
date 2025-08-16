@@ -389,74 +389,10 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
     rawBlock: block
   });
   
-  // Use a ref to track if we've initialized from props
-  const hasInitialized = useRef(false);
-  
-  const [milestone, setMilestone] = useState(() => {
-    hasInitialized.current = true;
-    return blockData.milestone || '';
-  });
-  const [issues, setIssues] = useState(() => {
-    return blockData.issues || [];
-  });
+  // Initialize state from block data
+  const [milestone, setMilestone] = useState(blockData.milestone || '');
+  const [issues, setIssues] = useState(blockData.issues || []);
   const [isEditingMilestone, setIsEditingMilestone] = useState(false);
-  const saveTimeoutRef = useRef(null);
-
-  // Auto-save functionality
-  const handleSave = useCallback(() => {
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
-    saveTimeoutRef.current = setTimeout(() => {
-      console.log('🎯 IssueTrackerBlock auto-saving:', {
-        blockId: block.id,
-        milestone,
-        issuesCount: issues.length
-      });
-      onUpdate(block.id, {
-        data: {
-          milestone,
-          issues
-        }
-      });
-    }, 3000);
-  }, [block.id, milestone, issues, onUpdate]);
-
-  // Sync with incoming block data (but only if it's actually different)
-  useEffect(() => {
-    if (block.data && hasInitialized.current) {
-      const incomingMilestone = block.data.milestone || '';
-      const incomingIssues = block.data.issues || [];
-      
-      // Only update if actually different
-      if (incomingMilestone !== milestone && incomingMilestone !== '') {
-        console.log('🎯 IssueTrackerBlock syncing milestone from props:', incomingMilestone);
-        setMilestone(incomingMilestone);
-      }
-      
-      if (JSON.stringify(incomingIssues) !== JSON.stringify(issues) && incomingIssues.length > 0) {
-        console.log('🎯 IssueTrackerBlock syncing issues from props:', incomingIssues.length);
-        setIssues(incomingIssues);
-      }
-    }
-  }, [block.data]); // Only depend on block.data, not on state
-  
-  // Trigger save when data changes
-  useEffect(() => {
-    if (hasInitialized.current) {
-      handleSave();
-    }
-  }, [milestone, issues, handleSave]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleAddIssue = () => {
     const newIssue = {
@@ -467,15 +403,39 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
       status: 'active',
       attempts: []
     };
-    setIssues([...issues, newIssue]);
+    const newIssues = [...issues, newIssue];
+    setIssues(newIssues);
+    // Save immediately when adding issue
+    onUpdate(block.id, {
+      data: {
+        milestone,
+        issues: newIssues
+      }
+    });
   };
 
   const handleUpdateIssue = (issueId, updates) => {
-    setIssues(issues.map(issue => issue.id === issueId ? updates : issue));
+    const newIssues = issues.map(issue => issue.id === issueId ? updates : issue);
+    setIssues(newIssues);
+    // Save when issue is updated
+    onUpdate(block.id, {
+      data: {
+        milestone,
+        issues: newIssues
+      }
+    });
   };
 
   const handleDeleteIssue = (issueId) => {
-    setIssues(issues.filter(issue => issue.id !== issueId));
+    const newIssues = issues.filter(issue => issue.id !== issueId);
+    setIssues(newIssues);
+    // Save when issue is deleted
+    onUpdate(block.id, {
+      data: {
+        milestone,
+        issues: newIssues
+      }
+    });
   };
 
   return (
@@ -492,11 +452,25 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
                 onBlur={() => {
                   if (milestone) {
                     setIsEditingMilestone(false);
+                    // Save milestone when user finishes editing
+                    onUpdate(block.id, {
+                      data: {
+                        milestone,
+                        issues
+                      }
+                    });
                   }
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     setIsEditingMilestone(false);
+                    // Save milestone when user presses Enter
+                    onUpdate(block.id, {
+                      data: {
+                        milestone,
+                        issues
+                      }
+                    });
                   } else if (e.key === 'Escape') {
                     setMilestone('');
                     setIsEditingMilestone(false);

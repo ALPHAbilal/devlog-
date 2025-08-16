@@ -78,7 +78,10 @@ function createSupabaseWrapper(adapter) {
     // Add saveDocument method for saving single document
     async saveDocument(document) {
       // MILESTONE 4: Redirect blocks to Smart Sync if available
-      if (document.blocks && window.__smartSyncManagers) {
+      // BUT skip for new documents that don't exist in the database yet
+      const isNewDocument = document.metadata?.isNewDocument || false;
+      
+      if (document.blocks && window.__smartSyncManagers && !isNewDocument) {
         const smartSyncManager = window.__smartSyncManagers.get(document.id);
         if (smartSyncManager) {
           console.log('StorageWrapper: Redirecting blocks to Smart Sync');
@@ -98,7 +101,8 @@ function createSupabaseWrapper(adapter) {
         }
       }
       
-      // Fall back to normal save if Smart Sync not available
+      // For new documents or when Smart Sync not available, save normally
+      // This ensures the document gets created in the database first
       return await adapter.saveDocument(document);
     },
     // Expose invalidateCache method

@@ -1433,7 +1433,7 @@ export default function Dashboard() {
               
               
               <button
-                onClick={createNewEntry}
+                onClick={() => createNewEntry()}
                 className="hidden md:flex flex-shrink-0 items-center gap-1.5 px-3 py-2 
                            bg-dark-secondary/40 hover:bg-dark-secondary/60
                            text-text-primary rounded transition-all
@@ -1530,7 +1530,7 @@ export default function Dashboard() {
               markdown support, and interconnected knowledge.
             </p>
             <button
-              onClick={createNewEntry}
+              onClick={() => createNewEntry()}
               className="inline-flex items-center gap-2 px-6 py-3 
                          bg-accent-green text-dark-primary rounded-lg
                          hover:bg-accent-green/80 transition-colors"

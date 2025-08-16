@@ -478,6 +478,32 @@ class SmartSyncManager {
   }
 
   /**
+   * Clear all pending changes for this document (useful for cleanup)
+   */
+  async clearAllPendingChanges() {
+    console.log('SmartSync: Clearing all pending changes for document', this.documentId);
+    
+    // Clear from IndexedDB
+    await this.db.changes
+      .where('documentId').equals(this.documentId)
+      .delete();
+    
+    // Clear from memory
+    this.batchQueue = [];
+    
+    // Clear emergency queue if it's for this document
+    const emergency = localStorage.getItem('devlog_emergency_queue');
+    if (emergency) {
+      const data = JSON.parse(emergency);
+      if (data.documentId === this.documentId) {
+        localStorage.removeItem('devlog_emergency_queue');
+      }
+    }
+    
+    console.log('SmartSync: All pending changes cleared');
+  }
+
+  /**
    * Cleanup on unmount
    */
   destroy() {

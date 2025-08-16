@@ -77,6 +77,28 @@ function createSupabaseWrapper(adapter) {
     },
     // Add saveDocument method for saving single document
     async saveDocument(document) {
+      // MILESTONE 4: Redirect blocks to Smart Sync if available
+      if (document.blocks && window.__smartSyncManagers) {
+        const smartSyncManager = window.__smartSyncManagers.get(document.id);
+        if (smartSyncManager) {
+          console.log('StorageWrapper: Redirecting blocks to Smart Sync');
+          
+          // Process each block through Smart Sync
+          for (const block of document.blocks) {
+            await smartSyncManager.handleChange(
+              block.id,
+              JSON.stringify(block),
+              'UPDATE'
+            );
+          }
+          
+          // Save only metadata through traditional path (remove blocks)
+          const { blocks, ...documentWithoutBlocks } = document;
+          return await adapter.saveDocument(documentWithoutBlocks);
+        }
+      }
+      
+      // Fall back to normal save if Smart Sync not available
       return await adapter.saveDocument(document);
     },
     // Expose invalidateCache method

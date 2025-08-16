@@ -1,50 +1,30 @@
-PS F:\devlog-> git add .
-warning: in the working copy of 'findings/autosave-analysis.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/comparison-with-devlog.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/data-structure.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/expert-save-coordinator.js', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/integration-guide.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/pattern-analysis.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/save-mechanism.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'findings/testing-checklist.md', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'migrations/batch_sync_changes.sql', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/components/DocumentEditor-SmartSync-Example.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/contexts/SupabaseContext.jsx', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/hooks/useSmartSync.js', LF will be replaced by CRLF the next time Git touches it
-warning: in the working copy of 'src/utils/smartSync.js', LF will be replaced by CRLF the next time Git touches it
-error: 'study/2025-01-15-autosave-tiptap/' does not have a commit checked out
-fatal: adding files failed
-PS F:\devlog-> git commit -m "feat: Smart Sync"
-On branch main
-Your branch is up to date with 'origin/main'.
-
-Changes not staged for commit:
-  (use "git add/rm <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        deleted:    CLONE-AND-INTEGRATE-PLAYBOOK.md
-        deleted:    GIT-ROLLBACK-CHECKPOINTS.md
-        deleted:    database-changes-log.md
-        deleted:    database-rollback-completed.md
-        deleted:    expert-ai-context-prompt.md
-        deleted:    find-existing-solutions-prompt.md
-        deleted:    github-AI-expert.md
-        deleted:    github-ai-followup-prompt.md
-        modified:   package.json
-        deleted:    rollback-and-lessons-learned.md
-        modified:   src/components/ExpandedViewEnhanced.jsx
-        modified:   src/hooks/useAutoSave.js
-        deleted:    src/utils/autoSaveManager.js
-        deleted:    src/utils/globalAutoSave.js
-
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-        findings/
-        migrations/batch_sync_changes.sql
-        src/components/DocumentEditor-SmartSync-Example.jsx
-        src/contexts/SupabaseContext.jsx
-        src/hooks/useSmartSync.js
-        src/utils/smartSync.js
-        study/
-
-no changes added to commit (use "git add" and/or "git commit -a")
-PS F:\devlog-> 
+[14:30:33.528] Running build in Washington, D.C., USA (East) – iad1
+[14:30:33.529] Build machine configuration: 2 cores, 8 GB
+[14:30:33.564] Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 4a838a7)
+[14:30:34.372] Cloning completed: 808.000ms
+[14:30:34.570] Restored build cache from previous deployment (9Z92gxNkwKL7YWuLM6ftHdRnCUWJ)
+[14:30:37.646] Running "vercel build"
+[14:30:38.063] Vercel CLI 45.0.10
+[14:30:38.899] Installing dependencies...
+[14:30:40.576] 
+[14:30:40.577] added 2 packages in 1s
+[14:30:40.577] 
+[14:30:40.577] 75 packages are looking for funding
+[14:30:40.578]   run `npm fund` for details
+[14:30:40.723] 
+[14:30:40.724] > journey-log-compass@0.0.0 build
+[14:30:40.724] > vite build
+[14:30:40.725] 
+[14:30:41.379] [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+[14:30:41.413] [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
+[14:30:41.809] transforming...
+[14:30:42.181] [32m✓[39m 6 modules transformed.
+[14:30:42.185] [31m✗[39m Build failed in 775ms
+[14:30:42.186] [31merror during build:
+[14:30:42.186] [31mCould not resolve "./utils/globalAutoSave" from "src/main.jsx"[31m
+[14:30:42.186] file: [36m/vercel/path0/src/main.jsx[31m
+[14:30:42.187]     at getRollupError (file:///vercel/path0/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+[14:30:42.187]     at error (file:///vercel/path0/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+[14:30:42.187]     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21490:24)
+[14:30:42.188]     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21450:26[39m
+[14:30:42.237] Error: Command "npm run build" exited with 1

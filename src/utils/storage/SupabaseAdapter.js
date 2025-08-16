@@ -5,7 +5,7 @@ export class SupabaseAdapter {
     this.initialized = false;
     this.documentsCache = null;
     this.cacheTimestamp = 0;
-    this.CACHE_DURATION = 5000; // 5 seconds cache
+    this.CACHE_DURATION = 5 * 60 * 1000; // 5 minutes cache (was 5 seconds)
     this.saveQueue = new Map(); // Prevent concurrent saves
   }
   

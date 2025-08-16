@@ -298,11 +298,13 @@ const ExpandedView = forwardRef((props, ref) => {
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
           
-          // Smart Sync handles everything - pass the normalized content
+          // Smart Sync handles everything - pass the normalized content WITH type and position
           smartSyncManagerRef.current.handleChange(
             blockId,
             serializedBlock.content, // Send normalized content field
-            'UPDATE'
+            'UPDATE',
+            updatedBlock.type,       // CRITICAL: Send block type
+            updatedBlock.position    // CRITICAL: Send position
           ).then(() => {
             // Update sync status will happen automatically via the interval
           }).catch(error => {
@@ -383,7 +385,9 @@ const ExpandedView = forwardRef((props, ref) => {
       smartSyncManagerRef.current.handleChange(
         duplicatedBlock.id,
         serializedBlock.content, // Send normalized content field
-        'CREATE'
+        'CREATE',
+        duplicatedBlock.type,    // CRITICAL: Send block type
+        duplicatedBlock.position // CRITICAL: Send position
       ).catch(error => {
         console.error('Smart Sync duplicate error:', error);
       });
@@ -678,7 +682,9 @@ const ExpandedView = forwardRef((props, ref) => {
       smartSyncManagerRef.current.handleChange(
         newBlock.id,
         serializedBlock.content, // Send normalized content field
-        'CREATE'
+        'CREATE',
+        newBlock.type,           // CRITICAL: Send block type
+        newBlock.position        // CRITICAL: Send position
       ).catch(error => {
         console.error('Smart Sync add block error:', error);
       });
@@ -728,7 +734,9 @@ const ExpandedView = forwardRef((props, ref) => {
         smartSyncManagerRef.current.handleChange(
           newBlock.id,
           serializedBlock.content, // Send normalized content field
-          'CREATE'
+          'CREATE',
+          newBlock.type,           // CRITICAL: Send block type
+          newBlock.position        // CRITICAL: Send position
         ).catch(error => {
           console.error('Smart Sync add below error:', error);
         });

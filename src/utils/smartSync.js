@@ -169,11 +169,24 @@ class SmartSyncManager {
    * Handle a change from the user
    * This is the main entry point for all changes
    */
-  async handleChange(blockId, content, action = 'UPDATE') {
+  async handleChange(blockId, content, action = 'UPDATE', blockType = null, position = null) {
+    // Sophisticated tracing - log what we're receiving
+    console.log('🚀 SmartSync.handleChange INPUT:', {
+      blockId,
+      action,
+      blockType,
+      position,
+      contentLength: content?.length,
+      contentPreview: content?.substring(0, 100),
+      timestamp: Date.now()
+    });
+
     const change = {
       blockId,
       content,
       action,
+      blockType, // CRITICAL: Add block type
+      position,  // CRITICAL: Add position
       documentId: this.documentId,
       timestamp: Date.now(),
       synced: false
@@ -284,6 +297,8 @@ class SmartSyncManager {
             block_id: change.blockId,
             content: change.content,
             action: change.action,
+            block_type: change.blockType, // CRITICAL: Send block type
+            position: change.position,     // CRITICAL: Send position
             timestamp: change.timestamp
           }))
         });

@@ -20,6 +20,17 @@ export function serializeBlock(block) {
     return block;
   }
 
+  // Sophisticated tracing - log input
+  console.log('🔍 BlockSerializer.serialize INPUT:', {
+    id: block.id,
+    type: block.type,
+    hasContent: 'content' in block,
+    hasMessages: 'messages' in block,
+    hasImages: 'images' in block,
+    hasData: 'data' in block,
+    blockKeys: Object.keys(block)
+  });
+
   // Create a copy to avoid mutating the original
   const serialized = {
     id: block.id,
@@ -121,6 +132,15 @@ export function serializeBlock(block) {
       serialized.content = JSON.stringify(rest);
   }
 
+  // Sophisticated tracing - log output
+  console.log('🔍 BlockSerializer.serialize OUTPUT:', {
+    id: serialized.id,
+    type: serialized.type,
+    position: serialized.position,
+    contentLength: serialized.content?.length,
+    contentPreview: serialized.content?.substring(0, 100)
+  });
+
   return serialized;
 }
 
@@ -132,8 +152,23 @@ export function serializeBlock(block) {
  * @returns {Object} The deserialized block with proper field structure
  */
 export function deserializeBlock(block) {
+  // Sophisticated tracing - log input
+  console.log('🔎 BlockSerializer.deserialize INPUT:', {
+    id: block?.id,
+    type: block?.type,
+    hasContent: 'content' in (block || {}),
+    contentType: typeof block?.content,
+    contentLength: block?.content?.length,
+    blockKeys: Object.keys(block || {})
+  });
+
   if (!block || !block.type) {
-    console.warn('BlockSerializer: Invalid block provided for deserialization', block);
+    console.error('❌ BlockSerializer: CRITICAL - No type field for deserialization!', {
+      block,
+      hasBlock: !!block,
+      blockType: block?.type,
+      blockId: block?.id
+    });
     return block;
   }
 
@@ -162,15 +197,29 @@ export function deserializeBlock(block) {
         break;
 
       case 'ai':
-        // Restore messages array
+        // Restore messages array - handle both old and new formats
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          deserialized.messages = parsed.messages || [];
-          if (parsed.metadata) {
-            deserialized.metadata = { ...deserialized.metadata, ...parsed.metadata };
+          try {
+            const parsed = typeof block.content === 'string' 
+              ? JSON.parse(block.content) 
+              : block.content;
+            deserialized.messages = parsed.messages || [];
+            if (parsed.metadata) {
+              deserialized.metadata = { ...deserialized.metadata, ...parsed.metadata };
+            }
+          } catch (e) {
+            // If content is not JSON, check metadata for messages (legacy format)
+            console.log('🔍 AI block: content not JSON, checking metadata for messages');
+            if (block.metadata?.messages) {
+              deserialized.messages = block.metadata.messages;
+            } else {
+              deserialized.messages = [];
+            }
           }
+        } else if (block.metadata?.messages) {
+          // Legacy format: messages stored in metadata
+          console.log('🔍 AI block: using messages from metadata (legacy format)');
+          deserialized.messages = block.metadata.messages;
         } else {
           deserialized.messages = [];
         }

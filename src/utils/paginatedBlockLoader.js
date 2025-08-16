@@ -10,6 +10,7 @@ export class PaginatedBlockLoader {
     this.cache = new Map(); // documentId -> { pages: Map, totalCount: number }
     this.activeLoads = new Map();
     this.pendingRequests = new Map(); // Track pending requests to deduplicate
+    this.cacheValidityMs = 5 * 60 * 1000; // 5 minutes cache validity (was 5 seconds)
   }
 
   /**
@@ -20,7 +21,7 @@ export class PaginatedBlockLoader {
     const cached = this.cache.get(documentId);
     if (cached && cached.pages.has(0)) {
       const cachedPage = cached.pages.get(0);
-      if (Date.now() - cachedPage.timestamp < 5000) {
+      if (Date.now() - cachedPage.timestamp < this.cacheValidityMs) {
         return {
           blocks: cachedPage.blocks,
           totalCount: cached.totalCount,
@@ -140,7 +141,7 @@ export class PaginatedBlockLoader {
       // Check cache first
       if (docCache && docCache.pages.has(page)) {
         const cachedPage = docCache.pages.get(page);
-        if (Date.now() - cachedPage.timestamp < 5000) {
+        if (Date.now() - cachedPage.timestamp < this.cacheValidityMs) {
           allBlocks.push(...cachedPage.blocks);
           continue;
         }
@@ -174,7 +175,7 @@ export class PaginatedBlockLoader {
       
       if (docCache.pages.has(nextPage)) {
         const cachedPage = docCache.pages.get(nextPage);
-        if (Date.now() - cachedPage.timestamp < 5000) {
+        if (Date.now() - cachedPage.timestamp < this.cacheValidityMs) {
           return; // Already cached and fresh
         }
       }

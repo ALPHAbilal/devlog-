@@ -98,7 +98,8 @@ class OptimizedSupabaseClient {
             'x-client-info': 'journey-log-compass',
             'x-connection-pooling': 'session',
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
+            // Don't set Content-Type globally - let each API set it appropriately
+            // This fixes file uploads which need multipart/form-data
             'Prefer': 'return=representation'
           },
           // Fix QUIC protocol errors by forcing HTTP/2

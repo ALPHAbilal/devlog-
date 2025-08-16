@@ -88,13 +88,13 @@ export function serializeBlock(block) {
     case 'issueTracker':
     case 'issue-tracker':
       // Issue tracker blocks store structured data
-      serialized.content = JSON.stringify({
-        data: block.data || {
-          issues: [],
-          categories: ['Bug', 'Feature', 'Enhancement'],
-          priorities: ['Low', 'Medium', 'High', 'Critical']
+      // The component expects data.milestone and data.issues directly
+      serialized.content = JSON.stringify(
+        block.data || {
+          milestone: '',
+          issues: []
         }
-      });
+      );
       break;
 
     case 'filetree':
@@ -278,16 +278,21 @@ export function deserializeBlock(block) {
           const parsed = typeof block.content === 'string' 
             ? JSON.parse(block.content) 
             : block.content;
-          deserialized.data = parsed.data || {
-            issues: [],
-            categories: ['Bug', 'Feature', 'Enhancement'],
-            priorities: ['Low', 'Medium', 'High', 'Critical']
-          };
+          // Handle both old format (nested data.data) and new format
+          if (parsed.data) {
+            // Old format: content = { data: { milestone, issues } }
+            deserialized.data = parsed.data;
+          } else {
+            // New format: content = { milestone, issues }
+            deserialized.data = parsed;
+          }
+          // Ensure required fields exist
+          if (!deserialized.data.milestone) deserialized.data.milestone = '';
+          if (!deserialized.data.issues) deserialized.data.issues = [];
         } else {
           deserialized.data = {
-            issues: [],
-            categories: ['Bug', 'Feature', 'Enhancement'],
-            priorities: ['Low', 'Medium', 'High', 'Critical']
+            milestone: '',
+            issues: []
           };
         }
         break;

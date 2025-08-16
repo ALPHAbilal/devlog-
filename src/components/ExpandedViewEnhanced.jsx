@@ -309,11 +309,11 @@ const ExpandedView = forwardRef((props, ref) => {
         }
       }
       
-      // Still call onUpdate for UI updates
-      if (onUpdate) {
-        setIsInternalUpdate(true);
-        onUpdate(entry.id, { blocks: updatedBlocks });
-      }
+      // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+      // if (onUpdate) {
+      //   setIsInternalUpdate(true);
+      //   onUpdate(entry.id, { blocks: updatedBlocks });
+      // }
     }
   };
 
@@ -329,10 +329,11 @@ const ExpandedView = forwardRef((props, ref) => {
     
     // Get updated blocks for the parent update
     const updatedBlocks = blocks.filter(block => block && block.id !== blockId);
-    if (onUpdate) {
-      setIsInternalUpdate(true);
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+    // if (onUpdate) {
+    //   setIsInternalUpdate(true);
+    //   onUpdate(entry.id, { blocks: updatedBlocks });
+    // }
   };
 
   const duplicateBlock = (blockId) => {
@@ -351,10 +352,11 @@ const ExpandedView = forwardRef((props, ref) => {
     updatedBlocks.splice(blockIndex + 1, 0, duplicatedBlock);
     
     updateLoadedBlocks(updatedBlocks);
-    if (onUpdate && !isInitialLoadRef.current) {
-      setIsInternalUpdate(true);
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+    // if (onUpdate && !isInitialLoadRef.current) {
+    //   setIsInternalUpdate(true);
+    //   onUpdate(entry.id, { blocks: updatedBlocks });
+    // }
   };
 
   const moveBlock = (blockId, direction) => {
@@ -369,9 +371,10 @@ const ExpandedView = forwardRef((props, ref) => {
     updatedBlocks.splice(newIndex, 0, movedBlock);
     
     updateLoadedBlocks(updatedBlocks);
-    if (onUpdate && !isInitialLoadRef.current) {
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+    // if (onUpdate && !isInitialLoadRef.current) {
+    //   onUpdate(entry.id, { blocks: updatedBlocks });
+    // }
   };
 
   // Auto-scroll during drag
@@ -488,11 +491,11 @@ const ExpandedView = forwardRef((props, ref) => {
       
       // Block state update will trigger re-render automatically
       
-      // Update parent/storage immediately
-      if (onUpdate) {
-        setIsInternalUpdate(true);
-        onUpdate(entry.id, { blocks: updatedBlocks });
-      }
+      // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+      // if (onUpdate) {
+      //   setIsInternalUpdate(true);
+      //   onUpdate(entry.id, { blocks: updatedBlocks });
+      // }
     });
     
     // Clean up drag state after flushSync
@@ -531,9 +534,10 @@ const ExpandedView = forwardRef((props, ref) => {
     });
     
     updateLoadedBlocks(updatedBlocks);
-    if (onUpdate && !isInitialLoadRef.current) {
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+    // if (onUpdate && !isInitialLoadRef.current) {
+    //   onUpdate(entry.id, { blocks: updatedBlocks });
+    // }
   };
 
   const addBlock = (type, afterBlockId = null) => {
@@ -566,9 +570,10 @@ const ExpandedView = forwardRef((props, ref) => {
     }
     
     updateLoadedBlocks(updatedBlocks);
-    if (onUpdate && !isInitialLoadRef.current) {
-      onUpdate(entry.id, { blocks: updatedBlocks });
-    }
+    // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+    // if (onUpdate && !isInitialLoadRef.current) {
+    //   onUpdate(entry.id, { blocks: updatedBlocks });
+    // }
 
     setShowBlockSelector(false);
     setSelectorPosition(null);
@@ -592,9 +597,10 @@ const ExpandedView = forwardRef((props, ref) => {
       updatedBlocks.splice(index + 1, 0, newBlock);
       
       updateLoadedBlocks(updatedBlocks);
-      if (onUpdate && !isInitialLoadRef.current) {
-        onUpdate(entry.id, { blocks: updatedBlocks });
-      }
+      // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+      // if (onUpdate && !isInitialLoadRef.current) {
+      //   onUpdate(entry.id, { blocks: updatedBlocks });
+      // }
     } else {
       // Normal behavior - show block selector
       setSelectorPosition(blockIdOrData);
@@ -1006,9 +1012,10 @@ const ExpandedView = forwardRef((props, ref) => {
                         updatedBlocks.splice(index + 1, 0, newBlock);
                         
                         updateLoadedBlocks(updatedBlocks);
-                        if (onUpdate && !isInitialLoadRef.current) {
-                          onUpdate(entry.id, { blocks: updatedBlocks });
-                        }
+                        // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+                        // if (onUpdate && !isInitialLoadRef.current) {
+                        //   onUpdate(entry.id, { blocks: updatedBlocks });
+                        // }
                       } else {
                         // Show selector
                         handleAddBelowBlock(block.id);

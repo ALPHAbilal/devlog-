@@ -377,8 +377,18 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
     );
   }
   
-  // Initialize with proper defaults
+  // Initialize with proper defaults and log for debugging
   const blockData = block.data || {};
+  
+  // Debug logging to track data flow
+  console.log('🎯 IssueTrackerBlock initialization:', {
+    blockId: block.id,
+    hasData: !!block.data,
+    milestone: blockData.milestone,
+    issuesCount: blockData.issues?.length || 0,
+    rawBlock: block
+  });
+  
   const [milestone, setMilestone] = useState(blockData.milestone || '');
   const [issues, setIssues] = useState(blockData.issues || []);
   const [isEditingMilestone, setIsEditingMilestone] = useState(false);

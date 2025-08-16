@@ -275,20 +275,35 @@ export function deserializeBlock(block) {
       case 'issue-tracker':
         // Restore issue tracker data
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          // Handle both old format (nested data.data) and new format
-          if (parsed.data) {
-            // Old format: content = { data: { milestone, issues } }
-            deserialized.data = parsed.data;
-          } else {
-            // New format: content = { milestone, issues }
-            deserialized.data = parsed;
+          try {
+            const parsed = typeof block.content === 'string' 
+              ? JSON.parse(block.content) 
+              : block.content;
+            
+            // Handle both old format (nested data.data) and new format
+            if (parsed.data && typeof parsed.data === 'object') {
+              // Old format: content = { data: { milestone, issues } }
+              deserialized.data = parsed.data;
+            } else if (parsed.milestone !== undefined || parsed.issues !== undefined) {
+              // New format: content = { milestone, issues }
+              deserialized.data = parsed;
+            } else {
+              // Fallback for unexpected format
+              console.warn('IssueTracker: Unexpected content format', parsed);
+              deserialized.data = { milestone: '', issues: [] };
+            }
+            
+            // Ensure required fields exist with proper defaults
+            if (deserialized.data.milestone === undefined || deserialized.data.milestone === null) {
+              deserialized.data.milestone = '';
+            }
+            if (!Array.isArray(deserialized.data.issues)) {
+              deserialized.data.issues = [];
+            }
+          } catch (e) {
+            console.error('IssueTracker: Failed to parse content', e, block.content);
+            deserialized.data = { milestone: '', issues: [] };
           }
-          // Ensure required fields exist
-          if (!deserialized.data.milestone) deserialized.data.milestone = '';
-          if (!deserialized.data.issues) deserialized.data.issues = [];
         } else {
           deserialized.data = {
             milestone: '',

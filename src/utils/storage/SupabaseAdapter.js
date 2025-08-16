@@ -728,16 +728,43 @@ export class SupabaseAdapter {
     // Retry logic for the optimized function as well
     while (retryCount <= maxRetries && useOptimized) {
       try {
-        // Try the safer save_document_blocks_v3 function that prevents data loss
-        const { error } = await supabase.rpc('save_document_blocks_v3', {
+        // Use the new batch_sync_changes function that prevents deadlocks
+        const changes = blocksToSave.map((block, index) => ({
+          block_id: block.id,
+          content: JSON.stringify(block),
+          action: 'UPDATE', // All saves are updates in this context
+          timestamp: new Date().toISOString(),
+          position: index
+        }));
+        
+        const { error } = await supabase.rpc('batch_sync_changes', {
           p_document_id: savedDoc.id,
-          p_blocks: blocksToSave
+          p_changes: changes
         });
         
         if (error) {
           if (error.message?.includes('function') && error.message?.includes('does not exist')) {
-            console.log('SupabaseAdapter: Optimized function not available, falling back to original');
-            useOptimized = false;
+            console.log('SupabaseAdapter: batch_sync_changes not available, falling back to save_document_blocks_v3');
+            // Fallback to save_document_blocks_v3
+            const { error: fallbackError } = await supabase.rpc('save_document_blocks_v3', {
+              p_document_id: savedDoc.id,
+              p_blocks: blocksToSave
+            });
+            
+            if (fallbackError) {
+              if (fallbackError.message?.includes('function') && fallbackError.message?.includes('does not exist')) {
+                console.log('SupabaseAdapter: Optimized function not available, falling back to original');
+                useOptimized = false;
+                break;
+              } else if (fallbackError.message?.includes('Document not found') && retryCount < maxRetries) {
+                // Document might not be visible yet due to transaction timing
+                console.log(`Document not found error, retrying (${retryCount + 1}/${maxRetries})...`);
+                await new Promise(resolve => setTimeout(resolve, 200 * (retryCount + 1)));
+                retryCount++;
+                continue;
+              }
+              throw fallbackError;
+            }
             break;
           } else if (error.message?.includes('Document not found') && retryCount < maxRetries) {
             // Document might not be visible yet due to transaction timing

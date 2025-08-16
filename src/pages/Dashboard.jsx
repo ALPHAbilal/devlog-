@@ -523,14 +523,24 @@ export default function Dashboard() {
       setExpandedEntry(updatedEntry);
     }
     
+    // MILESTONE 1: Skip block saves - let Smart Sync handle them
+    if (updates.blocks) {
+      console.log('Dashboard: Skipping block save - Smart Sync will handle it');
+      // Don't save blocks through storageWrapper, Smart Sync is already handling this
+      return;
+    }
+    
     // Save only this document to storage - use requestIdleCallback for non-blocking save
     const saveOperation = async () => {
       try {
-        // CRITICAL FIX: Don't send blocks if they weren't in the update
-        // This prevents overwriting blocks with empty array when updating tags/title
-        const documentToSave = updates.blocks !== undefined 
-          ? updatedEntry 
-          : { ...updatedEntry, blocks: undefined };
+        // Only save non-block updates (title, tags, etc.)
+        const documentToSave = { ...updatedEntry, blocks: undefined };
+          
+        console.log('Dashboard: Saving metadata only (no blocks):', {
+          id: documentToSave.id,
+          title: documentToSave.title,
+          hasBlocks: false
+        });
           
         await storageWrapper.saveDocument(documentToSave);
         // Update storage info after save

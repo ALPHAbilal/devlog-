@@ -498,9 +498,9 @@ export class SupabaseAdapter {
     }
     
     // Check if this is a new document
-    // Only consider it new if it has no createdAt (never saved to DB)
-    // The metadata flags alone don't mean it's new - they might just be stale
-    const isNewDocumentForSave = !docData.createdAt && !docData.created_at;
+    // A document is new if it has the isNewDocument flag OR if it has no created_at
+    // The isNewDocument flag is set when creating new documents in Dashboard
+    const isNewDocumentForSave = docData.metadata?.isNewDocument || (!docData.createdAt && !docData.created_at);
     const hasFolderId = docData.folder_id && docData.folder_id !== null;
     
     // Special handling for documents created locally with folders

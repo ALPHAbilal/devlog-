@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { ChevronDown, Plus, X, Check, AlertCircle, Clock, Code, Target, Trash2 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 import TimelineBranch, { VerticalConnector } from './TimelineBranch';
@@ -577,4 +577,12 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
   );
 };
 
-export default IssueTrackerBlock;
+// Memoize IssueTrackerBlock to prevent unnecessary re-renders
+export default memo(IssueTrackerBlock, (prevProps, nextProps) => {
+  // Only re-render if these props actually change
+  return (
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.data === nextProps.block.data &&
+    prevProps.isFocused === nextProps.isFocused
+  );
+});

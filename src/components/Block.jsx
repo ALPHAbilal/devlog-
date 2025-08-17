@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
 import AIBlock from './blocks/AIBlockRefined';
@@ -29,7 +29,7 @@ const blockComponents = {
   'issue-tracker': IssueTrackerBlock,
 };
 
-export default function Block({ 
+function Block({ 
   block, 
   onUpdate, 
   onDelete, 
@@ -261,3 +261,23 @@ export default function Block({
     </>
   );
 }
+
+// Memoize Block component to prevent unnecessary re-renders
+export default memo(Block, (prevProps, nextProps) => {
+  // Re-render only if these specific props change
+  return (
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.data === nextProps.block.data &&
+    prevProps.block.content === nextProps.block.content &&
+    prevProps.block.type === nextProps.block.type &&
+    prevProps.isFocused === nextProps.isFocused &&
+    prevProps.showAddButton === nextProps.showAddButton &&
+    prevProps.canMoveUp === nextProps.canMoveUp &&
+    prevProps.canMoveDown === nextProps.canMoveDown &&
+    prevProps.index === nextProps.index &&
+    prevProps.draggedBlockId === nextProps.draggedBlockId &&
+    prevProps.isDraggedBlock === nextProps.isDraggedBlock &&
+    prevProps.isDropTarget === nextProps.isDropTarget &&
+    prevProps.dropPosition === nextProps.dropPosition
+  );
+});

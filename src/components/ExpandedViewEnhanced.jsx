@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, startTransition, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition, useMemo } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
 import Block from './Block';
@@ -21,16 +21,15 @@ import BlockErrorBoundary from './BlockErrorBoundary';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
-const ExpandedView = forwardRef((props, ref) => {
-  const {
-    entry,
-    onClose,
-    onUpdate,
-    allEntries = [],
-    isMobileView = false,
-    scrollContainerRef: externalScrollRef,
-    onShowBlockSelector
-  } = props;
+export default function ExpandedView({
+  entry,
+  onClose,
+  onUpdate,
+  allEntries = [],
+  isMobileView = false,
+  scrollContainerRef: externalScrollRef,
+  onShowBlockSelector
+}) {
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
   
@@ -63,7 +62,8 @@ const ExpandedView = forwardRef((props, ref) => {
   } = loader;
   
   // We'll use loadedBlocks directly instead of duplicating state
-  const blocks = loadedBlocks || [];
+  // Memoize blocks array to prevent unnecessary re-renders
+  const blocks = useMemo(() => loadedBlocks || [], [loadedBlocks]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
   const [title, setTitle] = useState(entry.title);
@@ -97,22 +97,7 @@ const ExpandedView = forwardRef((props, ref) => {
   const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
   const smartSyncManagerRef = useRef(null);
 
-  // Expose methods to parent component via ref
-  useImperativeHandle(ref, () => ({
-    handleShare: () => {
-      setShowShareDialog(true);
-    },
-    handleDelete: () => {
-      setShowDeleteConfirm(true);
-    },
-    handleViewModeChange: (mode) => {
-      if (mode === 'toggle') {
-        setViewMode(prev => prev === 'blocks' ? 'lines' : 'blocks');
-      } else {
-        setViewMode(mode);
-      }
-    }
-  }));
+  // Methods for share, delete, and view mode are now handled internally
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
   useEffect(() => {
@@ -212,7 +197,7 @@ const ExpandedView = forwardRef((props, ref) => {
   }, [entry.title, allEntries]);
 
 
-  const updateBlock = (blockId, updates) => {
+  const updateBlock = useCallback((blockId, updates) => {
     // Add defensive check for blockId
     if (!blockId || !updates) {
       console.warn('updateBlock called with invalid parameters:', { blockId, updates });
@@ -321,9 +306,9 @@ const ExpandedView = forwardRef((props, ref) => {
       //   onUpdate(entry.id, { blocks: updatedBlocks });
       // }
     }
-  };
+  }, [blocks, updateSingleBlock]);
 
-  const deleteBlock = (blockId) => {
+  const deleteBlock = useCallback((blockId) => {
     // Defensive check
     if (!blockId) {
       console.warn('deleteBlock called with invalid blockId:', blockId);
@@ -351,9 +336,9 @@ const ExpandedView = forwardRef((props, ref) => {
     //   setIsInternalUpdate(true);
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
-  };
+  }, [removeBlock]);
 
-  const duplicateBlock = (blockId) => {
+  const duplicateBlock = useCallback((blockId) => {
     const blockIndex = blocks.findIndex(b => b.id === blockId);
     if (blockIndex === -1) return;
     
@@ -398,9 +383,9 @@ const ExpandedView = forwardRef((props, ref) => {
     //   setIsInternalUpdate(true);
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
-  };
+  }, [blocks, updateLoadedBlocks]);
 
-  const moveBlock = (blockId, direction) => {
+  const moveBlock = useCallback((blockId, direction) => {
     const blockIndex = blocks.findIndex(b => b.id === blockId);
     if (blockIndex === -1) return;
     
@@ -429,7 +414,7 @@ const ExpandedView = forwardRef((props, ref) => {
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
-  };
+  }, [blocks, updateLoadedBlocks]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {
@@ -574,7 +559,7 @@ const ExpandedView = forwardRef((props, ref) => {
     stopAutoScroll();
   };
 
-  const convertBlock = (blockId, newType, meta = {}) => {
+  const convertBlock = useCallback((blockId, newType, meta = {}) => {
     const updatedBlocks = blocks.map(block => {
       if (block.id === blockId) {
         // Preserve content if possible
@@ -619,9 +604,9 @@ const ExpandedView = forwardRef((props, ref) => {
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
-  };
+  }, [blocks, updateLoadedBlocks]);
 
-  const addBlock = (type, afterBlockId = null) => {
+  const addBlock = useCallback((type, afterBlockId = null) => {
     // Calculate position for the new block
     let position;
     if (afterBlockId) {
@@ -697,9 +682,9 @@ const ExpandedView = forwardRef((props, ref) => {
 
     setShowBlockSelector(false);
     setSelectorPosition(null);
-  };
+  }, [blocks, updateLoadedBlocks, focusedBlockId]);
 
-  const handleAddBelowBlock = (blockIdOrData) => {
+  const handleAddBelowBlock = useCallback((blockIdOrData) => {
     // If a block object is passed (from TextBlock paste), create it directly
     if (typeof blockIdOrData === 'object' && blockIdOrData.type) {
       // Find the TextBlock that called this function
@@ -751,12 +736,12 @@ const ExpandedView = forwardRef((props, ref) => {
       setSelectorPosition(blockIdOrData);
       setShowBlockSelector(true);
     }
-  };
+  }, [blocks, updateLoadedBlocks, focusedBlockId]);
 
-  const handleAddAtEnd = () => {
+  const handleAddAtEnd = useCallback(() => {
     setSelectorPosition('end');
     setShowBlockSelector(true);
-  };
+  }, []);
 
   // Helper function for saving with status updates
   const saveWithStatus = async (updates, description = 'changes') => {
@@ -1623,8 +1608,4 @@ const ExpandedView = forwardRef((props, ref) => {
       <ScrollToTop scrollContainerRef={scrollContainerRef} />
     </>
   );
-});
-
-ExpandedView.displayName = 'ExpandedView';
-
-export default ExpandedView;
+}

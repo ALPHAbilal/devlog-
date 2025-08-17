@@ -445,11 +445,4 @@ export default memo(TodoBlock, (prevProps, nextProps) => {
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.data?.todos === nextProps.block.data?.todos;
   
-  console.log(`✅ TodoBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    todosSame: prevProps.block.data?.todos === nextProps.block.data?.todos,
-    willPreventRerender
-  });
-  
-  return willPreventRerender;
 });

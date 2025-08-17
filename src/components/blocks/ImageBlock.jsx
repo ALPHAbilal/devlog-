@@ -520,13 +520,6 @@ export default memo(ImageBlock, (prevProps, nextProps) => {
     prevProps.block.metadata?.layout === nextProps.block.metadata?.layout &&
     prevProps.isFocused === nextProps.isFocused;
   
-  console.log(`🌆 ImageBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    imagesSame: prevProps.block.images === nextProps.block.images,
-    layoutSame: prevProps.block.metadata?.layout === nextProps.block.metadata?.layout,
-    isFocusedSame: prevProps.isFocused === nextProps.isFocused,
-    willPreventRerender
-  });
   
   return willPreventRerender;
 });

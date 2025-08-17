@@ -719,21 +719,11 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
 
 // Memoize TextBlock to prevent unnecessary re-renders
 export default memo(TextBlock, (prevProps, nextProps) => {
-  const willPreventRerender = 
+  return (
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.content === nextProps.block.content &&
     prevProps.block.isNew === nextProps.block.isNew &&
     prevProps.block.metadata?.isCollapsed === nextProps.block.metadata?.isCollapsed &&
-    prevProps.isFocused === nextProps.isFocused;
-  
-  console.log(`📝 TextBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    contentSame: prevProps.block.content === nextProps.block.content,
-    isNewSame: prevProps.block.isNew === nextProps.block.isNew,
-    isCollapsedSame: prevProps.block.metadata?.isCollapsed === nextProps.block.metadata?.isCollapsed,
-    isFocusedSame: prevProps.isFocused === nextProps.isFocused,
-    willPreventRerender
-  });
-  
-  return willPreventRerender;
+    prevProps.isFocused === nextProps.isFocused
+  );
 });

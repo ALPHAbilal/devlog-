@@ -436,18 +436,18 @@ export default function ExpandedView({
   };
 
   // Drag and drop handlers
-  const handleDragStart = (blockId) => {
+  const handleDragStart = useCallback((blockId) => {
     setDraggedBlockId(blockId);
-  };
+  }, []);
 
-  const handleDragEnd = () => {
+  const handleDragEnd = useCallback(() => {
     setDraggedBlockId(null);
     setDropTargetId(null);
     setDropPosition('after');
     stopAutoScroll();
-  };
+  }, [stopAutoScroll]);
 
-  const handleDragOver = (e, blockId) => {
+  const handleDragOver = useCallback((e, blockId) => {
     e.preventDefault();
     
     // Auto-scroll detection
@@ -476,9 +476,9 @@ export default function ExpandedView({
     }
     
     setDropTargetId(blockId);
-  };
+  }, [startAutoScroll, stopAutoScroll]);
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = useCallback((e) => {
     // Only clear if leaving the entire block area
     if (e.relatedTarget && e.currentTarget && e.relatedTarget instanceof Node && !e.currentTarget.contains(e.relatedTarget)) {
       setDropTargetId(null);
@@ -486,9 +486,9 @@ export default function ExpandedView({
       // If relatedTarget is null (mouse left the document), clear the drop target
       setDropTargetId(null);
     }
-  };
+  }, []);
 
-  const handleDrop = (draggedId, targetId) => {
+  const handleDrop = useCallback((draggedId, targetId) => {
     
     if (draggedId === targetId) return;
     
@@ -557,7 +557,7 @@ export default function ExpandedView({
     });
     
     stopAutoScroll();
-  };
+  }, [blocks, updateLoadedBlocks, dropPosition, stopAutoScroll]);
 
   const convertBlock = useCallback((blockId, newType, meta = {}) => {
     const updatedBlocks = blocks.map(block => {
@@ -742,6 +742,44 @@ export default function ExpandedView({
     setSelectorPosition('end');
     setShowBlockSelector(true);
   }, []);
+
+  // Memoized callback for inline block addition from Block component
+  const handleInlineBlockAdd = useCallback((blockIndex, data) => {
+    if (typeof data === 'object' && data.type) {
+      // Direct block creation from TextBlock
+      const newBlock = {
+        id: crypto.randomUUID(),
+        ...data,
+        position: blockIndex + 1,
+        created_at: Date.now(),
+        createdAt: data.createdAt || new Date().toISOString()
+      };
+      
+      const updatedBlocks = [...blocks];
+      updatedBlocks.splice(blockIndex + 1, 0, newBlock);
+      
+      // Update positions for all blocks after the insertion point
+      for (let i = blockIndex + 2; i < updatedBlocks.length; i++) {
+        updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+      }
+      
+      updateLoadedBlocks(updatedBlocks);
+      
+      // CRITICAL FIX: Call Smart Sync for inline new block
+      if (smartSyncManagerRef.current) {
+        smartSyncManagerRef.current.handleChange(
+          newBlock.id,
+          JSON.stringify(newBlock),
+          'CREATE'
+        ).catch(error => {
+          console.error('Smart Sync inline add error:', error);
+        });
+      }
+    } else {
+      // Show selector
+      handleAddBelowBlock(data);
+    }
+  }, [blocks, updateLoadedBlocks, handleAddBelowBlock]);
 
   // Helper function for saving with status updates
   const saveWithStatus = async (updates, description = 'changes') => {
@@ -1159,47 +1197,7 @@ export default function ExpandedView({
                       canMoveUp={index > 0}
                       canMoveDown={index < blocks.length - 1}
                       isMobileView={isMobileView}
-                      onAddBelow={(data) => {
-                      if (typeof data === 'object' && data.type) {
-                        // Direct block creation from TextBlock
-                        const newBlock = {
-                          id: crypto.randomUUID(),
-                          ...data,
-                          position: index + 1, // Add position field
-                          created_at: Date.now(), // Add created_at timestamp
-                          createdAt: data.createdAt || new Date().toISOString()
-                        };
-                        
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks.splice(index + 1, 0, newBlock);
-                        
-                        // Update positions for all blocks after the insertion point
-                        for (let i = index + 2; i < updatedBlocks.length; i++) {
-                          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
-                        }
-                        
-                        updateLoadedBlocks(updatedBlocks);
-                        
-                        // CRITICAL FIX: Call Smart Sync for inline new block
-                        if (smartSyncManagerRef.current) {
-                          smartSyncManagerRef.current.handleChange(
-                            newBlock.id,
-                            JSON.stringify(newBlock),
-                            'CREATE'
-                          ).catch(error => {
-                            console.error('Smart Sync inline add error:', error);
-                          });
-                        }
-                        
-                        // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
-                        // if (onUpdate && !isInitialLoadRef.current) {
-                        //   onUpdate(entry.id, { blocks: updatedBlocks });
-                        // }
-                      } else {
-                        // Show selector
-                        handleAddBelowBlock(block.id);
-                      }
-                    }}
+                      onAddBelow={(data) => handleInlineBlockAdd(index, data)}
                     onConvert={convertBlock}
                     showAddButton={true}
                     isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}

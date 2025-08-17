@@ -743,13 +743,6 @@ function AIBlock({ block, onUpdate }) {
 
 // Memoize AIBlock to prevent unnecessary re-renders
 export default memo(AIBlock, (prevProps, nextProps) => {
-  console.log(`🤖 AIBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    messagesSame: prevProps.block.messages === nextProps.block.messages,
-    willPreventRerender: prevProps.block.id === nextProps.block.id &&
-                         prevProps.block.messages === nextProps.block.messages
-  });
-  
   return (
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.messages === nextProps.block.messages &&

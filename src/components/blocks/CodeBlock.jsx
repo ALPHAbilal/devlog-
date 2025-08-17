@@ -617,13 +617,6 @@ export default memo(CodeBlock, (prevProps, nextProps) => {
     prevProps.block.filePath === nextProps.block.filePath &&
     prevProps.block.isNew === nextProps.block.isNew;
   
-  console.log(`💻 CodeBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    contentSame: prevProps.block.content === nextProps.block.content,
-    languageSame: prevProps.block.language === nextProps.block.language,
-    filePathSame: prevProps.block.filePath === nextProps.block.filePath,
-    isNewSame: prevProps.block.isNew === nextProps.block.isNew,
-    willPreventRerender
   });
   
   return willPreventRerender;

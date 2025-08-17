@@ -781,11 +781,5 @@ export default memo(FileTreeBlock, (prevProps, nextProps) => {
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.data === nextProps.block.data;
   
-  console.log(`📁 FileTreeBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    dataSame: prevProps.block.data === nextProps.block.data,
-    willPreventRerender
-  });
-  
   return willPreventRerender;
 });

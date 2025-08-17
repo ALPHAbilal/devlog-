@@ -129,13 +129,6 @@ export default memo(HeadingBlock, (prevProps, nextProps) => {
     prevProps.block.level === nextProps.block.level &&
     prevProps.block.isNew === nextProps.block.isNew;
   
-  console.log(`📌 HeadingBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    contentSame: prevProps.block.content === nextProps.block.content,
-    levelSame: prevProps.block.level === nextProps.block.level,
-    isNewSame: prevProps.block.isNew === nextProps.block.isNew,
-    willPreventRerender
-  });
   
   return willPreventRerender;
 });

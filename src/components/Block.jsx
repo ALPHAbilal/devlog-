@@ -264,20 +264,33 @@ function Block({
 
 // Memoize Block component to prevent unnecessary re-renders
 export default memo(Block, (prevProps, nextProps) => {
+  // Check if focus state changed for THIS specific block
+  const prevWasFocused = prevProps.isFocused === prevProps.block.id;
+  const nextIsFocused = nextProps.isFocused === nextProps.block.id;
+  const focusChanged = prevWasFocused !== nextIsFocused;
+  
+  // If focus changed for this block, we need to re-render
+  if (focusChanged) return false;
+  
+  // Check if this block is involved in drag operations
+  const prevIsDragged = prevProps.draggedBlockId === prevProps.block.id;
+  const nextIsDragged = nextProps.draggedBlockId === nextProps.block.id;
+  const prevIsDropTarget = prevProps.dropTargetId === prevProps.block.id;
+  const nextIsDropTarget = nextProps.dropTargetId === nextProps.block.id;
+  
   // Re-render only if these specific props change
   return (
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.data === nextProps.block.data &&
     prevProps.block.content === nextProps.block.content &&
     prevProps.block.type === nextProps.block.type &&
-    prevProps.isFocused === nextProps.isFocused &&
     prevProps.showAddButton === nextProps.showAddButton &&
     prevProps.canMoveUp === nextProps.canMoveUp &&
     prevProps.canMoveDown === nextProps.canMoveDown &&
     prevProps.index === nextProps.index &&
-    prevProps.draggedBlockId === nextProps.draggedBlockId &&
-    prevProps.isDraggedBlock === nextProps.isDraggedBlock &&
-    prevProps.isDropTarget === nextProps.isDropTarget &&
-    prevProps.dropPosition === nextProps.dropPosition
+    prevIsDragged === nextIsDragged &&
+    prevIsDropTarget === nextIsDropTarget &&
+    prevProps.dropPosition === nextProps.dropPosition &&
+    prevProps.dropTargetId === nextProps.dropTargetId
   );
 });

@@ -2227,12 +2227,5 @@ export default memo(VersionTrackBlock, (prevProps, nextProps) => {
     prevProps.block.data === nextProps.block.data &&
     prevProps.isActive === nextProps.isActive;
   
-  console.log(`📊 VersionTrackBlock ${prevProps.block.id} memo check:`, {
-    idSame: prevProps.block.id === nextProps.block.id,
-    dataSame: prevProps.block.data === nextProps.block.data,
-    isActiveSame: prevProps.isActive === nextProps.isActive,
-    willPreventRerender
-  });
-  
   return willPreventRerender;
 });

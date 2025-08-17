@@ -7,7 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "flow:init": "npx claude-flow@alpha init --force",
+    "flow:hive": "npx claude-flow@alpha hive-mind wizard",
+    "flow:swarm": "npx claude-flow@alpha swarm",
+    "flow:memory": "npx claude-flow@alpha memory stats",
+    "flow:help": "npx claude-flow@alpha --help",
+    "flow:status": "npx claude-flow@alpha hive-mind status",
+    "flow:spawn": "npx claude-flow@alpha hive-mind spawn"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",

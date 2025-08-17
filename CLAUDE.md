@@ -1,252 +1,272 @@
-# CLAUDE.md
+# Claude Code Configuration - SPARC Development Environment
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
+
+**ABSOLUTE RULES**:
+1. ALL operations MUST be concurrent/parallel in a single message
+2. **NEVER save working files, text/mds and tests to the root folder**
+3. ALWAYS organize files in appropriate subdirectories
+
+### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
+
+**MANDATORY PATTERNS:**
+- **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
+- **Task tool**: ALWAYS spawn ALL agents in ONE message with full instructions
+- **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
+- **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
+- **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
+
+### 📁 File Organization Rules
+
+**NEVER save to root folder. Use these directories:**
+- `/src` - Source code files
+- `/tests` - Test files
+- `/docs` - Documentation and markdown files
+- `/config` - Configuration files
+- `/scripts` - Utility scripts
+- `/examples` - Example code
 
 ## Project Overview
 
-Devlog (Journey Log Compass) is a developer-focused knowledge management system - a block-based documentation platform where developers capture, organize, and interconnect their learning journey. Built with React 19, Vite, and Supabase.
+This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
 
-## Development Commands
+## SPARC Commands
 
-```bash
-# Install dependencies
-npm install
+### Core Commands
+- `npx claude-flow sparc modes` - List available modes
+- `npx claude-flow sparc run <mode> "<task>"` - Execute specific mode
+- `npx claude-flow sparc tdd "<feature>"` - Run complete TDD workflow
+- `npx claude-flow sparc info <mode>` - Get mode details
 
-# Start development server
-npm run dev
+### Batchtools Commands
+- `npx claude-flow sparc batch <modes> "<task>"` - Parallel execution
+- `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
+- `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
 
-# Build for production
-npm run build
+### Build Commands
+- `npm run build` - Build project
+- `npm run test` - Run tests
+- `npm run lint` - Linting
+- `npm run typecheck` - Type checking
 
-# Run linter
-npm run lint
+## SPARC Workflow Phases
 
-# Preview production build
-npm run preview
+1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
+2. **Pseudocode** - Algorithm design (`sparc run spec-pseudocode`)
+3. **Architecture** - System design (`sparc run architect`)
+4. **Refinement** - TDD implementation (`sparc tdd`)
+5. **Completion** - Integration (`sparc run integration`)
 
-# Run tests (Vitest configured but no npm script)
-npx vitest
-```
+## Code Style & Best Practices
 
-## High-Level Architecture
+- **Modular Design**: Files under 500 lines
+- **Environment Safety**: Never hardcode secrets
+- **Test-First**: Write tests before implementation
+- **Clean Architecture**: Separate concerns
+- **Documentation**: Keep updated
 
-### Storage Architecture (Critical to Understand)
+## 🚀 Available Agents (54 Total)
 
-The app uses a multi-layer storage system with automatic fallback:
+### Core Development
+`coder`, `reviewer`, `tester`, `planner`, `researcher`
 
-1. **Supabase** (primary) - Cloud storage with RLS
-2. **IndexedDB** (fallback) - 1GB+ local storage with compression
-3. **LocalStorage** (last resort) - 5-10MB limit
+### Swarm Coordination
+`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
 
-Key files:
-- `src/utils/storage/storageWrapper.js` - Orchestrates storage adapters
-- `src/utils/storage/SupabaseAdapter.js` - Database operations
-- `src/utils/storage/IndexedDBAdapter.js` - Local storage with LZ-String compression
+### Consensus & Distributed
+`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
 
-### Block System Architecture
+### Performance & Optimization
+`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
 
-Documents are composed of blocks. Each block type has:
-- A component in `src/components/blocks/`
-- Data persistence handling in storage adapters
-- Type-specific metadata stored in JSONB
+### GitHub & Repository
+`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
 
-Current block types:
-- `text` - Markdown with inline tags/images
-- `code` - Syntax highlighting, file paths, version tracking
-- `table` - Dynamic tables with drag-and-drop
-- `ai` - AI conversation preservation
-- `filetree` - Visual project structure
-- `todo` - Task lists
-- `heading` - Document structure
-- `image` - Multi-image galleries
-- `inline-image` - Images within text blocks
+### SPARC Methodology
+`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
 
-### Critical Data Flow
+### Specialized Development
+`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
 
-1. **Document Loading**:
-   - `Dashboard.jsx` → `ExpandedViewEnhanced.jsx`
-   - Uses `useOptimizedBlockLoader` (single query) or `usePaginatedBlockLoader` (50+ blocks)
-   - 5-second cache for fast navigation
+### Testing & Validation
+`tdd-london-swarm`, `production-validator`
 
-2. **Block Saving**:
-   - Auto-save after 3 seconds of inactivity
-   - Local backup before each save attempt
-   - Atomic save via `save_document_blocks_v3` PostgreSQL function
-   - Retry logic with exponential backoff
+### Migration & Planning
+`migration-planner`, `swarm-init`
 
-3. **Block Data Persistence** (⚠️ CRITICAL):
-   - Block-specific data stored in `metadata` JSONB column
-   - Must update ALL transform functions when adding block types:
-     - `SupabaseAdapter.js` → `extractBlockData()` & `transformBlockFromDB()`
-     - `optimizedBlockLoader.js` → `transformBlockFromDB()`
-     - `blockStreamer.js` → `transformBlockFromDB()`
+## 🎯 Claude Code vs MCP Tools
 
-### Authentication & Security
+### Claude Code Handles ALL:
+- File operations (Read, Write, Edit, MultiEdit, Glob, Grep)
+- Code generation and programming
+- Bash commands and system operations
+- Implementation work
+- Project navigation and analysis
+- TodoWrite and task management
+- Git operations
+- Package management
+- Testing and debugging
 
-- Supabase Auth with email/password
-- Session stored in localStorage: `journey-log-auth`
-- Row Level Security (RLS) ensures data isolation
-- All database operations check `auth.uid()`
+### MCP Tools ONLY:
+- Coordination and planning
+- Memory management
+- Neural features
+- Performance tracking
+- Swarm orchestration
+- GitHub integration
 
-### Performance Optimizations
+**KEY**: MCP coordinates, Claude Code executes.
 
-1. **Virtualized Rendering** - Document grid handles thousands of items
-2. **Debounced Auto-save** - Prevents rapid save cascades
-3. **Skeleton Loading** - Content-aware placeholders
-4. **Session Caching** - Reduces auth calls
-5. **Event-driven Updates** - No polling, uses event listeners
-
-## Database Schema
-
-### Core Tables
-- `documents` - Metadata (title, tags, user_id)
-- `blocks` - Content (type, content, metadata JSONB, position)
-- `profiles` - User data
-- `document_links` - Inter-document connections
-- `images` - Image storage references
-
-### Key Patterns
-- Soft deletes via `deleted_at` column
-- Atomic saves via PostgreSQL functions
-- JSONB for extensible metadata
-- Position-based block ordering
-
-## Common Development Tasks
-
-### Adding a New Block Type
-
-1. Create component in `src/components/blocks/NewBlock.jsx`
-2. Add to `BLOCK_COMPONENTS` in `Block.jsx`
-3. Update block selector in `AddBlockRow.jsx`
-4. **CRITICAL**: Update ALL transform functions:
-   ```javascript
-   // In SupabaseAdapter.js, optimizedBlockLoader.js, blockStreamer.js
-   if (block.type === 'newtype' && block.metadata.customData) {
-     baseBlock.customData = block.metadata.customData;
-   }
-   ```
-5. Update database constraint:
-   ```sql
-   ALTER TABLE blocks DROP CONSTRAINT blocks_type_check;
-   ALTER TABLE blocks ADD CONSTRAINT blocks_type_check 
-   CHECK (type = ANY (ARRAY['text', 'code', 'heading', 'ai', 'table', 
-                            'filetree', 'todo', 'image', 'inline-image', 'newtype']));
-   ```
-
-### Debugging Save Issues
-
-1. Check browser console for auto-save logs
-2. Verify `block.id` is included in all updates
-3. Check Supabase logs for RLS violations
-4. Ensure partial updates set `blocks: undefined` (not empty array)
-
-### Running Database Migrations
-
-1. **ALWAYS backup first**:
-   ```sql
-   CREATE TABLE blocks_backup_$(date +%Y%m%d) AS SELECT * FROM blocks;
-   ```
-2. Test on Supabase branch first
-3. Use transactions for safety
-4. Run in Supabase SQL Editor
-
-## Bulletproof Architecture (6-Layer Protection)
-
-The app includes comprehensive error handling to prevent data loss:
-
-1. **Error Boundaries** - Catch React errors, provide recovery UI
-2. **Data Integrity** - SHA-256 checksums, 5 snapshots per document
-3. **Lock Manager** - Prevent race conditions across tabs
-4. **Transactions** - ACID-like guarantees, automatic rollback
-5. **Circuit Breaker** - Network resilience, request queuing
-6. **Recovery System** - Auto-save every 30s, crash detection
-
-Monitoring shortcuts:
-- `Cmd/Ctrl + Shift + P` - Performance monitor
-- `Cmd/Ctrl + Shift + H` - System health monitor
-
-## Critical Production Safety
-
-### Pre-deployment Checklist
-```bash
-# 1. Test production build locally
-npm run build && npm run preview
-
-# 2. Check for breaking changes
-git diff main -- '*.jsx' '*.js' | grep -E "(localStorage|route|api)"
-
-# 3. Test responsive breakpoints
-# 375px (mobile), 768px (tablet), 1024px (desktop)
-```
-
-### Database Migration Safety
-```sql
--- NEVER run these in production:
--- TRUNCATE TABLE blocks;
--- DROP TABLE documents CASCADE;
--- DELETE FROM blocks; (without WHERE)
-
--- Safe pattern:
-BEGIN;
-  -- Your migration
-  SELECT COUNT(*) FROM blocks; -- Verify data intact
-COMMIT; -- or ROLLBACK if wrong
-```
-
-### Common Pitfalls
-1. **CSS purging** - Safelist critical Tailwind utilities
-2. **Auth key changes** - Will log out all users
-3. **Route changes** - Add redirects in vercel.json
-4. **Empty blocks array** - Deletes all document content
-
-## Environment Variables
+## 🚀 Quick Setup
 
 ```bash
-VITE_SUPABASE_URL=https://[project-ref].supabase.co
-VITE_SUPABASE_ANON_KEY=[anon-key]
-
-# Optional Sentry monitoring
-SENTRY_DSN=[dsn]
-SENTRY_ORG=[org]
-SENTRY_PROJECT=[project]
+# Add Claude Flow MCP server
+claude mcp add claude-flow npx claude-flow@alpha mcp start
 ```
 
-## Recent Critical Fixes (January 2025)
+## MCP Tool Categories
 
-1. **Tag Save Data Loss** - Fixed by detecting partial updates in SupabaseAdapter
-2. **Document Link Navigation** - Fixed title update in ExpandedViewEnhanced
-3. **Block Data Persistence** - Added comprehensive metadata handling for all block types
-4. **Multi-Image Support** - ImageBlock now supports galleries with backward compatibility
+### Coordination
+`swarm_init`, `agent_spawn`, `task_orchestrate`
 
-## Quick Reference
+### Monitoring
+`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
 
-- **Main Editor**: `src/components/ExpandedViewEnhanced.jsx`
-- **Block Container**: `src/components/Block.jsx`
-- **Storage Logic**: `src/utils/storage/SupabaseAdapter.js`
-- **Auto-save**: `src/utils/autoSaveManager.js`
-- **Dashboard**: `src/pages/Dashboard.jsx`
-- **Auth Flow**: `src/contexts/AuthContext.jsx`
+### Memory & Neural
+`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
 
-## Test-First Development Approach
+### GitHub Integration
+`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
 
-When implementing new features:
-1. Create test scripts first
-2. Test independently to verify functionality
-3. Only integrate after successful testing
-4. Wait for user confirmation before integration
+### System
+`benchmark_run`, `features_detect`, `swarm_monitor`
 
+## 📋 Agent Coordination Protocol
 
+### Every Agent MUST:
 
-## Plan & Review
+**1️⃣ BEFORE Work:**
+```bash
+npx claude-flow@alpha hooks pre-task --description "[task]"
+npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
+```
 
-### Before starting work
-- Always in plan mode to make a plan
-- After get the plan, make sure you Write the plan to .claude/tasks/TASK_NAME.md.
-- The plan should be a detailed implementation plan and the reasoning behind them, as well as tasks broken down.
-- If the task require external knowledge or certain package, also research to get latest knowledge (Use Task tool for research)
-- Don't over plan it, always think MVP.
-- Once you write the plan, firstly ask me to review it. Do not continue until I approve the plan.
+**2️⃣ DURING Work:**
+```bash
+npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
+npx claude-flow@alpha hooks notify --message "[what was done]"
+```
 
-### While implementing
-- You should update the plan as you work.
-- After you complete tasks in the plan, you should update and append detailed descriptions of the changes you made, so following tasks can be easily hand over to other engineers.
+**3️⃣ AFTER Work:**
+```bash
+npx claude-flow@alpha hooks post-task --task-id "[task]"
+npx claude-flow@alpha hooks session-end --export-metrics true
+```
+
+## 🎯 Concurrent Execution Examples
+
+### ✅ CORRECT (Single Message):
+```javascript
+[BatchTool]:
+  // Initialize swarm
+  mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
+  mcp__claude-flow__agent_spawn { type: "researcher" }
+  mcp__claude-flow__agent_spawn { type: "coder" }
+  mcp__claude-flow__agent_spawn { type: "tester" }
+  
+  // Spawn agents with Task tool
+  Task("Research agent: Analyze requirements...")
+  Task("Coder agent: Implement features...")
+  Task("Tester agent: Create test suite...")
+  
+  // Batch todos
+  TodoWrite { todos: [
+    {id: "1", content: "Research", status: "in_progress", priority: "high"},
+    {id: "2", content: "Design", status: "pending", priority: "high"},
+    {id: "3", content: "Implement", status: "pending", priority: "high"},
+    {id: "4", content: "Test", status: "pending", priority: "medium"},
+    {id: "5", content: "Document", status: "pending", priority: "low"}
+  ]}
+  
+  // File operations
+  Bash "mkdir -p app/{src,tests,docs}"
+  Write "app/src/index.js"
+  Write "app/tests/index.test.js"
+  Write "app/docs/README.md"
+```
+
+### ❌ WRONG (Multiple Messages):
+```javascript
+Message 1: mcp__claude-flow__swarm_init
+Message 2: Task("agent 1")
+Message 3: TodoWrite { todos: [single todo] }
+Message 4: Write "file.js"
+// This breaks parallel coordination!
+```
+
+## Performance Benefits
+
+- **84.8% SWE-Bench solve rate**
+- **32.3% token reduction**
+- **2.8-4.4x speed improvement**
+- **27+ neural models**
+
+## Hooks Integration
+
+### Pre-Operation
+- Auto-assign agents by file type
+- Validate commands for safety
+- Prepare resources automatically
+- Optimize topology by complexity
+- Cache searches
+
+### Post-Operation
+- Auto-format code
+- Train neural patterns
+- Update memory
+- Analyze performance
+- Track token usage
+
+### Session Management
+- Generate summaries
+- Persist state
+- Track metrics
+- Restore context
+- Export workflows
+
+## Advanced Features (v2.0.0)
+
+- 🚀 Automatic Topology Selection
+- ⚡ Parallel Execution (2.8-4.4x speed)
+- 🧠 Neural Training
+- 📊 Bottleneck Analysis
+- 🤖 Smart Auto-Spawning
+- 🛡️ Self-Healing Workflows
+- 💾 Cross-Session Memory
+- 🔗 GitHub Integration
+
+## Integration Tips
+
+1. Start with basic swarm init
+2. Scale agents gradually
+3. Use memory for context
+4. Monitor progress regularly
+5. Train patterns from success
+6. Enable hooks automation
+7. Use GitHub tools first
+
+## Support
+
+- Documentation: https://github.com/ruvnet/claude-flow
+- Issues: https://github.com/ruvnet/claude-flow/issues
+
+---
+
+Remember: **Claude Flow coordinates, Claude Code creates!**
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+Never save working files, text/mds and tests to the root folder.

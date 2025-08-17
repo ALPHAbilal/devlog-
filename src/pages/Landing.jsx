@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect, useRef } from 'react';
+import { useState, lazy, Suspense, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
@@ -9,7 +9,9 @@ import HowItWorksVideo from '../components/HowItWorksVideo';
 import { DemoModeProvider } from '../contexts/DemoModeContext';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover, featureReveal, tiltEffect } from '../utils/animations';
+import { throttle } from '../utils/performance';
 import NoiseOverlay from '../components/NoiseOverlay';
+import LandingPerformanceMonitor from '../components/LandingPerformanceMonitor';
 // Removed section transitions for cleaner, uninterrupted flow
 
 // Lazy load heavy components
@@ -19,30 +21,47 @@ const PricingSection = lazy(() => import('../components/PricingSection'));
 function FeatureCard({ feature, index }) {
   const cardRef = useRef(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  const rafRef = useRef(null);
   
-  const handleMouseMove = (e) => {
-    if (!cardRef.current) return;
-    
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    const rotateX = ((y - centerY) / centerY) * -10;
-    const rotateY = ((x - centerX) / centerX) * 10;
-    
-    setRotation({ x: rotateX, y: rotateY });
-    
-    // Update CSS variables for glow effect
-    cardRef.current.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
-    cardRef.current.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
-  };
+  // Throttled mouse move handler
+  const handleMouseMove = useCallback(
+    throttle((e) => {
+      if (!cardRef.current) return;
+      
+      // Cancel any pending animation frame
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      rafRef.current = requestAnimationFrame(() => {
+        const rect = cardRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const rotateX = ((y - centerY) / centerY) * -10;
+        const rotateY = ((x - centerX) / centerX) * 10;
+        
+        setRotation({ x: rotateX, y: rotateY });
+        
+        // Update CSS variables for glow effect
+        if (cardRef.current) {
+          cardRef.current.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+          cardRef.current.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+        }
+      });
+    }, 16), // 16ms = ~60fps
+    []
+  );
   
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+    }
     setRotation({ x: 0, y: 0 });
-  };
+  }, []);
   
   return (
     <motion.div 
@@ -455,6 +474,7 @@ function LandingContent() {
 export default function Landing() {
   return (
     <DemoModeProvider>
+      <LandingPerformanceMonitor />
       <LandingContent />
     </DemoModeProvider>
   );

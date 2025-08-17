@@ -3,7 +3,20 @@ import { motion } from 'framer-motion';
 
 export default function GradientMesh() {
   const [isVisible, setIsVisible] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef(null);
+  
+  // Check device type and performance
+  useEffect(() => {
+    const checkDevice = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
   
   // Intersection Observer for performance
   useEffect(() => {
@@ -25,13 +38,15 @@ export default function GradientMesh() {
     };
   }, []);
   
-  // Check for reduced motion preference
+  // Check for reduced motion preference or low performance
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isLowPerformance = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
   
-  if (prefersReducedMotion) {
+  // Static gradient for mobile, reduced motion, or low performance devices
+  if (prefersReducedMotion || isMobile || isLowPerformance) {
     return (
       <div ref={containerRef} className="hero-gradient-mesh">
-        <div className="mesh-gradient" />
+        <div className="mesh-gradient" style={{ transform: 'scale(1.1)' }} />
       </div>
     );
   }
@@ -43,16 +58,19 @@ export default function GradientMesh() {
           className="mesh-gradient"
           animate={{
             transform: [
-              'translate3d(0%, 0%, 0) rotate(0deg) scale(1)',
-              'translate3d(-10%, 10%, 0) rotate(120deg) scale(1.1)',
-              'translate3d(10%, -10%, 0) rotate(240deg) scale(0.9)',
-              'translate3d(0%, 0%, 0) rotate(360deg) scale(1)',
+              'translate3d(0%, 0%, 0) scale(1)',
+              'translate3d(-5%, 5%, 0) scale(1.05)',
+              'translate3d(5%, -5%, 0) scale(0.95)',
+              'translate3d(0%, 0%, 0) scale(1)',
             ],
           }}
           transition={{
-            duration: 30,
+            duration: 45, // Slower animation for less CPU usage
             repeat: Infinity,
             ease: "linear",
+          }}
+          style={{
+            willChange: 'auto', // Let browser optimize
           }}
         />
       )}

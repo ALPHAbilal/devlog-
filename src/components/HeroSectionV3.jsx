@@ -1,8 +1,9 @@
 import { ArrowRight, ChevronDown, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { heroTextReveal, magneticHover, liquidMorph, staggerContainer, staggerItem, energyPulse } from '../utils/animations';
+import { throttle } from '../utils/performance';
 import ParticleField from './ParticleField';
 import GradientMesh from './GradientMesh';
 import FloatingElements from './FloatingElements';
@@ -11,17 +12,33 @@ import HeroBackgroundAnimation from './HeroBackgroundAnimation/index';
 export default function HeroSectionV3() {
   const navigate = useNavigate();
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const rafRef = useRef(null);
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      const { clientX, clientY } = e;
-      const x = (clientX - window.innerWidth / 2) / 50;
-      const y = (clientY - window.innerHeight / 2) / 50;
-      setMousePosition({ x, y });
-    };
+    // Throttled mouse move handler - max 60fps
+    const handleMouseMove = throttle((e) => {
+      // Cancel any pending animation frame
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+      
+      // Use requestAnimationFrame for smooth updates
+      rafRef.current = requestAnimationFrame(() => {
+        const { clientX, clientY } = e;
+        const x = (clientX - window.innerWidth / 2) / 50;
+        const y = (clientY - window.innerHeight / 2) / 50;
+        setMousePosition({ x, y });
+      });
+    }, 16); // 16ms = ~60fps max
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (rafRef.current) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
   }, []);
 
   const scrollToDemo = () => {
@@ -33,9 +50,9 @@ export default function HeroSectionV3() {
 
   return (
     <section className="hero-container gradient-hero relative min-h-screen flex items-center overflow-hidden">
-      {/* Premium background effects */}
+      {/* Premium background effects - optimized for performance */}
       <GradientMesh />
-      <ParticleField count={30} />
+      <ParticleField count={10} /> {/* Reduced from 30 for better performance */}
       <FloatingElements />
       
       {/* New sophisticated background animation */}

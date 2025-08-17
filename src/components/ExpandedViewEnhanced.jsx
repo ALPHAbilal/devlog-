@@ -5,8 +5,6 @@ import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
 import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
-import VirtualScroll from './VirtualScroll';
-import { estimateBlockHeight, blockHeightCache } from '../utils/blockHeightEstimator';
 import { getBacklinks } from '../utils/extractLinks';
 import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
 import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
@@ -98,18 +96,6 @@ export default function ExpandedView({
   const saveStatusTimeoutRef = useRef(null);
   const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
   const smartSyncManagerRef = useRef(null);
-  
-  // Virtual Scrolling Configuration
-  const enableVirtualScroll = import.meta.env.VITE_ENABLE_VIRTUAL_SCROLL !== 'false'; // Default to true
-  const virtualScrollThreshold = parseInt(import.meta.env.VITE_VIRTUAL_SCROLL_THRESHOLD || '20', 10);
-  const shouldUseVirtualScroll = enableVirtualScroll && blocks.length > virtualScrollThreshold && viewMode === 'blocks';
-  
-  // Track if we're in virtual scroll mode for debugging
-  useEffect(() => {
-    if (shouldUseVirtualScroll && import.meta.env.DEV) {
-      console.log(`🚀 Virtual Scrolling: ACTIVE (${blocks.length} blocks)`);
-    }
-  }, [shouldUseVirtualScroll, blocks.length]);
 
   // Methods for share, delete, and view mode are now handled internally
 
@@ -216,11 +202,6 @@ export default function ExpandedView({
     if (!blockId || !updates) {
       console.warn('updateBlock called with invalid parameters:', { blockId, updates });
       return;
-    }
-    
-    // Clear height cache when block content changes (for virtual scrolling)
-    if (shouldUseVirtualScroll && (updates.content !== undefined || updates.type !== undefined)) {
-      blockHeightCache.clearBlock(blockId);
     }
     
     // Debug AI blocks specifically
@@ -1154,201 +1135,96 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Conditionally render with Virtual Scrolling or traditional mapping */}
-          {shouldUseVirtualScroll ? (
-            <VirtualScroll
-              items={blocks.filter(block => block !== null && block !== undefined)}
-              estimatedItemHeight={150}
-              getItemHeight={(block) => blockHeightCache.getHeight(
-                block.id, 
-                block, 
-                { isMobile: isMobileView, isFocused: focusedBlockId === block.id }
-              )}
-              overscan={3}
-              className="mb-8"
-              gap={16}
-              renderItem={(block, index) => (
-                <div className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
-                  {block?.isLoading ? (
-                    <OptimizedBlockSkeleton 
-                      type={block.type} 
-                      estimatedHeight={block.estimatedHeight || 100}
-                    />
-                  ) : (
-                    <>
-                      <BlockErrorBoundary 
-                        blockType={block?.type} 
-                        blockId={block?.id}
-                      >
-                        <Block
-                          block={block}
-                          index={index}
-                          onUpdate={updateBlock}
-                          onDelete={deleteBlock}
-                          onDuplicate={duplicateBlock}
-                          onMoveUp={(id) => moveBlock(id, 'up')}
-                          onMoveDown={(id) => moveBlock(id, 'down')}
-                          canMoveUp={index > 0}
-                          canMoveDown={index < blocks.length - 1}
-                          isMobileView={isMobileView}
-                          onAddBelow={(data) => {
-                            if (typeof data === 'object' && data.type) {
-                              // Direct block creation from TextBlock
-                              const newBlock = {
-                                id: crypto.randomUUID(),
-                                ...data,
-                                position: index + 1,
-                                created_at: Date.now(),
-                                createdAt: data.createdAt || new Date().toISOString()
-                              };
-                              
-                              const updatedBlocks = [...blocks];
-                              updatedBlocks.splice(index + 1, 0, newBlock);
-                              
-                              // Update positions for all blocks after the insertion point
-                              for (let i = index + 2; i < updatedBlocks.length; i++) {
-                                updatedBlocks[i] = { ...updatedBlocks[i], position: i };
-                              }
-                              
-                              updateLoadedBlocks(updatedBlocks);
-                              
-                              // Clear height cache for affected blocks
-                              blockHeightCache.clearBlock(block.id);
-                              
-                              // CRITICAL FIX: Call Smart Sync for inline new block
-                              if (smartSyncManagerRef.current) {
-                                smartSyncManagerRef.current.handleChange(
-                                  newBlock.id,
-                                  JSON.stringify(newBlock),
-                                  'CREATE'
-                                ).catch(error => {
-                                  console.error('Smart Sync inline add error:', error);
-                                });
-                              }
-                            } else {
-                              // Show selector
-                              handleAddBelowBlock(block.id);
-                            }
-                          }}
-                          onConvert={convertBlock}
-                          showAddButton={true}
-                          isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-                          onFocus={setFocusedBlockId}
-                          allBlocks={blocks}
-                          onDragStart={handleDragStart}
-                          onDragEnd={handleDragEnd}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                          draggedBlockId={draggedBlockId}
-                          dropTargetId={dropTargetId}
-                          dropPosition={dropPosition}
-                        />
-                      </BlockErrorBoundary>
-                      <AddBlockRow
-                        show={showBlockSelector && selectorPosition === block.id}
-                        onSelect={(type) => addBlock(type, block.id)}
-                        onClose={() => setShowBlockSelector(false)}
-                        isMobileView={isMobileView}
-                      />
-                    </>
-                  )}
-                </div>
-              )}
-            />
-          ) : (
-            /* Traditional rendering for small documents or when virtual scroll is disabled */
-            blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
-              <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
-                {block?.isLoading ? (
-                  <OptimizedBlockSkeleton 
-                    type={block.type} 
-                    estimatedHeight={block.estimatedHeight || 100}
-                  />
-                ) : (
-                  <>
-                    <BlockErrorBoundary 
-                      blockType={block?.type} 
-                      blockId={block?.id}
-                    >
-                      <Block
-                        block={block}
-                        index={index}
-                        onUpdate={updateBlock}
-                        onDelete={deleteBlock}
-                        onDuplicate={duplicateBlock}
-                        onMoveUp={(id) => moveBlock(id, 'up')}
-                        onMoveDown={(id) => moveBlock(id, 'down')}
-                        canMoveUp={index > 0}
-                        canMoveDown={index < blocks.length - 1}
-                        isMobileView={isMobileView}
-                        onAddBelow={(data) => {
-                        if (typeof data === 'object' && data.type) {
-                          // Direct block creation from TextBlock
-                          const newBlock = {
-                            id: crypto.randomUUID(),
-                            ...data,
-                            position: index + 1, // Add position field
-                            created_at: Date.now(), // Add created_at timestamp
-                            createdAt: data.createdAt || new Date().toISOString()
-                          };
-                          
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks.splice(index + 1, 0, newBlock);
-                          
-                          // Update positions for all blocks after the insertion point
-                          for (let i = index + 2; i < updatedBlocks.length; i++) {
-                            updatedBlocks[i] = { ...updatedBlocks[i], position: i };
-                          }
-                          
-                          updateLoadedBlocks(updatedBlocks);
-                          
-                          // CRITICAL FIX: Call Smart Sync for inline new block
-                          if (smartSyncManagerRef.current) {
-                            smartSyncManagerRef.current.handleChange(
-                              newBlock.id,
-                              JSON.stringify(newBlock),
-                              'CREATE'
-                            ).catch(error => {
-                              console.error('Smart Sync inline add error:', error);
-                            });
-                          }
-                          
-                          // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
-                          // if (onUpdate && !isInitialLoadRef.current) {
-                          //   onUpdate(entry.id, { blocks: updatedBlocks });
-                          // }
-                        } else {
-                          // Show selector
-                          handleAddBelowBlock(block.id);
-                        }
-                      }}
-                      onConvert={convertBlock}
-                      showAddButton={true}
-                      isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-                      onFocus={setFocusedBlockId}
-                      allBlocks={blocks}
-                      onDragStart={handleDragStart}
-                      onDragEnd={handleDragEnd}
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      draggedBlockId={draggedBlockId}
-                      dropTargetId={dropTargetId}
-                      dropPosition={dropPosition}
-                    />
-                    </BlockErrorBoundary>
-                    <AddBlockRow
-                      show={showBlockSelector && selectorPosition === block.id}
-                      onSelect={(type) => addBlock(type, block.id)}
-                      onClose={() => setShowBlockSelector(false)}
+          {blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
+            <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
+              {block?.isLoading ? (
+                <OptimizedBlockSkeleton 
+                  type={block.type} 
+                  estimatedHeight={block.estimatedHeight || 100}
+                />
+              ) : (
+                <>
+                  <BlockErrorBoundary 
+                    blockType={block?.type} 
+                    blockId={block?.id}
+                  >
+                    <Block
+                      block={block}
+                      index={index}
+                      onUpdate={updateBlock}
+                      onDelete={deleteBlock}
+                      onDuplicate={duplicateBlock}
+                      onMoveUp={(id) => moveBlock(id, 'up')}
+                      onMoveDown={(id) => moveBlock(id, 'down')}
+                      canMoveUp={index > 0}
+                      canMoveDown={index < blocks.length - 1}
                       isMobileView={isMobileView}
-                    />
-                  </>
-                )}
-            </div>
-          ))
-        )}
+                      onAddBelow={(data) => {
+                      if (typeof data === 'object' && data.type) {
+                        // Direct block creation from TextBlock
+                        const newBlock = {
+                          id: crypto.randomUUID(),
+                          ...data,
+                          position: index + 1, // Add position field
+                          created_at: Date.now(), // Add created_at timestamp
+                          createdAt: data.createdAt || new Date().toISOString()
+                        };
+                        
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks.splice(index + 1, 0, newBlock);
+                        
+                        // Update positions for all blocks after the insertion point
+                        for (let i = index + 2; i < updatedBlocks.length; i++) {
+                          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+                        }
+                        
+                        updateLoadedBlocks(updatedBlocks);
+                        
+                        // CRITICAL FIX: Call Smart Sync for inline new block
+                        if (smartSyncManagerRef.current) {
+                          smartSyncManagerRef.current.handleChange(
+                            newBlock.id,
+                            JSON.stringify(newBlock),
+                            'CREATE'
+                          ).catch(error => {
+                            console.error('Smart Sync inline add error:', error);
+                          });
+                        }
+                        
+                        // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
+                        // if (onUpdate && !isInitialLoadRef.current) {
+                        //   onUpdate(entry.id, { blocks: updatedBlocks });
+                        // }
+                      } else {
+                        // Show selector
+                        handleAddBelowBlock(block.id);
+                      }
+                    }}
+                    onConvert={convertBlock}
+                    showAddButton={true}
+                    isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                    onFocus={setFocusedBlockId}
+                    allBlocks={blocks}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    draggedBlockId={draggedBlockId}
+                    dropTargetId={dropTargetId}
+                    dropPosition={dropPosition}
+                  />
+                  </BlockErrorBoundary>
+                  <AddBlockRow
+                    show={showBlockSelector && selectorPosition === block.id}
+                    onSelect={(type) => addBlock(type, block.id)}
+                    onClose={() => setShowBlockSelector(false)}
+                    isMobileView={isMobileView}
+                  />
+                </>
+              )}
+          </div>
+        ))}
 
           {/* Load More Indicator for Paginated Documents */}
           {shouldUsePagination && hasMore && (

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2, 
          FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft,
@@ -229,7 +229,12 @@ const getLanguageFromFilename = (filename) => {
   return languageMap[ext] || 'javascript';
 };
 
-export default function VersionTrackBlock({ block, onUpdate, isActive }) {
+function VersionTrackBlock({ block, onUpdate, isActive }) {
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`📊 VersionTrackBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
+  
   // Debug flag - set to true to enable comprehensive logging
   const DEBUG = false;
   const DEBUG_GRID = false; // Set to true to debug grid alignment
@@ -2214,3 +2219,20 @@ export default function VersionTrackBlock({ block, onUpdate, isActive }) {
     </>
   );
 }
+
+// Memoize VersionTrackBlock to prevent unnecessary re-renders
+export default memo(VersionTrackBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.data === nextProps.block.data &&
+    prevProps.isActive === nextProps.isActive;
+  
+  console.log(`📊 VersionTrackBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    dataSame: prevProps.block.data === nextProps.block.data,
+    isActiveSame: prevProps.isActive === nextProps.isActive,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

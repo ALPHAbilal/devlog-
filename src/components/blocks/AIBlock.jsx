@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useState, memo, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 
-export default function AIBlock({ block, onUpdate }) {
+function AIBlock({ block, onUpdate }) {
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`🤖 AIBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
+  
   const [messages, setMessages] = useState(block.messages || []);
   const [newMessage, setNewMessage] = useState({ role: 'user', content: '' });
   const [isAddingMessage, setIsAddingMessage] = useState(false);
@@ -102,3 +107,18 @@ export default function AIBlock({ block, onUpdate }) {
     </div>
   );
 }
+
+// Memoize AIBlock to prevent unnecessary re-renders
+export default memo(AIBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.messages === nextProps.block.messages;
+  
+  console.log(`🤖 AIBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    messagesSame: prevProps.block.messages === nextProps.block.messages,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

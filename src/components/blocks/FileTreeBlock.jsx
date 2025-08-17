@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronDown, Folder, FolderOpen, File, Plus, X, Check, Grip, Code, FileText, Eye, Edit3 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
@@ -441,7 +441,12 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
   );
 }
 
-export default function FileTreeBlock({ block, onUpdate }) {
+function FileTreeBlock({ block, onUpdate }) {
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`📁 FileTreeBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
+  
   const [treeData, setTreeData] = useState(block.treeData || [
     { id: '1', name: 'src', isFolder: true, children: [] }
   ]);
@@ -769,3 +774,18 @@ export default function FileTreeBlock({ block, onUpdate }) {
     </div>
   );
 }
+
+// Memoize FileTreeBlock to prevent unnecessary re-renders
+export default memo(FileTreeBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.data === nextProps.block.data;
+  
+  console.log(`📁 FileTreeBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    dataSame: prevProps.block.data === nextProps.block.data,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

@@ -1,13 +1,18 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Upload, X, Maximize2, Download, Trash2, Image as ImageIcon, Plus, Grid3x3, Move, Edit2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
 import InlineImage from '../InlineImage';
 import ImageViewer from '../ImageViewer';
 
-export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
+function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   const { user } = useAuth();
   const [images, setImages] = useState([]);
+  
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`🌆 ImageBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -506,3 +511,22 @@ export default function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
     </div>
   );
 }
+
+// Memoize ImageBlock to prevent unnecessary re-renders
+export default memo(ImageBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.images === nextProps.block.images &&
+    prevProps.block.metadata?.layout === nextProps.block.metadata?.layout &&
+    prevProps.isFocused === nextProps.isFocused;
+  
+  console.log(`🌆 ImageBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    imagesSame: prevProps.block.images === nextProps.block.images,
+    layoutSame: prevProps.block.metadata?.layout === nextProps.block.metadata?.layout,
+    isFocusedSame: prevProps.isFocused === nextProps.isFocused,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

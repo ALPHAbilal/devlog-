@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 
-export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
+function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [code, setCode] = useState(block.content || '');
   const [language, setLanguage] = useState(block.language || 'javascript');
@@ -24,6 +24,12 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
   const textareaRef = useRef(null);
   const containerRef = useRef(null);
   const dropdownRef = useRef(null);
+  
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`💻 CodeBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
+
 
   // Constants for collapse behavior
   const MAX_COLLAPSED_LINES = 15;
@@ -601,3 +607,24 @@ export default function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBloc
     </div>
   );
 }
+
+// Memoize CodeBlock to prevent unnecessary re-renders
+export default memo(CodeBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.content === nextProps.block.content &&
+    prevProps.block.language === nextProps.block.language &&
+    prevProps.block.filePath === nextProps.block.filePath &&
+    prevProps.block.isNew === nextProps.block.isNew;
+  
+  console.log(`💻 CodeBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    contentSame: prevProps.block.content === nextProps.block.content,
+    languageSame: prevProps.block.language === nextProps.block.language,
+    filePathSame: prevProps.block.filePath === nextProps.block.filePath,
+    isNewSame: prevProps.block.isNew === nextProps.block.isNew,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

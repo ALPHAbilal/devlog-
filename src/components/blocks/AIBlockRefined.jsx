@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Bot, User, Plus, Copy, Check, ChevronDown, ChevronUp, Sparkles, FileText, AlertCircle } from 'lucide-react';
 import { parseMarkdown } from '../../utils/parseMarkdown.jsx';
 import '../AIBlockScroll.css';
 
-export default function AIBlock({ block, onUpdate }) {
+function AIBlock({ block, onUpdate }) {
   const [messages, setMessages] = useState(block.messages || []);
   const [isAddingMessage, setIsAddingMessage] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -14,6 +14,14 @@ export default function AIBlock({ block, onUpdate }) {
   const [parsedMessages, setParsedMessages] = useState([]);
   const [selectedRole, setSelectedRole] = useState('user');
   const textareaRef = useRef(null);
+
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`🤖 AIBlock ${block.id} rendered at ${new Date().toISOString()}`);
+    return () => {
+      console.log(`🔚 AIBlock ${block.id} unmounted`);
+    };
+  }, [block.id]);
 
   // Auto-resize textarea helper
   const autoResize = useCallback((textarea) => {
@@ -732,3 +740,20 @@ export default function AIBlock({ block, onUpdate }) {
     </div>
   );
 }
+
+// Memoize AIBlock to prevent unnecessary re-renders
+export default memo(AIBlock, (prevProps, nextProps) => {
+  console.log(`🤖 AIBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    messagesSame: prevProps.block.messages === nextProps.block.messages,
+    willPreventRerender: prevProps.block.id === nextProps.block.id &&
+                         prevProps.block.messages === nextProps.block.messages
+  });
+  
+  return (
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.messages === nextProps.block.messages &&
+    prevProps.block.metadata?.collapsedMessages === nextProps.block.metadata?.collapsedMessages &&
+    prevProps.block.metadata?.isBlockCollapsed === nextProps.block.metadata?.isBlockCollapsed
+  );
+});

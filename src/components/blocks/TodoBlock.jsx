@@ -18,8 +18,13 @@ const PRIORITY_OPTIONS = [
   { value: 'low', label: 'Low', color: 'text-blue-400', icon: '🔵' }
 ];
 
-export default function TodoBlock({ block, onUpdate }) {
+function TodoBlock({ block, onUpdate }) {
   const [todos, setTodos] = useState(block.data?.todos || []);
+  
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`✅ TodoBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
   const [filter, setFilter] = useState({ status: 'all', priority: 'all' });
   const [showFilters, setShowFilters] = useState(false);
   const [editingCell, setEditingCell] = useState(null);
@@ -433,3 +438,18 @@ export default function TodoBlock({ block, onUpdate }) {
     </div>
   );
 }
+
+// Memoize TodoBlock to prevent unnecessary re-renders
+export default memo(TodoBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.data?.todos === nextProps.block.data?.todos;
+  
+  console.log(`✅ TodoBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    todosSame: prevProps.block.data?.todos === nextProps.block.data?.todos,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

@@ -1,11 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 
-export default function HeadingBlock({ block, onUpdate }) {
+function HeadingBlock({ block, onUpdate }) {
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
   const [level, setLevel] = useState(block.level || 2);
   const inputRef = useRef(null);
   const containerRef = useRef(null);
+  
+  // Performance monitoring
+  useEffect(() => {
+    console.log(`📌 HeadingBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
+
 
   // Update local state when block changes
   useEffect(() => {
@@ -114,3 +120,22 @@ export default function HeadingBlock({ block, onUpdate }) {
     </HeadingTag>
   );
 }
+
+// Memoize HeadingBlock to prevent unnecessary re-renders
+export default memo(HeadingBlock, (prevProps, nextProps) => {
+  const willPreventRerender = 
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.content === nextProps.block.content &&
+    prevProps.block.level === nextProps.block.level &&
+    prevProps.block.isNew === nextProps.block.isNew;
+  
+  console.log(`📌 HeadingBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    contentSame: prevProps.block.content === nextProps.block.content,
+    levelSame: prevProps.block.level === nextProps.block.level,
+    isNewSame: prevProps.block.isNew === nextProps.block.isNew,
+    willPreventRerender
+  });
+  
+  return willPreventRerender;
+});

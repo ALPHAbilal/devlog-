@@ -44,9 +44,13 @@ export function useFolders() {
       // This prevents the rate limiting issue
       console.log('Loading folders for user:', user.id);
       
+      // Load folders with document counts for better performance insight
       const { data, error } = await supabase
         .from('folders')
-        .select('*')
+        .select(`
+          *,
+          document_count:documents(count)
+        `)
         .eq('user_id', user.id)
         .order('position', { ascending: true });
 
@@ -70,7 +74,10 @@ export function useFolders() {
             // Retry the query once
             const { data: retryData, error: retryError } = await supabase
               .from('folders')
-              .select('*')
+              .select(`
+                *,
+                document_count:documents(count)
+              `)
               .eq('user_id', user.id)
               .order('position', { ascending: true });
             
@@ -101,10 +108,14 @@ export function useFolders() {
       const folderMap = new Map();
       const rootFolders = [];
 
-      // First pass: create all folder objects
+      // First pass: create all folder objects with document count
       foldersData.forEach(folder => {
+        // Extract document count from the aggregate
+        const docCount = folder.document_count?.[0]?.count || 0;
+        
         folderMap.set(folder.id, {
           ...folder,
+          documentCount: docCount,
           children: []
         });
       });

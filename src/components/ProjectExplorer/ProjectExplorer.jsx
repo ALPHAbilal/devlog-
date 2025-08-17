@@ -28,6 +28,7 @@ import SearchBar from './SearchBar';
 import ContextMenu from './ContextMenu';
 import { useToast } from '../../hooks/useToast';
 import { useFolders } from '../../hooks/useFolders';
+import { useProjectStructure } from '../../hooks/useBatchLoader';
 import '../VirtualizedGrid.css';
 import {
   DndContext,
@@ -144,6 +145,12 @@ export default function ProjectExplorer({
     moveFolder,
     moveDocumentToFolder
   } = useFolders();
+  
+  // Use batch loader for prefetching
+  const {
+    prefetchFolder,
+    cancelPrefetch
+  } = useProjectStructure();
   
   // Auto-expand folders to show the selected document and scroll to it
   useEffect(() => {
@@ -628,6 +635,18 @@ export default function ProjectExplorer({
           }
           setSelectedItemId(item.id);
         }}
+        onMouseEnter={() => {
+          // Prefetch folder contents on hover for better UX
+          if (item.type === 'folder' && !expandedItems.has(item.id)) {
+            prefetchFolder(item.id);
+          }
+        }}
+        onMouseLeave={() => {
+          // Cancel prefetch if mouse leaves quickly
+          if (item.type === 'folder') {
+            cancelPrefetch(item.id);
+          }
+        }}
         onContextMenu={(e) => handleContextMenu(e, item, parentId)}
       >
         <div className="flex items-center gap-1 min-w-0 flex-1">
@@ -678,14 +697,22 @@ export default function ProjectExplorer({
               onFocus={(e) => e.target.select()}
             />
           ) : (
-            <span className={`
-              text-sm truncate block min-w-0
-              ${isActiveDocument ? 'text-accent-green font-medium' : isSelected ? 'text-text-primary' : 'text-text-secondary'}
-              ${!isActiveDocument ? 'group-hover:text-text-primary' : ''}
-            `}
-            title={item.name}>
-              {item.name}
-            </span>
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <span className={`
+                text-sm truncate block min-w-0
+                ${isActiveDocument ? 'text-accent-green font-medium' : isSelected ? 'text-text-primary' : 'text-text-secondary'}
+                ${!isActiveDocument ? 'group-hover:text-text-primary' : ''}
+              `}
+              title={item.name}>
+                {item.name}
+              </span>
+              {/* Document count for folders */}
+              {item.type === 'folder' && item.documentCount !== undefined && item.documentCount > 0 && (
+                <span className="text-xs text-text-secondary/60 bg-surface-1/30 px-1.5 py-0.5 rounded-md">
+                  {item.documentCount}
+                </span>
+              )}
+            </div>
           )}
         </div>
         

@@ -114,11 +114,13 @@ import { VirtualGrid } from './VirtualScroll';
 
 ## 🛠️ Implementation Plan
 
-### Phase 1: Virtual Scrolling (Week 1)
-- [ ] Implement VirtualScroll in ExpandedViewEnhanced
-- [ ] Handle dynamic block heights
-- [ ] Add loading placeholders
-- [ ] Test with 1000+ blocks
+### Phase 1: Virtual Scrolling (COMPLETED ✅ - August 17, 2025)
+- [x] Implement VirtualScroll in ExpandedViewEnhanced
+- [x] Handle dynamic block heights with blockHeightEstimator
+- [x] Add feature flag for safe rollout (VITE_ENABLE_VIRTUAL_SCROLL)
+- [x] Maintain all existing features (drag & drop, add blocks, etc.)
+- [x] Automatic activation for 20+ blocks
+- [ ] Test with 1000+ blocks (next step)
 
 ### Phase 2: Batch Loading (COMPLETED ✅ - August 17, 2025)
 - [x] Document counts in folder queries

@@ -617,7 +617,5 @@ export default memo(CodeBlock, (prevProps, nextProps) => {
     prevProps.block.filePath === nextProps.block.filePath &&
     prevProps.block.isNew === nextProps.block.isNew;
   
-  });
-  
   return willPreventRerender;
 });

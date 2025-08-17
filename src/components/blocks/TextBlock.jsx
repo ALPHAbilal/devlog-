@@ -1,11 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import FloatingToolbar from '../FloatingToolbar';
 import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow, allBlocks }) {
+function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow, allBlocks }) {
   const { user } = useAuth();
   // Only auto-edit if this is a truly new block (has no content)
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
@@ -22,6 +22,14 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
   // Constants for collapse behavior
   const MAX_LINES_BEFORE_COLLAPSE = 15;
   const MAX_COLLAPSED_LINES = 10;
+  
+  // Performance monitoring - track actual renders
+  useEffect(() => {
+    console.log(`🔄 TextBlock ${block.id} rendered at ${new Date().toISOString()}`);
+    return () => {
+      console.log(`🔚 TextBlock ${block.id} unmounted`);
+    };
+  }, [block.id]);
   
   // Cleanup on unmount
   useEffect(() => {
@@ -711,3 +719,25 @@ export default function TextBlock({ block, onUpdate, onConvert, isFocused, onFoc
     </div>
   );
 }
+
+// Memoize TextBlock to prevent unnecessary re-renders
+export default memo(TextBlock, (prevProps, nextProps) => {
+  // Performance monitoring log
+  console.log(`🔍 TextBlock ${prevProps.block.id} memo check:`, {
+    idSame: prevProps.block.id === nextProps.block.id,
+    contentSame: prevProps.block.content === nextProps.block.content,
+    focusSame: prevProps.isFocused === nextProps.isFocused,
+    willPreventRerender: prevProps.block.id === nextProps.block.id &&
+                         prevProps.block.content === nextProps.block.content &&
+                         prevProps.isFocused === nextProps.isFocused
+  });
+  
+  // Only re-render if these props actually change
+  return (
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.content === nextProps.block.content &&
+    prevProps.block.isNew === nextProps.block.isNew &&
+    prevProps.block.metadata?.isCollapsed === nextProps.block.metadata?.isCollapsed &&
+    prevProps.isFocused === nextProps.isFocused
+  );
+});

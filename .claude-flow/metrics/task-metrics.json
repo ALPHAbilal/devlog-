@@ -1,10 +1,10 @@
 [
   {
-    "id": "cmd-hooks-1755518266607",
-    "type": "hooks",
+    "id": "cmd-init-1755528067693",
+    "type": "init",
     "success": true,
-    "duration": 36.657759,
-    "timestamp": 1755518266644,
+    "duration": 2.456959999999981,
+    "timestamp": 1755528067696,
     "metadata": {}
   }
 ]

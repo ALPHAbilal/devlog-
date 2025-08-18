@@ -186,7 +186,7 @@ export default function ExpandedView({
     }
   }, []);
   
-  // Row renderer for virtual list
+  // Row renderer for virtual list - simplified dependencies to avoid circular reference
   const VirtualRow = useCallback(({ index, style }) => {
     const block = blocks[index];
     if (!block) return null;
@@ -253,25 +253,14 @@ export default function ExpandedView({
   }, [
     blocks, 
     isMobileView,
-    updateBlock, 
-    deleteBlock,
-    duplicateBlock,
-    moveBlock,
-    handleInlineBlockAdd,
-    convertBlock,
     focusedBlockId, 
     showBlockSelector, 
-    selectorPosition, 
-    addBlock,
-    setItemSize,
-    handleDragStart,
-    handleDragEnd,
-    handleDragOver,
-    handleDragLeave,
-    handleDrop,
+    selectorPosition,
     draggedBlockId,
     dropTargetId,
-    dropPosition
+    dropPosition,
+    setItemSize
+    // Removed function dependencies to avoid circular reference issues in production build
   ]);
   
   // Calculate list height (subtract header and footer space)
@@ -1387,21 +1376,75 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Virtualized Block List */}
+          {/* Virtualized Block List with fallback */}
           {blocks.length > 0 ? (
-            <List
-              ref={listRef}
-              height={listHeight}
-              itemCount={blocks.filter(b => b !== null && b !== undefined).length}
-              itemSize={getItemSize}
-              width="100%"
-              overscanCount={3}
-              className="virtual-list"
-            >
-              {VirtualRow}
-            </List>
+            List ? (
+              <List
+                ref={listRef}
+                height={listHeight || 600}
+                itemCount={blocks.filter(b => b !== null && b !== undefined).length}
+                itemSize={getItemSize}
+                width="100%"
+                overscanCount={3}
+                className="virtual-list"
+              >
+                {VirtualRow}
+              </List>
+            ) : (
+              // Fallback to non-virtualized rendering if List component not available
+              blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
+                <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
+                  {block?.isLoading ? (
+                    <OptimizedBlockSkeleton 
+                      type={block.type} 
+                      estimatedHeight={block.estimatedHeight || 100}
+                    />
+                  ) : (
+                    <>
+                      <BlockErrorBoundary 
+                        blockType={block?.type} 
+                        blockId={block?.id}
+                      >
+                        <Block
+                          block={block}
+                          index={index}
+                          onUpdate={updateBlock}
+                          onDelete={deleteBlock}
+                          onDuplicate={duplicateBlock}
+                          onMoveUp={(id) => moveBlock(id, 'up')}
+                          onMoveDown={(id) => moveBlock(id, 'down')}
+                          canMoveUp={index > 0}
+                          canMoveDown={index < blocks.length - 1}
+                          isMobileView={isMobileView}
+                          onAddBelow={(data) => handleInlineBlockAdd(index, data)}
+                          onConvert={convertBlock}
+                          showAddButton={true}
+                          isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                          onFocus={setFocusedBlockId}
+                          allBlocks={blocks}
+                          onDragStart={handleDragStart}
+                          onDragEnd={handleDragEnd}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          draggedBlockId={draggedBlockId}
+                          dropTargetId={dropTargetId}
+                          dropPosition={dropPosition}
+                        />
+                      </BlockErrorBoundary>
+                      <AddBlockRow
+                        show={showBlockSelector && selectorPosition === block.id}
+                        onSelect={(type) => addBlock(type, block.id)}
+                        onClose={() => setShowBlockSelector(false)}
+                        isMobileView={isMobileView}
+                      />
+                    </>
+                  )}
+                </div>
+              ))
+            )
           ) : (
-            <div style={{ minHeight: listHeight }} className="flex items-center justify-center">
+            <div style={{ minHeight: listHeight || 600 }} className="flex items-center justify-center">
               <p className="text-text-secondary">No blocks yet. Add one below.</p>
             </div>
           )}

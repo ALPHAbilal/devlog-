@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef, useCallback, startTransition, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
+import { VariableSizeList as List } from 'react-window';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
@@ -20,6 +21,53 @@ import MobileBottomSheet from './MobileBottomSheet';
 import BlockErrorBoundary from './BlockErrorBoundary';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
+
+// Cache for block heights for virtualization
+const blockHeightCache = new Map();
+const DEFAULT_BLOCK_HEIGHT = 150;
+const ADD_BUTTON_HEIGHT = 40;
+
+// Get estimated height for different block types
+const getEstimatedHeight = (block) => {
+  if (!block) return DEFAULT_BLOCK_HEIGHT;
+  
+  // Use cached height if available
+  const cacheKey = `${block.id}-${block.type}`;
+  if (blockHeightCache.has(cacheKey)) {
+    return blockHeightCache.get(cacheKey);
+  }
+
+  // Estimate based on block type
+  switch (block.type) {
+    case 'text':
+      const lineCount = (block.content || '').split('\n').length;
+      return Math.max(100, lineCount * 24 + 40);
+    case 'heading':
+      return 80;
+    case 'code':
+      const codeLines = (block.content || '').split('\n').length;
+      return Math.max(150, codeLines * 20 + 60);
+    case 'ai':
+      const messageCount = block.messages?.length || 0;
+      return Math.max(200, messageCount * 100);
+    case 'version-track':
+      return 400; // Heavy component, fixed height for performance
+    case 'issue-tracker':
+      return 350; // Heavy component, fixed height for performance
+    case 'table':
+      return 300;
+    case 'todo':
+      const todoCount = block.todos?.length || 0;
+      return Math.max(100, todoCount * 40 + 60);
+    case 'image':
+    case 'inline-image':
+      return 300;
+    case 'filetree':
+      return 250;
+    default:
+      return DEFAULT_BLOCK_HEIGHT;
+  }
+};
 
 export default function ExpandedView({
   entry,
@@ -96,8 +144,140 @@ export default function ExpandedView({
   const saveStatusTimeoutRef = useRef(null);
   const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
   const smartSyncManagerRef = useRef(null);
+  
+  // Virtualization refs
+  const listRef = useRef();
+  const itemHeights = useRef({});
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
   // Methods for share, delete, and view mode are now handled internally
+  
+  // Handle window resize for virtualization
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Get item size for virtual list
+  const getItemSize = useCallback((index) => {
+    // Check if we have a measured height
+    if (itemHeights.current[index]) {
+      return itemHeights.current[index];
+    }
+    
+    // Return estimated height
+    if (blocks[index]) {
+      return getEstimatedHeight(blocks[index]) + ADD_BUTTON_HEIGHT;
+    }
+    
+    return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
+  }, [blocks]);
+
+  // Set measured height after render
+  const setItemSize = useCallback((index, size) => {
+    if (itemHeights.current[index] !== size) {
+      itemHeights.current[index] = size;
+      if (listRef.current) {
+        listRef.current.resetAfterIndex(index);
+      }
+    }
+  }, []);
+  
+  // Row renderer for virtual list
+  const VirtualRow = useCallback(({ index, style }) => {
+    const block = blocks[index];
+    if (!block) return null;
+
+    return (
+      <div 
+        style={style}
+        className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
+        ref={(el) => {
+          if (el && !block?.isLoading) {
+            const height = el.getBoundingClientRect().height;
+            setItemSize(index, height);
+          }
+        }}
+      >
+        {block?.isLoading ? (
+          <OptimizedBlockSkeleton 
+            type={block.type} 
+            estimatedHeight={block.estimatedHeight || 100}
+          />
+        ) : (
+          <>
+            <BlockErrorBoundary 
+              blockType={block?.type} 
+              blockId={block?.id}
+            >
+              <Block
+                block={block}
+                index={index}
+                onUpdate={updateBlock}
+                onDelete={deleteBlock}
+                onDuplicate={duplicateBlock}
+                onMoveUp={(id) => moveBlock(id, 'up')}
+                onMoveDown={(id) => moveBlock(id, 'down')}
+                canMoveUp={index > 0}
+                canMoveDown={index < blocks.length - 1}
+                isMobileView={isMobileView}
+                onAddBelow={(data) => handleInlineBlockAdd(index, data)}
+                onConvert={convertBlock}
+                showAddButton={true}
+                isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                onFocus={setFocusedBlockId}
+                allBlocks={blocks}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                draggedBlockId={draggedBlockId}
+                dropTargetId={dropTargetId}
+                dropPosition={dropPosition}
+              />
+            </BlockErrorBoundary>
+            <AddBlockRow
+              show={showBlockSelector && selectorPosition === block.id}
+              onSelect={(type) => addBlock(type, block.id)}
+              onClose={() => setShowBlockSelector(false)}
+              isMobileView={isMobileView}
+            />
+          </>
+        )}
+      </div>
+    );
+  }, [
+    blocks, 
+    isMobileView,
+    updateBlock, 
+    deleteBlock,
+    duplicateBlock,
+    moveBlock,
+    handleInlineBlockAdd,
+    convertBlock,
+    focusedBlockId, 
+    showBlockSelector, 
+    selectorPosition, 
+    addBlock,
+    setItemSize,
+    handleDragStart,
+    handleDragEnd,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    draggedBlockId,
+    dropTargetId,
+    dropPosition
+  ]);
+  
+  // Calculate list height (subtract header and footer space)
+  const listHeight = useMemo(() => {
+    return windowHeight - 350; // Account for header, tags, buttons, and footer
+  }, [windowHeight]);
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
   useEffect(() => {
@@ -315,8 +495,20 @@ export default function ExpandedView({
       return;
     }
     
+    // Clear cached height for deleted block
+    blocks.forEach(block => {
+      if (block.id === blockId) {
+        blockHeightCache.delete(`${block.id}-${block.type}`);
+      }
+    });
+    
     // Use the loader's removeBlock method
     removeBlock(blockId);
+    
+    // Reset virtualization cache after deletion
+    if (listRef.current) {
+      listRef.current.resetAfterIndex(0);
+    }
     
     // CRITICAL FIX: Call Smart Sync for delete operation
     if (smartSyncManagerRef.current) {
@@ -360,7 +552,9 @@ export default function ExpandedView({
       updatedBlocks[i] = { ...updatedBlocks[i], position: i };
     }
     
-    updateLoadedBlocks(updatedBlocks);
+    startTransition(() => {
+      updateLoadedBlocks(updatedBlocks);
+    });
     
     // CRITICAL FIX: Call Smart Sync for duplicate (create new block)
     if (smartSyncManagerRef.current) {
@@ -396,7 +590,9 @@ export default function ExpandedView({
     const [movedBlock] = updatedBlocks.splice(blockIndex, 1);
     updatedBlocks.splice(newIndex, 0, movedBlock);
     
-    updateLoadedBlocks(updatedBlocks);
+    startTransition(() => {
+      updateLoadedBlocks(updatedBlocks);
+    });
     
     // CRITICAL FIX: Call Smart Sync for reorder operation
     if (smartSyncManagerRef.current && movedBlock) {
@@ -526,7 +722,9 @@ export default function ExpandedView({
       
       
       // Update state with completely new array
-      updateLoadedBlocks(updatedBlocks);
+      startTransition(() => {
+        updateLoadedBlocks(updatedBlocks);
+      });
       
       // CRITICAL FIX: Call Smart Sync for drag-drop reorder
       if (smartSyncManagerRef.current && draggedBlock) {
@@ -562,6 +760,9 @@ export default function ExpandedView({
   const convertBlock = useCallback((blockId, newType, meta = {}) => {
     const updatedBlocks = blocks.map(block => {
       if (block.id === blockId) {
+        // Clear old cached height
+        blockHeightCache.delete(`${block.id}-${block.type}`);
+        
         // Preserve content if possible
         const newBlock = {
           ...block,
@@ -584,7 +785,14 @@ export default function ExpandedView({
       return block;
     });
     
-    updateLoadedBlocks(updatedBlocks);
+    startTransition(() => {
+      updateLoadedBlocks(updatedBlocks);
+    });
+    
+    // Reset list cache after conversion
+    if (listRef.current) {
+      listRef.current.resetAfterIndex(0);
+    }
     
     // CRITICAL FIX: Call Smart Sync for block type conversion
     if (smartSyncManagerRef.current) {
@@ -650,7 +858,9 @@ export default function ExpandedView({
       updatedBlocks = [...blocks, newBlock];
     }
     
-    updateLoadedBlocks(updatedBlocks);
+    startTransition(() => {
+      updateLoadedBlocks(updatedBlocks);
+    });
     
     // CRITICAL FIX: Call Smart Sync for new block creation
     if (smartSyncManagerRef.current) {
@@ -709,7 +919,9 @@ export default function ExpandedView({
         updatedBlocks[i] = { ...updatedBlocks[i], position: i };
       }
       
-      updateLoadedBlocks(updatedBlocks);
+      startTransition(() => {
+        updateLoadedBlocks(updatedBlocks);
+      });
       
       // CRITICAL FIX: Call Smart Sync for new block from paste
       if (smartSyncManagerRef.current) {
@@ -763,7 +975,9 @@ export default function ExpandedView({
         updatedBlocks[i] = { ...updatedBlocks[i], position: i };
       }
       
-      updateLoadedBlocks(updatedBlocks);
+      startTransition(() => {
+        updateLoadedBlocks(updatedBlocks);
+      });
       
       // CRITICAL FIX: Call Smart Sync for inline new block
       if (smartSyncManagerRef.current) {
@@ -1173,56 +1387,24 @@ export default function ExpandedView({
             </>
           )}
           
-          {blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
-            <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
-              {block?.isLoading ? (
-                <OptimizedBlockSkeleton 
-                  type={block.type} 
-                  estimatedHeight={block.estimatedHeight || 100}
-                />
-              ) : (
-                <>
-                  <BlockErrorBoundary 
-                    blockType={block?.type} 
-                    blockId={block?.id}
-                  >
-                    <Block
-                      block={block}
-                      index={index}
-                      onUpdate={updateBlock}
-                      onDelete={deleteBlock}
-                      onDuplicate={duplicateBlock}
-                      onMoveUp={(id) => moveBlock(id, 'up')}
-                      onMoveDown={(id) => moveBlock(id, 'down')}
-                      canMoveUp={index > 0}
-                      canMoveDown={index < blocks.length - 1}
-                      isMobileView={isMobileView}
-                      onAddBelow={(data) => handleInlineBlockAdd(index, data)}
-                    onConvert={convertBlock}
-                    showAddButton={true}
-                    isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-                    onFocus={setFocusedBlockId}
-                    allBlocks={blocks}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    draggedBlockId={draggedBlockId}
-                    dropTargetId={dropTargetId}
-                    dropPosition={dropPosition}
-                  />
-                  </BlockErrorBoundary>
-                  <AddBlockRow
-                    show={showBlockSelector && selectorPosition === block.id}
-                    onSelect={(type) => addBlock(type, block.id)}
-                    onClose={() => setShowBlockSelector(false)}
-                    isMobileView={isMobileView}
-                  />
-                </>
-              )}
-          </div>
-        ))}
+          {/* Virtualized Block List */}
+          {blocks.length > 0 ? (
+            <List
+              ref={listRef}
+              height={listHeight}
+              itemCount={blocks.filter(b => b !== null && b !== undefined).length}
+              itemSize={getItemSize}
+              width="100%"
+              overscanCount={3}
+              className="virtual-list"
+            >
+              {VirtualRow}
+            </List>
+          ) : (
+            <div style={{ minHeight: listHeight }} className="flex items-center justify-center">
+              <p className="text-text-secondary">No blocks yet. Add one below.</p>
+            </div>
+          )}
 
           {/* Load More Indicator for Paginated Documents */}
           {shouldUsePagination && hasMore && (

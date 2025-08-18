@@ -8,8 +8,8 @@ import TableBlock from './blocks/TableBlock';
 import TodoBlock from './blocks/TodoBlock';
 import ImageBlock from './blocks/ImageBlock';
 import InlineImageBlock from './blocks/InlineImageBlock';
-import VersionTrackBlock from './blocks/VersionTrackBlock';
-import IssueTrackerBlock from './blocks/IssueTrackerBlock';
+import OptimizedVersionTrackBlock from './blocks/OptimizedVersionTrackBlock';
+import OptimizedIssueTrackerBlock from './blocks/OptimizedIssueTrackerBlock';
 import BlockDivider from './BlockDivider';
 import InlineActionBar from './InlineActionBar';
 import MobileBlockControls from './MobileBlockControls';
@@ -25,8 +25,8 @@ const blockComponents = {
   todo: TodoBlock,
   image: ImageBlock,
   'inline-image': InlineImageBlock,
-  'version-track': VersionTrackBlock,
-  'issue-tracker': IssueTrackerBlock,
+  'version-track': OptimizedVersionTrackBlock,
+  'issue-tracker': OptimizedIssueTrackerBlock,
 };
 
 function Block({ 
@@ -264,19 +264,30 @@ function Block({
 
 // Memoize Block component to prevent unnecessary re-renders
 export default memo(Block, (prevProps, nextProps) => {
-  // Check if focus state changed for THIS specific block
+  // Fast path: if block reference didn't change and it's the same content, skip
+  if (prevProps.block === nextProps.block) {
+    // Still need to check focus and drag states
+    const focusChanged = prevProps.isFocused !== nextProps.isFocused;
+    const dragChanged = (prevProps.draggedBlockId !== nextProps.draggedBlockId) ||
+                       (prevProps.dropTargetId !== nextProps.dropTargetId) ||
+                       (prevProps.dropPosition !== nextProps.dropPosition);
+    
+    return !focusChanged && !dragChanged;
+  }
+  
+  // Check if this specific block's focus state changed
   const prevWasFocused = prevProps.isFocused === prevProps.block.id;
   const nextIsFocused = nextProps.isFocused === nextProps.block.id;
-  const focusChanged = prevWasFocused !== nextIsFocused;
-  
-  // If focus changed for this block, we need to re-render
-  if (focusChanged) return false;
+  if (prevWasFocused !== nextIsFocused) return false;
   
   // Check if this block is involved in drag operations
   const prevIsDragged = prevProps.draggedBlockId === prevProps.block.id;
   const nextIsDragged = nextProps.draggedBlockId === nextProps.block.id;
+  if (prevIsDragged !== nextIsDragged) return false;
+  
   const prevIsDropTarget = prevProps.dropTargetId === prevProps.block.id;
   const nextIsDropTarget = nextProps.dropTargetId === nextProps.block.id;
+  if (prevIsDropTarget !== nextIsDropTarget) return false;
   
   // Re-render only if these specific props change
   return (

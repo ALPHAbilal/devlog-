@@ -1,4 +1,6 @@
 import { useState, useEffect, memo } from 'react';
+import { useBlockLazyLoading } from '../hooks/useBlockLazyLoading';
+import LazyBlockSkeleton from './blocks/LazyBlockSkeleton';
 import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
 import AIBlock from './blocks/AIBlockRefined';
@@ -27,6 +29,39 @@ const blockComponents = {
   'inline-image': InlineImageBlock,
   'version-track': OptimizedVersionTrackBlock,
   'issue-tracker': OptimizedIssueTrackerBlock,
+};
+
+// Helper function to estimate block height for skeletons
+const getEstimatedHeight = (block) => {
+  switch (block.type) {
+    case 'text':
+      const lineCount = (block.content || '').split('\n').length;
+      return Math.max(100, lineCount * 24 + 40);
+    case 'heading':
+      return 80;
+    case 'code':
+      const codeLines = (block.content || '').split('\n').length;
+      return Math.max(150, codeLines * 20 + 60);
+    case 'ai':
+      const messageCount = block.messages?.length || 0;
+      return Math.max(200, messageCount * 100);
+    case 'version-track':
+      return 400;
+    case 'issue-tracker':
+      return 350;
+    case 'table':
+      return 300;
+    case 'todo':
+      const todoCount = block.todos?.length || 0;
+      return Math.max(100, todoCount * 40 + 60);
+    case 'image':
+    case 'inline-image':
+      return 300;
+    case 'filetree':
+      return 250;
+    default:
+      return 150;
+  }
 };
 
 function Block({ 
@@ -62,6 +97,14 @@ function Block({
   const BlockComponent = blockComponents[block.type] || TextBlock;
   const { isMobile } = useResponsive();
   const useMobileControls = isMobileView || isMobile;
+  
+  // Use lazy loading for heavy blocks
+  const { 
+    targetRef: lazyRef, 
+    shouldRender, 
+    isLoading: isLazyLoading, 
+    isHeavyBlock 
+  } = useBlockLazyLoading(block.type);
   
   // Debug mode detection
   const isDebugMode = typeof window !== 'undefined' && 
@@ -142,17 +185,24 @@ function Block({
         canMoveUp={canMoveUp}
         canMoveDown={canMoveDown}
       >
-        <div className="relative">
-          <BlockComponent 
-            block={block} 
-            onUpdate={onUpdate}
-            onConvert={handleConvert}
-            isFocused={isFocused}
-            onFocus={onFocus}
-            onAddBelow={onAddBelow}
-            allBlocks={allBlocks}
-            onNavigateToBlock={onNavigateToBlock}
-          />
+        <div className="relative" ref={lazyRef}>
+          {!shouldRender && isHeavyBlock ? (
+            <LazyBlockSkeleton 
+              blockType={block.type} 
+              estimatedHeight={getEstimatedHeight(block)}
+            />
+          ) : (
+            <BlockComponent 
+              block={block} 
+              onUpdate={onUpdate}
+              onConvert={handleConvert}
+              isFocused={isFocused}
+              onFocus={onFocus}
+              onAddBelow={onAddBelow}
+              allBlocks={allBlocks}
+              onNavigateToBlock={onNavigateToBlock}
+            />
+          )}
         </div>
       </MobileBlockControls>
     );
@@ -167,6 +217,7 @@ function Block({
       )}
       
       <div 
+        ref={lazyRef}
         className={`group block-wrapper relative transition-all duration-200 ${
           isDragging ? 'opacity-30 scale-[0.98]' : ''
         } ${
@@ -218,9 +269,9 @@ function Block({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
-        {/* World-Class Inline Action Bar - Single click for any action */}
+        {/* World-Class Inline Action Bar - Only show when block is rendered */}
         <InlineActionBar
-          isVisible={isHovered && !isDragging}
+          isVisible={isHovered && !isDragging && shouldRender}
           onDelete={() => onDelete(block.id)}
           onDuplicate={() => onDuplicate?.(block.id)}
           onMoveUp={() => onMoveUp?.(block.id)}
@@ -232,20 +283,27 @@ function Block({
           blockId={block.id}
         />
 
-        {/* Block Content */}
+        {/* Block Content or Lazy Loading Skeleton */}
         <div className={`relative ${
           isFocused === false ? 'opacity-40' : 'opacity-100'
         } transition-opacity duration-200`}>
-          <BlockComponent 
-            block={block} 
-            onUpdate={onUpdate}
-            onConvert={handleConvert}
-            isFocused={isFocused}
-            onFocus={onFocus}
-            onAddBelow={onAddBelow}
-            allBlocks={allBlocks}
-            onNavigateToBlock={onNavigateToBlock}
-          />
+          {!shouldRender && isHeavyBlock ? (
+            <LazyBlockSkeleton 
+              blockType={block.type} 
+              estimatedHeight={getEstimatedHeight(block)}
+            />
+          ) : (
+            <BlockComponent 
+              block={block} 
+              onUpdate={onUpdate}
+              onConvert={handleConvert}
+              isFocused={isFocused}
+              onFocus={onFocus}
+              onAddBelow={onAddBelow}
+              allBlocks={allBlocks}
+              onNavigateToBlock={onNavigateToBlock}
+            />
+          )}
         </div>
       </div>
 

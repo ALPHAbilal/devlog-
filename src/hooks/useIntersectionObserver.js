@@ -1,65 +1,96 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
- * Optimized Intersection Observer hook for lazy loading and animations
- * @param {Object} options - Intersection Observer options
- * @returns {Array} [ref, isIntersecting, entry]
+ * Custom hook for detecting when an element enters/exits the viewport
+ * Optimized for performance monitoring
  */
 export function useIntersectionObserver(options = {}) {
   const [isIntersecting, setIsIntersecting] = useState(false);
-  const [entry, setEntry] = useState(null);
-  const elementRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const targetRef = useRef(null);
   const observerRef = useRef(null);
 
   useEffect(() => {
-    const element = elementRef.current;
-    if (!element) return;
+    const target = targetRef.current;
+    if (!target) return;
 
-    // Create observer with default options
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '50px',
-      ...options,
+    const defaultOptions = {
+      threshold: 0.1, // Trigger when 10% visible
+      rootMargin: '100px', // Start observing 100px before entering viewport
+      ...options
     };
 
-    observerRef.current = new IntersectionObserver(([entry]) => {
-      setIsIntersecting(entry.isIntersecting);
-      setEntry(entry);
-    }, observerOptions);
+    observerRef.current = new IntersectionObserver(
+      ([entry]) => {
+        const intersecting = entry.isIntersecting;
+        const visible = intersecting && entry.intersectionRatio > 0.1;
+        
+        setIsIntersecting(intersecting);
+        setIsVisible(visible);
 
-    observerRef.current.observe(element);
+        // Performance logging in debug mode
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔍 Intersection Observer:`, {
+            target: entry.target.dataset.blockId || 'unknown',
+            isIntersecting: intersecting,
+            isVisible: visible,
+            intersectionRatio: entry.intersectionRatio,
+            timestamp: new Date().toISOString()
+          });
+        }
+      },
+      defaultOptions
+    );
+
+    observerRef.current.observe(target);
 
     return () => {
-      if (observerRef.current && element) {
-        observerRef.current.unobserve(element);
+      if (observerRef.current) {
         observerRef.current.disconnect();
       }
     };
-  }, [options.threshold, options.root, options.rootMargin]);
+  }, [options.threshold, options.rootMargin]);
 
-  return [elementRef, isIntersecting, entry];
+  return { targetRef, isIntersecting, isVisible };
 }
 
 /**
- * Hook for lazy loading components when they come into view
- * @param {Function} onIntersect - Callback when element intersects
- * @param {Object} options - Intersection Observer options
- * @returns {React.RefObject} Ref to attach to element
+ * Hook specifically for canvas animation control
+ * Provides more granular control for heavy animations
  */
-export function useLazyLoad(onIntersect, options = {}) {
-  const hasLoadedRef = useRef(false);
-  const [ref, isIntersecting] = useIntersectionObserver({
-    threshold: 0.01,
-    rootMargin: '100px',
-    ...options,
+export function useCanvasVisibility(options = {}) {
+  const { targetRef, isIntersecting, isVisible } = useIntersectionObserver({
+    threshold: 0.2, // Require 20% visibility for canvas animations
+    rootMargin: '50px', // Smaller margin for canvas to be more conservative
+    ...options
   });
 
-  useEffect(() => {
-    if (isIntersecting && !hasLoadedRef.current) {
-      hasLoadedRef.current = true;
-      onIntersect?.();
-    }
-  }, [isIntersecting, onIntersect]);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const animationTimeoutRef = useRef(null);
 
-  return ref;
+  useEffect(() => {
+    if (isVisible) {
+      // Start animation immediately when visible
+      setShouldAnimate(true);
+      
+      // Clear any pending stop timeout
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+        animationTimeoutRef.current = null;
+      }
+    } else {
+      // Delay stopping animation to prevent flickering during fast scrolling
+      animationTimeoutRef.current = setTimeout(() => {
+        setShouldAnimate(false);
+      }, 500); // 500ms delay before stopping animation
+    }
+
+    return () => {
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current);
+      }
+    };
+  }, [isVisible]);
+
+  return { targetRef, isIntersecting, isVisible, shouldAnimate };
 }

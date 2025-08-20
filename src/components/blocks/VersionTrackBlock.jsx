@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
+import { useCanvasVisibility } from '../../hooks/useIntersectionObserver';
+import { useCanvasCleanup, useBlockMemoryManagement } from '../../hooks/useMemoryManagement';
 import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2, 
          FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft,
          FilePlus, FolderPlus, Trash2, Edit3, Home } from 'lucide-react';
@@ -363,9 +365,29 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
   });
   const [hoveredNodeDetails, setHoveredNodeDetails] = useState(null);
 
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
   const codeContainerRef = useRef(null);
+  
+  // Use intersection observer to control canvas animation
+  const { targetRef: visibilityRef, shouldAnimate } = useCanvasVisibility({
+    threshold: 0.1,
+    rootMargin: '100px'
+  });
+  
+  // Memory management for canvas and resources
+  const { 
+    canvasRef, 
+    contextRef, 
+    animationFrameRef, 
+    registerResource, 
+    cleanup: cleanupCanvas 
+  } = useCanvasCleanup();
+  
+  const { 
+    registerTimeout, 
+    registerInterval,
+    registerEventListener,
+    cleanup: cleanupBlock 
+  } = useBlockMemoryManagement(block.type, block.id);
 
   // Validation and diagnostics effect
   useEffect(() => {
@@ -814,22 +836,37 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
     });
   }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
 
-  // Animation loop
+  // Animation loop - only run when visible
   useEffect(() => {
+    // Only animate when component is visible
+    if (!shouldAnimate) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
     const animate = () => {
-      drawMetroMap();
-      animationRef.current = requestAnimationFrame(animate);
+      // Double-check visibility before drawing
+      if (shouldAnimate) {
+        drawMetroMap();
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
     };
+    
+    // Start animation and register for cleanup
     animate();
     
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
       }
     };
-  }, [drawMetroMap]);
+  }, [drawMetroMap, shouldAnimate]);
 
-  // Keyboard navigation and wheel zoom
+  // Keyboard navigation and wheel zoom - managed with memory cleanup
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -900,14 +937,15 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
       });
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('wheel', handleWheel, { passive: false });
+    // Register event listeners with memory management
+    const cleanupKeyboard = registerEventListener(window, 'keydown', handleKeyDown);
+    const cleanupWheel = registerEventListener(window, 'wheel', handleWheel, { passive: false });
     
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('wheel', handleWheel);
+      cleanupKeyboard();
+      cleanupWheel();
     };
-  }, []);
+  }, [registerEventListener]);
 
   // Handle canvas interactions with visual feedback
   const handleCanvasClick = (e) => {
@@ -1687,7 +1725,11 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
 
   return (
     <>
-    <div className="bg-dark-primary rounded-lg overflow-hidden border-2 border-dark-secondary flex h-[600px]">
+    <div 
+      ref={visibilityRef}
+      data-block-id={block.id}
+      className="bg-dark-primary rounded-lg overflow-hidden border-2 border-dark-secondary flex h-[600px]"
+    >
       {/* File Tree Sidebar */}
       {showFileTree && (
         <div className="w-64 bg-dark-secondary border-r-2 border-dark-secondary flex flex-col">

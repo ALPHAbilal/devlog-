@@ -186,10 +186,22 @@ export default function ExpandedView({
     }
   }, []);
   
-  // Row renderer for virtual list - simplified dependencies to avoid circular reference
-  const VirtualRow = useCallback(({ index, style }) => {
-    const block = blocks[index];
-    if (!block) return null;
+  // Create a memoized block renderer component to avoid closure issues
+  const BlockRenderer = memo(({ 
+    block, 
+    index, 
+    style,
+    isMobileView,
+    focusedBlockId,
+    showBlockSelector,
+    selectorPosition,
+    draggedBlockId,
+    dropTargetId,
+    dropPosition,
+    onMeasure
+  }) => {
+    const isBlockFocused = focusedBlockId === null ? null : focusedBlockId === block.id;
+    const isShowingSelector = showBlockSelector && selectorPosition === block.id;
 
     return (
       <div 
@@ -197,8 +209,13 @@ export default function ExpandedView({
         className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
         ref={(el) => {
           if (el && !block?.isLoading) {
-            const height = el.getBoundingClientRect().height;
-            setItemSize(index, height);
+            // Use ResizeObserver for more accurate height measurement
+            requestAnimationFrame(() => {
+              const height = el.getBoundingClientRect().height;
+              if (height > 0) {
+                onMeasure(index, height);
+              }
+            });
           }
         }}
       >
@@ -227,7 +244,7 @@ export default function ExpandedView({
                 onAddBelow={(data) => handleInlineBlockAdd(index, data)}
                 onConvert={convertBlock}
                 showAddButton={true}
-                isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                isFocused={isBlockFocused}
                 onFocus={setFocusedBlockId}
                 allBlocks={blocks}
                 onDragStart={handleDragStart}
@@ -241,7 +258,7 @@ export default function ExpandedView({
               />
             </BlockErrorBoundary>
             <AddBlockRow
-              show={showBlockSelector && selectorPosition === block.id}
+              show={isShowingSelector}
               onSelect={(type) => addBlock(type, block.id)}
               onClose={() => setShowBlockSelector(false)}
               isMobileView={isMobileView}
@@ -250,17 +267,51 @@ export default function ExpandedView({
         )}
       </div>
     );
+  }, (prevProps, nextProps) => {
+    // Only re-render if these specific props changed
+    return (
+      prevProps.block === nextProps.block &&
+      prevProps.index === nextProps.index &&
+      prevProps.isMobileView === nextProps.isMobileView &&
+      prevProps.focusedBlockId === nextProps.focusedBlockId &&
+      prevProps.showBlockSelector === nextProps.showBlockSelector &&
+      prevProps.selectorPosition === nextProps.selectorPosition &&
+      prevProps.draggedBlockId === nextProps.draggedBlockId &&
+      prevProps.dropTargetId === nextProps.dropTargetId &&
+      prevProps.dropPosition === nextProps.dropPosition
+    );
+  });
+
+  // Row renderer for virtual list - stable reference
+  const VirtualRow = useCallback(({ index, style }) => {
+    const block = blocks[index];
+    if (!block) return null;
+
+    return (
+      <BlockRenderer
+        block={block}
+        index={index}
+        style={style}
+        isMobileView={isMobileView}
+        focusedBlockId={focusedBlockId}
+        showBlockSelector={showBlockSelector}
+        selectorPosition={selectorPosition}
+        draggedBlockId={draggedBlockId}
+        dropTargetId={dropTargetId}
+        dropPosition={dropPosition}
+        onMeasure={setItemSize}
+      />
+    );
   }, [
     blocks, 
-    isMobileView,
+    isMobileView, 
     focusedBlockId, 
     showBlockSelector, 
-    selectorPosition,
-    draggedBlockId,
-    dropTargetId,
-    dropPosition,
+    selectorPosition, 
+    draggedBlockId, 
+    dropTargetId, 
+    dropPosition, 
     setItemSize
-    // Removed function dependencies to avoid circular reference issues in production build
   ]);
   
   // Calculate list height (subtract header and footer space)

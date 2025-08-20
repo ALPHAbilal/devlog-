@@ -176,28 +176,6 @@ export default function ExpandedView({
     return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
   }, [blocks]);
 
-  // Performance monitoring (Rule 2: Measurement Manifesto)
-  useEffect(() => {
-    // Count actual DOM blocks vs total blocks
-    const checkPerformance = () => {
-      const visibleBlocks = document.querySelectorAll('[data-block-id]').length;
-      const totalBlocks = blocks.length;
-      
-      console.log(`🎯 Virtualization Performance:
-        - Total blocks: ${totalBlocks}
-        - DOM blocks: ${visibleBlocks}
-        - Efficiency: ${totalBlocks > 0 ? Math.round((1 - visibleBlocks/totalBlocks) * 100) : 0}% reduction
-        - Status: ${visibleBlocks <= 10 ? '✅ Good' : '⚠️ Too many DOM nodes'}`);
-      
-      if (visibleBlocks > 10 && totalBlocks > 10) {
-        console.warn(`⚠️ Performance Issue: ${visibleBlocks} blocks in DOM, expected ≤10`);
-      }
-    };
-    
-    // Check after render
-    setTimeout(checkPerformance, 100);
-  }, [blocks.length, viewMode]);
-
   // Set measured height after render
   const setItemSize = useCallback((index, size) => {
     if (itemHeights.current[index] !== size) {
@@ -1458,9 +1436,10 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Virtualized Block List - ALWAYS use virtualization (Rule 4: Virtualization First) */}
+          {/* Virtualized Block List with fallback */}
           {blocks.length > 0 ? (
-            <List
+            List ? (
+              <List
                 ref={listRef}
                 height={listHeight || 600}
                 itemCount={blocks.filter(b => b !== null && b !== undefined).length}
@@ -1471,6 +1450,59 @@ export default function ExpandedView({
               >
                 {VirtualRow}
               </List>
+            ) : (
+              // Fallback to non-virtualized rendering if List component not available
+              blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
+                <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
+                  {block?.isLoading ? (
+                    <OptimizedBlockSkeleton 
+                      type={block.type} 
+                      estimatedHeight={block.estimatedHeight || 100}
+                    />
+                  ) : (
+                    <>
+                      <BlockErrorBoundary 
+                        blockType={block?.type} 
+                        blockId={block?.id}
+                      >
+                        <Block
+                          block={block}
+                          index={index}
+                          onUpdate={updateBlock}
+                          onDelete={deleteBlock}
+                          onDuplicate={duplicateBlock}
+                          onMoveUp={(id) => moveBlock(id, 'up')}
+                          onMoveDown={(id) => moveBlock(id, 'down')}
+                          canMoveUp={index > 0}
+                          canMoveDown={index < blocks.length - 1}
+                          isMobileView={isMobileView}
+                          onAddBelow={(data) => handleInlineBlockAdd(index, data)}
+                          onConvert={convertBlock}
+                          showAddButton={true}
+                          isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
+                          onFocus={setFocusedBlockId}
+                          allBlocks={blocks}
+                          onDragStart={handleDragStart}
+                          onDragEnd={handleDragEnd}
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          draggedBlockId={draggedBlockId}
+                          dropTargetId={dropTargetId}
+                          dropPosition={dropPosition}
+                        />
+                      </BlockErrorBoundary>
+                      <AddBlockRow
+                        show={showBlockSelector && selectorPosition === block.id}
+                        onSelect={(type) => addBlock(type, block.id)}
+                        onClose={() => setShowBlockSelector(false)}
+                        isMobileView={isMobileView}
+                      />
+                    </>
+                  )}
+                </div>
+              ))
+            )
           ) : (
             <div style={{ minHeight: listHeight || 600 }} className="flex items-center justify-center">
               <p className="text-text-secondary">No blocks yet. Add one below.</p>

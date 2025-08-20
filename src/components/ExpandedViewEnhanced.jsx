@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue, memo } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
-import { VariableSizeList as List } from 'react-window';
+import { VariableSizeList as List, FixedSizeList } from 'react-window';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
@@ -160,6 +160,29 @@ export default function ExpandedView({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  // Performance monitoring for virtualization
+  useEffect(() => {
+    if (blocks && blocks.length > 0 && !isLoadingBlocks) {
+      // Delay to let DOM update
+      const timer = setTimeout(() => {
+        const domNodes = document.querySelectorAll('[data-block-id]').length;
+        const totalBlocks = blocks.length;
+        const efficiency = totalBlocks > 0 ? ((domNodes / totalBlocks) * 100).toFixed(1) : 0;
+        
+        console.log(`🎯 Virtualization Performance:
+  - DOM nodes: ${domNodes}
+  - Total blocks: ${totalBlocks}  
+  - Efficiency: ${efficiency}% (lower is better)
+  - Status: ${domNodes <= 20 ? '✅ Excellent' : domNodes <= 50 ? '⚠️ OK' : '❌ Poor'}`);
+        
+        if (domNodes > 50 && totalBlocks > 50) {
+          console.warn('⚠️ Performance Issue: Too many DOM nodes! Virtualization may not be working.');
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [blocks, viewMode, isLoadingBlocks]);
   
   // Get item size for virtual list
   const getItemSize = useCallback((index) => {
@@ -1357,33 +1380,44 @@ export default function ExpandedView({
               style={{ opacity: linesScrollProgress.bottom * 0.9 }}
             />
             
-            {/* Scrollable container */}
-            <div className="overflow-y-auto overflow-x-hidden 
-                            scrollbar-thin scrollbar-stable"
-                 style={{ maxHeight: '500px' }}
-                 onScroll={handleLinesScroll}>
-              {blocks.map((block, index) => (
-                <CompactBlockLine
-                key={block.id}
-                block={block}
-                index={index}
-                isSelected={selectedLineBlockId === block.id}
-                onClick={(blockId) => {
-                  setSelectedLineBlockId(blockId);
-                  // Scroll to the block if in blocks view
-                  if (viewMode === 'lines') {
-                    setViewMode('blocks');
-                    setFocusedBlockId(blockId);
-                    // Scroll to block after view change
-                    setTimeout(() => {
-                      const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
-                      blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 100);
-                  }
-                }}
-              />
-            ))}
-            </div>
+            {/* Virtualized scrollable container for lines view */}
+            <FixedSizeList
+              height={500}
+              itemCount={blocks.length}
+              itemSize={32} // Fixed height for compact lines
+              width="100%"
+              className="scrollbar-thin scrollbar-stable"
+              onScroll={handleLinesScroll}
+            >
+              {({ index, style }) => {
+                const block = blocks[index];
+                if (!block) return null;
+                
+                return (
+                  <div style={style}>
+                    <CompactBlockLine
+                      key={block.id}
+                      block={block}
+                      index={index}
+                      isSelected={selectedLineBlockId === block.id}
+                      onClick={(blockId) => {
+                        setSelectedLineBlockId(blockId);
+                        // Scroll to the block if in blocks view
+                        if (viewMode === 'lines') {
+                          setViewMode('blocks');
+                          setFocusedBlockId(blockId);
+                          // Scroll to block after view change
+                          setTimeout(() => {
+                            const blockElement = document.querySelector(`[data-block-id="${blockId}"]`);
+                            blockElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          }, 100);
+                        }
+                      }}
+                    />
+                  </div>
+                );
+              }}
+            </FixedSizeList>
           </div>
         </div>
       ) : (
@@ -1427,73 +1461,19 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Virtualized Block List with fallback */}
+          {/* Virtualized Block List - ALWAYS use virtualization for performance */}
           {blocks.length > 0 ? (
-            List ? (
-              <List
-                ref={listRef}
-                height={listHeight || 600}
-                itemCount={blocks.filter(b => b !== null && b !== undefined).length}
-                itemSize={getItemSize}
-                width="100%"
-                overscanCount={3}
-                className="virtual-list"
-              >
-                {VirtualRow}
-              </List>
-            ) : (
-              // Fallback to non-virtualized rendering if List component not available
-              blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
-                <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
-                  {block?.isLoading ? (
-                    <OptimizedBlockSkeleton 
-                      type={block.type} 
-                      estimatedHeight={block.estimatedHeight || 100}
-                    />
-                  ) : (
-                    <>
-                      <BlockErrorBoundary 
-                        blockType={block?.type} 
-                        blockId={block?.id}
-                      >
-                        <Block
-                          block={block}
-                          index={index}
-                          onUpdate={updateBlock}
-                          onDelete={deleteBlock}
-                          onDuplicate={duplicateBlock}
-                          onMoveUp={(id) => moveBlock(id, 'up')}
-                          onMoveDown={(id) => moveBlock(id, 'down')}
-                          canMoveUp={index > 0}
-                          canMoveDown={index < blocks.length - 1}
-                          isMobileView={isMobileView}
-                          onAddBelow={(data) => handleInlineBlockAdd(index, data)}
-                          onConvert={convertBlock}
-                          showAddButton={true}
-                          isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-                          onFocus={setFocusedBlockId}
-                          allBlocks={blocks}
-                          onDragStart={handleDragStart}
-                          onDragEnd={handleDragEnd}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                          draggedBlockId={draggedBlockId}
-                          dropTargetId={dropTargetId}
-                          dropPosition={dropPosition}
-                        />
-                      </BlockErrorBoundary>
-                      <AddBlockRow
-                        show={showBlockSelector && selectorPosition === block.id}
-                        onSelect={(type) => addBlock(type, block.id)}
-                        onClose={() => setShowBlockSelector(false)}
-                        isMobileView={isMobileView}
-                      />
-                    </>
-                  )}
-                </div>
-              ))
-            )
+            <List
+              ref={listRef}
+              height={listHeight || 600}
+              itemCount={blocks.filter(b => b !== null && b !== undefined).length}
+              itemSize={getItemSize}
+              width="100%"
+              overscanCount={2} // Reduced from 3 to render fewer off-screen blocks
+              className="virtual-list"
+            >
+              {VirtualRow}
+            </List>
           ) : (
             <div style={{ minHeight: listHeight || 600 }} className="flex items-center justify-center">
               <p className="text-text-secondary">No blocks yet. Add one below.</p>

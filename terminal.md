@@ -1,284 +1,95 @@
-index-AoFlndvC.js:26 Using optimized Supabase client
-index-AoFlndvC.js:26 IndexedDB initialized successfully
-index-AoFlndvC.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-AoFlndvC.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-AoFlndvC.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-AoFlndvC.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-AoFlndvC.js:26 Dashboard: Starting to load entries...
-index-AoFlndvC.js:26 Using Supabase for storage
-index-AoFlndvC.js:26 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-AoFlndvC.js:26 Dashboard: Storage initialized (32ms)
-index-AoFlndvC.js:26 SupabaseAdapter: getDocuments called
-index-AoFlndvC.js:26 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-AoFlndvC.js:26 SupabaseAdapter: Documents query completed in 489ms
-index-AoFlndvC.js:26 SupabaseAdapter: Found 83 documents
-index-AoFlndvC.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
-index-AoFlndvC.js:26 SupabaseAdapter: Total documents after merge: 83
-index-AoFlndvC.js:26 SupabaseAdapter: Returning 83 documents
-index-AoFlndvC.js:26 Dashboard: Loaded 83 entries (520ms)
-index-AoFlndvC.js:26 Dashboard: Total load time: 555ms
-index-AoFlndvC.js:26 SupabaseAdapter: Getting projects...
-index-AoFlndvC.js:26 SupabaseAdapter: Found 3 projects
-index-AoFlndvC.js:26 Dashboard: Loaded 3 projects
-index-AoFlndvC.js:26 Dashboard: Setting isLoading to false
-index-AoFlndvC.js:31 [Violation] 'message' handler took 216ms
-[Violation] Forced reflow while executing JavaScript took 112ms
-index-AoFlndvC.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-AoFlndvC.js:26 VirtualizedGrid - scroll container: {"totalHeight":10944,"containerHeight":789,"hasOverflow":true,"parentIsCardsContainer":true}
-index-AoFlndvC.js:26 VirtualizedGrid - scroll container: {"totalHeight":2976,"containerHeight":789,"hasOverflow":true,"parentIsCardsContainer":true}
-index-AoFlndvC.js:26 Loaded 42 folders (19 root folders)
-index-AoFlndvC.js:26 Dashboard: Showing ExpandedView instead of grid
-index-AoFlndvC.js:26 Dashboard: Showing ExpandedView instead of grid
-index-AoFlndvC.js:26 ErrorBoundary caught: ReferenceError: memo is not defined
-    at WN (index-AoFlndvC.js:1020:1983)
-    at Oy (index-AoFlndvC.js:106:34208)
-    at Zy (index-AoFlndvC.js:106:63003)
-    at J1 (index-AoFlndvC.js:106:73613)
-    at k_ (index-AoFlndvC.js:106:107798)
-    at tI (index-AoFlndvC.js:106:106854)
-    at S0 (index-AoFlndvC.js:106:106684)
-    at x_ (index-AoFlndvC.js:106:103768)
-    at B_ (index-AoFlndvC.js:106:115427)
-    at Od (index-AoFlndvC.js:106:113996)
-    at I_ (index-AoFlndvC.js:106:114267)
-    at index-AoFlndvC.js:106:115487Caused by: React ErrorBoundary ReferenceError: memo is not defined
-    at WN (index-AoFlndvC.js:1020:365)
-    at lte (index-AoFlndvC.js:1074:120)
-    at main (<anonymous>)
-    at div (<anonymous>)
-    at sC (index-AoFlndvC.js:1250:2983)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at Jv (index-AoFlndvC.js:614:499)
-    at KU (index-AoFlndvC.js:74:3968)
-    at nF (index-AoFlndvC.js:74:7879)
-    at sentryRoute(/auth/nF) (<anonymous>)
-    at One (index-AoFlndvC.js:1548:864)
-    at Qee (index-AoFlndvC.js:952:2547)
-    at UH (index-AoFlndvC.js:116:48152)
-    at zH (index-AoFlndvC.js:116:46349)
-    at BH (index-AoFlndvC.js:116:44094)
-    at tF (index-AoFlndvC.js:74:7263)
-    at uF (index-AoFlndvC.js:83:874)
-    at Tne (index-AoFlndvC.js:1539:780)
-    at Ine (<anonymous>) {componentStack: '\n    at WN (https://www.devlog.design/assets/index…ex-AoFlndvC.js:1539:780)\n    at Ine (<anonymous>)'}
-(anonymous) @ index-AoFlndvC.js:26
-componentDidCatch @ index-AoFlndvC.js:1539
-B1.O.componentDidCatch.a.callback @ index-AoFlndvC.js:106
-$S @ index-AoFlndvC.js:106
-US @ index-AoFlndvC.js:106
-e_ @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-C_ @ index-AoFlndvC.js:106
-T_ @ index-AoFlndvC.js:106
-b_ @ index-AoFlndvC.js:106
-x_ @ index-AoFlndvC.js:106
-B_ @ index-AoFlndvC.js:106
-Od @ index-AoFlndvC.js:106
-I_ @ index-AoFlndvC.js:106
-(anonymous) @ index-AoFlndvC.js:106
-index-AoFlndvC.js:1539 Error Report
-index-AoFlndvC.js:26 Error: ReferenceError: memo is not defined
-    at WN (index-AoFlndvC.js:1020:1983)
-    at Oy (index-AoFlndvC.js:106:34208)
-    at Zy (index-AoFlndvC.js:106:63003)
-    at J1 (index-AoFlndvC.js:106:73613)
-    at k_ (index-AoFlndvC.js:106:107798)
-    at tI (index-AoFlndvC.js:106:106854)
-    at S0 (index-AoFlndvC.js:106:106684)
-    at x_ (index-AoFlndvC.js:106:103768)
-    at B_ (index-AoFlndvC.js:106:115427)
-    at Od (index-AoFlndvC.js:106:113996)
-    at I_ (index-AoFlndvC.js:106:114267)
-    at index-AoFlndvC.js:106:115487Caused by: React ErrorBoundary ReferenceError: memo is not defined
-    at WN (index-AoFlndvC.js:1020:365)
-    at lte (index-AoFlndvC.js:1074:120)
-    at main (<anonymous>)
-    at div (<anonymous>)
-    at sC (index-AoFlndvC.js:1250:2983)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at Jv (index-AoFlndvC.js:614:499)
-    at KU (index-AoFlndvC.js:74:3968)
-    at nF (index-AoFlndvC.js:74:7879)
-    at sentryRoute(/auth/nF) (<anonymous>)
-    at One (index-AoFlndvC.js:1548:864)
-    at Qee (index-AoFlndvC.js:952:2547)
-    at UH (index-AoFlndvC.js:116:48152)
-    at zH (index-AoFlndvC.js:116:46349)
-    at BH (index-AoFlndvC.js:116:44094)
-    at tF (index-AoFlndvC.js:74:7263)
-    at uF (index-AoFlndvC.js:83:874)
-    at Tne (index-AoFlndvC.js:1539:780)
-    at Ine (<anonymous>)
-(anonymous) @ index-AoFlndvC.js:26
-reportError @ index-AoFlndvC.js:1539
-componentDidCatch @ index-AoFlndvC.js:1539
-B1.O.componentDidCatch.a.callback @ index-AoFlndvC.js:106
-$S @ index-AoFlndvC.js:106
-US @ index-AoFlndvC.js:106
-e_ @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-C_ @ index-AoFlndvC.js:106
-T_ @ index-AoFlndvC.js:106
-b_ @ index-AoFlndvC.js:106
-x_ @ index-AoFlndvC.js:106
-B_ @ index-AoFlndvC.js:106
-Od @ index-AoFlndvC.js:106
-I_ @ index-AoFlndvC.js:106
-(anonymous) @ index-AoFlndvC.js:106
-index-AoFlndvC.js:26 Component Stack: 
-    at WN (https://www.devlog.design/assets/index-AoFlndvC.js:1020:365)
-    at lte (https://www.devlog.design/assets/index-AoFlndvC.js:1074:120)
-    at main (<anonymous>)
-    at div (<anonymous>)
-    at sC (https://www.devlog.design/assets/index-AoFlndvC.js:1250:2983)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at Jv (https://www.devlog.design/assets/index-AoFlndvC.js:614:499)
-    at KU (https://www.devlog.design/assets/index-AoFlndvC.js:74:3968)
-    at nF (https://www.devlog.design/assets/index-AoFlndvC.js:74:7879)
-    at sentryRoute(nF) (<anonymous>)
-    at One (https://www.devlog.design/assets/index-AoFlndvC.js:1548:864)
-    at Qee (https://www.devlog.design/assets/index-AoFlndvC.js:952:2547)
-    at UH (https://www.devlog.design/assets/index-AoFlndvC.js:116:48152)
-    at zH (https://www.devlog.design/assets/index-AoFlndvC.js:116:46349)
-    at BH (https://www.devlog.design/assets/index-AoFlndvC.js:116:44094)
-    at tF (https://www.devlog.design/assets/index-AoFlndvC.js:74:7263)
-    at uF (https://www.devlog.design/assets/index-AoFlndvC.js:83:874)
-    at Tne (https://www.devlog.design/assets/index-AoFlndvC.js:1539:780)
-    at Ine (<anonymous>)
-(anonymous) @ index-AoFlndvC.js:26
-reportError @ index-AoFlndvC.js:1539
-componentDidCatch @ index-AoFlndvC.js:1539
-B1.O.componentDidCatch.a.callback @ index-AoFlndvC.js:106
-$S @ index-AoFlndvC.js:106
-US @ index-AoFlndvC.js:106
-e_ @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-C_ @ index-AoFlndvC.js:106
-T_ @ index-AoFlndvC.js:106
-b_ @ index-AoFlndvC.js:106
-x_ @ index-AoFlndvC.js:106
-B_ @ index-AoFlndvC.js:106
-Od @ index-AoFlndvC.js:106
-I_ @ index-AoFlndvC.js:106
-(anonymous) @ index-AoFlndvC.js:106
-index-AoFlndvC.js:26 Props: {children: {…}}
-(anonymous) @ index-AoFlndvC.js:26
-reportError @ index-AoFlndvC.js:1539
-componentDidCatch @ index-AoFlndvC.js:1539
-B1.O.componentDidCatch.a.callback @ index-AoFlndvC.js:106
-$S @ index-AoFlndvC.js:106
-US @ index-AoFlndvC.js:106
-e_ @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-C_ @ index-AoFlndvC.js:106
-T_ @ index-AoFlndvC.js:106
-b_ @ index-AoFlndvC.js:106
-x_ @ index-AoFlndvC.js:106
-B_ @ index-AoFlndvC.js:106
-Od @ index-AoFlndvC.js:106
-I_ @ index-AoFlndvC.js:106
-(anonymous) @ index-AoFlndvC.js:106
-index-AoFlndvC.js:106 [Violation] 'click' handler took 246ms
-index-AoFlndvC.js:29  POST https://o4509700300013568.ingest.us.sentry.io/api/4509700330946560/envelope/?sentry_version=7&sentry_key=8985ce96e54c88227c28ea3a45962f5f&sentry_client=sentry.javascript.react%2F9.45.0 429 (Too Many Requests)
-s @ index-AoFlndvC.js:29
-m @ index-AoFlndvC.js:19
-s @ index-AoFlndvC.js:19
-o @ index-AoFlndvC.js:19
-w$ @ index-AoFlndvC.js:33
-await in w$
-MA @ index-AoFlndvC.js:33
-_runFlush @ index-AoFlndvC.js:33
-await in _runFlush
-_flush @ index-AoFlndvC.js:33
-_debouncedFlush.f$.maxWait @ index-AoFlndvC.js:33
-f @ index-AoFlndvC.js:19
-m @ index-AoFlndvC.js:19
-flushImmediate @ index-AoFlndvC.js:33
-sendBufferedReplayOrFlush @ index-AoFlndvC.js:33
-(anonymous) @ index-AoFlndvC.js:31
-r @ index-AoFlndvC.js:26
-setTimeout
-(anonymous) @ index-AoFlndvC.js:29
-ch @ index-AoFlndvC.js:29
-S8 @ index-AoFlndvC.js:31
-(anonymous) @ index-AoFlndvC.js:31
-(anonymous) @ index-AoFlndvC.js:18
-emit @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-Promise.then
-sendEvent @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-_executeHandlers @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-_runExecutor @ index-AoFlndvC.js:18
-Mo @ index-AoFlndvC.js:18
-then @ index-AoFlndvC.js:18
-_processEvent @ index-AoFlndvC.js:18
-_captureEvent @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-_executeHandlers @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:18
-_runExecutor @ index-AoFlndvC.js:18
-Mo @ index-AoFlndvC.js:18
-then @ index-AoFlndvC.js:18
-captureException @ index-AoFlndvC.js:18
-captureException @ index-AoFlndvC.js:14
-jg @ index-AoFlndvC.js:18
-(anonymous) @ index-AoFlndvC.js:41
-withScope @ index-AoFlndvC.js:14
-T5 @ index-AoFlndvC.js:14
-nh @ index-AoFlndvC.js:14
-nU @ index-AoFlndvC.js:41
-(anonymous) @ index-AoFlndvC.js:41
-L1 @ index-AoFlndvC.js:106
-B1.O.componentDidCatch.a.callback @ index-AoFlndvC.js:106
-$S @ index-AoFlndvC.js:106
-US @ index-AoFlndvC.js:106
-e_ @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-so @ index-AoFlndvC.js:106
-i_ @ index-AoFlndvC.js:106
-C_ @ index-AoFlndvC.js:106
-T_ @ index-AoFlndvC.js:106
-b_ @ index-AoFlndvC.js:106
-x_ @ index-AoFlndvC.js:106
-B_ @ index-AoFlndvC.js:106
-Od @ index-AoFlndvC.js:106
-I_ @ index-AoFlndvC.js:106
-(anonymous) @ index-AoFlndvC.js:106
-index-AoFlndvC.js:26 [Supabase] Auth event: SIGNED_IN
+index-B0MjZaoP.js:26 Using optimized Supabase client
+index-B0MjZaoP.js:26 IndexedDB initialized successfully
+index-B0MjZaoP.js:26 SW registered: ServiceWorkerRegistration
+index-B0MjZaoP.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-B0MjZaoP.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-B0MjZaoP.js:26 [AuthContext] Auth state change received: INITIAL_SESSION Object
+index-B0MjZaoP.js:26 Dashboard: Starting to load entries...
+index-B0MjZaoP.js:26 Using Supabase for storage
+index-B0MjZaoP.js:26 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-B0MjZaoP.js:26 Dashboard: Storage initialized (24ms)
+index-B0MjZaoP.js:26 SupabaseAdapter: getDocuments called
+index-B0MjZaoP.js:26 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-B0MjZaoP.js:26 SupabaseAdapter: Documents query completed in 439ms
+index-B0MjZaoP.js:26 SupabaseAdapter: Found 83 documents
+index-B0MjZaoP.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
+index-B0MjZaoP.js:26 SupabaseAdapter: Total documents after merge: 83
+index-B0MjZaoP.js:26 SupabaseAdapter: Returning 83 documents
+index-B0MjZaoP.js:26 Dashboard: Loaded 83 entries (454ms)
+index-B0MjZaoP.js:26 Dashboard: Total load time: 480ms
+index-B0MjZaoP.js:26 SupabaseAdapter: Getting projects...
+index-B0MjZaoP.js:26 SupabaseAdapter: Found 3 projects
+index-B0MjZaoP.js:26 Dashboard: Loaded 3 projects
+index-B0MjZaoP.js:26 Dashboard: Setting isLoading to false
+index-B0MjZaoP.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-B0MjZaoP.js:26 VirtualizedGrid - scroll container: {"totalHeight":10944,"containerHeight":789,"hasOverflow":true,"parentIsCardsContainer":true}
+index-B0MjZaoP.js:26 VirtualizedGrid - scroll container: {"totalHeight":2976,"containerHeight":789,"hasOverflow":true,"parentIsCardsContainer":true}
+index-B0MjZaoP.js:26 Loaded 42 folders (19 root folders)
+index-B0MjZaoP.js:26 Dashboard: Showing ExpandedView instead of grid
+index-B0MjZaoP.js:106 [Violation] 'click' handler took 273ms
+[Violation] Forced reflow while executing JavaScript took 102ms
+index-B0MjZaoP.js:26 SmartSync: IndexedDB initialized
+index-B0MjZaoP.js:26 ExpandedView: Initial load period complete, enabling saves
+index-B0MjZaoP.js:26 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document 4099d574-c879-4eee-980b-aa208e38b9a2
+index-B0MjZaoP.js:26 PaginatedBlockLoader: Loaded 17 blocks for page 0 of document 4099d574-c879-4eee-980b-aa208e38b9a2
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'ada8807e-22d9-41e2-ab54-c9141bdcc83d', type: 'text', hasContent: true, contentType: 'string', contentLength: 23, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'a0ff9869-b571-4004-8634-34f4170a6127', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'bf4f642f-fdeb-4e7e-bad2-6861f48fca5d', type: 'heading', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '3bce2a41-01ed-4d68-944e-e9e7d8390fc5', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '13228eb7-6e94-480c-8976-0f5722463e3e', type: 'image', hasContent: true, contentType: 'string', contentLength: 468, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1ff2cb14-c850-464d-bf1b-5cdeccb5b738', type: 'table', hasContent: true, contentType: 'string', contentLength: 133, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '87f57ea8-74b5-4d41-857a-05eceeaa20c3', type: 'ai', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-B0MjZaoP.js:26 🔵 AI Block Load Debug (OptimizedBlockLoader): {blockId: '87f57ea8-74b5-4d41-857a-05eceeaa20c3', messageCount: 0, hasMessages: true}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '5c9e16cf-908e-4db2-a9dc-1c1bfe72fd1e', type: 'filetree', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '3b9602b4-46bd-49e3-9b9b-eac05c964018', type: 'version-track', hasContent: true, contentType: 'string', contentLength: 334, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '014299ac-b190-49ec-81b5-304089f5ac92', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 699, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '94222e24-94f3-4691-a133-1bd4f3404269', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 596, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '973d71de-30f2-4837-bc47-ed6dc967eef7', type: 'filetree', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'ffa545f6-65d9-4d98-842b-d54a18a8a71d', type: 'image', hasContent: true, contentType: 'string', contentLength: 41, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '9e67e13d-d31e-46d5-8c20-1e50bc969d57', type: 'filetree', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4195c898-75d3-43a1-84d4-61b1021e9db9', type: 'version-track', hasContent: true, contentType: 'string', contentLength: 334, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7f8a0300-afbe-4193-a0ee-7fe16b7df9c7', type: 'image', hasContent: true, contentType: 'string', contentLength: 41, …}
+index-B0MjZaoP.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'd832c440-df5a-4b72-882c-2b9fbb20a3dc', type: 'text', hasContent: true, contentType: 'string', contentLength: 334, …}
+[Violation] Forced reflow while executing JavaScript took 79ms
+index-B0MjZaoP.js:26 📝 TextBlock ada8807e-22d9-41e2-ab54-c9141bdcc83d rendered at 2025-08-20T14:49:44.931Z
+index-B0MjZaoP.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'ada8807e-22d9-41e2-ab54-c9141bdcc83d', type: 'text', hasContent: true, hasMessages: false, hasImages: false, …}
+index-B0MjZaoP.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'ada8807e-22d9-41e2-ab54-c9141bdcc83d', type: 'text', position: 0, contentLength: 23, contentPreview: "i'm bilal chafi bilal\n\n"}
+index-B0MjZaoP.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'ada8807e-22d9-41e2-ab54-c9141bdcc83d', action: 'UPDATE', blockType: 'text', position: 0, contentLength: 23, …}
+index-B0MjZaoP.js:26 📝 TextBlock a0ff9869-b571-4004-8634-34f4170a6127 rendered at 2025-08-20T14:49:44.949Z
+index-B0MjZaoP.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'a0ff9869-b571-4004-8634-34f4170a6127', type: 'text', hasContent: true, hasMessages: false, hasImages: false, …}
+index-B0MjZaoP.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'a0ff9869-b571-4004-8634-34f4170a6127', type: 'text', position: 1, contentLength: 0, contentPreview: ''}
+index-B0MjZaoP.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'a0ff9869-b571-4004-8634-34f4170a6127', action: 'UPDATE', blockType: 'text', position: 1, contentLength: 0, …}
+index-B0MjZaoP.js:26 📌 HeadingBlock bf4f642f-fdeb-4e7e-bad2-6861f48fca5d rendered at 2025-08-20T14:49:44.959Z
+index-B0MjZaoP.js:26 💻 CodeBlock 3bce2a41-01ed-4d68-944e-e9e7d8390fc5 rendered at 2025-08-20T14:49:44.962Z
+index-B0MjZaoP.js:26 🌆 ImageBlock 13228eb7-6e94-480c-8976-0f5722463e3e rendered at 2025-08-20T14:49:44.965Z
+index-B0MjZaoP.js:26 🌆 ImageBlock ffa545f6-65d9-4d98-842b-d54a18a8a71d rendered at 2025-08-20T14:49:44.984Z
+index-B0MjZaoP.js:26 🌆 ImageBlock 7f8a0300-afbe-4193-a0ee-7fe16b7df9c7 rendered at 2025-08-20T14:49:44.989Z
+index-B0MjZaoP.js:26 📝 TextBlock d832c440-df5a-4b72-882c-2b9fbb20a3dc rendered at 2025-08-20T14:49:44.995Z
+index-B0MjZaoP.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'd832c440-df5a-4b72-882c-2b9fbb20a3dc', type: 'text', hasContent: true, hasMessages: false, hasImages: false, …}
+index-B0MjZaoP.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'd832c440-df5a-4b72-882c-2b9fbb20a3dc', type: 'text', position: 999, contentLength: 334, contentPreview: '{"data":{"repository":{"versions":{"v1":{"id":"v1","message":"Initial commit","timestamp":"2025-08-1'}
+index-B0MjZaoP.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'd832c440-df5a-4b72-882c-2b9fbb20a3dc', action: 'UPDATE', blockType: 'text', position: 999, contentLength: 334, …}
+index-B0MjZaoP.js:26 SmartSync: Syncing 3 changes
+index-B0MjZaoP.js:26 SmartSync: Changes being sent: (3) [{…}, {…}, {…}]
+index-B0MjZaoP.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-B0MjZaoP.js:26 SmartSync: RPC response: {total: 3, errors: Array(0), success: true, processed: 3, timestamp: 1755701388218.887}
+index-B0MjZaoP.js:26 SmartSync: Successfully synced 3 changes
+[Violation] Forced reflow while executing JavaScript took 64ms
+index-B0MjZaoP.js:26 🤖 AIBlock 87f57ea8-74b5-4d41-857a-05eceeaa20c3 rendered at 2025-08-20T14:49:49.725Z
+index-B0MjZaoP.js:26 📁 FileTreeBlock 5c9e16cf-908e-4db2-a9dc-1c1bfe72fd1e rendered at 2025-08-20T14:49:49.788Z
+index-B0MjZaoP.js:26 [Violation] 'load' handler took 303ms
+[Violation] Forced reflow while executing JavaScript took 221ms
+index-B0MjZaoP.js:26 📁 FileTreeBlock 973d71de-30f2-4837-bc47-ed6dc967eef7 rendered at 2025-08-20T14:49:51.590Z
+index-B0MjZaoP.js:26 🎯 IssueTrackerBlock initialization: {blockId: '014299ac-b190-49ec-81b5-304089f5ac92', hasData: true, milestone: 'dfdf', issuesCount: 1, rawBlock: {…}}
+index-B0MjZaoP.js:26 🎯 IssueTrackerBlock initialization: {blockId: '94222e24-94f3-4691-a133-1bd4f3404269', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-B0MjZaoP.js:26 🎯 IssueTrackerBlock initialization: {blockId: '014299ac-b190-49ec-81b5-304089f5ac92', hasData: true, milestone: 'dfdf', issuesCount: 1, rawBlock: {…}}
+index-B0MjZaoP.js:26 🎯 IssueTrackerBlock initialization: {blockId: '014299ac-b190-49ec-81b5-304089f5ac92', hasData: true, milestone: 'dfdf', issuesCount: 1, rawBlock: {…}}
+index-B0MjZaoP.js:26 🎯 IssueTrackerBlock initialization: {blockId: '014299ac-b190-49ec-81b5-304089f5ac92', hasData: true, milestone: 'dfdf', issuesCount: 1, rawBlock: {…}}
+index-B0MjZaoP.js:26 🎯 IssueTrackerBlock initialization: {blockId: '94222e24-94f3-4691-a133-1bd4f3404269', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-B0MjZaoP.js:26 📊 VersionTrackBlock 3b9602b4-46bd-49e3-9b9b-eac05c964018 rendered at 2025-08-20T14:49:51.976Z
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms
+[Violation] 'requestAnimationFrame' handler took <N>ms

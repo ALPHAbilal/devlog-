@@ -41,10 +41,17 @@
    - [ ] Have I checked one level UP from where it appears?
    - [ ] Is this a symptom or the actual cause?
 
-□ 5. SOLUTION VALIDATION
-   - [ ] Will my fix address the ROOT cause?
+□ 5. DOUBLE-CHECK MEASUREMENT (Rule 7 - Measure Twice)
+   - [ ] First measure: WHAT is the problem? (symptoms, counts, metrics)
+   - [ ] Second measure: WHY does it happen? (root cause, triggers, patterns)
+   - [ ] Can I explain why the symptom exists, not just that it exists?
+   - [ ] Have I verified my hypothesis with logs/data?
+
+□ 6. SOLUTION VALIDATION
+   - [ ] Will my fix address the ROOT cause (not the symptom)?
    - [ ] Have I considered side effects?
    - [ ] Is there a simpler solution?
+   - [ ] Did I measure twice before cutting once?
 ```
 
 ### 🔒 ENFORCEMENT: YOU MUST DOCUMENT YOUR ANALYSIS
@@ -97,6 +104,7 @@
 1. The container's loop/iteration logic
 2. What's being re-calculated unnecessarily
 3. What's happening OUTSIDE the visible area
+4. **CRITICAL**: Count renders per component - if same component renders multiple times, it's NOT a "too many components" problem, it's a re-render problem!
 
 ### Pattern 3: State Issues / Data Not Updating / Stale Values
 **ALWAYS CHECK:**
@@ -157,7 +165,47 @@
 - Require AI to predict system-wide impacts before changes
 - *This prevents: Tunnel vision optimization, fixing symptoms not causes, breaking system coherence*
 
-### RULE 7: The Swarm Intelligence Protocol  
+### RULE 7: The "Measure Twice, Cut Once" Protocol
+**When you see a performance problem, measure it TWICE from different angles before fixing.**
+
+**The Two-Measurement Mandate:**
+```
+First Measurement: WHAT is happening?
+- Count the symptoms (DOM nodes, render times, memory usage)
+- Document the visible problem
+
+Second Measurement: WHY is it happening?  
+- Check if symptoms repeat (re-renders vs initial renders)
+- Trace the root cause (state updates, timers, event handlers)
+- Verify your hypothesis with logs
+
+Only THEN: Cut once with the right fix
+```
+
+**Real Example That Would Have Saved Hours:**
+```
+WRONG (What I did):
+1. Saw: "17 blocks in DOM" 
+2. Assumed: "Too many blocks = problem"
+3. Fixed: Added virtualization
+4. Result: Broke UI, blocks re-rendering 8x worse
+
+RIGHT (What this rule enforces):
+1. First measure: "17 blocks in DOM"
+2. Second measure: "Wait, blocks rendering 3-8 times each!"
+3. Real cause: Re-render problem, not initial render count
+4. Right fix: Fix re-renders, not virtualization
+```
+
+**Signs You Only Measured Once:**
+- You say "obviously the problem is..."
+- Your fix targets the first thing you noticed
+- You can't explain WHY the symptom exists
+- Your fix makes things worse
+
+*This prevents: Wrong solutions, wasted time, breaking working features, fixing symptoms not causes*
+
+### RULE 8: The Swarm Intelligence Protocol  
 **Know WHEN and HOW to orchestrate subagents - not every task needs a swarm.**
 
 **Decision Matrix:**

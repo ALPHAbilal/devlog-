@@ -342,11 +342,20 @@ export default function ExpandedView({
     const syncManager = getSmartSyncManager(entry.id);
     smartSyncManagerRef.current = syncManager;
     
-    // Update sync status periodically
+    // Update sync status periodically (only if changed)
     const statusInterval = setInterval(() => {
       if (smartSyncManagerRef.current) {
         const status = smartSyncManagerRef.current.getSyncStatus();
-        setSyncStatus(status);
+        setSyncStatus(prevStatus => {
+          // Only update if values actually changed
+          if (!prevStatus || 
+              prevStatus.pending !== status.pending ||
+              prevStatus.syncing !== status.syncing ||
+              prevStatus.online !== status.online) {
+            return status;
+          }
+          return prevStatus;
+        });
       }
     }, 1000);
     

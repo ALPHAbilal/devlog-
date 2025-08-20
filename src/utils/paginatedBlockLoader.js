@@ -72,6 +72,9 @@ export class PaginatedBlockLoader {
       // Then fetch the page of blocks
       console.log(`PaginatedBlockLoader: Loading page ${page} (offset: ${offset}, limit: ${pageSize}) for document ${documentId}`);
       
+      // CRITICAL DEBUG: Check what table we're querying
+      console.log('[BLOCKS-LOAD-DEBUG] Querying blocks table for document:', documentId);
+      
       const { data: blocks, error } = await supabase
         .from('blocks')
         .select('*')
@@ -83,6 +86,20 @@ export class PaginatedBlockLoader {
       if (controller.signal.aborted) return null;
 
       console.log(`PaginatedBlockLoader: Loaded ${blocks?.length || 0} blocks for page ${page} of document ${documentId}`);
+      
+      // CRITICAL DEBUG: Check if blocks have type field
+      if (blocks && blocks.length > 0) {
+        console.log('[BLOCKS-LOAD-DEBUG] First block from DB:', {
+          id: blocks[0].id,
+          type: blocks[0].type,
+          has_type: !!blocks[0].type,
+          position: blocks[0].position,
+          has_position: blocks[0].position !== null && blocks[0].position !== undefined,
+          content_length: blocks[0].content?.length || 0
+        });
+      } else {
+        console.log('[BLOCKS-LOAD-DEBUG] No blocks found in blocks table');
+      }
 
       // Transform blocks
       const transformedBlocks = blocks.map(block => 

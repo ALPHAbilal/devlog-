@@ -531,33 +531,75 @@ useEffect(() => {
 
 ### Rule 16: "Collaborative Log Loop" Protocol 🔄
 **The Problem**: AI tries to fix everything blind without real runtime feedback
-**The Universal Rule**: When stuck, add logs, collaborate with user, iterate
+**The Universal Rule**: Debugging is a CONVERSATION, not a monologue. Multiple rounds beat one perfect attempt.
 
 ```markdown
-□ When debugging is difficult or unclear:
-  1. ADD STRATEGIC LOGGING:
+□ MANDATORY COLLABORATION MINDSET:
+  - [ ] Accept you CAN'T see runtime behavior - user CAN
+  - [ ] Expect 3-5 rounds minimum for complex issues
+  - [ ] Each round reveals new information
+  - [ ] Small incremental progress > Big blind changes
+  - [ ] User feedback is your EYES into the system
+
+□ THE COLLABORATION LOOP:
+  1. ADD STRATEGIC LOGGING (Round 1):
      - [ ] Log at entry/exit of suspected functions
-     - [ ] Log with timestamps: `[${new Date().toISOString()}]`
+     - [ ] Log with prefixes: `[DEBUG-${ROUND}]` where ROUND increments
      - [ ] Log actual values: `{variable: value, state: currentState}`
      - [ ] Log performance: `Operation took ${endTime - startTime}ms`
-     - [ ] Commit: "DEBUG: Added logging for [specific issue]"
+     - [ ] Commit: "DEBUG: Round 1 - Added logging for [specific issue]"
   
   2. REQUEST USER COLLABORATION:
      - [ ] "Please run the app and copy console output to terminal.md"
-     - [ ] "Please trigger [specific action] and capture logs"
-     - [ ] "Please test [specific scenario] and share results"
+     - [ ] "I expect this will take 3-5 rounds to solve properly"
+     - [ ] "Each round will get us closer to the root cause"
+     - [ ] Be specific: "Please click X, then Y, then check console"
   
   3. ANALYZE REAL DATA:
      - [ ] Read terminal.md for actual behavior
      - [ ] Compare expected vs actual values
-     - [ ] Identify patterns in timestamps
-     - [ ] Find the REAL bottleneck/error
+     - [ ] Document what you learned: "Round 1 revealed X"
+     - [ ] Identify what's still unknown
   
-  4. ITERATE BASED ON EVIDENCE:
-     - [ ] Make targeted fix based on log data
-     - [ ] Add more specific logs if needed
-     - [ ] Push and request another test
-     - [ ] Continue until resolved
+  4. ITERATE WITH PURPOSE (Rounds 2-5+):
+     - [ ] Based on Round 1: Add more targeted logs
+     - [ ] Based on Round 2: Narrow down to specific function
+     - [ ] Based on Round 3: Identify exact line causing issue
+     - [ ] Based on Round 4: Test the fix
+     - [ ] Based on Round 5: Verify no side effects
+  
+  5. EXPECT MULTIPLE ROUNDS:
+     - [ ] Round 1: Broad logging to identify area
+     - [ ] Round 2: Focused logging on problem area
+     - [ ] Round 3: Detailed state inspection
+     - [ ] Round 4: Test potential fix
+     - [ ] Round 5: Confirm fix works completely
+```
+
+**THE POWER OF ITERATION:**
+- Round 1 finds the neighborhood
+- Round 2 finds the street
+- Round 3 finds the house
+- Round 4 finds the room
+- Round 5 finds the exact problem
+
+**REAL EXAMPLE:**
+```javascript
+// Round 1: Wide net
+console.log('[DEBUG-1] Function called');
+
+// Round 2: After seeing Round 1 logs
+console.log('[DEBUG-2] State before:', state);
+console.log('[DEBUG-2] State after:', newState);
+
+// Round 3: After seeing state issue
+console.log('[DEBUG-3] Mutation point:', specificVariable);
+
+// Round 4: After finding mutation
+console.log('[DEBUG-4] Fix applied, checking:', result);
+
+// Round 5: Verification
+console.log('[DEBUG-5] All systems normal:', finalCheck);
 ```
 
 **Example Strategic Logging:**

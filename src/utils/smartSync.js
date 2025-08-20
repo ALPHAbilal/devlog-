@@ -314,6 +314,37 @@ class SmartSyncManager {
       // CRITICAL DEBUG: Check what the RPC actually did
       console.log('[SYNC-DEBUG] Full RPC Response:', JSON.stringify(data, null, 2));
       console.log('[SYNC-DEBUG] Blocks should now be in database for document:', this.documentId);
+      
+      // CRITICAL DEBUG: Show EXACTLY what fields we sent to RPC
+      console.log('[SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===');
+      console.log('[SYNC-DEBUG] RPC Function needs block_type and position to save properly!');
+      batch.forEach((change, idx) => {
+        const hasType = !!change.blockType;
+        const hasPosition = change.position !== null && change.position !== undefined;
+        
+        if (!hasType || !hasPosition) {
+          console.error(`[SYNC-DEBUG] ❌ Change ${idx + 1} MISSING CRITICAL FIELDS:`, {
+            block_type_missing: !hasType,
+            position_missing: !hasPosition,
+            block_type: change.blockType,
+            position: change.position
+          });
+        }
+        
+        console.log(`[SYNC-DEBUG] Change ${idx + 1}:`, {
+          action: change.action,
+          block_id: change.blockId,
+          block_type: change.blockType,  // THIS MUST NOT BE NULL/UNDEFINED
+          position: change.position,       // THIS MUST NOT BE NULL/UNDEFINED
+          has_type: hasType,
+          has_position: hasPosition,
+          content_length: change.content?.length || 0,
+          timestamp: change.timestamp
+        });
+      });
+      console.log('[SYNC-DEBUG] === END CRITICAL FIELDS ===');
+      console.log('[SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!');
+      
       console.log('[SYNC-DEBUG] Changes that were sent:', batch.map(c => ({
         block_id: c.blockId,
         action: c.action,

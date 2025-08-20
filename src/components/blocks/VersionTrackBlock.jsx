@@ -515,6 +515,43 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
   }, [repository, block.id, onUpdate, block.data]);
 
   // Draw metro map visualization with enhanced graphics
+  // Progressive drawing state
+  const drawingPhaseRef = useRef(0);
+  const noiseTextureRef = useRef(null);
+  const lastCanvasSizeRef = useRef({ width: 0, height: 0 });
+
+  // Create or reuse noise texture (cached for performance)
+  const getNoiseTexture = useCallback((width, height) => {
+    // Reuse existing texture if canvas size hasn't changed significantly
+    if (noiseTextureRef.current && 
+        Math.abs(lastCanvasSizeRef.current.width - width) < 50 &&
+        Math.abs(lastCanvasSizeRef.current.height - height) < 50) {
+      return noiseTextureRef.current;
+    }
+
+    // Create offscreen canvas for noise texture
+    const offscreenCanvas = document.createElement('canvas');
+    offscreenCanvas.width = Math.min(width, 200); // Limit size for performance
+    offscreenCanvas.height = Math.min(height, 200);
+    const offCtx = offscreenCanvas.getContext('2d');
+    
+    // Generate noise pattern (much fewer pixels)
+    const noisePixels = Math.min(width * height * 0.01, 500); // Cap at 500 pixels
+    for (let i = 0; i < noisePixels; i++) {
+      const x = Math.random() * offscreenCanvas.width;
+      const y = Math.random() * offscreenCanvas.height;
+      const opacity = Math.random() * 0.02 + 0.01;
+      offCtx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      offCtx.fillRect(x, y, 1, 1);
+    }
+    
+    // Cache the texture
+    noiseTextureRef.current = offscreenCanvas;
+    lastCanvasSizeRef.current = { width, height };
+    
+    return offscreenCanvas;
+  }, []);
+
   const drawMetroMap = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -525,169 +562,155 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
     // Skip drawing if canvas is not visible (performance optimization)
     if (rect.width === 0 || rect.height === 0) return;
     
-    canvas.width = rect.width * window.devicePixelRatio;
-    canvas.height = rect.height * window.devicePixelRatio;
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+    // Progressive drawing - split into phases
+    const startTime = performance.now();
+    const FRAME_BUDGET = 12; // Stay under 16ms frame budget
     
-    // Clear canvas with platform dark background
-    ctx.fillStyle = '#0a1628'; // Darker background for better contrast
-    ctx.fillRect(0, 0, rect.width, rect.height);
-    
-    // Add subtle noise texture
-    ctx.save();
-    for (let i = 0; i < rect.width * rect.height * 0.03; i++) {
-      const x = Math.random() * rect.width;
-      const y = Math.random() * rect.height;
-      const opacity = Math.random() * 0.02 + 0.01;
-      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-      ctx.fillRect(x, y, 1, 1);
+    // Phase 0: Setup canvas (only once)
+    if (drawingPhaseRef.current === 0) {
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      
+      // Clear canvas with platform dark background
+      ctx.fillStyle = '#0a1628';
+      ctx.fillRect(0, 0, rect.width, rect.height);
+      
+      drawingPhaseRef.current = 1;
+      
+      // Check time budget
+      if (performance.now() - startTime > FRAME_BUDGET) {
+        return; // Continue in next frame
+      }
     }
-    ctx.restore();
     
-    // Enable better rendering
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-    
-    // Apply zoom and pan transforms for everything
-    ctx.save();
-    ctx.translate(pan.x, pan.y);
-    ctx.scale(zoom, zoom);
-    
-    // Draw dynamic grid in world space (same coordinate system as nodes)
-    ctx.save();
-    
-    // Calculate visible bounds in world coordinates
-    const worldLeft = -pan.x / zoom;
-    const worldTop = -pan.y / zoom;
-    const worldRight = (rect.width - pan.x) / zoom;
-    const worldBottom = (rect.height - pan.y) / zoom;
-    
-    // Draw vertical lines at each node's X position
-    const nodeXPositions = [...new Set(Object.values(nodePositions).map(pos => pos.x))].sort((a, b) => a - b);
-    ctx.strokeStyle = '#1e3a5f';
-    ctx.lineWidth = 0.5 / zoom; // Adjust line width for zoom
-    ctx.globalAlpha = 0.15;
-    
-    nodeXPositions.forEach(x => {
-      // Only draw if line is within or near visible bounds
-      if (x >= worldLeft - 50 && x <= worldRight + 50) {
-        ctx.beginPath();
-        ctx.setLineDash([2 / zoom, 4 / zoom]); // Adjust dash for zoom
-        ctx.moveTo(x, worldTop - 100);
-        ctx.lineTo(x, worldBottom + 100);
-        ctx.stroke();
+    // Phase 1: Draw noise texture (cached)
+    if (drawingPhaseRef.current === 1) {
+      ctx.save();
+      const noiseTexture = getNoiseTexture(rect.width, rect.height);
+      if (noiseTexture) {
+        ctx.globalAlpha = 0.5;
+        // Draw the noise texture tiled across the canvas
+        const pattern = ctx.createPattern(noiseTexture, 'repeat');
+        ctx.fillStyle = pattern;
+        ctx.fillRect(0, 0, rect.width, rect.height);
       }
-    });
-    
-    // Draw horizontal lane guides for each branch
-    const laneLevels = [...new Set(Object.values(nodePositions).map(pos => pos.y))].sort((a, b) => a - b);
-    ctx.strokeStyle = '#1e3a5f';
-    ctx.lineWidth = 0.3 / zoom; // Adjust line width for zoom
-    ctx.globalAlpha = 0.2;
-    
-    laneLevels.forEach(y => {
-      // Only draw if line is within or near visible bounds
-      if (y >= worldTop - 50 && y <= worldBottom + 50) {
-        ctx.beginPath();
-        ctx.setLineDash([1 / zoom, 8 / zoom]); // Adjust dash for zoom
-        ctx.moveTo(worldLeft - 100, y);
-        ctx.lineTo(worldRight + 100, y);
-        ctx.stroke();
+      ctx.restore();
+      
+      drawingPhaseRef.current = 2;
+      
+      // Check time budget
+      if (performance.now() - startTime > FRAME_BUDGET) {
+        return; // Continue in next frame
       }
-    });
+    }
     
-    ctx.setLineDash([]);
-    ctx.restore();
+    // Phase 2: Setup transforms and grid
+    if (drawingPhaseRef.current === 2) {
+      // Enable better rendering
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      
+      // Apply zoom and pan transforms for everything
+      ctx.save();
+      ctx.translate(pan.x, pan.y);
+      ctx.scale(zoom, zoom);
+      
+      drawingPhaseRef.current = 3;
+      
+      // Check time budget
+      if (performance.now() - startTime > FRAME_BUDGET) {
+        return; // Continue in next frame
+      }
+    }
     
-    // Draw branch lane backgrounds
-    const laneBgData = {};
-    Object.values(repository.versions).forEach(version => {
-      const pos = nodePositions[version.id];
-      if (pos) {
-        if (!laneBgData[pos.lane]) {
-          laneBgData[pos.lane] = {
-            y: pos.y,
-            branch: version.branch || 'main',
-            color: repository.branches[version.branch || 'main']?.color || BRANCH_COLORS.main
-          };
+    // Phase 3: Draw grid (simplified for performance)
+    if (drawingPhaseRef.current === 3) {
+      // Skip grid drawing if there are too many lines (performance optimization)
+      const nodeXPositions = [...new Set(Object.values(nodePositions).map(pos => pos.x))].sort((a, b) => a - b);
+      
+      if (nodeXPositions.length < 20) { // Only draw grid for small graphs
+        // Draw dynamic grid in world space
+        ctx.save();
+        
+        // Calculate visible bounds
+        const worldLeft = -pan.x / zoom;
+        const worldTop = -pan.y / zoom;
+        const worldRight = (rect.width - pan.x) / zoom;
+        const worldBottom = (rect.height - pan.y) / zoom;
+        
+        // Draw vertical lines (limit to visible area)
+        ctx.strokeStyle = '#1e3a5f';
+        ctx.lineWidth = 0.5 / zoom;
+        ctx.globalAlpha = 0.15;
+        ctx.setLineDash([2 / zoom, 4 / zoom]);
+        
+        nodeXPositions.forEach(x => {
+          if (x >= worldLeft - 50 && x <= worldRight + 50) {
+            ctx.beginPath();
+            ctx.moveTo(x, worldTop - 100);
+            ctx.lineTo(x, worldBottom + 100);
+            ctx.stroke();
+          }
+        });
+        
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+      
+      drawingPhaseRef.current = 4;
+      
+      // Check time budget
+      if (performance.now() - startTime > FRAME_BUDGET) {
+        return; // Continue in next frame
+      }
+    }
+    
+    // Phase 4: Draw connections (most important visual element)
+    if (drawingPhaseRef.current >= 4) {
+      // Build path from current version to root for highlighting
+      const pathToRoot = new Set();
+      if (currentVersion) {
+        let current = currentVersion;
+        while (current) {
+          pathToRoot.add(current);
+          const version = repository.versions[current];
+          current = version ? version.parent : null;
         }
       }
-    });
-    
-    // Draw subtle lane backgrounds
-    ctx.save();
-    Object.values(laneBgData).forEach(lane => {
-      const isActiveBranch = lane.branch === selectedBranch;
-      ctx.fillStyle = isActiveBranch ? `${lane.color.primary}08` : `${lane.color.primary}04`;
-      ctx.fillRect(-1000, lane.y - 25, rect.width / zoom + 2000, 50);
-    });
-    ctx.restore();
-    
-    // Build path from current version to root for highlighting
-    const pathToRoot = new Set();
-    if (currentVersion) {
-      let current = currentVersion;
-      while (current) {
-        pathToRoot.add(current);
-        const version = repository.versions[current];
-        current = version ? version.parent : null;
-      }
-    }
-    
-    // Draw connections with enhanced styling
-    Object.values(repository.versions).forEach(version => {
-      if (version.parent) {
+      
+      // Draw connections in batches to manage performance
+      const connections = Object.values(repository.versions).filter(v => v.parent);
+      const connectionsPerFrame = 5; // Process a few connections per frame
+      const startIdx = (drawingPhaseRef.current - 4) * connectionsPerFrame;
+      const endIdx = Math.min(startIdx + connectionsPerFrame, connections.length);
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        const version = connections[i];
         const parentPos = nodePositions[version.parent];
         const childPos = nodePositions[version.id];
         
         if (parentPos && childPos) {
           const branch = repository.branches[version.branch] || repository.branches.main;
-          const isCurrentBranch = version.branch === selectedBranch;
-          const isHovered = hoveredNode === version.id || hoveredNode === version.parent;
           const isInPath = pathToRoot.has(version.id) && pathToRoot.has(version.parent);
           
-          // Create gradient for the connection
-          const gradient = ctx.createLinearGradient(parentPos.x, parentPos.y, childPos.x, childPos.y);
-          if (isInPath) {
-            // Highlighted path with brighter colors
-            gradient.addColorStop(0, branch.color.primary);
-            gradient.addColorStop(1, `${branch.color.primary}EE`);
-          } else if (isCurrentBranch) {
-            gradient.addColorStop(0, `${branch.color.primary}CC`);
-            gradient.addColorStop(1, branch.color.primary);
-          } else {
-            gradient.addColorStop(0, `${branch.color.primary}40`);
-            gradient.addColorStop(1, `${branch.color.primary}60`);
-          }
-          
+          // Simplified gradient (fewer color stops for performance)
           ctx.save();
-          ctx.strokeStyle = gradient;
-          ctx.lineWidth = isInPath ? 5 : (isCurrentBranch ? 4 : 3);
+          ctx.strokeStyle = isInPath ? branch.color.primary : `${branch.color.primary}80`;
+          ctx.lineWidth = isInPath ? 4 : 3;
           ctx.lineCap = 'round';
           ctx.lineJoin = 'round';
-          
-          // Add glow effect for active branch or path
-          if (isInPath || isCurrentBranch || isHovered) {
-            ctx.shadowColor = branch.color.primary;
-            ctx.shadowBlur = isInPath ? 10 : (isHovered ? 8 : 4);
-          }
           
           ctx.beginPath();
           ctx.moveTo(parentPos.x, parentPos.y);
           
-          // 90-degree connections like traditional Git graphs
+          // Simple connection lines
           if (parentPos.y !== childPos.y) {
-            // Draw a right-angle connection
             const midX = parentPos.x + (childPos.x - parentPos.x) * 0.5;
-            
-            // Horizontal line to mid-point
             ctx.lineTo(midX, parentPos.y);
-            // Vertical line to child's Y position
             ctx.lineTo(midX, childPos.y);
-            // Horizontal line to child
             ctx.lineTo(childPos.x, childPos.y);
           } else {
-            // Straight horizontal line for same lane
             ctx.lineTo(childPos.x, childPos.y);
           }
           
@@ -695,105 +718,76 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
           ctx.restore();
         }
       }
-    });
+      
+      // Move to next batch or next phase
+      if (endIdx >= connections.length) {
+        drawingPhaseRef.current = 5; // Move to nodes phase
+      } else {
+        drawingPhaseRef.current++; // Continue with more connections
+      }
+      
+      // Check time budget
+      if (performance.now() - startTime > FRAME_BUDGET) {
+        return; // Continue in next frame
+      }
+    }
     
-    // Draw nodes with modern enhanced design
-    Object.entries(repository.versions).forEach(([versionId, version]) => {
-      const pos = nodePositions[versionId];
-      if (!pos) return;
+    // Phase 5+: Draw nodes (final visual element)
+    if (drawingPhaseRef.current >= 5) {
+      const nodes = Object.entries(repository.versions);
+      const nodesPerFrame = 10; // Process nodes in batches
+      const nodePhase = drawingPhaseRef.current - 5;
+      const startIdx = nodePhase * nodesPerFrame;
+      const endIdx = Math.min(startIdx + nodesPerFrame, nodes.length);
       
-      const branch = repository.branches[version.branch] || repository.branches.main;
-      const isCurrentVersion = versionId === currentVersion;
-      const isHEAD = versionId === repository.HEAD;
-      const isHovered = hoveredNode === versionId;
-      const isMergeCommit = pos.isMerge || version.message?.toLowerCase().includes('merge');
-      const isInPath = pathToRoot.has(versionId);
-      
-      ctx.save();
-      
-      // Drop shadow for depth
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-      ctx.shadowBlur = 4;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 2;
-      
-      // Base node - larger size for important nodes
-      const nodeRadius = (isHEAD || isInPath) ? 8 : 7;
-      
-      // Draw node border/background
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, nodeRadius, 0, Math.PI * 2);
-      ctx.fillStyle = '#0a1628'; // Dark background
-      ctx.fill();
-      ctx.strokeStyle = isInPath ? branch.color.primary : `${branch.color.primary}CC`;
-      ctx.lineWidth = isInPath ? 3 : 2;
-      ctx.stroke();
-      
-      // Inner fill with branch color
-      ctx.beginPath();
-      ctx.arc(pos.x, pos.y, nodeRadius - 2, 0, Math.PI * 2);
-      ctx.fillStyle = isCurrentVersion || isInPath ? branch.color.primary : `${branch.color.primary}40`;
-      ctx.fill();
-      
-      // Reset shadow for cleaner rings
-      ctx.shadowColor = 'transparent';
-      
-      // HEAD double-ring indicator
-      if (isHEAD) {
-        // Outer ring
+      for (let i = startIdx; i < endIdx; i++) {
+        const [versionId, version] = nodes[i];
+        const pos = nodePositions[versionId];
+        if (!pos) continue;
+        
+        const branch = repository.branches[version.branch] || repository.branches.main;
+        const isCurrentVersion = versionId === currentVersion;
+        const isHEAD = versionId === repository.HEAD;
+        const isHovered = hoveredNode === versionId;
+        
+        ctx.save();
+        
+        // Simplified node drawing for performance
+        const nodeRadius = isHEAD ? 8 : 7;
+        
+        // Draw node with single operation
         ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+        ctx.arc(pos.x, pos.y, nodeRadius, 0, Math.PI * 2);
+        ctx.fillStyle = isCurrentVersion ? branch.color.primary : `${branch.color.primary}80`;
+        ctx.fill();
         ctx.strokeStyle = branch.color.primary;
         ctx.lineWidth = 2;
         ctx.stroke();
         
-        // Optional: Add a subtle glow
-        ctx.save();
-        ctx.shadowColor = branch.color.primary;
-        ctx.shadowBlur = 6;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
-        ctx.strokeStyle = `${branch.color.primary}60`;
-        ctx.lineWidth = 1;
-        ctx.stroke();
+        // HEAD indicator (simplified)
+        if (isHEAD) {
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, 12, 0, Math.PI * 2);
+          ctx.strokeStyle = branch.color.primary;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+        
         ctx.restore();
       }
       
-      // Current version highlight (if different from HEAD)
-      if (isCurrentVersion && !isHEAD) {
-        ctx.strokeStyle = `${branch.color.primary}80`;
-        ctx.lineWidth = 2;
-        ctx.setLineDash([4, 2]);
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 11, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.setLineDash([]);
+      // Check if we're done with all nodes
+      if (endIdx >= nodes.length) {
+        // Drawing complete - reset for next frame
+        drawingPhaseRef.current = 0;
+        
+        // Restore transform
+        ctx.restore();
+      } else {
+        // Continue with more nodes
+        drawingPhaseRef.current++;
       }
-      
-      // Hover effect - scale animation suggestion
-      if (isHovered) {
-        ctx.globalAlpha = 0.3;
-        ctx.beginPath();
-        ctx.arc(pos.x, pos.y, 14, 0, Math.PI * 2);
-        ctx.fillStyle = branch.color.primary;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-      
-      // Merge commit indicator - special symbol
-      if (isMergeCommit) {
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 10px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('⬡', pos.x, pos.y);
-      }
-      
-      ctx.restore();
-    });
-    
-    // Restore transform
-    ctx.restore();
+    }
     
     // Draw branch labels aligned with their lanes
     // Extract branch lanes from nodePositions
@@ -839,7 +833,12 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
         ctx.setLineDash([]);
       }
     });
-  }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
+  }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan, getNoiseTexture]);
+
+  // Reset drawing phase when key props change
+  useEffect(() => {
+    drawingPhaseRef.current = 0;
+  }, [repository, nodePositions, currentVersion, selectedBranch, zoom, pan]);
 
   // Animation loop - only run when truly visible (Rule 7: Measure twice, cut once)
   useEffect(() => {

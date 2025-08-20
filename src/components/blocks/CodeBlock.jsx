@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 

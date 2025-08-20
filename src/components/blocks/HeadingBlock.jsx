@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, memo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 
 function HeadingBlock({ block, onUpdate }) {
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);

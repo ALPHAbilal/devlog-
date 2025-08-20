@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import FloatingToolbar from '../FloatingToolbar';
 import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';

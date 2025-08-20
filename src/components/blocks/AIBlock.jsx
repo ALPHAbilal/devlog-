@@ -1,4 +1,4 @@
-import { useState, memo, useEffect } from 'react';
+import React, { useState, memo, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 
 function AIBlock({ block, onUpdate }) {

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, memo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Bot, User, Plus, Copy, Check, ChevronDown, ChevronUp, Sparkles, FileText, AlertCircle } from 'lucide-react';
 import { parseMarkdown } from '../../utils/parseMarkdown.jsx';
 import '../AIBlockScroll.css';

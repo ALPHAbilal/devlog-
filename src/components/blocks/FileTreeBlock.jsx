@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, ChevronDown, Folder, FolderOpen, File, Plus, X, Check, Grip, Code, FileText, Eye, Edit3 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';

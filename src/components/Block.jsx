@@ -1,4 +1,4 @@
-import { useState, useEffect, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useBlockLazyLoading } from '../hooks/useBlockLazyLoading';
 import LazyBlockSkeleton from './blocks/LazyBlockSkeleton';
 import TextBlock from './blocks/TextBlock';

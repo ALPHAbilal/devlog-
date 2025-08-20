@@ -39,6 +39,14 @@
 - Consolidate before you proliferate
 - *This prevents: Cascade re-renders, unmaintainable components*
 
+### RULE 6: The Context Preservation Protocol
+**Before solving ANY problem, force the AI to map three contexts: System → Container → Component**
+- Make AI write down what the system does (entire app purpose)
+- Make AI identify where this component lives (container architecture)
+- Only then let AI touch the component code
+- Require AI to predict system-wide impacts before changes
+- *This prevents: Tunnel vision optimization, fixing symptoms not causes, breaking system coherence*
+
 ---
 
 ## 🏗️ ARCHITECTURAL PRACTICES THAT PREVENT DISASTERS

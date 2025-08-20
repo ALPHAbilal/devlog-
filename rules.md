@@ -47,6 +47,49 @@
 - Require AI to predict system-wide impacts before changes
 - *This prevents: Tunnel vision optimization, fixing symptoms not causes, breaking system coherence*
 
+### RULE 7: The Swarm Intelligence Protocol  
+**Know WHEN and HOW to orchestrate subagents - not every task needs a swarm.**
+
+**Decision Matrix:**
+```
+Files Touched | Complexity | Action
+-------------|------------|--------
+1-2 files    | Simple     | Work solo (faster, less overhead)
+3-5 files    | Medium     | 2-3 focused agents
+5+ files     | Complex    | Full swarm orchestration
+Unknown      | Research   | Mesh topology (explore all angles)
+```
+
+**Topology Selection:**
+- **Mesh (all-to-all):** Research, brainstorming, finding root causes
+- **Hierarchical (tree):** Development, structured implementation  
+- **Star (hub-spoke):** Simple coordination, status collection
+- **Ring (sequential):** Pipeline processing, step-by-step validation
+
+**Orchestration Rules:**
+1. **ALWAYS spawn agents in ONE message** - parallel > sequential (4x faster)
+2. **Give each agent FULL context** - include files, errors, goals
+3. **Specify EXACT deliverables** - "find bugs" ❌ vs "analyze lines 450-500 for race conditions" ✅
+4. **Set agent limits** - max 8 agents (coordination overhead > benefits beyond this)
+5. **Synthesize before acting** - collect all findings, then make ONE coherent change
+
+**Example Orchestration:**
+```javascript
+// GOOD: Parallel specialized agents
+Task("Architecture Agent: Analyze component hierarchy in src/")
+Task("Performance Agent: Profile rendering bottlenecks") 
+Task("Test Agent: Create test coverage report")
+// All launch together, work in parallel
+
+// BAD: Sequential generic agents
+Task("Agent 1: Look at the code")
+// Wait for completion...
+Task("Agent 2: Find problems")
+// 4x slower, shallow analysis
+```
+
+- *This prevents: Overhead from unnecessary agents, analysis paralysis, coordination chaos, missing critical perspectives*
+
 ---
 
 ## 🏗️ ARCHITECTURAL PRACTICES THAT PREVENT DISASTERS

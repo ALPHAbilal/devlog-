@@ -311,6 +311,17 @@ class SmartSyncManager {
       // Log the response from the database
       console.log('SmartSync: RPC response:', data);
       
+      // CRITICAL DEBUG: Check what the RPC actually did
+      console.log('[SYNC-DEBUG] Full RPC Response:', JSON.stringify(data, null, 2));
+      console.log('[SYNC-DEBUG] Blocks should now be in database for document:', this.documentId);
+      console.log('[SYNC-DEBUG] Changes that were sent:', batch.map(c => ({
+        block_id: c.blockId,
+        action: c.action,
+        type: c.blockType,
+        position: c.position,
+        content_length: c.content?.length || 0
+      })));
+      
       // Log detailed errors if present
       if (data && data.errors && data.errors.length > 0) {
         console.error('SmartSync: Database errors detail:', data.errors);

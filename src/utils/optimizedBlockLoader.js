@@ -55,16 +55,43 @@ export class OptimizedBlockLoader {
           
           // Fetch all blocks in one query - much faster than streaming
           console.log(`OptimizedBlockLoader: Loading blocks for document ${documentId}`);
+          
+          // CRITICAL DEBUG: Check what we're querying
+          console.log('[BLOCKS-DEBUG] Attempting to load from blocks table');
+          console.log('[BLOCKS-DEBUG] Query: SELECT * FROM blocks WHERE document_id =', documentId);
+          
           const { data: blocks, error } = await supabase
             .from('blocks')
             .select('*')
             .eq('document_id', documentId)
             .order('position');
 
-          if (error) throw error;
+          if (error) {
+            console.error('[BLOCKS-DEBUG] Error loading blocks:', error);
+            console.error('[BLOCKS-DEBUG] Error details:', {
+              message: error.message,
+              details: error.details,
+              hint: error.hint,
+              code: error.code
+            });
+            throw error;
+          }
           if (controller.signal.aborted) return null;
 
           console.log(`OptimizedBlockLoader: Loaded ${blocks?.length || 0} blocks for document ${documentId}`);
+          
+          // DEBUG: Show what we actually got
+          if (blocks && blocks.length > 0) {
+            console.log('[BLOCKS-DEBUG] First block structure:', {
+              id: blocks[0].id,
+              type: blocks[0].type,
+              position: blocks[0].position,
+              has_content: !!blocks[0].content,
+              content_length: blocks[0].content?.length || 0
+            });
+          } else {
+            console.log('[BLOCKS-DEBUG] No blocks found in blocks table for document:', documentId);
+          }
           const transformedBlocks = blocks.map(this.transformBlockFromDB);
           
           // Cache the result

@@ -1,272 +1,131 @@
-# Claude Code Configuration - SPARC Development Environment
+# CLAUDE.md
 
-## 🚨 CRITICAL: CONCURRENT EXECUTION & FILE MANAGEMENT
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-**ABSOLUTE RULES**:
-1. ALL operations MUST be concurrent/parallel in a single message
-2. **NEVER save working files, text/mds and tests to the root folder**
-3. ALWAYS organize files in appropriate subdirectories
+## Important: Read rules.md First
+**CRITICAL**: Before working on this codebase, read the `rules.md` file which contains mandatory debugging protocols and strategic development rules learned from actual debugging sessions. These rules will prevent common mistakes and save significant time.
 
-### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
-
-**MANDATORY PATTERNS:**
-- **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
-- **Task tool**: ALWAYS spawn ALL agents in ONE message with full instructions
-- **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
-- **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
-- **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
-
-### 📁 File Organization Rules
-
-**NEVER save to root folder. Use these directories:**
-- `/src` - Source code files
-- `/tests` - Test files
-- `/docs` - Documentation and markdown files
-- `/config` - Configuration files
-- `/scripts` - Utility scripts
-- `/examples` - Example code
-
-## Project Overview
-
-This project uses SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology with Claude-Flow orchestration for systematic Test-Driven Development.
-
-## SPARC Commands
-
-### Core Commands
-- `npx claude-flow sparc modes` - List available modes
-- `npx claude-flow sparc run <mode> "<task>"` - Execute specific mode
-- `npx claude-flow sparc tdd "<feature>"` - Run complete TDD workflow
-- `npx claude-flow sparc info <mode>` - Get mode details
-
-### Batchtools Commands
-- `npx claude-flow sparc batch <modes> "<task>"` - Parallel execution
-- `npx claude-flow sparc pipeline "<task>"` - Full pipeline processing
-- `npx claude-flow sparc concurrent <mode> "<tasks-file>"` - Multi-task processing
-
-### Build Commands
-- `npm run build` - Build project
-- `npm run test` - Run tests
-- `npm run lint` - Linting
-- `npm run typecheck` - Type checking
-
-## SPARC Workflow Phases
-
-1. **Specification** - Requirements analysis (`sparc run spec-pseudocode`)
-2. **Pseudocode** - Algorithm design (`sparc run spec-pseudocode`)
-3. **Architecture** - System design (`sparc run architect`)
-4. **Refinement** - TDD implementation (`sparc tdd`)
-5. **Completion** - Integration (`sparc run integration`)
-
-## Code Style & Best Practices
-
-- **Modular Design**: Files under 500 lines
-- **Environment Safety**: Never hardcode secrets
-- **Test-First**: Write tests before implementation
-- **Clean Architecture**: Separate concerns
-- **Documentation**: Keep updated
-
-## 🚀 Available Agents (54 Total)
-
-### Core Development
-`coder`, `reviewer`, `tester`, `planner`, `researcher`
-
-### Swarm Coordination
-`hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`, `collective-intelligence-coordinator`, `swarm-memory-manager`
-
-### Consensus & Distributed
-`byzantine-coordinator`, `raft-manager`, `gossip-coordinator`, `consensus-builder`, `crdt-synchronizer`, `quorum-manager`, `security-manager`
-
-### Performance & Optimization
-`perf-analyzer`, `performance-benchmarker`, `task-orchestrator`, `memory-coordinator`, `smart-agent`
-
-### GitHub & Repository
-`github-modes`, `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`, `workflow-automation`, `project-board-sync`, `repo-architect`, `multi-repo-swarm`
-
-### SPARC Methodology
-`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`, `refinement`
-
-### Specialized Development
-`backend-dev`, `mobile-dev`, `ml-developer`, `cicd-engineer`, `api-docs`, `system-architect`, `code-analyzer`, `base-template-generator`
-
-### Testing & Validation
-`tdd-london-swarm`, `production-validator`
-
-### Migration & Planning
-`migration-planner`, `swarm-init`
-
-## 🎯 Claude Code vs MCP Tools
-
-### Claude Code Handles ALL:
-- File operations (Read, Write, Edit, MultiEdit, Glob, Grep)
-- Code generation and programming
-- Bash commands and system operations
-- Implementation work
-- Project navigation and analysis
-- TodoWrite and task management
-- Git operations
-- Package management
-- Testing and debugging
-
-### MCP Tools ONLY:
-- Coordination and planning
-- Memory management
-- Neural features
-- Performance tracking
-- Swarm orchestration
-- GitHub integration
-
-**KEY**: MCP coordinates, Claude Code executes.
-
-## 🚀 Quick Setup
+## Development Commands
 
 ```bash
-# Add Claude Flow MCP server
-claude mcp add claude-flow npx claude-flow@alpha mcp start
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Run linting
+npm run lint
+
+# Preview production build
+npm run preview
 ```
 
-## MCP Tool Categories
+## High-Level Architecture
 
-### Coordination
-`swarm_init`, `agent_spawn`, `task_orchestrate`
+### Core Concept: Block-Based Document System
+Devlog is a developer-focused knowledge management system built around a flexible block-based architecture. Each document consists of various block types (text, code, heading, AI conversation, table, file tree, etc.) that can be reordered, converted, and interconnected.
 
-### Monitoring
-`swarm_status`, `agent_list`, `agent_metrics`, `task_status`, `task_results`
+### Key Architectural Components
 
-### Memory & Neural
-`memory_usage`, `neural_status`, `neural_train`, `neural_patterns`
+#### 1. Storage Architecture (Multi-Layer)
+- **Memory Cache** → **IndexedDB** → **Supabase**
+- Hybrid storage with cloud-first (Supabase) and offline-first (IndexedDB) fallback
+- Automatic compression using LZ-String for 50-80% space savings
+- Storage adapters in `src/utils/storage/`:
+  - `SupabaseAdapterOptimized.js` - Cloud storage with Row Level Security
+  - `IndexedDBAdapter.js` - Local storage with 1GB+ capacity
+  - `CompressedStorageAdapter.js` - Automatic compression layer
 
-### GitHub Integration
-`github_swarm`, `repo_analyze`, `pr_enhance`, `issue_triage`, `code_review`
+#### 2. Block System
+- Block types defined in `src/components/blocks/`
+- Each block type has specific metadata stored in JSONB
+- Position-based ordering for blocks within documents
+- Block rendering coordinated through `src/components/Block.jsx`
 
-### System
-`benchmark_run`, `features_detect`, `swarm_monitor`
+#### 3. Performance Optimizations
+- **Virtualization**: React-window for list rendering
+- **Lazy Loading**: Components loaded on demand
+- **Optimistic Updates**: Instant UI feedback before database sync
+- **Debounced Saves**: Prevents overwrites during rapid typing
+- **Background Operations**: All storage operations are async
 
-## 📋 Agent Coordination Protocol
+#### 4. State Management
+- No centralized state management library (no Redux/MobX)
+- React hooks for local state management
+- Custom hooks in `src/hooks/` for shared logic
+- Event-driven updates using `src/utils/eventBus.js`
 
-### Every Agent MUST:
+## Important Development Practices
 
-**1️⃣ BEFORE Work:**
-```bash
-npx claude-flow@alpha hooks pre-task --description "[task]"
-npx claude-flow@alpha hooks session-restore --session-id "swarm-[id]"
+### Critical: Follow rules.md Protocol
+The `rules.md` file contains comprehensive debugging protocols and strategic development rules that MUST be followed. Key highlights:
+- **Container Rule**: Always check parent/container before component
+- **Measurement Manifesto**: Profile and measure before optimizing
+- **Collaborative Loop Protocol**: Add logs, test, share terminal.md when stuck
+- **Performance Budgets**: 16ms for animations, 100ms for interactions
+- Detailed debugging checklists and error patterns
+
+### Performance Budgets
+- Animation frame: 16ms (60fps)
+- User input response: 100ms maximum
+- Page load: 3 seconds maximum
+- Database query: 100ms maximum
+
+### Auto-Save System
+- Changes saved after 1 second of inactivity
+- Local backup created before every save
+- 3 retry attempts with exponential backoff
+- Backups in both memory and localStorage
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── blocks/          # Individual block type components
+│   ├── Block.jsx        # Main block renderer
+│   └── ...             # UI components
+├── hooks/              # Custom React hooks
+├── pages/              # Route components
+├── services/           # Business logic services
+├── utils/
+│   ├── storage/        # Storage adapters
+│   └── ...            # Utility functions
+└── main.jsx           # App entry point
 ```
 
-**2️⃣ DURING Work:**
-```bash
-npx claude-flow@alpha hooks post-edit --file "[file]" --memory-key "swarm/[agent]/[step]"
-npx claude-flow@alpha hooks notify --message "[what was done]"
-```
+## Testing & Debugging
 
-**3️⃣ AFTER Work:**
-```bash
-npx claude-flow@alpha hooks post-task --task-id "[task]"
-npx claude-flow@alpha hooks session-end --export-metrics true
-```
+### Performance Monitoring
+- Built-in performance monitor: `Cmd/Ctrl + Shift + P`
+- System health monitor: `Cmd/Ctrl + Shift + H`
+- Animation performance tracking in `src/utils/animationPerformance.js`
 
-## 🎯 Concurrent Execution Examples
+### Common Debugging Scenarios
+1. **Block rendering issues**: Check `BlockErrorBoundary.jsx` and parent container
+2. **Storage issues**: Check IndexedDB/Supabase adapters and network status
+3. **Performance issues**: Profile with DevTools, check for re-renders
+4. **State issues**: Check event bus and hook dependencies
 
-### ✅ CORRECT (Single Message):
-```javascript
-[BatchTool]:
-  // Initialize swarm
-  mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
-  mcp__claude-flow__agent_spawn { type: "researcher" }
-  mcp__claude-flow__agent_spawn { type: "coder" }
-  mcp__claude-flow__agent_spawn { type: "tester" }
-  
-  // Spawn agents with Task tool
-  Task("Research agent: Analyze requirements...")
-  Task("Coder agent: Implement features...")
-  Task("Tester agent: Create test suite...")
-  
-  // Batch todos
-  TodoWrite { todos: [
-    {id: "1", content: "Research", status: "in_progress", priority: "high"},
-    {id: "2", content: "Design", status: "pending", priority: "high"},
-    {id: "3", content: "Implement", status: "pending", priority: "high"},
-    {id: "4", content: "Test", status: "pending", priority: "medium"},
-    {id: "5", content: "Document", status: "pending", priority: "low"}
-  ]}
-  
-  // File operations
-  Bash "mkdir -p app/{src,tests,docs}"
-  Write "app/src/index.js"
-  Write "app/tests/index.test.js"
-  Write "app/docs/README.md"
-```
+## Key Dependencies
+- **React 19** with Strict Mode
+- **Vite** for build tooling
+- **Supabase** for cloud storage and auth
+- **Framer Motion** for animations
+- **React Window** for virtualization
+- **Prism React Renderer** for syntax highlighting
+- **DND Kit** for drag and drop
 
-### ❌ WRONG (Multiple Messages):
-```javascript
-Message 1: mcp__claude-flow__swarm_init
-Message 2: Task("agent 1")
-Message 3: TodoWrite { todos: [single todo] }
-Message 4: Write "file.js"
-// This breaks parallel coordination!
-```
+## Environment Configuration
+- Uses Vite environment variables
+- Supabase credentials required for cloud features
+- Sentry integration for error tracking in production
 
-## Performance Benefits
-
-- **84.8% SWE-Bench solve rate**
-- **32.3% token reduction**
-- **2.8-4.4x speed improvement**
-- **27+ neural models**
-
-## Hooks Integration
-
-### Pre-Operation
-- Auto-assign agents by file type
-- Validate commands for safety
-- Prepare resources automatically
-- Optimize topology by complexity
-- Cache searches
-
-### Post-Operation
-- Auto-format code
-- Train neural patterns
-- Update memory
-- Analyze performance
-- Track token usage
-
-### Session Management
-- Generate summaries
-- Persist state
-- Track metrics
-- Restore context
-- Export workflows
-
-## Advanced Features (v2.0.0)
-
-- 🚀 Automatic Topology Selection
-- ⚡ Parallel Execution (2.8-4.4x speed)
-- 🧠 Neural Training
-- 📊 Bottleneck Analysis
-- 🤖 Smart Auto-Spawning
-- 🛡️ Self-Healing Workflows
-- 💾 Cross-Session Memory
-- 🔗 GitHub Integration
-
-## Integration Tips
-
-1. Start with basic swarm init
-2. Scale agents gradually
-3. Use memory for context
-4. Monitor progress regularly
-5. Train patterns from success
-6. Enable hooks automation
-7. Use GitHub tools first
-
-## Support
-
-- Documentation: https://github.com/ruvnet/claude-flow
-- Issues: https://github.com/ruvnet/claude-flow/issues
-
----
-
-Remember: **Claude Flow coordinates, Claude Code creates!**
-
-# important-instruction-reminders
-Do what has been asked; nothing more, nothing less.
-NEVER create files unless they're absolutely necessary for achieving your goal.
-ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
-Never save working files, text/mds and tests to the root folder.
+## Development Tips
+1. **Always run `npm run lint` before committing** - catches common issues
+2. **Test with 10x expected data** - ensure scalability
+3. **Check container components first** when debugging
+4. **Use existing libraries** before writing custom solutions
+5. **Add strategic logging** when debugging unclear issues
+6. **Follow the 16ms frame budget** for smooth animations

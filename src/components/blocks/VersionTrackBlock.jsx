@@ -364,6 +364,7 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
     deleted: []  // { path }
   });
   const [hoveredNodeDetails, setHoveredNodeDetails] = useState(null);
+  const [isCanvasReady, setIsCanvasReady] = useState(false);
 
   const codeContainerRef = useRef(null);
   
@@ -520,6 +521,9 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
 
     const ctx = canvas.getContext('2d');
     const rect = canvas.getBoundingClientRect();
+    
+    // Skip drawing if canvas is not visible (performance optimization)
+    if (rect.width === 0 || rect.height === 0) return;
     
     canvas.width = rect.width * window.devicePixelRatio;
     canvas.height = rect.height * window.devicePixelRatio;
@@ -853,23 +857,49 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
       return;
     }
 
-    const animate = () => {
-      // Only continue if still in view
-      if (isInView) {
-        drawMetroMap();
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }
+    // Defer initial canvas drawing to prevent RAF violations
+    // Use requestIdleCallback for non-blocking initial render
+    const startAnimation = () => {
+      const animate = () => {
+        // Only continue if still in view
+        if (isInView) {
+          drawMetroMap();
+          animationFrameRef.current = requestAnimationFrame(animate);
+        }
+      };
+      
+      animate();
     };
-    
-    // Start animation when in view
-    animate();
-    
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-    };
+
+    // Use requestIdleCallback if available, otherwise setTimeout
+    if ('requestIdleCallback' in window) {
+      const idleCallbackId = requestIdleCallback(() => {
+        setIsCanvasReady(true);
+        startAnimation();
+      }, { timeout: 100 });
+      
+      return () => {
+        cancelIdleCallback(idleCallbackId);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+      };
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      const timeoutId = setTimeout(() => {
+        setIsCanvasReady(true);
+        startAnimation();
+      }, 16);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+          animationFrameRef.current = null;
+        }
+      };
+    }
   }, [drawMetroMap, isInView, block.id]);
 
   // Keyboard navigation and wheel zoom - managed with memory cleanup
@@ -2015,9 +2045,14 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
 
       {/* Metro Map Visualization */}
       <div className="relative bg-dark-primary h-48 overflow-hidden flex-shrink-0 border-b-2 border-dark-secondary">
+        {!isCanvasReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-dark-primary/50">
+            <div className="text-text-secondary text-xs">Loading visualization...</div>
+          </div>
+        )}
         <canvas
           ref={canvasRef}
-          className="w-full h-full"
+          className={`w-full h-full transition-opacity duration-300 ${isCanvasReady ? 'opacity-100' : 'opacity-0'}`}
           style={{ 
             imageRendering: 'auto',
             cursor: isDragging ? 'grabbing' : (hoveredNode ? 'pointer' : 'grab'),

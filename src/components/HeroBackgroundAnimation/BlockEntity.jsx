@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { memo } from 'react';
+import React, { memo } from 'react';
 
 const blockIcons = {
   code: (

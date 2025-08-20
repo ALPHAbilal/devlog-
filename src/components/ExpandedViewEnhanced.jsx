@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue } from 'react';
+import React, { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue, memo } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
 import { VariableSizeList as List } from 'react-window';

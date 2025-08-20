@@ -1,4 +1,4 @@
-import { useEffect, useState, memo } from 'react';
+import React, { useEffect, useState, memo } from 'react';
 import { deviceCapabilities, performanceMonitor } from '../utils/mobilePerformance';
 import MobileNavigation from './MobileNavigation';
 

@@ -1,7 +1,7 @@
-import { useState, useRef, useEffect, memo } from 'react';
+import React, { useState, useRef, useEffect, memo } from 'react';
 import { Plus, X, AlignLeft, AlignCenter, AlignRight, Download, Copy, Check, Table } from 'lucide-react';
 
-const TableBlock = memo(function TableBlock({ block, onUpdate, isFocused, onFocus }) {
+const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) {
   // Custom CSS for smooth scrolling
   const customStyles = `
     .table-scroll::-webkit-scrollbar {
@@ -677,9 +677,10 @@ const TableBlock = memo(function TableBlock({ block, onUpdate, isFocused, onFocu
       )}
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Fast shallow comparison
-  if (prevProps.block.id !== nextProps.block.id) return false;
+};
+
+export default memo(TableBlock, (prevProps, nextProps) => {
+  // Standard checks first
   if (prevProps.isFocused !== nextProps.isFocused) return false;
   if (prevProps.onUpdate !== nextProps.onUpdate) return false;
   if (prevProps.onFocus !== nextProps.onFocus) return false;
@@ -701,5 +702,3 @@ const TableBlock = memo(function TableBlock({ block, onUpdate, isFocused, onFocu
     prevData.rows?.length === nextData.rows?.length
   );
 });
-
-export default TableBlock;

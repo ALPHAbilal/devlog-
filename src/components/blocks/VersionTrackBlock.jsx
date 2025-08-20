@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { useCanvasVisibility } from '../../hooks/useIntersectionObserver';
+import { motion, useInView } from 'framer-motion';
 import { useCanvasCleanup, useBlockMemoryManagement } from '../../hooks/useMemoryManagement';
 import { ChevronDown, Save, GitBranch, Clock, User, Code2, ZoomIn, ZoomOut, Maximize2, 
          FileText, File, Folder, FolderOpen, ChevronRight, Plus, X, PanelLeftClose, PanelLeft,
@@ -367,10 +367,11 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
 
   const codeContainerRef = useRef(null);
   
-  // Use intersection observer to control canvas animation
-  const { targetRef: visibilityRef, shouldAnimate } = useCanvasVisibility({
-    threshold: 0.1,
-    rootMargin: '100px'
+  // Use framer-motion for viewport detection (Rule 3: Proven library > Custom implementation)
+  const visibilityRef = useRef(null);
+  const isInView = useInView(visibilityRef, { 
+    once: false,  // Re-trigger when scrolling back
+    amount: 0.3   // Start animating when 30% visible
   });
   
   // Memory management for canvas and resources
@@ -836,10 +837,15 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
     });
   }, [repository, nodePositions, currentVersion, hoveredNode, selectedBranch, zoom, pan]);
 
-  // Animation loop - only run when visible
+  // Animation loop - only run when truly visible (Rule 7: Measure twice, cut once)
   useEffect(() => {
-    // Only animate when component is visible
-    if (!shouldAnimate) {
+    // Performance logging to verify fix
+    if (DEBUG) {
+      console.log(`📊 VersionTrackBlock ${block.id}: ${isInView ? 'ANIMATING' : 'PAUSED'}`);
+    }
+    
+    // Stop animation when out of view
+    if (!isInView) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
         animationFrameRef.current = null;
@@ -848,14 +854,14 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
     }
 
     const animate = () => {
-      // Double-check visibility before drawing
-      if (shouldAnimate) {
+      // Only continue if still in view
+      if (isInView) {
         drawMetroMap();
         animationFrameRef.current = requestAnimationFrame(animate);
       }
     };
     
-    // Start animation and register for cleanup
+    // Start animation when in view
     animate();
     
     return () => {
@@ -864,7 +870,7 @@ function VersionTrackBlock({ block, onUpdate, isActive }) {
         animationFrameRef.current = null;
       }
     };
-  }, [drawMetroMap, shouldAnimate]);
+  }, [drawMetroMap, isInView, block.id]);
 
   // Keyboard navigation and wheel zoom - managed with memory cleanup
   useEffect(() => {

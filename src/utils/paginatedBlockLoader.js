@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { optimizedBlockLoader } from './optimizedBlockLoader';
+import { LRUCache } from './storage/LRUCache';
 
 /**
  * Paginated block loader for handling large documents efficiently
@@ -7,10 +8,14 @@ import { optimizedBlockLoader } from './optimizedBlockLoader';
 export class PaginatedBlockLoader {
   constructor() {
     this.pageSize = 50; // Default page size
-    this.cache = new Map(); // documentId -> { pages: Map, totalCount: number }
+    // Using LRUCache with 30-second TTL for active editing (was 5 minutes!)
+    this.cache = new LRUCache({ 
+      maxSize: 50,  // Max 50 documents cached
+      ttl: 30000    // 30 seconds TTL - perfect for active editing
+    });
     this.activeLoads = new Map();
     this.pendingRequests = new Map(); // Track pending requests to deduplicate
-    this.cacheValidityMs = 5 * 60 * 1000; // 5 minutes cache validity (was 5 seconds)
+    this.cacheValidityMs = 30000; // 30 seconds cache validity (was 5 minutes!)
   }
 
   /**
@@ -18,34 +23,33 @@ export class PaginatedBlockLoader {
    */
   async loadDocumentFirstPage(documentId, pageSize = this.pageSize) {
     // Check if we have cached data
-    const cached = this.cache.get(documentId);
-    if (cached && cached.pages.has(0)) {
-      const cachedPage = cached.pages.get(0);
+    const cacheKey = `${documentId}-page-0`;
+    const cachedPage = this.cache.get(cacheKey);
+    if (cachedPage) {
       const cacheAge = Date.now() - cachedPage.timestamp;
-      console.log('[DEBUG-R1] PaginatedBlockLoader.loadInitialPage: Cache check', {
+      console.log('[DEBUG-R3] PaginatedBlockLoader.loadInitialPage: Cache HIT', {
         documentId,
-        cacheExists: true,
-        cacheAge: cacheAge + 'ms',
-        cacheValidityMs: this.cacheValidityMs + 'ms (5 MINUTES!)',
-        cacheValid: cacheAge < this.cacheValidityMs,
-        willUseCache: cacheAge < this.cacheValidityMs,
+        cacheKey,
         cachedBlockCount: cachedPage.blocks?.length,
+        ttl: '30 seconds',
         firstCachedBlockPreview: cachedPage.blocks?.[0] ? {
           id: cachedPage.blocks[0].id,
           contentPreview: cachedPage.blocks[0].content?.substring(0, 50)
         } : null
       });
-      if (cacheAge < this.cacheValidityMs) {
-        console.log('[DEBUG-R1] PaginatedBlockLoader: ⚠️ USING 5-MINUTE CACHED DATA (definitely stale!)');
-        return {
-          blocks: cachedPage.blocks,
-          totalCount: cached.totalCount,
-          hasMore: cached.totalCount > pageSize,
-          fromCache: true
-        };
-      }
+      // LRUCache handles TTL automatically, so if we got data, it's fresh
+      return {
+        blocks: cachedPage.blocks,
+        totalCount: cachedPage.totalCount || cachedPage.blocks.length,
+        hasMore: cachedPage.totalCount > pageSize,
+        fromCache: true
+      };
     } else {
-      console.log('[DEBUG-R1] PaginatedBlockLoader.loadInitialPage: No cache found');
+      console.log('[DEBUG-R3] PaginatedBlockLoader.loadInitialPage: Cache MISS', {
+        documentId,
+        cacheKey,
+        reason: 'No cached data or TTL expired'
+      });
     }
 
     return this.loadDocumentPage(documentId, 0, pageSize);
@@ -136,20 +140,24 @@ export class PaginatedBlockLoader {
         optimizedBlockLoader.transformBlockFromDB(block)
       );
 
-      // Update cache
-      if (!this.cache.has(documentId)) {
-        this.cache.set(documentId, {
-          pages: new Map(),
-          totalCount: totalCount || 0
-        });
-      }
-
-      const docCache = this.cache.get(documentId);
-      docCache.pages.set(page, {
+      // Update cache with page-specific key
+      const pageCacheKey = `${documentId}-page-${page}`;
+      this.cache.set(pageCacheKey, {
         blocks: transformedBlocks,
+        totalCount: totalCount || 0,
         timestamp: Date.now()
       });
-      docCache.totalCount = totalCount || 0;
+      
+      // Also cache the total count separately
+      this.cache.set(`${documentId}-totalCount`, totalCount || 0);
+      
+      console.log('[DEBUG-R3] Cached page data:', {
+        documentId,
+        page,
+        cacheKey: pageCacheKey,
+        blockCount: transformedBlocks.length,
+        ttl: '30 seconds'
+      });
 
         this.activeLoads.delete(cacheKey);
         this.pendingRequests.delete(cacheKey); // Clean up pending request
@@ -180,18 +188,17 @@ export class PaginatedBlockLoader {
    * Load all blocks up to a certain page (for smooth scrolling)
    */
   async loadBlocksUpToPage(documentId, targetPage, pageSize = this.pageSize) {
-    const docCache = this.cache.get(documentId);
     const allBlocks = [];
     
     // Load all pages up to target page
     for (let page = 0; page <= targetPage; page++) {
       // Check cache first
-      if (docCache && docCache.pages.has(page)) {
-        const cachedPage = docCache.pages.get(page);
-        if (Date.now() - cachedPage.timestamp < this.cacheValidityMs) {
-          allBlocks.push(...cachedPage.blocks);
-          continue;
-        }
+      const pageCacheKey = `${documentId}-page-${page}`;
+      const cachedPage = this.cache.get(pageCacheKey);
+      if (cachedPage) {
+        // LRUCache handles TTL, so if we got data, it's fresh
+        allBlocks.push(...cachedPage.blocks);
+        continue;
       }
 
       // Load page if not cached
@@ -201,10 +208,11 @@ export class PaginatedBlockLoader {
       }
     }
 
+    const totalCount = this.cache.get(`${documentId}-totalCount`) || allBlocks.length;
     return {
       blocks: allBlocks,
-      totalCount: docCache?.totalCount || allBlocks.length,
-      hasMore: allBlocks.length < (docCache?.totalCount || 0)
+      totalCount: totalCount,
+      hasMore: allBlocks.length < totalCount
     };
   }
 
@@ -213,18 +221,17 @@ export class PaginatedBlockLoader {
    */
   async preloadNextPage(documentId, currentPage, pageSize = this.pageSize) {
     const nextPage = currentPage + 1;
-    const docCache = this.cache.get(documentId);
+    const totalCount = this.cache.get(`${documentId}-totalCount`);
     
     // Check if we already have the next page or if there are no more pages
-    if (docCache) {
-      const totalPages = Math.ceil(docCache.totalCount / pageSize);
+    if (totalCount) {
+      const totalPages = Math.ceil(totalCount / pageSize);
       if (nextPage >= totalPages) return;
       
-      if (docCache.pages.has(nextPage)) {
-        const cachedPage = docCache.pages.get(nextPage);
-        if (Date.now() - cachedPage.timestamp < this.cacheValidityMs) {
-          return; // Already cached and fresh
-        }
+      const pageCacheKey = `${documentId}-page-${nextPage}`;
+      const cachedPage = this.cache.get(pageCacheKey);
+      if (cachedPage) {
+        return; // Already cached and fresh (LRUCache handles TTL)
       }
     }
 
@@ -262,7 +269,21 @@ export class PaginatedBlockLoader {
    * Clear cache for a document
    */
   clearCache(documentId) {
-    this.cache.delete(documentId);
+    console.log('[DEBUG-R3] PaginatedBlockLoader.clearCache called:', {
+      documentId,
+      timestamp: Date.now()
+    });
+    
+    // Clear all pages for this document
+    const keysToDelete = [];
+    for (const key of this.cache.keys()) {
+      if (key.startsWith(documentId)) {
+        keysToDelete.push(key);
+      }
+    }
+    
+    keysToDelete.forEach(key => this.cache.delete(key));
+    console.log('[DEBUG-R3] Cleared cache entries:', keysToDelete);
     
     // Cancel any active loads for this document
     for (const [key, controller] of this.activeLoads.entries()) {
@@ -271,6 +292,7 @@ export class PaginatedBlockLoader {
         this.activeLoads.delete(key);
       }
     }
+    console.log('[DEBUG-R3] Cache cleared successfully for document:', documentId);
   }
 
   /**
@@ -310,17 +332,35 @@ export class PaginatedBlockLoader {
    * Remove a block from cache (for deletions)
    */
   removeBlockFromCache(documentId, blockId) {
-    const docCache = this.cache.get(documentId);
-    if (!docCache) return;
-
     // Find and remove the block from cached pages
-    for (const [page, pageData] of docCache.pages) {
-      const blockIndex = pageData.blocks.findIndex(b => b.id === blockId);
-      if (blockIndex !== -1) {
-        pageData.blocks.splice(blockIndex, 1);
-        docCache.totalCount--;
+    let page = 0;
+    
+    while (true) {
+      const pageCacheKey = `${documentId}-page-${page}`;
+      const cachedPage = this.cache.get(pageCacheKey);
+      
+      if (!cachedPage) {
+        // No more cached pages
         break;
       }
+      
+      const blockIndex = cachedPage.blocks.findIndex(b => b.id === blockId);
+      if (blockIndex !== -1) {
+        // Found the block, remove it
+        cachedPage.blocks.splice(blockIndex, 1);
+        cachedPage.totalCount = Math.max(0, (cachedPage.totalCount || 0) - 1);
+        // Re-cache the updated page
+        this.cache.set(pageCacheKey, cachedPage);
+        
+        // Update total count
+        const totalCount = this.cache.get(`${documentId}-totalCount`);
+        if (totalCount) {
+          this.cache.set(`${documentId}-totalCount`, Math.max(0, totalCount - 1));
+        }
+        break;
+      }
+      
+      page++;
     }
   }
 }

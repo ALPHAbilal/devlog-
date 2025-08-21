@@ -413,7 +413,15 @@ class SmartSyncManager {
         }))
       });
       console.log('[DEBUG-R1] SmartSync: Database should now have updated blocks');
-      console.log('[DEBUG-R1] SmartSync: ⚠️ WARNING: PaginatedBlockLoader has 5-MINUTE cache!');
+      console.log('[DEBUG-R3] SmartSync: Clearing PaginatedBlockLoader cache after successful sync');
+      
+      // Clear the cache to force fresh data on next load
+      paginatedBlockLoader.clearCache(this.documentId);
+      console.log('[DEBUG-R3] Cache cleared after successful sync:', {
+        documentId: this.documentId,
+        blocksSynced: batch.length,
+        timestamp: Date.now()
+      });
 
       // Clean up old synced changes (keep last 100 for history)
       this.cleanupSyncedChanges();

@@ -12,6 +12,14 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   useEffect(() => {
     console.log(`📝 TextBlock ${block.id} rendered at ${new Date().toISOString()}`);
   }, [block.id]);
+  
+  // Track mount status to prevent initial render updates
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
   // Only auto-edit if this is a truly new block (has no content)
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
@@ -24,6 +32,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   const [isCollapsed, setIsCollapsed] = useState(block.metadata?.isCollapsed || false);
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
+  const isMountedRef = useRef(false); // Track if component has mounted
   
   // Constants for collapse behavior
   const MAX_LINES_BEFORE_COLLAPSE = 15;
@@ -202,12 +211,13 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   
   // Update metadata when collapse state changes
   useEffect(() => {
-    if (block.metadata?.isCollapsed !== isCollapsed) {
+    // Only update if component is mounted AND value actually changed
+    if (isMountedRef.current && block.metadata?.isCollapsed !== isCollapsed) {
       onUpdate(block.id, { 
         metadata: { ...block.metadata, isCollapsed }
       });
     }
-  }, [isCollapsed]);
+  }, [isCollapsed, block.id, block.metadata, onUpdate]);
 
   const handleTag = (selectedText, tagName) => {
     if (!textareaRef.current) return;

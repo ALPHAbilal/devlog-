@@ -11,15 +11,12 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   // Performance monitoring
   useEffect(() => {
     console.log(`📝 TextBlock ${block.id} rendered at ${new Date().toISOString()}`);
-    console.log(`[DEBUG-MOUNT-1] Initial render - isMountedRef.current: ${isMountedRef.current}`);
   }, [block.id]);
   
   // Track mount status to prevent initial render updates
   useEffect(() => {
-    console.log(`[DEBUG-MOUNT-2] Setting isMountedRef to true for block ${block.id}`);
     isMountedRef.current = true;
     return () => {
-      console.log(`[DEBUG-MOUNT-3] Unmounting - setting isMountedRef to false for block ${block.id}`);
       isMountedRef.current = false;
     };
   }, []);
@@ -32,7 +29,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   const [showToolbar, setShowToolbar] = useState(false);
   const [toolbarPosition, setToolbarPosition] = useState(null);
   const [selectedText, setSelectedText] = useState('');
-  const [isCollapsed, setIsCollapsed] = useState(block.metadata?.isCollapsed || false);
+  const [isCollapsed, setIsCollapsed] = useState(block.metadata?.isCollapsed ?? false);
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(false); // Track if component has mounted
@@ -190,7 +187,6 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   }, [isEditing, content]);
 
   const handleSave = () => {
-    console.log(`[DEBUG-UPDATE-1] handleSave called for block ${block.id}, hasContentChanged: ${hasContentChanged}`);
     // Hide toolbar immediately
     setShowToolbar(false);
     setSelectedText('');
@@ -198,8 +194,6 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     
     // Only save if content actually changed
     if (hasContentChanged) {
-      console.log(`[DEBUG-UPDATE-2] Calling onUpdate from handleSave - content changed`);
-      console.trace('[DEBUG-UPDATE-2-TRACE]');
       // Extract tags from content before saving
       const extractedTags = extractTagsFromContent(content);
       // Remove isNew flag when saving
@@ -217,11 +211,8 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   
   // Update metadata when collapse state changes
   useEffect(() => {
-    console.log(`[DEBUG-UPDATE-3] Collapse useEffect - isMountedRef: ${isMountedRef.current}, block.isCollapsed: ${block.metadata?.isCollapsed}, state.isCollapsed: ${isCollapsed}`);
     // Only update if component is mounted AND value actually changed
     if (isMountedRef.current && block.metadata?.isCollapsed !== isCollapsed) {
-      console.log(`[DEBUG-UPDATE-4] Calling onUpdate from collapse useEffect`);
-      console.trace('[DEBUG-UPDATE-4-TRACE]');
       onUpdate(block.id, { 
         metadata: { ...block.metadata, isCollapsed }
       });

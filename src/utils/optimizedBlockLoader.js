@@ -17,9 +17,25 @@ export class OptimizedBlockLoader {
     // Check cache first
     if (this.cache.has(documentId)) {
       const cached = this.cache.get(documentId);
-      if (Date.now() - cached.timestamp < 5000) { // 5 second cache
+      const cacheAge = Date.now() - cached.timestamp;
+      console.log('[DEBUG-R1] BlockLoader: Cache check', {
+        documentId,
+        cacheExists: true,
+        cacheAge: cacheAge + 'ms',
+        cacheValid: cacheAge < 5000,
+        willUseCache: cacheAge < 5000,
+        cachedBlockCount: cached.blocks?.length,
+        firstCachedBlockPreview: cached.blocks?.[0] ? {
+          id: cached.blocks[0].id,
+          contentPreview: cached.blocks[0].content?.substring(0, 50)
+        } : null
+      });
+      if (cacheAge < 5000) { // 5 second cache
+        console.log('[DEBUG-R1] BlockLoader: ⚠️ USING CACHED DATA (might be stale!)');
         return { blocks: cached.blocks, fromCache: true };
       }
+    } else {
+      console.log('[DEBUG-R1] BlockLoader: No cache found, will fetch from DB');
     }
 
     // Cancel any existing load
@@ -93,6 +109,18 @@ export class OptimizedBlockLoader {
             console.log('[BLOCKS-DEBUG] No blocks found in blocks table for document:', documentId);
           }
           const transformedBlocks = blocks.map(this.transformBlockFromDB);
+          
+          // DEBUG-R1: Log what we got from fresh database load
+          console.log('[DEBUG-R1] BlockLoader: Fresh load from database', {
+            documentId,
+            blocksLoaded: blocks?.length || 0,
+            firstBlockContent: blocks?.[0] ? {
+              id: blocks[0].id,
+              type: blocks[0].type,
+              contentPreview: blocks[0].content?.substring(0, 50)
+            } : null,
+            timestamp: Date.now()
+          });
           
           // Cache the result
           this.cache.set(documentId, {

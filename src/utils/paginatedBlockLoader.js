@@ -21,7 +21,22 @@ export class PaginatedBlockLoader {
     const cached = this.cache.get(documentId);
     if (cached && cached.pages.has(0)) {
       const cachedPage = cached.pages.get(0);
-      if (Date.now() - cachedPage.timestamp < this.cacheValidityMs) {
+      const cacheAge = Date.now() - cachedPage.timestamp;
+      console.log('[DEBUG-R1] PaginatedBlockLoader.loadInitialPage: Cache check', {
+        documentId,
+        cacheExists: true,
+        cacheAge: cacheAge + 'ms',
+        cacheValidityMs: this.cacheValidityMs + 'ms (5 MINUTES!)',
+        cacheValid: cacheAge < this.cacheValidityMs,
+        willUseCache: cacheAge < this.cacheValidityMs,
+        cachedBlockCount: cachedPage.blocks?.length,
+        firstCachedBlockPreview: cachedPage.blocks?.[0] ? {
+          id: cachedPage.blocks[0].id,
+          contentPreview: cachedPage.blocks[0].content?.substring(0, 50)
+        } : null
+      });
+      if (cacheAge < this.cacheValidityMs) {
+        console.log('[DEBUG-R1] PaginatedBlockLoader: ⚠️ USING 5-MINUTE CACHED DATA (definitely stale!)');
         return {
           blocks: cachedPage.blocks,
           totalCount: cached.totalCount,
@@ -29,6 +44,8 @@ export class PaginatedBlockLoader {
           fromCache: true
         };
       }
+    } else {
+      console.log('[DEBUG-R1] PaginatedBlockLoader.loadInitialPage: No cache found');
     }
 
     return this.loadDocumentPage(documentId, 0, pageSize);
@@ -86,6 +103,19 @@ export class PaginatedBlockLoader {
       if (controller.signal.aborted) return null;
 
       console.log(`PaginatedBlockLoader: Loaded ${blocks?.length || 0} blocks for page ${page} of document ${documentId}`);
+      
+      // DEBUG-R1: Log what we got from fresh database load
+      console.log('[DEBUG-R1] PaginatedBlockLoader: Fresh load from database', {
+        documentId,
+        page,
+        blocksLoaded: blocks?.length || 0,
+        firstBlockContent: blocks?.[0] ? {
+          id: blocks[0].id,
+          type: blocks[0].type,
+          contentPreview: blocks[0].content?.substring(0, 50)
+        } : null,
+        timestamp: Date.now()
+      });
       
       // CRITICAL DEBUG: Check if blocks have type field
       if (blocks && blocks.length > 0) {

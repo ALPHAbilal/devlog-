@@ -476,12 +476,16 @@ export default function ExpandedView({
     // Skip saves during initial load
     if (needsSave && !isInitialLoadRef.current) {
       // Get the updated blocks for auto-save
-      const updatedBlocks = blocks.map(block => {
+      const updatedBlocks = blocks.map((block, index) => {
         if (!block) return null; // Defensive check for undefined blocks
         if (block.id === blockId) {
           // Remove isNew flag when updating a block (user has interacted with it)
           const { isNew, ...blockWithoutNew } = block;
-          const updatedBlock = { ...blockWithoutNew, ...updates };
+          const updatedBlock = { 
+            ...blockWithoutNew, 
+            ...updates,
+            position: index  // CRITICAL: Preserve position based on array index
+          };
           
           // console.log('🟩 ExpandedViewEnhanced: Block before and after update:', {
           //   blockId: blockId,
@@ -494,7 +498,7 @@ export default function ExpandedView({
           
           return updatedBlock;
         }
-        return block;
+        return { ...block, position: index }; // Ensure all blocks have position
       }).filter(Boolean); // Remove any null blocks
       
       // console.log('🟩 ExpandedViewEnhanced: Passing to autoSaveManager:', {
@@ -506,9 +510,10 @@ export default function ExpandedView({
       
       // Use Smart Sync for saving
       if (smartSyncManagerRef.current) {
-        // Get the specific block that was updated
+        // Get the specific block that was updated and its position
+        const blockIndex = blocks.findIndex(b => b && b.id === blockId);
         const updatedBlock = updatedBlocks.find(b => b.id === blockId);
-        if (updatedBlock) {
+        if (updatedBlock && blockIndex !== -1) {
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
           
@@ -518,7 +523,7 @@ export default function ExpandedView({
             serializedBlock.content, // Send normalized content field
             'UPDATE',
             updatedBlock.type,       // CRITICAL: Send block type
-            updatedBlock.position    // CRITICAL: Send position
+            blockIndex               // CRITICAL: Use actual array index as position
           ).then(() => {
             // Update sync status will happen automatically via the interval
           }).catch(error => {
@@ -807,7 +812,7 @@ export default function ExpandedView({
   }, [blocks, updateLoadedBlocks, dropPosition, stopAutoScroll]);
 
   const convertBlock = useCallback((blockId, newType, meta = {}) => {
-    const updatedBlocks = blocks.map(block => {
+    const updatedBlocks = blocks.map((block, index) => {
       if (block.id === blockId) {
         // Clear old cached height
         blockHeightCache.delete(`${block.id}-${block.type}`);
@@ -816,6 +821,7 @@ export default function ExpandedView({
         const newBlock = {
           ...block,
           type: newType,
+          position: index,  // CRITICAL: Preserve position based on array index
           ...meta
         };
         
@@ -831,7 +837,7 @@ export default function ExpandedView({
         
         return newBlock;
       }
-      return block;
+      return { ...block, position: index }; // Ensure all blocks have position
     });
     
     startTransition(() => {

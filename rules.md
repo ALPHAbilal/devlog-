@@ -75,11 +75,13 @@
    - [ ] Found the ONE fix that eliminates ALL symptoms?
    - [ ] Verified this is cause, not effect?
 
-□ 11. COLLABORATION CHECK (Rule 16)
+□ 11. COLLABORATION CHECK (Rules 16 & 17)
    - [ ] Am I guessing or do I have data?
    - [ ] Would logs help identify the real issue?
    - [ ] Should I ask user to test and share terminal.md?
    - [ ] Am I trying to fix everything in one go?
+   - [ ] Am I stuck defending my initial hypothesis? (Rule 17)
+   - [ ] Would admitting uncertainty lead to better discovery?
 
 □ 12. SOLUTION VALIDATION
    - [ ] Will my fix address the ROOT cause (not the symptom)?
@@ -128,6 +130,36 @@
 ```
 
 **Result:** 1 file fix instead of 10+, 2 minutes instead of 30.
+
+### 📚 REAL EXAMPLE 2: The Virtualization Wild Goose Chase
+
+**The Symptoms:** Slow performance in document viewer
+
+**What Happened (WRONG - Ego-driven debugging):**
+1. AI: "It's obviously too many DOM nodes, need virtualization"
+2. Spent 30 minutes implementing complex virtualization
+3. Performance got WORSE (8x more re-renders)
+4. AI: "Let me fix the virtualization..." (defending wrong solution)
+5. User: "The canvas animation seems slow..."
+6. AI: Finally checked canvas → 65ms draw time per frame!
+
+**What Rule 17 Would Have Done (RIGHT - Ego-free discovery):**
+```markdown
+Round 1: "Initial hypothesis: might be DOM node count. Let me measure..."
+         [DISCOVERY-1] DOM nodes: 17 (not excessive)
+         
+Round 2: "Interesting! Not a DOM issue. Let me profile actual performance..."
+         [DISCOVERY-2] Found: VersionTrackBlock canvas at 65ms!
+         
+Round 3: "Great discovery - it's canvas drawing, not React rendering!"
+         [DISCOVERY-3] Optimizing canvas animation...
+         
+Result: Fixed in 10 minutes instead of wasting 30 on wrong solution
+```
+
+**The Key Difference:**
+- Ego-driven: Defends initial theory despite evidence
+- Discovery-driven: Celebrates finding real issue, even if initial theory was wrong
 
 ---
 
@@ -532,6 +564,7 @@ useEffect(() => {
 ### Rule 16: "Collaborative Log Loop" Protocol 🔄
 **The Problem**: AI tries to fix everything blind without real runtime feedback
 **The Universal Rule**: Debugging is a CONVERSATION, not a monologue. Multiple rounds beat one perfect attempt.
+**See Also**: Rule 17 for maintaining ego-free discovery mindset during collaboration
 
 ```markdown
 □ MANDATORY COLLABORATION MINDSET:
@@ -635,6 +668,113 @@ try {
 - terminal.md is your shared debugging workspace
 - Small iterations with feedback > Big blind changes
 - Real data > Best assumptions
+
+### Rule 17: "The Ego-Free Discovery Protocol" 🔄
+**The Problem**: AI gets stuck defending initial hypothesis instead of discovering real issue
+**The Universal Rule**: Debugging is exploration, not validation. Being wrong initially is EXPECTED.
+
+```markdown
+□ THE EGO-FREE MINDSET:
+  - [ ] Your first hypothesis is probably wrong - THAT'S NORMAL
+  - [ ] Each wrong turn teaches something valuable
+  - [ ] Discovery > Being Right
+  - [ ] User's reality > Your assumptions
+  - [ ] Changing direction = Intelligence, not failure
+
+□ THE PIVOT PROTOCOL:
+  1. DOCUMENT INITIAL HYPOTHESIS:
+     "Initial theory: The issue might be [X] because [reasoning]"
+     - NOT: "The issue IS definitely..."
+     - NOT: "Obviously the problem is..."
+  
+  2. EMBRACE CONTRADICTIONS:
+     When logs/data contradict hypothesis:
+     ✅ "Interesting! The logs show Y instead of X. Let me explore Y."
+     ✅ "This discovery changes my understanding. New theory: Z"
+     ✅ "Great - we've ruled out X. That's progress!"
+     ❌ "That's strange, it should be X..."
+     ❌ "Let me try to make X work..."
+  
+  3. CELEBRATE DISCOVERIES:
+     - "Excellent discovery - it's not what I initially thought!"
+     - "This is fascinating - the real issue is completely different"
+     - "Thanks for the logs - they revealed the actual problem"
+     - Make the user feel like a collaborator in discovery
+  
+  4. TRANSPARENT JOURNEY DOCUMENTATION:
+     Round 1: "Starting hypothesis: Component re-rendering"
+     Round 2: "Logs show no re-renders. Pivoting to check animations"
+     Round 3: "Found it! Canvas redrawing every frame. Not React at all!"
+     Round 4: "Applying canvas-specific fix"
+     Round 5: "Verified - 65ms → 12ms. Journey was worth it!"
+
+□ PIVOT TRIGGERS (Change direction immediately when):
+  - [ ] Logs contradict hypothesis
+  - [ ] Fix doesn't improve symptoms
+  - [ ] User describes different behavior
+  - [ ] Performance metrics show different bottleneck
+  - [ ] Error occurs in unexpected location
+  - [ ] You've been on same theory for >10 minutes without progress
+
+□ THE DISCOVERY DIALOG:
+  WRONG (Ego-driven):
+  "It must be the virtualization"
+  "That shouldn't happen"
+  "The code says X so X must be true"
+  
+  RIGHT (Discovery-driven):
+  "Let's see what's actually happening"
+  "The data shows Y - let me understand why"
+  "My assumption was wrong - here's what I learned"
+```
+
+**REAL EXAMPLES OF EGO-FREE PIVOTING:**
+
+```javascript
+// Round 1: Initial (wrong) hypothesis
+console.log('[DISCOVERY-1] Checking if re-render issue...');
+// Result: "No re-renders detected"
+
+// Round 2: Pivot without shame
+console.log('[DISCOVERY-2] Not re-renders! Checking animation loop...');
+// Result: "Canvas redrawing detected: 65ms per frame"
+
+// Round 3: Celebrate the discovery
+console.log('[DISCOVERY-3] Found it! Canvas, not React. Fixing...');
+```
+
+**The Power of Being Wrong:**
+- Wrong hypothesis 1 → Eliminates 30% of possibilities
+- Wrong hypothesis 2 → Eliminates another 30%
+- Wrong hypothesis 3 → Narrows to final 40%
+- Right hypothesis 4 → Found because of previous eliminations
+
+**Communication Templates for Pivoting:**
+1. **Initial Investigation:**
+   "Based on the symptoms, I'll start by checking [hypothesis]. This might not be right, but it's a good starting point."
+
+2. **When Wrong:**
+   "Interesting! The logs show it's not [initial theory]. This is actually helpful - we can rule that out. Let me check [new direction]."
+
+3. **When Really Wrong:**
+   "This is a great discovery - I was completely wrong about the cause! The real issue is [actual problem]. This explains all the symptoms better."
+
+4. **When User Corrects You:**
+   "Thank you for that clarification! You're absolutely right. Let me adjust my approach based on what you're actually seeing."
+
+**Why Ego-Free Debugging Wins:**
+- Faster solutions (no time defending wrong ideas)
+- Better collaboration (user trusts your process)
+- Accurate fixes (willing to find real cause)
+- Learning mindset (each wrong turn = valuable data)
+- Psychological safety (okay to be wrong, not okay to stay wrong)
+
+**The Ultimate Test:**
+Ask yourself: "Am I trying to prove my hypothesis, or discover the truth?"
+If proving → STOP, add logs, ask for data
+If discovering → Continue exploring
+
+**Remember:** The user doesn't care if your first guess was wrong. They care that you find and fix the real issue. Being wrong initially and right eventually > Being stubborn and never solving it.
 
 ---
 

@@ -15,6 +15,7 @@
 
 import Dexie from 'dexie';
 import { debounce, throttle } from 'lodash-es';
+import { paginatedBlockLoader } from './paginatedBlockLoader';
 
 class SmartSyncManager {
   constructor(supabase, documentId) {

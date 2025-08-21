@@ -27,7 +27,6 @@ export class PaginatedBlockLoader {
     const cachedPage = this.cache.get(cacheKey);
     if (cachedPage) {
       const cacheAge = Date.now() - cachedPage.timestamp;
-      console.log('[DEBUG-R3] PaginatedBlockLoader.loadInitialPage: Cache HIT', {
         documentId,
         cacheKey,
         cachedBlockCount: cachedPage.blocks?.length,
@@ -45,7 +44,6 @@ export class PaginatedBlockLoader {
         fromCache: true
       };
     } else {
-      console.log('[DEBUG-R3] PaginatedBlockLoader.loadInitialPage: Cache MISS', {
         documentId,
         cacheKey,
         reason: 'No cached data or TTL expired'
@@ -108,8 +106,6 @@ export class PaginatedBlockLoader {
 
       console.log(`PaginatedBlockLoader: Loaded ${blocks?.length || 0} blocks for page ${page} of document ${documentId}`);
       
-      // DEBUG-R1: Log what we got from fresh database load
-      console.log('[DEBUG-R1] PaginatedBlockLoader: Fresh load from database', {
         documentId,
         page,
         blocksLoaded: blocks?.length || 0,
@@ -151,7 +147,6 @@ export class PaginatedBlockLoader {
       // Also cache the total count separately
       this.cache.set(`${documentId}-totalCount`, totalCount || 0);
       
-      console.log('[DEBUG-R3] Cached page data:', {
         documentId,
         page,
         cacheKey: pageCacheKey,
@@ -269,11 +264,6 @@ export class PaginatedBlockLoader {
    * Clear cache for a document
    */
   clearCache(documentId) {
-    console.log('[DEBUG-R3] PaginatedBlockLoader.clearCache called:', {
-      documentId,
-      timestamp: Date.now()
-    });
-    
     // Clear all pages for this document
     const keysToDelete = [];
     for (const key of this.cache.keys()) {
@@ -283,7 +273,6 @@ export class PaginatedBlockLoader {
     }
     
     keysToDelete.forEach(key => this.cache.delete(key));
-    console.log('[DEBUG-R3] Cleared cache entries:', keysToDelete);
     
     // Cancel any active loads for this document
     for (const [key, controller] of this.activeLoads.entries()) {
@@ -292,7 +281,6 @@ export class PaginatedBlockLoader {
         this.activeLoads.delete(key);
       }
     }
-    console.log('[DEBUG-R3] Cache cleared successfully for document:', documentId);
   }
 
   /**

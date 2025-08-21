@@ -401,28 +401,8 @@ class SmartSyncManager {
       this.lastSyncTime = Date.now();
       console.log(`SmartSync: Successfully synced ${batch.length} changes`);
       
-      // DEBUG-R1: Log what was successfully synced
-      console.log('[DEBUG-R1] SmartSync: Batch sync completed', {
-        documentId: this.documentId,
-        blocksProcessed: batch.length,
-        timestamp: Date.now(),
-        blockIds: batch.map(b => b.blockId),
-        blockContents: batch.map(b => ({
-          id: b.blockId,
-          action: b.action,
-          contentPreview: b.content?.substring(0, 50)
-        }))
-      });
-      console.log('[DEBUG-R1] SmartSync: Database should now have updated blocks');
-      console.log('[DEBUG-R3] SmartSync: Clearing PaginatedBlockLoader cache after successful sync');
-      
       // Clear the cache to force fresh data on next load
       paginatedBlockLoader.clearCache(this.documentId);
-      console.log('[DEBUG-R3] Cache cleared after successful sync:', {
-        documentId: this.documentId,
-        blocksSynced: batch.length,
-        timestamp: Date.now()
-      });
 
       // Clean up old synced changes (keep last 100 for history)
       this.cleanupSyncedChanges();

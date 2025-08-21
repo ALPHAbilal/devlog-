@@ -18,7 +18,6 @@ export class OptimizedBlockLoader {
     if (this.cache.has(documentId)) {
       const cached = this.cache.get(documentId);
       const cacheAge = Date.now() - cached.timestamp;
-      console.log('[DEBUG-R1] BlockLoader: Cache check', {
         documentId,
         cacheExists: true,
         cacheAge: cacheAge + 'ms',
@@ -31,11 +30,9 @@ export class OptimizedBlockLoader {
         } : null
       });
       if (cacheAge < 5000) { // 5 second cache
-        console.log('[DEBUG-R1] BlockLoader: ⚠️ USING CACHED DATA (might be stale!)');
         return { blocks: cached.blocks, fromCache: true };
       }
     } else {
-      console.log('[DEBUG-R1] BlockLoader: No cache found, will fetch from DB');
     }
 
     // Cancel any existing load
@@ -110,8 +107,6 @@ export class OptimizedBlockLoader {
           }
           const transformedBlocks = blocks.map(this.transformBlockFromDB);
           
-          // DEBUG-R1: Log what we got from fresh database load
-          console.log('[DEBUG-R1] BlockLoader: Fresh load from database', {
             documentId,
             blocksLoaded: blocks?.length || 0,
             firstBlockContent: blocks?.[0] ? {

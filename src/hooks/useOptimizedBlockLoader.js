@@ -22,8 +22,6 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   }, []);
 
   useEffect(() => {
-    // DEBUG-R1: Log when document loading is triggered
-    console.log('[DEBUG-R1] useOptimizedBlockLoader: Effect triggered', {
       documentId,
       skip,
       isAlreadyLoading: loadingRef.current,
@@ -44,7 +42,6 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
     const abortController = new AbortController();
 
     const loadBlocks = async () => {
-      console.log('[DEBUG-R1] useOptimizedBlockLoader: Starting to load blocks');
       loadingRef.current = true;
       lastLoadedDocRef.current = documentId; // Mark as loading
       setIsLoading(true);

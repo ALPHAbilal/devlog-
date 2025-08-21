@@ -15,8 +15,12 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   
   // Track mount status to prevent initial render updates
   useEffect(() => {
-    isMountedRef.current = true;
+    // Set mounted flag after a microtask to ensure all initial effects have run
+    const timer = setTimeout(() => {
+      isMountedRef.current = true;
+    }, 0);
     return () => {
+      clearTimeout(timer);
       isMountedRef.current = false;
     };
   }, []);
@@ -212,7 +216,9 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   // Update metadata when collapse state changes
   useEffect(() => {
     // Only update if component is mounted AND value actually changed
-    if (isMountedRef.current && block.metadata?.isCollapsed !== isCollapsed) {
+    // AND only if the state is different from the initial state we set
+    const blockIsCollapsed = block.metadata?.isCollapsed ?? false;
+    if (isMountedRef.current && blockIsCollapsed !== isCollapsed) {
       onUpdate(block.id, { 
         metadata: { ...block.metadata, isCollapsed }
       });

@@ -22,13 +22,6 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   }, []);
 
   useEffect(() => {
-      documentId,
-      skip,
-      isAlreadyLoading: loadingRef.current,
-      lastLoadedDoc: lastLoadedDocRef.current,
-      willLoad: !(!documentId || loadingRef.current || skip || lastLoadedDocRef.current === documentId)
-    });
-    
     // Check if we're already loading this document
     if (!documentId || loadingRef.current || skip || lastLoadedDocRef.current === documentId) {
       // If skipped, set loading to false immediately

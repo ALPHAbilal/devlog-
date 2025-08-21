@@ -26,28 +26,13 @@ export class PaginatedBlockLoader {
     const cacheKey = `${documentId}-page-0`;
     const cachedPage = this.cache.get(cacheKey);
     if (cachedPage) {
-      const cacheAge = Date.now() - cachedPage.timestamp;
-        documentId,
-        cacheKey,
-        cachedBlockCount: cachedPage.blocks?.length,
-        ttl: '30 seconds',
-        firstCachedBlockPreview: cachedPage.blocks?.[0] ? {
-          id: cachedPage.blocks[0].id,
-          contentPreview: cachedPage.blocks[0].content?.substring(0, 50)
-        } : null
-      });
-      // LRUCache handles TTL automatically, so if we got data, it's fresh
+      // Cache hit - using cached data (LRUCache handles TTL automatically)
       return {
         blocks: cachedPage.blocks,
         totalCount: cachedPage.totalCount || cachedPage.blocks.length,
         hasMore: cachedPage.totalCount > pageSize,
         fromCache: true
       };
-    } else {
-        documentId,
-        cacheKey,
-        reason: 'No cached data or TTL expired'
-      });
     }
 
     return this.loadDocumentPage(documentId, 0, pageSize);
@@ -106,17 +91,6 @@ export class PaginatedBlockLoader {
 
       console.log(`PaginatedBlockLoader: Loaded ${blocks?.length || 0} blocks for page ${page} of document ${documentId}`);
       
-        documentId,
-        page,
-        blocksLoaded: blocks?.length || 0,
-        firstBlockContent: blocks?.[0] ? {
-          id: blocks[0].id,
-          type: blocks[0].type,
-          contentPreview: blocks[0].content?.substring(0, 50)
-        } : null,
-        timestamp: Date.now()
-      });
-      
       // CRITICAL DEBUG: Check if blocks have type field
       if (blocks && blocks.length > 0) {
         console.log('[BLOCKS-LOAD-DEBUG] First block from DB:', {
@@ -146,13 +120,6 @@ export class PaginatedBlockLoader {
       
       // Also cache the total count separately
       this.cache.set(`${documentId}-totalCount`, totalCount || 0);
-      
-        documentId,
-        page,
-        cacheKey: pageCacheKey,
-        blockCount: transformedBlocks.length,
-        ttl: '30 seconds'
-      });
 
         this.activeLoads.delete(cacheKey);
         this.pendingRequests.delete(cacheKey); // Clean up pending request

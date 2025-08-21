@@ -5,6 +5,7 @@ import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthC
 import { SettingsProvider } from './contexts/SettingsContext';
 import { SidebarProvider } from './contexts/SidebarContext';
 import { useGlobalAutoSave } from './hooks/useAutoSave';
+import { useAnalytics } from './hooks/useAnalytics';
 import { initMonitoring, setUserContext } from './utils/monitoring';
 import { register as registerServiceWorker } from './utils/serviceWorker';
 import { preloadResources } from './utils/performance';
@@ -19,6 +20,7 @@ import Terms from './pages/Terms';
 import SharedDocument from './pages/SharedDocument';
 import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
+import CookieConsentBanner from './components/CookieConsentBanner';
 
 // Lazy load the API settings page
 const ApiSettingsPage = lazy(() => import('./pages/settings/api.jsx'));
@@ -52,11 +54,30 @@ function AutoSaveProvider() {
 
 function AppContent() {
   const { user, loading } = useAuth();
+  const { setUserId, setUserProperties, trackEvent } = useAnalytics();
 
-  // Set user context for monitoring
+  // Set user context for monitoring and analytics
   useEffect(() => {
     setUserContext(user);
-  }, [user]);
+    
+    // Set up Google Analytics user tracking
+    if (user) {
+      setUserId(user.id);
+      setUserProperties({
+        plan_type: user.user_metadata?.plan || 'free',
+        signup_date: user.created_at,
+        email_verified: user.email_confirmed_at ? 'true' : 'false'
+      });
+      
+      // Track login event
+      trackEvent('login', {
+        method: user.app_metadata?.provider || 'email'
+      });
+    } else {
+      // Clear user ID on logout
+      setUserId(null);
+    }
+  }, [user, setUserId, setUserProperties, trackEvent]);
 
   // Add beforeunload handler to save pending changes
   useEffect(() => {
@@ -206,6 +227,7 @@ function App() {
               <ToastProvider>
                 <AutoSaveProvider />
                 <AppContent />
+                <CookieConsentBanner />
               </ToastProvider>
             </SidebarProvider>
           </SettingsProvider>

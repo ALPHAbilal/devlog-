@@ -27,6 +27,7 @@ import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
 import { useToast } from '../hooks/useToast';
 import { useSidebar } from '../contexts/SidebarContext';
+import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 import TrialBanner from '../components/TrialBanner';
 import useDocumentOrganization from '../hooks/useDocumentOrganization';
 import { 
@@ -56,6 +57,10 @@ export default function Dashboard() {
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
+  
+  // Analytics hooks
+  const { trackEvent } = useAnalytics();
+  const { trackDocumentEvent, startDocumentTimer, endDocumentTimer } = useDocumentAnalytics();
   
   // Check for expired trial
   useEffect(() => {
@@ -238,6 +243,13 @@ export default function Dashboard() {
     try {
       await storageWrapper.saveDocument(newEntry);
       console.log('New document saved successfully');
+      
+      // Track document creation
+      trackDocumentEvent('created', newEntry.id, {
+        folder_id: folderId || 'root',
+        creation_method: 'manual',
+        has_folder: !!folderId
+      });
     } catch (error) {
       console.error('Error saving new document:', {
         message: error.message,
@@ -252,7 +264,7 @@ export default function Dashboard() {
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
     setExpandedEntry(newEntry);
-  }, [entries, saveEntries]);
+  }, [entries, saveEntries, trackDocumentEvent]);
 
   // Handle click outside for profile menu
   useEffect(() => {
@@ -458,12 +470,18 @@ export default function Dashboard() {
       const doc = entries.find(e => e.id === documentId);
       if (doc && !expandedEntry) {
         setExpandedEntry(doc);
+        // Track document opened
+        trackDocumentEvent('opened', doc.id, {
+          open_method: 'url_navigation',
+          has_content: doc.blocks?.length > 0
+        });
+        startDocumentTimer('editing', doc.id);
       } else if (!doc && documentId) {
         // Document not found, redirect to dashboard
         navigate('/dashboard', { replace: true });
       }
     }
-  }, [documentId, entries, expandedEntry, navigate]);
+  }, [documentId, entries, expandedEntry, navigate, trackDocumentEvent, startDocumentTimer]);
 
 
   // Update entry
@@ -471,6 +489,16 @@ export default function Dashboard() {
     // Handle deletion when updates is null
     if (updates === null) {
       try {
+        // Track document deletion
+        const entryToDelete = entries.find(entry => entry.id === entryId);
+        if (entryToDelete) {
+          trackDocumentEvent('deleted', entryId, {
+            had_content: entryToDelete.blocks?.length > 1 || 
+                        (entryToDelete.blocks?.[0]?.content?.length > 0),
+            document_age_days: Math.floor((Date.now() - new Date(entryToDelete.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+          });
+        }
+        
         // Delete from storage first
         await storageWrapper.deleteEntry(entryId);
         
@@ -481,6 +509,7 @@ export default function Dashboard() {
         // If we're deleting the currently expanded entry, close it
         if (expandedEntry && expandedEntry.id === entryId) {
           setExpandedEntry(null);
+          endDocumentTimer('editing', entryId);
         }
         
         // Update storage info after deletion

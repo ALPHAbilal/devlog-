@@ -19,6 +19,7 @@ import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
 import MobileBottomSheet from './MobileBottomSheet';
 import BlockErrorBoundary from './BlockErrorBoundary';
+import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
@@ -78,6 +79,10 @@ export default function ExpandedView({
   scrollContainerRef: externalScrollRef,
   onShowBlockSelector
 }) {
+  // Analytics hooks
+  const { trackEvent } = useAnalytics();
+  const { trackDocumentEvent } = useDocumentAnalytics();
+  
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
   
@@ -550,6 +555,18 @@ export default function ExpandedView({
       return;
     }
     
+    // Track block deletion
+    const blockToDelete = blocks.find(b => b.id === blockId);
+    if (blockToDelete) {
+      trackEvent('block_deleted', {
+        block_type: blockToDelete.type,
+        had_content: blockToDelete.content?.length > 0 || 
+                    blockToDelete.data?.issues?.length > 0 || 
+                    blockToDelete.rows?.length > 0,
+        document_id: entry.id
+      });
+    }
+    
     // Clear cached height for deleted block
     blocks.forEach(block => {
       if (block.id === blockId) {
@@ -901,6 +918,14 @@ export default function ExpandedView({
       };
       newBlock.content = ''; // Add empty content to prevent undefined errors
     }
+    
+    // Track block creation
+    trackEvent('block_created', {
+      block_type: type,
+      position: position,
+      after_block: !!afterBlockId,
+      document_id: entry.id
+    });
 
     let updatedBlocks;
     if (afterBlockId) {

@@ -4,9 +4,11 @@ import { parseMarkdown, detectHeadingMarkdown, processLineBreaksAndLists, extrac
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useAnalytics } from '../../hooks/useAnalytics';
 
 function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow, allBlocks }) {
   const { user } = useAuth();
+  const { trackEvent } = useAnalytics();
   
   // Performance monitoring
   useEffect(() => {
@@ -200,6 +202,16 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     if (hasContentChanged) {
       // Extract tags from content before saving
       const extractedTags = extractTagsFromContent(content);
+      
+      // Track tag usage if tags were added
+      const previousTags = block.tags || [];
+      if (extractedTags.length > 0 && extractedTags.length !== previousTags.length) {
+        trackEvent('text_block_tagged', {
+          tag_count: extractedTags.length,
+          tags_added: extractedTags.length - previousTags.length
+        });
+      }
+      
       // Remove isNew flag when saving
       onUpdate(block.id, { 
         content: content, 

@@ -484,7 +484,8 @@ export default function ExpandedView({
           const updatedBlock = { 
             ...blockWithoutNew, 
             ...updates,
-            position: index  // CRITICAL: Preserve position based on array index
+            // Use stored position if available, otherwise use array index
+            position: block.position !== undefined ? block.position : index
           };
           
           // console.log('🟩 ExpandedViewEnhanced: Block before and after update:', {
@@ -498,7 +499,8 @@ export default function ExpandedView({
           
           return updatedBlock;
         }
-        return { ...block, position: index }; // Ensure all blocks have position
+        // Don't override existing positions
+        return block.position !== undefined ? block : { ...block, position: index };
       }).filter(Boolean); // Remove any null blocks
       
       // console.log('🟩 ExpandedViewEnhanced: Passing to autoSaveManager:', {
@@ -510,10 +512,9 @@ export default function ExpandedView({
       
       // Use Smart Sync for saving
       if (smartSyncManagerRef.current) {
-        // Get the specific block that was updated and its position
-        const blockIndex = blocks.findIndex(b => b && b.id === blockId);
+        // Get the specific block that was updated
         const updatedBlock = updatedBlocks.find(b => b.id === blockId);
-        if (updatedBlock && blockIndex !== -1) {
+        if (updatedBlock) {
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
           
@@ -523,7 +524,7 @@ export default function ExpandedView({
             serializedBlock.content, // Send normalized content field
             'UPDATE',
             updatedBlock.type,       // CRITICAL: Send block type
-            blockIndex               // CRITICAL: Use actual array index as position
+            updatedBlock.position    // CRITICAL: Use the block's actual position, not array index
           ).then(() => {
             // Update sync status will happen automatically via the interval
           }).catch(error => {
@@ -821,7 +822,7 @@ export default function ExpandedView({
         const newBlock = {
           ...block,
           type: newType,
-          position: index,  // CRITICAL: Preserve position based on array index
+          position: block.position !== undefined ? block.position : index,  // Keep existing position if available
           ...meta
         };
         
@@ -837,7 +838,8 @@ export default function ExpandedView({
         
         return newBlock;
       }
-      return { ...block, position: index }; // Ensure all blocks have position
+      // Don't override existing positions
+      return block.position !== undefined ? block : { ...block, position: index };
     });
     
     startTransition(() => {

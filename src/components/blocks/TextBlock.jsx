@@ -15,6 +15,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   // Only auto-edit if this is a truly new block (has no content)
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [content, setContent] = useState(block.content || '');
+  const [hasContentChanged, setHasContentChanged] = useState(false); // Track if content was modified
   const [slashHint, setSlashHint] = useState('');
   const [slashHintPosition, setSlashHintPosition] = useState(null);
   const [showToolbar, setShowToolbar] = useState(false);
@@ -182,15 +183,19 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     setSelectedText('');
     setToolbarPosition(null);
     
-    // Extract tags from content before saving
-    const extractedTags = extractTagsFromContent(content);
-    // Remove isNew flag when saving
-    onUpdate(block.id, { 
-      content: content, 
-      tags: extractedTags, 
-      isNew: undefined,
-      metadata: { ...block.metadata, isCollapsed }
-    });
+    // Only save if content actually changed
+    if (hasContentChanged) {
+      // Extract tags from content before saving
+      const extractedTags = extractTagsFromContent(content);
+      // Remove isNew flag when saving
+      onUpdate(block.id, { 
+        content: content, 
+        tags: extractedTags, 
+        isNew: undefined,
+        metadata: { ...block.metadata, isCollapsed }
+      });
+      setHasContentChanged(false); // Reset the change flag
+    }
     setIsEditing(false);
     if (onFocus) onFocus(null); // Clear focus
   };
@@ -215,6 +220,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     const taggedText = `#${tagName}[${selectedText}]`;
     const newContent = content.substring(0, start) + taggedText + content.substring(end);
     setContent(newContent);
+    setHasContentChanged(true);
     
 
     // Set cursor position after the tagged text
@@ -238,6 +244,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
       const newText = `[[${selectedText}]]`;
       const newContent = content.substring(0, start) + newText + content.substring(end);
       setContent(newContent);
+      setHasContentChanged(true);
       // Removed processContentForSave - function was undefined
       
       // Set cursor position after the link
@@ -251,6 +258,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
       const newText = `![${selectedText}](url)`;
       const newContent = content.substring(0, start) + newText + content.substring(end);
       setContent(newContent);
+      setHasContentChanged(true);
       // Removed processContentForSave - function was undefined
       
       // Select the 'url' part for easy replacement
@@ -264,6 +272,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
       const newText = `${wrapper}${selectedText}${wrapper}`;
       const newContent = content.substring(0, start) + newText + content.substring(end);
       setContent(newContent);
+      setHasContentChanged(true);
       // Removed processContentForSave - function was undefined
       
       // Keep selection on the formatted text
@@ -386,6 +395,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   const handleChange = (e) => {
     const newContent = e.target.value;
     setContent(newContent);
+    setHasContentChanged(true); // Mark content as changed when user types
 
     // Check if user is typing a slash command
     const lines = newContent.split('\n');
@@ -437,6 +447,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
           lines[lines.length - 1] = beforeSlash + command.value;
           const expandedContent = lines.join('\n');
           setContent(expandedContent);
+          setHasContentChanged(true);
           // Removed processContentForSave - function was undefined
           setSlashHint('');
           setSlashHintPosition(null);
@@ -530,6 +541,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
         }
         const expandedContent = lines.join('\n');
         setContent(expandedContent);
+        setHasContentChanged(true);
         // Removed processContentForSave - function was undefined
         setSlashHint('');
       }

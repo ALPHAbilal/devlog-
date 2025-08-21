@@ -12,7 +12,7 @@
 - **Database**: Supabase (PostgreSQL) with Row Level Security
 - **State Management**: Zustand + Context API for optimal performance
 - **Storage**: Multi-layer system (Memory → IndexedDB → Supabase)
-- **AI Integration**: Claude Flow v2.0.0 with 54 specialized agents and MCP servers
+- **AI Integration**: MCP (Model Context Protocol) servers for AI capabilities
 - **Monitoring**: Sentry for error tracking and performance monitoring
 - **Compression**: LZ-String for 50-80% storage savings
 
@@ -33,8 +33,7 @@ devlog/
 ├── AI & Claude Integration
 │   ├── CLAUDE.md                # SPARC methodology documentation
 │   ├── .claude/                 # Claude Code configuration
-│   ├── .mcp.json               # MCP server configuration
-│   └── claude-flow.config.json  # AI orchestration settings
+│   └── .mcp.json               # MCP server configuration
 │
 └── Public Assets
     ├── manifest.json            # PWA configuration

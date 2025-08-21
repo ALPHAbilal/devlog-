@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContextOptimized'
 import { supabase } from '../../lib/supabase'
 import { useToast } from '../../hooks/useToast'
+import { useAnalytics } from '../../hooks/useAnalytics'
 import { Key, Copy, Trash2, Plus, ChevronLeft, Shield, Sparkles, Code2, Terminal, ChevronDown, ChevronUp, ExternalLink, CheckCircle } from 'lucide-react'
 import MobileBottomSheet from '../../components/MobileBottomSheet'
 import '../../styles/settings-claude.css'
@@ -85,12 +86,12 @@ const ApiKeyCard = ({ apiKey, onDelete, onCopy }) => {
   )
 }
 
-const CodeBlock = ({ code, onCopy }) => (
+const CodeBlock = ({ code, onCopy, context = 'code_example' }) => (
   <div className="code-block">
     <pre>{code}</pre>
     <button 
       className="code-copy-button"
-      onClick={() => onCopy(code)}
+      onClick={() => onCopy(code, context)}
       title="Copy to clipboard"
     >
       <Copy size={16} />
@@ -133,6 +134,7 @@ export default function ApiKeysPage() {
   const { user } = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
+  const { trackEvent } = useAnalytics()
   const [apiKeys, setApiKeys] = useState([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -168,6 +170,12 @@ export default function ApiKeysPage() {
 
       if (error) throw error
       setApiKeys(data || [])
+      
+      // Track API settings page view
+      trackEvent('api_settings_viewed', {
+        existing_keys_count: data?.length || 0,
+        has_keys: (data?.length || 0) > 0
+      })
     } catch (error) {
       toast.error('Failed to load API keys')
       console.error('Error loading API keys:', error)
@@ -212,6 +220,13 @@ export default function ApiKeysPage() {
 
       if (error) throw error
 
+      // Track API key creation
+      trackEvent('api_key_created', {
+        key_name: newKeyName.trim(),
+        key_prefix: 'dvlg_sk_prod',
+        created_from: 'settings_page'
+      })
+
       // Show the full key once
       setNewApiKey(apiKey)
       setApiKeys([newKey, ...apiKeys])
@@ -228,12 +243,27 @@ export default function ApiKeysPage() {
 
   const deleteApiKey = async (id) => {
     try {
+      // Find the key to get metadata before deletion
+      const keyToDelete = apiKeys.find(key => key.id === id)
+      
       const { error } = await supabase
         .from('api_keys')
         .update({ is_active: false })
         .eq('id', id)
 
       if (error) throw error
+
+      // Track API key deletion
+      if (keyToDelete) {
+        const keyAgeMs = Date.now() - new Date(keyToDelete.created_at).getTime()
+        const keyAgeDays = Math.floor(keyAgeMs / (1000 * 60 * 60 * 24))
+        
+        trackEvent('api_key_deleted', {
+          key_age_days: keyAgeDays,
+          was_used: !!keyToDelete.last_used_at,
+          key_name: keyToDelete.name
+        })
+      }
 
       setApiKeys(apiKeys.filter(key => key.id !== id))
       toast.success('API key deleted')
@@ -243,13 +273,19 @@ export default function ApiKeysPage() {
     }
   }
 
-  const copyToClipboard = (text) => {
+  const copyToClipboard = (text, context = 'unknown') => {
     navigator.clipboard.writeText(text)
     toast.success('Copied to clipboard')
+    
+    // Track API key copy
+    trackEvent('api_key_copied', {
+      copy_location: context,
+      is_first_copy: context === 'initial_creation' && !copiedKey
+    })
   }
 
   const copyApiKey = (key) => {
-    copyToClipboard(key)
+    copyToClipboard(key, 'initial_creation')
     setCopiedKey(true)
     setTimeout(() => setCopiedKey(false), 2000)
   }

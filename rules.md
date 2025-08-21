@@ -1071,12 +1071,142 @@ Copy this file to a Python project, a Go service, a Ruby app, or even a C++ code
 
 ---
 
+### Rule 20: The "Plan-First Documentation Protocol" 📋
+**Before implementing ANY feature, create a PLAN.md file with the complete implementation roadmap**
+
+**The Problem**: AI assistants often start coding immediately without full understanding, leading to:
+- Incomplete implementations where features are half-built
+- Missing edge cases that cause bugs later
+- Forgotten requirements from the original request
+- No progress tracking between AI sessions
+- Difficult handoffs when sessions timeout or change
+
+**The Universal Rule**: DOCUMENT → PLAN → IMPLEMENT → TRACK
+
+```markdown
+□ THE PLAN-FIRST PROTOCOL:
+
+1. CREATE IMPLEMENTATION DOCUMENT (Before ANY code):
+   - [ ] Create `{feature}-IMPLEMENTATION-PLAN.md` in project root
+   - [ ] Include ALL research/answers in the document
+   - [ ] Define complete scope BEFORE starting
+   - [ ] List ALL files that will be touched
+   - [ ] Identify ALL dependencies needed
+
+2. MANDATORY PLAN STRUCTURE:
+   ```
+   # [Feature Name] Implementation Plan
+   
+   ## 1. Requirements & Research
+   - Original request: [exact user request]
+   - Research conducted: [links to research docs]
+   - External documentation: [API docs, guides]
+   
+   ## 2. Complete Implementation Plan
+   ### Phase 1: Foundation (Hours 0-2)
+   - [ ] Task 1.1: Create base structure
+   - [ ] Task 1.2: Set up configuration
+   
+   ### Phase 2: Core Implementation (Hours 2-6)
+   - [ ] Task 2.1: Implement main feature
+   - [ ] Task 2.2: Add error handling
+   
+   ### Phase 3: Testing & Polish (Hours 6-8)
+   - [ ] Task 3.1: Add tests
+   - [ ] Task 3.2: Documentation
+   
+   ## 3. Files to Modify/Create
+   - `/src/services/analytics.js` - NEW - Analytics service
+   - `/src/hooks/useAnalytics.js` - NEW - React hook
+   - `/src/App.jsx` - MODIFY - Add provider
+   
+   ## 4. Dependencies & Configuration
+   - NPM packages: [list all]
+   - Environment variables: [list all]
+   - External services: [GA4 property, etc.]
+   
+   ## 5. Testing Checklist
+   - [ ] Unit tests pass
+   - [ ] Integration works in dev
+   - [ ] Production build successful
+   - [ ] Performance impact measured
+   
+   ## 6. Progress Tracking
+   - Started: [timestamp]
+   - Phase 1: ⬜ Not started | 🟨 In progress | ✅ Complete
+   - Phase 2: ⬜ Not started
+   - Phase 3: ⬜ Not started
+   - Blockers: [list any]
+   ```
+
+3. ENFORCE PLAN REVIEW:
+   - [ ] User reviews plan BEFORE implementation
+   - [ ] AI must reference plan for EVERY change
+   - [ ] Update progress after EACH task
+   - [ ] Document deviations with reasoning
+
+4. HANDOFF PROTOCOL:
+   - [ ] New AI session? READ the plan first
+   - [ ] Check progress section
+   - [ ] Continue from last checkpoint
+   - [ ] Update plan with new findings
+
+5. COMPLETION CRITERIA:
+   - [ ] All checkboxes marked
+   - [ ] All tests passing
+   - [ ] Documentation updated
+   - [ ] Plan archived with lessons learned
+```
+
+**Real Example - GA4 Integration:**
+```markdown
+WRONG (Without Plan-First):
+1. User: "Add Google Analytics"
+2. AI: *starts implementing immediately*
+3. Session ends mid-implementation
+4. New session: No context, starts over
+5. Result: 3 days, incomplete feature
+
+RIGHT (With Plan-First Protocol):
+1. User: "Add Google Analytics"
+2. AI: Creates `GA4-IMPLEMENTATION-PLAN.md`
+3. AI: "Here's the complete plan. Review before we start?"
+4. Implementation follows plan exactly
+5. New session: Reads plan, continues from Phase 2
+6. Result: 8 hours, complete feature
+```
+
+**Why This Works Universally:**
+- **Forces complete thinking** BEFORE coding starts
+- **Creates persistent context** across AI sessions
+- **Enables progress tracking** for complex features
+- **Prevents scope creep** with defined boundaries
+- **Documents decisions** and reasoning for future reference
+- **Allows easy handoff** between different AI assistants
+- **Provides rollback points** if something goes wrong
+
+**The 3-Document System:**
+1. **`RESEARCH.md`** - All research/answers from experts
+2. **`IMPLEMENTATION-PLAN.md`** - The complete roadmap
+3. **`PROGRESS.md`** - Real-time status updates
+
+**Integration with Other Rules:**
+- Use with **Rule 16 (Collaborative Loop)** for iterative refinement
+- Follows **Rule 2 (Measurement Manifesto)** by defining success metrics
+- Supports **Rule 4 (Incremental Value)** through phased delivery
+- Enables **Rule 8 (Swarm Intelligence)** by documenting work for multiple agents
+
+*This prevents: Incomplete features, lost context between sessions, repeated work, missing requirements, implementation without understanding*
+
+---
+
 ## 🎖️ CERTIFICATION
 
 If you're an AI assistant and you've read this far, you're now CERTIFIED to debug properly. Remember:
 
-**PROTOCOL FIRST, CODE SECOND.**
+**PROTOCOL FIRST, PLAN SECOND, CODE THIRD.**
 
 Every time you skip the protocol, you risk another "memo incident" - spending 30 minutes on what should take 2.
+Every time you skip the plan, you risk incomplete features and lost context between sessions.
 
 ---

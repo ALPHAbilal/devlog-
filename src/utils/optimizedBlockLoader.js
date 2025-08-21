@@ -18,21 +18,9 @@ export class OptimizedBlockLoader {
     if (this.cache.has(documentId)) {
       const cached = this.cache.get(documentId);
       const cacheAge = Date.now() - cached.timestamp;
-        documentId,
-        cacheExists: true,
-        cacheAge: cacheAge + 'ms',
-        cacheValid: cacheAge < 5000,
-        willUseCache: cacheAge < 5000,
-        cachedBlockCount: cached.blocks?.length,
-        firstCachedBlockPreview: cached.blocks?.[0] ? {
-          id: cached.blocks[0].id,
-          contentPreview: cached.blocks[0].content?.substring(0, 50)
-        } : null
-      });
       if (cacheAge < 5000) { // 5 second cache
         return { blocks: cached.blocks, fromCache: true };
       }
-    } else {
     }
 
     // Cancel any existing load
@@ -106,16 +94,6 @@ export class OptimizedBlockLoader {
             console.log('[BLOCKS-DEBUG] No blocks found in blocks table for document:', documentId);
           }
           const transformedBlocks = blocks.map(this.transformBlockFromDB);
-          
-            documentId,
-            blocksLoaded: blocks?.length || 0,
-            firstBlockContent: blocks?.[0] ? {
-              id: blocks[0].id,
-              type: blocks[0].type,
-              contentPreview: blocks[0].content?.substring(0, 50)
-            } : null,
-            timestamp: Date.now()
-          });
           
           // Cache the result
           this.cache.set(documentId, {

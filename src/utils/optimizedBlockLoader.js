@@ -65,6 +65,7 @@ export class OptimizedBlockLoader {
             .from('blocks')
             .select('*')
             .eq('document_id', documentId)
+            .is('deleted_at', null)  // CRITICAL: Filter out soft-deleted blocks
             .order('position');
 
           if (error) {

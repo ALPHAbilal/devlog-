@@ -624,8 +624,25 @@ export default function ExpandedView({
         'DELETE',
         blockToDelete?.type || null,           // ADD: block type (required!)
         blockIndex >= 0 ? blockIndex : null    // Use array index as position (required!)
-      ).catch(error => {
-        console.error('Smart Sync delete error:', error);
+      ).then((result) => {
+        // Verification: Log successful deletion
+        console.log('[DELETE-SUCCESS] Block marked for deletion:', {
+          blockId,
+          syncResult: result
+        });
+        
+        // Clear from session cache to prevent reappearance
+        if (window.sessionCache) {
+          window.sessionCache.clearBlock(entry.id, blockId);
+        }
+        
+        // Clear from paginated block loader cache
+        if (window.paginatedBlockLoader) {
+          window.paginatedBlockLoader.clearCache(entry.id);
+        }
+      }).catch(error => {
+        console.error('[DELETE-ERROR] Smart Sync delete failed:', error);
+        // TODO: Show user error notification
       });
     }
     

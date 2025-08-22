@@ -196,6 +196,20 @@ class SessionCache {
   }
 
   /**
+   * Clear a specific block from cache
+   */
+  clearBlock(documentId, blockId) {
+    const blocks = this.getBlocks(documentId);
+    if (blocks && Array.isArray(blocks)) {
+      const filteredBlocks = blocks.filter(block => block.id !== blockId);
+      if (filteredBlocks.length !== blocks.length) {
+        this.updateBlocks(documentId, filteredBlocks);
+        console.log(`SessionCache: Cleared block ${blockId} from document ${documentId}`);
+      }
+    }
+  }
+
+  /**
    * Clear all cached data
    */
   clearAll() {

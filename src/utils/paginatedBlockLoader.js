@@ -64,11 +64,12 @@ export class PaginatedBlockLoader {
       try {
         const offset = page * pageSize;
 
-        // First, get the total count
+        // First, get the total count (excluding soft-deleted blocks)
         const { count: totalCount, error: countError } = await supabase
           .from('blocks')
           .select('*', { count: 'exact', head: true })
-          .eq('document_id', documentId);
+          .eq('document_id', documentId)
+          .is('deleted_at', null);  // CRITICAL: Filter out soft-deleted blocks
 
         if (countError) throw countError;
         if (controller.signal.aborted) return null;
@@ -83,6 +84,7 @@ export class PaginatedBlockLoader {
         .from('blocks')
         .select('*')
         .eq('document_id', documentId)
+        .is('deleted_at', null)  // CRITICAL: Filter out soft-deleted blocks
         .order('position')
         .range(offset, offset + pageSize - 1);
 

@@ -1,4 +1,4 @@
-# Strategic Development Rules - Preventing Problems Before They Exist
+# Strategic Development Rules - must follow guide to make effective actions 
 
 *Universal practices that guarantee avoiding critical errors. If AI assistants follow these, problems are prevented, not just solved.*
 

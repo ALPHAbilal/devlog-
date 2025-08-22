@@ -777,7 +777,7 @@ If discovering → Continue exploring
 **Remember:** The user doesn't care if your first guess was wrong. They care that you find and fix the real issue. Being wrong initially and right eventually > Being stubborn and never solving it.
 
 ---
----
+
 ### RULE 18: The Four-Stage Debugging Escalation Protocol 🐛
 **Start simple, escalate systematically. Each stage has its place.**
 
@@ -901,175 +901,6 @@ Fix: Prevent trigger at useEffect (5 min) vs trying 3 different fixes (30 min)
 ```
 
 *This prevents: Fixing at wrong layer, missing root cause, cascading fixes, circular debugging*
-
----
-
-## 🎯 PRACTICES THAT GUARANTEE SUCCESS
-
-### The Investigation Investment
-**Spend 20% of total time investigating before implementing.**
-- 5-day task = 1 day investigation minimum
-- Skipping investigation = 3x longer implementation
-- Understanding > Assuming
-
-### The Measurement Integration
-**Build measurement into components, not around them.**
-```javascript
-// Every component should self-report
-function Component() {
-  useEffect(() => {
-    performance.mark('Component-render-start');
-    return () => {
-      performance.mark('Component-render-end');
-      // Self-reporting built in
-    };
-  });
-}
-```
-
-### The Simplicity Bias
-**When choosing between solutions:**
-1. Proven library > Custom implementation
-2. Boring technology > Exciting technology
-3. Less code > More features
-4. Clear code > Clever code
-
-### The Reality Check
-**After every planning session:**
-- Can I explain this to a junior developer?
-- Would I want to maintain this in 2 years?
-- Is this the simplest solution that works?
-- If No to any → Redesign
-
----
-
-## 📐 THE UNIVERSAL LAWS
-
-### LAW 1: Architecture Determines Performance Ceiling
-You cannot optimize your way out of bad architecture. Fix architecture first.
-
-### LAW 2: Measurement Determines Truth
-Without measurement, you're guessing. With measurement, you're engineering.
-
-### LAW 3: Complexity Compounds
-Today's shortcut is tomorrow's technical debt. Do it right or do it twice.
-
-### LAW 4: Partial Success Is Success
-Ship incremental value. Perfect is the enemy of good enough.
-
-### LAW 5: The Bug Is Never Where You Think
-Check the system, then the container, then the component, then your code.
-
----
-
-## 🚀 FOR AI ASSISTANTS: YOUR PRIME DIRECTIVES
-
-When helping with ANY project:
-
-1. **ALWAYS investigate container before component**
-2. **NEVER optimize without measurements**
-3. **ALWAYS design for 10x current scale**
-4. **NEVER estimate less than 3x initial guess**
-5. **ALWAYS add cleanup with allocation**
-6. **NEVER assume the obvious cause**
-7. **ALWAYS ship incremental value**
-
-Follow these rules and you will prevent 90% of problems before they exist.
-
----
-
-*These rules come from pain. Following them prevents that pain. This is the way.*
-
----
-
-## 📝 HOW TO ADD NEW LESSONS (For Humans & AI Assistants)
-
-When you learn a new lesson from pain/failure, add it using this template:
-
-### For Strategic Principles (Section: CORE STRATEGIC PRINCIPLES)
-```markdown
-### RULE [#]: The [Memorable Name]
-**[One sentence command that forces action]**
-- [Specific practice that implements this]
-- [Why this matters]
-- [What happens if you don't]
-- *This prevents: [List specific disasters this rule prevents]*
-```
-
-### For Practices (Section: ARCHITECTURAL PRACTICES)
-```markdown
-### PRACTICE [#]: The [Action Name]
-**[Question every component/decision must answer]**
-- [Specific action to take]
-- [When to take this action]
-- [Measurable outcome]
-- *This prevents: [Specific problems avoided]*
-```
-
-### For Frameworks (Section: STRATEGIC DECISION FRAMEWORKS)
-```markdown
-### FRAMEWORK [#]: The [Decision Process Name]
-[Step-by-step decision tree or checklist]
-If [condition] → [action]
-If [condition] → [different action]
-```
-
-### For Universal Laws (Section: THE UNIVERSAL LAWS)
-```markdown
-### LAW [#]: [Fundamental Truth]
-[One sentence that captures eternal wisdom]
-```
-
-### Example of Adding a New Lesson:
-
-**Your Experience:** "Spent 2 weeks debugging because dev tools showed different performance than production build"
-
-**Becomes:**
-```markdown
-### RULE 6: The Production Truth Principle
-**Never trust development build performance - only production builds reveal truth.**
-- Profile production builds from Day 1
-- Dev builds hide 50% of performance issues
-- React DevTools ≠ Real user experience
-- *This prevents: Optimizing phantom problems, missing real bottlenecks*
-```
-
-**Key Pattern:** Transform your specific pain into a universal practice that would have prevented it.
-
-**Remember:** 
-- Make it **actionable** (tells what TO DO, not just what went wrong)
-- Make it **preventative** (stops problems before they start)
-- Make it **universal** (applies to any project, any language)
-- Make it **measurable** (clear success/failure criteria)
-
----
-
-## 🌍 UNIVERSAL PORTABILITY GUARANTEE
-
-**This rules.md file is designed to work in ANY project, ANY tech stack, ANY language.**
-
-### How to Use in a New Project:
-1. Copy this entire rules.md to your project root
-2. That's it. No configuration needed.
-
-### Why It Works Everywhere:
-- **No tech-specific commands** - All rules are pattern-based
-- **No framework assumptions** - Principles apply to any architecture
-- **No language dependencies** - Error patterns are universal
-- **No tool requirements** - Debugging steps work with any tooling
-
-### The Universal Truth:
-- Containers exist in every language (modules, packages, classes, namespaces)
-- Stack traces exist in every runtime
-- Imports/dependencies exist in every ecosystem
-- Performance issues follow the same patterns everywhere
-
-### Test It Yourself:
-Copy this file to a Python project, a Go service, a Ruby app, or even a C++ codebase. The debugging protocol will still catch issues faster than reactive fixing.
-
-**The magic isn't in the technology - it's in the methodology.**
-
----
 
 ### Rule 20: The "Plan-First Documentation Protocol" 📋
 **Before implementing ANY feature, create a PLAN.md file with the complete implementation roadmap**
@@ -1197,6 +1028,330 @@ RIGHT (With Plan-First Protocol):
 - Enables **Rule 8 (Swarm Intelligence)** by documenting work for multiple agents
 
 *This prevents: Incomplete features, lost context between sessions, repeated work, missing requirements, implementation without understanding*
+
+### RULE 21: The Backward-Tracing Protocol 🔍
+**When understanding unfamiliar code, ALWAYS start from known outputs and trace backward to inputs.**
+- Find something concrete the code produces (file, API response, UI element)
+- Locate the exact line producing this output
+- Trace backward one step at a time through the data flow
+- Document each connection you discover
+- 60% more effective than forward reading (proven by research)
+- *This prevents: Getting lost in implementation details, missing critical flows, wasting hours on wrong assumptions*
+
+### RULE 22: The Mental Model First Doctrine 🧠
+**Spend the first 30 minutes building a mental model WITHOUT touching code - just think and diagram.**
+- Stand back and think about what the system MUST do
+- Draw boxes and arrows before reading any code
+- List your assumptions explicitly
+- Test mental model predictions against actual behavior
+- Update model when wrong, don't defend it
+- *This prevents: Memorizing syntax without understanding, debugging blindly, making same mistakes repeatedly*
+
+### RULE 23: The T-Shaped Investigation Strategy 🔤
+**First map ALL components broadly (horizontal), then dive deep into critical areas (vertical).**
+- Hour 1: Map every major component and interface
+- Hour 2: Identify critical data flows
+- Hour 3: Pick ONE critical component and understand it completely
+- Hour 4: Connect deep knowledge back to broad map
+- Reduces comprehension time by 50% vs random exploration
+- *This prevents: Tunnel vision, missing system interactions, incomplete understanding*
+
+### RULE 24: The Time-Box Comprehension Protocol ⏱️
+**Use strict time limits for each understanding phase: 15min orientation, 45min exploration, 60min deep-dive.**
+
+```markdown
+FIRST HOUR BREAKDOWN:
+0-15 min: Setup, README, run the app
+15-45 min: Use as end-user, identify core features  
+45-60 min: Map folder structure, find entry points
+
+FIRST DAY BREAKDOWN:
+Hours 2-4: Documentation, tests, dependencies
+Hours 5-8: Trace ONE feature completely, identify hot spots
+
+FIRST WEEK: 
+Days 2-3: Pattern recognition
+Days 4-5: First contribution
+```
+- *This prevents: Analysis paralysis, overwhelming information overload, endless exploration without progress*
+
+### RULE 25: The Pattern Recognition Accelerator 🎯
+**Document every pattern you see - experts recognize patterns 3-4x faster through systematic cataloging.**
+- Create a patterns.md file in every project
+- Record: Pattern name, where seen, what it does, why it exists
+- Group patterns: Syntactic, Semantic, Architectural, Domain-specific
+- Review patterns before diving into new areas
+- Build pattern library across projects
+- *This prevents: Relearning same concepts, missing familiar structures, slow comprehension*
+
+### RULE 26: The Code Archaeology Protocol 🏛️
+**When facing legacy code, excavate its history before trying to understand its present.**
+- Check git history for frequently modified files (these are problem areas)
+- Look for TODO comments (reveal known issues)
+- Find the oldest code first (usually most stable/important)
+- Use 2-point font view to see code "shape" and structure
+- Read commit messages for "why" not just "what"
+- *This prevents: Missing critical context, breaking stable code, repeating past mistakes*
+
+### RULE 27: The Cognitive Bias Breaker 🎭
+**Every assumption is wrong until proven right - test EVERYTHING you think you know.**
+- Write down what you think code does BEFORE running it
+- Test your prediction
+- When wrong, update mental model immediately
+- Never test only happy paths
+- Get second opinion when "99% certain"
+- Reality: Developers wrong 40% of time when "certain"
+- *This prevents: Confirmation bias disasters, hidden bugs, overconfidence failures*
+
+### RULE 28: The Systematic Note-Taking Mandate 📝
+**Document understanding in three layers: inline (why), module (what), system (how).**
+
+```markdown
+## Code Understanding Template
+### Purpose
+- What: [What this code does]
+- Why: [Business reason it exists]
+
+### Entry Points
+- Main: [Primary entry point]
+- Dependencies: [What it needs]
+
+### Data Flow
+- Input: [What comes in]
+- Transform: [What happens]
+- Output: [What goes out]
+
+### Patterns Observed
+- [Pattern]: [Where/Why]
+
+### Questions/Unknown
+- [ ] [Things to investigate]
+```
+- *This prevents: Relearning same code, lost insights, team knowledge silos*
+
+### RULE 29: The Distributed System Reality Check 🌐
+**For microservices/distributed systems, trace ONE request end-to-end before studying any service.**
+- Pick one user action
+- Follow it through EVERY service it touches
+- Document each hop and transformation
+- Note every network call and data store hit
+- Only THEN study individual services
+- *This prevents: Missing critical interactions, incorrect mental models, debugging wrong service*
+
+### RULE 30: The Error Kernel Focus Principle 🎯
+**Find the 20% of code responsible for 80% of functionality and understand that FIRST.**
+- Identify code that MUST work for system to function
+- Ignore edge cases initially
+- Focus on happy path through critical features
+- Map critical path dependencies
+- Expand understanding outward from kernel
+- *This prevents: Information overload, missing forest for trees, wasted time on rarely-used code*
+
+### RULE 31: The Language-Agnostic Pattern Protocol 🌍
+**Ignore syntax, focus on patterns - all code has: entry points, data flow, state management, error handling.**
+
+```markdown
+Universal Questions for ANY Codebase:
+□ Where does execution start?
+□ How does data enter the system?
+□ Where is state stored?
+□ How are errors handled?
+□ What external systems does it touch?
+□ How is configuration managed?
+□ Where are the boundaries?
+```
+- *This prevents: Language paralysis, framework fear, technology switching friction*
+
+### RULE 32: The Comprehension Validation Test ✅
+**You don't understand code until you can predict its behavior and modify it without breaking anything.**
+- Test 1: Can you explain it to someone else?
+- Test 2: Can you predict output given input?
+- Test 3: Can you add a feature without breaking existing ones?
+- Test 4: Can you optimize it without changing behavior?
+- If any test fails → You don't understand it yet
+- *This prevents: False confidence, production disasters, "I thought I understood it" moments*
+
+---
+
+## 🎯 PRACTICES THAT GUARANTEE SUCCESS
+
+### The Investigation Investment
+**Spend 20% of total time investigating before implementing.**
+- 5-day task = 1 day investigation minimum
+- Skipping investigation = 3x longer implementation
+- Understanding > Assuming
+
+### The Measurement Integration
+**Build measurement into components, not around them.**
+```javascript
+// Every component should self-report
+function Component() {
+  useEffect(() => {
+    performance.mark('Component-render-start');
+    return () => {
+      performance.mark('Component-render-end');
+      // Self-reporting built in
+    };
+  });
+}
+```
+
+### The Simplicity Bias
+**When choosing between solutions:**
+1. Proven library > Custom implementation
+2. Boring technology > Exciting technology
+3. Less code > More features
+4. Clear code > Clever code
+
+### The Reality Check
+**After every planning session:**
+- Can I explain this to a junior developer?
+- Would I want to maintain this in 2 years?
+- Is this the simplest solution that works?
+- If No to any → Redesign
+
+---
+
+## 📐 THE UNIVERSAL LAWS
+
+### LAW 1: Architecture Determines Performance Ceiling
+You cannot optimize your way out of bad architecture. Fix architecture first.
+
+### LAW 2: Measurement Determines Truth
+Without measurement, you're guessing. With measurement, you're engineering.
+
+### LAW 3: Complexity Compounds
+Today's shortcut is tomorrow's technical debt. Do it right or do it twice.
+
+### LAW 4: Partial Success Is Success
+Ship incremental value. Perfect is the enemy of good enough.
+
+### LAW 5: The Bug Is Never Where You Think
+Check the system, then the container, then the component, then your code.
+
+### LAW 6: Understanding Beats Memorization
+You cannot debug what you don't understand. Mental models > syntax knowledge.
+
+### LAW 7: Backward Beats Forward  
+Tracing from outputs to inputs is 60% more effective than forward reading.
+
+### LAW 8: Patterns Beat Details
+Recognizing patterns gives 3-4x comprehension speed over line-by-line reading.
+
+### LAW 9: Time-Boxing Beats Endless Exploration
+Structured time limits force focus and prevent analysis paralysis.
+
+### LAW 10: Documentation Is Comprehension
+If you can't document it, you don't understand it.
+
+---
+
+## 🚀 FOR AI ASSISTANTS: YOUR PRIME DIRECTIVES
+
+When helping with ANY project:
+
+1. **ALWAYS investigate container before component**
+2. **NEVER optimize without measurements**
+3. **ALWAYS design for 10x current scale**
+4. **NEVER estimate less than 3x initial guess**
+5. **ALWAYS add cleanup with allocation**
+6. **NEVER assume the obvious cause**
+7. **ALWAYS ship incremental value**
+
+Follow these rules and you will prevent 90% of problems before they exist.
+
+---
+
+*These rules come from pain. Following them prevents that pain. This is the way.*
+
+---
+
+## 📝 HOW TO ADD NEW LESSONS (For Humans & AI Assistants)
+
+When you learn a new lesson from pain/failure, add it using this template:
+
+### For Strategic Principles (Section: CORE STRATEGIC PRINCIPLES)
+```markdown
+### RULE [#]: The [Memorable Name]
+**[One sentence command that forces action]**
+- [Specific practice that implements this]
+- [Why this matters]
+- [What happens if you don't]
+- *This prevents: [List specific disasters this rule prevents]*
+```
+
+### For Practices (Section: ARCHITECTURAL PRACTICES)
+```markdown
+### PRACTICE [#]: The [Action Name]
+**[Question every component/decision must answer]**
+- [Specific action to take]
+- [When to take this action]
+- [Measurable outcome]
+- *This prevents: [Specific problems avoided]*
+```
+
+### For Frameworks (Section: STRATEGIC DECISION FRAMEWORKS)
+```markdown
+### FRAMEWORK [#]: The [Decision Process Name]
+[Step-by-step decision tree or checklist]
+If [condition] → [action]
+If [condition] → [different action]
+```
+
+### For Universal Laws (Section: THE UNIVERSAL LAWS)
+```markdown
+### LAW [#]: [Fundamental Truth]
+[One sentence that captures eternal wisdom]
+```
+
+### Example of Adding a New Lesson:
+
+**Your Experience:** "Spent 2 weeks debugging because dev tools showed different performance than production build"
+
+**Becomes:**
+```markdown
+### RULE 6: The Production Truth Principle
+**Never trust development build performance - only production builds reveal truth.**
+- Profile production builds from Day 1
+- Dev builds hide 50% of performance issues
+- React DevTools ≠ Real user experience
+- *This prevents: Optimizing phantom problems, missing real bottlenecks*
+```
+
+**Key Pattern:** Transform your specific pain into a universal practice that would have prevented it.
+
+**Remember:** 
+- Make it **actionable** (tells what TO DO, not just what went wrong)
+- Make it **preventative** (stops problems before they start)
+- Make it **universal** (applies to any project, any language)
+- Make it **measurable** (clear success/failure criteria)
+
+---
+
+## 🌍 UNIVERSAL PORTABILITY GUARANTEE
+
+**This rules.md file is designed to work in ANY project, ANY tech stack, ANY language.**
+
+### How to Use in a New Project:
+1. Copy this entire rules.md to your project root
+2. That's it. No configuration needed.
+
+### Why It Works Everywhere:
+- **No tech-specific commands** - All rules are pattern-based
+- **No framework assumptions** - Principles apply to any architecture
+- **No language dependencies** - Error patterns are universal
+- **No tool requirements** - Debugging steps work with any tooling
+
+### The Universal Truth:
+- Containers exist in every language (modules, packages, classes, namespaces)
+- Stack traces exist in every runtime
+- Imports/dependencies exist in every ecosystem
+- Performance issues follow the same patterns everywhere
+
+### Test It Yourself:
+Copy this file to a Python project, a Go service, a Ruby app, or even a C++ codebase. The debugging protocol will still catch issues faster than reactive fixing.
+
+**The magic isn't in the technology - it's in the methodology.**
 
 ---
 

@@ -277,7 +277,15 @@ export default function BlockControls({
               {/* Move Up */}
               {canMoveUp && (
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    console.log('[DEBUG-MOVE-1] Move UP button clicked:', {
+                      blockId,
+                      timestamp: Date.now(),
+                      eventTimeStamp: e.timeStamp,
+                      isTrusted: e.isTrusted,
+                      detail: e.detail, // Shows click count (1 for single, 2 for double)
+                      callStack: new Error().stack.substring(0, 200)
+                    });
                     onMoveUp?.();
                     setShowMenu(false);
                   }}
@@ -294,7 +302,15 @@ export default function BlockControls({
               {/* Move Down */}
               {canMoveDown && (
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    console.log('[DEBUG-MOVE-1] Move DOWN button clicked:', {
+                      blockId,
+                      timestamp: Date.now(),
+                      eventTimeStamp: e.timeStamp,
+                      isTrusted: e.isTrusted,
+                      detail: e.detail, // Shows click count (1 for single, 2 for double)
+                      callStack: new Error().stack.substring(0, 200)
+                    });
                     onMoveDown?.();
                     setShowMenu(false);
                   }}

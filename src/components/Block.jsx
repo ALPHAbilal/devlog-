@@ -274,8 +274,22 @@ function Block({
           isVisible={isHovered && !isDragging && shouldRender}
           onDelete={() => onDelete(block.id)}
           onDuplicate={() => onDuplicate?.(block.id)}
-          onMoveUp={() => onMoveUp?.(block.id)}
-          onMoveDown={() => onMoveDown?.(block.id)}
+          onMoveUp={() => {
+            console.log('[DEBUG-MOVE-2] Block.onMoveUp called:', {
+              blockId: block.id,
+              blockType: block.type,
+              timestamp: Date.now()
+            });
+            onMoveUp?.(block.id);
+          }}
+          onMoveDown={() => {
+            console.log('[DEBUG-MOVE-2] Block.onMoveDown called:', {
+              blockId: block.id,
+              blockType: block.type,
+              timestamp: Date.now()
+            });
+            onMoveDown?.(block.id);
+          }}
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}
           onDragStart={handleDragStart}

@@ -1171,6 +1171,70 @@ Universal Questions for ANY Codebase:
 - If any test fails → You don't understand it yet
 - *This prevents: False confidence, production disasters, "I thought I understood it" moments*
 
+### RULE 33: The Debug Log Protocol 📝
+**ALWAYS use DEBUG-LOG.md to document your debugging journey - it's the ONLY place to look.**
+
+```markdown
+□ THE SIMPLE DEBUG PROTOCOL:
+
+1. BEFORE STARTING ANY DEBUG:
+   - [ ] Open DEBUG-LOG.md 
+   - [ ] Check "PATTERNS QUICK REFERENCE" - is this familiar?
+   - [ ] Check "RECENT SESSIONS" - similar issue solved before?
+
+2. DOCUMENT AS YOU GO:
+   ## Iteration 1: [What you're trying]
+   **Hypothesis**: [What you think]
+   **Test**: [What you did]
+   **Result**: [What happened]
+   **Learning**: [What this tells you]
+   Status: ❌ Wrong / ✅ Found it / ⚠️ Partial
+
+3. ITERATE (not time-based, just numbered):
+   - Iteration 1: First attempt
+   - Iteration 2: After first learning
+   - Iteration 3: After pivot
+   - Keep going until solved
+
+4. WHEN SOLVED:
+   - [ ] Add pattern to "PATTERNS QUICK REFERENCE" section
+   - [ ] Move session to "RECENT SESSIONS ARCHIVE"
+   - [ ] Keep only last 5 sessions (delete older ones)
+```
+
+**The ONE File System**:
+- **DEBUG-LOG.md** - Everything goes here
+- Current debugging at top
+- Patterns in middle  
+- Recent sessions at bottom
+- That's it. No other files needed.
+
+**Why This Works**:
+- ONE place to check (not 7 different files)
+- Iterations not timestamps (AI bad with time)
+- Patterns visible immediately
+- No complex archiving system
+- Previous solutions easy to find
+
+**Example Format**:
+```markdown
+## Iteration 1: Check if it's the database
+**Hypothesis**: Database query is wrong
+**Test**: Log the SQL query
+**Result**: Query is correct, data is null before query
+**Learning**: Problem is before database layer
+Status: ❌ Wrong
+
+## Iteration 2: Check the component 
+**Hypothesis**: Component sending null data
+**Test**: Log what component sends
+**Result**: Found stale closure!
+**Learning**: Need functional setState
+Status: ✅ Found it
+```
+
+*This prevents: Scattered knowledge, repeated debugging, complex file systems, time confusion*
+
 ---
 
 ## 🎯 PRACTICES THAT GUARANTEE SUCCESS

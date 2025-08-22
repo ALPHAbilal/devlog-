@@ -705,15 +705,39 @@ export default function ExpandedView({
   }, [blocks, updateLoadedBlocks]);
 
   const moveBlock = useCallback((blockId, direction) => {
+    // Enhanced debug logging with unique invocation ID
+    const invocationId = Math.random().toString(36).substring(7);
+    console.log('[DEBUG-MOVE-3] moveBlock START:', {
+      invocationId,
+      blockId,
+      direction,
+      timestamp: Date.now(),
+      callStack: new Error().stack.substring(0, 300)
+    });
+    
     const blockIndex = blocks.findIndex(b => b.id === blockId);
-    if (blockIndex === -1) return;
+    if (blockIndex === -1) {
+      console.log('[DEBUG-MOVE-3] moveBlock ABORT - block not found:', { invocationId, blockId });
+      return;
+    }
     
     const newIndex = direction === 'up' ? blockIndex - 1 : blockIndex + 1;
-    if (newIndex < 0 || newIndex >= blocks.length) return;
+    if (newIndex < 0 || newIndex >= blocks.length) {
+      console.log('[DEBUG-MOVE-3] moveBlock ABORT - invalid index:', { invocationId, newIndex });
+      return;
+    }
     
     const updatedBlocks = [...blocks];
     const [movedBlock] = updatedBlocks.splice(blockIndex, 1);
     updatedBlocks.splice(newIndex, 0, movedBlock);
+    
+    console.log('[DEBUG-MOVE-3] moveBlock STATE UPDATE:', {
+      invocationId,
+      blockId,
+      oldIndex: blockIndex,
+      newIndex,
+      blockType: movedBlock.type
+    });
     
     startTransition(() => {
       updateLoadedBlocks(updatedBlocks);
@@ -732,11 +756,13 @@ export default function ExpandedView({
     // CRITICAL FIX: Call Smart Sync for reorder operation
     if (smartSyncManagerRef.current && movedBlock) {
       // DEBUG: Log what we're sending for REORDER
-      console.log('[DEBUG-FIX] REORDER operation with:', {
+      console.log('[DEBUG-MOVE-4] Calling SmartSync.handleChange:', {
+        invocationId,
         blockId: movedBlock.id,
         blockType: movedBlock.type,
         position: newIndex,
-        action: 'REORDER'
+        action: 'REORDER',
+        timestamp: Date.now()
       });
       
       // Send all required parameters for REORDER
@@ -747,9 +773,11 @@ export default function ExpandedView({
         movedBlock.type,    // ADD: block type (required!)
         newIndex            // ADD: position as number (required!)
       ).catch(error => {
-        console.error('Smart Sync move error:', error);
+        console.error('[DEBUG-MOVE-4] Smart Sync move error:', { invocationId, error });
       });
     }
+    
+    console.log('[DEBUG-MOVE-3] moveBlock END:', { invocationId, timestamp: Date.now() });
     
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
     // if (onUpdate && !isInitialLoadRef.current) {

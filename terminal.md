@@ -1,138 +1,201 @@
-index-dnv1_Qz4.js:26 Using optimized Supabase client
-index-dnv1_Qz4.js:26 IndexedDB initialized successfully
-index-dnv1_Qz4.js:26 Persistent storage granted
-index-dnv1_Qz4.js:26 [Supabase] Restored existing session: ee7f1d0a-3252-4303-b795-cf1966ef90a1
-index-dnv1_Qz4.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-dnv1_Qz4.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: 'ee7f1d0a-3252-4303-b795-cf1966ef90a1'}
-index-dnv1_Qz4.js:26 Dashboard: Starting to load entries...
-index-dnv1_Qz4.js:26 Using Supabase for storage
-index-dnv1_Qz4.js:26 SupabaseAdapter: Init with provided userId ee7f1d0a-3252-4303-b795-cf1966ef90a1
-index-dnv1_Qz4.js:26 Dashboard: Storage initialized (5ms)
-index-dnv1_Qz4.js:26 SupabaseAdapter: getDocuments called
-index-dnv1_Qz4.js:26 SupabaseAdapter: Querying documents for user ee7f1d0a-3252-4303-b795-cf1966ef90a1
-index-dnv1_Qz4.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-dnv1_Qz4.js:26 SupabaseAdapter: Documents query completed in 3187ms
-index-dnv1_Qz4.js:26 SupabaseAdapter: Found 1 documents
-index-dnv1_Qz4.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
-index-dnv1_Qz4.js:26 SupabaseAdapter: Total documents after merge: 1
-index-dnv1_Qz4.js:26 SupabaseAdapter: Returning 1 documents
-index-dnv1_Qz4.js:26 Dashboard: Loaded 1 entries (3195ms)
-index-dnv1_Qz4.js:26 Dashboard: Total load time: 3201ms
-index-dnv1_Qz4.js:26 SupabaseAdapter: Getting projects...
-index-dnv1_Qz4.js:26 Dashboard: Showing ExpandedView instead of grid
-index-dnv1_Qz4.js:26 Loading folders for user: ee7f1d0a-3252-4303-b795-cf1966ef90a1
-index-dnv1_Qz4.js:26 OptimizedBlockLoader: Loading blocks for document 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 [BLOCKS-DEBUG] Attempting to load from blocks table
-index-dnv1_Qz4.js:26 [BLOCKS-DEBUG] Query: SELECT * FROM blocks WHERE document_id = 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 SmartSync: IndexedDB initialized
-index-dnv1_Qz4.js:26 SupabaseAdapter: Found 0 projects
-index-dnv1_Qz4.js:26 Dashboard: Loaded 0 projects
-index-dnv1_Qz4.js:26 Dashboard: Setting isLoading to false
-index-dnv1_Qz4.js:26 Dashboard: Showing ExpandedView instead of grid
-index-dnv1_Qz4.js:26 Loaded 2 folders (1 root folders)
-index-dnv1_Qz4.js:26 ExpandedView: Initial load period complete, enabling saves
-index-dnv1_Qz4.js:26 OptimizedBlockLoader: Loaded 12 blocks for document 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 [BLOCKS-DEBUG] First block structure: {id: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', type: 'text', position: 0, has_content: true, content_length: 380}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', type: 'text', hasContent: true, contentType: 'string', contentLength: 380, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4601479b-6b69-49a0-9465-002c03a0762a', type: 'text', hasContent: true, contentType: 'string', contentLength: 2045, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1d499e00-faa4-4770-a782-eaa6f2f1f9f3', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'a79c06c6-bca9-4b35-8559-5a903dd63813', type: 'code', hasContent: true, contentType: 'string', contentLength: 18139, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'f8ce8263-17c5-4f32-b188-4c12f4029913', type: 'text', hasContent: true, contentType: 'string', contentLength: 3, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '930f3f5a-f16c-4f6a-9d46-999540f43ccf', type: 'ai', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔍 AI block: using messages from metadata (legacy format)
-index-dnv1_Qz4.js:26 🔵 AI Block Load Debug (OptimizedBlockLoader): {blockId: '930f3f5a-f16c-4f6a-9d46-999540f43ccf', messageCount: 5, hasMessages: true}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '190bedc4-482a-4d71-95eb-61bef051afac', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'fe602784-e9c5-44f8-9710-b6338c25b47f', type: 'table', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8a414737-1676-42bb-9a18-31afdfced672', type: 'version-track', hasContent: true, contentType: 'string', contentLength: 361, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '660bf22e-2500-41b1-98f2-527f47e931d3', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '32dabd59-72b8-4000-b292-f100eb6dcb19', type: 'heading', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '56ef096a-ed52-4996-b257-2c3d2882741d', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 SessionCache: Cached 12 blocks for document 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 📝 TextBlock 4c8b21ff-affc-453e-9beb-0e7b129d26d8 rendered at 2025-08-22T13:58:47.034Z
-index-dnv1_Qz4.js:26 📝 TextBlock 4601479b-6b69-49a0-9465-002c03a0762a rendered at 2025-08-22T13:58:47.035Z
-index-dnv1_Qz4.js:26 💻 CodeBlock 1d499e00-faa4-4770-a782-eaa6f2f1f9f3 rendered at 2025-08-22T13:58:47.036Z
-index-dnv1_Qz4.js:26 💻 CodeBlock a79c06c6-bca9-4b35-8559-5a903dd63813 rendered at 2025-08-22T13:58:47.037Z
-index-dnv1_Qz4.js:26 📝 TextBlock f8ce8263-17c5-4f32-b188-4c12f4029913 rendered at 2025-08-22T13:58:47.038Z
-index-dnv1_Qz4.js:26 💻 CodeBlock 660bf22e-2500-41b1-98f2-527f47e931d3 rendered at 2025-08-22T13:58:47.041Z
-index-dnv1_Qz4.js:26 📌 HeadingBlock 32dabd59-72b8-4000-b292-f100eb6dcb19 rendered at 2025-08-22T13:58:47.042Z
-index-dnv1_Qz4.js:26 🤖 AIBlock 930f3f5a-f16c-4f6a-9d46-999540f43ccf rendered at 2025-08-22T13:58:48.489Z
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '56ef096a-ed52-4996-b257-2c3d2882741d', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 🎯 IssueTrackerBlock initialization: {blockId: '190bedc4-482a-4d71-95eb-61bef051afac', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-dnv1_Qz4.js:26 📊 VersionTrackBlock 8a414737-1676-42bb-9a18-31afdfced672 rendered at 2025-08-22T13:58:49.176Z
-index-dnv1_Qz4.js:26 [DELETE] Finding block: {blockId: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', blocksLength: 12, blockFound: true, blockType: 'text', position: 0, …}
-index-dnv1_Qz4.js:26 [DEBUG-FIX] DELETE operation with: {blockId: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', blockType: 'text', position: 0, action: 'DELETE'}
-index-dnv1_Qz4.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', action: 'DELETE', blockType: 'text', position: 0, contentLength: undefined, …}
-index-dnv1_Qz4.js:26 [DELETE] Finding block: {blockId: '4601479b-6b69-49a0-9465-002c03a0762a', blocksLength: 12, blockFound: true, blockType: 'text', position: 1, …}
-index-dnv1_Qz4.js:26 [DEBUG-FIX] DELETE operation with: {blockId: '4601479b-6b69-49a0-9465-002c03a0762a', blockType: 'text', position: 1, action: 'DELETE'}
-index-dnv1_Qz4.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '4601479b-6b69-49a0-9465-002c03a0762a', action: 'DELETE', blockType: 'text', position: 1, contentLength: undefined, …}
-index-dnv1_Qz4.js:26 [DELETE] Finding block: {blockId: '1d499e00-faa4-4770-a782-eaa6f2f1f9f3', blocksLength: 12, blockFound: true, blockType: 'code', position: 2, …}
-index-dnv1_Qz4.js:26 [DEBUG-FIX] DELETE operation with: {blockId: '1d499e00-faa4-4770-a782-eaa6f2f1f9f3', blockType: 'code', position: 2, action: 'DELETE'}
-index-dnv1_Qz4.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '1d499e00-faa4-4770-a782-eaa6f2f1f9f3', action: 'DELETE', blockType: 'code', position: 2, contentLength: undefined, …}
-index-dnv1_Qz4.js:26 [DELETE] Finding block: {blockId: 'a79c06c6-bca9-4b35-8559-5a903dd63813', blocksLength: 12, blockFound: true, blockType: 'code', position: 3, …}
-index-dnv1_Qz4.js:26 [DEBUG-FIX] DELETE operation with: {blockId: 'a79c06c6-bca9-4b35-8559-5a903dd63813', blockType: 'code', position: 3, action: 'DELETE'}
-index-dnv1_Qz4.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'a79c06c6-bca9-4b35-8559-5a903dd63813', action: 'DELETE', blockType: 'code', position: 3, contentLength: undefined, …}
-index-dnv1_Qz4.js:26 SmartSync: Syncing 4 changes
-index-dnv1_Qz4.js:26 SmartSync: Changes being sent: (4) [{…}, {…}, {…}, {…}]
-index-dnv1_Qz4.js:26 SmartSync: Current user ID: ee7f1d0a-3252-4303-b795-cf1966ef90a1
-index-dnv1_Qz4.js:26 SmartSync: RPC response: {total: 4, errors: Array(0), success: true, processed: 4, timestamp: 1755871156181.681}
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Full RPC Response: {
-  "total": 4,
+index-BhJ5O1Uu.js:26 Using optimized Supabase client
+index-BhJ5O1Uu.js:26 SW registered: ServiceWorkerRegistration
+index-BhJ5O1Uu.js:26 [Supabase] Restored existing session: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-BhJ5O1Uu.js:26 [AuthContext] Auth state change received: INITIAL_SESSION Object
+index-BhJ5O1Uu.js:26 IndexedDB initialized successfully
+index-BhJ5O1Uu.js:26 Persistent storage granted
+index-BhJ5O1Uu.js:26 Dashboard: Starting to load entries...
+index-BhJ5O1Uu.js:26 Using Supabase for storage
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Init with provided userId 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 Dashboard: Storage initialized (14ms)
+index-BhJ5O1Uu.js:26 SupabaseAdapter: getDocuments called
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Querying documents for user 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Documents query completed in 246ms
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Found 8 documents
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Total documents after merge: 8
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Returning 8 documents
+index-BhJ5O1Uu.js:26 Dashboard: Loaded 8 entries (248ms)
+index-BhJ5O1Uu.js:26 Dashboard: Total load time: 262ms
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Getting projects...
+index-BhJ5O1Uu.js:26 SupabaseAdapter: Found 1 projects
+index-BhJ5O1Uu.js:26 Dashboard: Loaded 1 projects
+index-BhJ5O1Uu.js:26 Dashboard: Setting isLoading to false
+index-BhJ5O1Uu.js:26 Loading folders for user: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 VirtualizedGrid - scroll container: {"totalHeight":1044,"containerHeight":610,"hasOverflow":true,"parentIsCardsContainer":true}
+index-BhJ5O1Uu.js:26 VirtualizedGrid - scroll container: {"totalHeight":336,"containerHeight":610,"hasOverflow":false,"parentIsCardsContainer":true}
+index-BhJ5O1Uu.js:26 Loaded 3 folders (2 root folders)
+index-BhJ5O1Uu.js:26 Dashboard: Showing ExpandedView instead of grid
+index-BhJ5O1Uu.js:26 SmartSync: IndexedDB initialized
+index-BhJ5O1Uu.js:26 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [BLOCKS-LOAD-DEBUG] Querying blocks table for document: 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 PaginatedBlockLoader: Loaded 15 blocks for page 0 of document 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [BLOCKS-LOAD-DEBUG] First block from DB: {id: '424d5462-23f1-406d-9978-c2db64761168', type: 'text', has_type: true, position: 1, has_position: true, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '424d5462-23f1-406d-9978-c2db64761168', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e2312ce2-dfda-45a2-b7b3-b27e346d3f5e', type: 'text', hasContent: true, contentType: 'string', contentLength: 16, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 28, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '279adbf6-75f2-4922-9152-ac8d735217ae', type: 'todo', hasContent: true, contentType: 'string', contentLength: 228, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'ee104885-37aa-42bd-aec4-cbb741dacc8a', type: 'table', hasContent: true, contentType: 'string', contentLength: 96, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'feadef62-b5d0-4a68-bac7-ce034bf0afde', type: 'image', hasContent: true, contentType: 'string', contentLength: 41, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'b561aee6-dcdd-420b-be05-76509fcf1ead', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4a187553-e59c-488e-8463-e411dca46411', type: 'heading', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7cd222ad-7122-4880-93d2-08d17a000a66', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'dac6f16c-8bde-452c-b64b-d1ff3b7d3eeb', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 28, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1a92b6da-5f1c-4d21-817f-19c171861558', type: 'version-track', hasContent: true, contentType: 'string', contentLength: 334, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'aa5ef328-efb1-4950-8eea-a7f7d77dce43', type: 'filetree', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'b1357548-9a4d-41f0-9d66-f9599139b29a', type: 'ai', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-BhJ5O1Uu.js:26 🔵 AI Block Load Debug (OptimizedBlockLoader): {blockId: 'b1357548-9a4d-41f0-9d66-f9599139b29a', messageCount: 0, hasMessages: true}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '382c4b30-abf6-491c-bd04-af73167b6c27', type: 'table', hasContent: true, contentType: 'string', contentLength: 96, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '121e8c2d-1744-430a-82ba-f177097e1685', type: 'image', hasContent: true, contentType: 'string', contentLength: 41, …}
+index-BhJ5O1Uu.js:26 📝 TextBlock 424d5462-23f1-406d-9978-c2db64761168 rendered at 2025-08-22T14:28:37.079Z
+index-BhJ5O1Uu.js:26 📝 TextBlock e2312ce2-dfda-45a2-b7b3-b27e346d3f5e rendered at 2025-08-22T14:28:37.081Z
+index-BhJ5O1Uu.js:26 ✅ TodoBlock 279adbf6-75f2-4922-9152-ac8d735217ae rendered at 2025-08-22T14:28:37.082Z
+index-BhJ5O1Uu.js:26 🌆 ImageBlock feadef62-b5d0-4a68-bac7-ce034bf0afde rendered at 2025-08-22T14:28:37.084Z
+index-BhJ5O1Uu.js:26 💻 CodeBlock b561aee6-dcdd-420b-be05-76509fcf1ead rendered at 2025-08-22T14:28:37.085Z
+index-BhJ5O1Uu.js:26 📌 HeadingBlock 4a187553-e59c-488e-8463-e411dca46411 rendered at 2025-08-22T14:28:37.086Z
+index-BhJ5O1Uu.js:26 📝 TextBlock 7cd222ad-7122-4880-93d2-08d17a000a66 rendered at 2025-08-22T14:28:37.087Z
+index-BhJ5O1Uu.js:26 🌆 ImageBlock 121e8c2d-1744-430a-82ba-f177097e1685 rendered at 2025-08-22T14:28:37.089Z
+index-BhJ5O1Uu.js:26 ExpandedView: Initial load period complete, enabling saves
+index-BhJ5O1Uu.js:26 🎯 IssueTrackerBlock initialization: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
+index-BhJ5O1Uu.js:26 🎯 IssueTrackerBlock initialization: {blockId: 'dac6f16c-8bde-452c-b64b-d1ff3b7d3eeb', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
+index-BhJ5O1Uu.js:26 📁 FileTreeBlock aa5ef328-efb1-4950-8eea-a7f7d77dce43 rendered at 2025-08-22T14:28:42.430Z
+index-BhJ5O1Uu.js:26 📊 VersionTrackBlock 1a92b6da-5f1c-4d21-817f-19c171861558 rendered at 2025-08-22T14:28:42.687Z
+index-BhJ5O1Uu.js:26 🤖 AIBlock b1357548-9a4d-41f0-9d66-f9599139b29a rendered at 2025-08-22T14:28:43.093Z
+index-BhJ5O1Uu.js:26 [DELETE] Finding block: {blockId: '121e8c2d-1744-430a-82ba-f177097e1685', blocksLength: 15, blockFound: true, blockType: 'image', position: 14, …}
+index-BhJ5O1Uu.js:26 [DEBUG-FIX] DELETE operation with: {blockId: '121e8c2d-1744-430a-82ba-f177097e1685', blockType: 'image', position: 14, action: 'DELETE'}
+index-BhJ5O1Uu.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '121e8c2d-1744-430a-82ba-f177097e1685', action: 'DELETE', blockType: 'image', position: 14, contentLength: undefined, …}
+index-BhJ5O1Uu.js:26 [DELETE-SUCCESS] Block marked for deletion: {blockId: '121e8c2d-1744-430a-82ba-f177097e1685', syncResult: {…}}
+index-BhJ5O1Uu.js:26 SmartSync: Syncing 1 changes
+index-BhJ5O1Uu.js:26 SmartSync: Changes being sent: [{…}]
+index-BhJ5O1Uu.js:26 SmartSync: Current user ID: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 SmartSync: RPC response: {total: 1, errors: Array(0), success: true, processed: 1, timestamp: 1755872936329.079}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
   "errors": [],
   "success": true,
-  "processed": 4,
-  "timestamp": 1755871156181.681
+  "processed": 1,
+  "timestamp": 1755872936329.079
 }
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Change 1: {action: 'DELETE', block_id: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', block_type: 'text', position: 0, has_type: true, …}
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Change 2: {action: 'DELETE', block_id: '4601479b-6b69-49a0-9465-002c03a0762a', block_type: 'text', position: 1, has_type: true, …}
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Change 3: {action: 'DELETE', block_id: '1d499e00-faa4-4770-a782-eaa6f2f1f9f3', block_type: 'code', position: 2, has_type: true, …}
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Change 4: {action: 'DELETE', block_id: 'a79c06c6-bca9-4b35-8559-5a903dd63813', block_type: 'code', position: 3, has_type: true, …}
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
-index-dnv1_Qz4.js:26 [SYNC-DEBUG] Changes that were sent: (4) [{…}, {…}, {…}, {…}]
-index-dnv1_Qz4.js:26 SmartSync: Successfully synced 4 changes
-index-dnv1_Qz4.js:26 🔚 AIBlock 930f3f5a-f16c-4f6a-9d46-999540f43ccf unmounted
-index-dnv1_Qz4.js:26 Loading folders for user: ee7f1d0a-3252-4303-b795-cf1966ef90a1
-index-dnv1_Qz4.js:26 VirtualizedGrid - scroll container: {"totalHeight":120,"containerHeight":576,"hasOverflow":false,"parentIsCardsContainer":true}
-index-dnv1_Qz4.js:26 VirtualizedGrid - scroll container: {"totalHeight":160,"containerHeight":576,"hasOverflow":false,"parentIsCardsContainer":true}
-index-dnv1_Qz4.js:26 Loaded 2 folders (1 root folders)
-index-dnv1_Qz4.js:26 Dashboard: Showing ExpandedView instead of grid
-index-dnv1_Qz4.js:26 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 [BLOCKS-LOAD-DEBUG] Querying blocks table for document: 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 PaginatedBlockLoader: Loaded 12 blocks for page 0 of document 07039da7-62a6-491a-a388-3c3b274b8739
-index-dnv1_Qz4.js:26 [BLOCKS-LOAD-DEBUG] First block from DB: {id: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', type: 'text', has_type: true, position: 0, has_position: true, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4c8b21ff-affc-453e-9beb-0e7b129d26d8', type: 'text', hasContent: true, contentType: 'string', contentLength: 380, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4601479b-6b69-49a0-9465-002c03a0762a', type: 'text', hasContent: true, contentType: 'string', contentLength: 2045, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1d499e00-faa4-4770-a782-eaa6f2f1f9f3', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'a79c06c6-bca9-4b35-8559-5a903dd63813', type: 'code', hasContent: true, contentType: 'string', contentLength: 18139, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'f8ce8263-17c5-4f32-b188-4c12f4029913', type: 'text', hasContent: true, contentType: 'string', contentLength: 3, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '930f3f5a-f16c-4f6a-9d46-999540f43ccf', type: 'ai', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔍 AI block: using messages from metadata (legacy format)
-index-dnv1_Qz4.js:26 🔵 AI Block Load Debug (OptimizedBlockLoader): {blockId: '930f3f5a-f16c-4f6a-9d46-999540f43ccf', messageCount: 5, hasMessages: true}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '190bedc4-482a-4d71-95eb-61bef051afac', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'fe602784-e9c5-44f8-9710-b6338c25b47f', type: 'table', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8a414737-1676-42bb-9a18-31afdfced672', type: 'version-track', hasContent: true, contentType: 'string', contentLength: 361, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '660bf22e-2500-41b1-98f2-527f47e931d3', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '32dabd59-72b8-4000-b292-f100eb6dcb19', type: 'heading', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '56ef096a-ed52-4996-b257-2c3d2882741d', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-dnv1_Qz4.js:26 📝 TextBlock 4c8b21ff-affc-453e-9beb-0e7b129d26d8 rendered at 2025-08-22T13:59:22.876Z
-index-dnv1_Qz4.js:26 📝 TextBlock 4601479b-6b69-49a0-9465-002c03a0762a rendered at 2025-08-22T13:59:22.877Z
-index-dnv1_Qz4.js:26 💻 CodeBlock 1d499e00-faa4-4770-a782-eaa6f2f1f9f3 rendered at 2025-08-22T13:59:22.879Z
-index-dnv1_Qz4.js:26 💻 CodeBlock a79c06c6-bca9-4b35-8559-5a903dd63813 rendered at 2025-08-22T13:59:22.880Z
-index-dnv1_Qz4.js:26 📝 TextBlock f8ce8263-17c5-4f32-b188-4c12f4029913 rendered at 2025-08-22T13:59:22.883Z
-index-dnv1_Qz4.js:26 💻 CodeBlock 660bf22e-2500-41b1-98f2-527f47e931d3 rendered at 2025-08-22T13:59:22.887Z
-index-dnv1_Qz4.js:26 📌 HeadingBlock 32dabd59-72b8-4000-b292-f100eb6dcb19 rendered at 2025-08-22T13:59:22.888Z
-index-dnv1_Qz4.js:26 ExpandedView: Initial load period complete, enabling saves
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Change 1: {action: 'DELETE', block_id: '121e8c2d-1744-430a-82ba-f177097e1685', block_type: 'image', position: 14, has_type: true, …}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Changes that were sent: [{…}]
+index-BhJ5O1Uu.js:26 SmartSync: Successfully synced 1 changes
+index-BhJ5O1Uu.js:26 🔍 BlockSerializer.serialize INPUT: {id: '382c4b30-abf6-491c-bd04-af73167b6c27', type: 'table', hasContent: false, hasMessages: false, hasImages: false, …}
+index-BhJ5O1Uu.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '382c4b30-abf6-491c-bd04-af73167b6c27', type: 'table', position: 18, contentLength: 113, contentPreview: '{"data":{"headers":["bilal","Column 2"],"rows":[["",""]],"columnAlignments":["left","left"],"hasHead'}
+index-BhJ5O1Uu.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '382c4b30-abf6-491c-bd04-af73167b6c27', action: 'UPDATE', blockType: 'table', position: 18, contentLength: 113, …}
+index-BhJ5O1Uu.js:26 SmartSync: Syncing 1 changes
+index-BhJ5O1Uu.js:26 SmartSync: Changes being sent: [{…}]
+index-BhJ5O1Uu.js:26 SmartSync: Current user ID: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 SmartSync: RPC response: {total: 1, errors: Array(0), success: true, processed: 1, timestamp: 1755872944307.489}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
+  "errors": [],
+  "success": true,
+  "processed": 1,
+  "timestamp": 1755872944307.489
+}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Change 1: {action: 'UPDATE', block_id: '382c4b30-abf6-491c-bd04-af73167b6c27', block_type: 'table', position: 18, has_type: true, …}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Changes that were sent: [{…}]
+index-BhJ5O1Uu.js:26 SmartSync: Successfully synced 1 changes
+index-BhJ5O1Uu.js:26 🔚 AIBlock b1357548-9a4d-41f0-9d66-f9599139b29a unmounted
+index-BhJ5O1Uu.js:26 Loading folders for user: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 VirtualizedGrid - scroll container: {"totalHeight":1044,"containerHeight":610,"hasOverflow":true,"parentIsCardsContainer":true}
+index-BhJ5O1Uu.js:26 VirtualizedGrid - scroll container: {"totalHeight":336,"containerHeight":610,"hasOverflow":false,"parentIsCardsContainer":true}
+index-BhJ5O1Uu.js:26 Loaded 3 folders (2 root folders)
+index-BhJ5O1Uu.js:26 Dashboard: Showing ExpandedView instead of grid
+index-BhJ5O1Uu.js:26 PaginatedBlockLoader: Loading page 0 (offset: 0, limit: 50) for document 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [BLOCKS-LOAD-DEBUG] Querying blocks table for document: 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 PaginatedBlockLoader: Loaded 14 blocks for page 0 of document 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [BLOCKS-LOAD-DEBUG] First block from DB: {id: '424d5462-23f1-406d-9978-c2db64761168', type: 'text', has_type: true, position: 1, has_position: true, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '424d5462-23f1-406d-9978-c2db64761168', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e2312ce2-dfda-45a2-b7b3-b27e346d3f5e', type: 'text', hasContent: true, contentType: 'string', contentLength: 16, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 28, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '279adbf6-75f2-4922-9152-ac8d735217ae', type: 'todo', hasContent: true, contentType: 'string', contentLength: 228, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'ee104885-37aa-42bd-aec4-cbb741dacc8a', type: 'table', hasContent: true, contentType: 'string', contentLength: 96, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'feadef62-b5d0-4a68-bac7-ce034bf0afde', type: 'image', hasContent: true, contentType: 'string', contentLength: 41, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'b561aee6-dcdd-420b-be05-76509fcf1ead', type: 'code', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '4a187553-e59c-488e-8463-e411dca46411', type: 'heading', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7cd222ad-7122-4880-93d2-08d17a000a66', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'dac6f16c-8bde-452c-b64b-d1ff3b7d3eeb', type: 'issue-tracker', hasContent: true, contentType: 'string', contentLength: 28, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1a92b6da-5f1c-4d21-817f-19c171861558', type: 'version-track', hasContent: true, contentType: 'string', contentLength: 334, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'aa5ef328-efb1-4950-8eea-a7f7d77dce43', type: 'filetree', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'b1357548-9a4d-41f0-9d66-f9599139b29a', type: 'ai', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-BhJ5O1Uu.js:26 🔵 AI Block Load Debug (OptimizedBlockLoader): {blockId: 'b1357548-9a4d-41f0-9d66-f9599139b29a', messageCount: 0, hasMessages: true}
+index-BhJ5O1Uu.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '382c4b30-abf6-491c-bd04-af73167b6c27', type: 'table', hasContent: true, contentType: 'string', contentLength: 113, …}
+index-BhJ5O1Uu.js:26 📝 TextBlock 424d5462-23f1-406d-9978-c2db64761168 rendered at 2025-08-22T14:29:14.650Z
+index-BhJ5O1Uu.js:26 📝 TextBlock e2312ce2-dfda-45a2-b7b3-b27e346d3f5e rendered at 2025-08-22T14:29:14.651Z
+index-BhJ5O1Uu.js:26 ✅ TodoBlock 279adbf6-75f2-4922-9152-ac8d735217ae rendered at 2025-08-22T14:29:14.653Z
+index-BhJ5O1Uu.js:26 🌆 ImageBlock feadef62-b5d0-4a68-bac7-ce034bf0afde rendered at 2025-08-22T14:29:14.655Z
+index-BhJ5O1Uu.js:26 💻 CodeBlock b561aee6-dcdd-420b-be05-76509fcf1ead rendered at 2025-08-22T14:29:14.656Z
+index-BhJ5O1Uu.js:26 📌 HeadingBlock 4a187553-e59c-488e-8463-e411dca46411 rendered at 2025-08-22T14:29:14.657Z
+index-BhJ5O1Uu.js:26 📝 TextBlock 7cd222ad-7122-4880-93d2-08d17a000a66 rendered at 2025-08-22T14:29:14.658Z
+index-BhJ5O1Uu.js:26 🎯 IssueTrackerBlock initialization: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
+index-BhJ5O1Uu.js:26 ExpandedView: Initial load period complete, enabling saves
+index-BhJ5O1Uu.js:26 🎯 IssueTrackerBlock initialization: {blockId: 'dac6f16c-8bde-452c-b64b-d1ff3b7d3eeb', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
+index-BhJ5O1Uu.js:26 📊 VersionTrackBlock 1a92b6da-5f1c-4d21-817f-19c171861558 rendered at 2025-08-22T14:29:16.974Z
+index-BhJ5O1Uu.js:26 📁 FileTreeBlock aa5ef328-efb1-4950-8eea-a7f7d77dce43 rendered at 2025-08-22T14:29:17.491Z
+index-BhJ5O1Uu.js:26 🤖 AIBlock b1357548-9a4d-41f0-9d66-f9599139b29a rendered at 2025-08-22T14:29:17.824Z
+index-BhJ5O1Uu.js:26 [MOVE] Block move calculation: {blockId: 'e2312ce2-dfda-45a2-b7b3-b27e346d3f5e', currentIndex: 1, direction: 'down', newIndex: 2, totalBlocks: 14, …}
+index-BhJ5O1Uu.js:26 [DEBUG-FIX] REORDER operation with: {blockId: 'e2312ce2-dfda-45a2-b7b3-b27e346d3f5e', blockType: 'text', position: 2, action: 'REORDER'}
+index-BhJ5O1Uu.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e2312ce2-dfda-45a2-b7b3-b27e346d3f5e', action: 'REORDER', blockType: 'text', position: 2, contentLength: undefined, …}
+index-BhJ5O1Uu.js:26 SmartSync: Max interval reached, forcing sync
+index-BhJ5O1Uu.js:26 SmartSync: Syncing 1 changes
+index-BhJ5O1Uu.js:26 SmartSync: Changes being sent: [{…}]
+index-BhJ5O1Uu.js:26 SmartSync: Current user ID: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 SmartSync: RPC response: {total: 1, errors: Array(0), success: true, processed: 1, timestamp: 1755872988171.428}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
+  "errors": [],
+  "success": true,
+  "processed": 1,
+  "timestamp": 1755872988171.428
+}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Change 1: {action: 'REORDER', block_id: 'e2312ce2-dfda-45a2-b7b3-b27e346d3f5e', block_type: 'text', position: 2, has_type: true, …}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Changes that were sent: [{…}]
+index-BhJ5O1Uu.js:26 SmartSync: Successfully synced 1 changes
+index-BhJ5O1Uu.js:26 [MOVE] Block move calculation: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', currentIndex: 2, direction: 'down', newIndex: 3, totalBlocks: 14, …}
+index-BhJ5O1Uu.js:26 [DEBUG-FIX] REORDER operation with: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', blockType: 'issue-tracker', position: 3, action: 'REORDER'}
+index-BhJ5O1Uu.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', action: 'REORDER', blockType: 'issue-tracker', position: 3, contentLength: undefined, …}
+index-BhJ5O1Uu.js:26 [MOVE] Block move calculation: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', currentIndex: 2, direction: 'down', newIndex: 3, totalBlocks: 14, …}
+index-BhJ5O1Uu.js:26 [DEBUG-FIX] REORDER operation with: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', blockType: 'issue-tracker', position: 3, action: 'REORDER'}
+index-BhJ5O1Uu.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', action: 'REORDER', blockType: 'issue-tracker', position: 3, contentLength: undefined, …}
+index-BhJ5O1Uu.js:26 SmartSync: Syncing 2 changes
+index-BhJ5O1Uu.js:26 SmartSync: Changes being sent: (2) [{…}, {…}]
+index-BhJ5O1Uu.js:26 SmartSync: Current user ID: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 SmartSync: RPC response: {total: 2, errors: Array(0), success: true, processed: 2, timestamp: 1755873006220.881}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 2,
+  "errors": [],
+  "success": true,
+  "processed": 2,
+  "timestamp": 1755873006220.881
+}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 2df64b7f-ad1a-4ba0-bd57-cd40bee9cd75
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Change 1: {action: 'REORDER', block_id: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', block_type: 'issue-tracker', position: 3, has_type: true, …}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Change 2: {action: 'REORDER', block_id: '8532ac15-3c66-4e9b-967a-1e4dbe862abd', block_type: 'issue-tracker', position: 3, has_type: true, …}
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-BhJ5O1Uu.js:26 [SYNC-DEBUG] Changes that were sent: (2) [{…}, {…}]
+index-BhJ5O1Uu.js:26 SmartSync: Successfully synced 2 changes
+index-BhJ5O1Uu.js:26 🔚 AIBlock b1357548-9a4d-41f0-9d66-f9599139b29a unmounted
+index-BhJ5O1Uu.js:26 Loading folders for user: 16e57a7a-2bb3-4f0d-a055-c1c407f06ef6
+index-BhJ5O1Uu.js:26 VirtualizedGrid - scroll container: {"totalHeight":1044,"containerHeight":610,"hasOverflow":true,"parentIsCardsContainer":true}
+index-BhJ5O1Uu.js:26 VirtualizedGrid - scroll container: {"totalHeight":336,"containerHeight":610,"hasOverflow":false,"parentIsCardsContainer":true}
+index-BhJ5O1Uu.js:26 Loaded 3 folders (2 root folders)

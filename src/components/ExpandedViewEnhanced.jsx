@@ -567,8 +567,11 @@ export default function ExpandedView({
       return;
     }
     
+    // CRITICAL FIX: Find block BEFORE removing it from state
+    const blockIndex = blocks.findIndex(b => b.id === blockId);
+    const blockToDelete = blockIndex >= 0 ? blocks[blockIndex] : null;
+    
     // Track block deletion
-    const blockToDelete = blocks.find(b => b.id === blockId);
     if (blockToDelete) {
       trackEvent('block_deleted', {
         block_type: blockToDelete.type,
@@ -585,10 +588,6 @@ export default function ExpandedView({
         blockHeightCache.delete(`${block.id}-${block.type}`);
       }
     });
-    
-    // CRITICAL FIX: Find block BEFORE removing it from state
-    const blockIndex = blocks.findIndex(b => b.id === blockId);
-    const blockToDelete = blockIndex >= 0 ? blocks[blockIndex] : null;
     
     // Use the loader's removeBlock method
     removeBlock(blockId);

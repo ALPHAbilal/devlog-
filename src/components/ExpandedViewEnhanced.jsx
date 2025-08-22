@@ -586,6 +586,10 @@ export default function ExpandedView({
       }
     });
     
+    // CRITICAL FIX: Find block BEFORE removing it from state
+    const blockIndex = blocks.findIndex(b => b.id === blockId);
+    const blockToDelete = blockIndex >= 0 ? blocks[blockIndex] : null;
+    
     // Use the loader's removeBlock method
     removeBlock(blockId);
     
@@ -594,12 +598,8 @@ export default function ExpandedView({
       listRef.current.resetAfterIndex(0);
     }
     
-    // CRITICAL FIX: Call Smart Sync for delete operation
+    // Call Smart Sync for delete operation
     if (smartSyncManagerRef.current) {
-      // Find the block index and block to get its type and position before deletion
-      const blockIndex = blocks.findIndex(b => b.id === blockId);
-      const blockToDelete = blockIndex >= 0 ? blocks[blockIndex] : null;
-      
       // Strategic logging for DELETE block finding
       console.log('[DELETE] Finding block:', {
         blockId,
@@ -706,7 +706,7 @@ export default function ExpandedView({
     // Strategic logging for move position calculation
     console.log('[MOVE] Block move calculation:', {
       blockId: blockId,
-      currentIndex,
+      currentIndex: blockIndex,
       direction,
       newIndex,
       totalBlocks: blocks.length,

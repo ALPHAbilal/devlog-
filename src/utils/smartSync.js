@@ -171,17 +171,31 @@ class SmartSyncManager {
         
         // Add valid changes to queue for syncing with ALL fields
         if (validChanges.length > 0) {
-          this.batchQueue.push(...validChanges.map(change => ({
-            id: change.id,
-            blockId: change.blockId,
-            content: change.content,
-            action: change.action,
-            blockType: change.blockType || change.block_type,  // Handle both field names
-            position: change.position,                          // Include position!
-            documentId: change.documentId,                      // Include documentId
-            timestamp: change.timestamp,
-            synced: change.synced
-          })));
+          this.batchQueue.push(...validChanges.map(change => {
+            // Strategic logging for recovery analysis
+            console.log('[RECOVERY] Processing change from IndexedDB:', {
+              action: change.action,
+              blockId: change.blockId,
+              hasContent: !!change.content,
+              contentLength: change.content?.length,
+              contentPreview: change.action === 'REORDER' ? 'SHOULD BE NULL' : change.content?.substring(0, 50),
+              position: change.position,
+              blockType: change.blockType || change.block_type
+            });
+
+            return {
+              id: change.id,
+              blockId: change.blockId,
+              // CRITICAL FIX: REORDER operations should NEVER have content
+              content: change.action === 'REORDER' ? null : change.content,
+              action: change.action,
+              blockType: change.blockType || change.block_type,  // Handle both field names
+              position: change.position,                          // Include position!
+              documentId: change.documentId,                      // Include documentId
+              timestamp: change.timestamp,
+              synced: change.synced
+            };
+          }));
           
           // Schedule sync
           this.scheduleSmartSync();

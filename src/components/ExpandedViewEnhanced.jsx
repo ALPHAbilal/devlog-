@@ -600,6 +600,16 @@ export default function ExpandedView({
       const blockIndex = blocks.findIndex(b => b.id === blockId);
       const blockToDelete = blockIndex >= 0 ? blocks[blockIndex] : null;
       
+      // Strategic logging for DELETE block finding
+      console.log('[DELETE] Finding block:', {
+        blockId,
+        blocksLength: blocks.length,
+        blockFound: blockIndex >= 0,
+        blockType: blockToDelete?.type,
+        position: blockIndex,
+        firstFewBlocks: blocks.slice(0, 3).map(b => ({id: b.id.substring(0,8), type: b.type}))
+      });
+      
       // DEBUG: Log what we're sending for DELETE
       console.log('[DEBUG-FIX] DELETE operation with:', {
         blockId: blockId,
@@ -693,6 +703,16 @@ export default function ExpandedView({
       updateLoadedBlocks(updatedBlocks);
     });
     
+    // Strategic logging for move position calculation
+    console.log('[MOVE] Block move calculation:', {
+      blockId: blockId,
+      currentIndex,
+      direction,
+      newIndex,
+      totalBlocks: blocks.length,
+      currentPositions: blocks.slice(0, 5).map(b => ({id: b.id.substring(0,8), pos: blocks.indexOf(b)}))
+    });
+
     // CRITICAL FIX: Call Smart Sync for reorder operation
     if (smartSyncManagerRef.current && movedBlock) {
       // DEBUG: Log what we're sending for REORDER

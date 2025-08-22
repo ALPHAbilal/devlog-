@@ -2,8 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Important: Read rules.md First
-**CRITICAL**: Before working on this codebase, read the `rules.md` file which contains mandatory debugging protocols and strategic development rules learned from actual debugging sessions. These rules will prevent common mistakes and save significant time.
+## Important: Check AI-MEMORY First
+**CRITICAL**: Before ANY work, check the `/AI-MEMORY/` directory:
+1. **PATTERNS.md** - Known issues and proven solutions (check FIRST)
+2. **NOW.md** - Current active work and session context
+3. **DECISIONS.md** - Why architecture choices were made
+4. **rules.md** - Mandatory debugging protocols
+
+The AI-MEMORY system replaces scattered documentation with a single source of truth.
 
 ## Development Commands
 
@@ -363,4 +369,32 @@ src/
 5. **Add strategic logging** when debugging unclear issues
 6. **Follow the 16ms frame budget** for smooth animations
 7. **Use the event bus** for cross-component communication
-8. **Check rules.md** for debugging protocols and patterns
+8. **Check AI-MEMORY and rules.md** for patterns and protocols
+
+## AI-MEMORY Documentation System
+
+The `/AI-MEMORY/` directory is the single source of truth for AI assistants and developers:
+
+### Structure:
+```
+/AI-MEMORY/
+├── NOW.md           # Current active work (update as you work)
+├── PATTERNS.md      # Known issues and proven fixes (check first!)
+├── DECISIONS.md     # Architecture decisions and rationale
+└── archive/         # Completed work (auto-dated files)
+```
+
+### Usage Protocol:
+1. **Starting Work**: Check PATTERNS.md first for known issues
+2. **During Work**: Update NOW.md with progress and discoveries
+3. **Finding Issues**: Add new patterns to PATTERNS.md immediately
+4. **Architecture Changes**: Document reasoning in DECISIONS.md
+5. **Completing Work**: Archive NOW.md with date prefix
+
+### Key Benefits:
+- **Fast Discovery**: 3 files instead of 90+ scattered docs
+- **Pattern Matching**: Prevents repeated debugging
+- **Context Preservation**: Explains why code exists
+- **Status Tracking**: NOW.md shows current work instantly
+
+This system follows Rule 33 from rules.md but with better organization.

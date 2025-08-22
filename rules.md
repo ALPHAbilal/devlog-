@@ -23,6 +23,12 @@
 **For ANY error in ANY language/framework:**
 
 ```markdown
+□ 0. AI-MEMORY CHECK (MUST DO FIRST)
+   - [ ] Checked /AI-MEMORY/PATTERNS.md for known issues?
+   - [ ] Checked /AI-MEMORY/NOW.md for current work context?
+   - [ ] Checked /AI-MEMORY/DECISIONS.md for architecture rationale?
+   - [ ] If pattern found, used proven solution?
+
 □ 1. CONTAINER CHECK (Rule 1)
    - [ ] Have I identified what's ONE LEVEL ABOVE the error in the stack?
    - [ ] Have I checked that file/component/module FIRST?
@@ -95,6 +101,15 @@
 **If stuck for >5 minutes**: Add logs, push, ask user for terminal.md
 **If unsure about cause**: Add logs, push, ask user for terminal.md  
 **If fix didn't work**: Add more logs, push, ask user for terminal.md
+
+### 🔒 ENFORCEMENT: CHECK AI-MEMORY FIRST!
+
+**Before doing ANYTHING:**
+1. Check `/AI-MEMORY/PATTERNS.md` - Your issue might already be solved
+2. Check `/AI-MEMORY/NOW.md` - Understand current context
+3. Check `/AI-MEMORY/DECISIONS.md` - Understand why code exists
+
+**ONLY THEN proceed with debugging or coding.**
 
 ### 🔒 ENFORCEMENT: YOU MUST DOCUMENT YOUR ANALYSIS
 
@@ -1171,69 +1186,56 @@ Universal Questions for ANY Codebase:
 - If any test fails → You don't understand it yet
 - *This prevents: False confidence, production disasters, "I thought I understood it" moments*
 
-### RULE 33: The Debug Log Protocol 📝
-**ALWAYS use DEBUG-LOG.md to document your debugging journey - it's the ONLY place to look.**
+### RULE 33: The AI-MEMORY Protocol 📝
+**ALWAYS use the /AI-MEMORY/ system for documentation - it's the SINGLE source of truth.**
 
 ```markdown
-□ THE SIMPLE DEBUG PROTOCOL:
+□ THE AI-MEMORY SYSTEM:
 
-1. BEFORE STARTING ANY DEBUG:
-   - [ ] Open DEBUG-LOG.md 
-   - [ ] Check "PATTERNS QUICK REFERENCE" - is this familiar?
-   - [ ] Check "RECENT SESSIONS" - similar issue solved before?
+1. BEFORE ANY WORK:
+   - [ ] Check PATTERNS.md - is this a known issue?
+   - [ ] Check NOW.md - what's currently being worked on?
+   - [ ] Check DECISIONS.md - why is the code this way?
 
-2. DOCUMENT AS YOU GO:
-   ## Iteration 1: [What you're trying]
-   **Hypothesis**: [What you think]
-   **Test**: [What you did]
-   **Result**: [What happened]
-   **Learning**: [What this tells you]
-   Status: ❌ Wrong / ✅ Found it / ⚠️ Partial
+2. DURING WORK:
+   - [ ] Update NOW.md with timestamped progress
+   - [ ] Format: [YYYY-MM-DD HH:MM] Action taken
+   - [ ] Track status: 🟡 Working / ✅ Done / 🔴 Blocked
 
-3. ITERATE (not time-based, just numbered):
-   - Iteration 1: First attempt
-   - Iteration 2: After first learning
-   - Iteration 3: After pivot
-   - Keep going until solved
+3. WHEN YOU FIND PATTERNS:
+   - [ ] Add to PATTERNS.md immediately
+   - [ ] Include: Symptom, Fix, Location, Time Saved
+   - [ ] Use bold keywords for scanning
 
-4. WHEN SOLVED:
-   - [ ] Add pattern to "PATTERNS QUICK REFERENCE" section
-   - [ ] Move session to "RECENT SESSIONS ARCHIVE"
-   - [ ] Keep only last 5 sessions (delete older ones)
+4. FOR ARCHITECTURE CHANGES:
+   - [ ] Document in DECISIONS.md
+   - [ ] Include: Decision, Why, Tradeoff, Impact
 ```
 
-**The ONE File System**:
-- **DEBUG-LOG.md** - Everything goes here
-- Current debugging at top
-- Patterns in middle  
-- Recent sessions at bottom
-- That's it. No other files needed.
+**The 3-File System**:
+- **/AI-MEMORY/NOW.md** - Current active work only
+- **/AI-MEMORY/PATTERNS.md** - Known issues & proven fixes
+- **/AI-MEMORY/DECISIONS.md** - Architecture rationale
+- **/AI-MEMORY/archive/** - Completed work (dated)
 
-**Why This Works**:
-- ONE place to check (not 7 different files)
-- Iterations not timestamps (AI bad with time)
-- Patterns visible immediately
-- No complex archiving system
-- Previous solutions easy to find
+**Why This Beats Old System**:
+- 3 files to check instead of 90+ scattered docs
+- Scannable format with bold keywords
+- Time-saved metrics prove value
+- Clear status tracking
+- No verbose explanations
 
-**Example Format**:
+**Example PATTERNS.md Entry**:
 ```markdown
-## Iteration 1: Check if it's the database
-**Hypothesis**: Database query is wrong
-**Test**: Log the SQL query
-**Result**: Query is correct, data is null before query
-**Learning**: Problem is before database layer
-Status: ❌ Wrong
-
-## Iteration 2: Check the component 
-**Hypothesis**: Component sending null data
-**Test**: Log what component sends
-**Result**: Found stale closure!
-**Learning**: Need functional setState
-Status: ✅ Found it
+### Canvas Animation Bottleneck
+**Symptom**: Slow performance, >16ms frame time
+**Fix**: Use requestAnimationFrame + throttling
+**Location**: src/components/blocks/VersionTrackBlock.jsx:127
+**Metrics**: Reduced 65ms → 12ms
+**Saved**: 1+ hour
 ```
 
-*This prevents: Scattered knowledge, repeated debugging, complex file systems, time confusion*
+*This prevents: Scattered knowledge, repeated debugging, lost context, redundant work*
 
 ---
 
@@ -1314,6 +1316,7 @@ If you can't document it, you don't understand it.
 
 When helping with ANY project:
 
+0. **ALWAYS check /AI-MEMORY/ before starting ANY work**
 1. **ALWAYS investigate container before component**
 2. **NEVER optimize without measurements**
 3. **ALWAYS design for 10x current scale**

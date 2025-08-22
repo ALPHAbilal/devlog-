@@ -706,7 +706,7 @@ export default function ExpandedView({
       // Send all required parameters for REORDER
       smartSyncManagerRef.current.handleChange(
         movedBlock.id,
-        movedBlock.content || JSON.stringify(serializeBlock(movedBlock)), // Stringify the serialized object
+        null,               // REORDER doesn't need content - only position changes!
         'REORDER',
         movedBlock.type,    // ADD: block type (required!)
         newIndex            // ADD: position as number (required!)
@@ -848,7 +848,7 @@ export default function ExpandedView({
         // Send all required parameters for REORDER
         smartSyncManagerRef.current.handleChange(
           draggedBlock.id,
-          draggedBlock.content || JSON.stringify(serializeBlock(draggedBlock)), // Stringify the serialized object
+          null,                 // REORDER doesn't need content - only position changes!
           'REORDER',
           draggedBlock.type,    // ADD: block type (required!)
           insertIndex           // ADD: position as number (required!)

@@ -15,6 +15,52 @@ class AnalyticsService {
     this.eventQueue = [];
     this.consentManager = new ConsentManager();
     this.userId = null;
+    this.clientId = this.getOrCreateClientId();
+    this.sessionId = this.getOrCreateSessionId();
+    this.lastPageView = { path: null, timestamp: 0 };
+    this.pageViewThrottle = 1000; // 1 second throttle for duplicate page views
+  }
+
+  /**
+   * Get or create a persistent client ID
+   */
+  getOrCreateClientId() {
+    const storedId = localStorage.getItem('ga_client_id');
+    if (storedId) {
+      return storedId;
+    }
+    
+    // Generate a new client ID (UUID v4 format)
+    const newId = 'client_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem('ga_client_id', newId);
+    return newId;
+  }
+
+  /**
+   * Get or create a session ID (expires after 30 minutes of inactivity)
+   */
+  getOrCreateSessionId() {
+    const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 minutes
+    const now = Date.now();
+    
+    const stored = sessionStorage.getItem('ga_session');
+    if (stored) {
+      const session = JSON.parse(stored);
+      if (now - session.lastActivity < SESSION_TIMEOUT) {
+        session.lastActivity = now;
+        sessionStorage.setItem('ga_session', JSON.stringify(session));
+        return session.id;
+      }
+    }
+    
+    // Create new session
+    const newSession = {
+      id: 'session_' + Math.random().toString(36).substring(2) + Date.now().toString(36),
+      startTime: now,
+      lastActivity: now
+    };
+    sessionStorage.setItem('ga_session', JSON.stringify(newSession));
+    return newSession.id;
   }
 
   /**
@@ -54,6 +100,8 @@ class AnalyticsService {
       const config = {
         send_page_view: false, // We'll manually track page views for SPA
         debug_mode: this.debugMode,
+        client_id: this.clientId, // Use persistent client ID
+        session_id: this.sessionId
       };
 
       // Add user ID if available
@@ -98,11 +146,25 @@ class AnalyticsService {
   }
 
   /**
-   * Track a page view
+   * Track a page view with deduplication
    * @param {string} path - The page path
    * @param {string} title - The page title
    */
   trackPageView(path, title) {
+    const now = Date.now();
+    
+    // Throttle duplicate page views for the same path
+    if (this.lastPageView.path === path && 
+        (now - this.lastPageView.timestamp) < this.pageViewThrottle) {
+      if (this.debugMode) {
+        console.log('[GA4] Skipping duplicate page view (throttled):', path);
+      }
+      return;
+    }
+    
+    // Update last page view tracking
+    this.lastPageView = { path, timestamp: now };
+    
     if (!this.initialized) {
       this.eventQueue.push({ type: 'page_view', path, title });
       return;
@@ -111,13 +173,46 @@ class AnalyticsService {
     if (!window.gtag) return;
 
     if (this.debugMode) {
-      console.log('[GA4] Page view:', path);
+      console.log('[GA4] Page view tracked:', {
+        path,
+        title: title || document.title,
+        client_id: this.clientId,
+        session_id: this.sessionId,
+        user_id: this.userId
+      });
     }
+
+    // Update session activity
+    this.sessionId = this.getOrCreateSessionId();
 
     window.gtag('event', 'page_view', {
       page_path: path,
       page_title: title || document.title,
-      page_location: window.location.origin + path
+      page_location: window.location.origin + path,
+      client_id: this.clientId,
+      session_id: this.sessionId
+    });
+  }
+
+  /**
+   * Track a document view (separate from page views)
+   * @param {string} documentId - The document ID
+   * @param {string} documentTitle - The document title
+   */
+  trackDocumentView(documentId, documentTitle) {
+    if (this.debugMode) {
+      console.log('[GA4] Document view:', {
+        document_id: documentId,
+        document_title: documentTitle,
+        client_id: this.clientId,
+        session_id: this.sessionId
+      });
+    }
+
+    this.trackEvent('document_view', {
+      document_id: documentId,
+      document_title: documentTitle,
+      view_type: 'full'
     });
   }
 
@@ -139,16 +234,30 @@ class AnalyticsService {
       console.warn(`[GA4] Event name "${eventName}" exceeds 40 character limit`);
     }
 
-    if (this.debugMode) {
-      console.log('[GA4] Event:', eventName, parameters);
-    }
+    // Update session activity
+    this.sessionId = this.getOrCreateSessionId();
+
+    // Add tracking IDs to parameters
+    const enrichedParams = {
+      ...parameters,
+      client_id: this.clientId,
+      session_id: this.sessionId
+    };
 
     // Add user ID if available
-    if (this.userId && !parameters.user_id) {
-      parameters.user_id = this.userId;
+    if (this.userId && !enrichedParams.user_id) {
+      enrichedParams.user_id = this.userId;
     }
 
-    window.gtag('event', eventName, parameters);
+    if (this.debugMode) {
+      console.log('[GA4] Event tracked:', {
+        event: eventName,
+        parameters: enrichedParams,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    window.gtag('event', eventName, enrichedParams);
   }
 
   /**
@@ -158,13 +267,25 @@ class AnalyticsService {
   setUserId(userId) {
     this.userId = userId;
     
+    // Store user ID persistently
+    if (userId) {
+      localStorage.setItem('ga_user_id', userId);
+    } else {
+      localStorage.removeItem('ga_user_id');
+    }
+    
     if (this.initialized && window.gtag) {
       window.gtag('config', this.measurementId, {
-        user_id: userId
+        user_id: userId,
+        client_id: this.clientId
       });
 
       if (this.debugMode) {
-        console.log('[GA4] User ID set:', userId);
+        console.log('[GA4] User ID set:', {
+          user_id: userId,
+          client_id: this.clientId,
+          session_id: this.sessionId
+        });
       }
     }
   }

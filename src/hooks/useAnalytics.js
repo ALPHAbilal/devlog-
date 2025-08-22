@@ -35,7 +35,7 @@ export function useAnalytics() {
     }
   }, [analytics]);
 
-  // Track page views on route change
+  // Track page views on route change (but not document views)
   useEffect(() => {
     const currentPath = location.pathname + location.search;
     
@@ -44,19 +44,26 @@ export function useAnalytics() {
       return;
     }
 
+    // Skip document paths - they should be tracked as document_view events instead
+    const isDocumentPath = /^\/dashboard\/[a-f0-9-]{36}/.test(currentPath);
+    
     // Skip the first render (initial page load)
     if (previousPath.current === null) {
       previousPath.current = currentPath;
-      // Track initial page view after a short delay
-      setTimeout(() => {
-        analytics.trackPageView(currentPath);
-      }, 100);
+      // Track initial page view after a short delay (unless it's a document)
+      if (!isDocumentPath) {
+        setTimeout(() => {
+          analytics.trackPageView(currentPath);
+        }, 100);
+      }
       return;
     }
 
-    // Track subsequent page views
+    // Track subsequent page views (but not document views)
     previousPath.current = currentPath;
-    analytics.trackPageView(currentPath);
+    if (!isDocumentPath) {
+      analytics.trackPageView(currentPath);
+    }
   }, [location, analytics]);
 
   // Memoized tracking functions

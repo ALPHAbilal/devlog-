@@ -83,6 +83,18 @@ export default function ExpandedView({
   const { trackEvent } = useAnalytics();
   const { trackDocumentEvent } = useDocumentAnalytics();
   
+  // Track document view on mount (not as page view)
+  useEffect(() => {
+    if (entry?.id && entry?.title) {
+      // Track as custom document_view event, not page_view
+      trackDocumentEvent('view', entry.id, {
+        document_title: entry.title,
+        block_count: entry.blockCount || 0,
+        has_blocks: !!entry.blocks
+      });
+    }
+  }, [entry?.id]); // Only track once per document ID
+  
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
   

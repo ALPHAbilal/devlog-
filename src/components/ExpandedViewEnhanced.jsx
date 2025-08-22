@@ -596,14 +596,15 @@ export default function ExpandedView({
     
     // CRITICAL FIX: Call Smart Sync for delete operation
     if (smartSyncManagerRef.current) {
-      // Find the block to get its type and position before deletion
-      const blockToDelete = blocks.find(b => b.id === blockId);
+      // Find the block index and block to get its type and position before deletion
+      const blockIndex = blocks.findIndex(b => b.id === blockId);
+      const blockToDelete = blockIndex >= 0 ? blocks[blockIndex] : null;
       
       // DEBUG: Log what we're sending for DELETE
       console.log('[DEBUG-FIX] DELETE operation with:', {
         blockId: blockId,
         blockType: blockToDelete?.type || null,
-        position: blockToDelete?.position || null,
+        position: blockIndex >= 0 ? blockIndex : null,  // Use array index as position
         action: 'DELETE'
       });
       
@@ -612,8 +613,8 @@ export default function ExpandedView({
         blockId,
         null, // null content for delete
         'DELETE',
-        blockToDelete?.type || null,      // ADD: block type (required!)
-        blockToDelete?.position || null   // ADD: position (required!)
+        blockToDelete?.type || null,           // ADD: block type (required!)
+        blockIndex >= 0 ? blockIndex : null    // Use array index as position (required!)
       ).catch(error => {
         console.error('Smart Sync delete error:', error);
       });
@@ -705,7 +706,7 @@ export default function ExpandedView({
       // Send all required parameters for REORDER
       smartSyncManagerRef.current.handleChange(
         movedBlock.id,
-        movedBlock.content || serializeBlock(movedBlock), // Proper content
+        movedBlock.content || JSON.stringify(serializeBlock(movedBlock)), // Stringify the serialized object
         'REORDER',
         movedBlock.type,    // ADD: block type (required!)
         newIndex            // ADD: position as number (required!)
@@ -847,7 +848,7 @@ export default function ExpandedView({
         // Send all required parameters for REORDER
         smartSyncManagerRef.current.handleChange(
           draggedBlock.id,
-          draggedBlock.content || serializeBlock(draggedBlock), // Proper content
+          draggedBlock.content || JSON.stringify(serializeBlock(draggedBlock)), // Stringify the serialized object
           'REORDER',
           draggedBlock.type,    // ADD: block type (required!)
           insertIndex           // ADD: position as number (required!)

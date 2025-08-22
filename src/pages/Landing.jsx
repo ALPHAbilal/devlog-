@@ -208,8 +208,14 @@ function LandingContent() {
           
           {/* Desktop Navigation */}
           <div className="hidden md:!flex items-center gap-4">
+            {/* Beta - Hidden until launch
             <span className="text-sm text-text-secondary/70">
               Trusted by 7,000+ developers
+            </span>
+            <div className="w-px h-5 bg-dark-secondary/30"></div> */}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-green/10 text-accent-green text-xs font-medium rounded-full">
+              <span className="w-1.5 h-1.5 bg-accent-green rounded-full animate-pulse"></span>
+              Beta
             </span>
             <div className="w-px h-5 bg-dark-secondary/30"></div>
             <a
@@ -364,6 +370,7 @@ function LandingContent() {
         {/* Noise overlay for premium texture */}
         <div className="noise-overlay" />
         <div className="max-w-4xl mx-auto text-center relative z-10 py-16 md:py-20">
+          {/* Beta - Launch pricing hidden until ready
           <motion.div 
             className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
                           text-accent-green rounded-full text-sm font-medium mb-6"
@@ -373,7 +380,7 @@ function LandingContent() {
           >
             <span className="inline-block w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
             Launch pricing ends Friday at midnight
-          </motion.div>
+          </motion.div> */}
           
           <motion.h3 
             className="text-3xl md:text-4xl font-bold mb-4 md:mb-6"
@@ -391,7 +398,9 @@ function LandingContent() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.1 }}
           >
-            7,000+ developers already building their second brain. Start today.
+            {/* Beta - User count hidden until launch
+            7,000+ developers already building their second brain. Start today. */}
+            Join the beta and start building your second brain today.
           </motion.p>
           <motion.div 
             className="flex flex-col items-center gap-4"

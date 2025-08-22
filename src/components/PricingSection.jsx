@@ -26,8 +26,8 @@ export default function PricingSection() {
       icon: <Users size={24} />,
       description: 'For developers preserving their coding journey',
       price: {
-        monthly: 9,
-        annual: 7
+        monthly: '...',
+        annual: '...'
       },
       features: [
         { 
@@ -66,8 +66,8 @@ export default function PricingSection() {
       icon: <Building2 size={24} />,
       description: 'For teams building shared knowledge',
       price: {
-        monthly: 19,
-        annual: 15
+        monthly: '...',
+        annual: '...'
       },
       features: [
         { 
@@ -156,8 +156,15 @@ export default function PricingSection() {
           <p className="text-text-secondary text-base md:text-lg mb-2">
             Don't lose another $100 ChatGPT solution. Capture every insight permanently.
           </p>
+          {/* Beta - Community size hidden until launch
           <p className="text-accent-green text-sm mb-6 md:mb-8">
             Join 10,000+ developers who save 4 hours every week
+          </p> */}
+          <p className="text-accent-green text-sm mb-6 md:mb-8">
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-accent-green/10 rounded-full">
+              <span className="w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
+              Beta - Pricing Coming Soon
+            </span>
           </p>
 
           {/* Billing Toggle */}
@@ -262,7 +269,7 @@ export default function PricingSection() {
                         exit={{ opacity: 0, y: 20 }}
                         transition={{ duration: 0.3 }}
                       >
-                        ${plan.price[billingPeriod]}
+                        {plan.price[billingPeriod]}
                       </motion.span>
                     </AnimatePresence>
                     <span className="text-text-secondary">

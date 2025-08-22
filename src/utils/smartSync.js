@@ -149,17 +149,43 @@ class SmartSyncManager {
       if (unsynced.length > 0) {
         console.log(`SmartSync: Found ${unsynced.length} unsynced changes in IndexedDB`);
         
-        // Add to queue for syncing
-        this.batchQueue.push(...unsynced.map(change => ({
-          id: change.id,
-          blockId: change.blockId,
-          content: change.content,
-          action: change.action,
-          timestamp: change.timestamp
-        })));
+        // Filter out old malformed DELETE operations (one-time cleanup)
+        const validChanges = unsynced.filter(change => {
+          // Check for old DELETE operations without required fields
+          if (change.action === 'DELETE' && (!change.blockType || change.position === undefined || change.position === null)) {
+            console.log('[CLEANUP] Removing old malformed DELETE:', {
+              blockId: change.blockId,
+              action: change.action,
+              blockType: change.blockType,
+              position: change.position,
+              changeId: change.id
+            });
+            // Remove the bad change from IndexedDB
+            this.db.changes.delete(change.id).catch(err => 
+              console.error('[CLEANUP] Error removing malformed change:', err)
+            );
+            return false; // Filter out this change
+          }
+          return true; // Keep valid changes
+        });
         
-        // Schedule sync
-        this.scheduleSmartSync();
+        // Add valid changes to queue for syncing with ALL fields
+        if (validChanges.length > 0) {
+          this.batchQueue.push(...validChanges.map(change => ({
+            id: change.id,
+            blockId: change.blockId,
+            content: change.content,
+            action: change.action,
+            blockType: change.blockType || change.block_type,  // Handle both field names
+            position: change.position,                          // Include position!
+            documentId: change.documentId,                      // Include documentId
+            timestamp: change.timestamp,
+            synced: change.synced
+          })));
+          
+          // Schedule sync
+          this.scheduleSmartSync();
+        }
       }
     } catch (error) {
       console.error('SmartSync: Error recovering pending changes:', error);

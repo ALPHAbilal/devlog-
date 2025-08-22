@@ -179,7 +179,9 @@ class SmartSyncManager {
       position,
       contentLength: content?.length,
       contentPreview: content?.substring(0, 100),
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      // Add validation check
+      hasRequiredFields: !!(blockType && (position !== null && position !== undefined))
     });
 
     const change = {

@@ -596,10 +596,24 @@ export default function ExpandedView({
     
     // CRITICAL FIX: Call Smart Sync for delete operation
     if (smartSyncManagerRef.current) {
+      // Find the block to get its type and position before deletion
+      const blockToDelete = blocks.find(b => b.id === blockId);
+      
+      // DEBUG: Log what we're sending for DELETE
+      console.log('[DEBUG-FIX] DELETE operation with:', {
+        blockId: blockId,
+        blockType: blockToDelete?.type || null,
+        position: blockToDelete?.position || null,
+        action: 'DELETE'
+      });
+      
+      // Send all required parameters for DELETE
       smartSyncManagerRef.current.handleChange(
         blockId,
         null, // null content for delete
-        'DELETE'
+        'DELETE',
+        blockToDelete?.type || null,      // ADD: block type (required!)
+        blockToDelete?.position || null   // ADD: position (required!)
       ).catch(error => {
         console.error('Smart Sync delete error:', error);
       });
@@ -680,11 +694,21 @@ export default function ExpandedView({
     
     // CRITICAL FIX: Call Smart Sync for reorder operation
     if (smartSyncManagerRef.current && movedBlock) {
-      // For REORDER, send just the new position as a string
+      // DEBUG: Log what we're sending for REORDER
+      console.log('[DEBUG-FIX] REORDER operation with:', {
+        blockId: movedBlock.id,
+        blockType: movedBlock.type,
+        position: newIndex,
+        action: 'REORDER'
+      });
+      
+      // Send all required parameters for REORDER
       smartSyncManagerRef.current.handleChange(
         movedBlock.id,
-        String(newIndex), // Just the position as a string
-        'REORDER'
+        movedBlock.content || serializeBlock(movedBlock), // Proper content
+        'REORDER',
+        movedBlock.type,    // ADD: block type (required!)
+        newIndex            // ADD: position as number (required!)
       ).catch(error => {
         console.error('Smart Sync move error:', error);
       });
@@ -812,11 +836,21 @@ export default function ExpandedView({
       
       // CRITICAL FIX: Call Smart Sync for drag-drop reorder
       if (smartSyncManagerRef.current && draggedBlock) {
-        // For REORDER, send just the new position as a string
+        // DEBUG: Log what we're sending for drag-drop REORDER
+        console.log('[DEBUG-FIX] Drag-drop REORDER operation with:', {
+          blockId: draggedBlock.id,
+          blockType: draggedBlock.type,
+          position: insertIndex,
+          action: 'REORDER'
+        });
+        
+        // Send all required parameters for REORDER
         smartSyncManagerRef.current.handleChange(
           draggedBlock.id,
-          String(insertIndex), // Just the position as a string
-          'REORDER'
+          draggedBlock.content || serializeBlock(draggedBlock), // Proper content
+          'REORDER',
+          draggedBlock.type,    // ADD: block type (required!)
+          insertIndex           // ADD: position as number (required!)
         ).catch(error => {
           console.error('Smart Sync drag-drop error:', error);
         });

@@ -43,7 +43,9 @@ const AuthDesktop = () => {
           </h2>
 
           <p className="auth-subtitle">
-            Join 7,000+ developers who save their ChatGPT solutions before they disappear.
+            {/* Beta - User count hidden until launch
+            Join 7,000+ developers who save their ChatGPT solutions before they disappear. */}
+            Save your ChatGPT solutions before they disappear. Join the beta today.
           </p>
 
           <div className="auth-code-snippets">

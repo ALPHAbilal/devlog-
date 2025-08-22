@@ -63,12 +63,18 @@ const AuthElite = () => {
   const [taglineIndex, setTaglineIndex] = useState(0)
   const [isTyping, setIsTyping] = useState(true)
 
-  // Developer statistics ticker
+  // Developer statistics ticker - Beta mode (placeholder values)
   const stats = [
+    /* Beta - Real statistics hidden until launch
     { value: '12,847', label: 'developers', icon: Code2 },
     { value: '3.2M', label: 'snippets saved', icon: Database },
     { value: '847K', label: 'bugs solved', icon: Zap },
     { value: '99.9%', label: 'uptime', icon: Shield }
+    */
+    { value: 'Beta', label: 'early access', icon: Sparkles },
+    { value: '∞', label: 'possibilities', icon: Database },
+    { value: '100%', label: 'your data', icon: Shield },
+    { value: '0', label: 'ads forever', icon: Zap }
   ]
 
   // Viewport detection and dynamic class application

@@ -59,7 +59,7 @@ export default function HeroSectionV3() {
       <HeroBackgroundAnimation />
       
       <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10 py-16 md:py-20">
-        {/* Enhanced Urgency Badge */}
+        {/* Beta Badge */}
         <motion.div
           className="hero-badge mb-6"
           initial={{ opacity: 0, scale: 0.9, y: -20 }}
@@ -68,7 +68,7 @@ export default function HeroSectionV3() {
           whileHover={{ scale: 1.05 }}
         >
           <div className="hero-badge-pulse" />
-          <span>Launch Week: 50% off ends Friday</span>
+          <span>Beta Access Available</span>
           <motion.div
             className="absolute inset-0 rounded-full"
             style={{ background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)' }}
@@ -183,7 +183,9 @@ export default function HeroSectionV3() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.6 }}
         >
-          Join 7,000+ developers building their second brain
+          {/* Beta - User count hidden until launch
+          Join 7,000+ developers building their second brain */}
+          Start building your second brain today
         </motion.p>
       </div>
     </section>

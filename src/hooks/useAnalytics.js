@@ -141,37 +141,54 @@ export function usePerformanceTracking() {
   const metricsRef = useRef({});
 
   useEffect(() => {
-    // Track Core Web Vitals
-    if ('web-vitals' in window) {
+    // Use modern Performance Observer API
+    if (!('PerformanceObserver' in window)) {
       return;
     }
 
-    // Simple performance tracking without web-vitals library
-    const trackNavigationTiming = () => {
-      if (performance.timing) {
-        const timing = performance.timing;
-        const pageLoadTime = timing.loadEventEnd - timing.navigationStart;
-        const domReadyTime = timing.domContentLoadedEventEnd - timing.navigationStart;
-        const firstPaintTime = timing.responseEnd - timing.navigationStart;
+    try {
+      // Track Largest Contentful Paint (LCP)
+      const lcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1];
+        if (lastEntry) {
+          trackTiming('web_vitals', 'LCP', Math.round(lastEntry.startTime));
+        }
+      });
+      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
 
-        if (pageLoadTime > 0) {
-          trackTiming('performance', 'page_load', pageLoadTime);
-        }
-        if (domReadyTime > 0) {
-          trackTiming('performance', 'dom_ready', domReadyTime);
-        }
-        if (firstPaintTime > 0) {
-          trackTiming('performance', 'first_paint', firstPaintTime);
-        }
-      }
-    };
+      // Track First Input Delay (FID)
+      const fidObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.processingStart && entry.startTime) {
+            const fid = entry.processingStart - entry.startTime;
+            trackTiming('web_vitals', 'FID', Math.round(fid));
+          }
+        });
+      });
+      fidObserver.observe({ type: 'first-input', buffered: true });
 
-    // Track after page load
-    if (document.readyState === 'complete') {
-      trackNavigationTiming();
-    } else {
-      window.addEventListener('load', trackNavigationTiming);
-      return () => window.removeEventListener('load', trackNavigationTiming);
+      // Track Navigation Timing
+      const navObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        entries.forEach((entry) => {
+          if (entry.entryType === 'navigation') {
+            trackTiming('performance', 'page_load', Math.round(entry.loadEventEnd));
+            trackTiming('performance', 'dom_ready', Math.round(entry.domContentLoadedEventEnd));
+            trackTiming('performance', 'response_time', Math.round(entry.responseEnd - entry.fetchStart));
+          }
+        });
+      });
+      navObserver.observe({ type: 'navigation', buffered: true });
+
+      return () => {
+        lcpObserver.disconnect();
+        fidObserver.disconnect();
+        navObserver.disconnect();
+      };
+    } catch (error) {
+      console.error('[GA4] Performance tracking error:', error);
     }
   }, [trackTiming]);
 

@@ -470,11 +470,8 @@ export default function Dashboard() {
       const doc = entries.find(e => e.id === documentId);
       if (doc && !expandedEntry) {
         setExpandedEntry(doc);
-        // Track document opened
-        trackDocumentEvent('opened', doc.id, {
-          open_method: 'url_navigation',
-          has_content: doc.blocks?.length > 0
-        });
+        // Don't track here - ExpandedViewEnhanced will track the view event
+        // This prevents duplicate tracking
         startDocumentTimer('editing', doc.id);
       } else if (!doc && documentId) {
         // Document not found, redirect to dashboard

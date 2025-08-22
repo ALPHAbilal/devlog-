@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
@@ -55,6 +55,7 @@ function AutoSaveProvider() {
 function AppContent() {
   const { user, loading } = useAuth();
   const { setUserId, setUserProperties, trackEvent } = useAnalytics();
+  const [hasTrackedSession, setHasTrackedSession] = useState(false);
 
   // Set user context for monitoring and analytics
   useEffect(() => {
@@ -69,15 +70,31 @@ function AppContent() {
         email_verified: user.email_confirmed_at ? 'true' : 'false'
       });
       
-      // Track login event
-      trackEvent('login', {
-        method: user.app_metadata?.provider || 'email'
-      });
+      // Only track login/session once per session
+      if (!hasTrackedSession) {
+        // Check if this is a fresh login or session restoration
+        const isNewLogin = sessionStorage.getItem('fresh_login') === 'true';
+        
+        if (isNewLogin) {
+          // Track actual login event
+          trackEvent('login', {
+            method: user.app_metadata?.provider || 'email'
+          });
+          sessionStorage.removeItem('fresh_login');
+        } else {
+          // Track session restoration (page refresh while logged in)
+          trackEvent('session_restored', {
+            user_id: user.id
+          });
+        }
+        setHasTrackedSession(true);
+      }
     } else {
       // Clear user ID on logout
       setUserId(null);
+      setHasTrackedSession(false);
     }
-  }, [user, setUserId, setUserProperties, trackEvent]);
+  }, [user, setUserId, setUserProperties, trackEvent, hasTrackedSession]);
 
   // Add beforeunload handler to save pending changes
   useEffect(() => {

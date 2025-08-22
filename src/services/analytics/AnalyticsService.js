@@ -14,7 +14,8 @@ class AnalyticsService {
     this.debugMode = import.meta.env.VITE_GA4_DEBUG_MODE === 'true';
     this.eventQueue = [];
     this.consentManager = new ConsentManager();
-    this.userId = null;
+    // Restore user ID from localStorage if it exists
+    this.userId = localStorage.getItem('ga_user_id') || null;
     this.clientId = this.getOrCreateClientId();
     this.sessionId = this.getOrCreateSessionId();
     this.lastPageView = { path: null, timestamp: 0 };

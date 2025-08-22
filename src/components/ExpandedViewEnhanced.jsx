@@ -636,7 +636,7 @@ export default function ExpandedView({
     //   setIsInternalUpdate(true);
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
-  }, [removeBlock]);
+  }, [removeBlock, blocks]);
 
   const duplicateBlock = useCallback((blockId) => {
     const blockIndex = blocks.findIndex(b => b.id === blockId);

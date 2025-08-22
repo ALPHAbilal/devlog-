@@ -46,6 +46,19 @@ export default function InlineActionBar({
   const hideTimeoutRef = useRef(null);
   const containerRef = useRef(null);
   
+  // Debug logging on mount and prop changes
+  useEffect(() => {
+    console.log('[INLINE-ACTION] Props received:', {
+      blockId,
+      hasOnMoveUp: !!onMoveUp,
+      hasOnMoveDown: !!onMoveDown,
+      canMoveUp,
+      canMoveDown,
+      isVisible,
+      timestamp: Date.now()
+    });
+  }, [blockId, onMoveUp, onMoveDown, canMoveUp, canMoveDown, isVisible]);
+  
   // Use click outside hook for dropdown
   const dropdownRef = useClickOutside(() => {
     setShowDropdown(false);
@@ -201,7 +214,22 @@ export default function InlineActionBar({
             {/* Move up */}
             <button
               onClick={() => {
-                onMoveUp?.();
+                console.log('[INLINE-ACTION] Move UP clicked:', {
+                  blockId,
+                  hasHandler: !!onMoveUp,
+                  canMoveUp,
+                  handlerType: typeof onMoveUp,
+                  timestamp: Date.now()
+                });
+                
+                if (onMoveUp) {
+                  onMoveUp();
+                } else {
+                  console.error('[INLINE-ACTION] ERROR: onMoveUp handler is not provided!', {
+                    blockId,
+                    allProps: { onDelete: !!onDelete, onDuplicate: !!onDuplicate, onMoveUp: !!onMoveUp, onMoveDown: !!onMoveDown }
+                  });
+                }
                 setShowDropdown(false);
               }}
               disabled={!canMoveUp}
@@ -220,7 +248,22 @@ export default function InlineActionBar({
             {/* Move down */}
             <button
               onClick={() => {
-                onMoveDown?.();
+                console.log('[INLINE-ACTION] Move DOWN clicked:', {
+                  blockId,
+                  hasHandler: !!onMoveDown,
+                  canMoveDown,
+                  handlerType: typeof onMoveDown,
+                  timestamp: Date.now()
+                });
+                
+                if (onMoveDown) {
+                  onMoveDown();
+                } else {
+                  console.error('[INLINE-ACTION] ERROR: onMoveDown handler is not provided!', {
+                    blockId,
+                    allProps: { onDelete: !!onDelete, onDuplicate: !!onDuplicate, onMoveUp: !!onMoveUp, onMoveDown: !!onMoveDown }
+                  });
+                }
                 setShowDropdown(false);
               }}
               disabled={!canMoveDown}

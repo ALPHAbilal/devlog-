@@ -98,6 +98,21 @@ function Block({
   const { isMobile } = useResponsive();
   const useMobileControls = isMobileView || isMobile;
   
+  // Debug logging for props
+  useEffect(() => {
+    console.log('[BLOCK] Component mounted/updated:', {
+      blockId: block.id,
+      blockType: block.type,
+      hasOnMoveUp: !!onMoveUp,
+      hasOnMoveDown: !!onMoveDown,
+      canMoveUp,
+      canMoveDown,
+      isFocused,
+      index,
+      timestamp: Date.now()
+    });
+  }, [block.id, onMoveUp, onMoveDown, isFocused]);
+  
   // Use lazy loading for heavy blocks
   const { 
     targetRef: lazyRef, 
@@ -275,20 +290,50 @@ function Block({
           onDelete={() => onDelete(block.id)}
           onDuplicate={() => onDuplicate?.(block.id)}
           onMoveUp={() => {
-            console.log('[DEBUG-MOVE-2] Block.onMoveUp called:', {
+            console.log('[DEBUG-MOVE-2] Block.onMoveUp wrapper called:', {
               blockId: block.id,
               blockType: block.type,
+              hasOnMoveUp: !!onMoveUp,
+              onMoveUpType: typeof onMoveUp,
               timestamp: Date.now()
             });
-            onMoveUp?.(block.id);
+            if (onMoveUp) {
+              onMoveUp(block.id);
+            } else {
+              console.error('[BLOCK] onMoveUp prop is undefined!', {
+                blockId: block.id,
+                allProps: {
+                  onUpdate: !!onUpdate,
+                  onDelete: !!onDelete,
+                  onMoveUp: !!onMoveUp,
+                  onMoveDown: !!onMoveDown,
+                  isFocused
+                }
+              });
+            }
           }}
           onMoveDown={() => {
-            console.log('[DEBUG-MOVE-2] Block.onMoveDown called:', {
+            console.log('[DEBUG-MOVE-2] Block.onMoveDown wrapper called:', {
               blockId: block.id,
               blockType: block.type,
+              hasOnMoveDown: !!onMoveDown,
+              onMoveDownType: typeof onMoveDown,
               timestamp: Date.now()
             });
-            onMoveDown?.(block.id);
+            if (onMoveDown) {
+              onMoveDown(block.id);
+            } else {
+              console.error('[BLOCK] onMoveDown prop is undefined!', {
+                blockId: block.id,
+                allProps: {
+                  onUpdate: !!onUpdate,
+                  onDelete: !!onDelete,
+                  onMoveUp: !!onMoveUp,
+                  onMoveDown: !!onMoveDown,
+                  isFocused
+                }
+              });
+            }
           }}
           canMoveUp={canMoveUp}
           canMoveDown={canMoveDown}

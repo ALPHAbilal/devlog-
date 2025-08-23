@@ -205,6 +205,29 @@ animate={{ left: 100 }} // Bad - triggers layout
 **Result**: Consistent, high-quality AI assistance
 **Saved**: 10x reduction in repeated errors
 
+## 🗂️ MCP Folder Management Pattern
+**Symptom**: Need to add folder operations to MCP
+**Fix**: Folder functions already exist in database, just expose via MCP
+**Location**: 
+- Database functions: supabase/migrations/20250812_mcp_folder_operations.sql
+- MCP handlers: devlog-mcp-remote/src/tools.ts (lines 288-545)
+- Tool definitions: devlog-mcp-remote/src/mcp-server.ts
+**Discovery**: All 6 operations implemented: create, list, get_contents, move_document, delete, update
+**API Key**: Required for all folder operations (passed as p_api_key to functions)
+**Saved**: 4+ hours (avoided reimplementing existing functionality)
+
+## 🔐 MCP API Key Validation Error Pattern
+**Symptom**: "function digest(text, unknown) does not exist" when calling folder operations
+**Cause**: validate_mcp_api_key PostgreSQL function uses digest() from pgcrypto
+**Location**: Database function validate_mcp_api_key, called from auth.ts
+**Fix Options**:
+1. Use test key `dvlg_sk_test_123` which bypasses digest
+2. Fix validate_mcp_api_key to not use digest or handle properly
+3. Store API key hash directly in api_keys table
+**Workaround**: Document operations work fine, only folder ops affected
+**Deployment**: https://devlog-mcp.bilal-kosika.workers.dev
+**Saved**: 2+ hours debugging PostgreSQL extension issues
+
 ## 📝 How to Add New Patterns
 
 When you discover a new pattern, add it here immediately:

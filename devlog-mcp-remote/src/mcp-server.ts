@@ -142,6 +142,83 @@ export class DevlogMCPServer {
               required: ['document_id', 'conversation'],
             },
           },
+          {
+            name: 'create_folder',
+            description: 'Create a new folder or subfolder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                name: { type: 'string', description: 'Folder name' },
+                parent_id: { type: 'string', description: 'Parent folder ID (optional for root folders)' },
+                color: { type: 'string', description: 'Hex color code (default: #6B7280)' },
+                icon: { type: 'string', description: 'Icon name (default: folder)' },
+              },
+              required: ['name'],
+            },
+          },
+          {
+            name: 'list_folders',
+            description: 'List folders in the workspace',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                parent_id: { type: 'string', description: 'Parent folder ID to list children (optional)' },
+                recursive: { type: 'boolean', description: 'Get entire folder tree recursively' },
+              },
+            },
+          },
+          {
+            name: 'get_folder_contents',
+            description: 'Get folders and documents in a specific folder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                folder_id: { type: 'string', description: 'Folder ID (optional, null for root)' },
+                include_subfolders: { type: 'boolean', description: 'Include subfolders in response' },
+              },
+            },
+          },
+          {
+            name: 'move_document_to_folder',
+            description: 'Move a document to a different folder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: { type: 'string', description: 'Document ID to move' },
+                folder_id: { type: 'string', description: 'Target folder ID (optional, null for root)' },
+                position: { type: 'number', description: 'Position in the folder (optional)' },
+              },
+              required: ['document_id'],
+            },
+          },
+          {
+            name: 'delete_folder',
+            description: 'Delete a folder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                folder_id: { type: 'string', description: 'Folder ID to delete' },
+                recursive: { type: 'boolean', description: 'Delete all contents recursively' },
+              },
+              required: ['folder_id'],
+            },
+          },
+          {
+            name: 'update_folder',
+            description: 'Update folder properties',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                folder_id: { type: 'string', description: 'Folder ID to update' },
+                name: { type: 'string', description: 'New folder name' },
+                color: { type: 'string', description: 'New hex color code' },
+                icon: { type: 'string', description: 'New icon name' },
+                is_favorite: { type: 'boolean', description: 'Mark as favorite' },
+                parent_id: { type: 'string', description: 'Move to different parent folder' },
+              },
+              required: ['folder_id'],
+            },
+          },
         ],
       };
     });
@@ -166,6 +243,18 @@ export class DevlogMCPServer {
             return await this.handleManageTodos(args);
           case 'capture_conversation':
             return await this.handleCaptureConversation(args);
+          case 'create_folder':
+            return await this.handleCreateFolder(args);
+          case 'list_folders':
+            return await this.handleListFolders(args);
+          case 'get_folder_contents':
+            return await this.handleGetFolderContents(args);
+          case 'move_document_to_folder':
+            return await this.handleMoveDocumentToFolder(args);
+          case 'delete_folder':
+            return await this.handleDeleteFolder(args);
+          case 'update_folder':
+            return await this.handleUpdateFolder(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -385,5 +474,166 @@ export class DevlogMCPServer {
     return Math.max(...structure.children.map((child: any) => 
       this.calculateDepth(child, currentDepth + 1)
     ));
+  }
+
+  // Folder operation handlers
+  private async handleCreateFolder(args: any): Promise<any> {
+    // Import executeToolCommand to handle the actual API call
+    const { executeToolCommand } = await import('./tools');
+    
+    // Get API key from the request context (this would need to be passed in)
+    // For now, we'll delegate to the tools.ts implementation
+    const results = await executeToolCommand(
+      'create_folder',
+      args,
+      this.env,
+      this.userId,
+      this.projectId,
+      // API key should be passed through the request context
+      (this as any).apiKey
+    );
+    
+    return {
+      content: results,
+    };
+  }
+
+  private async handleListFolders(args: any): Promise<any> {
+    const result = await this.supabase.listFolders(args);
+    
+    if (!result.folders || result.folders.length === 0) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: 'No folders found.',
+          },
+        ],
+      };
+    }
+
+    const formatFolder = (folder: any, indent: number = 0): string => {
+      const prefix = '  '.repeat(indent) + (indent > 0 ? '└─ ' : '');
+      return `${prefix}📁 ${folder.name} (${folder.id.substring(0, 8)}...)`;
+    };
+
+    let output = 'Folder Structure:\n';
+    if (args.recursive) {
+      // Build tree structure
+      const folderMap = new Map(result.folders.map((f: any) => [f.id, f]));
+      const rootFolders = result.folders.filter((f: any) => !f.parent_id);
+      
+      const renderTree = (folderId: string, depth: number = 0): string => {
+        const folder = folderMap.get(folderId);
+        if (!folder) return '';
+        
+        let text = formatFolder(folder, depth) + '\n';
+        const children = result.folders.filter((f: any) => f.parent_id === folderId);
+        children.forEach((child: any) => {
+          text += renderTree(child.id, depth + 1);
+        });
+        return text;
+      };
+
+      rootFolders.forEach((folder: any) => {
+        output += renderTree(folder.id);
+      });
+    } else {
+      result.folders.forEach((folder: any) => {
+        output += formatFolder(folder) + '\n';
+      });
+    }
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: output,
+        },
+      ],
+    };
+  }
+
+  private async handleGetFolderContents(args: any): Promise<any> {
+    const result = await this.supabase.getFolderContents(args);
+    
+    let output = args.folder_id ? `Contents of folder ${args.folder_id}:\n` : 'Root folder contents:\n';
+    output += '\n';
+
+    if (result.folders && result.folders.length > 0) {
+      output += 'Subfolders:\n';
+      result.folders.forEach((folder: any) => {
+        output += `  📁 ${folder.name}\n`;
+      });
+      output += '\n';
+    }
+
+    if (result.documents && result.documents.length > 0) {
+      output += 'Documents:\n';
+      result.documents.forEach((doc: any) => {
+        output += `  📄 ${doc.title}`;
+        if (doc.tags && doc.tags.length > 0) {
+          output += ` [${doc.tags.join(', ')}]`;
+        }
+        output += '\n';
+      });
+    }
+
+    output += `\nTotal: ${result.total_folders || 0} folders, ${result.total_documents || 0} documents`;
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: output,
+        },
+      ],
+    };
+  }
+
+  private async handleMoveDocumentToFolder(args: any): Promise<any> {
+    const result = await this.supabase.moveDocumentToFolder(args);
+    
+    const folderText = args.folder_id ? `folder ${args.folder_id}` : 'root folder';
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Successfully moved document ${args.document_id} to ${folderText}`,
+        },
+      ],
+    };
+  }
+
+  private async handleDeleteFolder(args: any): Promise<any> {
+    const result = await this.supabase.deleteFolder(args);
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Successfully deleted folder ${args.folder_id}`,
+        },
+      ],
+    };
+  }
+
+  private async handleUpdateFolder(args: any): Promise<any> {
+    const result = await this.supabase.updateFolder(args);
+    
+    const updates = [];
+    if (args.name) updates.push(`name: "${args.name}"`);
+    if (args.color) updates.push(`color: ${args.color}`);
+    if (args.icon) updates.push(`icon: ${args.icon}`);
+    if (args.is_favorite !== undefined) updates.push(`favorite: ${args.is_favorite}`);
+    if (args.parent_id !== undefined) updates.push(`moved to parent: ${args.parent_id || 'root'}`);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Successfully updated folder ${args.folder_id}\nChanges: ${updates.join(', ')}`,
+        },
+      ],
+    };
   }
 }

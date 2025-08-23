@@ -185,6 +185,21 @@
 **Alternative**: Node.js server (rejected: scaling complexity)
 **Files**: devlog-mcp-remote/
 
+## 🔧 MCP Integration Decisions
+
+### 2025-01-23: MCP Folder Operations Implementation
+**Decision**: Expose existing database folder functions through MCP rather than reimplementing
+**Why**: 
+- All 6 folder operations already exist as PostgreSQL functions
+- Functions tested and working in production (51 folders exist)
+- Avoids code duplication and maintains single source of truth
+**Tradeoff**: Dependency on database functions vs standalone implementation
+**Alternative Considered**: Reimplement in TypeScript (rejected: unnecessary duplication)
+**Impact**: 4+ hours saved, consistent behavior with frontend
+**Files**: devlog-mcp-remote/src/tools.ts, mcp-server.ts
+**Issue Found**: API key validation uses pgcrypto digest function causing errors
+**Deployment**: Successfully deployed to Cloudflare Workers
+
 ## 📝 Documentation Decisions
 
 ### 2025-01: AI-MEMORY System

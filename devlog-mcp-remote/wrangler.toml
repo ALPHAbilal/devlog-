@@ -2,6 +2,7 @@ name = "devlog-mcp"
 main = "src/index.ts"
 compatibility_date = "2025-01-15"
 compatibility_flags = ["nodejs_compat"]
+account_id = "b54591d7d061206ca63cc7964d369216"
 
 # Build configuration (disabled for now due to TS errors)
 # [build]

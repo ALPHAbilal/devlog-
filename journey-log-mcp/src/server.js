@@ -2,14 +2,25 @@
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { 
+  CallToolRequestSchema,
+  ListToolsRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 import { ApiClient } from './api-client.js';
 
 class JourneyLogMCPServer {
   constructor() {
+    const apiKey = process.env.JOURNEY_LOG_API_KEY;
+    if (!apiKey) {
+      throw new Error('JOURNEY_LOG_API_KEY environment variable is required');
+    }
+    
+    this.apiClient = new ApiClient(apiKey);
+    
     this.server = new Server(
       {
         name: 'journey-log-mcp',
-        version: '1.0.0',
+        version: '1.1.0',
       },
       {
         capabilities: {
@@ -18,33 +29,12 @@ class JourneyLogMCPServer {
       }
     );
 
-    this.apiClient = null;
     this.setupHandlers();
   }
 
   setupHandlers() {
-    // Initialize handler
-    this.server.setRequestHandler('initialize', async (request) => {
-      const apiKey = process.env.JOURNEY_LOG_API_KEY;
-      if (!apiKey) {
-        throw new Error('JOURNEY_LOG_API_KEY environment variable is required');
-      }
-
-      this.apiClient = new ApiClient(apiKey);
-      return {
-        protocolVersion: '2024-11-05',
-        capabilities: {
-          tools: {},
-        },
-        serverInfo: {
-          name: 'journey-log-mcp',
-          version: '1.0.0',
-        },
-      };
-    });
-
     // Tools list handler
-    this.server.setRequestHandler('tools/list', async () => {
+    this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       return {
         tools: [
           {
@@ -230,12 +220,143 @@ class JourneyLogMCPServer {
               required: ['document_id'],
             },
           },
+          {
+            name: 'create_folder',
+            description: 'Create a new folder or subfolder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                name: {
+                  type: 'string',
+                  description: 'Folder name',
+                },
+                parent_id: {
+                  type: 'string',
+                  description: 'Parent folder ID (optional for root folders)',
+                },
+                color: {
+                  type: 'string',
+                  description: 'Hex color code (default: #6B7280)',
+                },
+                icon: {
+                  type: 'string',
+                  description: 'Icon name (default: folder)',
+                },
+              },
+              required: ['name'],
+            },
+          },
+          {
+            name: 'list_folders',
+            description: 'List folders in the workspace',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                parent_id: {
+                  type: 'string',
+                  description: 'Filter by parent folder ID',
+                },
+                include_documents: {
+                  type: 'boolean',
+                  description: 'Include document count for each folder',
+                },
+              },
+            },
+          },
+          {
+            name: 'get_folder_contents',
+            description: 'Get documents in a specific folder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                folder_id: {
+                  type: 'string',
+                  description: 'Folder ID',
+                },
+                include_subfolders: {
+                  type: 'boolean',
+                  description: 'Include contents of subfolders',
+                },
+              },
+              required: ['folder_id'],
+            },
+          },
+          {
+            name: 'move_document_to_folder',
+            description: 'Move a document to a folder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                document_id: {
+                  type: 'string',
+                  description: 'Document ID to move',
+                },
+                folder_id: {
+                  type: 'string',
+                  description: 'Target folder ID (null for root)',
+                },
+              },
+              required: ['document_id'],
+            },
+          },
+          {
+            name: 'delete_folder',
+            description: 'Delete a folder',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                folder_id: {
+                  type: 'string',
+                  description: 'Folder ID to delete',
+                },
+                recursive: {
+                  type: 'boolean',
+                  description: 'Delete all contents recursively',
+                },
+              },
+              required: ['folder_id'],
+            },
+          },
+          {
+            name: 'update_folder',
+            description: 'Update folder properties',
+            inputSchema: {
+              type: 'object',
+              properties: {
+                folder_id: {
+                  type: 'string',
+                  description: 'Folder ID to update',
+                },
+                name: {
+                  type: 'string',
+                  description: 'New folder name',
+                },
+                color: {
+                  type: 'string',
+                  description: 'New hex color code',
+                },
+                icon: {
+                  type: 'string',
+                  description: 'New icon name',
+                },
+                is_favorite: {
+                  type: 'boolean',
+                  description: 'Mark as favorite',
+                },
+                parent_id: {
+                  type: 'string',
+                  description: 'Move to different parent folder',
+                },
+              },
+              required: ['folder_id'],
+            },
+          },
         ],
       };
     });
 
     // Tool execution handler
-    this.server.setRequestHandler('tools/call', async (request) => {
+    this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       if (!this.apiClient) {
         throw new Error('API client not initialized. Please set JOURNEY_LOG_API_KEY.');
       }
@@ -260,6 +381,18 @@ class JourneyLogMCPServer {
             return await this.handleManageTodos(args);
           case 'track_versions':
             return await this.handleTrackVersions(args);
+          case 'create_folder':
+            return await this.handleCreateFolder(args);
+          case 'list_folders':
+            return await this.handleListFolders(args);
+          case 'get_folder_contents':
+            return await this.handleGetFolderContents(args);
+          case 'move_document_to_folder':
+            return await this.handleMoveDocumentToFolder(args);
+          case 'delete_folder':
+            return await this.handleDeleteFolder(args);
+          case 'update_folder':
+            return await this.handleUpdateFolder(args);
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -550,6 +683,70 @@ class JourneyLogMCPServer {
       content: [{
         type: 'text',
         text: `Version Tracking:\n${JSON.stringify(versions, null, 2)}`
+      }]
+    };
+  }
+
+  async handleCreateFolder(args) {
+    const result = await this.apiClient.createFolder(args);
+    return {
+      content: [{
+        type: 'text',
+        text: `Created folder "${result.name}" successfully!\nID: ${result.id}`
+      }]
+    };
+  }
+
+  async handleListFolders(args) {
+    const folders = await this.apiClient.listFolders(args);
+    return {
+      content: [{
+        type: 'text',
+        text: `Found ${folders.length} folders:\n${folders.map(f => 
+          `- ${f.name} (${f.id})${f.parent_id ? ' [subfolder]' : ''}`
+        ).join('\n')}`
+      }]
+    };
+  }
+
+  async handleGetFolderContents(args) {
+    const contents = await this.apiClient.getFolderContents(args);
+    return {
+      content: [{
+        type: 'text',
+        text: `Folder contents (${contents.documents?.length || 0} documents, ${contents.subfolders?.length || 0} subfolders):\n` +
+          `Documents:\n${(contents.documents || []).map(d => `- ${d.title}`).join('\n')}\n` +
+          `Subfolders:\n${(contents.subfolders || []).map(f => `- ${f.name}`).join('\n')}`
+      }]
+    };
+  }
+
+  async handleMoveDocumentToFolder(args) {
+    const result = await this.apiClient.moveDocumentToFolder(args);
+    return {
+      content: [{
+        type: 'text',
+        text: `Moved document to ${args.folder_id ? 'folder' : 'root'} successfully!`
+      }]
+    };
+  }
+
+  async handleDeleteFolder(args) {
+    const result = await this.apiClient.deleteFolder(args);
+    return {
+      content: [{
+        type: 'text',
+        text: `Deleted folder successfully!`
+      }]
+    };
+  }
+
+  async handleUpdateFolder(args) {
+    const result = await this.apiClient.updateFolder(args);
+    return {
+      content: [{
+        type: 'text',
+        text: `Updated folder successfully!`
       }]
     };
   }

@@ -46,6 +46,19 @@
 **Migration**: 20250131_fix_delete_blocks_issue.sql
 **Impact**: +5% storage but enables recovery
 
+### 2025-01-23: MCP Two-Tier Architecture
+**Decision**: Separate NPM package + Cloudflare API
+**Why**:
+- NPM package (`@journey-log/mcp-server`) for easy global distribution
+- Cloudflare API handles all database operations
+- Folder operations proxy through to remote API
+**Implementation**:
+- Local: `/journey-log-mcp/` - User-facing MCP server
+- Remote: `/devlog-mcp-remote/` - Database operations
+**Result**: Users run `npx @journey-log/mcp-server`, it connects to Cloudflare
+**Alternative Rejected**: Single monolithic package (too complex to deploy)
+**Impact**: Clean separation of concerns, easy updates
+
 ## 🎨 UI/UX Decisions
 
 ### 2025-01: Custom Block Controls vs Library

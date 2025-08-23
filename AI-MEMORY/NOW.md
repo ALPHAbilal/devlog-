@@ -1,8 +1,8 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Task: Add MCP Folder Management Capabilities
-Status: ✅ COMPLETE - All operations working with test API key!
+## Task: Fix NPM Package with Folder Operations
+Status: ✅ PUBLISHED - v1.1.0 live on NPM!
 
 ## Previous Task: Create Protocol Enforcement Commands for Claude Code
 Status: ✅ Done
@@ -27,6 +27,15 @@ Status: ✅ Done
 [2025-01-23 11:20] BREAKTHROUGH: Test API key works perfectly for ALL operations!
 [2025-01-23 11:25] Verified all 6 folder operations working with test key
 [2025-01-23 11:30] Created FOLDER_OPERATIONS_GUIDE.md for usage
+[2025-01-23 17:00] Fixed NPM package - folder ops were in wrong location
+[2025-01-23 17:05] Added folder operations to journey-log-mcp package
+[2025-01-23 17:10] Fixed API client to call remote MCP properly
+[2025-01-23 17:15] Tested all 6 folder operations - working!
+[2025-01-23 17:20] Package v1.1.0 ready for npm publish
+[2025-01-23 17:30] Created journey-log organization on NPM
+[2025-01-23 17:35] Successfully published @journey-log/mcp-server v1.1.0
+[2025-01-23 17:36] Package live at https://www.npmjs.com/package/@journey-log/mcp-server
+[2025-01-23 17:37] Global users can now use folder operations!
 
 ### Discoveries - Folder Management
 - All 6 folder functions exist in database (create, list, get contents, move, delete, update)

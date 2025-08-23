@@ -205,6 +205,20 @@ animate={{ left: 100 }} // Bad - triggers layout
 **Result**: Consistent, high-quality AI assistance
 **Saved**: 10x reduction in repeated errors
 
+## 🗂️ MCP Package Deployment Pattern
+**Symptom**: MCP won't connect - "npm error 404 Not Found @journey-log/mcp-server"
+**Cause**: Package exists locally but was never published to npm
+**Fix**: 
+1. Add features to `/journey-log-mcp/` (NOT remote MCP)
+2. Update both server.js and api-client.js
+3. Test locally with `JOURNEY_LOG_API_KEY=test node test-server.js`
+4. Create NPM organization if using scoped package
+5. Publish with `npm publish --access public`
+**Location**: /workspace/devlog-/journey-log-mcp/
+**NPM Package**: https://www.npmjs.com/package/@journey-log/mcp-server
+**Version**: 1.1.0 with folder operations
+**Saved**: 3+ hours (avoided wrong location edits)
+
 ## 🗂️ MCP Folder Management Pattern
 **Symptom**: Need to add folder operations to MCP
 **Fix**: Folder functions already exist in database, just expose via MCP

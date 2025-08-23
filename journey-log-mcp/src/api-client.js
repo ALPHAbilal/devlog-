@@ -2,6 +2,7 @@ export class ApiClient {
   constructor(apiKey) {
     this.apiKey = apiKey;
     this.baseUrl = 'https://devlog.design/api/mcp';
+    this.remoteUrl = 'https://devlog-mcp.bilal-kosika.workers.dev/api/execute';
   }
 
   async request(method, path, body = null) {
@@ -71,5 +72,77 @@ export class ApiClient {
 
   async getDocument(documentId) {
     return this.request('GET', `/documents/${documentId}`);
+  }
+
+  // Remote MCP call for folder operations
+  async remoteMcpCall(toolName, args) {
+    const response = await fetch(this.remoteUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify({
+        tool: toolName,
+        arguments: args,
+      }),
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || `Remote MCP Error: ${response.status}`);
+    }
+
+    return data.result;
+  }
+
+  // Folder operations - proxy to remote MCP
+  async createFolder({ name, parent_id, color, icon }) {
+    return this.remoteMcpCall('create_folder', {
+      name,
+      parent_id,
+      color,
+      icon,
+    });
+  }
+
+  async listFolders({ parent_id, include_documents } = {}) {
+    return this.remoteMcpCall('list_folders', {
+      parent_id,
+      include_documents,
+    });
+  }
+
+  async getFolderContents({ folder_id, include_subfolders }) {
+    return this.remoteMcpCall('get_folder_contents', {
+      folder_id,
+      include_subfolders,
+    });
+  }
+
+  async moveDocumentToFolder({ document_id, folder_id }) {
+    return this.remoteMcpCall('move_document_to_folder', {
+      document_id,
+      folder_id,
+    });
+  }
+
+  async deleteFolder({ folder_id, recursive }) {
+    return this.remoteMcpCall('delete_folder', {
+      folder_id,
+      recursive,
+    });
+  }
+
+  async updateFolder({ folder_id, name, color, icon, is_favorite, parent_id }) {
+    return this.remoteMcpCall('update_folder', {
+      folder_id,
+      name,
+      color,
+      icon,
+      is_favorite,
+      parent_id,
+    });
   }
 }

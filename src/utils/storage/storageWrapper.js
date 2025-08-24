@@ -71,77 +71,6 @@ function createSupabaseWrapper(adapter) {
         entry.content?.toLowerCase().includes(lowerQuery)
       );
     },
-    // Add paginated loading support
-    async loadDocumentsPage(options = {}) {
-      const { 
-        page = 0, 
-        limit = 30, 
-        includeBlocks = false,
-        orderBy = 'updated_at',
-        ascending = false 
-      } = options;
-      
-      // Check if we're using SupabaseAdapterOptimized which has loadAllDocuments
-      // The adapter is the supabaseAdapter itself when using SupabaseAdapterOptimized
-      if (adapter.supabaseAdapter && adapter.supabaseAdapter.loadAllDocuments) {
-        // Get the userId from the underlying supabaseAdapter
-        const userId = adapter.supabaseAdapter.userId;
-        if (!userId) {
-          // Fallback to loading all and slicing
-          const allDocs = await adapter.getDocuments();
-          const start = page * limit;
-          const end = start + limit;
-          return {
-            documents: allDocs.slice(start, end).map(doc => {
-              if (!includeBlocks) {
-                const { blocks, ...docWithoutBlocks } = doc;
-                return docWithoutBlocks;
-              }
-              return doc;
-            }),
-            totalCount: allDocs.length,
-            page,
-            pageSize: limit,
-            hasMore: end < allDocs.length
-          };
-        }
-        
-        const result = await adapter.supabaseAdapter.loadAllDocuments(userId, {
-          page,
-          limit,
-          orderBy,
-          ascending,
-          includeDeleted: false
-        });
-        
-        // If includeBlocks is false, strip blocks from documents to save memory
-        if (!includeBlocks && result.documents) {
-          result.documents = result.documents.map(doc => {
-            const { blocks, ...docWithoutBlocks } = doc;
-            return docWithoutBlocks;
-          });
-        }
-        
-        return result;
-      }
-      
-      // Fallback for regular adapter
-      const allDocs = await adapter.getDocuments();
-      const start = page * limit;
-      const end = start + limit;
-      const pageDocs = allDocs.slice(start, end);
-      
-      return {
-        documents: includeBlocks ? pageDocs : pageDocs.map(doc => {
-          const { blocks, ...docWithoutBlocks } = doc;
-          return docWithoutBlocks;
-        }),
-        totalCount: allDocs.length,
-        page,
-        pageSize: limit,
-        hasMore: end < allDocs.length
-      };
-    },
     // Add getDocument method for loading single document with blocks
     async getDocument(documentId) {
       return await adapter.getDocument(documentId);
@@ -315,61 +244,6 @@ export async function searchEntries(query) {
   );
 }
 
-// New function for paginated loading
-export async function loadDocumentsPage(options = {}) {
-  const storageAdapter = await init();
-  
-  // Use the paginated method if available
-  if (storageAdapter.loadDocumentsPage) {
-    return storageAdapter.loadDocumentsPage(options);
-  }
-  
-  // Fallback: load all and slice
-  const allEntries = await storageAdapter.loadEntries();
-  const { page = 0, limit = 30, includeBlocks = false } = options;
-  const start = page * limit;
-  const end = start + limit;
-  
-  const documents = allEntries.slice(start, end).map(doc => {
-    if (!includeBlocks) {
-      const { blocks, ...docWithoutBlocks } = doc;
-      return docWithoutBlocks;
-    }
-    return doc;
-  });
-  
-  return {
-    documents,
-    totalCount: allEntries.length,
-    page,
-    pageSize: limit,
-    hasMore: end < allEntries.length
-  };
-}
-
-// Get single document with optional blocks
-export async function getDocument(documentId, includeBlocks = true) {
-  const storageAdapter = await init();
-  
-  if (storageAdapter.getDocument) {
-    const doc = await storageAdapter.getDocument(documentId);
-    if (!includeBlocks && doc) {
-      const { blocks, ...docWithoutBlocks } = doc;
-      return docWithoutBlocks;
-    }
-    return doc;
-  }
-  
-  // Fallback: find in all documents
-  const allEntries = await storageAdapter.loadEntries();
-  const doc = allEntries.find(e => e.id === documentId);
-  if (!includeBlocks && doc) {
-    const { blocks, ...docWithoutBlocks } = doc;
-    return docWithoutBlocks;
-  }
-  return doc;
-}
-
 // Reset function for logout
 export function reset() {
   adapter = null;
@@ -396,8 +270,6 @@ export const storageWrapper = {
   deleteEntry,
   searchEntries,
   getAdapter,
-  loadDocumentsPage,
-  getDocument,
   // Backward compatibility aliases
   getEntries: loadEntries,
   deleteDocument: deleteEntry,

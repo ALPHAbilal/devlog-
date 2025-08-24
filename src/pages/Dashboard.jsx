@@ -56,10 +56,6 @@ export default function Dashboard() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
-  const [hasMore, setHasMore] = useState(true);
-  const [totalDocuments, setTotalDocuments] = useState(0);
   const isInitialized = useRef(false);
   
   // Analytics hooks
@@ -133,43 +129,24 @@ export default function Dashboard() {
   // Pull to refresh on mobile
   const { elementRef: pullToRefreshRef, isPulling, pullDistance, pullProgress } = usePullToRefresh(
     async () => {
-      // Reset pagination and reload first page
-      setCurrentPage(0);
-      setHasMore(true);
-      await loadEntries(0, false);
+      await loadEntries();
       toast.success('Documents refreshed');
     },
     isMobile ? 80 : 0 // Only enable on mobile
   );
   
   // Handle document expansion with lazy block loading
-  const handleDocumentExpand = useCallback(async (document) => {
-    // If document doesn't have blocks, load them now
-    if (!document.blocks) {
-      console.log(`Dashboard: Loading blocks for document ${document.id}`);
-      try {
-        // Show document immediately with loading state
-        setExpandedEntry({ ...document, blocksLoading: true });
-        navigate(`/dashboard/${document.id}`, { replace: true });
-        
-        // Load full document with blocks
-        const fullDocument = await storageWrapper.getDocument(document.id, true);
-        if (fullDocument) {
-          // Update with loaded blocks
-          setExpandedEntry(fullDocument);
-          // Cache the document with blocks
-          sessionCache.setDocument(fullDocument);
-        }
-      } catch (error) {
-        console.error('Error loading document blocks:', error);
-        // Still show document even if blocks fail to load
-        setExpandedEntry(document);
-      }
-    } else {
-      // Document already has blocks, open immediately
-      setExpandedEntry(document);
-      navigate(`/dashboard/${document.id}`, { replace: true });
-    }
+  const handleDocumentExpand = useCallback((document) => {
+    // Open document immediately - ExpandedViewEnhanced will handle progressive loading
+    // Clear blocks array to force full reload from database
+    const documentForEdit = {
+      ...document,
+      blocks: undefined // Force block loader to fetch all blocks
+    };
+    setExpandedEntry(documentForEdit);
+    
+    // Update URL to reflect the opened document
+    navigate(`/dashboard/${document.id}`, { replace: true });
   }, [navigate]);
 
   // Update storage info
@@ -354,72 +331,67 @@ export default function Dashboard() {
   // Create a ref to track if we're currently loading
   const loadingRef = useRef(false);
   
-  // Load entries function with pagination support
-  const loadEntries = useCallback(async (page = 0, append = false) => {
+  // Load entries function - accessible from multiple places
+  const loadEntries = useCallback(async () => {
     // Prevent concurrent loads
-    if (loadingRef.current) {
-      console.log('Dashboard: Skipping load - already loading');
+    if (loadingRef.current || (isInitialized.current && !isPulling)) {
+      console.log('Dashboard: Skipping load - already loading or initialized');
       return;
     }
     
     loadingRef.current = true;
     const startTime = performance.now();
-    console.log(`Dashboard: Loading page ${page} (append: ${append})...`);
-    
-    if (page === 0) {
-      setIsLoading(true);
-    } else {
-      setIsLoadingMore(true);
-    }
+    console.log('Dashboard: Starting to load entries...');
+    setIsLoading(true);
     
     try {
       // Ensure storage is initialized
+      const initStart = performance.now();
       await storageWrapper.init();
+      console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
       
-      // Load documents page WITHOUT blocks for better performance
+      // Load entries
       const loadStart = performance.now();
-      const response = await storageWrapper.loadDocumentsPage({
-        page,
-        limit: 30,
-        includeBlocks: false, // Don't load blocks for grid view
-        orderBy: 'updated_at',
-        ascending: false
-      });
+      const savedEntries = await storageWrapper.getEntries();
+      console.log(`Dashboard: Loaded ${savedEntries?.length || 0} entries (${Math.round(performance.now() - loadStart)}ms)`);
+      console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
       
-      console.log(`Dashboard: Loaded ${response.documents?.length || 0} documents (page ${page}) in ${Math.round(performance.now() - loadStart)}ms`);
-      console.log(`Dashboard: Total documents: ${response.totalCount}, Has more: ${response.hasMore}`);
-      
-      if (response.documents && response.documents.length > 0) {
-        // Check session cache for any cached documents
+      if (savedEntries && savedEntries.length > 0) {
+        // Check session cache first for any cached documents
         const cachedDocs = sessionCache.getAllDocuments();
         const cachedMap = new Map(cachedDocs.map(doc => [doc.id, doc]));
         
-        // Merge cached data with loaded documents
-        const mergedDocs = response.documents.map(entry => {
+        // Merge cached data with saved entries
+        const mergedEntries = savedEntries.map(entry => {
           const cached = cachedMap.get(entry.id);
-          if (cached && cached.blocks) {
-            // If we have cached blocks, use them
+          if (cached) {
+            // Use cached version but update with any newer fields
             return {
               ...entry,
-              blocks: cached.blocks,
+              ...cached,
               updatedAt: entry.updatedAt > cached.updatedAt ? entry.updatedAt : cached.updatedAt
+            };
+          }
+          
+          // Clean up any stale isNew flags
+          if (entry.blocks) {
+            return {
+              ...entry,
+              blocks: entry.blocks.map(block => {
+                if (block.isNew) {
+                  const { isNew, ...blockWithoutNew } = block;
+                  return blockWithoutNew;
+                }
+                return block;
+              })
             };
           }
           return entry;
         });
         
-        if (append) {
-          setEntries(prev => [...prev, ...mergedDocs]);
-        } else {
-          setEntries(mergedDocs);
-        }
-        
-        setTotalDocuments(response.totalCount || mergedDocs.length);
-        setHasMore(response.hasMore);
-        setCurrentPage(page);
-        
-      } else if (page === 0) {
-        // Only show welcome entry on first page if no documents
+        setEntries(mergedEntries);
+      } else {
+        // Initialize with example entry
         const initialEntries = [
           {
             id: crypto.randomUUID(),
@@ -456,57 +428,41 @@ export default function Dashboard() {
         ];
         setEntries(initialEntries);
         await storageWrapper.saveEntries(initialEntries);
-        setHasMore(false);
       }
       
-      // Get initial storage info on first load
-      if (page === 0) {
-        await updateStorageInfo();
-        
-        // Load projects if using Supabase
-        if (storageWrapper.isSupabase) {
-          try {
-            const projectList = await storageWrapper.getProjects();
-            console.log(`Dashboard: Loaded ${projectList?.length || 0} projects`);
-            setProjects(projectList || []);
-          } catch (error) {
-            console.error('Error loading projects:', error);
-          }
+      // Get initial storage info
+      await updateStorageInfo();
+      
+      // Load projects if using Supabase
+      if (storageWrapper.isSupabase) {
+        try {
+          const projectList = await storageWrapper.getProjects();
+          console.log(`Dashboard: Loaded ${projectList?.length || 0} projects`);
+          setProjects(projectList || []);
+        } catch (error) {
+          console.error('Error loading projects:', error);
         }
       }
-      
-      console.log(`Dashboard: Page ${page} load complete in ${Math.round(performance.now() - startTime)}ms`);
     } catch (error) {
       console.error('Error loading entries:', error);
-      setHasMore(false);
     } finally {
+      console.log('Dashboard: Setting isLoading to false');
       setIsLoading(false);
-      setIsLoadingMore(false);
       isInitialized.current = true;
       loadingRef.current = false;
     }
-  }, [updateStorageInfo]);
-  
-  // Load more entries when scrolling near bottom
-  const loadMoreEntries = useCallback(async () => {
-    if (!hasMore || isLoadingMore || loadingRef.current) {
-      return;
-    }
-    
-    console.log('Dashboard: Loading more entries...');
-    await loadEntries(currentPage + 1, true);
-  }, [currentPage, hasMore, isLoadingMore, loadEntries]);
+  }, [isPulling, updateStorageInfo]);
 
-  // Load initial entries on mount
+  // Load entries on mount
   useEffect(() => {
     let isMounted = true;
     
-    loadEntries(0, false); // Load first page
+    loadEntries();
     
     return () => {
       isMounted = false;
     };
-  }, []); // Remove loadEntries dependency to prevent re-runs
+  }, [loadEntries]);
   
   // Sync URL with document state
   useEffect(() => {
@@ -1331,8 +1287,7 @@ export default function Dashboard() {
               {/* Document Stats - Inline and Minimal */}
               <div className="hidden sm:flex items-center gap-3 text-xs">
                 <span className="text-text-secondary/70">
-                  <span className="text-text-primary font-medium">{totalDocuments || entries.length}</span> docs
-                  {hasMore && <span className="text-text-secondary/50"> ({entries.length} loaded)</span>}
+                  <span className="text-text-primary font-medium">{entries.length}</span> docs
                 </span>
                 <span className="text-text-secondary/40">•</span>
                 <span className="text-text-secondary/70">
@@ -1558,9 +1513,6 @@ export default function Dashboard() {
             onSelectDocument={handleDocumentSelect}
             selectionMode={selectedDocuments.size > 0}
             sidebarCollapsed={isSidebarCollapsed}
-            onLoadMore={loadMoreEntries}
-            hasMore={hasMore}
-            isLoadingMore={isLoadingMore}
             onContextMenu={isMobile ? (entry) => {
               setContextMenuTarget(entry);
               setShowMobileContextMenu(true);

@@ -13,10 +13,7 @@ export default function VirtualizedGrid({
   onSelectDocument,
   selectionMode = false,
   sidebarCollapsed = false,
-  onContextMenu,
-  onLoadMore,
-  hasMore = false,
-  isLoadingMore = false
+  onContextMenu
 }) {
   const containerRef = useRef(null);
   const [visibleRange, setVisibleRange] = useState({ start: 0, end: 20 });
@@ -151,7 +148,7 @@ export default function VirtualizedGrid({
     setTouchScrolling(false);
   }, []);
   
-  // Handle scroll to update visible range and trigger infinite scroll
+  // Handle scroll to update visible range
   const handleScroll = useCallback(() => {
     // Find the parent scrollable container (the cards container in Dashboard)
     const scrollContainer = containerRef.current?.closest('.overflow-y-scroll, .overflow-y-auto');
@@ -159,7 +156,6 @@ export default function VirtualizedGrid({
 
     const scrollTop = scrollContainer.scrollTop;
     const containerHeight = scrollContainer.clientHeight;
-    const scrollHeight = scrollContainer.scrollHeight;
     
     // Calculate visible range based on parent's scroll position
     const startRow = Math.max(0, Math.floor(scrollTop / (CARD_HEIGHT + GAP)) - BUFFER_ROWS);
@@ -172,14 +168,7 @@ export default function VirtualizedGrid({
     const end = Math.min(allItems.length, endRow * columns);
     
     setVisibleRange({ start, end });
-    
-    // Check if we should load more (within 500px of bottom)
-    const distanceFromBottom = scrollHeight - (scrollTop + containerHeight);
-    if (distanceFromBottom < 500 && hasMore && !isLoadingMore && onLoadMore) {
-      console.log('VirtualizedGrid: Triggering load more - distance from bottom:', distanceFromBottom);
-      onLoadMore();
-    }
-  }, [columns, rows, allItems.length, hasMore, isLoadingMore, onLoadMore]);
+  }, [columns, rows, allItems.length]);
 
   useEffect(() => {
     // Find the parent scrollable container
@@ -226,9 +215,8 @@ export default function VirtualizedGrid({
     };
   };
 
-  // Calculate total height including padding and loading indicator
-  const baseHeight = rows * (CARD_HEIGHT + GAP) - GAP;
-  const totalHeight = isLoadingMore ? baseHeight + 80 : baseHeight; // Add space for loading indicator
+  // Calculate total height including padding
+  const totalHeight = rows * (CARD_HEIGHT + GAP) - GAP; // Removed padding from calculation
   
   // Debug logging
   useEffect(() => {
@@ -450,23 +438,6 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
               +{entry.tags.length - 2}
             </span>
           )}
-        </div>
-      )}
-      
-      {/* Loading indicator for infinite scroll */}
-      {isLoadingMore && (
-        <div 
-          className="absolute left-0 right-0 flex items-center justify-center py-8"
-          style={{ 
-            top: rows * (CARD_HEIGHT + GAP),
-            left: centerOffset,
-            width: totalGridWidth
-          }}
-        >
-          <div className="flex items-center gap-3 px-4 py-2 bg-dark-secondary/80 rounded-lg border border-dark-secondary/50">
-            <div className="animate-spin rounded-full h-4 w-4 border-2 border-accent-green border-t-transparent" />
-            <span className="text-text-secondary text-sm">Loading more documents...</span>
-          </div>
         </div>
       )}
     </div>

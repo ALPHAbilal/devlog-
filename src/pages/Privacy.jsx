@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
 import NoiseOverlay from '../components/NoiseOverlay';
-import { ArrowLeft, Shield, Lock, Database, UserCheck, Eye, FileText, Clock, Mail } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 
@@ -24,7 +24,6 @@ export default function Privacy() {
     {
       number: '1',
       title: 'Introduction',
-      icon: <Shield />,
       content: (
         <p className="legal-text">
           At Devlog ("we", "our", or "us"), we take your privacy seriously. This Privacy Policy 
@@ -36,7 +35,6 @@ export default function Privacy() {
     {
       number: '2',
       title: 'Information We Collect',
-      icon: <Database />,
       content: (
         <>
           <div className="legal-subsection">
@@ -71,7 +69,6 @@ export default function Privacy() {
     {
       number: '3',
       title: 'How We Use Your Information',
-      icon: <Eye />,
       content: (
         <>
           <p className="legal-text">We use your information to:</p>
@@ -89,7 +86,6 @@ export default function Privacy() {
     {
       number: '4',
       title: 'Data Storage and Security',
-      icon: <Lock />,
       content: (
         <>
           <p className="legal-text">Your documents and code snippets are:</p>
@@ -106,7 +102,6 @@ export default function Privacy() {
     {
       number: '5',
       title: 'Data Sharing',
-      icon: <UserCheck />,
       content: (
         <>
           <p className="legal-text">
@@ -124,7 +119,6 @@ export default function Privacy() {
     {
       number: '6',
       title: 'Your Rights',
-      icon: <FileText />,
       content: (
         <>
           <p className="legal-text">You have the right to:</p>
@@ -141,7 +135,6 @@ export default function Privacy() {
     {
       number: '7',
       title: 'Data Retention',
-      icon: <Clock />,
       content: (
         <p className="legal-text">
           We retain your data as long as your account is active. Upon account deletion, 
@@ -153,7 +146,6 @@ export default function Privacy() {
     {
       number: '8',
       title: 'Contact Us',
-      icon: <Mail />,
       content: (
         <>
           <p className="legal-text">
@@ -175,7 +167,6 @@ export default function Privacy() {
     {
       number: '9',
       title: 'Changes to This Policy',
-      icon: <FileText />,
       content: (
         <p className="legal-text">
           We may update this Privacy Policy from time to time. We will notify you of any 
@@ -255,7 +246,6 @@ export default function Privacy() {
               <div className="legal-section-header">
                 <span className="section-number">{section.number}</span>
                 <h2 className="legal-section-title">{section.title}</h2>
-                <span className="section-icon">{section.icon}</span>
               </div>
               {section.content}
             </motion.div>

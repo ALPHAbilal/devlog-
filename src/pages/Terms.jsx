@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
 import NoiseOverlay from '../components/NoiseOverlay';
-import { ArrowLeft, FileText, Shield, Settings, CreditCard, Users, AlertCircle, Gavel, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 
@@ -24,7 +24,6 @@ export default function Terms() {
     {
       number: '1',
       title: 'Acceptance of Terms',
-      icon: <CheckCircle />,
       content: (
         <p className="legal-text">
           By accessing or using Devlog ("Service"), you agree to be bound by these Terms of Service 
@@ -35,7 +34,6 @@ export default function Terms() {
     {
       number: '2',
       title: 'Description of Service',
-      icon: <FileText />,
       content: (
         <p className="legal-text">
           Devlog is a developer-focused knowledge management platform that allows you to capture, 
@@ -47,7 +45,6 @@ export default function Terms() {
     {
       number: '3',
       title: 'Account Registration',
-      icon: <Users />,
       content: (
         <ul className="legal-list">
           <li>You must provide accurate and complete information during registration</li>
@@ -61,7 +58,6 @@ export default function Terms() {
     {
       number: '4',
       title: 'Acceptable Use',
-      icon: <Shield />,
       content: (
         <>
           <p className="legal-text">You agree not to:</p>
@@ -80,7 +76,6 @@ export default function Terms() {
     {
       number: '5',
       title: 'Content Ownership',
-      icon: <FileText />,
       content: (
         <>
           <div className="legal-subsection">
@@ -104,7 +99,6 @@ export default function Terms() {
     {
       number: '6',
       title: 'Subscription Plans',
-      icon: <CreditCard />,
       content: (
         <>
           <div className="legal-subsection">
@@ -132,7 +126,6 @@ export default function Terms() {
     {
       number: '7',
       title: 'Privacy and Data Protection',
-      icon: <Shield />,
       content: (
         <p className="legal-text">
           Your use of the Service is also governed by our Privacy Policy. We are committed to protecting 
@@ -144,7 +137,6 @@ export default function Terms() {
     {
       number: '8',
       title: 'Limitation of Liability',
-      icon: <AlertCircle />,
       content: (
         <p className="legal-text" style={{ textTransform: 'uppercase', fontSize: '0.875rem' }}>
           TO THE MAXIMUM EXTENT PERMITTED BY LAW, DEVLOG SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, 
@@ -156,7 +148,6 @@ export default function Terms() {
     {
       number: '9',
       title: 'Indemnification',
-      icon: <Shield />,
       content: (
         <p className="legal-text">
           You agree to indemnify and hold harmless Devlog, Inc. and its officers, directors, employees, 
@@ -168,7 +159,6 @@ export default function Terms() {
     {
       number: '10',
       title: 'Termination',
-      icon: <Settings />,
       content: (
         <p className="legal-text">
           We may terminate or suspend your account immediately, without prior notice, for conduct that 
@@ -180,7 +170,6 @@ export default function Terms() {
     {
       number: '11',
       title: 'Changes to Terms',
-      icon: <FileText />,
       content: (
         <p className="legal-text">
           We reserve the right to modify these Terms at any time. Material changes will be notified 
@@ -192,7 +181,6 @@ export default function Terms() {
     {
       number: '12',
       title: 'Governing Law',
-      icon: <Gavel />,
       content: (
         <p className="legal-text">
           These Terms shall be governed by the laws of the State of California, United States, 
@@ -203,7 +191,6 @@ export default function Terms() {
     {
       number: '13',
       title: 'Contact Information',
-      icon: <Mail />,
       content: (
         <>
           <p className="legal-text">
@@ -293,7 +280,6 @@ export default function Terms() {
               <div className="legal-section-header">
                 <span className="section-number">{section.number}</span>
                 <h2 className="legal-section-title">{section.title}</h2>
-                <span className="section-icon">{section.icon}</span>
               </div>
               {section.content}
             </motion.div>

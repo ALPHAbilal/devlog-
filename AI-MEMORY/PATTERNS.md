@@ -205,19 +205,31 @@ animate={{ left: 100 }} // Bad - triggers layout
 **Result**: Consistent, high-quality AI assistance
 **Saved**: 10x reduction in repeated errors
 
-## 🗂️ MCP Package Deployment Pattern
-**Symptom**: MCP won't connect - "npm error 404 Not Found @journey-log/mcp-server"
-**Cause**: Package exists locally but was never published to npm
-**Fix**: 
-1. Add features to `/journey-log-mcp/` (NOT remote MCP)
-2. Update both server.js and api-client.js
-3. Test locally with `JOURNEY_LOG_API_KEY=test node test-server.js`
-4. Create NPM organization if using scoped package
-5. Publish with `npm publish --access public`
-**Location**: /workspace/devlog-/journey-log-mcp/
-**NPM Package**: https://www.npmjs.com/package/@journey-log/mcp-server
-**Version**: 1.1.0 with folder operations
-**Saved**: 3+ hours (avoided wrong location edits)
+## 🗂️ MCP NPM Package Confusion Pattern - TWO PACKAGES EXIST!
+**Symptom**: Confusion about which NPM package to use/update
+**Root Cause**: Two different NPM packages were created during development
+**IMPORTANT**: We have TWO packages but only ONE is active!
+
+### Package 1: `devlog-mcp` (v2.0.1) - ✅ THE ACTIVE ONE
+- **NPM**: https://www.npmjs.com/package/devlog-mcp
+- **Location**: `/workspace/devlog-/devlog-mcp-client/`
+- **Purpose**: Bridge to Cloudflare Worker (the one we're using)
+- **Status**: ACTIVE, 95.7% test coverage, all fixes applied
+- **Claude Config**: `"args": ["devlog-mcp"]`
+
+### Package 2: `@journey-log/mcp-server` (v1.1.0) - ⚠️ OLD/EXPERIMENTAL
+- **NPM**: https://www.npmjs.com/package/@journey-log/mcp-server
+- **Location**: `/workspace/devlog-/journey-log-mcp/`
+- **Purpose**: Early experimental version
+- **Status**: Outdated, not maintained, can be ignored
+- **Claude Config**: `"args": ["@journey-log/mcp-server"]` (DON'T USE)
+
+**How to Check Which You're Using**: 
+Look at Claude Desktop config - if it says `devlog-mcp` you're good!
+
+**Action**: DO NOTHING - `devlog-mcp` v2.0.1 works perfectly
+**Note**: All fixes are server-side (Cloudflare), NPM package doesn't need updates
+**Saved**: Prevents accidental updates to wrong package
 
 ## 🗂️ MCP Folder Management Pattern - COMPLETE FIX
 **Symptom**: Folder tools not available in Claude Code despite being implemented

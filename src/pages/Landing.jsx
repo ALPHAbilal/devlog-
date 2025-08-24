@@ -438,42 +438,40 @@ function LandingContent() {
 
       {/* Footer */}
       <footer className="px-4 md:px-6 gradient-footer relative">
-        {/* Noise overlay for premium texture */}
+        {/* Subtle gradient background with noise */}
         <div className="noise-overlay" />
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 py-8">
-          <div className="flex items-center gap-2">
-            <LogoMinimal size={24} />
-            <span className="text-xs md:text-sm text-text-secondary">© 2025 Devlog</span>
+        
+        <div className="max-w-6xl mx-auto text-center relative z-10 py-12 md:py-16">
+          {/* Centered logo and tagline */}
+          <div className="flex flex-col items-center gap-3 mb-6">
+            <LogoMinimal size={28} className="opacity-80" />
+            <p className="text-sm text-text-secondary/50">
+              Your second brain for code
+            </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm text-text-secondary">
-            <a 
-              href="https://github.com/journey-log/mcp-server" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-accent-green transition-colors"
-            >
-              GitHub
-            </a>
-            <a 
-              href="https://www.npmjs.com/package/@journey-log/mcp-server" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-accent-green transition-colors"
-            >
-              Documentation
-            </a>
+          
+          {/* Minimal legal links */}
+          <div className="flex items-center justify-center gap-6 text-xs text-text-secondary/40">
+            <span>© 2025 Devlog</span>
+            <span className="w-px h-3 bg-text-secondary/20" />
             <a 
               href="/privacy" 
-              className="hover:text-accent-green transition-colors"
+              className="hover:text-text-secondary/60 transition-colors"
             >
               Privacy
             </a>
+            <span className="w-px h-3 bg-text-secondary/20" />
             <a 
               href="/terms" 
-              className="hover:text-accent-green transition-colors"
+              className="hover:text-text-secondary/60 transition-colors"
             >
               Terms
             </a>
+          </div>
+          
+          {/* Subtle pulse animation element */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-96 h-96 bg-accent-green/5 rounded-full blur-3xl animate-pulse" />
           </div>
         </div>
       </footer>

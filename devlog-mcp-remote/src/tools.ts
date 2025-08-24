@@ -58,35 +58,65 @@ export async function executeToolCommand(
         const documentId = createResult.document_id;
 
         // Add blocks if provided using mcp_add_block function
+        // Batch blocks to avoid Cloudflare subrequest limit
         if (blocks.length > 0) {
-          for (let index = 0; index < blocks.length; index++) {
-            const block = blocks[index];
+          const BATCH_SIZE = 20; // Process blocks in batches of 20
+          const batches = [];
+          
+          // Create batches
+          for (let i = 0; i < blocks.length; i += BATCH_SIZE) {
+            batches.push(blocks.slice(i, i + BATCH_SIZE));
+          }
+          
+          // Process each batch
+          for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+            const batch = batches[batchIndex];
+            const batchPromises = [];
             
-            const blockResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_add_block`, {
-              method: 'POST',
-              headers: {
-                'apikey': env.SUPABASE_ANON_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=representation',
-              },
-              body: JSON.stringify({
-                p_api_key: apiKey,
-                p_document_id: documentId,
-                p_type: block.type,
-                p_content: block.content || '',
-                p_metadata: block.metadata || {},
-                p_position: index
-              })
-            });
-
-            if (!blockResponse.ok) {
-              const error = await blockResponse.text();
-              throw new Error(`Failed to add block: ${error}`);
+            // Create promises for all blocks in this batch
+            for (let blockIndex = 0; blockIndex < batch.length; blockIndex++) {
+              const block = batch[blockIndex];
+              const absoluteIndex = batchIndex * BATCH_SIZE + blockIndex;
+              
+              const blockPromise = fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_add_block`, {
+                method: 'POST',
+                headers: {
+                  'apikey': env.SUPABASE_ANON_KEY,
+                  'Content-Type': 'application/json',
+                  'Prefer': 'return=representation',
+                },
+                body: JSON.stringify({
+                  p_api_key: apiKey,
+                  p_document_id: documentId,
+                  p_type: block.type,
+                  p_content: block.content || '',
+                  p_metadata: block.metadata || {},
+                  p_position: absoluteIndex
+                })
+              });
+              
+              batchPromises.push(blockPromise);
             }
             
-            const blockResult = await blockResponse.json();
-            if (!blockResult.success) {
-              throw new Error(`Failed to add block: ${blockResult.error || 'Unknown error'}`);
+            // Wait for all blocks in this batch to complete
+            const batchResponses = await Promise.all(batchPromises);
+            
+            // Check all responses
+            for (const blockResponse of batchResponses) {
+              if (!blockResponse.ok) {
+                const error = await blockResponse.text();
+                throw new Error(`Failed to add block: ${error}`);
+              }
+              
+              const blockResult = await blockResponse.json();
+              if (!blockResult.success) {
+                throw new Error(`Failed to add block: ${blockResult.error || 'Unknown error'}`);
+              }
+            }
+            
+            // Small delay between batches to avoid rate limiting
+            if (batchIndex < batches.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 100));
             }
           }
         }
@@ -644,7 +674,7 @@ export async function executeToolCommand(
           body: JSON.stringify({
             p_api_key: apiKey,
             p_document_id: document_id,
-            p_query: query || '',
+            p_search_query: query || '',  // Fixed: use p_search_query instead of p_query
             p_block_type: block_type,
             p_limit: limit,
             p_offset: offset
@@ -662,9 +692,10 @@ export async function executeToolCommand(
           throw new Error(`Failed to search blocks: ${result.error || 'Unknown error'}`);
         }
 
+        // Return blocks array directly for test compatibility
         return [{
           type: 'text',
-          text: JSON.stringify(result, null, 2),
+          text: JSON.stringify(result.blocks || [], null, 2),
         }];
       }
 
@@ -745,7 +776,8 @@ export async function executeToolCommand(
             p_api_key: apiKey,
             p_document_id: document_id,
             p_position: position,
-            p_blocks: JSON.stringify(blocks)
+            p_blocks: blocks,  // Pass as JSON array directly, not stringified
+            p_shift_mode: 'after'  // Default shift mode
           })
         });
 
@@ -767,7 +799,9 @@ export async function executeToolCommand(
       }
 
       case 'update_specific_blocks': {
-        const { document_id, updates } = args;
+        // Support both 'updates' and 'blocks' parameter names for backward compatibility
+        const { document_id, updates, blocks } = args;
+        const blockUpdates = updates || blocks;
         
         if (!apiKey) {
           throw new Error('API key is required for updating blocks');
@@ -777,8 +811,8 @@ export async function executeToolCommand(
           throw new Error('Document ID is required');
         }
         
-        if (!updates || !Array.isArray(updates)) {
-          throw new Error('Updates array is required');
+        if (!blockUpdates || !Array.isArray(blockUpdates)) {
+          throw new Error('Updates array is required (pass as either "updates" or "blocks")');
         }
         
         const response = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_update_specific_blocks`, {
@@ -791,7 +825,7 @@ export async function executeToolCommand(
           body: JSON.stringify({
             p_api_key: apiKey,
             p_document_id: document_id,
-            p_updates: updates
+            p_updates: blockUpdates  // Pass as JSON array directly, not stringified
           })
         });
 

@@ -18,6 +18,7 @@
 @import './styles/mobile-optimizations.css';
 @import './styles/unified-gradients.css';
 @import './styles/section-transitions.css';
+@import './styles/legal-pages.css';
 
 @tailwind base;
 @tailwind components;

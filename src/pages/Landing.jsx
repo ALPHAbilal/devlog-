@@ -468,11 +468,6 @@ function LandingContent() {
               Terms
             </a>
           </div>
-          
-          {/* Subtle pulse animation element */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-96 h-96 bg-accent-green/5 rounded-full blur-3xl animate-pulse" />
-          </div>
         </div>
       </footer>
     </div>

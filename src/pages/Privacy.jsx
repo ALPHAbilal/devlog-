@@ -187,9 +187,9 @@ export default function Privacy() {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-primary text-text-primary">
+    <div className="legal-page-wrapper bg-dark-primary text-text-primary">
       {/* Premium gradient background */}
-      <div className="fixed inset-0 gradient-hero opacity-20" />
+      <div className="fixed inset-0 gradient-hero opacity-20 pointer-events-none" />
       <NoiseOverlay />
       
       {/* Enhanced Navigation */}
@@ -289,9 +289,6 @@ export default function Privacy() {
             >
               Terms
             </a>
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-96 h-96 bg-accent-green/5 rounded-full blur-3xl animate-pulse" />
           </div>
         </div>
       </footer>

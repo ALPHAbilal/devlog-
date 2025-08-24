@@ -1,5 +1,22 @@
 /* Legal Pages - Premium UI Design System */
 
+/* Ensure full dark background on legal pages */
+.legal-page-wrapper {
+  min-height: 100vh;
+  background-color: #0d1117; /* dark-primary color */
+  position: relative;
+  /* Ensure background extends to full content height */
+  background-attachment: fixed;
+}
+
+/* Fallback for html/body to ensure no white space */
+html.legal-page,
+body.legal-page {
+  background-color: #0d1117;
+  margin: 0;
+  padding: 0;
+}
+
 /* Hero Section for Legal Pages */
 .legal-hero {
   position: relative;

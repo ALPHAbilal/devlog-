@@ -442,13 +442,12 @@ function LandingContent() {
         <div className="noise-overlay" />
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 relative z-10 py-8">
           <div className="flex items-center gap-2">
-            <LogoMinimal size={20} className="md:hidden" />
-            <LogoMinimal size={24} className="hidden md:block" />
+            <LogoMinimal size={24} />
             <span className="text-xs md:text-sm text-text-secondary">© 2025 Devlog</span>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-sm text-text-secondary">
             <a 
-              href="https://github.com/devlog-app/devlog" 
+              href="https://github.com/journey-log/mcp-server" 
               target="_blank" 
               rel="noopener noreferrer"
               className="hover:text-accent-green transition-colors"
@@ -456,7 +455,9 @@ function LandingContent() {
               GitHub
             </a>
             <a 
-              href="/docs" 
+              href="https://www.npmjs.com/package/@journey-log/mcp-server" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-accent-green transition-colors"
             >
               Documentation

@@ -1,6 +1,6 @@
 {
   "name": "devlog-mcp",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Connect AI assistants to Devlog using Model Context Protocol (MCP)",
   "type": "module",
   "main": "src/index.js",

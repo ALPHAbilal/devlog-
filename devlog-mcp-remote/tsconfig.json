@@ -4,7 +4,7 @@
     "lib": ["es2021", "webworker"],
     "module": "es2022",
     "moduleResolution": "node",
-    "types": ["@cloudflare/workers-types", "./worker-configuration.d.ts"],
+    "types": ["@cloudflare/workers-types"],
     "resolveJsonModule": true,
     "allowJs": true,
     "noEmit": true,
@@ -14,6 +14,6 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*", "worker-configuration.d.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

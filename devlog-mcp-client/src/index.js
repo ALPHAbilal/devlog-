@@ -297,7 +297,7 @@ class DevlogMCPBridge {
               },
             },
             {
-              name: 'move_document',
+              name: 'move_document_to_folder',
               description: 'Move a document to a different folder',
               inputSchema: {
                 type: 'object',

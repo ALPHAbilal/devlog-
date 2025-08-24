@@ -413,6 +413,7 @@ export async function executeToolCommand(
         }];
       }
 
+      case 'move_document_to_folder':
       case 'move_document': {
         const { document_id, folder_id = null, position = null } = args;
         

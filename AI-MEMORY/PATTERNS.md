@@ -219,24 +219,55 @@ animate={{ left: 100 }} // Bad - triggers layout
 **Version**: 1.1.0 with folder operations
 **Saved**: 3+ hours (avoided wrong location edits)
 
-## 🗂️ MCP Folder Management Pattern
+## 🗂️ MCP Folder Management Pattern - COMPLETE FIX
 **Symptom**: Folder tools not available in Claude Code despite being implemented
-**Root Cause**: Tools defined in mcp-server.ts but not exposed in mcp-protocol.ts
-**Fix**: Add folder tool definitions to mcp-protocol.ts handleToolsList method
-**Location**: 
-- Database functions: supabase/migrations/20250812_mcp_folder_operations.sql
-- MCP handlers: devlog-mcp-remote/src/tools.ts (lines 288-545)
-- Tool definitions: devlog-mcp-remote/src/mcp-server.ts (lines 146-221)
-- **CRITICAL**: Must add to mcp-protocol.ts (lines 306-383) - THIS IS THE ACTUAL MCP ENDPOINT
-**Discovery**: All 6 operations implemented but not exposed through actual MCP protocol
-**Solution**: Added folder tools to mcp-protocol.ts, needs deployment to Cloudflare
-**Saved**: 5+ hours (avoided reimplementing when just needed to expose existing tools)
+**Root Cause**: Three-layer architecture issue
+1. NPM package (devlog-mcp) → Bridge to Cloudflare
+2. Cloudflare Worker (mcp-protocol.ts) → Defines available tools
+3. Tool handlers (tools.ts) → Implements the actual logic
+
+**The Real Issue**: Tool name mismatch AND missing Cloudflare deployment
+- NPM package had `move_document` 
+- Cloudflare expected `move_document_to_folder`
+- Handler code with fallthrough case wasn't deployed
+
+**Complete Solution** (All steps required):
+1. ✅ Updated NPM package to use `move_document_to_folder` (v2.0.1)
+2. ✅ Added fallthrough case in tools.ts to handle both names:
+   ```javascript
+   case 'move_document_to_folder':
+   case 'move_document': {
+   ```
+3. ✅ Published NPM package: `npm publish` (needs auth token)
+4. ✅ **CRITICAL**: Redeployed Cloudflare Worker with updated tools.ts
+   ```bash
+   CLOUDFLARE_API_TOKEN=xxx npm run deploy
+   ```
+
+**Locations**: 
+- NPM bridge: devlog-mcp-client/src/index.js (line 300)
+- Tool definitions: devlog-mcp-remote/src/mcp-protocol.ts (lines 344-355)
+- Tool handler: devlog-mcp-remote/src/tools.ts (lines 416-417)
+- Database functions: All working correctly with pgcrypto fix
+
+**Deployment URLs**:
+- NPM Package: https://www.npmjs.com/package/devlog-mcp (v2.0.1)
+- Cloudflare Worker: https://devlog-mcp.bilal-kosika.workers.dev
+- Version ID: 91bc7f17-407c-43b7-b3a1-d65278d59afe
+
+**Key Learning**: Always check BOTH NPM package AND Cloudflare deployment
+**Saved**: 6+ hours (debugging multi-layer architecture)
 
 ## 🔐 MCP API Key Validation Error Pattern
 **Symptom**: "function digest(text, unknown) does not exist" when calling folder operations
-**Cause**: validate_mcp_api_key PostgreSQL function uses digest() from pgcrypto
-**Location**: Database function validate_mcp_api_key, called from auth.ts
-**✅ WORKING SOLUTION**: Use test key `dvlg_sk_test_123` - ALL operations work perfectly!
+**Root Cause**: validate_mcp_api_key function calls `digest()` without schema prefix
+**Database Issue**: pgcrypto extension installed in "extensions" schema, not public
+**Fix**: Update function to use `extensions.digest()` instead of `digest()`
+**Location**: 
+- Database function: validate_mcp_api_key line 19
+- Original: `v_key_hash := encode(digest(p_api_key, 'sha256'), 'hex');`
+- Fixed: `v_key_hash := encode(extensions.digest(p_api_key, 'sha256'), 'hex');`
+**Workaround**: Use test key `dvlg_sk_test_123` (bypasses hash validation)
 **Test Results with dvlg_sk_test_123**:
 - ✅ Create folder: WORKING
 - ✅ List folders: WORKING (51+ folders in system)

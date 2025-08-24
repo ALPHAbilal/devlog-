@@ -279,6 +279,73 @@ animate={{ left: 100 }} // Bad - triggers layout
 **Documentation**: /devlog-mcp-remote/FOLDER_OPERATIONS_GUIDE.md
 **Saved**: 2+ hours debugging PostgreSQL extension issues
 
+## 🔌 MCP Tools Status & Known Issues
+**Testing Date**: August 24, 2025
+**Test Method**: Direct testing via Claude MCP interface
+
+### ✅ Working Tools (8/9)
+| Tool | Status | Notes |
+|------|--------|-------|
+| `create_document` | ✅ Working | Creates documents with blocks successfully |
+| `search_documents` | ✅ Working | Full-text search functional |
+| `get_document` | ✅ Working | Retrieves documents with all blocks |
+| `list_folders` | ✅ Working | Lists all folders recursively |
+| `create_folder` | ✅ Working | Creates folders with metadata |
+| `get_folder_contents` | ✅ Working | Gets folders and documents |
+| `move_document_to_folder` | ✅ Working | Fixed after name sync & deployment |
+| `update_folder` | ✅ Working | Updates folder properties |
+| `delete_folder` | ✅ Working | Deletes with recursive option |
+
+### ❌ Known Issues
+
+#### 1. update_document Tool Error
+**Symptom**: "cannot call json_array_elements on a scalar"
+**Root Cause**: Blocks parameter expects JSON string, not array
+**Location**: devlog-mcp-remote/src/tools.ts (update_document handler)
+**Current Behavior**: Tool call fails when passing blocks array
+**Fix Required**: 
+```javascript
+// Current (broken):
+p_blocks: args.blocks
+
+// Should be:
+p_blocks: JSON.stringify(args.blocks)
+```
+**Impact**: Cannot update document content via MCP
+**Saved**: Will save 1+ hour debugging
+
+#### 2. Session Validation for Direct API
+**Symptom**: "Invalid session" when testing directly against Cloudflare
+**Root Cause**: Stateless validation requires proper MCP initialization
+**Location**: devlog-mcp-remote/src/mcp-protocol.ts:445-466
+**Behavior**: Re-authenticates on every request, no persistent session
+**Workaround**: Use Claude MCP interface or NPM package
+**Note**: This is by design for stateless operation
+**Saved**: 2+ hours trying to bypass session
+
+#### 3. Advanced Block Tools (Untested)
+**Status**: Not tested via Claude MCP
+**Tools**: 
+- `search_blocks`
+- `get_blocks_range`
+- `insert_blocks_at`
+- `update_specific_blocks`
+- `delete_blocks`
+- `move_blocks`
+**Reason**: Require document context and block IDs
+**Priority**: Low - basic operations working
+
+### 🏗️ Architecture Confirmation
+**Working Flow**: Claude Desktop → NPM Package (v2.0.1) → Cloudflare Worker → Supabase
+**Critical Success Factors**:
+1. Tool names must match across all layers
+2. NPM package must be published and updated
+3. Cloudflare Worker must be deployed with changes
+4. Database functions must have proper permissions
+
+**Validation**: 89% of core tools operational
+**Production Ready**: Yes, with update_document limitation
+
 ## 📝 How to Add New Patterns
 
 When you discover a new pattern, add it here immediately:

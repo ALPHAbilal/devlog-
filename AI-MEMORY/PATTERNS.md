@@ -220,15 +220,17 @@ animate={{ left: 100 }} // Bad - triggers layout
 **Saved**: 3+ hours (avoided wrong location edits)
 
 ## 🗂️ MCP Folder Management Pattern
-**Symptom**: Need to add folder operations to MCP
-**Fix**: Folder functions already exist in database, just expose via MCP
+**Symptom**: Folder tools not available in Claude Code despite being implemented
+**Root Cause**: Tools defined in mcp-server.ts but not exposed in mcp-protocol.ts
+**Fix**: Add folder tool definitions to mcp-protocol.ts handleToolsList method
 **Location**: 
 - Database functions: supabase/migrations/20250812_mcp_folder_operations.sql
 - MCP handlers: devlog-mcp-remote/src/tools.ts (lines 288-545)
-- Tool definitions: devlog-mcp-remote/src/mcp-server.ts
-**Discovery**: All 6 operations implemented: create, list, get_contents, move_document, delete, update
-**API Key**: Required for all folder operations (passed as p_api_key to functions)
-**Saved**: 4+ hours (avoided reimplementing existing functionality)
+- Tool definitions: devlog-mcp-remote/src/mcp-server.ts (lines 146-221)
+- **CRITICAL**: Must add to mcp-protocol.ts (lines 306-383) - THIS IS THE ACTUAL MCP ENDPOINT
+**Discovery**: All 6 operations implemented but not exposed through actual MCP protocol
+**Solution**: Added folder tools to mcp-protocol.ts, needs deployment to Cloudflare
+**Saved**: 5+ hours (avoided reimplementing when just needed to expose existing tools)
 
 ## 🔐 MCP API Key Validation Error Pattern
 **Symptom**: "function digest(text, unknown) does not exist" when calling folder operations

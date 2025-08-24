@@ -23,7 +23,7 @@
   "author": "Devlog Team",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.17.2"
+    "@modelcontextprotocol/sdk": "^1.17.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250812.0",

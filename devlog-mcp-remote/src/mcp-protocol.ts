@@ -303,6 +303,84 @@ export class MCPProtocolServer {
             required: ['id'],
           },
         },
+        // Folder management tools
+        {
+          name: 'create_folder',
+          description: 'Create a new folder or subfolder',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'Folder name' },
+              parent_id: { type: 'string', description: 'Parent folder ID (optional for root folders)' },
+              color: { type: 'string', description: 'Hex color code (default: #6B7280)' },
+              icon: { type: 'string', description: 'Icon name (default: folder)' },
+            },
+            required: ['name'],
+          },
+        },
+        {
+          name: 'list_folders',
+          description: 'List folders in the workspace',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              parent_id: { type: 'string', description: 'Parent folder ID to list children (optional)' },
+              recursive: { type: 'boolean', description: 'Get entire folder tree recursively' },
+            },
+          },
+        },
+        {
+          name: 'get_folder_contents',
+          description: 'Get folders and documents in a specific folder',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              folder_id: { type: 'string', description: 'Folder ID (optional, null for root)' },
+              include_subfolders: { type: 'boolean', description: 'Include subfolders in response' },
+            },
+          },
+        },
+        {
+          name: 'move_document_to_folder',
+          description: 'Move a document to a different folder',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              document_id: { type: 'string', description: 'Document ID to move' },
+              folder_id: { type: 'string', description: 'Target folder ID (optional, null for root)' },
+              position: { type: 'number', description: 'Position in the folder (optional)' },
+            },
+            required: ['document_id'],
+          },
+        },
+        {
+          name: 'delete_folder',
+          description: 'Delete a folder',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              folder_id: { type: 'string', description: 'Folder ID to delete' },
+              recursive: { type: 'boolean', description: 'Delete all contents recursively' },
+            },
+            required: ['folder_id'],
+          },
+        },
+        {
+          name: 'update_folder',
+          description: 'Update folder properties',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              folder_id: { type: 'string', description: 'Folder ID to update' },
+              name: { type: 'string', description: 'New folder name' },
+              color: { type: 'string', description: 'New hex color code' },
+              icon: { type: 'string', description: 'New icon name' },
+              is_favorite: { type: 'boolean', description: 'Mark as favorite' },
+              parent_id: { type: 'string', description: 'Move to different parent folder' },
+            },
+            required: ['folder_id'],
+          },
+        },
       ];
 
       return {

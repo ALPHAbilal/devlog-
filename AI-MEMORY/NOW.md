@@ -1,7 +1,21 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Task: Fix NPM Package with Folder Operations
+## Task: Fix MCP Folder Tools Not Exposed in Claude Code
+Status: ✅ DEPLOYED AND WORKING!
+
+### Issue Found
+- Folder tools ARE implemented in database and handlers
+- But NOT exposed in the actual MCP protocol endpoint
+- mcp-protocol.ts only had 5 basic tools, missing all 6 folder tools
+
+### Solution Applied
+- Added folder tool definitions to /devlog-mcp-remote/src/mcp-protocol.ts (lines 306-383)
+- Tools now include: create_folder, list_folders, get_folder_contents, move_document_to_folder, delete_folder, update_folder
+- Production API key works fine (no auth issue)
+- Needs deployment to Cloudflare Workers to take effect
+
+## Previous Task: Fix NPM Package with Folder Operations
 Status: ✅ PUBLISHED - v1.1.0 live on NPM!
 
 ## Previous Task: Create Protocol Enforcement Commands for Claude Code

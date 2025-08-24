@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import LogoMinimal from '../components/LogoMinimal';
 import NoiseOverlay from '../components/NoiseOverlay';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp, FileCheck, Users, Shield, AlertTriangle, FileText, CreditCard, Lock, Scale, Ban, Gavel, RefreshCw, Building, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
 
@@ -10,20 +10,47 @@ export default function Terms() {
   const navigate = useNavigate();
   const lastUpdated = 'January 9, 2025';
   const [isScrolled, setIsScrolled] = useState(false);
+  const [expandedSections, setExpandedSections] = useState(new Set(['1'])); // First section expanded by default
+  const [readingProgress, setReadingProgress] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
+      
+      // Calculate reading progress
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = (scrollTop / docHeight) * 100;
+      setReadingProgress(Math.min(100, Math.max(0, progress)));
     };
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const toggleSection = (sectionNumber) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionNumber)) {
+      newExpanded.delete(sectionNumber);
+    } else {
+      newExpanded.add(sectionNumber);
+    }
+    setExpandedSections(newExpanded);
+  };
+
+  const expandAll = () => {
+    setExpandedSections(new Set(sections.map(s => s.number)));
+  };
+
+  const collapseAll = () => {
+    setExpandedSections(new Set());
+  };
+
   const sections = [
     {
       number: '1',
       title: 'Acceptance of Terms',
+      icon: FileCheck,
       content: (
         <p className="legal-text">
           By accessing or using Devlog ("Service"), you agree to be bound by these Terms of Service 
@@ -34,6 +61,7 @@ export default function Terms() {
     {
       number: '2',
       title: 'Description of Service',
+      icon: FileText,
       content: (
         <p className="legal-text">
           Devlog is a developer-focused knowledge management platform that allows you to capture, 
@@ -45,6 +73,7 @@ export default function Terms() {
     {
       number: '3',
       title: 'Account Registration',
+      icon: Users,
       content: (
         <ul className="legal-list">
           <li>You must provide accurate and complete information during registration</li>
@@ -58,6 +87,7 @@ export default function Terms() {
     {
       number: '4',
       title: 'Acceptable Use',
+      icon: AlertTriangle,
       content: (
         <>
           <p className="legal-text">You agree not to:</p>
@@ -76,6 +106,7 @@ export default function Terms() {
     {
       number: '5',
       title: 'Content Ownership',
+      icon: Shield,
       content: (
         <>
           <div className="legal-subsection">
@@ -99,6 +130,7 @@ export default function Terms() {
     {
       number: '6',
       title: 'Subscription Plans',
+      icon: CreditCard,
       content: (
         <>
           <div className="legal-subsection">
@@ -126,6 +158,7 @@ export default function Terms() {
     {
       number: '7',
       title: 'Privacy and Data Protection',
+      icon: Lock,
       content: (
         <p className="legal-text">
           Your use of the Service is also governed by our Privacy Policy. We are committed to protecting 
@@ -137,6 +170,7 @@ export default function Terms() {
     {
       number: '8',
       title: 'Limitation of Liability',
+      icon: Scale,
       content: (
         <p className="legal-text" style={{ textTransform: 'uppercase', fontSize: '0.875rem' }}>
           TO THE MAXIMUM EXTENT PERMITTED BY LAW, DEVLOG SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, 
@@ -148,6 +182,7 @@ export default function Terms() {
     {
       number: '9',
       title: 'Indemnification',
+      icon: Shield,
       content: (
         <p className="legal-text">
           You agree to indemnify and hold harmless Devlog, Inc. and its officers, directors, employees, 
@@ -159,6 +194,7 @@ export default function Terms() {
     {
       number: '10',
       title: 'Termination',
+      icon: Ban,
       content: (
         <p className="legal-text">
           We may terminate or suspend your account immediately, without prior notice, for conduct that 
@@ -170,6 +206,7 @@ export default function Terms() {
     {
       number: '11',
       title: 'Changes to Terms',
+      icon: RefreshCw,
       content: (
         <p className="legal-text">
           We reserve the right to modify these Terms at any time. Material changes will be notified 
@@ -181,6 +218,7 @@ export default function Terms() {
     {
       number: '12',
       title: 'Governing Law',
+      icon: Gavel,
       content: (
         <p className="legal-text">
           These Terms shall be governed by the laws of the State of California, United States, 
@@ -191,6 +229,7 @@ export default function Terms() {
     {
       number: '13',
       title: 'Contact Information',
+      icon: Mail,
       content: (
         <>
           <p className="legal-text">
@@ -217,8 +256,16 @@ export default function Terms() {
       <div className="fixed inset-0 gradient-hero opacity-20 pointer-events-none" />
       <NoiseOverlay />
       
-      {/* Enhanced Navigation */}
+      {/* Enhanced Navigation with Progress */}
       <nav className={`legal-nav ${isScrolled ? 'scrolled' : ''}`}>
+        {/* Reading Progress Bar */}
+        <div className="reading-progress-bar">
+          <div 
+            className="reading-progress-fill" 
+            style={{ width: `${readingProgress}%` }}
+          />
+        </div>
+        
         <div className="legal-nav-content">
           <div className="legal-nav-left">
             <button
@@ -229,7 +276,25 @@ export default function Terms() {
               <LogoMinimal size={24} />
               <span>Back to Home</span>
             </button>
+            
+            {/* Section Controls */}
+            <div className="section-controls">
+              <button onClick={expandAll} className="control-btn" title="Expand All">
+                <ChevronDown size={16} />
+                <span className="sr-only">Expand All</span>
+              </button>
+              <button onClick={collapseAll} className="control-btn" title="Collapse All">
+                <ChevronUp size={16} />
+                <span className="sr-only">Collapse All</span>
+              </button>
+            </div>
           </div>
+          
+          {/* Progress indicator */}
+          <div className="reading-progress">
+            <span className="progress-text">{Math.round(readingProgress)}%</span>
+          </div>
+          
           <button
             onClick={() => navigate('/auth')}
             className="legal-nav-cta"
@@ -263,27 +328,60 @@ export default function Terms() {
         </motion.div>
       </section>
 
-      {/* Content with improved cards */}
+      {/* Content with collapsible sections */}
       <section className="legal-content">
         <motion.div
           initial="hidden"
           animate="visible"
           variants={staggerContainer}
         >
-          {sections.map((section, index) => (
-            <motion.div
-              key={section.number}
-              className="legal-card fade-in-up"
-              variants={staggerItem}
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="legal-section-header">
-                <span className="section-number">{section.number}</span>
-                <h2 className="legal-section-title">{section.title}</h2>
-              </div>
-              {section.content}
-            </motion.div>
-          ))}
+          {sections.map((section, index) => {
+            const isExpanded = expandedSections.has(section.number);
+            const IconComponent = section.icon;
+            
+            return (
+              <motion.div
+                key={section.number}
+                className="legal-card fade-in-up"
+                variants={staggerItem}
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div 
+                  className="legal-section-header collapsible"
+                  onClick={() => toggleSection(section.number)}
+                >
+                  <div className="section-header-left">
+                    <div className="section-icon">
+                      <IconComponent size={18} />
+                    </div>
+                    <span className="section-number">{section.number}</span>
+                    <h2 className="legal-section-title">{section.title}</h2>
+                  </div>
+                  <button className="collapse-toggle">
+                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                  </button>
+                </div>
+                
+                <AnimatePresence initial={false}>
+                  {isExpanded && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ 
+                        duration: 0.3,
+                        ease: [0.04, 0.62, 0.23, 0.98]
+                      }}
+                    >
+                      <div className="legal-section-content">
+                        {section.content}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </section>
 

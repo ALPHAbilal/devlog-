@@ -147,7 +147,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       abortController.abort();
       loadingRef.current = false;
     };
-  }, [documentId, entry, skip, isLoading]);
+  }, [documentId, entry?.blocks, skip]);
 
   // Preload function for nearby documents
   const preloadNearbyDocuments = (documentIds) => {

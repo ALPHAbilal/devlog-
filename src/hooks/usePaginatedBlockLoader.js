@@ -109,7 +109,7 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
     };
 
     loadInitialBlocks();
-  }, [documentId, entry, pageSize, preloadNextPage, skip, isLoading]);
+  }, [documentId, entry?.blocks, pageSize, preloadNextPage, skip]);
 
   // Load more blocks
   const loadMore = useCallback(async () => {

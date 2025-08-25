@@ -13,6 +13,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   const loadingRef = useRef(false);
   const mountedRef = useRef(true);
   const lastLoadedDocRef = useRef(null); // Track last loaded document
+  const previousEntryRef = useRef(null); // Track previous entry for debugging
 
   useEffect(() => {
     mountedRef.current = true;
@@ -22,6 +23,24 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   }, []);
 
   useEffect(() => {
+    // DEBUG: Track what changed in entry to trigger this effect
+    console.log('[useOptimizedBlockLoader] Effect triggered:', {
+      documentId,
+      hasEntry: !!entry,
+      entryChanged: entry !== previousEntryRef.current,
+      entryTitle: entry?.title,
+      previousTitle: previousEntryRef.current?.title,
+      entryBlocksLength: entry?.blocks?.length,
+      previousBlocksLength: previousEntryRef.current?.blocks?.length,
+      blocksReferenceChanged: entry?.blocks !== previousEntryRef.current?.blocks,
+      skip,
+      isLoading,
+      timestamp: new Date().toISOString()
+    });
+
+    // Update previous entry reference
+    previousEntryRef.current = entry;
+
     // Check if we're already loading this document
     if (!documentId || loadingRef.current || skip || lastLoadedDocRef.current === documentId) {
       // If skipped, set loading to false immediately
@@ -35,6 +54,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
     const abortController = new AbortController();
 
     const loadBlocks = async () => {
+      console.log('[useOptimizedBlockLoader] Starting loadBlocks for:', documentId);
       loadingRef.current = true;
       lastLoadedDocRef.current = documentId; // Mark as loading
       setIsLoading(true);
@@ -43,6 +63,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       try {
         // Check if blocks are already in entry AND have content
         if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
+          console.log('[useOptimizedBlockLoader] Using blocks from entry prop, skipping database load');
           // If blocks array exists with content, they were already loaded
           // Ensure all blocks have positions
           const blocksWithPositions = entry.blocks.map((block, index) => ({
@@ -58,6 +79,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
         // Check session cache
         const cachedBlocks = sessionCache.getBlocks(documentId);
         if (cachedBlocks && cachedBlocks.length > 0) {
+          console.log('[useOptimizedBlockLoader] Using blocks from cache, skipping database load');
           // Ensure cached blocks have positions
           const blocksWithPositions = cachedBlocks.map((block, index) => ({
             ...block,
@@ -70,11 +92,16 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
         // Only show skeletons when we're actually loading from database
         // This happens when entry.blocks is undefined (not loaded yet)
+        console.log('[useOptimizedBlockLoader] No blocks in entry or cache, loading from database with skeletons');
         const skeletons = OptimizedBlockLoader.generateSkeletons(null);
         setBlocks(skeletons);
 
         // Load actual blocks
         const result = await optimizedBlockLoader.loadDocument(documentId);
+        console.log('[useOptimizedBlockLoader] Database load complete:', { 
+          blocksCount: result?.blocks?.length, 
+          fromCache: result?.fromCache 
+        });
         
         if (!mountedRef.current) return;
 

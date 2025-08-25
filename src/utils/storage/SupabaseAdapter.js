@@ -420,67 +420,17 @@ export class SupabaseAdapter {
       documentTitle: document.title
     });
     
-    // CRITICAL: Prevent data loss - check if we're trying to save 0 blocks for a document that has blocks
-    const blocks = document.blocks || [];
-    
-    console.log('🔍 DEBUG: After blocks conversion:', {
-      originalBlocks: document.blocks,
-      convertedBlocksLength: blocks.length,
-      willTriggerSafetyCheck: blocks.length === 0
-    });
-    
-    const documentId = document.id;
-    const isNewDocument = document.metadata?.isNewDocument === true || 
-                         document.metadata?.createdLocally === true ||
-                         !document.createdAt;
-    
-    // Only perform the safety check for existing documents, not brand new ones
-    console.log('🔍 DEBUG: Safety check evaluation:', {
-      blocksLength: blocks.length,
-      documentId,
-      isNewDocument,
-      willRunSafetyCheck: blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument
-    });
-    
-    if (blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument) {
-      // Check if this document already has blocks
-      const { data: existingBlocks, error: checkError } = await supabase
-        .from('blocks')
-        .select('id')
-        .eq('document_id', documentId)
-        .is('deleted_at', null)
-        .limit(1);
-      
-      if (!checkError && existingBlocks && existingBlocks.length > 0) {
-        console.log('🔍 DEBUG: SAFETY CHECK TRIGGERED!', {
-          existingBlocksFound: existingBlocks.length,
-          preventingSave: true,
-          documentId,
-          title: document.title
-        });
-        console.error(`🚨 CRITICAL: Attempted to save 0 blocks for document ${documentId} that has existing blocks. Preventing data loss.`);
-        console.warn('Stack trace:', new Error().stack);
-        
-        // Return the document without saving to prevent data loss
-        return {
-          ...document,
-          id: documentId,
-          blocks: [] // Return empty blocks as requested, but don't delete existing ones
-        };
-      }
-    }
-    
+    // CRITICAL FIX: Check for partial update FIRST before any block processing
     const { blocks: documentBlocks, ...docData } = document;
     
-    // CRITICAL FIX: If blocks are not provided, this is a partial update
-    // Don't touch the blocks - only update document metadata
-    console.log('🔍 DEBUG: Partial update check:', {
+    console.log('🔍 DEBUG: Partial update check (NOW FIRST!):', {
       documentBlocksIsUndefined: documentBlocks === undefined,
       willDoPartialUpdate: documentBlocks === undefined,
       reachedThisPoint: true,
-      noteTheProblem: 'This check should run BEFORE safety check!'
+      fixed: 'This now runs BEFORE safety check!'
     });
     
+    // If blocks are not provided, this is a partial update - handle it immediately
     if (documentBlocks === undefined) {
       console.log('SupabaseAdapter: Partial update detected (no blocks provided), updating only document metadata');
       
@@ -521,6 +471,56 @@ export class SupabaseAdapter {
       // Invalidate cache and return
       this.invalidateCache();
       return savedDoc.id;
+    }
+    
+    // Now handle full document saves with blocks
+    // CRITICAL: Prevent data loss - check if we're trying to save 0 blocks for a document that has blocks
+    const blocks = documentBlocks || [];
+    const documentId = document.id;
+    const isNewDocument = document.metadata?.isNewDocument === true || 
+                         document.metadata?.createdLocally === true ||
+                         !document.createdAt;
+    
+    console.log('🔍 DEBUG: After blocks conversion (AFTER partial check):', {
+      originalBlocks: documentBlocks,
+      convertedBlocksLength: blocks.length,
+      willTriggerSafetyCheck: blocks.length === 0
+    });
+    
+    // Only perform the safety check for existing documents, not brand new ones
+    console.log('🔍 DEBUG: Safety check evaluation:', {
+      blocksLength: blocks.length,
+      documentId,
+      isNewDocument,
+      willRunSafetyCheck: blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument
+    });
+    
+    if (blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument) {
+      // Check if this document already has blocks
+      const { data: existingBlocks, error: checkError } = await supabase
+        .from('blocks')
+        .select('id')
+        .eq('document_id', documentId)
+        .is('deleted_at', null)
+        .limit(1);
+      
+      if (!checkError && existingBlocks && existingBlocks.length > 0) {
+        console.log('🔍 DEBUG: SAFETY CHECK TRIGGERED!', {
+          existingBlocksFound: existingBlocks.length,
+          preventingSave: true,
+          documentId,
+          title: document.title
+        });
+        console.error(`🚨 CRITICAL: Attempted to save 0 blocks for document ${documentId} that has existing blocks. Preventing data loss.`);
+        console.warn('Stack trace:', new Error().stack);
+        
+        // Return the document without saving to prevent data loss
+        return {
+          ...document,
+          id: documentId,
+          blocks: [] // Return empty blocks as requested, but don't delete existing ones
+        };
+      }
     }
     
     // Use preview from document if already provided, otherwise generate

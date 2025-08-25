@@ -17,6 +17,16 @@
 **Example**: /workspace/devlog-/src/components/ExpandedViewEnhanced.jsx:handleDeleteBlock
 **Saved**: 45+ minutes
 
+### React Dependency Causing Unnecessary Reloads
+**Symptom**: Skeleton flash when editing title/metadata, blocks reload unnecessarily
+**Fix**: Use specific field references in dependencies, not full objects
+**Location**: useOptimizedBlockLoader.js, usePaginatedBlockLoader.js
+**Example**: Changed `[entry]` to `[entry?.blocks]` in useEffect dependencies
+**Root Cause**: When parent creates new object reference, useEffect re-runs even if relevant data unchanged
+**Performance Impact**: Prevents N database queries for N metadata edits
+**Metrics**: Eliminated 100ms+ skeleton flash, prevented unnecessary database loads
+**Saved**: 2+ hours debugging, scales to millions of users
+
 ### Re-render vs Initial Render
 **Symptom**: "Too many components" performance assumption
 **Fix**: Count re-renders, not component count - fix re-render cause

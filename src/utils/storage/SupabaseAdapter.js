@@ -411,14 +411,37 @@ export class SupabaseAdapter {
     }
     console.log(`SupabaseAdapter: Using userId ${this.userId} for save`);
     
+    // DEBUG LOGS FOR COLLABORATIVE DEBUGGING (Rule 16)
+    console.log('🔍 DEBUG: saveDocument received:', {
+      documentId: document.id,
+      hasBlocks: document.blocks !== undefined,
+      blocksIsUndefined: document.blocks === undefined,
+      blocksLength: document.blocks ? document.blocks.length : 'N/A',
+      documentTitle: document.title
+    });
+    
     // CRITICAL: Prevent data loss - check if we're trying to save 0 blocks for a document that has blocks
     const blocks = document.blocks || [];
+    
+    console.log('🔍 DEBUG: After blocks conversion:', {
+      originalBlocks: document.blocks,
+      convertedBlocksLength: blocks.length,
+      willTriggerSafetyCheck: blocks.length === 0
+    });
+    
     const documentId = document.id;
     const isNewDocument = document.metadata?.isNewDocument === true || 
                          document.metadata?.createdLocally === true ||
                          !document.createdAt;
     
     // Only perform the safety check for existing documents, not brand new ones
+    console.log('🔍 DEBUG: Safety check evaluation:', {
+      blocksLength: blocks.length,
+      documentId,
+      isNewDocument,
+      willRunSafetyCheck: blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument
+    });
+    
     if (blocks.length === 0 && documentId && documentId !== 'new' && !isNewDocument) {
       // Check if this document already has blocks
       const { data: existingBlocks, error: checkError } = await supabase
@@ -429,6 +452,12 @@ export class SupabaseAdapter {
         .limit(1);
       
       if (!checkError && existingBlocks && existingBlocks.length > 0) {
+        console.log('🔍 DEBUG: SAFETY CHECK TRIGGERED!', {
+          existingBlocksFound: existingBlocks.length,
+          preventingSave: true,
+          documentId,
+          title: document.title
+        });
         console.error(`🚨 CRITICAL: Attempted to save 0 blocks for document ${documentId} that has existing blocks. Preventing data loss.`);
         console.warn('Stack trace:', new Error().stack);
         
@@ -445,6 +474,13 @@ export class SupabaseAdapter {
     
     // CRITICAL FIX: If blocks are not provided, this is a partial update
     // Don't touch the blocks - only update document metadata
+    console.log('🔍 DEBUG: Partial update check:', {
+      documentBlocksIsUndefined: documentBlocks === undefined,
+      willDoPartialUpdate: documentBlocks === undefined,
+      reachedThisPoint: true,
+      noteTheProblem: 'This check should run BEFORE safety check!'
+    });
+    
     if (documentBlocks === undefined) {
       console.log('SupabaseAdapter: Partial update detected (no blocks provided), updating only document metadata');
       

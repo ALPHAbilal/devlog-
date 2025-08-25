@@ -337,10 +337,11 @@ export default function ExpandedView({
   }, [windowHeight]);
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
+  // Also sync when title changes from parent (after save confirmation)
   useEffect(() => {
     setTitle(entry.title);
     setTags(entry.tags || []);
-  }, [entry.id]);
+  }, [entry.id, entry.title, entry.tags]);
   
   // Cleanup save status timeout on unmount
   useEffect(() => {

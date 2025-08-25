@@ -77,6 +77,25 @@ useEffect(() => {
 
 ## 🎯 State Management Patterns
 
+### Parent-Child State Desynchronization
+**Symptom**: Child component state doesn't update when parent updates the prop
+**Fix**: Add prop values to useEffect dependencies to sync state
+**Location**: Common in components with local state derived from props
+**Example**: /workspace/devlog-/src/components/ExpandedViewEnhanced.jsx:344
+```javascript
+// Before - only syncs on ID change
+useEffect(() => {
+  setTitle(entry.title);
+}, [entry.id]);
+
+// After - syncs when title prop changes
+useEffect(() => {
+  setTitle(entry.title);
+}, [entry.id, entry.title]);
+```
+**Root Cause**: React doesn't automatically sync local state with prop changes
+**Saved**: 1+ hour debugging "why doesn't my update show"
+
 ### Event Bus Memory Leak
 **Symptom**: Components receiving events after unmount
 **Fix**: Always unsubscribe in cleanup

@@ -1,7 +1,34 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Dashboard Performance Optimization Planning
+## Current Task: Fixed Document Title Update Issue
+Status: ✅ COMPLETED - Title now updates correctly
+Date: 2025-08-25
+
+### What Was Fixed
+Document title wasn't updating in the UI after editing, even though other blocks updated successfully.
+
+### Root Cause
+Parent-child state desynchronization in ExpandedViewEnhanced.jsx:
+- Component had local `title` state that only synced on `entry.id` changes
+- When parent updated `entry.title` after save, child component didn't re-sync
+
+### Solution Applied
+Updated useEffect dependency array to include `entry.title`:
+```javascript
+// Line 344 in ExpandedViewEnhanced.jsx
+useEffect(() => {
+  setTitle(entry.title);
+  setTags(entry.tags || []);
+}, [entry.id, entry.title, entry.tags]); // Added entry.title and entry.tags
+```
+
+### Pattern Added
+Added to PATTERNS.md under "Parent-Child State Desynchronization" for future reference.
+
+---
+
+## Previous Task: Dashboard Performance Optimization Planning
 Status: ✅ PLAN CREATED - Ready for implementation
 Date: 2025-08-24
 

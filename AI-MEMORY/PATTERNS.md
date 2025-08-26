@@ -36,12 +36,18 @@
 
 ### MCP Filetree Block Empty Display
 **Symptom**: Filetree blocks created via MCP appear empty in UI
-**Fix**: Convert treeData from object to array in serializeBlockContent()
-**Location**: /workspace/devlog-/devlog-mcp-remote/src/tools.ts:47-99
-**Root Cause**: FileTreeBlock expects array, MCP sends object (single root)
-**Solution**: Wrap object in array: `treeData = [treeData]`
+**Fix**: Two-part solution:
+  1. MCP: Convert treeData to array in tools.ts
+  2. UI: Handle both formats in blockSerializer.js deserializeBlock()
+**Location**: 
+  - /workspace/devlog-/devlog-mcp-remote/src/tools.ts:47-99 (MCP side)
+  - /workspace/devlog-/src/utils/blockSerializer.js:315-344 (UI side)
+**Root Cause**: FileTreeBlock expects array, MCP/DB stores object (single root)
+**Solution**: 
+  - MCP: Wrap object in array when creating
+  - UI: Detect and convert on deserialize
 **Example**: `{"name": "root", "type": "folder"}` → `[{"name": "root", "type": "folder"}]`
-**Saved**: 3+ hours debugging data format issues
+**Saved**: 4+ hours debugging, prevents future issues
 
 ## ⚡ Performance Patterns
 

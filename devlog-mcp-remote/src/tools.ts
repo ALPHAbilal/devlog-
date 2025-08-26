@@ -5,6 +5,90 @@ interface ToolResult {
   text: string;
 }
 
+// Helper function to properly serialize block content based on type
+function serializeBlockContent(block: any): string {
+  // Simple blocks use content directly
+  if (['text', 'heading', 'code'].includes(block.type)) {
+    return block.content || '';
+  }
+  
+  // Complex blocks need JSON serialization with proper structure
+  switch (block.type) {
+    case 'table':
+      // Table blocks need data wrapped in a data object
+      return JSON.stringify({
+        data: block.data || {
+          headers: ['Column 1', 'Column 2', 'Column 3'],
+          rows: [['', '', '']],
+          columnAlignments: ['left', 'left', 'left'],
+          hasHeaderRow: true
+        }
+      });
+      
+    case 'issue-tracker':
+    case 'issueTracker':
+      // Issue tracker stores milestone and issues directly
+      return JSON.stringify({
+        milestone: block.milestone || block.data?.milestone || '',
+        issues: block.issues || block.data?.issues || []
+      });
+      
+    case 'version-track':
+    case 'versionTrack':
+      // Version track wraps data in a data object
+      return JSON.stringify({
+        data: block.data || {
+          repository: null,
+          commits: [],
+          branches: []
+        }
+      });
+      
+    case 'filetree':
+    case 'file-tree':
+      // File tree stores tree structure
+      return JSON.stringify({
+        treeData: block.treeData || block.data?.treeData || [],
+        expanded: block.expanded || block.data?.expanded || []
+      });
+      
+    case 'todo':
+      // Todo blocks store todos array in data
+      return JSON.stringify({
+        data: {
+          todos: block.todos || block.data?.todos || []
+        }
+      });
+      
+    case 'ai':
+    case 'ai_conversation':
+      // AI conversation blocks store messages
+      return JSON.stringify({
+        messages: block.messages || block.data?.messages || []
+      });
+      
+    case 'image':
+      // Image blocks store images array
+      return JSON.stringify({
+        images: block.images || block.data?.images || [],
+        layout: block.layout || 'grid',
+        columns: block.columns || 3
+      });
+      
+    case 'inlineImage':
+      // Inline images store URL and metadata
+      return JSON.stringify({
+        url: block.url || block.data?.url || '',
+        alt: block.alt || block.data?.alt || '',
+        caption: block.caption || block.data?.caption || ''
+      });
+      
+    default:
+      // For unknown types, preserve content as-is
+      return block.content || '';
+  }
+}
+
 // All MCP operations now use dedicated Supabase functions
 // This ensures consistent authentication and bypasses RLS issues
 
@@ -89,7 +173,7 @@ export async function executeToolCommand(
                   p_api_key: apiKey,
                   p_document_id: documentId,
                   p_type: block.type,
-                  p_content: block.content || '',
+                  p_content: serializeBlockContent(block),
                   p_metadata: block.metadata || {},
                   p_position: absoluteIndex
                 })
@@ -237,6 +321,17 @@ export async function executeToolCommand(
           throw new Error('API key is required for document update');
         }
         
+        // Parse blocks if it's a JSON string
+        let parsedBlocks = blocks;
+        if (typeof blocks === 'string') {
+          try {
+            parsedBlocks = JSON.parse(blocks);
+          } catch (e) {
+            // If it's not valid JSON, treat it as null
+            parsedBlocks = null;
+          }
+        }
+        
         // Update document metadata (title, tags) without blocks to avoid the database function bug
         const metadataResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_update_document`, {
           method: 'POST',
@@ -250,7 +345,7 @@ export async function executeToolCommand(
             p_document_id: documentId,
             p_title: title || null,
             p_tags: tags || null,
-            p_blocks: null  // Don't pass blocks to avoid the database function bug
+            p_blocks: null  // Always set to null to avoid the database function bug
           })
         });
 
@@ -266,7 +361,7 @@ export async function executeToolCommand(
         }
 
         // If blocks are provided, handle them separately
-        if (blocks && Array.isArray(blocks)) {
+        if (parsedBlocks && Array.isArray(parsedBlocks)) {
           // First, get existing blocks to delete them
           const getDocResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_get_document`, {
             method: 'POST',
@@ -307,8 +402,8 @@ export async function executeToolCommand(
           }
           
           // Add new blocks
-          for (let index = 0; index < blocks.length; index++) {
-            const block = blocks[index];
+          for (let index = 0; index < parsedBlocks.length; index++) {
+            const block = parsedBlocks[index];
             
             const blockResponse = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/mcp_add_block`, {
               method: 'POST',
@@ -321,7 +416,7 @@ export async function executeToolCommand(
                 p_api_key: apiKey,
                 p_document_id: documentId,
                 p_type: block.type,
-                p_content: block.content || '',
+                p_content: serializeBlockContent(block),
                 p_metadata: block.metadata || {},
                 p_position: index
               })

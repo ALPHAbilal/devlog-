@@ -320,6 +320,29 @@ Look at Claude Desktop config - if it says `devlog-mcp` you're good!
 **Documentation**: /devlog-mcp-remote/FOLDER_OPERATIONS_GUIDE.md
 **Saved**: 2+ hours debugging PostgreSQL extension issues
 
+## 🔴 MCP Block Data Structure Mismatch - CRITICAL FIX APPLIED
+**Symptom**: MCP-created blocks appear empty in Devlog UI (version tracker, issue tracker, table, filetree)
+**Root Cause**: MCP stores plain text in `content` field, but complex blocks need structured JSON
+**Evidence**: Text/code blocks work (use simple strings), complex blocks fail (need structured data)
+**Fix Applied**: Added `serializeBlockContent()` function in tools.ts to properly format block data
+**Location**: 
+- `/workspace/devlog-/devlog-mcp-remote/src/tools.ts:8-90` (serialization function)
+- Applied to lines 92 and 408 (both block creation paths)
+**Deployed**: Production version ef54f4be-fd24-48c7-bda6-5876713a532e
+**Testing Required**: Create blocks via MCP and verify they display properly in UI
+**Saved**: 3+ hours debugging data structure mismatches
+
+### Block Type Serialization Patterns
+| Block Type | Required Structure | Wrapper |
+|------------|-------------------|---------|
+| text/code/heading | Plain string in content | None |
+| table | `{data: {headers, rows, columnAlignments}}` | data wrapper |
+| issue-tracker | `{milestone, issues}` | No wrapper |
+| version-track | `{data: {repository, commits, branches}}` | data wrapper |
+| filetree | `{treeData, expanded}` | No wrapper |
+| todo | `{data: {todos}}` | data wrapper |
+| ai_conversation | `{messages}` | No wrapper |
+
 ## 🔌 MCP Tools Status & Comprehensive Testing Results
 **Testing Date**: August 24, 2025
 **Test Method**: Comprehensive automated test suite with 23 test cases

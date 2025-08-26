@@ -318,11 +318,29 @@ export function deserializeBlock(block) {
           const parsed = typeof block.content === 'string' 
             ? JSON.parse(block.content) 
             : block.content;
-          deserialized.treeData = parsed.treeData || [];
-          deserialized.expanded = parsed.expanded || [];
+          
+          // Handle both formats:
+          // 1. Proper format: {treeData: [...], expanded: {...}}
+          // 2. Direct tree format: {name: "root", type: "folder", children: [...]}
+          
+          if (parsed.treeData !== undefined) {
+            // Proper format with treeData property
+            deserialized.treeData = parsed.treeData || [];
+            deserialized.expanded = parsed.expanded || {};
+          } else if (parsed.name && parsed.type) {
+            // Direct tree object - wrap it in an array
+            console.log('🌲 FileTree: Converting direct tree object to array format', parsed);
+            deserialized.treeData = [parsed];
+            deserialized.expanded = {};
+          } else {
+            // Unknown format, default to empty
+            console.warn('🌲 FileTree: Unknown content format, defaulting to empty', parsed);
+            deserialized.treeData = [];
+            deserialized.expanded = {};
+          }
         } else {
           deserialized.treeData = [];
-          deserialized.expanded = [];
+          deserialized.expanded = {};
         }
         break;
 

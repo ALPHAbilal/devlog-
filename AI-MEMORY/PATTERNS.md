@@ -34,6 +34,15 @@
 **Example**: 17 blocks rendering 3-8 times each, not 136 blocks
 **Saved**: 2+ hours (avoided wrong virtualization)
 
+### MCP Filetree Block Empty Display
+**Symptom**: Filetree blocks created via MCP appear empty in UI
+**Fix**: Convert treeData from object to array in serializeBlockContent()
+**Location**: /workspace/devlog-/devlog-mcp-remote/src/tools.ts:47-99
+**Root Cause**: FileTreeBlock expects array, MCP sends object (single root)
+**Solution**: Wrap object in array: `treeData = [treeData]`
+**Example**: `{"name": "root", "type": "folder"}` → `[{"name": "root", "type": "folder"}]`
+**Saved**: 3+ hours debugging data format issues
+
 ## ⚡ Performance Patterns
 
 ### Canvas Animation Bottleneck

@@ -47,9 +47,55 @@ function serializeBlockContent(block: any): string {
     case 'filetree':
     case 'file-tree':
       // File tree stores tree structure
+      // Handle both object (single root) and array formats
+      
+      // Extract treeData and expanded from various possible locations
+      let treeData = null;
+      let expanded = null;
+      
+      // Priority 1: Check if content is already an object with treeData
+      if (typeof block.content === 'object' && block.content !== null) {
+        treeData = block.content.treeData;
+        expanded = block.content.expanded;
+      }
+      // Priority 2: Check if treeData is a direct property
+      else if (block.treeData !== undefined) {
+        treeData = block.treeData;
+        expanded = block.expanded;
+      }
+      // Priority 3: Check if it's in data property
+      else if (block.data) {
+        treeData = block.data.treeData;
+        expanded = block.data.expanded;
+      }
+      // Priority 4: Check if content is a JSON string
+      else if (typeof block.content === 'string' && block.content.startsWith('{')) {
+        try {
+          const parsedContent = JSON.parse(block.content);
+          treeData = parsedContent.treeData;
+          expanded = parsedContent.expanded;
+        } catch (e) {
+          // Not valid JSON, ignore
+        }
+      }
+      
+      // Default to empty values if nothing found
+      if (treeData === null || treeData === undefined) {
+        treeData = [];
+      }
+      if (expanded === null || expanded === undefined) {
+        expanded = {};
+      }
+      
+      // ALWAYS convert treeData to array format for FileTreeBlock compatibility
+      if (treeData && typeof treeData === 'object' && !Array.isArray(treeData)) {
+        // Wrap single object in array
+        treeData = [treeData];
+      }
+      
       return JSON.stringify({
-        treeData: block.treeData || block.data?.treeData || [],
-        expanded: block.expanded || block.data?.expanded || []
+        treeData: treeData,
+        expanded: expanded
       });
       
     case 'todo':

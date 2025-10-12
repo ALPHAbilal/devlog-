@@ -4,7 +4,7 @@
 
 Devlog transforms the chaos of learning, debugging, and building into an interconnected knowledge system that grows with you. Built on the philosophy that **every line of code, every debugging session, and every "aha!" moment deserves to be captured and connected**.
 
-![Devlog Demo](demo.png)
+![Devlog Demo](demo.png) b
 
 ## 🎨 Brand Identity
 

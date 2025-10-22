@@ -181,7 +181,7 @@ function LandingContent() {
     <div className="min-h-screen bg-dark-primary text-text-primary overflow-x-hidden">
       {/* Subtle noise texture overlay */}
       <NoiseOverlay />
-      {/* Navigation - New Figma Design */}
+      {/* Navigation - Updated with emerald green theme */}
       <motion.nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 md:px-6 pt-6"
         initial={{ opacity: 0, y: -20 }}
@@ -189,9 +189,9 @@ function LandingContent() {
         transition={{ duration: 0.6 }}
       >
         <div
-          className="max-w-5xl w-full flex items-center justify-between px-6 py-1 rounded-2xl border border-[#1a3d52] transition-all duration-300"
+          className="max-w-5xl w-full flex items-center justify-between px-6 py-1 rounded-2xl border border-[#2d333b] transition-all duration-300"
           style={{
-            backgroundColor: 'rgba(13, 36, 51, 0.8)',
+            backgroundColor: 'rgba(22, 27, 34, 0.8)',
             backdropFilter: 'blur(12px)',
             height: '74px'
           }}
@@ -215,28 +215,28 @@ function LandingContent() {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <div
-              className="flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(0,255,136,0.3)]"
+              className="flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(16,185,129,0.3)]"
               style={{
-                backgroundColor: 'rgba(0, 255, 136, 0.1)'
+                backgroundColor: 'rgba(16, 185, 129, 0.1)'
               }}
             >
               <div className="w-3.5 h-3.5 flex items-center justify-center">
                 <svg viewBox="0 0 14 14" fill="none" className="w-full h-full">
-                  <circle cx="7" cy="7" r="6" stroke="#00ff88" strokeWidth="1.5" fill="none"/>
-                  <circle cx="7" cy="7" r="2" fill="#00ff88"/>
+                  <circle cx="7" cy="7" r="6" stroke="#10b981" strokeWidth="1.5" fill="none"/>
+                  <circle cx="7" cy="7" r="2" fill="#10b981"/>
                 </svg>
               </div>
-              <span className="text-[#00ff88] text-[13px] font-['Consolas']">Beta</span>
+              <span className="text-[#10b981] text-[13px] font-['Consolas']">Beta</span>
             </div>
             <a
               href="#pricing"
-              className="text-[#b8c5d0] text-[15px] hover:text-white transition-colors font-['Arial']"
+              className="text-slate-400 text-[15px] hover:text-white transition-colors font-['Arial']"
             >
               Pricing
             </a>
             <button
               onClick={() => navigate('/auth')}
-              className="text-[#b8c5d0] text-[15px] hover:text-white transition-colors font-['Arial']"
+              className="text-slate-400 text-[15px] hover:text-white transition-colors font-['Arial']"
             >
               Sign In
             </button>
@@ -245,8 +245,8 @@ function LandingContent() {
           {/* Desktop CTA Button */}
           <motion.button
             onClick={() => navigate('/auth')}
-            className="hidden md:block px-6 py-2.5 bg-[#00ff88] text-[#0a1e2e] rounded-lg font-['Arial'] text-[14px] font-medium
-                       hover:bg-[#00ff88]/90 transition-all relative overflow-hidden"
+            className="hidden md:block px-6 py-2.5 bg-[#10b981] text-[#050d1a] rounded-lg font-['Arial'] text-[14px] font-medium
+                       hover:bg-[#10b981]/90 transition-all relative overflow-hidden"
             variants={buttonHover}
             initial="rest"
             whileHover="hover"

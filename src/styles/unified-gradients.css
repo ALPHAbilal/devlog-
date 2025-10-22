@@ -9,15 +9,15 @@
    ===================================================== */
 
 :root {
-  /* Core Dark Palette - Used Throughout */
-  --dark-base: #0a0f14;
+  /* Core Dark Palette - Used Throughout - Updated to match Figma */
+  --dark-base: #0a1628;
   --dark-primary: #0d1117;
   --dark-secondary: #0f1419;
   --dark-accent: #111922;
-  
-  /* Universal Gradient Colors - No Section Variations */
-  --gradient-primary: #0a0f14;
-  --gradient-secondary: #0d1117;
+
+  /* Universal Gradient Colors - No Section Variations - Updated to match Figma */
+  --gradient-primary: #0a1628;
+  --gradient-secondary: #050d1a;
   --gradient-accent: rgba(16, 185, 129, 0.08);
   
   /* All sections use the same base */

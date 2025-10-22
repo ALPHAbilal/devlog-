@@ -132,7 +132,8 @@ export default function HeroSectionV3() {
         </motion.p>
 
         <motion.div
-          className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+          className="flex flex-col sm:flex-row justify-center mb-8"
+          style={{ gap: '16px' }}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}

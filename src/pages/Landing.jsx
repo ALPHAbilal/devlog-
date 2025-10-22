@@ -181,74 +181,92 @@ function LandingContent() {
     <div className="min-h-screen bg-dark-primary text-text-primary overflow-x-hidden">
       {/* Subtle noise texture overlay */}
       <NoiseOverlay />
-      {/* Navigation */}
-      <motion.nav 
-        className={`fixed top-0 nav-with-scrollbar z-50 transition-all duration-300 ${
-          isScrolled ? 'glassmorphism-nav' : ''
-        }`}
-        style={{
-          backgroundColor: !isScrolled ? 'rgba(13, 17, 23, 0.75)' : undefined,
-          backdropFilter: !isScrolled ? 'blur(12px)' : undefined,
-          borderBottom: !isScrolled ? '1px solid rgba(255, 255, 255, 0.05)' : undefined,
-          boxShadow: !isScrolled ? 'none' : undefined
-        }}
+      {/* Navigation - New Figma Design */}
+      <motion.nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center px-4 md:px-6 pt-6"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
       >
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <motion.div 
-            className="flex items-center gap-2.5"
+        <div
+          className="max-w-5xl w-full flex items-center justify-between px-6 py-1 rounded-2xl border border-[#1a3d52] transition-all duration-300"
+          style={{
+            backgroundColor: 'rgba(13, 36, 51, 0.8)',
+            backdropFilter: 'blur(12px)',
+            height: '74px'
+          }}
+        >
+          {/* Logo */}
+          <motion.div
+            className="flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div>
-              <LogoMinimal size={32} />
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
+              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
             </div>
-            <h1 className="text-xl font-semibold">Devlog</h1>
+            <h1 className="text-white text-base font-['Consolas'] tracking-tight">Devlog</h1>
           </motion.div>
-          
-          {/* Desktop Navigation */}
-          <div className="hidden md:!flex items-center gap-4">
-            {/* Beta - Hidden until launch
-            <span className="text-sm text-text-secondary/70">
-              Trusted by 7,000+ developers
-            </span>
-            <div className="w-px h-5 bg-dark-secondary/30"></div> */}
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-accent-green/10 text-accent-green text-xs font-medium rounded-full">
-              <span className="w-1.5 h-1.5 bg-accent-green rounded-full animate-pulse"></span>
-              Beta
-            </span>
-            <div className="w-px h-5 bg-dark-secondary/30"></div>
+
+          {/* Desktop Center Navigation */}
+          <motion.div
+            className="hidden md:flex items-center gap-8"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <div
+              className="flex items-center gap-2 px-3 py-1 rounded-full border border-[rgba(0,255,136,0.3)]"
+              style={{
+                backgroundColor: 'rgba(0, 255, 136, 0.1)'
+              }}
+            >
+              <div className="w-3.5 h-3.5 flex items-center justify-center">
+                <svg viewBox="0 0 14 14" fill="none" className="w-full h-full">
+                  <circle cx="7" cy="7" r="6" stroke="#00ff88" strokeWidth="1.5" fill="none"/>
+                  <circle cx="7" cy="7" r="2" fill="#00ff88"/>
+                </svg>
+              </div>
+              <span className="text-[#00ff88] text-[13px] font-['Consolas']">Beta</span>
+            </div>
             <a
               href="#pricing"
-              className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
+              className="text-[#b8c5d0] text-[15px] hover:text-white transition-colors font-['Arial']"
             >
               Pricing
             </a>
             <button
               onClick={() => navigate('/auth')}
-              className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
+              className="text-[#b8c5d0] text-[15px] hover:text-white transition-colors font-['Arial']"
             >
               Sign In
             </button>
-            <motion.button
-                onClick={() => navigate('/auth')}
-                className="px-4 py-2 bg-accent-green text-dark-primary rounded font-medium 
-                           relative overflow-hidden"
-                variants={buttonHover}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.6 }}
-                />
-                <span className="relative z-10">Start Free Trial</span>
-              </motion.button>
-          </div>
-          
+          </motion.div>
+
+          {/* Desktop CTA Button */}
+          <motion.button
+            onClick={() => navigate('/auth')}
+            className="hidden md:block px-6 py-2.5 bg-[#00ff88] text-[#0a1e2e] rounded-lg font-['Arial'] text-[14px] font-medium
+                       hover:bg-[#00ff88]/90 transition-all relative overflow-hidden"
+            variants={buttonHover}
+            initial="rest"
+            whileHover="hover"
+            whileTap="tap"
+            style={{ height: '40px' }}
+          >
+            <motion.span
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              initial={{ x: "-100%" }}
+              whileHover={{ x: "100%" }}
+              transition={{ duration: 0.6 }}
+            />
+            <span className="relative z-10">Start Free Trial</span>
+          </motion.button>
+
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

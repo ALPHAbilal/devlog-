@@ -59,24 +59,6 @@ export default function HeroSectionV3() {
       <HeroBackgroundAnimation />
       
       <div className="max-w-6xl mx-auto px-4 md:px-6 w-full text-center relative z-10 py-16 md:py-20">
-        {/* Beta Badge - Updated to match Figma sizing */}
-        <motion.div
-          className="inline-flex items-center gap-2.5 px-5 py-2.5 mb-8 rounded-[10px] border border-[#2d333b]"
-          style={{
-            backgroundColor: '#161b22',
-            height: '43px'
-          }}
-          initial={{ opacity: 0, scale: 0.9, y: -20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          whileHover={{ scale: 1.05 }}
-        >
-          <div className="w-2 h-2 bg-emerald-500 rounded-full opacity-75" />
-          <span className="text-slate-400 text-sm font-['Consolas'] tracking-tight" style={{ letterSpacing: '-0.35px' }}>
-            beta_access_available
-          </span>
-        </motion.div>
-
         {/* Main content - single column, centered */}
         <motion.div
           initial="hidden"

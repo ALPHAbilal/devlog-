@@ -58,23 +58,23 @@ export default function HeroSectionV3() {
       {/* New sophisticated background animation */}
       <HeroBackgroundAnimation />
       
-      <div className="max-w-4xl mx-auto px-4 md:px-6 w-full text-center relative z-10 py-16 md:py-20">
-        {/* Beta Badge */}
+      <div className="max-w-6xl mx-auto px-4 md:px-6 w-full text-center relative z-10 py-16 md:py-20">
+        {/* Beta Badge - Updated to match Figma sizing */}
         <motion.div
-          className="hero-badge mb-6"
+          className="inline-flex items-center gap-2.5 px-5 py-2.5 mb-8 rounded-[10px] border border-[#2d333b]"
+          style={{
+            backgroundColor: '#161b22',
+            height: '43px'
+          }}
           initial={{ opacity: 0, scale: 0.9, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           whileHover={{ scale: 1.05 }}
         >
-          <div className="hero-badge-pulse" />
-          <span>Beta Access Available</span>
-          <motion.div
-            className="absolute inset-0 rounded-full"
-            style={{ background: 'linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%)' }}
-            animate={{ x: ["-100%", "200%"] }}
-            transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          />
+          <div className="w-2 h-2 bg-emerald-500 rounded-full opacity-75" />
+          <span className="text-slate-400 text-sm font-['Consolas'] tracking-tight" style={{ letterSpacing: '-0.35px' }}>
+            beta_access_available
+          </span>
         </motion.div>
 
         {/* Main content - single column, centered */}
@@ -83,109 +83,153 @@ export default function HeroSectionV3() {
           animate="visible"
           variants={staggerContainer}
         >
-          <motion.h1 
-            className="hero-title mb-6 md:mb-8"
+          <motion.h1
+            className="mb-6 md:mb-8"
+            style={{
+              fontSize: '72px',
+              lineHeight: '82.8px',
+              letterSpacing: '-1.44px',
+              fontWeight: 400,
+              fontFamily: 'Arial, sans-serif'
+            }}
             variants={heroTextReveal}
           >
-            <motion.span variants={staggerItem}>
+            <motion.span variants={staggerItem} className="text-white">
               Never Google The Same
             </motion.span>
             <br />
-            <motion.span 
+            <motion.span variants={staggerItem} className="text-white">
+              Same
+            </motion.span>
+            <br />
+            <motion.span
               className="hero-title-gradient"
               data-text="Error Twice"
               variants={staggerItem}
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 300 }}
+              style={{ letterSpacing: '-1.08px' }}
             >
               Error Twice
             </motion.span>
           </motion.h1>
         </motion.div>
-        
-        <motion.p 
-          className="hero-subtitle mb-8 md:mb-12 px-4"
+
+        <motion.p
+          className="text-slate-400 mb-8 md:mb-12 mx-auto"
+          style={{
+            fontSize: '21px',
+            lineHeight: '33.6px',
+            maxWidth: '768px',
+            fontFamily: 'Arial, sans-serif'
+          }}
           initial={{ opacity: 0, y: 20, filter: "blur(5px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
         >
-          That Stack Overflow answer you found at 2am? That ChatGPT explanation that finally made it click? 
+          That Stack Overflow answer you found at 2am? That ChatGPT explanation that finally made it click?
           Capture, connect, and find them instantly when you need them again.
         </motion.p>
 
-        <motion.div 
+        <motion.div
           className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6, ease: "easeOut" }}
         >
           <motion.button
-              onClick={() => navigate('/auth')}
-              className="hero-cta-primary w-full sm:w-auto"
-              variants={liquidMorph}
-              initial="rest"
-              whileHover="hover"
-              whileTap={{ scale: 0.98 }}
-              custom={mousePosition}
-            >
-              <span className="relative z-10">Start Building</span>
-              <ArrowRight size={20} className="relative z-10" />
-              <motion.div
-                className="absolute inset-0 rounded-xl"
-                style={{ background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 70%)' }}
-                variants={energyPulse}
-                initial="initial"
-                whileHover="animate"
-              />
-            </motion.button>
-          
+            onClick={() => navigate('/auth')}
+            className="inline-flex items-center justify-start gap-2 bg-emerald-500 text-[#050d1a] rounded-lg relative overflow-hidden"
+            style={{
+              height: '72px',
+              minWidth: '143px',
+              padding: '0 12px',
+              fontSize: '16px',
+              letterSpacing: '-0.4px',
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 400
+            }}
+            variants={liquidMorph}
+            initial="rest"
+            whileHover="hover"
+            whileTap={{ scale: 0.98 }}
+            custom={mousePosition}
+          >
+            <span className="relative z-10">Start Building</span>
+            <ArrowRight size={16} className="relative z-10" />
+            <motion.div
+              className="absolute inset-0 rounded-lg"
+              style={{ background: 'radial-gradient(circle at center, rgba(255, 255, 255, 0.2), transparent 70%)' }}
+              variants={energyPulse}
+              initial="initial"
+              whileHover="animate"
+            />
+          </motion.button>
+
           <motion.button
             onClick={scrollToDemo}
-            className="hero-cta-secondary w-full sm:w-auto"
-            whileHover={{ scale: 1.02 }}
+            className="inline-flex items-center justify-center gap-2 border border-[#2d333b] text-indigo-100 rounded-lg relative overflow-hidden"
+            style={{
+              height: '74px',
+              minWidth: '231px',
+              padding: '0 16px',
+              fontSize: '16px',
+              letterSpacing: '-0.4px',
+              fontFamily: 'Arial, sans-serif',
+              fontWeight: 400,
+              background: 'transparent'
+            }}
+            whileHover={{ scale: 1.02, borderColor: 'rgba(16, 185, 129, 0.5)' }}
             whileTap={{ scale: 0.98 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
-            <span className="relative z-10">See It Work in 60 Seconds</span>
-            <ChevronDown size={20} className="relative z-10" />
+            <ChevronDown size={16} className="relative z-10" />
+            <span className="relative z-10">See It Work In 60 Seconds</span>
           </motion.button>
         </motion.div>
 
-        <motion.div 
-          className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 text-xs sm:text-sm text-text-secondary"
+        <motion.div
+          className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 mb-12"
+          style={{
+            fontSize: '15px',
+            letterSpacing: '-0.375px',
+            fontFamily: 'Arial, sans-serif'
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.6 }}
         >
-          <motion.div 
-            className="hero-trust-item"
+          <motion.div
+            className="inline-flex items-center gap-2 text-slate-400"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="hero-trust-check" style={{ '--check-delay': '0s' }}>✓</span>
+            <span className="text-emerald-500">✓</span>
             <span>14-day free trial</span>
           </motion.div>
-          <div className="hidden sm:block">•</div>
-          <motion.div className="hero-trust-item" whileHover={{ scale: 1.05 }}>
-            <span className="hero-trust-check" style={{ '--check-delay': '0.5s' }}>✓</span>
+          <div className="hidden sm:block text-slate-600">•</div>
+          <motion.div className="inline-flex items-center gap-2 text-slate-400" whileHover={{ scale: 1.05 }}>
+            <span className="text-emerald-500">✓</span>
             <span>Export anytime</span>
           </motion.div>
-          <div className="hidden sm:block">•</div>
-          <motion.div className="hero-trust-item" whileHover={{ scale: 1.05 }}>
-            <span className="hero-trust-check" style={{ '--check-delay': '1s' }}>✓</span>
-            <span>Works offline</span>
+          <div className="hidden sm:block text-slate-600">•</div>
+          <motion.div className="inline-flex items-center gap-2 text-slate-400" whileHover={{ scale: 1.05 }}>
+            <span className="text-emerald-500">✓</span>
+            <span>Works Offline</span>
           </motion.div>
         </motion.div>
 
-        {/* Trust Indicator */}
-        <motion.p 
-          className="mt-8 text-sm text-text-secondary/70"
+        {/* Trust Indicator - Bottom text */}
+        <motion.p
+          className="text-slate-400 font-['Consolas']"
+          style={{
+            fontSize: '14px',
+            letterSpacing: '-0.35px'
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2, duration: 0.6 }}
         >
-          {/* Beta - User count hidden until launch
-          Join 7,000+ developers building their second brain */}
-          Start building your second brain today
+          // Start building your second brain today
         </motion.p>
       </div>
     </section>

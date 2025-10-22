@@ -337,6 +337,12 @@
   font-style: normal;
 }
 
+.auth-disclaimer p {
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 0;
+}
+
 .auth-disclaimer a {
   font-size: 11px;
   font-weight: normal;

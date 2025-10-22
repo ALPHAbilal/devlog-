@@ -12,7 +12,7 @@ import { preloadResources } from './utils/performance';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import SettingsClaude from './pages/SettingsClaude';
-import AuthElite from './components/AuthElite';
+import AuthPageRedesign from './components/AuthPageRedesign';
 import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
@@ -156,7 +156,7 @@ function AppContent() {
     return (
       <SentryRoutes>
         <Route path="/" element={<Landing />} />
-        <Route path="/auth" element={<AuthElite />} />
+        <Route path="/auth" element={<AuthPageRedesign />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />

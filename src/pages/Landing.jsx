@@ -196,19 +196,14 @@ function LandingContent() {
             height: '74px'
           }}
         >
-          {/* Logo */}
+          {/* Logo - Keep existing LogoMinimal component */}
           <motion.div
             className="flex items-center gap-3"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
-              <div className="w-2 h-2 bg-[#00d9ff] rounded-full"></div>
-            </div>
+            <LogoMinimal size={24} />
             <h1 className="text-white text-base font-['Consolas'] tracking-tight">Devlog</h1>
           </motion.div>
 

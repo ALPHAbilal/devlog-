@@ -23,8 +23,6 @@ import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
 import CookieConsentBanner from './components/CookieConsentBanner';
 
-// Lazy load the API settings page
-const ApiSettingsPage = lazy(() => import('./pages/settings/api.jsx'));
 import { ToastProvider } from './hooks/useToast';
 import { useEffect } from 'react';
 
@@ -220,11 +218,6 @@ function AppContent() {
       } />
       <Route path="/settings" element={<SettingsClaude />} />
       <Route path="/settings-redesign" element={<SettingsRedesign />} />
-      <Route path="/settings/api" element={
-        <Suspense fallback={<div className="loading-spinner">Loading...</div>}>
-          <ApiSettingsPage />
-        </Suspense>
-      } />
       <Route path="/shared/:shareCode" element={
         <Layout>
           <SharedDocument />

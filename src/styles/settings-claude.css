@@ -5,23 +5,26 @@
   /* Brand Colors */
   --brand-primary: #10b981;
   --brand-primary-hover: #059669;
-  
+
   /* Dark Theme Colors */
   --bg-primary: #0a1628;
   --bg-secondary: #1e3a5f;
   --bg-elevated: #1e3a5f;
   --border-color: rgba(255, 255, 255, 0.1);
-  
-  /* Text Colors */
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
+
+  /* Text Colors - Figma Design Specification */
+  --text-primary: #ffffff;              /* Pure white for main titles */
+  --text-secondary: #90a1b9;            /* Light blue-gray for descriptions */
+  --text-tertiary: #cad5e2;             /* Lighter for labels */
+  --text-muted: #62748e;                /* Darkest gray for small labels */
   --text-disabled: rgba(243, 244, 246, 0.4);
-  
+
   /* Semantic Colors */
   --color-success: #10b981;
   --color-error: #ef4444;
   --color-warning: #f59e0b;
-  
+  --color-danger: #ff6467;
+
   /* Spacing Scale (4px base) */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
@@ -29,9 +32,9 @@
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
-  
-  /* Typography */
-  --font-ui: system-ui, -apple-system, sans-serif;
+
+  /* Typography - Arial from Figma */
+  --font-ui: Arial, -apple-system, system-ui, sans-serif;
   --transition: 200ms ease;
 }
 
@@ -145,24 +148,25 @@
   gap: 8px;
   background: none;
   border: none;
-  color: #90a1b9;
+  color: var(--text-secondary);
   font-size: 14px;
+  font-weight: 400;
   cursor: pointer;
   padding: 24px 16px;
-  font-family: Arial, sans-serif;
-  font-weight: normal;
+  font-family: var(--font-ui);
   line-height: 20px;
   height: 20px;
   transition: color var(--transition);
 }
 
 .back-button-settings:hover {
-  color: #cad5e2;
+  color: var(--text-tertiary);
 }
 
 .back-button-settings span {
-  font-family: Arial, sans-serif;
+  font-family: var(--font-ui);
   font-size: 14px;
+  font-weight: 400;
   line-height: 20px;
   color: inherit;
 }
@@ -213,8 +217,10 @@
   border: none;
   border-radius: 0.5rem;
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: var(--font-ui);
+  line-height: 20px;
   text-align: left;
   cursor: pointer;
   transition: var(--transition);
@@ -223,12 +229,12 @@
 
 .nav-item:hover {
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
+  color: var(--text-tertiary);
 }
 
 .nav-item.active {
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--brand-primary);
+  background: rgba(0, 212, 146, 0.1);
+  color: #00d492;
 }
 
 /* Main Content */
@@ -247,8 +253,11 @@
 }
 
 .section-title {
-  font-size: 2rem;
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 36px;
+  color: var(--text-primary);
   margin: 0 0 var(--space-8) 0;
 }
 
@@ -258,10 +267,12 @@
 }
 
 .setting-group-title {
-  font-size: 1.25rem;
-  font-weight: 500;
-  margin: 0 0 var(--space-6) 0;
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
   color: var(--text-primary);
+  margin: 0 0 var(--space-6) 0;
 }
 
 /* Setting Items */
@@ -284,21 +295,28 @@
 
 .setting-label {
   display: block;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-tertiary);
   margin-bottom: var(--space-1);
 }
 
 .setting-description {
-  font-size: 0.875rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
 }
 
 .setting-value {
-  font-size: 1rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   color: var(--text-secondary);
   margin: 0;
 }
@@ -376,12 +394,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-weight: 500;
+  font-weight: 400;
+  font-family: var(--font-ui);
   border-radius: 0.5rem;
   border: none;
   cursor: pointer;
   transition: all var(--transition);
-  font-family: inherit;
 }
 
 .btn:disabled {
@@ -442,9 +460,11 @@
 .form-field label {
   display: block;
   margin-bottom: var(--space-2);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-tertiary);
 }
 
 .form-field input {
@@ -453,9 +473,11 @@
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   border-radius: 0.5rem;
-  color: var(--text-primary);
-  font-size: 1rem;
-  font-family: inherit;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   transition: var(--transition);
 }
 
@@ -479,7 +501,10 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   color: var(--text-primary);
-  font-size: 1rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   cursor: pointer;
   transition: all var(--transition);
 }
@@ -578,20 +603,27 @@
 
 /* Danger Zone */
 .danger-zone {
-  background: rgba(239, 68, 68, 0.05);
-  border: 1px solid rgba(239, 68, 68, 0.2);
+  background: rgba(70, 8, 9, 0.1);
+  border: 1px solid rgba(130, 24, 26, 0.3);
   border-radius: 0.5rem;
   padding: var(--space-4);
 }
 
 .danger-zone h4 {
   margin: 0 0 var(--space-2) 0;
-  color: var(--color-error);
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--color-danger);
 }
 
 .danger-zone p {
   margin: 0 0 var(--space-4) 0;
-  font-size: 0.875rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   color: var(--text-secondary);
 }
 
@@ -629,8 +661,11 @@
 }
 
 .modal-title {
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--text-primary);
   margin: 0;
   padding: var(--space-6) var(--space-6) 0;
 }
@@ -641,11 +676,19 @@
 
 .modal-content p {
   margin: var(--space-4) 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   color: var(--text-secondary);
 }
 
 .modal-content ul {
   margin: var(--space-2) 0 var(--space-6) var(--space-6);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   color: var(--text-secondary);
 }
 
@@ -715,7 +758,9 @@
   }
   
   .section-title {
-    font-size: 1.5rem;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 32px;
     margin-bottom: var(--space-4);
     color: var(--text-primary);
   }
@@ -744,14 +789,17 @@
   }
   
   .setting-group-title {
-    font-size: 1.125rem;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
     margin-bottom: var(--space-4);
   }
   
   /* Improve button sizes on mobile */
   .btn {
     min-height: 48px;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: 400;
   }
   
   /* Ensure form fields are properly sized */
@@ -780,11 +828,18 @@
   list-style: decimal;
   padding-left: var(--space-6);
   color: var(--text-secondary);
-  line-height: 1.8;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .setup-steps li {
   margin-bottom: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
 }
 
 .setup-steps code {
@@ -804,7 +859,10 @@
 .external-link {
   color: var(--brand-primary);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
   transition: color var(--transition);
 }
 

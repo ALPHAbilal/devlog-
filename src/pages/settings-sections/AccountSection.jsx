@@ -58,7 +58,7 @@ export default function AccountSection() {
       </div>
 
       {/* Account Status Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+      <div className="account-cards-grid">
         <div className="info-card">
           <span className="card-label">Account Status</span>
           <span className="card-value success">Active</span>

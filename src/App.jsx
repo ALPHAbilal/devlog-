@@ -12,6 +12,7 @@ import { preloadResources } from './utils/performance';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import SettingsClaude from './pages/SettingsClaude';
+import SettingsRedesign from './pages/SettingsRedesign';
 import AuthPageRedesign from './components/AuthPageRedesign';
 import AuthCallback from './pages/auth/callback';
 import Landing from './pages/Landing';
@@ -218,6 +219,7 @@ function AppContent() {
         </Layout>
       } />
       <Route path="/settings" element={<SettingsClaude />} />
+      <Route path="/settings-redesign" element={<SettingsRedesign />} />
       <Route path="/settings/api" element={
         <Suspense fallback={<div className="loading-spinner">Loading...</div>}>
           <ApiSettingsPage />

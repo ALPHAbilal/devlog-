@@ -4,7 +4,7 @@ import { ChevronLeft, User, Lock, Database, Key, Menu } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { useSettings } from '../contexts/SettingsContext';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
-import { ErrorBoundary } from 'react-error-boundary';
+import ErrorBoundary from '../components/ErrorBoundary';
 import '../styles/settings-redesign.css';
 
 // Component imports
@@ -12,19 +12,6 @@ import AccountSection from './settings-sections/AccountSection';
 import SecuritySection from './settings-sections/SecuritySection';
 import StorageSection from './settings-sections/StorageSection';
 import ApiKeysSection from './settings-sections/ApiKeysSection';
-
-// Error fallback component
-function ErrorFallback({ error, resetErrorBoundary }) {
-  return (
-    <div className="error-state">
-      <h2>Something went wrong</h2>
-      <p>{error.message}</p>
-      <button className="btn-primary" onClick={resetErrorBoundary}>
-        Try Again
-      </button>
-    </div>
-  );
-}
 
 export default function SettingsRedesign() {
   const navigate = useNavigate();
@@ -110,16 +97,16 @@ export default function SettingsRedesign() {
 
       {/* Main Content Area */}
       <div className="settings-content">
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ErrorBoundary name="AccountSection" feature="settings">
           {activeSection === 'account' && <AccountSection />}
         </ErrorBoundary>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ErrorBoundary name="SecuritySection" feature="settings">
           {activeSection === 'security' && <SecuritySection />}
         </ErrorBoundary>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ErrorBoundary name="StorageSection" feature="settings">
           {activeSection === 'storage' && <StorageSection />}
         </ErrorBoundary>
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <ErrorBoundary name="ApiKeysSection" feature="settings">
           {activeSection === 'apiKeys' && <ApiKeysSection />}
         </ErrorBoundary>
       </div>

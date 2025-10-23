@@ -153,12 +153,12 @@ export default function ApiKeysSection() {
           <p style={{ color: 'var(--text-muted)' }}>No API keys created yet</p>
         ) : (
           apiKeys.map(key => (
-            <div key={key.id} className="info-card" style={{ padding: '21px', gap: '12px' }}>
+            <div key={key.id} className="api-key-card">
               {/* Key Header */}
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <span style={{ fontSize: '14px', lineHeight: '20px' }}>{key.name}</span>
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '12px', lineHeight: '16px', color: 'var(--text-dimmed)' }}>
+              <div className="api-key-header">
+                <div className="api-key-info">
+                  <div className="api-key-name">{key.name}</div>
+                  <div className="api-key-metadata">
                     <span>Created {new Date(key.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     {key.last_used_at && (
                       <span>Last used {new Date(key.last_used_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -166,20 +166,21 @@ export default function ApiKeysSection() {
                   </div>
                 </div>
 
-                <button
-                  className="icon-button"
-                  onClick={() => deleteApiKey(key.id)}
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="api-key-actions">
+                  <button
+                    className="delete-button"
+                    onClick={() => deleteApiKey(key.id)}
+                    aria-label="Delete API key"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
 
               {/* Masked Key Display */}
-              <div className="key-display">
-                <code style={{ flex: 1, fontSize: '12px', fontFamily: 'Consolas, monospace', color: 'var(--accent-green)' }}>
-                  {key.key_preview || '•'.repeat(58)}
-                </code>
-                <button className="icon-button" onClick={() => copyToClipboard(key.key_preview)}>
+              <div className="api-key-preview">
+                <code>{key.key_preview || '•'.repeat(58)}</code>
+                <button onClick={() => copyToClipboard(key.key_preview)} aria-label="Copy API key">
                   <Copy size={16} />
                 </button>
               </div>

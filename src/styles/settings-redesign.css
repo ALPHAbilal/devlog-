@@ -39,6 +39,7 @@
   background: var(--bg-primary);
   border: none;
   border-right: none;
+  box-shadow: none;
 }
 
 .settings-content {
@@ -87,6 +88,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border: none;
+  border-bottom: none;
 }
 
 .nav-item {

@@ -139,6 +139,34 @@
   flex-direction: column;
 }
 
+.back-button-settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #90a1b9;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 24px 16px;
+  font-family: Arial, sans-serif;
+  font-weight: normal;
+  line-height: 20px;
+  height: 20px;
+  transition: color var(--transition);
+}
+
+.back-button-settings:hover {
+  color: #cad5e2;
+}
+
+.back-button-settings span {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  color: inherit;
+}
+
 .sidebar-header {
   display: flex;
   align-items: center;
@@ -172,6 +200,9 @@
 .nav-sections {
   flex: 1;
   padding: var(--space-4);
+  margin-top: 60px;
+  border: none;
+  border-top: none;
 }
 
 .nav-item {

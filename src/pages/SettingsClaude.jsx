@@ -164,17 +164,14 @@ export default function SettingsClaude() {
       <div className="settings-layout">
         {/* Sidebar Navigation */}
         <nav className={`settings-sidebar ${showMobileSidebar ? 'show' : ''}`}>
-          <div className="sidebar-header">
-            <h2>Settings</h2>
-            <button
-              className="close-button desktop-only"
-              onClick={() => navigate('/dashboard')}
-              title="Close settings"
-            >
-              <X size={20} />
-            </button>
-          </div>
-          
+          <button
+            className="back-button-settings"
+            onClick={() => navigate('/dashboard')}
+          >
+            <ChevronLeft size={16} />
+            <span>Back</span>
+          </button>
+
           <div className="nav-sections">
             {sections.map(section => (
               <button

@@ -147,6 +147,8 @@ export default function SettingsClaude() {
   const { user, signOut } = useAuth();
   const { databaseSize, storageLimit, usagePercentage } = useSmartDatabaseUsage();
   const { settings, updateSetting } = useSettings();
+  const toast = useToast();
+  const { trackEvent } = useAnalytics();
   
   const [activeSection, setActiveSection] = useState('account');
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
@@ -266,12 +268,12 @@ export default function SettingsClaude() {
       if (error) throw error;
       setApiKeys(data || []);
 
-      useAnalytics().trackEvent('api_settings_viewed', {
+      trackEvent('api_settings_viewed', {
         existing_keys_count: data?.length || 0,
         has_keys: (data?.length || 0) > 0
       });
     } catch (error) {
-      useToast().error('Failed to load API keys');
+      toast.error('Failed to load API keys');
       console.error('Error:', error);
     } finally {
       setApiKeysLoading(false);
@@ -281,7 +283,7 @@ export default function SettingsClaude() {
   // Create new API key
   const createApiKey = async () => {
     if (!newKeyName.trim()) {
-      useToast().error('Please enter a name for the API key');
+      toast.error('Please enter a name for the API key');
       return;
     }
 
@@ -315,7 +317,7 @@ export default function SettingsClaude() {
 
       if (error) throw error;
 
-      useAnalytics().trackEvent('api_key_created', {
+      trackEvent('api_key_created', {
         key_name: newKeyName.trim(),
         key_prefix: 'dvlg_sk_prod',
         created_from: 'settings_page'
@@ -326,7 +328,7 @@ export default function SettingsClaude() {
       setNewKeyName('');
       setShowCreateSheet(false);
     } catch (error) {
-      useToast().error('Failed to create API key');
+      toast.error('Failed to create API key');
       console.error('Error:', error);
     } finally {
       setCreating(false);
@@ -349,7 +351,7 @@ export default function SettingsClaude() {
         const keyAgeMs = Date.now() - new Date(keyToDelete.created_at).getTime();
         const keyAgeDays = Math.floor(keyAgeMs / (1000 * 60 * 60 * 24));
 
-        useAnalytics().trackEvent('api_key_deleted', {
+        trackEvent('api_key_deleted', {
           key_age_days: keyAgeDays,
           was_used: !!keyToDelete.last_used_at,
           key_name: keyToDelete.name
@@ -357,9 +359,9 @@ export default function SettingsClaude() {
       }
 
       setApiKeys(apiKeys.filter(key => key.id !== id));
-      useToast().success('API key deleted');
+      toast.success('API key deleted');
     } catch (error) {
-      useToast().error('Failed to delete API key');
+      toast.error('Failed to delete API key');
       console.error('Error:', error);
     }
   };
@@ -367,9 +369,9 @@ export default function SettingsClaude() {
   // Copy to clipboard utility
   const copyToClipboard = (text, context = 'unknown') => {
     navigator.clipboard.writeText(text);
-    useToast().success('Copied to clipboard');
+    toast.success('Copied to clipboard');
 
-    useAnalytics().trackEvent('api_key_copied', {
+    trackEvent('api_key_copied', {
       copy_location: context,
       is_first_copy: context === 'initial_creation' && !copiedKey
     });

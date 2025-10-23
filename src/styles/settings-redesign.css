@@ -37,6 +37,8 @@
   flex-direction: column;
   gap: 60px;
   background: var(--bg-primary);
+  border: none;
+  border-right: none;
 }
 
 .settings-content {
@@ -48,6 +50,8 @@
   padding: 48px 270px;
   min-height: calc(100vh - 24px);
   width: calc(100% - 256px);
+  border: none;
+  border-left: none;
 }
 
 /* Back Button */

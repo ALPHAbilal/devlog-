@@ -63,17 +63,6 @@ const ApiKeyCard = ({ apiKey, onDelete, onCopy }) => {
         </div>
       </div>
 
-      <div className="api-key-meta">
-        <span className="api-key-date">
-          Created {new Date(apiKey.created_at).toLocaleDateString()}
-        </span>
-        {apiKey.last_used_at && (
-          <span className="api-key-date">
-            Last used {new Date(apiKey.last_used_at).toLocaleDateString()}
-          </span>
-        )}
-      </div>
-
       <div className="api-key-actions">
         {showConfirm ? (
           <>

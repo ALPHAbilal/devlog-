@@ -952,18 +952,6 @@
   display: inline-block;
 }
 
-.api-key-meta {
-  display: flex;
-  gap: var(--space-4);
-  margin-bottom: var(--space-3);
-  padding-left: calc(44px + var(--space-3));
-}
-
-.api-key-date {
-  font-size: 0.875rem;
-  color: var(--text-disabled);
-}
-
 .api-key-actions {
   display: flex;
   align-items: center;
@@ -1373,12 +1361,6 @@
 
   .setup-guide {
     padding: var(--space-4);
-  }
-
-  .api-key-meta {
-    flex-direction: column;
-    gap: var(--space-1);
-    padding-left: 0;
   }
 
   .api-keys-list {

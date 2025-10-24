@@ -204,7 +204,7 @@ function LandingContent() {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <LogoMinimal size={24} />
-            <h1 className="text-white text-base font-['Consolas'] tracking-tight">Devlog</h1>
+            <h1 className="text-white text-base font-['Consolas'] tracking-tight" style={{ display: 'flex', alignItems: 'center' }}>Devlog</h1>
           </motion.div>
 
           {/* Desktop Center Navigation */}

@@ -60,28 +60,33 @@ export default function SettingsRedesign() {
       <div className={`settings-sidebar ${isMobile && showMobileSidebar ? 'open' : ''}`}>
         {!isMobile && (
           <button className="back-button" onClick={() => navigate('/dashboard')}>
-            <ChevronLeft size={16} />
+            <ChevronLeft size={12} />
             <span>Back</span>
           </button>
         )}
 
         <nav className="settings-nav" role="navigation" aria-label="Settings navigation">
-          {sections.map(section => {
+          {sections.map((section, index) => {
             const IconComponent = section.icon;
+            const isPrimary = index < 3; // First three sections are primary
             return (
-              <button
-                key={section.id}
-                className={`nav-item ${activeSection === section.id ? 'active' : ''}`}
-                onClick={() => {
-                  setActiveSection(section.id);
-                  setShowMobileSidebar(false);
-                }}
-                aria-label={`${section.label} settings`}
-                aria-current={activeSection === section.id ? 'page' : undefined}
-              >
-                <IconComponent size={16} aria-hidden="true" />
-                <span>{section.label}</span>
-              </button>
+              <React.Fragment key={section.id}>
+                <button
+                  className={`nav-item ${isPrimary ? 'primary' : ''} ${activeSection === section.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveSection(section.id);
+                    setShowMobileSidebar(false);
+                  }}
+                  aria-label={`${section.label} settings`}
+                  aria-current={activeSection === section.id ? 'page' : undefined}
+                >
+                  <IconComponent size={16} aria-hidden="true" />
+                  <span>{section.label}</span>
+                </button>
+                {index === 2 && (
+                  <div className="nav-separator" aria-hidden="true" />
+                )}
+              </React.Fragment>
             );
           })}
         </nav>

@@ -32,10 +32,10 @@
   position: fixed;
   left: 0;
   top: 0;
-  padding: 24px 16px;
+  padding: 12px 16px 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 8px;
   background: var(--bg-primary);
   border: none;
   border-right: none;
@@ -59,18 +59,19 @@
 .back-button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: none;
   border: none;
   color: var(--text-dimmed);
-  font-size: 13px;
+  font-size: 11px;
   cursor: pointer;
   padding: 0;
   font-family: Arial, sans-serif;
   font-weight: normal;
-  line-height: 20px;
-  height: 20px;
-  opacity: 0.8;
+  line-height: 14px;
+  height: 14px;
+  opacity: 0.6;
+  margin-bottom: -6px;
 }
 
 .back-button:hover {
@@ -80,8 +81,8 @@
 
 .back-button span {
   font-family: Arial, sans-serif;
-  font-size: 13px;
-  line-height: 20px;
+  font-size: 11px;
+  line-height: 14px;
   color: inherit;
 }
 
@@ -92,7 +93,7 @@
   gap: 4px;
   border: none;
   border-bottom: none;
-  margin-top: 8px;
+  margin-top: 0;
 }
 
 .nav-item {
@@ -122,6 +123,27 @@
   color: var(--accent-green);
   padding: 9px 12px;
   height: 42px;
+}
+
+/* Primary navigation items (first 3) */
+.nav-item.primary {
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.nav-item.primary:not(.active):hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Navigation separator */
+.nav-separator {
+  height: 1px;
+  background: rgba(49, 65, 88, 0.4);
+  margin: 10px 0 8px 0;
+  width: 100%;
 }
 
 /* Section Layout */

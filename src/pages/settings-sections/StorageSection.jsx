@@ -8,8 +8,8 @@ export default function StorageSection() {
     <div className="section-container">
       {/* Header */}
       <div className="section-header">
-        <h1 className="section-title">Storage</h1>
-        <p className="section-description">Monitor your storage usage and manage your data</p>
+        <h1 className="section-title">Data & Privacy</h1>
+        <p className="section-description">Manage your data storage, privacy settings, and information security</p>
       </div>
 
       <hr className="section-divider" />

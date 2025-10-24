@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { supabase } from '../lib/supabase';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
 import { useSettings } from '../contexts/SettingsContext';
-import { X, ChevronLeft, Lock, Key, Copy, Trash2, CheckCircle, Shield, ChevronUp, ChevronDown, Eye, EyeOff, Check } from 'lucide-react';
+import { X, ChevronLeft, Lock, Key, Copy, Trash2, CheckCircle, Shield, ChevronUp, ChevronDown, Eye, EyeOff, Check, Download, Trash, HardDrive, BarChart2 } from 'lucide-react';
 import MobileBottomSheet from '../components/MobileBottomSheet';
 import { useToast } from '../hooks/useToast';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -686,24 +686,118 @@ export default function SettingsClaude() {
           {activeSection === 'data' && (
             <div className="content-section">
               <h2 className="section-title">Data & Privacy</h2>
-              
+              <p className="section-description">
+                Manage your data, privacy settings, and storage usage
+              </p>
+
               <SettingGroup title="Storage">
-                <div className="storage-info">
+                <div className="data-privacy-card storage-card">
                   <div className="storage-header">
-                    <span className="storage-label">Storage Usage</span>
-                    <span className="storage-value">
-                      {databaseSize} / {storageLimit}
-                    </span>
+                    <div className="storage-header-content">
+                      <div className="storage-icon">
+                        <BarChart2 size={20} />
+                      </div>
+                      <div className="storage-info-section">
+                        <span className="storage-label">Storage Usage</span>
+                        <div className="storage-metadata">
+                          <span>Documents: {apiKeys.length || 0}</span>
+                          <span>Last backup: Never</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="storage-value-container">
+                      <span className="storage-value">
+                        {databaseSize} / {storageLimit}
+                      </span>
+                    </div>
                   </div>
-                  <div className="storage-bar">
-                    <div 
-                      className="storage-fill"
-                      style={{ width: `${Math.min(usagePercentage, 100)}%` }}
-                    />
+                  <div className="storage-bar-container">
+                    <div className="storage-bar">
+                      <div
+                        className="storage-fill"
+                        style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                      />
+                    </div>
+                    <p className="storage-description">
+                      {Math.round(usagePercentage)}% of your storage is being used
+                    </p>
                   </div>
-                  <p className="storage-description">
-                    {Math.round(usagePercentage)}% of your storage is being used
-                  </p>
+                </div>
+              </SettingGroup>
+
+              <SettingGroup title="Privacy Settings">
+                <div className="data-privacy-card">
+                  <ToggleSwitch
+                    label="Analytics & Improvements"
+                    description="Help improve Devlog by sharing anonymous usage data"
+                    value={settings.enableAnalytics}
+                    onChange={(value) => handleSettingChange('enableAnalytics', value)}
+                  />
+                </div>
+                <div className="data-privacy-card">
+                  <ToggleSwitch
+                    label="Crash Reports"
+                    description="Automatically send crash reports to help fix issues"
+                    value={settings.enableCrashReports}
+                    onChange={(value) => handleSettingChange('enableCrashReports', value)}
+                  />
+                </div>
+              </SettingGroup>
+
+              <SettingGroup title="Data Management">
+                <div className="data-privacy-card">
+                  <div className="data-action-item">
+                    <div className="data-action-content">
+                      <div className="data-action-icon">
+                        <Download size={20} />
+                      </div>
+                      <div className="data-action-info">
+                        <h4>Export Your Data</h4>
+                        <p>Download all your documents and settings in JSON format</p>
+                      </div>
+                    </div>
+                    <Button variant="secondary">
+                      Export Data
+                    </Button>
+                  </div>
+                </div>
+                <div className="data-privacy-card">
+                  <div className="data-action-item">
+                    <div className="data-action-content">
+                      <div className="data-action-icon">
+                        <HardDrive size={20} />
+                      </div>
+                      <div className="data-action-info">
+                        <h4>Clear Cache</h4>
+                        <p>Remove temporary files and cached data to free up space</p>
+                      </div>
+                    </div>
+                    <Button variant="secondary">
+                      Clear Cache
+                    </Button>
+                  </div>
+                </div>
+              </SettingGroup>
+
+              <SettingGroup title="Danger Zone">
+                <div className="data-privacy-card danger-card">
+                  <div className="data-action-item">
+                    <div className="data-action-content">
+                      <div className="data-action-icon danger-icon">
+                        <Trash size={20} />
+                      </div>
+                      <div className="data-action-info">
+                        <h4>Delete All Data</h4>
+                        <p className="danger-text">Permanently delete all your documents and settings</p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="danger"
+                      onClick={() => setShowDeleteModal(true)}
+                    >
+                      Delete Data
+                    </Button>
+                  </div>
                 </div>
               </SettingGroup>
             </div>

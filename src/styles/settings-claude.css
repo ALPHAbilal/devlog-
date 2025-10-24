@@ -1,5 +1,8 @@
 /* Claude.ai Inspired Settings - Devlog Brand Colors */
 
+/* Import Cousine font for API key display */
+@import url('https://fonts.googleapis.com/css2?family=Cousine:wght@400&display=swap');
+
 /* CSS Variables */
 :root {
   /* Brand Colors - Updated to Teal from Figma */
@@ -1045,12 +1048,12 @@
 
 /* API Key Card - Exact Figma Specifications */
 .api-key-card {
-  background: var(--bg-elevated); /* Use new elevated background */
-  border: 1px solid var(--border-subtle); /* Use new border colors */
+  background: rgba(15, 23, 43, 0.5); /* Semi-transparent dark background from Figma */
+  border: 1px solid rgba(49, 65, 88, 0.5); /* Subtle border from Figma */
   border-radius: 10px;
   padding: 21px;
   margin-bottom: 16px;
-  height: 132px;
+  min-height: 132px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -1061,13 +1064,14 @@
 
 .api-key-card:hover {
   border-color: rgba(49, 65, 88, 0.7);
+  background: rgba(15, 23, 43, 0.6);
 }
 
 .api-key-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  height: 40px;
+  min-height: 40px;
   flex-shrink: 0;
 }
 
@@ -1079,7 +1083,7 @@
 }
 
 .api-key-name {
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
@@ -1090,11 +1094,20 @@
 .api-key-metadata {
   display: flex;
   gap: 16px;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
   color: #62748e;
+}
+
+.api-key-metadata span {
+  color: #62748e;
+}
+
+/* API Key Preview Container */
+.api-key-preview-container {
+  width: 100%;
 }
 
 .api-key-preview {
@@ -1106,27 +1119,60 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .api-key-preview code {
   flex: 1;
-  font-family: 'Cousine', Consolas, Monaco, monospace; /* Add Cousine font from Figma */
+  font-family: 'Cousine', Consolas, Monaco, monospace;
   font-size: 12px;
   line-height: 16px;
-  color: var(--api-key-text); /* Use teal color variable */
+  color: #00d492; /* Teal color from Figma */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+/* Preview Action Buttons */
+.api-key-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.preview-action-btn {
+  background: transparent;
+  border: none;
+  color: #90a1b9;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.preview-action-btn:hover {
+  color: #cad5e2;
+}
+
+.preview-action-btn.copy-success {
+  color: #00d492;
 }
 
 .api-key-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
   flex-shrink: 0;
 }
 
@@ -1149,24 +1195,55 @@
   background: rgba(255, 100, 103, 0.1);
 }
 
-.api-key-preview button {
+/* Confirm Delete Actions */
+.confirm-delete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-text {
+  font-size: 12px;
+  color: #ff6467;
+  margin-right: 4px;
+}
+
+.cancel-btn,
+.confirm-btn {
   background: transparent;
-  border: none;
-  color: #90a1b9;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  cursor: pointer;
+  border: 1px solid transparent;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: color 0.2s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  padding: 0;
 }
 
-.api-key-preview button:hover {
-  color: #cad5e2;
+.cancel-btn {
+  color: #90a1b9;
+  border-color: rgba(144, 161, 185, 0.3);
 }
+
+.cancel-btn:hover {
+  background: rgba(144, 161, 185, 0.1);
+  border-color: rgba(144, 161, 185, 0.5);
+}
+
+.confirm-btn {
+  color: #ff6467;
+  border-color: rgba(255, 100, 103, 0.3);
+}
+
+.confirm-btn:hover {
+  background: rgba(255, 100, 103, 0.1);
+  border-color: rgba(255, 100, 103, 0.5);
+}
+
 
 /* Empty & Loading States */
 .empty-state,
@@ -1559,6 +1636,29 @@
   .api-key-card {
     border-radius: 12px;
     margin-bottom: var(--space-3);
+    padding: 16px;
+  }
+
+  .api-key-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .api-key-preview {
+    flex-direction: column;
+    height: auto;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .api-key-preview code {
+    width: 100%;
+    word-break: break-all;
+  }
+
+  .api-key-preview-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 
   .create-key-inline {

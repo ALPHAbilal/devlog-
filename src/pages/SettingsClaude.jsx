@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContextOptimized';
 import { supabase } from '../lib/supabase';
 import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
 import { useSettings } from '../contexts/SettingsContext';
-import { X, ChevronLeft, Lock, Key, Copy, Trash2, CheckCircle, Shield, ChevronUp, ChevronDown } from 'lucide-react';
+import { X, ChevronLeft, Lock, Key, Copy, Trash2, CheckCircle, Shield, ChevronUp, ChevronDown, Eye, EyeOff, Check } from 'lucide-react';
 import MobileBottomSheet from '../components/MobileBottomSheet';
 import { useToast } from '../hooks/useToast';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -50,47 +50,80 @@ const Button = ({ variant = 'primary', size = 'medium', children, ...props }) =>
 // API Key Card Component
 const ApiKeyCard = ({ apiKey, onDelete, onCopy }) => {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showFullKey, setShowFullKey] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const handleCopy = async () => {
+    await onCopy(apiKey.key_preview); // In real implementation, this would copy the full key
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
 
   return (
     <div className="api-key-card">
       <div className="api-key-header">
-        <div className="api-key-icon">
-          <Key size={20} />
-        </div>
         <div className="api-key-info">
           <h4 className="api-key-name">{apiKey.name}</h4>
-          <code className="api-key-preview">{apiKey.key_preview}</code>
+          <div className="api-key-metadata">
+            <span>Created: {new Date(apiKey.created_at).toLocaleDateString()}</span>
+            {apiKey.last_used_at && (
+              <span>Last used: {new Date(apiKey.last_used_at).toLocaleDateString()}</span>
+            )}
+          </div>
+        </div>
+        <div className="api-key-actions">
+          {showConfirm ? (
+            <div className="confirm-delete">
+              <span className="confirm-text">Delete?</span>
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="cancel-btn"
+                title="Cancel"
+              >
+                ✕
+              </button>
+              <button
+                onClick={() => onDelete(apiKey.id)}
+                className="confirm-btn"
+                title="Confirm delete"
+              >
+                ✓
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowConfirm(true)}
+              className="delete-button"
+              title="Delete API key"
+          >
+              <Trash2 size={16} />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="api-key-actions">
-        {showConfirm ? (
-          <>
-            <span className="confirm-text">Delete this key?</span>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={() => setShowConfirm(false)}
+      <div className="api-key-preview-container">
+        <div className="api-key-preview">
+          <code>
+            {showFullKey ? apiKey.key_preview : '••••••••••••••••••••••••••••••••••••••••••••••••••••••••'}
+          </code>
+          <div className="api-key-preview-actions">
+            <button
+              onClick={() => setShowFullKey(!showFullKey)}
+              className="preview-action-btn"
+              title={showFullKey ? "Hide key" : "Show key"}
             >
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              size="small"
-              onClick={() => onDelete(apiKey.id)}
+              {showFullKey ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+            <button
+              onClick={handleCopy}
+              className={`preview-action-btn ${copySuccess ? 'copy-success' : ''}`}
+              title="Copy API key"
             >
-              Delete
-            </Button>
-          </>
-        ) : (
-          <button
-            onClick={() => setShowConfirm(true)}
-            className="delete-button"
-            title="Delete API key"
-          >
-            <Trash2 size={18} />
-          </button>
-        )}
+              {copySuccess ? <Check size={16} /> : <Copy size={16} />}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

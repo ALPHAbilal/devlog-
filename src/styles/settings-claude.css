@@ -755,7 +755,7 @@
 
 .storage-header-content {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 12px;
   flex: 1;
 }
@@ -774,8 +774,7 @@
 
 .storage-info-section {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  align-items: center;
   flex: 1;
 }
 
@@ -785,20 +784,6 @@
   font-weight: 400;
   line-height: 20px;
   color: #ffffff;
-}
-
-.storage-metadata {
-  display: flex;
-  gap: 16px;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
-  color: #62748e;
-}
-
-.storage-metadata span {
-  color: #62748e;
 }
 
 .storage-value-container {

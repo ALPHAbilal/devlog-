@@ -696,9 +696,6 @@ export default function SettingsClaude() {
                       </div>
                       <div className="storage-info-section">
                         <span className="storage-label">Storage Usage</span>
-                        <div className="storage-metadata">
-                          <span>Documents: {apiKeys.length || 0}</span>
-                        </div>
                       </div>
                     </div>
                     <div className="storage-value-container">

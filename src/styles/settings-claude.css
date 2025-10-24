@@ -136,15 +136,24 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  background: var(--bg-secondary); /* Set dark background for the gap effect */
 }
 
 /* Sidebar */
 .settings-sidebar {
   width: 256px; /* Updated from 240px per Figma */
   background: var(--bg-secondary);
-  border-right: 1px solid var(--border-color);
+  /* Add subtle gradient for depth */
+  background: linear-gradient(
+    180deg,
+    var(--bg-secondary) 0%,
+    rgba(2, 6, 24, 0.98) 100%
+  );
+  border-right: 1px solid rgba(255, 255, 255, 0.05); /* Softer border */
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1; /* Ensure sidebar is behind the rounded content */
 }
 
 .back-button-settings {
@@ -254,14 +263,42 @@
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg-primary);
-  border-top-left-radius: 14px; /* New: rounded corner from Figma */
-  margin-top: 24px; /* New: spacing from top */
-  box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.25); /* New: shadow */
-  overflow: clip; /* New: enforce rounded corners */
+  border-top-left-radius: 24px; /* Enhanced: even more prominent rounded corner */
+  border-top-right-radius: 0; /* Explicitly set to 0 for clarity */
+  margin-top: 40px; /* Enhanced: beautiful gap for visual breathing room */
+  margin-left: 0; /* Ensure it's flush with sidebar */
+  box-shadow:
+    0px 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0px -2px 10px rgba(0, 0, 0, 0.1), /* Top shadow for depth */
+    inset 1px 1px 0 rgba(255, 255, 255, 0.02); /* Subtle inner highlight */
+  overflow: clip; /* Enforce rounded corners */
   width: 100%;
-  height: calc(100% - 24px); /* Adjust height for margin */
+  height: calc(100% - 40px); /* Adjust height for larger margin */
   display: flex;
   flex-direction: column;
+  position: relative; /* For proper shadow rendering */
+  /* Create a subtle inner border effect */
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Add a subtle gradient overlay for depth */
+.settings-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.01) 0%,
+    transparent 100%
+  );
+  border-top-left-radius: 24px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .content-section {
@@ -269,6 +306,8 @@
   max-width: 832px; /* Updated from 800px to match Figma */
   padding: 48px 48px; /* More reasonable padding for actual use */
   margin: 0 auto;
+  position: relative;
+  z-index: 1; /* Ensure content is above the gradient overlay */
 }
 
 .section-title {
@@ -774,6 +813,15 @@
     height: 100%;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    /* Remove rounded corner on mobile for full-width experience */
+    border-top-left-radius: 0;
+    margin-top: 0;
+    height: 100%;
+  }
+
+  /* Hide the gradient overlay on mobile */
+  .settings-content::before {
+    display: none;
   }
   
   .content-section {

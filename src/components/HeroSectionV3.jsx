@@ -72,7 +72,8 @@ export default function HeroSectionV3() {
               lineHeight: '82.8px',
               letterSpacing: '-1.44px',
               fontWeight: 400,
-              fontFamily: 'Arial, sans-serif'
+              fontFamily: 'Arial, sans-serif',
+              marginTop: '40px'
             }}
             variants={heroTextReveal}
           >

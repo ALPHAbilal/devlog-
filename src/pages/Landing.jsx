@@ -203,7 +203,7 @@ function LandingContent() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <LogoMinimal size={24} />
+            <LogoMinimal size={32} />
             <h1 className="text-white text-base font-['Consolas'] tracking-tight" style={{ display: 'flex', alignItems: 'center' }}>Devlog</h1>
           </motion.div>
 

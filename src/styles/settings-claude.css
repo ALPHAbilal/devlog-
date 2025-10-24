@@ -2,15 +2,19 @@
 
 /* CSS Variables */
 :root {
-  /* Brand Colors */
-  --brand-primary: #10b981;
-  --brand-primary-hover: #059669;
+  /* Brand Colors - Updated to Teal from Figma */
+  --brand-primary: #00bc7d;
+  --brand-primary-end: #00bba7;
+  --brand-primary-hover: #00a06a;
+  --api-key-text: #00d492;
 
-  /* Dark Theme Colors */
-  --bg-primary: #0a1628;
-  --bg-secondary: #1e3a5f;
-  --bg-elevated: #1e3a5f;
+  /* Dark Theme Colors - Updated to Darker Figma Theme */
+  --bg-primary: #0f172b;
+  --bg-secondary: #020618;
+  --bg-elevated: rgba(15, 23, 43, 0.5);
   --border-color: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(49, 65, 88, 0.5);
+  --border-section: rgba(29, 41, 61, 0.5);
 
   /* Text Colors - Figma Design Specification */
   --text-primary: #ffffff;              /* Pure white for main titles */
@@ -68,7 +72,7 @@
   z-index: 101;
   height: 60px;
   backdrop-filter: blur(10px);
-  background: rgba(30, 58, 95, 0.95);
+  background: rgba(2, 6, 24, 0.95); /* Darker to match new theme */
 }
 
 .mobile-header h1 {
@@ -136,7 +140,7 @@
 
 /* Sidebar */
 .settings-sidebar {
-  width: 240px;
+  width: 256px; /* Updated from 240px per Figma */
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -236,9 +240,12 @@
 }
 
 .nav-item.active {
-  background: linear-gradient(to right, rgba(0, 212, 146, 0.12), rgba(0, 187, 167, 0.12));
+  background: linear-gradient(to bottom, rgba(0, 188, 125, 0.1), rgba(0, 187, 167, 0.1));
+  border: 1px solid rgba(0, 188, 125, 0.2);
+  border-radius: 10px;
+  height: 42px; /* Specific height from Figma */
   color: #00d492;
-  font-weight: 600;
+  font-weight: normal; /* Not bold in Figma */
 }
 
 /* Main Content */
@@ -247,19 +254,20 @@
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg-primary);
+  border-top-left-radius: 14px; /* New: rounded corner from Figma */
+  margin-top: 24px; /* New: spacing from top */
+  box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.25); /* New: shadow */
+  overflow: clip; /* New: enforce rounded corners */
   width: 100%;
-  height: 100%;
+  height: calc(100% - 24px); /* Adjust height for margin */
   display: flex;
   flex-direction: column;
 }
 
 .content-section {
   width: 100%;
-  max-width: 800px;
-  padding-left: var(--space-8);
-  padding-right: var(--space-8);
-  padding-bottom: var(--space-8);
-  padding-top: var(--space-8);
+  max-width: 832px; /* Updated from 800px to match Figma */
+  padding: 48px 48px; /* More reasonable padding for actual use */
   margin: 0 auto;
 }
 
@@ -279,11 +287,11 @@
 
 .setting-group-title {
   font-family: var(--font-ui);
-  font-size: 18px;
+  font-size: 20px; /* Changed from 18px per Figma */
   font-weight: 400;
   line-height: 28px;
   color: var(--text-primary);
-  margin: 0 0 var(--space-6) 0;
+  margin: 0 0 16px 0; /* 16px margin per Figma */
 }
 
 /* Setting Items */
@@ -420,12 +428,17 @@
 
 /* Button Variants */
 .btn-primary {
-  background: var(--brand-primary);
+  background: linear-gradient(to bottom, #00bc7d, #00bba7); /* Gradient from Figma */
   color: white;
+  border-radius: 8px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: normal;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--brand-primary-hover);
+  background: linear-gradient(to bottom, #00a06a, #009f8f);
 }
 
 .btn-secondary {
@@ -888,8 +901,8 @@
 
 /* API Key Card - Exact Figma Specifications */
 .api-key-card {
-  background: rgba(15, 23, 43, 0.5);
-  border: 1px solid rgba(49, 65, 88, 0.5);
+  background: var(--bg-elevated); /* Use new elevated background */
+  border: 1px solid var(--border-subtle); /* Use new border colors */
   border-radius: 10px;
   padding: 21px;
   margin-bottom: 16px;
@@ -955,10 +968,10 @@
 
 .api-key-preview code {
   flex: 1;
-  font-family: Consolas, Monaco, monospace;
+  font-family: 'Cousine', Consolas, Monaco, monospace; /* Add Cousine font from Figma */
   font-size: 12px;
   line-height: 16px;
-  color: #00d492;
+  color: var(--api-key-text); /* Use teal color variable */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1075,21 +1088,23 @@
 
 /* Setup Accordion */
 .setup-accordion {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  margin-bottom: var(--space-3);
+  background: var(--bg-elevated); /* Translucent background from Figma */
+  border: 1px solid var(--border-subtle); /* Updated border color */
+  border-radius: 10px; /* Consistent with other cards */
+  height: auto; /* Dynamic height based on content */
+  min-height: 54px; /* Minimum height from Figma */
+  margin-bottom: 12px;
   overflow: hidden;
   transition: all var(--transition);
 }
 
 .setup-accordion.open {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: rgba(0, 188, 125, 0.3); /* Teal border when open */
 }
 
 .setup-accordion-header {
   width: 100%;
-  padding: var(--space-4);
+  padding: 16px;
   background: none;
   border: none;
   color: var(--text-primary);
@@ -1099,6 +1114,7 @@
   justify-content: space-between;
   text-align: left;
   transition: all var(--transition);
+  min-height: 54px;
 }
 
 .setup-accordion-header:hover {
@@ -1125,8 +1141,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
-  background: rgba(16, 185, 129, 0.1);
-  color: var(--brand-primary);
+  background: rgba(0, 188, 125, 0.1); /* Updated to teal */
+  color: var(--api-key-text); /* Use teal color */
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -1213,8 +1229,8 @@
 
 /* API Key Success Message */
 .api-key-success {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: linear-gradient(135deg, rgba(0, 188, 125, 0.15) 0%, rgba(0, 187, 167, 0.05) 100%);
+  border: 1px solid rgba(0, 188, 125, 0.3);
   border-radius: 12px;
   padding: var(--space-6);
   margin-bottom: var(--space-6);
@@ -1231,13 +1247,13 @@
 .success-icon {
   width: 40px;
   height: 40px;
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.4);
+  background: rgba(0, 188, 125, 0.2);
+  border: 1px solid rgba(0, 188, 125, 0.4);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--brand-primary);
+  color: var(--api-key-text);
   font-weight: bold;
   font-size: 1.25rem;
   flex-shrink: 0;
@@ -1344,10 +1360,20 @@
 }
 
 .section-description {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin-top: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 16px; /* Updated from 0.875rem per Figma */
+  line-height: 24px;
+  color: #90a1b9; /* Specific gray from Figma */
+  margin-top: 6px; /* Specific margin from Figma */
   margin-bottom: var(--space-6);
+}
+
+/* Section Dividers - New from Figma */
+.section-divider {
+  height: 1px;
+  background: var(--border-section);
+  margin: 32px 0;
+  width: 100%;
 }
 
 /* Mobile Specific */

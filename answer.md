@@ -131,4 +131,4 @@ To identify which element controls the scrollbar:
 - **Visual padding should be separate from structural positioning**[8][3]
 - **Use `scrollbar-gutter: stable` to prevent layout shifts**[9][8]
 
-The most reliable approach is typically **Solution 1**: making the fixed container handle all scrolling while moving visual padding to inner elements. This ensures the scrollbar track extends from viewport top to bottom while maintaining your desired visual spacing.
+The most reliable approach is typically **Solution 1**: making the fixed container handle all scrolling while moving visual padding to inner elements. This ensures the scrollbar track extends from viewport top to bottom while maintaining your desired visual spacing. now 

@@ -42,6 +42,104 @@
   --transition: 200ms ease;
 }
 
+/* Custom Scrollbar Styling */
+/* Global scrollbar for entire settings page */
+.settings-page ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.settings-page ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 5px;
+}
+
+.settings-page ::-webkit-scrollbar-thumb {
+  background: rgba(0, 188, 125, 0.25);
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.settings-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 125, 0.4);
+}
+
+.settings-page ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Specific styling for main content scrollbar */
+/* Works in Webkit browsers (Chrome, Safari, Edge) */
+.settings-content::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  margin: 20px 0; /* Add margin to avoid overlapping with rounded corner */
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 188, 125, 0.3) 0%,
+    rgba(0, 187, 167, 0.25) 100%
+  );
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 188, 125, 0.5) 0%,
+    rgba(0, 187, 167, 0.4) 100%
+  );
+  border: 1px solid rgba(0, 188, 125, 0.2);
+  box-shadow: 0 0 10px rgba(0, 188, 125, 0.3);
+}
+
+.settings-content::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 188, 125, 0.6) 0%,
+    rgba(0, 187, 167, 0.5) 100%
+  );
+}
+
+/* Firefox scrollbar styling */
+.settings-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 188, 125, 0.3) rgba(255, 255, 255, 0.02);
+}
+
+/* Apply scrollbar to other scrollable elements */
+.modal::-webkit-scrollbar,
+.setup-accordion-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal::-webkit-scrollbar-track,
+.setup-accordion-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb,
+.setup-accordion-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 188, 125, 0.25);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.modal::-webkit-scrollbar-thumb:hover,
+.setup-accordion-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 125, 0.4);
+}
+
 /* Base */
 .settings-page {
   position: fixed;
@@ -167,6 +265,8 @@
   font-weight: 400;
   cursor: pointer;
   padding: 16px 16px;
+  margin-top: 32px; /* Increased margin to push button even lower */
+  margin-bottom: 8px; /* Add bottom margin for separation */
   font-family: var(--font-ui);
   line-height: 20px;
   height: 20px;
@@ -220,7 +320,7 @@
 .nav-sections {
   flex: 1;
   padding: var(--space-4);
-  margin-top: 24px;
+  margin-top: 16px; /* Reduced since back button is now lower */
   border: none;
   border-top: none;
 }

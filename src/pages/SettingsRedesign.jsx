@@ -36,9 +36,9 @@ export default function SettingsRedesign() {
   // Section configurations
   const sections = [
     { id: 'account', label: 'Account', icon: User },
-    { id: 'security', label: 'Security', icon: Lock },
-    { id: 'storage', label: 'Storage', icon: Database },
-    { id: 'apiKeys', label: 'API Keys', icon: Key }
+    { id: 'apiKeys', label: 'API Keys', icon: Key },
+    { id: 'storage', label: 'Data & Privacy', icon: Database },
+    { id: 'security', label: 'Security', icon: Lock }
   ];
 
   return (

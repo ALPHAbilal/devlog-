@@ -35,7 +35,7 @@
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 60px;
+  gap: 24px;
   background: var(--bg-primary);
   border: none;
   border-right: none;
@@ -62,23 +62,25 @@
   gap: 8px;
   background: none;
   border: none;
-  color: var(--text-muted);
-  font-size: 14px;
+  color: var(--text-dimmed);
+  font-size: 13px;
   cursor: pointer;
   padding: 0;
   font-family: Arial, sans-serif;
   font-weight: normal;
   line-height: 20px;
   height: 20px;
+  opacity: 0.8;
 }
 
 .back-button:hover {
-  color: var(--text-secondary);
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .back-button span {
   font-family: Arial, sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 20px;
   color: inherit;
 }
@@ -90,6 +92,7 @@
   gap: 4px;
   border: none;
   border-bottom: none;
+  margin-top: 8px;
 }
 
 .nav-item {

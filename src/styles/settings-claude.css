@@ -839,86 +839,7 @@
   margin: 0;
 }
 
-/* Data Action Items */
-.data-action-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 20px;
-}
 
-.data-action-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-}
-
-.data-action-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  background: rgba(0, 188, 125, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: #00d492;
-}
-
-.data-action-icon.danger-icon {
-  background: rgba(255, 100, 103, 0.1);
-  color: #ff6467;
-}
-
-/* Toggle Switches inside Data Privacy Cards */
-.data-privacy-card .setting-item {
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border: none;
-}
-
-.data-privacy-card .setting-item:hover {
-  background: transparent;
-}
-
-.data-action-info {
-  flex: 1;
-}
-
-.data-action-info h4 {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
-  color: #ffffff;
-  margin: 0 0 4px 0;
-}
-
-.data-action-info p {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 16px;
-  color: #90a1b9;
-  margin: 0;
-}
-
-/* Danger Card Styling */
-.danger-card {
-  background: rgba(15, 23, 43, 0.5);
-  border-color: rgba(255, 100, 103, 0.3);
-}
-
-.danger-card:hover {
-  border-color: rgba(255, 100, 103, 0.5);
-  background: rgba(70, 8, 9, 0.1);
-}
-
-.danger-text {
-  color: #ff6467 !important;
-}
 
 /* Danger Zone */
 .danger-zone {
@@ -1831,16 +1752,6 @@
 
   .storage-value-container {
     align-self: flex-start;
-  }
-
-  .data-action-item {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-
-  .data-action-item .btn {
-    width: 100%;
   }
 
   .create-key-inline {

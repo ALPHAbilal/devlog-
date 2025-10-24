@@ -150,23 +150,25 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   cursor: pointer;
-  padding: 24px 16px;
+  padding: 16px 16px;
   font-family: var(--font-ui);
   line-height: 20px;
   height: 20px;
   transition: color var(--transition);
+  opacity: 0.8;
 }
 
 .back-button-settings:hover {
   color: var(--text-tertiary);
+  opacity: 1;
 }
 
 .back-button-settings span {
   font-family: var(--font-ui);
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   line-height: 20px;
   color: inherit;
@@ -205,7 +207,7 @@
 .nav-sections {
   flex: 1;
   padding: var(--space-4);
-  margin-top: 60px;
+  margin-top: 24px;
   border: none;
   border-top: none;
 }
@@ -213,29 +215,30 @@
 .nav-item {
   display: block;
   width: 100%;
-  padding: var(--space-3) var(--space-4);
-  background: none;
+  padding: 10px var(--space-4);
+  background: rgba(255, 255, 255, 0.02);
   border: none;
   border-radius: 0.5rem;
   color: var(--text-secondary);
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   font-family: var(--font-ui);
   line-height: 20px;
   text-align: left;
   cursor: pointer;
   transition: var(--transition);
-  margin-bottom: var(--space-1);
+  margin-bottom: 6px;
 }
 
 .nav-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-tertiary);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
 }
 
 .nav-item.active {
-  background: rgba(0, 212, 146, 0.1);
+  background: linear-gradient(to right, rgba(0, 212, 146, 0.12), rgba(0, 187, 167, 0.12));
   color: #00d492;
+  font-weight: 600;
 }
 
 /* Main Content */

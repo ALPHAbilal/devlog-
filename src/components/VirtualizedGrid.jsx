@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import EntryCard from './EntryCard';
+import EntryCardRedesigned from './EntryCardRedesigned';
 import Sparkline from './Sparkline';
 import { generateActivityData } from '../utils/activityData';
 import { useTouchGestures } from '../hooks/useTouchGestures';
@@ -302,13 +303,12 @@ export default function VirtualizedGrid({
       {/* Render only visible items - no wrapper div */}
       {allItems.slice(visibleRange.start, visibleRange.end).map((item, index) => {
         const actualIndex = visibleRange.start + index;
-        
+
         return (
           <div key={item.id} className="virtualized-grid-item" style={getItemStyle(actualIndex)}>
-            <CompactEntryCard 
-              entry={item} 
+            <EntryCardRedesigned
+              entry={item}
               onExpand={onExpand}
-              searchTerm={searchTerm}
               isSelected={selectedDocuments.has(item.id)}
               onSelect={onSelectDocument}
               selectionMode={selectionMode}

@@ -7,6 +7,7 @@ import { useResponsive } from '../hooks/useResponsive';
 import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
+import DocumentGridRedesigned from '../components/DocumentGridRedesigned';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
 // import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
@@ -1154,78 +1155,60 @@ export default function Dashboard() {
   // Show loading skeleton only during initial load
   if (isLoading && !isInitialized.current) {
     return (
-      <div className="flex flex-col h-full relative bg-dark-primary">
-        {/* Floating Tags Skeleton */}
-        <div className="absolute left-3 top-24 bottom-6 z-30 max-w-[160px]">
-          <div className="h-full flex flex-col">
-            <div className="flex-1 overflow-hidden">
-              <div className="flex flex-col gap-2">
-                {[1, 2, 3, 4].map(i => (
+      <div className="h-screen overflow-hidden flex flex-col
+                      bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32]">
+        {/* Header Skeleton */}
+        <header className="flex-shrink-0 z-30 relative
+                          bg-[#0a1628]/40 backdrop-blur-xl
+                          border-b border-white/5
+                          shadow-2xl shadow-black/20">
+          {/* Top Row */}
+          <div className="flex items-center justify-between px-4 md:px-6 py-4">
+            <div className="flex items-center gap-3 ml-0 lg:ml-[288px]">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+              <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
+            </div>
+            <div className="flex items-center gap-3 mr-2 md:mr-8">
+              <div className="h-9 w-20 bg-white/10 rounded-lg animate-pulse" />
+              <div className="h-9 w-9 bg-white/10 rounded-lg animate-pulse" />
+            </div>
+          </div>
+        </header>
+
+        {/* Search Bar Skeleton */}
+        <div className="flex-shrink-0 px-4 md:px-6 py-4 ml-0 lg:ml-[288px]">
+          <div className="h-12 max-w-3xl bg-white/5 border border-white/10 rounded-xl animate-pulse" />
+        </div>
+
+        {/* Content Skeleton */}
+        <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 ml-0 lg:ml-[288px]">
+          <div className="h-full bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl
+                          border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
+            <div className="p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
                   <div
                     key={i}
-                    className="h-10 bg-gray-800/30 rounded border border-dashed border-dark-secondary/40 animate-pulse"
-                  />
+                    className="bg-gradient-to-br from-[#1a2942]/40 to-[#0f1d32]/40
+                               rounded-xl border border-white/10 p-5 h-[140px]
+                               animate-pulse"
+                  >
+                    {/* Title skeleton */}
+                    <div className="h-4 bg-white/10 rounded w-3/4 mb-4" />
+                    {/* Chart skeleton */}
+                    <div className="mt-auto h-16 flex items-end gap-1">
+                      {[...Array(20)].map((_, j) => (
+                        <div
+                          key={j}
+                          className="flex-1 bg-emerald-500/20 rounded-t"
+                          style={{ height: `${Math.random() * 100}%` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Header Skeleton */}
-        <div className="flex-shrink-0">
-          {/* Top Navigation Bar */}
-          <div className="flex items-center justify-between px-6 py-2 border-b border-dark-secondary/20">
-            {/* Logo and Brand */}
-            <div className="flex items-center gap-2.5 ml-56">
-              <LogoMinimal size={32} />
-              <div className="h-7 w-16 bg-gray-800/50 rounded animate-pulse" />
-            </div>
-            
-            {/* Stats and Profile */}
-            <div className="flex items-center gap-4 mr-8">
-              <div className="flex items-center gap-3">
-                <div className="h-4 w-20 bg-gray-800/50 rounded animate-pulse" />
-                <div className="h-4 w-24 bg-gray-800/50 rounded animate-pulse" />
-              </div>
-              <div className="w-8 h-8 bg-gray-800/50 rounded-full animate-pulse" />
-            </div>
-          </div>
-
-          {/* Search and Actions Bar */}
-          <div className="px-6 py-3 ml-56">
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center gap-2">
-                <div className="flex-1 h-10 bg-gray-800/30 rounded animate-pulse" />
-                <div className="w-20 h-10 bg-gray-800/30 rounded animate-pulse" />
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Content Skeleton with margin for tags */}
-        <div className="flex-grow overflow-hidden px-6 ml-56">
-          <div className="fluid-grid-dashboard">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-              <div key={i} className="group">
-                <div className="bg-dark-secondary/30 rounded-lg p-4 h-[140px] 
-                                border border-dark-secondary/50">
-                  {/* Title skeleton */}
-                  <div className="h-5 bg-gray-800/50 rounded w-3/4 mb-3 animate-pulse" />
-                  
-                  {/* Preview skeleton */}
-                  <div className="space-y-2 mb-3">
-                    <div className="h-3 bg-gray-800/30 rounded animate-pulse" />
-                    <div className="h-3 bg-gray-800/30 rounded w-5/6 animate-pulse" />
-                  </div>
-                  
-                  {/* Tags skeleton */}
-                  <div className="flex gap-2 mt-auto">
-                    <div className="h-5 w-16 bg-gray-800/30 rounded-full animate-pulse" />
-                    <div className="h-5 w-20 bg-gray-800/30 rounded-full animate-pulse" />
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       </div>
@@ -1233,7 +1216,7 @@ export default function Dashboard() {
   }
 
   return (
-    <DndContext 
+    <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
@@ -1241,15 +1224,20 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      <div className="h-screen overflow-hidden dashboard-container flex flex-col">
+      {/* New Figma-style gradient background */}
+      <div className="h-screen overflow-hidden dashboard-container flex flex-col
+                      bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32]">
         {/* Trial Banner - Fixed at top */}
         <TrialBanner trialStatus={trialStatus} />
-        
-        {/* Fixed Header - Outside Grid */}
-        <header className="flex-shrink-0 border-b border-dark-secondary/20 bg-dark-primary z-30 relative">
-          {/* Top Navigation Bar - Compact and Efficient */}
-          <div className="flex items-center justify-between px-4 md:px-6 py-2">
-            {/* Logo and Brand - Fixed Position */}
+
+        {/* Fixed Header - Redesigned Bento Box Style */}
+        <header className="flex-shrink-0 z-30 relative
+                          bg-[#0a1628]/40 backdrop-blur-xl
+                          border-b border-white/5
+                          shadow-2xl shadow-black/20">
+          {/* Top Row - Figma Style Header */}
+          <div className="flex items-center justify-between px-4 md:px-6 py-4">
+            {/* Logo and Status */}
             <div className="flex items-center gap-2.5 ml-0 lg:ml-[288px]">
               {/* Mobile menu button */}
               <button
@@ -1260,72 +1248,84 @@ export default function Dashboard() {
                     toggleMobileSidebar();
                   }
                 }}
-                className="p-2 hover:bg-dark-secondary/40 rounded transition-colors lg:hidden"
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors lg:hidden"
               >
-                <Menu size={20} className="text-text-primary" />
+                <Menu size={20} className="text-white/90" />
               </button>
-              <LogoMinimal size={32} />
-              <h1 className="text-xl font-semibold text-text-primary">Devlog</h1>
+
+              {/* Status indicator and document count */}
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse
+                               shadow-lg shadow-emerald-400/50" />
+                <h1 className="text-white/90 text-base">
+                  All Documents <span className="text-white/40">({entries.length})</span>
+                </h1>
+              </div>
             </div>
 
-            {/* Stats and Profile - Moved from main content */}
-            <div className="flex items-center gap-2 md:gap-4 mr-2 md:mr-8">
-              {/* Document Stats - Inline and Minimal */}
-              <div className="hidden sm:flex items-center gap-3 text-xs">
-                <span className="text-text-secondary/70">
-                  <span className="text-text-primary font-medium">{entries.length}</span> docs
-                </span>
-                <span className="text-text-secondary/40">•</span>
-                <span className="text-text-secondary/70">
-                  <span className="text-text-primary font-medium">{entries.reduce((acc, e) => acc + (e.blocks?.length || e.blockCount || 0), 0)}</span> blocks
-                </span>
-              </div>
-              
-              {/* Profile Dropdown - Full Functionality */}
+            {/* Actions */}
+            <div className="flex items-center gap-3 mr-2 md:mr-8">
+              {/* New Button */}
+              <button
+                onClick={() => createNewEntry()}
+                className="hidden md:flex items-center gap-2 h-9 px-4
+                           bg-white/5 hover:bg-emerald-500/10
+                           text-white/70 hover:text-emerald-400
+                           border border-white/10 hover:border-emerald-500/30
+                           transition-all rounded-lg"
+              >
+                <Plus className="w-4 h-4" />
+                New
+              </button>
+
+              {/* Profile Dropdown - Figma Style */}
               <div className="relative profile-menu-container">
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center gap-1.5 p-1.5 hover:bg-dark-secondary/40 
-                            rounded transition-colors group"
+                  className="h-9 w-9 rounded-lg p-0
+                            bg-white/5 hover:bg-white/10
+                            border border-white/10 hover:border-white/20
+                            transition-all flex items-center justify-center"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-accent-green/20 to-accent-green/10 
-                                  rounded-full flex items-center justify-center border border-accent-green/20
-                                  group-hover:border-accent-green/40 transition-colors">
-                    <User size={16} className="text-accent-green" />
+                  <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500
+                                  rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-medium">DV</span>
                   </div>
-                  <div className="w-1.5 h-1.5 border-l border-b border-text-secondary/40 
-                                  transform rotate-[-45deg] transition-transform duration-200
-                                  group-hover:border-text-primary/60"
-                        style={{ transform: showProfileMenu ? 'rotate(135deg)' : 'rotate(-45deg)' }}
-                  />
                 </button>
 
-                {/* Profile Menu - Compact */}
+                {/* Profile Menu - Glassmorphic */}
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-1 w-48 bg-dark-secondary rounded 
-                                  shadow-xl border border-dark-primary/50 overflow-hidden z-50
+                  <div className="absolute right-0 mt-1 w-56
+                                  bg-[#1a2942]/95 backdrop-blur-xl
+                                  border-white/10 border rounded-xl
+                                  shadow-xl shadow-black/20 overflow-hidden z-50
                                   animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="p-3 border-b border-dark-primary/50">
-                      <p className="text-sm font-medium text-text-primary">Developer</p>
-                      <p className="text-xs text-text-secondary/70">{user?.email || 'developer@journey.log'}</p>
+                    <div className="p-3 border-b border-white/10">
+                      <p className="text-sm leading-none text-white/90">Developer</p>
+                      <p className="text-xs leading-none text-white/50 mt-1">
+                        {user?.email || 'developer@devlog.app'}
+                      </p>
                     </div>
-                    
+
                     <div className="p-1">
-                      <button 
+                      <button
                         onClick={() => navigate('/settings')}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
-                                       text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
-                                       rounded transition-colors text-sm">
-                        <Settings size={14} />
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left
+                                   text-white/70 hover:text-white/90 hover:bg-white/5
+                                   focus:bg-white/5 focus:text-white/90
+                                   rounded transition-colors text-sm cursor-pointer">
+                        <Settings className="w-4 h-4" />
                         <span>Settings</span>
                       </button>
-                      <button 
+                      <div className="my-1 h-px bg-white/10" />
+                      <button
                         onClick={() => signOut()}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left 
-                                       text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 
-                                       rounded transition-colors text-sm">
-                        <LogOut size={14} />
-                        <span>Sign Out</span>
+                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left
+                                   text-red-400 hover:text-red-300 hover:bg-red-500/10
+                                   focus:bg-red-500/10 focus:text-red-300
+                                   rounded transition-colors text-sm cursor-pointer">
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign out</span>
                       </button>
                     </div>
                   </div>
@@ -1406,89 +1406,67 @@ export default function Dashboard() {
 
       {/* Main Content Area */}
       <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out lg:col-start-2">
-        {/* Content Header - Search and Actions Only */}
-        <div className="flex-shrink-0">
-
-        {/* Search and Actions Bar - Compact and Efficient */}
-        <div className="px-4 md:px-6 py-3">
-          <div className="max-w-5xl mx-auto">
-            {/* Breadcrumb Navigation */}
-            <div className="mb-3">
-              <Breadcrumb
-                viewMode="documents"
-                selectedProject={selectedProjectId ? projects.find(p => p.id === selectedProjectId) : null}
-                documentTitle={expandedEntry?.title}
-                totalDocuments={entries.length}
-                onNavigateHome={() => {
-                  setSelectedProjectId(null);
-                }}
-                onNavigateProjects={() => {}}
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <SearchBar ref={searchBarRef} value={searchTerm} onChange={setSearchTerm} />
-              
-              
-              <button
-                onClick={() => createNewEntry()}
-                className="hidden md:flex flex-shrink-0 items-center gap-1.5 px-3 py-2 
-                           bg-dark-secondary/40 hover:bg-dark-secondary/60
-                           text-text-primary rounded transition-all
-                           border border-dark-secondary/50 hover:border-accent-green/40
-                           group relative overflow-hidden text-sm"
-                title="Create new document (⌘N)"
-              >
-                <div className="absolute inset-0 bg-accent-green/10 transform -translate-x-full 
-                                group-hover:translate-x-0 transition-transform duration-300" />
-                <Plus size={16} className="group-hover:rotate-90 transition-transform duration-300 relative z-10" />
-                <span className="font-medium relative z-10">New</span>
-                <kbd className="hidden sm:inline-block ml-1.5 text-xs text-text-secondary/70 
-                                bg-dark-primary/30 px-1 py-0.5 rounded relative z-10">
-                  ⌘N
-                </kbd>
-              </button>
-            </div>
+        {/* Content Header - Search Bar */}
+        <div className="flex-shrink-0 px-4 md:px-6 py-4 ml-0 lg:ml-[288px]">
+          {/* Search Bar - Figma Style */}
+          <div className="relative max-w-3xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+            <input
+              ref={searchBarRef}
+              type="text"
+              placeholder="Search documents..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl
+                         pl-11 pr-4 py-3 text-white/90 placeholder:text-white/40
+                         focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+                         focus:border-emerald-500/50 transition-all backdrop-blur-sm"
+            />
           </div>
         </div>
-        </div>
 
-        {/* Main Content - Documents Grid */}
-        <div 
-          ref={pullToRefreshRef}
-          className="flex-1 overflow-y-auto overflow-x-hidden px-4 md:px-6 pb-4 min-h-0 custom-scrollbar relative"
-          style={{ 
-            scrollbarWidth: 'thin',
-            scrollbarColor: 'rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05)',
-            paddingBottom: isMobile ? '80px' : '1rem' // Space for mobile FAB
-          }}>
-          {/* Pull to refresh indicator */}
-          {isPulling && (
-            <div 
-              className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all"
-              style={{ 
-                height: `${pullDistance}px`,
-                opacity: pullProgress 
-              }}
-            >
-              <div className="text-text-secondary text-sm">
-                {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
+        {/* Main Content - Documents Grid Bento Box */}
+        <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 ml-0 lg:ml-[288px]">
+          <div className="h-full bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl
+                          border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
+            <div
+              ref={pullToRefreshRef}
+              className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative"
+              style={{
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(16, 185, 129, 0.3) rgba(255, 255, 255, 0.05)',
+                paddingBottom: isMobile ? '80px' : '1rem' // Space for mobile FAB
+              }}>
+              {/* Pull to refresh indicator */}
+              {isPulling && (
+                <div
+                  className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all"
+                  style={{
+                    height: `${pullDistance}px`,
+                    opacity: pullProgress
+                  }}
+                >
+                  <div className="text-white/60 text-sm">
+                    {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
+                  </div>
+                </div>
+              )}
+              <div className="p-6">
+                <DocumentGridRedesigned
+                  entries={filteredEntries}
+                  onExpand={handleDocumentExpand}
+                  searchTerm={searchTerm}
+                  selectedDocuments={selectedDocuments}
+                  onSelectDocument={handleDocumentSelect}
+                  selectionMode={selectedDocuments.size > 0}
+                  onContextMenu={isMobile ? (entry) => {
+                    setContextMenuTarget(entry);
+                    setShowMobileContextMenu(true);
+                  } : undefined}
+                />
               </div>
             </div>
-          )}
-          <VirtualizedGrid 
-            entries={filteredEntries}
-            onExpand={handleDocumentExpand}
-            searchTerm={searchTerm}
-            selectedDocuments={selectedDocuments}
-            onSelectDocument={handleDocumentSelect}
-            selectionMode={selectedDocuments.size > 0}
-            sidebarCollapsed={isSidebarCollapsed}
-            onContextMenu={isMobile ? (entry) => {
-              setContextMenuTarget(entry);
-              setShowMobileContextMenu(true);
-            } : undefined}
-          />
+          </div>
         </div>
       </main>
 

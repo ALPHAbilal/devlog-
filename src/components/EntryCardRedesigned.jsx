@@ -1,0 +1,185 @@
+import { useState, useRef, useMemo } from 'react';
+import { optimizedBlockLoader } from '../utils/optimizedBlockLoader';
+import { useDraggable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
+import { GripVertical, Check, MoreVertical, Star } from 'lucide-react';
+import { useTouchGestures } from '../hooks/useTouchGestures';
+import { generateActivityData } from '../utils/activityData';
+
+export default function EntryCardRedesigned({ entry, onExpand, isSelected = false, onSelect, selectionMode = false, onContextMenu }) {
+  const [touchActive, setTouchActive] = useState(false);
+  const cardRef = useRef(null);
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    isDragging
+  } = useDraggable({
+    id: entry.id,
+    data: {
+      type: 'document',
+      entry
+    }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+  };
+
+  // Preload blocks on hover
+  const handleMouseEnter = () => {
+    optimizedBlockLoader.preloadDocuments([entry.id]);
+  };
+
+  // Touch gesture handling
+  const gestureRef = useTouchGestures({
+    onLongPress: () => {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(30);
+      }
+      onContextMenu?.(entry);
+    },
+    threshold: 50,
+    longPressDelay: 400
+  });
+
+  const handleClick = (e) => {
+    // Prevent double-tap zoom on mobile
+    e.preventDefault();
+
+    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+      onSelect?.(entry.id, e);
+    } else if (selectionMode) {
+      onSelect?.(entry.id, e);
+    } else {
+      onExpand(entry);
+    }
+  };
+
+  const handleTouchStart = () => {
+    setTouchActive(true);
+  };
+
+  const handleTouchEnd = () => {
+    setTimeout(() => setTouchActive(false), 100);
+  };
+
+  // Generate activity data for chart visualization
+  const activityData = useMemo(() => generateActivityData(entry), [entry]);
+
+  // Check if document has chart data (has activity or blocks)
+  const hasChart = entry.blocks && entry.blocks.length > 0;
+
+  return (
+    <div
+      ref={(node) => {
+        setNodeRef(node);
+        cardRef.current = node;
+        if (node) gestureRef.current = node;
+      }}
+      style={style}
+      onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className={`group relative bg-gradient-to-br from-[#1a2942]/60 to-[#0f1d32]/60 backdrop-blur-sm
+                 rounded-xl border border-white/10 hover:border-emerald-500/30
+                 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10
+                 cursor-pointer overflow-hidden self-start
+                 touch-manipulation select-none
+                 ${isDragging ? 'opacity-0' : ''}
+                 ${isSelected ? 'ring-2 ring-emerald-500 shadow-lg shadow-emerald-500/20' : ''}
+                 ${touchActive ? 'scale-[0.98]' : ''}`}
+    >
+      {/* Hover gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/0
+                      group-hover:from-emerald-500/10 group-hover:to-transparent
+                      transition-all duration-300 pointer-events-none" />
+
+      {/* Drag Handle - Hidden on mobile */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="hidden lg:block absolute -left-8 top-1/2 -translate-y-1/2 p-2
+                   bg-[#0a1628]/80 hover:bg-[#1a2942] backdrop-blur-sm
+                   rounded-l-lg transition-all duration-200
+                   cursor-grab active:cursor-grabbing
+                   opacity-0 group-hover:opacity-100
+                   hover:shadow-md border border-white/10"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical size={20} className="text-white/40 hover:text-emerald-400 transition-colors" />
+      </div>
+
+      {/* Mobile Context Menu Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onContextMenu?.(entry);
+        }}
+        className="lg:hidden absolute top-3 right-3 p-2 z-20
+                   hover:bg-white/10 active:bg-white/20
+                   rounded-lg transition-colors"
+      >
+        <MoreVertical size={16} className="text-white/60" />
+      </button>
+
+      {/* Favorite Star Indicator */}
+      {entry.isFavorite && (
+        <div className="absolute top-3 right-3 z-10">
+          <Star className="w-4 h-4 text-blue-200/60 fill-blue-400/20
+                          drop-shadow-[0_2px_8px_rgba(59,130,246,0.5)]" />
+        </div>
+      )}
+
+      {/* Selection Indicator */}
+      {isSelected && (
+        <div className="absolute top-3 right-3 bg-emerald-500 rounded-full p-1.5 shadow-lg z-20
+                        animate-in fade-in zoom-in duration-200">
+          <Check size={14} className="text-white" strokeWidth={3} />
+        </div>
+      )}
+
+      <div className="relative p-5 flex flex-col h-full min-h-[140px]">
+        {/* Title */}
+        <h3 className="text-white/90 mb-4 group-hover:text-white transition-colors
+                       line-clamp-3 min-h-[4.5rem] flex items-start pr-6 leading-snug">
+          {entry.title}
+        </h3>
+
+        {/* Chart visualization */}
+        {hasChart && (
+          <div className="mt-auto h-16 flex items-end gap-1 px-1 pb-1">
+            {activityData.map((value, i) => (
+              <div
+                key={i}
+                className="flex-1 bg-gradient-to-t from-emerald-500/40 to-emerald-400/30 rounded-t
+                           group-hover:from-emerald-500/60 group-hover:to-emerald-400/50
+                           transition-all duration-300 shadow-sm shadow-emerald-500/20"
+                style={{
+                  height: `${value}%`,
+                  transitionDelay: `${i * 20}ms`
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Preview text for documents without chart */}
+        {!hasChart && (
+          <p className="mt-auto text-white/60 text-sm line-clamp-2 leading-relaxed">
+            {entry.preview || 'Click to start editing...'}
+          </p>
+        )}
+      </div>
+
+      {/* Accent line on hover */}
+      <div className="absolute bottom-0 left-0 right-0 h-0.5
+                      bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/0
+                      group-hover:from-emerald-500/50 group-hover:via-emerald-500 group-hover:to-emerald-500/50
+                      transition-all duration-500" />
+    </div>
+  );
+}

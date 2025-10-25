@@ -21,7 +21,7 @@ import MobileFAB from '../components/MobileFAB';
 import MobileBottomSheet from '../components/MobileBottomSheet';
 import MobileContextMenu from '../components/MobileContextMenu';
 import { useTouchGestures, usePullToRefresh } from '../hooks/useTouchGestures';
-import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft, MoreVertical } from 'lucide-react';
+import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft, MoreVertical, Search } from 'lucide-react';
 import storageWrapper, { deleteEntry } from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
 import { useAuth } from '../contexts/AuthContextOptimized';

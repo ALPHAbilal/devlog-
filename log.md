@@ -1,38 +1,176 @@
-20:37:24.989 Running build in Washington, D.C., USA (East) – iad1
-20:37:24.989 Build machine configuration: 2 cores, 8 GB
-20:37:25.010 Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: a0a76cf)
-20:37:25.911 Cloning completed: 901.000ms
-20:37:26.193 Restored build cache from previous deployment (BmAwoxHgyU7WoBTeBsRr29vVDToy)
-20:37:26.793 Running "vercel build"
-20:37:27.305 Vercel CLI 48.1.6
-20:37:28.417 Installing dependencies...
-20:37:29.923 
-20:37:29.924 up to date in 1s
-20:37:29.925 
-20:37:29.925 75 packages are looking for funding
-20:37:29.926   run `npm fund` for details
-20:37:30.120 
-20:37:30.120 > journey-log-compass@0.0.0 build
-20:37:30.121 > vite build
-20:37:30.121 
-20:37:31.115 [36mvite v6.3.5 [32mbuilding for production...[36m[39m
-20:37:31.163 [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
-20:37:31.678 transforming...
-20:37:37.724 [32m✓[39m 2364 modules transformed.
-20:37:37.729 [31m✗[39m Build failed in 6.57s
-20:37:37.730 [31merror during build:
-20:37:37.731 [31m[vite]: Rollup failed to resolve import "tailwind-merge" from "/vercel/path0/src/utils/cn.js".
-20:37:37.731 This is most likely unintended because it can break your application at runtime.
-20:37:37.732 If you do want to externalize this module explicitly add it to
-20:37:37.732 `build.rollupOptions.external`[31m
-20:37:37.733     at viteLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
-20:37:37.733     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46403:18
-20:37:37.733     at onwarn (file:///vercel/path0/node_modules/@vitejs/plugin-react/dist/index.js:90:7)
-20:37:37.734     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46401:7
-20:37:37.734     at onRollupLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46393:5)
-20:37:37.735     at onLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
-20:37:37.735     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:20866:32
-20:37:37.736     at Object.logger [as onLog] (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:22748:9)
-20:37:37.736     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21492:26)
-20:37:37.737     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21450:26[39m
-20:37:37.828 Error: Command "npm run build" exited with 1
+index-C7UuK2on.js:26 Using optimized Supabase client
+index-C7UuK2on.js:26 IndexedDB initialized successfully
+index-C7UuK2on.js:26 Persistent storage granted
+index-C7UuK2on.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-C7UuK2on.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-C7UuK2on.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-C7UuK2on.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+index-C7UuK2on.js:26 Dashboard: Starting to load entries...
+index-C7UuK2on.js:26 Using Supabase for storage
+index-C7UuK2on.js:26 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-C7UuK2on.js:26 Dashboard: Storage initialized (27ms)
+index-C7UuK2on.js:26 SupabaseAdapter: getDocuments called
+index-C7UuK2on.js:26 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-C7UuK2on.js:26 SupabaseAdapter: Documents query completed in 747ms
+index-C7UuK2on.js:26 SupabaseAdapter: Found 248 documents
+index-C7UuK2on.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
+index-C7UuK2on.js:26 SupabaseAdapter: Total documents after merge: 248
+index-C7UuK2on.js:26 SupabaseAdapter: Returning 248 documents
+index-C7UuK2on.js:26 Dashboard: Loaded 248 entries (765ms)
+index-C7UuK2on.js:26 Dashboard: Total load time: 794ms
+index-C7UuK2on.js:26 SupabaseAdapter: Getting projects...
+index-C7UuK2on.js:26 SupabaseAdapter: Found 3 projects
+index-C7UuK2on.js:26 Dashboard: Loaded 3 projects
+index-C7UuK2on.js:26 Dashboard: Setting isLoading to false
+index-C7UuK2on.js:26 ErrorBoundary caught: ReferenceError: Search is not defined
+    at _N (index-C7UuK2on.js:1319:886)
+    at Xy (index-C7UuK2on.js:106:34202)
+    at p0 (index-C7UuK2on.js:106:62971)
+    at y_ (index-C7UuK2on.js:106:73538)
+    at q_ (index-C7UuK2on.js:106:107678)
+    at TI (index-C7UuK2on.js:106:106737)
+    at B0 (index-C7UuK2on.js:106:106567)
+    at z_ (index-C7UuK2on.js:106:103658)
+    at rk (index-C7UuK2on.js:106:115174)
+    at MessagePort.re (index-C7UuK2on.js:91:1592)Caused by: React ErrorBoundary ReferenceError: Search is not defined
+    at _N (index-C7UuK2on.js:1262:3498)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at gb (index-C7UuK2on.js:655:499)
+    at vF (index-C7UuK2on.js:74:3968)
+    at CF (index-C7UuK2on.js:74:7879)
+    at sentryRoute(/CF) (<anonymous>)
+    at sse (index-C7UuK2on.js:1575:2916)
+    at qte (index-C7UuK2on.js:992:2547)
+    at hH (index-C7UuK2on.js:116:48152)
+    at dH (index-C7UuK2on.js:116:46349)
+    at uH (index-C7UuK2on.js:116:44094)
+    at TF (index-C7UuK2on.js:74:7263)
+    at LF (index-C7UuK2on.js:83:874)
+    at Jre (index-C7UuK2on.js:1566:780)
+    at ase (<anonymous>) {componentStack: '\n    at _N (https://www.devlog.design/assets/index…ex-C7UuK2on.js:1566:780)\n    at ase (<anonymous>)'}
+(anonymous) @ index-C7UuK2on.js:26
+componentDidCatch @ index-C7UuK2on.js:1566
+M.componentDidCatch.a.callback @ index-C7UuK2on.js:106
+i1 @ index-C7UuK2on.js:106
+o1 @ index-C7UuK2on.js:106
+x_ @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+Y_ @ index-C7UuK2on.js:106
+G_ @ index-C7UuK2on.js:106
+$_ @ index-C7UuK2on.js:106
+z_ @ index-C7UuK2on.js:106
+rk @ index-C7UuK2on.js:106
+re @ index-C7UuK2on.js:91
+index-C7UuK2on.js:1566 Error Report
+index-C7UuK2on.js:26 Error: ReferenceError: Search is not defined
+    at _N (index-C7UuK2on.js:1319:886)
+    at Xy (index-C7UuK2on.js:106:34202)
+    at p0 (index-C7UuK2on.js:106:62971)
+    at y_ (index-C7UuK2on.js:106:73538)
+    at q_ (index-C7UuK2on.js:106:107678)
+    at TI (index-C7UuK2on.js:106:106737)
+    at B0 (index-C7UuK2on.js:106:106567)
+    at z_ (index-C7UuK2on.js:106:103658)
+    at rk (index-C7UuK2on.js:106:115174)
+    at MessagePort.re (index-C7UuK2on.js:91:1592)Caused by: React ErrorBoundary ReferenceError: Search is not defined
+    at _N (index-C7UuK2on.js:1262:3498)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at gb (index-C7UuK2on.js:655:499)
+    at vF (index-C7UuK2on.js:74:3968)
+    at CF (index-C7UuK2on.js:74:7879)
+    at sentryRoute(/CF) (<anonymous>)
+    at sse (index-C7UuK2on.js:1575:2916)
+    at qte (index-C7UuK2on.js:992:2547)
+    at hH (index-C7UuK2on.js:116:48152)
+    at dH (index-C7UuK2on.js:116:46349)
+    at uH (index-C7UuK2on.js:116:44094)
+    at TF (index-C7UuK2on.js:74:7263)
+    at LF (index-C7UuK2on.js:83:874)
+    at Jre (index-C7UuK2on.js:1566:780)
+    at ase (<anonymous>)
+(anonymous) @ index-C7UuK2on.js:26
+reportError @ index-C7UuK2on.js:1566
+componentDidCatch @ index-C7UuK2on.js:1566
+M.componentDidCatch.a.callback @ index-C7UuK2on.js:106
+i1 @ index-C7UuK2on.js:106
+o1 @ index-C7UuK2on.js:106
+x_ @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+Y_ @ index-C7UuK2on.js:106
+G_ @ index-C7UuK2on.js:106
+$_ @ index-C7UuK2on.js:106
+z_ @ index-C7UuK2on.js:106
+rk @ index-C7UuK2on.js:106
+re @ index-C7UuK2on.js:91
+index-C7UuK2on.js:26 Component Stack: 
+    at _N (https://www.devlog.design/assets/index-C7UuK2on.js:1262:3498)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at gb (https://www.devlog.design/assets/index-C7UuK2on.js:655:499)
+    at vF (https://www.devlog.design/assets/index-C7UuK2on.js:74:3968)
+    at CF (https://www.devlog.design/assets/index-C7UuK2on.js:74:7879)
+    at sentryRoute(CF) (<anonymous>)
+    at sse (https://www.devlog.design/assets/index-C7UuK2on.js:1575:2916)
+    at qte (https://www.devlog.design/assets/index-C7UuK2on.js:992:2547)
+    at hH (https://www.devlog.design/assets/index-C7UuK2on.js:116:48152)
+    at dH (https://www.devlog.design/assets/index-C7UuK2on.js:116:46349)
+    at uH (https://www.devlog.design/assets/index-C7UuK2on.js:116:44094)
+    at TF (https://www.devlog.design/assets/index-C7UuK2on.js:74:7263)
+    at LF (https://www.devlog.design/assets/index-C7UuK2on.js:83:874)
+    at Jre (https://www.devlog.design/assets/index-C7UuK2on.js:1566:780)
+    at ase (<anonymous>)
+(anonymous) @ index-C7UuK2on.js:26
+reportError @ index-C7UuK2on.js:1566
+componentDidCatch @ index-C7UuK2on.js:1566
+M.componentDidCatch.a.callback @ index-C7UuK2on.js:106
+i1 @ index-C7UuK2on.js:106
+o1 @ index-C7UuK2on.js:106
+x_ @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+Y_ @ index-C7UuK2on.js:106
+G_ @ index-C7UuK2on.js:106
+$_ @ index-C7UuK2on.js:106
+z_ @ index-C7UuK2on.js:106
+rk @ index-C7UuK2on.js:106
+re @ index-C7UuK2on.js:91
+index-C7UuK2on.js:26 Props: {children: {…}}
+(anonymous) @ index-C7UuK2on.js:26
+reportError @ index-C7UuK2on.js:1566
+componentDidCatch @ index-C7UuK2on.js:1566
+M.componentDidCatch.a.callback @ index-C7UuK2on.js:106
+i1 @ index-C7UuK2on.js:106
+o1 @ index-C7UuK2on.js:106
+x_ @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+uo @ index-C7UuK2on.js:106
+j_ @ index-C7UuK2on.js:106
+Y_ @ index-C7UuK2on.js:106
+G_ @ index-C7UuK2on.js:106
+$_ @ index-C7UuK2on.js:106
+z_ @ index-C7UuK2on.js:106
+rk @ index-C7UuK2on.js:106
+re @ index-C7UuK2on.js:91

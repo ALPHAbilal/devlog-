@@ -1,4 +1,6 @@
 /* Import custom styles - must be before @tailwind */
+/* Dashboard Design Tokens */
+@import './styles/dashboard-design-tokens.css';
 @import './styles/typography.css';
 @import './styles/fluid-grids.css';
 @import './styles/glassmorphism.css';

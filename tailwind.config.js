@@ -93,6 +93,16 @@ export default {
         'safe-bottom': 'env(safe-area-inset-bottom)',
         'safe-left': 'env(safe-area-inset-left)',
         'safe-right': 'env(safe-area-inset-right)',
+        // Dashboard-specific spacing
+        'db-xs': '0.5rem',
+        'db-sm': '0.75rem',
+        'db-md': '1rem',
+        'db-lg': '1.5rem',
+        'db-xl': '2rem',
+        'db-2xl': '3rem',
+        'db-sidebar-expanded': '280px',
+        'db-sidebar-collapsed': '80px',
+        'db-header': '72px',
       },
       screens: {
         // Base breakpoints
@@ -144,9 +154,55 @@ export default {
         'vt-surface': '#1E1E1E',
         'vt-glass': 'rgba(255, 255, 255, 0.05)',
         'vt-glass-border': 'rgba(255, 255, 255, 0.1)',
+        // Dashboard-specific colors
+        'db-dark': {
+          base: '#050b14',
+          primary: '#0a1628',
+          secondary: '#0f1d32',
+          tertiary: '#142842',
+        },
+        'db-emerald': {
+          DEFAULT: '#10b981',
+          light: '#34d399',
+          dark: '#059669',
+        },
+        'db-blue': {
+          DEFAULT: '#60a5fa',
+          light: '#93c5fd',
+          dark: '#3b82f6',
+        },
+        'db-amber': {
+          DEFAULT: '#fbbf24',
+          light: '#fcd34d',
+          dark: '#f59e0b',
+        },
+        'db-text': {
+          primary: '#f8fafc',
+          secondary: '#cbd5e1',
+          tertiary: '#94a3b8',
+          muted: '#64748b',
+        },
       },
       backgroundImage: {
         'card-gradient': 'linear-gradient(135deg, #1e3a5f 0%, #0a1628 100%)',
+      },
+      // Dashboard-specific border radius
+      borderRadius: {
+        'db-sm': '8px',
+        'db-md': '12px',
+        'db-lg': '16px',
+        'db-xl': '24px',
+      },
+      // Dashboard-specific box shadows
+      boxShadow: {
+        'db-sm': '0 1px 2px rgba(0, 0, 0, 0.3)',
+        'db-md': '0 4px 6px rgba(0, 0, 0, 0.4)',
+        'db-lg': '0 10px 15px rgba(0, 0, 0, 0.5)',
+        'db-glow': '0 0 20px rgba(16, 185, 129, 0.3)',
+      },
+      // Dashboard-specific backdrop blur
+      backdropBlur: {
+        'db': '24px',
       },
       // Touch-optimized minimum sizes
       minHeight: {
@@ -179,6 +235,10 @@ export default {
         'slide-down': 'slide-down 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         'slide-left': 'slide-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         'slide-right': 'slide-right 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        // Dashboard-specific animations
+        'db-fade-in': 'db-fade-in 0.3s ease-out',
+        'db-slide-in-left': 'db-slide-in-left 0.3s ease-out',
+        'db-pulse-glow': 'db-pulse-glow 2s ease-in-out infinite',
       },
       keyframes: {
         'in': {
@@ -209,6 +269,19 @@ export default {
         'slide-right': {
           '0%': { transform: 'translateX(-100%)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        // Dashboard-specific keyframes
+        'db-fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'db-slide-in-left': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'db-pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 20px rgba(16, 185, 129, 0.3)' },
+          '50%': { boxShadow: '0 0 30px rgba(16, 185, 129, 0.5)' },
         },
       },
       transitionProperty: {

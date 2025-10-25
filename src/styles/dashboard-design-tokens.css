@@ -1,0 +1,111 @@
+/* Dashboard Redesign Design Tokens */
+:root {
+  /* === Color System === */
+
+  /* Base Colors */
+  --db-dark-base: #050b14;
+  --db-dark-primary: #0a1628;
+  --db-dark-secondary: #0f1d32;
+  --db-dark-tertiary: #142842;
+
+  /* Accent Colors */
+  --db-emerald: #10b981;
+  --db-emerald-light: #34d399;
+  --db-emerald-dark: #059669;
+
+  --db-blue: #60a5fa;
+  --db-blue-light: #93c5fd;
+  --db-blue-dark: #3b82f6;
+
+  --db-amber: #fbbf24;
+  --db-amber-light: #fcd34d;
+  --db-amber-dark: #f59e0b;
+
+  /* Text Colors */
+  --db-text-primary: #f8fafc;
+  --db-text-secondary: #cbd5e1;
+  --db-text-tertiary: #94a3b8;
+  --db-text-muted: #64748b;
+
+  /* === Glassmorphism === */
+  --db-glass-bg: rgba(10, 22, 40, 0.4);
+  --db-glass-border: rgba(255, 255, 255, 0.1);
+  --db-glass-blur: 24px;
+
+  /* === Spacing === */
+  --db-spacing-xs: 0.5rem;    /* 8px */
+  --db-spacing-sm: 0.75rem;   /* 12px */
+  --db-spacing-md: 1rem;      /* 16px */
+  --db-spacing-lg: 1.5rem;    /* 24px */
+  --db-spacing-xl: 2rem;      /* 32px */
+  --db-spacing-2xl: 3rem;     /* 48px */
+
+  /* === Border Radius === */
+  --db-radius-sm: 8px;
+  --db-radius-md: 12px;
+  --db-radius-lg: 16px;
+  --db-radius-xl: 24px;
+
+  /* === Shadows === */
+  --db-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --db-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --db-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+  --db-shadow-glow: 0 0 20px rgba(16, 185, 129, 0.3);
+
+  /* === Transitions === */
+  --db-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --db-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --db-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* === Layout === */
+  --db-sidebar-width-expanded: 280px;
+  --db-sidebar-width-collapsed: 80px;
+  --db-header-height: 72px;
+  --db-container-max-width: 1920px;
+
+  /* === Z-Index Scale === */
+  --db-z-base: 1;
+  --db-z-elevated: 10;
+  --db-z-header: 100;
+  --db-z-sidebar: 90;
+  --db-z-modal: 1000;
+  --db-z-toast: 2000;
+}
+
+/* Gradient Backgrounds */
+.db-gradient-base {
+  background: linear-gradient(
+    135deg,
+    var(--db-dark-base) 0%,
+    var(--db-dark-primary) 50%,
+    var(--db-dark-secondary) 100%
+  );
+}
+
+.db-gradient-card {
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1) 0%,
+    rgba(96, 165, 250, 0.1) 100%
+  );
+}
+
+/* Glassmorphism Utility */
+.db-glass {
+  background: var(--db-glass-bg);
+  border: 1px solid var(--db-glass-border);
+  backdrop-filter: blur(var(--db-glass-blur));
+  -webkit-backdrop-filter: blur(var(--db-glass-blur));
+}
+
+/* Bento Box Container */
+.db-bento-container {
+  border-radius: var(--db-radius-xl);
+  padding: var(--db-spacing-lg);
+  transition: all var(--db-transition-normal);
+}
+
+.db-bento-container:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--db-shadow-lg);
+}

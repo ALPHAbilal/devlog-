@@ -1,119 +1,38 @@
-index-Lvm3IBmf.js:26 Using optimized Supabase client
-index-Lvm3IBmf.js:26 IndexedDB initialized successfully
-index-Lvm3IBmf.js:26 Persistent storage granted
-index-Lvm3IBmf.js:26 SW registered: ServiceWorkerRegistration
-index-Lvm3IBmf.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-Lvm3IBmf.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-Lvm3IBmf.js:26 [AuthContext] Auth state change received: INITIAL_SESSION Object
-index-Lvm3IBmf.js:26 Dashboard: Starting to load entries...
-index-Lvm3IBmf.js:26 Using Supabase for storage
-index-Lvm3IBmf.js:26 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-Lvm3IBmf.js:26 Dashboard: Storage initialized (34ms)
-index-Lvm3IBmf.js:26 SupabaseAdapter: getDocuments called
-index-Lvm3IBmf.js:26 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-Lvm3IBmf.js:26 SupabaseAdapter: Documents query completed in 925ms
-index-Lvm3IBmf.js:26 SupabaseAdapter: Found 248 documents
-index-Lvm3IBmf.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
-index-Lvm3IBmf.js:26 SupabaseAdapter: Total documents after merge: 248
-index-Lvm3IBmf.js:26 SupabaseAdapter: Returning 248 documents
-index-Lvm3IBmf.js:26 Dashboard: Loaded 248 entries (931ms)
-index-Lvm3IBmf.js:26 Dashboard: Total load time: 966ms
-index-Lvm3IBmf.js:26 SupabaseAdapter: Getting projects...
-index-Lvm3IBmf.js:26 SupabaseAdapter: Found 3 projects
-index-Lvm3IBmf.js:26 Dashboard: Loaded 3 projects
-index-Lvm3IBmf.js:26 Dashboard: Setting isLoading to false
-index-Lvm3IBmf.js:26 ErrorBoundary caught: ReferenceError: favoriteItems is not defined
-    at gx (index-Lvm3IBmf.js:1161:6744)
-    at $y (index-Lvm3IBmf.js:106:34195)
-    at s0 (index-Lvm3IBmf.js:106:62963)
-    at r_ (index-Lvm3IBmf.js:106:73528)
-    at A_ (index-Lvm3IBmf.js:106:107666)
-    at aI (index-Lvm3IBmf.js:106:106725)
-    at N0 (index-Lvm3IBmf.js:106:106555)
-    at E_ (index-Lvm3IBmf.js:106:103646)
-    at H_ (index-Lvm3IBmf.js:106:115162)
-    at MessagePort.te (index-Lvm3IBmf.js:91:1589)Caused by: React ErrorBoundary ReferenceError: favoriteItems is not defined
-    at gx (index-Lvm3IBmf.js:1161:2644)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at index-Lvm3IBmf.js:654:26596
-    at oC (index-Lvm3IBmf.js:1244:3498)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at ix (index-Lvm3IBmf.js:650:499)
-    at XU (index-Lvm3IBmf.js:74:3968)
-    at iF (index-Lvm3IBmf.js:74:7879)
-    at sentryRoute(iF) (<anonymous>)
-    at ire (index-Lvm3IBmf.js:1541:2916)
-    at _te (index-Lvm3IBmf.js:987:2547)
-    at V7 (index-Lvm3IBmf.js:116:48152)
-    at H7 (index-Lvm3IBmf.js:116:46349)
-    at F7 (index-Lvm3IBmf.js:116:44094)
-    at aF (index-Lvm3IBmf.js:74:7263)
-    at pF (index-Lvm3IBmf.js:83:874)
-    at Qne (index-Lvm3IBmf.js:1532:780)
-    at ore (<anonymous>) Object
-(anonymous) @ index-Lvm3IBmf.js:26
-index-Lvm3IBmf.js:1532 Error Report
-index-Lvm3IBmf.js:26 Error: ReferenceError: favoriteItems is not defined
-    at gx (index-Lvm3IBmf.js:1161:6744)
-    at $y (index-Lvm3IBmf.js:106:34195)
-    at s0 (index-Lvm3IBmf.js:106:62963)
-    at r_ (index-Lvm3IBmf.js:106:73528)
-    at A_ (index-Lvm3IBmf.js:106:107666)
-    at aI (index-Lvm3IBmf.js:106:106725)
-    at N0 (index-Lvm3IBmf.js:106:106555)
-    at E_ (index-Lvm3IBmf.js:106:103646)
-    at H_ (index-Lvm3IBmf.js:106:115162)
-    at MessagePort.te (index-Lvm3IBmf.js:91:1589)Caused by: React ErrorBoundary ReferenceError: favoriteItems is not defined
-    at gx (index-Lvm3IBmf.js:1161:2644)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at index-Lvm3IBmf.js:654:26596
-    at oC (index-Lvm3IBmf.js:1244:3498)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at ix (index-Lvm3IBmf.js:650:499)
-    at XU (index-Lvm3IBmf.js:74:3968)
-    at iF (index-Lvm3IBmf.js:74:7879)
-    at sentryRoute(iF) (<anonymous>)
-    at ire (index-Lvm3IBmf.js:1541:2916)
-    at _te (index-Lvm3IBmf.js:987:2547)
-    at V7 (index-Lvm3IBmf.js:116:48152)
-    at H7 (index-Lvm3IBmf.js:116:46349)
-    at F7 (index-Lvm3IBmf.js:116:44094)
-    at aF (index-Lvm3IBmf.js:74:7263)
-    at pF (index-Lvm3IBmf.js:83:874)
-    at Qne (index-Lvm3IBmf.js:1532:780)
-    at ore (<anonymous>)
-(anonymous) @ index-Lvm3IBmf.js:26
-index-Lvm3IBmf.js:26 Component Stack: 
-    at gx (https://www.devlog.design/assets/index-Lvm3IBmf.js:1161:2644)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at https://www.devlog.design/assets/index-Lvm3IBmf.js:654:26596
-    at oC (https://www.devlog.design/assets/index-Lvm3IBmf.js:1244:3498)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at ix (https://www.devlog.design/assets/index-Lvm3IBmf.js:650:499)
-    at XU (https://www.devlog.design/assets/index-Lvm3IBmf.js:74:3968)
-    at iF (https://www.devlog.design/assets/index-Lvm3IBmf.js:74:7879)
-    at sentryRoute(iF) (<anonymous>)
-    at ire (https://www.devlog.design/assets/index-Lvm3IBmf.js:1541:2916)
-    at _te (https://www.devlog.design/assets/index-Lvm3IBmf.js:987:2547)
-    at V7 (https://www.devlog.design/assets/index-Lvm3IBmf.js:116:48152)
-    at H7 (https://www.devlog.design/assets/index-Lvm3IBmf.js:116:46349)
-    at F7 (https://www.devlog.design/assets/index-Lvm3IBmf.js:116:44094)
-    at aF (https://www.devlog.design/assets/index-Lvm3IBmf.js:74:7263)
-    at pF (https://www.devlog.design/assets/index-Lvm3IBmf.js:83:874)
-    at Qne (https://www.devlog.design/assets/index-Lvm3IBmf.js:1532:780)
-    at ore (<anonymous>)
-(anonymous) @ index-Lvm3IBmf.js:26
-index-Lvm3IBmf.js:26 Props: Object
-(anonymous) @ index-Lvm3IBmf.js:26
+20:37:24.989 Running build in Washington, D.C., USA (East) – iad1
+20:37:24.989 Build machine configuration: 2 cores, 8 GB
+20:37:25.010 Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: a0a76cf)
+20:37:25.911 Cloning completed: 901.000ms
+20:37:26.193 Restored build cache from previous deployment (BmAwoxHgyU7WoBTeBsRr29vVDToy)
+20:37:26.793 Running "vercel build"
+20:37:27.305 Vercel CLI 48.1.6
+20:37:28.417 Installing dependencies...
+20:37:29.923 
+20:37:29.924 up to date in 1s
+20:37:29.925 
+20:37:29.925 75 packages are looking for funding
+20:37:29.926   run `npm fund` for details
+20:37:30.120 
+20:37:30.120 > journey-log-compass@0.0.0 build
+20:37:30.121 > vite build
+20:37:30.121 
+20:37:31.115 [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+20:37:31.163 [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
+20:37:31.678 transforming...
+20:37:37.724 [32m✓[39m 2364 modules transformed.
+20:37:37.729 [31m✗[39m Build failed in 6.57s
+20:37:37.730 [31merror during build:
+20:37:37.731 [31m[vite]: Rollup failed to resolve import "tailwind-merge" from "/vercel/path0/src/utils/cn.js".
+20:37:37.731 This is most likely unintended because it can break your application at runtime.
+20:37:37.732 If you do want to externalize this module explicitly add it to
+20:37:37.732 `build.rollupOptions.external`[31m
+20:37:37.733     at viteLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46345:15)
+20:37:37.733     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46403:18
+20:37:37.733     at onwarn (file:///vercel/path0/node_modules/@vitejs/plugin-react/dist/index.js:90:7)
+20:37:37.734     at file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46401:7
+20:37:37.734     at onRollupLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46393:5)
+20:37:37.735     at onLog (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46043:7)
+20:37:37.735     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:20866:32
+20:37:37.736     at Object.logger [as onLog] (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:22748:9)
+20:37:37.736     at ModuleLoader.handleInvalidResolvedId (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21492:26)
+20:37:37.737     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:21450:26[39m
+20:37:37.828 Error: Command "npm run build" exited with 1

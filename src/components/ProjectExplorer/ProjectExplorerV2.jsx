@@ -3,21 +3,18 @@ import {
   Folder,
   FolderOpen,
   FileText,
-  Star,
   ChevronRight,
   ChevronDown,
-  ChevronLeft,
-  Plus,
-  MoreVertical,
-  Edit2,
-  Trash2,
+  PanelLeftClose,
+  PanelLeft,
+  MoreHorizontal,
   FolderPlus,
-  FilePlus
+  FilePlus,
+  Trash2
 } from 'lucide-react';
 import { useFolders } from '../../hooks/useFolders';
 import { useProjectStructure } from '../../hooks/useBatchLoader';
 import { useToast } from '../../hooks/useToast';
-import ContextMenu from './ContextMenu';
 import {
   DndContext,
   closestCenter,
@@ -34,7 +31,7 @@ import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import '../../styles/project-explorer-v2.css';
 
 // Droppable folder component
-function DroppableFolder({ id, children, isActive }) {
+function DroppableFolder({ id, children }) {
   const { isOver, setNodeRef, active } = useDroppable({
     id: id,
     data: { type: 'folder' }
@@ -46,7 +43,7 @@ function DroppableFolder({ id, children, isActive }) {
     <div
       ref={setNodeRef}
       className={`
-        ${isOver && canDrop ? 'sidebar-v2-drop-active' : ''}
+        ${isOver && canDrop ? 'ring-1 ring-emerald-400/50 bg-emerald-400/5 rounded-lg' : ''}
         transition-all duration-200
       `}
     >
@@ -86,6 +83,227 @@ function DraggableItem({ id, type, data, children, isRenaming }) {
   );
 }
 
+// Recursive folder tree item component
+function FolderTreeItem({
+  item,
+  isExpanded,
+  onToggle,
+  expandedFolders,
+  depth = 0,
+  isFavorite = false,
+  onContextMenu,
+  onRename,
+  selectedDocumentId,
+  onDocumentSelect,
+  prefetchFolder,
+  cancelPrefetch
+}) {
+  const hasChildren = item.children && item.children.length > 0;
+  const isFile = item.type === 'file' || item.type === 'document';
+  const isActiveDocument = isFile && item.id === selectedDocumentId;
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showMenu]);
+
+  return (
+    <div className="relative">
+      {/* Tree guide lines */}
+      {depth > 0 && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-white/10 via-white/5 to-transparent"
+          style={{ left: `${(depth - 1) * 16 + 20}px` }}
+        />
+      )}
+
+      <div
+        className={`
+          flex items-center gap-2 py-1.5 px-2 text-sm transition-all duration-200 group relative
+          ${isFile ? 'text-white/60 hover:text-white/90' : 'text-white/70 hover:text-white/95'}
+          ${!isFile ? 'cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent rounded-lg' : 'cursor-pointer hover:bg-white/[0.03] rounded-lg'}
+          ${isActiveDocument ? 'bg-emerald-400/10 text-emerald-400' : ''}
+        `}
+        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+        onClick={() => {
+          if (!isFile) {
+            onToggle(item.id);
+          } else if (onDocumentSelect) {
+            onDocumentSelect(item.data || item);
+          }
+        }}
+        onMouseEnter={() => {
+          if (!isFile && !expandedFolders.has(item.id) && prefetchFolder) {
+            prefetchFolder(item.id);
+          }
+        }}
+        onMouseLeave={() => {
+          if (!isFile && cancelPrefetch) {
+            cancelPrefetch(item.id);
+          }
+        }}
+        onContextMenu={(e) => onContextMenu(e, item)}
+      >
+        {/* Chevron for folders with children */}
+        {!isFile && hasChildren && (
+          <ChevronRight
+            className={`
+              w-3.5 h-3.5 text-white/40 transition-all duration-300 flex-shrink-0
+              ${isExpanded ? 'rotate-90 text-emerald-400/80' : 'group-hover:text-white/60'}
+            `}
+          />
+        )}
+
+        {/* Spacer for folders without children or files */}
+        {(isFile || (!hasChildren && !isFile)) && (
+          <div className="w-3.5 h-3.5 flex-shrink-0" />
+        )}
+
+        {/* Icon */}
+        {isFile ? (
+          <FileText className={`w-3.5 h-3.5 flex-shrink-0 transition-all duration-200 ${
+            isActiveDocument ? 'text-emerald-400' : 'text-white/30 group-hover:text-emerald-400/90'
+          }`} />
+        ) : isExpanded ? (
+          <FolderOpen className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-all duration-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" />
+        ) : (
+          <Folder className={`
+            w-4 h-4 flex-shrink-0 transition-all duration-200
+            ${isFavorite
+              ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
+              : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
+            }
+          `} />
+        )}
+
+        {/* Name */}
+        <span className={`
+          flex-1 truncate transition-all duration-200 text-[13px]
+          ${isFile ? 'group-hover:translate-x-0.5' : ''}
+        `}>
+          {item.name || item.title || 'Untitled'}
+        </span>
+
+        {/* Count badge */}
+        {item.count !== undefined && item.count > 0 && (
+          <span className="text-[11px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded-md group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0 border border-white/5">
+            {item.count}
+          </span>
+        )}
+
+        {/* Three-dot menu */}
+        <div className="relative">
+          <button
+            className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowMenu(!showMenu);
+            }}
+          >
+            <MoreHorizontal className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
+          </button>
+
+          {/* Dropdown menu */}
+          {showMenu && (
+            <div
+              ref={menuRef}
+              className="absolute right-0 top-full mt-1 bg-[#1a2942]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl w-48 py-1 z-50"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!isFile && (
+                <>
+                  <button
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      // Create new folder
+                      if (onContextMenu) {
+                        onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} }, { ...item, action: 'newFolder' });
+                      }
+                    }}
+                  >
+                    <FolderPlus className="w-4 h-4 text-blue-400" />
+                    <span>New Folder</span>
+                  </button>
+                  <button
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      // Create new document
+                      if (onContextMenu) {
+                        onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} }, { ...item, action: 'newFile' });
+                      }
+                    }}
+                  >
+                    <FilePlus className="w-4 h-4 text-emerald-400" />
+                    <span>New Document</span>
+                  </button>
+                  <div className="h-px bg-white/10 my-1" />
+                </>
+              )}
+              <button
+                className="flex items-center gap-2 px-3 py-2 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/10 w-full text-left transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(false);
+                  // Delete item
+                  if (onContextMenu) {
+                    onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} }, { ...item, action: 'delete' });
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Hover indicator line */}
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-gradient-to-b from-emerald-400 to-emerald-500 rounded-full group-hover:h-4 transition-all duration-200 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+      </div>
+
+      {/* Render children recursively */}
+      {!isFile && isExpanded && hasChildren && (
+        <div className="overflow-hidden animate-in slide-in-from-top-1 duration-200">
+          <div className="space-y-0.5 py-0.5">
+            {item.children.map((child, index) => (
+              <FolderTreeItem
+                key={child.id}
+                item={child}
+                isExpanded={expandedFolders.has(child.id)}
+                onToggle={onToggle}
+                expandedFolders={expandedFolders}
+                depth={depth + 1}
+                isFavorite={false}
+                onContextMenu={onContextMenu}
+                onRename={onRename}
+                selectedDocumentId={selectedDocumentId}
+                onDocumentSelect={onDocumentSelect}
+                prefetchFolder={prefetchFolder}
+                cancelPrefetch={cancelPrefetch}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProjectExplorerV2({
   onDocumentSelect,
   selectedDocumentId,
@@ -98,18 +316,13 @@ export default function ProjectExplorerV2({
   height = 'h-full'
 }) {
   // State management
-  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [expandedItems, setExpandedItems] = useState(new Set());
   const [selectedItemId, setSelectedItemId] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [contextMenu, setContextMenu] = useState(null);
   const [renamingId, setRenamingId] = useState(null);
   const [renamingValue, setRenamingValue] = useState('');
-  const [isRenaming, setIsRenaming] = useState(false);
   const [draggedItem, setDraggedItem] = useState(null);
-  const [dragOverFolderId, setDragOverFolderId] = useState(null);
+  const [explorerExpanded, setExplorerExpanded] = useState(true);
 
-  const scrollContainerRef = useRef(null);
   const hoverTimerRef = useRef(null);
   const { showToast } = useToast();
 
@@ -142,36 +355,38 @@ export default function ProjectExplorerV2({
     })
   );
 
-  // Load favorites from localStorage
+  // Auto-expand folders for selected document
   useEffect(() => {
-    const saved = localStorage.getItem('devlog_favorites');
-    if (saved) {
-      try {
-        setFavoriteIds(new Set(JSON.parse(saved)));
-      } catch (e) {
-        console.error('Failed to load favorites:', e);
+    if (!selectedDocumentId || !documents.length) return;
+
+    const selectedDoc = documents.find(doc => doc.id === selectedDocumentId);
+    if (!selectedDoc) return;
+
+    setSelectedItemId(selectedDocumentId);
+
+    if (selectedDoc.folder_id) {
+      const getFolderPath = (folderId, path = []) => {
+        const folder = folders.find(f => f.id === folderId);
+        if (!folder) return path;
+
+        path.unshift(folder.id);
+        if (folder.parent_id) {
+          return getFolderPath(folder.parent_id, path);
+        }
+        return path;
+      };
+
+      const folderPath = getFolderPath(selectedDoc.folder_id);
+
+      if (folderPath.length > 0) {
+        setExpandedItems(prev => {
+          const newExpanded = new Set(prev);
+          folderPath.forEach(folderId => newExpanded.add(folderId));
+          return newExpanded;
+        });
       }
     }
-  }, []);
-
-  // Save favorites to localStorage
-  const saveFavorites = useCallback((favorites) => {
-    localStorage.setItem('devlog_favorites', JSON.stringify([...favorites]));
-  }, []);
-
-  // Toggle favorite
-  const toggleFavorite = useCallback((itemId) => {
-    setFavoriteIds(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(itemId)) {
-        newFavorites.delete(itemId);
-      } else {
-        newFavorites.add(itemId);
-      }
-      saveFavorites(newFavorites);
-      return newFavorites;
-    });
-  }, [saveFavorites]);
+  }, [selectedDocumentId, documents, folders]);
 
   // Build folder structure with documents
   const folderStructure = useMemo(() => {
@@ -180,13 +395,16 @@ export default function ProjectExplorerV2({
       return {
         ...folder,
         type: 'folder',
+        name: folder.name,
         documents: folderDocuments.map(doc => ({
           id: doc.id,
           name: doc.title || 'Untitled',
+          title: doc.title || 'Untitled',
           type: 'document',
           data: doc
         })),
-        children: folder.children ? folder.children.map(addDocumentsToFolder) : []
+        children: folder.children ? folder.children.map(addDocumentsToFolder) : [],
+        count: folderDocuments.length
       };
     };
 
@@ -197,31 +415,23 @@ export default function ProjectExplorerV2({
     const rootDocuments = documents.filter(doc => !doc.folder_id).map(doc => ({
       id: doc.id,
       name: doc.title || 'Untitled',
+      title: doc.title || 'Untitled',
       type: 'document',
       data: doc
     }));
 
-    return [...rootFolders, ...rootDocuments].sort((a, b) => {
+    // Combine folders with their documents as children
+    const foldersWithDocs = rootFolders.map(folder => ({
+      ...folder,
+      children: [...(folder.children || []), ...(folder.documents || [])]
+    }));
+
+    return [...foldersWithDocs, ...rootDocuments].sort((a, b) => {
       if (a.type === 'folder' && b.type !== 'folder') return -1;
       if (a.type !== 'folder' && b.type === 'folder') return 1;
       return (a.name || '').localeCompare(b.name || '');
     });
   }, [folders, documents]);
-
-  // Get favorite items
-  const favoriteItems = useMemo(() => {
-    const favoriteFolders = folders.filter(f => favoriteIds.has(f.id)).map(folder => ({
-      ...folder,
-      type: 'folder',
-      name: folder.name
-    }));
-    const favoriteDocuments = documents.filter(d => favoriteIds.has(d.id)).map(doc => ({
-      ...doc,
-      type: 'document',
-      name: doc.title || 'Untitled'
-    }));
-    return [...favoriteFolders, ...favoriteDocuments];
-  }, [folders, documents, favoriteIds]);
 
   // Toggle folder expansion
   const toggleExpanded = useCallback((itemId) => {
@@ -237,42 +447,19 @@ export default function ProjectExplorerV2({
   }, []);
 
   // Handle context menu
-  const handleContextMenu = useCallback((e, item, parentId = null) => {
+  const handleContextMenu = useCallback((e, item) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const isFavorite = favoriteIds.has(item.id);
-    const menuItems = [];
-
-    // Add favorite toggle
-    menuItems.push({
-      label: isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
-      icon: Star,
-      onClick: () => toggleFavorite(item.id),
-      className: isFavorite ? 'text-yellow-400' : ''
-    });
-
-    menuItems.push({ divider: true });
-
-    if (item.type === 'folder') {
-      menuItems.push(
-        { label: 'New Folder', icon: FolderPlus, onClick: () => createNewFolder(item.id) },
-        { label: 'New File', icon: FilePlus, onClick: () => createNewDocument(item.id) },
-        { divider: true }
-      );
+    if (item.action === 'newFolder') {
+      createNewFolder(item.id);
+    } else if (item.action === 'newFile') {
+      createNewDocument(item.id);
+    } else if (item.action === 'delete') {
+      deleteItem(item);
     }
-
-    menuItems.push(
-      { label: 'Rename', icon: Edit2, onClick: () => startRenaming(item) },
-      { label: 'Delete', icon: Trash2, onClick: () => deleteItem(item, parentId), danger: true }
-    );
-
-    setContextMenu({
-      x: e.clientX,
-      y: e.clientY,
-      items: menuItems
-    });
-  }, [favoriteIds, toggleFavorite]);
+    // Context menu actions handled via the dropdown menu in the UI
+  }, []);
 
   // Create new folder
   const createNewFolder = useCallback(async (parentId) => {
@@ -303,35 +490,8 @@ export default function ProjectExplorerV2({
     }
   }, [onDocumentSelect]);
 
-  // Start renaming
-  const startRenaming = useCallback((item) => {
-    setRenamingId(item.id);
-    setRenamingValue(item.name);
-  }, []);
-
-  // Complete renaming
-  const completeRenaming = useCallback(async () => {
-    if (!renamingId || !renamingValue.trim() || isRenaming) {
-      setRenamingId(null);
-      return;
-    }
-
-    setIsRenaming(true);
-    try {
-      await updateFolder(renamingId, { name: renamingValue.trim() });
-    } catch (error) {
-      if (error.message?.includes('unique_folder_name_per_parent')) {
-        showToast('A folder with this name already exists at this level', 'error');
-      }
-    } finally {
-      setIsRenaming(false);
-      setRenamingId(null);
-      setSelectedItemId(null);
-    }
-  }, [renamingId, renamingValue, updateFolder, isRenaming, showToast]);
-
   // Delete item
-  const deleteItem = useCallback(async (item, parentId) => {
+  const deleteItem = useCallback(async (item) => {
     if (item.type === 'folder') {
       await deleteFolderFromDB(item.id);
     } else if (item.type === 'document' && onDocumentDelete) {
@@ -343,10 +503,6 @@ export default function ProjectExplorerV2({
   const findItemInStructure = useCallback((items, id) => {
     for (const item of items) {
       if (item.id === id) return item;
-      if (item.documents) {
-        const doc = item.documents.find(d => d.id === id);
-        if (doc) return doc;
-      }
       if (item.children) {
         const result = findItemInStructure(item.children, id);
         if (result) return result;
@@ -370,35 +526,27 @@ export default function ProjectExplorerV2({
         clearTimeout(hoverTimerRef.current);
         hoverTimerRef.current = null;
       }
-      setDragOverFolderId(null);
       return;
     }
 
-    if (over.id !== dragOverFolderId) {
+    const targetItem = findItemInStructure(folderStructure, over.id);
+
+    if (targetItem && targetItem.type === 'folder' && !expandedItems.has(over.id)) {
       if (hoverTimerRef.current) {
         clearTimeout(hoverTimerRef.current);
+      }
+      hoverTimerRef.current = setTimeout(() => {
+        setExpandedItems(prev => new Set([...prev, over.id]));
         hoverTimerRef.current = null;
-      }
-
-      setDragOverFolderId(over.id);
-
-      const targetItem = findItemInStructure(folderStructure, over.id);
-
-      if (targetItem && targetItem.type === 'folder' && !expandedItems.has(over.id)) {
-        hoverTimerRef.current = setTimeout(() => {
-          setExpandedItems(prev => new Set([...prev, over.id]));
-          hoverTimerRef.current = null;
-        }, 700);
-      }
+      }, 700);
     }
-  }, [dragOverFolderId, folderStructure, expandedItems, findItemInStructure]);
+  }, [folderStructure, expandedItems, findItemInStructure]);
 
   const handleDragEnd = useCallback(async (event) => {
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
       hoverTimerRef.current = null;
     }
-    setDragOverFolderId(null);
 
     const { active, over } = event;
 
@@ -442,218 +590,67 @@ export default function ProjectExplorerV2({
     setDraggedItem(null);
   }, [folderStructure, moveDocumentToFolder, moveFolder, onDocumentMove, findItemInStructure]);
 
-  // Render favorite item
-  const renderFavoriteItem = (item) => {
-    const isActiveDocument = item.type === 'document' && item.id === selectedDocumentId;
-
-    return (
-      <div
-        key={item.id}
-        className={`sidebar-v2-item ${isActiveDocument ? 'active' : ''}`}
-        onClick={() => {
-          if (item.type === 'document') {
-            onDocumentSelect?.(item.data || item);
-          }
-          setSelectedItemId(item.id);
-        }}
-        onContextMenu={(e) => handleContextMenu(e, item)}
-      >
-        <div className="sidebar-v2-item-icon">
-          {item.type === 'folder' ? (
-            <Folder size={14} className="text-amber-400" />
-          ) : (
-            <FileText size={14} className={isActiveDocument ? 'text-accent-green' : ''} />
-          )}
-        </div>
-        <span className="sidebar-v2-item-text">{item.name}</span>
-        <Star size={12} className="text-amber-400" />
-      </div>
-    );
-  };
-
-  // Render tree item
-  const renderTreeItem = (item, depth = 0, parentId = null) => {
-    const isExpanded = expandedItems.has(item.id);
-    const isSelected = selectedItemId === item.id;
-    const isRenaming = renamingId === item.id;
-    const hasChildren = (item.children && item.children.length > 0) || (item.documents && item.documents.length > 0);
-    const isActiveDocument = item.type === 'document' && item.id === selectedDocumentId;
-    const isFavorite = favoriteIds.has(item.id);
-    const documentCount = item.documents ? item.documents.length : 0;
-
-    const itemContent = (
-      <div
-        data-document-id={item.type === 'document' ? item.id : undefined}
-        className={`sidebar-v2-item ${isActiveDocument ? 'active' : ''} ${isSelected && !isActiveDocument ? 'selected' : ''}`}
-        style={{ paddingLeft: `${(depth * 16) + 12}px` }}
-        onClick={() => {
-          if (item.type === 'folder') {
-            toggleExpanded(item.id);
-          } else if (item.type === 'document') {
-            onDocumentSelect?.(item.data);
-          }
-          setSelectedItemId(item.id);
-        }}
-        onMouseEnter={() => {
-          if (item.type === 'folder' && !expandedItems.has(item.id)) {
-            prefetchFolder(item.id);
-          }
-        }}
-        onMouseLeave={() => {
-          if (item.type === 'folder') {
-            cancelPrefetch(item.id);
-          }
-        }}
-        onContextMenu={(e) => handleContextMenu(e, item, parentId)}
-      >
-        <div className="flex items-center gap-1 flex-1 min-w-0">
-          {(hasChildren || item.type === 'folder') && (
-            <ChevronRight
-              size={12}
-              className={`sidebar-v2-chevron ${isExpanded ? 'expanded' : ''}`}
-            />
-          )}
-          {!hasChildren && item.type !== 'folder' && (
-            <div className="w-3" />
-          )}
-
-          <div className="sidebar-v2-item-icon">
-            {item.type === 'folder' ? (
-              isExpanded ? (
-                <FolderOpen size={14} className="text-accent-green" />
-              ) : (
-                <Folder size={14} />
-              )
-            ) : (
-              <FileText size={14} className={isActiveDocument ? 'text-accent-green' : ''} />
-            )}
-          </div>
-
-          {isRenaming ? (
-            <input
-              type="text"
-              value={renamingValue}
-              onChange={(e) => setRenamingValue(e.target.value)}
-              onBlur={completeRenaming}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') completeRenaming();
-                if (e.key === 'Escape') {
-                  setRenamingId(null);
-                  setRenamingValue('');
-                }
-              }}
-              className="sidebar-v2-rename-input"
-              autoFocus
-              onClick={(e) => e.stopPropagation()}
-              onFocus={(e) => e.target.select()}
-            />
-          ) : (
-            <>
-              <span className="sidebar-v2-item-text" title={item.name}>
-                {item.name}
-              </span>
-              {isFavorite && <Star size={10} className="text-amber-400 ml-auto" />}
-              {item.type === 'folder' && documentCount > 0 && (
-                <span className="sidebar-v2-item-count">{documentCount}</span>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="sidebar-v2-item-actions">
-          {item.type === 'folder' && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                createNewFolder(item.id);
-              }}
-              className="sidebar-v2-action-btn"
-              title="New folder"
-            >
-              <FolderPlus size={12} />
-            </button>
-          )}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleContextMenu(e, item, parentId);
-            }}
-            className="sidebar-v2-action-btn"
-            title="More options"
-          >
-            <MoreVertical size={12} />
-          </button>
-        </div>
-      </div>
-    );
-
-    let wrappedContent;
-    if (item.type === 'folder') {
-      wrappedContent = (
-        <DroppableFolder id={item.id}>
-          <DraggableItem
-            id={item.id}
-            type={item.type}
-            data={item}
-            isRenaming={isRenaming}
-          >
-            {itemContent}
-          </DraggableItem>
-        </DroppableFolder>
-      );
-    } else {
-      wrappedContent = (
-        <DraggableItem
-          id={item.id}
-          type={item.type}
-          data={item}
-          isRenaming={isRenaming}
-        >
-          {itemContent}
-        </DraggableItem>
-      );
-    }
-
-    return (
-      <div key={item.id}>
-        {wrappedContent}
-        {isExpanded && hasChildren && (
-          <div className="sidebar-v2-children expanded">
-            {item.children && item.children.map(child => renderTreeItem(child, depth + 1, item.id))}
-            {item.documents && item.documents.map(doc => renderTreeItem(doc, depth + 1, item.id))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Render loading skeleton
-  const FolderSkeleton = () => (
-    <div className="sidebar-v2-skeleton">
-      <div className="sidebar-v2-skeleton-item">
-        <div className="skeleton-icon" />
-        <div className="skeleton-text" />
-      </div>
-    </div>
-  );
-
-  // Collapsed view
+  // Collapsed sidebar
   if (isCollapsed) {
     return (
-      <div className="sidebar-v2-container sidebar-v2-collapsed">
-        <div className="sidebar-v2-header-collapsed">
+      <div className="w-20 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden flex flex-col relative transition-all duration-300 ease-in-out">
+        <div className="px-2 pt-3 pb-2 flex-shrink-0">
           <button
             onClick={onToggleCollapse}
-            className="sidebar-v2-toggle-btn"
-            title="Expand sidebar (Ctrl+B)"
+            className="w-full h-11 p-0 text-white/50 hover:text-emerald-400 hover:bg-emerald-400/10 transition-all duration-200 rounded-xl relative group flex items-center justify-center"
+            title="Expand sidebar"
           >
-            <ChevronRight size={20} />
+            <PanelLeft className="w-5 h-5" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-emerald-400 rounded-full group-hover:h-8 transition-all duration-200" />
           </button>
         </div>
+
+        <div className="h-px bg-white/10 mx-4 mb-2" />
+
+        {favoriteItems.length > 0 && (
+          <>
+            <div className="px-2 py-1">
+              <div className="flex items-center justify-center p-3 text-amber-400/70 hover:text-amber-300 hover:bg-amber-400/10 rounded-xl cursor-pointer transition-all duration-200 group relative">
+                <Star className="w-5 h-5 fill-current" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-amber-400 rounded-full group-hover:h-8 transition-all duration-200" />
+              </div>
+            </div>
+            <div className="h-px bg-white/10 mx-4 my-2" />
+          </>
+        )}
+
+        <div className="flex-1 mt-1 flex flex-col">
+          <div className="px-2 space-y-1">
+            {folderStructure.slice(0, 6).map((folder) => folder.type === 'folder' && (
+              <div
+                key={folder.id}
+                className="flex items-center justify-center p-3 text-white/50 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
+                title={folder.name}
+              >
+                <Folder className="w-5 h-5" />
+                {folder.count > 0 && (
+                  <div className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-emerald-500 text-white text-[10px] rounded-full flex items-center justify-center px-1 shadow-lg">
+                    {folder.count}
+                  </div>
+                )}
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-emerald-400 rounded-full group-hover:h-8 transition-all duration-200" />
+              </div>
+            ))}
+          </div>
+
+          {folderStructure.filter(f => f.type === 'folder').length > 6 && (
+            <div className="px-2 mt-2 flex items-center justify-center p-2 text-white/30 text-xs">
+              +{folderStructure.filter(f => f.type === 'folder').length - 6}
+            </div>
+          )}
+        </div>
+
+        <div className="h-3 flex-shrink-0" />
       </div>
     );
   }
 
+  // Expanded sidebar
   return (
     <DndContext
       sensors={sensors}
@@ -662,111 +659,111 @@ export default function ProjectExplorerV2({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className={`sidebar-v2-container ${className}`}>
-        {/* Header */}
-        <div className="sidebar-v2-header">
+      <div className="w-72 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden flex flex-col relative transition-all duration-300">
+        {/* Collapse Button */}
+        <div className="px-4 pt-3 pb-2 flex-shrink-0">
           <button
             onClick={onToggleCollapse}
-            className="sidebar-v2-toggle-btn"
-            title="Collapse sidebar (Ctrl+B)"
+            className="w-full h-10 px-3 text-white/40 hover:text-white/90 hover:bg-white/10 transition-all rounded-lg flex items-center justify-center gap-2"
           >
-            <ChevronLeft size={20} />
+            <PanelLeftClose className="w-4 h-4" />
+            <span className="text-xs">Collapse</span>
           </button>
-          <h3 className="sidebar-v2-title">Explorer</h3>
-          <div className="sidebar-v2-header-actions">
-            <button
-              onClick={() => createNewDocument(null)}
-              className="sidebar-v2-action-btn"
-              title="New document"
-            >
-              <FilePlus size={14} />
-            </button>
-            <button
-              onClick={() => createNewFolder(null)}
-              className="sidebar-v2-action-btn"
-              title="New folder"
-            >
-              <FolderPlus size={14} />
-            </button>
-          </div>
         </div>
 
-        {/* Favorites Section */}
-        {favoriteItems.length > 0 && (
-          <div className="sidebar-v2-section">
-            <div className="sidebar-v2-section-header">
-              <span>Favorites</span>
-            </div>
-            <div className="sidebar-v2-items">
-              {favoriteItems.map(item => renderFavoriteItem(item))}
-            </div>
-          </div>
-        )}
+        <div className="h-px bg-white/10 mx-4 mb-3" />
 
         {/* All Folders Section */}
-        <div className="sidebar-v2-section">
-          <div className="sidebar-v2-section-header">
-            <span>All Folders</span>
-          </div>
-          <div
-            ref={scrollContainerRef}
-            className="sidebar-v2-scroll-container"
-            onWheel={(e) => {
-              const container = e.currentTarget;
-              const canScroll = container.scrollHeight > container.clientHeight;
-              const atTop = container.scrollTop === 0;
-              const atBottom = container.scrollTop + container.clientHeight >= container.scrollHeight;
-
-              if (canScroll && !((e.deltaY < 0 && atTop) || (e.deltaY > 0 && atBottom))) {
-                e.stopPropagation();
-              }
-            }}
+        <div className="flex-1 px-4 min-h-0 flex flex-col pb-4">
+          <button
+            onClick={() => setExplorerExpanded(!explorerExpanded)}
+            className="flex items-center gap-2 px-3 py-2 text-white/50 text-xs hover:text-white/80 transition-colors w-full group rounded-lg hover:bg-white/5 flex-shrink-0"
           >
-            <DroppableFolder id="root">
-              <div className="sidebar-v2-items">
-                {foldersLoading ? (
-                  <>
-                    <FolderSkeleton />
-                    <FolderSkeleton />
-                    <FolderSkeleton />
-                  </>
-                ) : (
-                  folderStructure.map(item => renderTreeItem(item))
-                )}
-              </div>
-            </DroppableFolder>
-          </div>
+            {explorerExpanded ? (
+              <ChevronDown className="w-3.5 h-3.5 transition-transform" />
+            ) : (
+              <ChevronRight className="w-3.5 h-3.5 transition-transform" />
+            )}
+            <span className="uppercase tracking-wider">All Folders</span>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-xs text-white/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                {folderStructure.filter(f => f.type === 'folder').length}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  createNewFolder(null);
+                }}
+                className="opacity-0 group-hover:opacity-100 hover:bg-emerald-500/20 rounded p-1 transition-all duration-200 hover:scale-110"
+                title="New Folder"
+              >
+                <FolderPlus className="w-3.5 h-3.5 text-emerald-400 hover:text-emerald-300" />
+              </button>
+            </div>
+          </button>
+
+          {explorerExpanded && (
+            <div className="flex-1 overflow-y-auto overflow-x-hidden mt-2 sidebar-scroll">
+              <DroppableFolder id="root">
+                <div className="space-y-0.5 pr-2 pb-4">
+                  {foldersLoading ? (
+                    <>
+                      <div className="h-8 bg-white/5 rounded animate-pulse" />
+                      <div className="h-8 bg-white/5 rounded animate-pulse" />
+                      <div className="h-8 bg-white/5 rounded animate-pulse" />
+                    </>
+                  ) : (
+                    folderStructure.map((item) => (
+                      <DraggableItem
+                        key={item.id}
+                        id={item.id}
+                        type={item.type}
+                        data={item}
+                        isRenaming={renamingId === item.id}
+                      >
+                        <FolderTreeItem
+                          item={item}
+                          isExpanded={expandedItems.has(item.id)}
+                          onToggle={toggleExpanded}
+                          expandedFolders={expandedItems}
+                          depth={0}
+                          isFavorite={false}
+                          onContextMenu={handleContextMenu}
+                          selectedDocumentId={selectedDocumentId}
+                          onDocumentSelect={onDocumentSelect}
+                          prefetchFolder={prefetchFolder}
+                          cancelPrefetch={cancelPrefetch}
+                        />
+                      </DraggableItem>
+                    ))
+                  )}
+                </div>
+              </DroppableFolder>
+            </div>
+          )}
         </div>
 
-        {/* Drag overlay */}
-        <DragOverlay
-          dropAnimation={{
-            duration: 200,
-            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
-          }}
-        >
-          {draggedItem ? (
-            <div className="sidebar-v2-drag-preview">
-              {draggedItem.type === 'folder' ? (
-                <Folder size={14} />
-              ) : (
-                <FileText size={14} />
-              )}
-              <span>{draggedItem.name || 'Moving...'}</span>
-            </div>
-          ) : null}
-        </DragOverlay>
+        <div className="h-4 flex-shrink-0" />
       </div>
 
-      {/* Context Menu */}
-      {contextMenu && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          items={contextMenu.items}
-          onClose={() => setContextMenu(null)}
-        />
-      )}
+      {/* Drag overlay */}
+      <DragOverlay
+        dropAnimation={{
+          duration: 200,
+          easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+        }}
+      >
+        {draggedItem ? (
+          <div className="bg-[#1a2942]/95 backdrop-blur-sm text-white px-3 py-2 rounded-lg shadow-2xl flex items-center gap-2 border border-emerald-400/20">
+            {draggedItem.type === 'folder' ? (
+              <Folder className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <FileText className="w-4 h-4 text-white/60" />
+            )}
+            <span className="text-sm">{draggedItem.name || 'Moving...'}</span>
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 }

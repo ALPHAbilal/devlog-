@@ -9,7 +9,7 @@ import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
-import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
+// import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
 import ProjectExplorerV2 from '../components/ProjectExplorer/ProjectExplorerV2';
 import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
@@ -85,9 +85,6 @@ export default function Dashboard() {
   const [contextMenuTarget, setContextMenuTarget] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const searchBarRef = useRef(null);
-
-  // Feature flag for new sidebar
-  const USE_NEW_SIDEBAR = localStorage.getItem('devlog_new_sidebar') === 'true';
 
   // Check if we're in projects view
   const isProjectsView = location.search.includes('view=projects');
@@ -1097,90 +1094,39 @@ export default function Dashboard() {
         >
           {/* Sidebar Content wrapper for spacing */}
           <div className="flex-1 min-h-0 pt-20 pb-7 flex flex-col">
-            {USE_NEW_SIDEBAR ? (
-              <ProjectExplorerV2
-                isCollapsed={isSidebarCollapsed}
-                onToggleCollapse={toggleSidebarCollapse}
-                className="flex-1 min-h-0"
-                onDocumentSelect={(data) => {
-                  if (data?.action === 'create') {
-                    createNewEntry(data.folderId);
-                  } else if (data?.id) {
-                    const doc = entries.find(e => e.id === data.id);
-                    if (doc) {
-                      handleDocumentExpand(doc);
-                    }
-                  } else if (data) {
-                    // Direct document object passed
-                    handleDocumentExpand(data);
+            <ProjectExplorerV2
+              isCollapsed={isSidebarCollapsed}
+              onToggleCollapse={toggleSidebarCollapse}
+              className="flex-1 min-h-0"
+              onDocumentSelect={(data) => {
+                if (data?.action === 'create') {
+                  createNewEntry(data.folderId);
+                } else if (data?.id) {
+                  const doc = entries.find(e => e.id === data.id);
+                  if (doc) {
+                    handleDocumentExpand(doc);
                   }
-                }}
-                selectedDocumentId={expandedEntry?.id}
-                documents={entries}
-                onDocumentMove={async (docId, folderId) => {
-                  // Update the document's folder_id
-                  await updateEntry(docId, { folder_id: folderId });
-                }}
-                onDocumentDelete={async (document) => {
-                  const docId = document.id || document;
-                  if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                    await deleteEntry(docId);
-                    // Refresh the entries list
-                    await loadEntries();
-                    toast.success('Document deleted successfully');
-                  }
-                }}
-              />
-            ) : (
-              <ProjectExplorer
-                isCollapsed={isSidebarCollapsed}
-                onToggleCollapse={toggleSidebarCollapse}
-                className="flex-1 min-h-0"
-                onDocumentSelect={(data) => {
-                  if (data?.action === 'create') {
-                    createNewEntry(data.folderId);
-                  } else if (data?.id) {
-                    const doc = entries.find(e => e.id === data.id);
-                    if (doc) {
-                      handleDocumentExpand(doc);
-                    }
-                  } else if (data) {
-                    // Direct document object passed
-                    handleDocumentExpand(data);
-                  }
-                }}
-                selectedDocumentId={expandedEntry?.id}
-                projects={projects}
-                documents={entries}
-                selectedProjectId={selectedProjectId}
-                onProjectSelect={handleProjectSelect}
-                onDocumentMove={async (docId, folderId) => {
-                  // Update the document's folder_id
-                  await updateEntry(docId, { folder_id: folderId });
-                }}
-                onDocumentDelete={async (document) => {
-                  const docId = document.id || document;
-                  if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                    await deleteEntry(docId);
-                    // Refresh the entries list
-                    await loadEntries();
-                    toast.success('Document deleted successfully');
-                  }
-                }}
-                onCreateProject={() => {
-                  setEditingProject(null);
-                  setShowProjectModal(true);
-                }}
-                onUpdateProject={(project) => {
-                  setEditingProject(project);
-                  setShowProjectModal(true);
-                }}
-                onDeleteProject={handleDeleteProject}
-                onToggleFavorite={handleToggleFavorite}
-                totalDocuments={entries.length}
-                uncategorizedCount={entries.filter(e => !e.project_id).length}
-              />
-            )}
+                } else if (data) {
+                  // Direct document object passed
+                  handleDocumentExpand(data);
+                }
+              }}
+              selectedDocumentId={expandedEntry?.id}
+              documents={entries}
+              onDocumentMove={async (docId, folderId) => {
+                // Update the document's folder_id
+                await updateEntry(docId, { folder_id: folderId });
+              }}
+              onDocumentDelete={async (document) => {
+                const docId = document.id || document;
+                if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+                  await deleteEntry(docId);
+                  // Refresh the entries list
+                  await loadEntries();
+                  toast.success('Document deleted successfully');
+                }
+              }}
+            />
           </div>
         </div>
         
@@ -1421,92 +1367,40 @@ export default function Dashboard() {
       >
         {/* Sidebar Content wrapper for spacing */}
         <div className="flex-1 min-h-0 pb-7 flex flex-col">
-          {USE_NEW_SIDEBAR ? (
-            <ProjectExplorerV2
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={toggleSidebarCollapse}
-              className="flex-1 min-h-0"
-              onDocumentSelect={(data) => {
-                if (data?.action === 'create') {
-                  createNewEntry(data.folderId);
-                } else if (data?.id) {
-                  const doc = entries.find(e => e.id === data.id);
-                  if (doc) {
-                    handleDocumentExpand(doc);
-                  }
-                } else if (data) {
-                  // Direct document object passed
-                  handleDocumentExpand(data);
+          <ProjectExplorerV2
+            isCollapsed={isSidebarCollapsed}
+            onToggleCollapse={toggleSidebarCollapse}
+            className="flex-1 min-h-0"
+            onDocumentSelect={(data) => {
+              if (data?.action === 'create') {
+                createNewEntry(data.folderId);
+              } else if (data?.id) {
+                const doc = entries.find(e => e.id === data.id);
+                if (doc) {
+                  handleDocumentExpand(doc);
                 }
-              }}
-              selectedDocumentId={expandedEntry?.id}
-              height="h-full"
-              documents={entries}
-              onDocumentMove={async (docId, folderId) => {
-                // Update the document's folder_id
-                await updateEntry(docId, { folder_id: folderId });
-              }}
-              onDocumentDelete={async (document) => {
-                const docId = document.id || document;
-                if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                  await deleteEntry(docId);
-                  // Refresh the entries list
-                  await loadEntries();
-                  toast.success('Document deleted successfully');
-                }
-              }}
-            />
-          ) : (
-            <ProjectExplorer
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={toggleSidebarCollapse}
-              className="flex-1 min-h-0"
-              onDocumentSelect={(data) => {
-                if (data?.action === 'create') {
-                  createNewEntry(data.folderId);
-                } else if (data?.id) {
-                  const doc = entries.find(e => e.id === data.id);
-                  if (doc) {
-                    handleDocumentExpand(doc);
-                  }
-                } else if (data) {
-                  // Direct document object passed
-                  handleDocumentExpand(data);
-                }
-              }}
-              selectedDocumentId={expandedEntry?.id}
-              height="h-full"
-              projects={projects}
-              documents={entries}
-              selectedProjectId={selectedProjectId}
-              onProjectSelect={handleProjectSelect}
-              onDocumentMove={async (docId, folderId) => {
-                // Update the document's folder_id
-                await updateEntry(docId, { folder_id: folderId });
-              }}
-              onDocumentDelete={async (document) => {
-                const docId = document.id || document;
-                if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                  await deleteEntry(docId);
-                  // Refresh the entries list
-                  await loadEntries();
-                  toast.success('Document deleted successfully');
-                }
-              }}
-              onCreateProject={() => {
-                setEditingProject(null);
-                setShowProjectModal(true);
-              }}
-              onUpdateProject={(project) => {
-                setEditingProject(project);
-                setShowProjectModal(true);
-              }}
-              onDeleteProject={handleDeleteProject}
-              onToggleFavorite={handleToggleFavorite}
-              totalDocuments={entries.length}
-              uncategorizedCount={entries.filter(e => !e.project_id).length}
-            />
-          )}
+              } else if (data) {
+                // Direct document object passed
+                handleDocumentExpand(data);
+              }
+            }}
+            selectedDocumentId={expandedEntry?.id}
+            height="h-full"
+            documents={entries}
+            onDocumentMove={async (docId, folderId) => {
+              // Update the document's folder_id
+              await updateEntry(docId, { folder_id: folderId });
+            }}
+            onDocumentDelete={async (document) => {
+              const docId = document.id || document;
+              if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+                await deleteEntry(docId);
+                // Refresh the entries list
+                await loadEntries();
+                toast.success('Document deleted successfully');
+              }
+            }}
+          />
         </div>
       </div>
 
@@ -1738,7 +1632,7 @@ export default function Dashboard() {
           snapPoints={['50%', '90%']}
           defaultSnap={0}
         >
-          <ProjectExplorer
+          <ProjectExplorerV2
             isCollapsed={false}
             onToggleCollapse={() => {}}
             className="h-full"
@@ -1756,13 +1650,7 @@ export default function Dashboard() {
               setShowMobileSidebarSheet(false);
             }}
             selectedDocumentId={expandedEntry?.id}
-            projects={projects}
             documents={entries}
-            selectedProjectId={selectedProjectId}
-            onProjectSelect={(projectId) => {
-              handleProjectSelect(projectId);
-              setShowMobileSidebarSheet(false);
-            }}
             onDocumentMove={async (docId, folderId) => {
               await updateEntry(docId, { folder_id: folderId });
             }}
@@ -1774,20 +1662,6 @@ export default function Dashboard() {
                 toast.success('Document deleted successfully');
               }
             }}
-            onCreateProject={() => {
-              setEditingProject(null);
-              setShowProjectModal(true);
-              setShowMobileSidebarSheet(false);
-            }}
-            onUpdateProject={(project) => {
-              setEditingProject(project);
-              setShowProjectModal(true);
-              setShowMobileSidebarSheet(false);
-            }}
-            onDeleteProject={handleDeleteProject}
-            onToggleFavorite={handleToggleFavorite}
-            totalDocuments={entries.length}
-            uncategorizedCount={entries.filter(e => !e.project_id).length}
           />
         </MobileBottomSheet>
       )}

@@ -12,6 +12,7 @@ import {
   FilePlus,
   Trash2
 } from 'lucide-react';
+import { cn } from '../../utils/cn';
 import { useFolders } from '../../hooks/useFolders';
 import { useProjectStructure } from '../../hooks/useBatchLoader';
 import { useToast } from '../../hooks/useToast';
@@ -593,15 +594,34 @@ export default function ProjectExplorerV2({
   // Collapsed sidebar
   if (isCollapsed) {
     return (
-      <div className="w-20 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden flex flex-col relative transition-all duration-300 ease-in-out">
+      <div
+        className={cn(
+          "db-glass db-bento-container",
+          "w-db-sidebar-collapsed h-full",
+          "border-db-glass-border",
+          "transition-all duration-300 ease-in-out",
+          "m-4 rounded-db-xl flex flex-col relative overflow-hidden"
+        )}
+        style={{
+          background: 'var(--db-glass-bg)',
+          backdropFilter: 'blur(var(--db-glass-blur))',
+        }}
+      >
         <div className="px-2 pt-3 pb-2 flex-shrink-0">
           <button
             onClick={onToggleCollapse}
-            className="w-full h-11 p-0 text-white/50 hover:text-emerald-400 hover:bg-emerald-400/10 transition-all duration-200 rounded-xl relative group flex items-center justify-center"
+            className={cn(
+              "w-full h-11 p-0",
+              "text-db-text-secondary hover:text-db-emerald",
+              "hover:bg-db-emerald/10",
+              "transition-all duration-200",
+              "rounded-db-md relative group",
+              "flex items-center justify-center"
+            )}
             title="Expand sidebar"
           >
             <PanelLeft className="w-5 h-5" />
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-emerald-400 rounded-full group-hover:h-8 transition-all duration-200" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-db-emerald rounded-full group-hover:h-8 transition-all duration-200" />
           </button>
         </div>
 
@@ -612,22 +632,28 @@ export default function ProjectExplorerV2({
             {folderStructure.slice(0, 6).map((folder) => folder.type === 'folder' && (
               <div
                 key={folder.id}
-                className="flex items-center justify-center p-3 text-white/50 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
+                className={cn(
+                  "flex items-center justify-center p-3",
+                  "text-db-text-secondary hover:text-db-emerald",
+                  "hover:bg-db-emerald/10",
+                  "rounded-db-md cursor-pointer",
+                  "transition-all duration-200 group relative"
+                )}
                 title={folder.name}
               >
                 <Folder className="w-5 h-5" />
                 {folder.count > 0 && (
-                  <div className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-emerald-500 text-white text-[10px] rounded-full flex items-center justify-center px-1 shadow-lg">
+                  <div className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-db-emerald text-white text-[10px] rounded-full flex items-center justify-center px-1 shadow-lg">
                     {folder.count}
                   </div>
                 )}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-emerald-400 rounded-full group-hover:h-8 transition-all duration-200" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-db-emerald rounded-full group-hover:h-8 transition-all duration-200" />
               </div>
             ))}
           </div>
 
           {folderStructure.filter(f => f.type === 'folder').length > 6 && (
-            <div className="px-2 mt-2 flex items-center justify-center p-2 text-white/30 text-xs">
+            <div className="px-2 mt-2 flex items-center justify-center p-2 text-db-text-muted text-xs">
               +{folderStructure.filter(f => f.type === 'folder').length - 6}
             </div>
           )}
@@ -647,12 +673,31 @@ export default function ProjectExplorerV2({
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-72 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden flex flex-col relative transition-all duration-300">
+      <div
+        className={cn(
+          "db-glass db-bento-container",
+          "w-db-sidebar-expanded h-full",
+          "border-db-glass-border",
+          "transition-all duration-300 ease-in-out",
+          "m-4 rounded-db-xl flex flex-col relative overflow-hidden"
+        )}
+        style={{
+          background: 'var(--db-glass-bg)',
+          backdropFilter: 'blur(var(--db-glass-blur))',
+        }}
+      >
         {/* Collapse Button */}
         <div className="px-4 pt-3 pb-2 flex-shrink-0">
           <button
             onClick={onToggleCollapse}
-            className="w-full h-10 px-3 text-white/40 hover:text-white/90 hover:bg-white/10 transition-all rounded-lg flex items-center justify-center gap-2"
+            className={cn(
+              "w-full h-10 px-3",
+              "text-db-text-secondary hover:text-db-text-primary",
+              "hover:bg-db-emerald/10",
+              "transition-all duration-200",
+              "rounded-db-md",
+              "flex items-center justify-center gap-2"
+            )}
           >
             <PanelLeftClose className="w-4 h-4" />
             <span className="text-xs">Collapse</span>
@@ -665,7 +710,12 @@ export default function ProjectExplorerV2({
         <div className="flex-1 px-4 min-h-0 flex flex-col pb-4">
           <button
             onClick={() => setExplorerExpanded(!explorerExpanded)}
-            className="flex items-center gap-2 px-3 py-2 text-white/50 text-xs hover:text-white/80 transition-colors w-full group rounded-lg hover:bg-white/5 flex-shrink-0"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2",
+              "text-db-text-secondary hover:text-db-text-primary",
+              "text-xs transition-colors w-full group",
+              "rounded-db-sm hover:bg-db-emerald/5 flex-shrink-0"
+            )}
           >
             {explorerExpanded ? (
               <ChevronDown className="w-3.5 h-3.5 transition-transform" />
@@ -674,7 +724,7 @@ export default function ProjectExplorerV2({
             )}
             <span className="uppercase tracking-wider">All Folders</span>
             <div className="ml-auto flex items-center gap-2">
-              <span className="text-xs text-white/30 opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="text-xs text-db-text-muted opacity-0 group-hover:opacity-100 transition-opacity">
                 {folderStructure.filter(f => f.type === 'folder').length}
               </span>
               <button
@@ -682,10 +732,14 @@ export default function ProjectExplorerV2({
                   e.stopPropagation();
                   createNewFolder(null);
                 }}
-                className="opacity-0 group-hover:opacity-100 hover:bg-emerald-500/20 rounded p-1 transition-all duration-200 hover:scale-110"
+                className={cn(
+                  "opacity-0 group-hover:opacity-100",
+                  "hover:bg-db-emerald/20 rounded p-1",
+                  "transition-all duration-200 hover:scale-110"
+                )}
                 title="New Folder"
               >
-                <FolderPlus className="w-3.5 h-3.5 text-emerald-400 hover:text-emerald-300" />
+                <FolderPlus className="w-3.5 h-3.5 text-db-emerald hover:text-db-emerald-light" />
               </button>
             </div>
           </button>

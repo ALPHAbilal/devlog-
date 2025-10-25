@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  Folder, 
-  FolderOpen, 
-  FileText, 
+import {
+  Folder,
+  FolderOpen,
+  FileText,
   Code,
   MessageSquare,
   Table,
@@ -16,6 +16,7 @@ import {
   Edit2,
   GripVertical
 } from 'lucide-react';
+import { cn } from '../../utils/cn';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -133,19 +134,19 @@ export default function TreeNode({
       {...attributes}
     >
       <div
-        className={`
-          group relative flex items-center gap-2 px-2 py-1.5 rounded-lg
-          transition-all duration-200 cursor-pointer
-          ${isSelected 
-            ? 'bg-accent-green/20 text-accent-green shadow-sm' 
+        className={cn(
+          "group relative flex items-center gap-2 px-2 py-1.5",
+          "transition-all duration-200 cursor-pointer",
+          "rounded-db-sm",
+          isSelected
+            ? "bg-db-emerald/20 border-l-2 border-db-emerald text-db-emerald shadow-sm"
             : isHovered
-              ? 'bg-surface-2/80 text-text-primary'
-              : 'hover:bg-surface-2/50 text-text-secondary hover:text-text-primary'
-          }
-          ${isOver && isFolder ? 'ring-2 ring-accent-green/50 bg-accent-green/10' : ''}
-          ${isDragging ? 'opacity-50' : ''}
-          ${isCompact ? 'py-1' : ''}
-        `}
+              ? "bg-db-emerald/5 text-db-text-primary"
+              : "hover:bg-db-emerald/5 text-db-text-secondary hover:text-db-text-primary",
+          isOver && isFolder && "ring-2 ring-db-emerald/50 bg-db-emerald/10",
+          isDragging && "opacity-50",
+          isCompact && "py-1"
+        )}
         style={{ paddingLeft: `${indentWidth + 8}px` }}
         onClick={() => onSelect(node)}
         onContextMenu={(e) => onContextMenu(e, node)}
@@ -196,23 +197,22 @@ export default function TreeNode({
         
         {/* Icon */}
         <div className="relative flex-shrink-0">
-          <Icon 
-            size={16} 
-            className={`
-              transition-all duration-200
-              ${isFolder 
-                ? isSelected || isHovered ? 'text-accent-green' : ''
-                : 'text-text-secondary'
-              }
-              ${isExpanded ? 'rotate-15' : ''}
-            `}
-            style={{ 
+          <Icon
+            size={16}
+            className={cn(
+              "transition-all duration-200",
+              isFolder
+                ? isSelected || isHovered ? "text-db-emerald" : ""
+                : "text-db-text-secondary",
+              isExpanded && "rotate-15"
+            )}
+            style={{
               color: isFolder && !isSelected && !isHovered ? folderColor : undefined,
               transform: isFolder && isExpanded ? 'rotate(15deg)' : undefined
             }}
           />
           {node.is_favorite && (
-            <Star size={8} className="absolute -top-1 -right-1 text-yellow-400 fill-yellow-400" />
+            <Star size={8} className="absolute -top-1 -right-1 text-db-amber fill-db-amber" />
           )}
         </div>
         

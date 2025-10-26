@@ -505,18 +505,19 @@ export default function Dashboard() {
     // Only re-combine if:
     // 1. Folders have loaded (not empty)
     // 2. We already have documents (from initial load)
-    // 3. We're not currently loading
-    if (!folders || folders.length === 0 || allDocuments.length === 0 || isLoading) {
+    if (!folders || folders.length === 0 || allDocuments.length === 0) {
+      console.log(`[DEBUG-DASHBOARD] Skipping re-combine: folders=${folders?.length || 0}, docs=${allDocuments.length}`);
       return;
     }
 
     // Check if entries already include folders
     const hasFolders = entries.some(e => e.type === 'folder');
     if (hasFolders) {
+      console.log(`[DEBUG-DASHBOARD] Skipping re-combine: Already have ${entries.filter(e => e.type === 'folder').length} folders`);
       return; // Already combined, don't duplicate
     }
 
-    console.log(`[DEBUG] Re-combining: Folders loaded (${folders.length}), re-combining with documents`);
+    console.log(`[DEBUG-DASHBOARD] Re-combining: ${folders.length} folders with ${allDocuments.length} documents`);
 
     // Get root folders
     const rootFolders = folders
@@ -538,7 +539,7 @@ export default function Dashboard() {
 
     console.log(`Dashboard: Re-combined ${rootFolders.length} folders with ${rootDocs.length} documents`);
     setEntries(combined);
-  }, [folders, allDocuments]); // Trigger when folders or documents change
+  }, [folders, allDocuments, isLoading]); // Trigger when folders, documents, or loading state change
 
   // Load entries on mount
   useEffect(() => {

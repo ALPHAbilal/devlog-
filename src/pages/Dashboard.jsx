@@ -1225,252 +1225,210 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      {/* New Figma-style gradient background */}
-      <div className="h-screen overflow-hidden dashboard-container flex flex-col
+      {/* Figma Layout: Outer container with padding */}
+      <div className="min-h-screen dashboard-container flex flex-col
                       bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32]">
-        {/* Trial Banner - Fixed at top */}
+        {/* Trial Banner - Above everything */}
         <TrialBanner trialStatus={trialStatus} />
 
-        {/* Fixed Header - Redesigned Bento Box Style */}
-        <header className="flex-shrink-0 z-30 relative
-                          bg-[#0a1628]/40 backdrop-blur-xl
-                          border-b border-white/5
-                          shadow-2xl shadow-black/20">
-          {/* Top Row - Figma Style Header */}
-          <div className="flex items-center justify-between px-4 md:px-6 py-4">
-            {/* Logo and Status */}
-            <div className="flex items-center gap-2.5 ml-0 lg:ml-[288px]">
-              {/* Mobile menu button */}
-              <button
-                onClick={() => {
-                  if (isMobile) {
-                    setShowMobileSidebarSheet(true);
-                  } else {
-                    toggleMobileSidebar();
+        {/* Figma Layout: Main content area with padding and max-width */}
+        <div className="flex-1 p-6">
+          <div className="flex gap-6 h-[calc(100vh-3rem)] max-w-[1800px] mx-auto">
+            {/* Mobile Sidebar Overlay */}
+            {showSidebar && !isMobile && (
+              <div
+                className="fixed inset-0 bg-black/50 z-20 lg:hidden"
+                onClick={() => setShowSidebar(false)}
+              />
+            )}
+
+            {/* Sidebar Bento Box - Desktop always visible, mobile overlay */}
+            <div className={`
+              ${isMobile ? 'fixed inset-y-0 left-0 z-40 transition-transform duration-300' : ''}
+              ${isMobile && !showSidebar ? '-translate-x-full' : 'translate-x-0'}
+              ${!isMobile ? 'flex-shrink-0' : ''}
+            `}>
+              <ProjectExplorerV2
+                isCollapsed={isSidebarCollapsed}
+                onToggleCollapse={toggleSidebarCollapse}
+                className="h-full"
+                onDocumentSelect={(data) => {
+                  if (data?.action === 'create') {
+                    createNewEntry(data.folderId);
+                  } else if (data?.id) {
+                    const doc = entries.find(e => e.id === data.id);
+                    if (doc) {
+                      handleDocumentExpand(doc);
+                    }
+                  } else if (data) {
+                    handleDocumentExpand(data);
+                  }
+                  // Close mobile sidebar after selection
+                  if (isMobile) setShowSidebar(false);
+                }}
+                selectedDocumentId={expandedEntry?.id}
+                height="h-full"
+                documents={entries}
+                onDocumentMove={async (docId, folderId) => {
+                  await updateEntry(docId, { folder_id: folderId });
+                }}
+                onDocumentDelete={async (document) => {
+                  const docId = document.id || document;
+                  if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
+                    await deleteEntry(docId);
+                    await loadEntries();
+                    toast.success('Document deleted successfully');
                   }
                 }}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors lg:hidden"
-              >
-                <Menu size={20} className="text-white/90" />
-              </button>
-
-              {/* Status indicator and document count */}
-              <div className="flex items-center gap-3">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse
-                               shadow-lg shadow-emerald-400/50" />
-                <h1 className="text-white/90 text-base">
-                  All Documents <span className="text-white/40">({entries.length})</span>
-                </h1>
-              </div>
+              />
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3 mr-2 md:mr-8">
-              {/* New Button */}
-              <button
-                onClick={() => createNewEntry()}
-                className="hidden md:flex items-center gap-2 h-9 px-4
-                           bg-white/5 hover:bg-emerald-500/10
-                           text-white/70 hover:text-emerald-400
-                           border border-white/10 hover:border-emerald-500/30
-                           transition-all rounded-lg"
-              >
-                <Plus className="w-4 h-4" />
-                New
-              </button>
+            {/* Main Content Column */}
+            <div className="flex-1 flex flex-col gap-6 min-w-0">
+              {/* Header Bento Box */}
+              <div className="bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6 flex-shrink-0">
+                {/* Top Row */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    {/* Mobile menu button */}
+                    <button
+                      onClick={() => {
+                        if (isMobile) {
+                          setShowMobileSidebarSheet(true);
+                        } else {
+                          setShowSidebar(!showSidebar);
+                        }
+                      }}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors lg:hidden"
+                    >
+                      <Menu size={20} className="text-white/90" />
+                    </button>
 
-              {/* Profile Dropdown - Figma Style */}
-              <div className="relative profile-menu-container">
-                <button
-                  onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="h-9 w-9 rounded-lg p-0
-                            bg-white/5 hover:bg-white/10
-                            border border-white/10 hover:border-white/20
-                            transition-all flex items-center justify-center"
-                >
-                  <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500
-                                  rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-medium">DV</span>
-                  </div>
-                </button>
-
-                {/* Profile Menu - Glassmorphic */}
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-1 w-56
-                                  bg-[#1a2942]/95 backdrop-blur-xl
-                                  border-white/10 border rounded-xl
-                                  shadow-xl shadow-black/20 overflow-hidden z-50
-                                  animate-in fade-in slide-in-from-top-1 duration-150">
-                    <div className="p-3 border-b border-white/10">
-                      <p className="text-sm leading-none text-white/90">Developer</p>
-                      <p className="text-xs leading-none text-white/50 mt-1">
-                        {user?.email || 'developer@devlog.app'}
-                      </p>
-                    </div>
-
-                    <div className="p-1">
-                      <button
-                        onClick={() => navigate('/settings')}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left
-                                   text-white/70 hover:text-white/90 hover:bg-white/5
-                                   focus:bg-white/5 focus:text-white/90
-                                   rounded transition-colors text-sm cursor-pointer">
-                        <Settings className="w-4 h-4" />
-                        <span>Settings</span>
-                      </button>
-                      <div className="my-1 h-px bg-white/10" />
-                      <button
-                        onClick={() => signOut()}
-                        className="w-full flex items-center gap-2 px-2 py-1.5 text-left
-                                   text-red-400 hover:text-red-300 hover:bg-red-500/10
-                                   focus:bg-red-500/10 focus:text-red-300
-                                   rounded transition-colors text-sm cursor-pointer">
-                        <LogOut className="w-4 h-4" />
-                        <span>Sign out</span>
-                      </button>
+                    {/* Status indicator and document count */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+                      <h1 className="text-white/90">
+                        All Documents <span className="text-white/40">({entries.length})</span>
+                      </h1>
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </header>
 
-        {/* Grid Container - Below Header */}
-        <div 
-          className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-[auto,1fr]"
-          style={{
-            '--sidebar-width': isSidebarCollapsed ? '80px' : '280px',
-            transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-            willChange: 'grid-template-columns',
-            contain: 'layout style'
-          }}
-        >
-      {/* Mobile overlay */}
-      {showSidebar && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-          onClick={() => setShowSidebar(false)}
-        />
-      )}
-      
-      {/* Project Sidebar */}
-      <div 
-        className={`
-          fixed lg:relative inset-y-0 left-0 z-40 w-[280px] max-w-[280px] lg:w-auto lg:max-w-[280px]
-          bg-dark-primary lg:bg-transparent
-          flex flex-col
-          transition-all duration-300 ease-cubic
-          h-full overflow-hidden
-          ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          lg:col-start-1
-        `}
-      >
-        {/* Sidebar Content wrapper for spacing */}
-        <div className="flex-1 min-h-0 pb-7 flex flex-col">
-          <ProjectExplorerV2
-            isCollapsed={isSidebarCollapsed}
-            onToggleCollapse={toggleSidebarCollapse}
-            className="flex-1 min-h-0"
-            onDocumentSelect={(data) => {
-              if (data?.action === 'create') {
-                createNewEntry(data.folderId);
-              } else if (data?.id) {
-                const doc = entries.find(e => e.id === data.id);
-                if (doc) {
-                  handleDocumentExpand(doc);
-                }
-              } else if (data) {
-                // Direct document object passed
-                handleDocumentExpand(data);
-              }
-            }}
-            selectedDocumentId={expandedEntry?.id}
-            height="h-full"
-            documents={entries}
-            onDocumentMove={async (docId, folderId) => {
-              // Update the document's folder_id
-              await updateEntry(docId, { folder_id: folderId });
-            }}
-            onDocumentDelete={async (document) => {
-              const docId = document.id || document;
-              if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                await deleteEntry(docId);
-                // Refresh the entries list
-                await loadEntries();
-                toast.success('Document deleted successfully');
-              }
-            }}
-          />
-        </div>
-      </div>
+                  {/* Actions */}
+                  <div className="flex items-center gap-3">
+                    {/* New Button */}
+                    <button
+                      onClick={() => createNewEntry()}
+                      className="hidden md:flex items-center gap-2 h-9 px-4 bg-white/5 hover:bg-emerald-500/10 text-white/70 hover:text-emerald-400 border border-white/10 hover:border-emerald-500/30 transition-all rounded-lg"
+                    >
+                      <Plus className="w-4 h-4" />
+                      New
+                    </button>
 
-      {/* Main Content Area */}
-      <main className="flex flex-col min-w-0 overflow-hidden transition-all duration-300 ease-out lg:col-start-2">
-        {/* Content Header - Search Bar */}
-        <div className="flex-shrink-0 px-4 md:px-6 py-4 ml-0 lg:ml-[288px]">
-          {/* Search Bar - Figma Style */}
-          <div className="relative max-w-3xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-            <input
-              ref={searchBarRef}
-              type="text"
-              placeholder="Search documents..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-xl
-                         pl-11 pr-4 py-3 text-white/90 placeholder:text-white/40
-                         focus:outline-none focus:ring-2 focus:ring-emerald-500/50
-                         focus:border-emerald-500/50 transition-all backdrop-blur-sm"
-            />
-          </div>
-        </div>
+                    {/* Profile Dropdown */}
+                    <div className="relative profile-menu-container">
+                      <button
+                        onClick={() => setShowProfileMenu(!showProfileMenu)}
+                        className="h-9 w-9 rounded-lg p-0 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all flex items-center justify-center"
+                      >
+                        <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-medium">
+                            {user?.email?.charAt(0).toUpperCase() || 'D'}
+                          </span>
+                        </div>
+                      </button>
 
-        {/* Main Content - Documents Grid Bento Box */}
-        <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 ml-0 lg:ml-[288px]">
-          <div className="h-full bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl
-                          border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
-            <div
-              ref={pullToRefreshRef}
-              className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative"
-              style={{
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(16, 185, 129, 0.3) rgba(255, 255, 255, 0.05)',
-                paddingBottom: isMobile ? '80px' : '1rem' // Space for mobile FAB
-              }}>
-              {/* Pull to refresh indicator */}
-              {isPulling && (
-                <div
-                  className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all"
-                  style={{
-                    height: `${pullDistance}px`,
-                    opacity: pullProgress
-                  }}
-                >
-                  <div className="text-white/60 text-sm">
-                    {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
+                      {/* Profile Menu */}
+                      {showProfileMenu && (
+                        <div className="absolute right-0 mt-1 w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                          <div className="p-3 border-b border-white/10">
+                            <p className="text-sm leading-none text-white/90">
+                              {user?.user_metadata?.full_name || 'Developer'}
+                            </p>
+                            <p className="text-xs leading-none text-white/50 mt-1">
+                              {user?.email || 'developer@devlog.app'}
+                            </p>
+                          </div>
+
+                          <div className="p-1">
+                            <button
+                              onClick={() => navigate('/settings')}
+                              className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
+                            >
+                              <Settings className="w-4 h-4" />
+                              <span>Settings</span>
+                            </button>
+                            <div className="my-1 h-px bg-white/10" />
+                            <button
+                              onClick={() => signOut()}
+                              className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
+                            >
+                              <LogOut className="w-4 h-4" />
+                              <span>Sign out</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              )}
-              <div className="p-6">
-                <DocumentGridRedesigned
-                  entries={filteredEntries}
-                  onExpand={handleDocumentExpand}
-                  searchTerm={searchTerm}
-                  selectedDocuments={selectedDocuments}
-                  onSelectDocument={handleDocumentSelect}
-                  selectionMode={selectedDocuments.size > 0}
-                  onContextMenu={isMobile ? (entry) => {
-                    setContextMenuTarget(entry);
-                    setShowMobileContextMenu(true);
-                  } : undefined}
-                />
+
+                {/* Search Bar - Full Width Inside Header */}
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                  <input
+                    ref={searchBarRef}
+                    type="text"
+                    placeholder="Search documents..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3 text-white/90 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all backdrop-blur-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Documents Grid Bento Box */}
+              <div className="flex-1 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
+                <div
+                  ref={pullToRefreshRef}
+                  className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative"
+                  style={{
+                    scrollbarWidth: 'thin',
+                    scrollbarColor: 'rgba(16, 185, 129, 0.3) rgba(255, 255, 255, 0.05)',
+                    paddingBottom: isMobile ? '80px' : '1rem'
+                  }}
+                >
+                  {/* Pull to refresh indicator */}
+                  {isPulling && (
+                    <div
+                      className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all"
+                      style={{
+                        height: `${pullDistance}px`,
+                        opacity: pullProgress
+                      }}
+                    >
+                      <div className="text-white/60 text-sm">
+                        {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
+                      </div>
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <DocumentGridRedesigned
+                      entries={filteredEntries}
+                      onExpand={handleDocumentExpand}
+                      searchTerm={searchTerm}
+                      selectedDocuments={selectedDocuments}
+                      onSelectDocument={handleDocumentSelect}
+                      selectionMode={selectedDocuments.size > 0}
+                      onContextMenu={isMobile ? (entry) => {
+                        setContextMenuTarget(entry);
+                        setShowMobileContextMenu(true);
+                      } : undefined}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </main>
-
         </div>
       </div>
 

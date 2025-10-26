@@ -52,6 +52,7 @@ export default function Dashboard() {
   const { documentId } = useParams();
   const { user, signOut, trialStatus } = useAuth();
   const [entries, setEntries] = useState([]);
+  const [allDocuments, setAllDocuments] = useState([]); // All documents for sidebar (includes docs in folders)
   const [expandedEntry, setExpandedEntry] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showLinkModal, setShowLinkModal] = useState(false);
@@ -396,6 +397,9 @@ export default function Dashboard() {
           return entry;
         });
 
+        // Store ALL documents for sidebar (includes documents in folders)
+        setAllDocuments(mergedEntries);
+
         // Combine folders (from useFolders hook) with documents for grid display
         // Only show root-level folders (no parent_id) and root-level documents (no folder_id)
         const rootFolders = (folders || [])  // Use folders from hook state
@@ -462,6 +466,9 @@ export default function Dashboard() {
             items: folder.children || []
           }));
 
+        // Store initial entries as all documents
+        setAllDocuments(initialEntries);
+
         // Combine initial entries with any existing folders
         const combined = [...rootFolders, ...initialEntries.map(e => ({ ...e, type: 'document' }))]
           .sort((a, b) => (a.position || 0) - (b.position || 0));
@@ -492,6 +499,46 @@ export default function Dashboard() {
       loadingRef.current = false;
     }
   }, [isPulling, updateStorageInfo]);
+
+  // Re-combine entries when folders finish loading (fixes race condition)
+  useEffect(() => {
+    // Only re-combine if:
+    // 1. Folders have loaded (not empty)
+    // 2. We already have documents (from initial load)
+    // 3. We're not currently loading
+    if (!folders || folders.length === 0 || allDocuments.length === 0 || isLoading) {
+      return;
+    }
+
+    // Check if entries already include folders
+    const hasFolders = entries.some(e => e.type === 'folder');
+    if (hasFolders) {
+      return; // Already combined, don't duplicate
+    }
+
+    console.log(`[DEBUG] Re-combining: Folders loaded (${folders.length}), re-combining with documents`);
+
+    // Get root folders
+    const rootFolders = folders
+      .filter(f => !f.parent_id)
+      .map(f => ({
+        ...f,
+        type: 'folder',
+        items: f.children || []
+      }));
+
+    // Get documents that aren't in folders (use allDocuments, not entries)
+    const rootDocs = allDocuments
+      .filter(doc => !doc.folder_id)
+      .map(doc => ({ ...doc, type: 'document' }));
+
+    // Combine and sort
+    const combined = [...rootFolders, ...rootDocs]
+      .sort((a, b) => (a.position || 0) - (b.position || 0));
+
+    console.log(`Dashboard: Re-combined ${rootFolders.length} folders with ${rootDocs.length} documents`);
+    setEntries(combined);
+  }, [folders, allDocuments]); // Trigger when folders or documents change
 
   // Load entries on mount
   useEffect(() => {
@@ -1141,7 +1188,7 @@ export default function Dashboard() {
                 if (data?.action === 'create') {
                   createNewEntry(data.folderId);
                 } else if (data?.id) {
-                  const doc = entries.find(e => e.id === data.id);
+                  const doc = allDocuments.find(e => e.id === data.id);
                   if (doc) {
                     handleDocumentExpand(doc);
                   }
@@ -1151,7 +1198,7 @@ export default function Dashboard() {
                 }
               }}
               selectedDocumentId={expandedEntry?.id}
-              documents={entries}
+              documents={allDocuments}
               onDocumentMove={async (docId, folderId) => {
                 // Update the document's folder_id
                 await updateEntry(docId, { folder_id: folderId });
@@ -1293,7 +1340,7 @@ export default function Dashboard() {
                   if (data?.action === 'create') {
                     createNewEntry(data.folderId);
                   } else if (data?.id) {
-                    const doc = entries.find(e => e.id === data.id);
+                    const doc = allDocuments.find(e => e.id === data.id);
                     if (doc) {
                       handleDocumentExpand(doc);
                     }
@@ -1305,7 +1352,7 @@ export default function Dashboard() {
                 }}
                 selectedDocumentId={expandedEntry?.id}
                 height="h-full"
-                documents={entries}
+                documents={allDocuments}
                 onDocumentMove={async (docId, folderId) => {
                   await updateEntry(docId, { folder_id: folderId });
                 }}
@@ -1614,7 +1661,7 @@ export default function Dashboard() {
               if (data?.action === 'create') {
                 createNewEntry(data.folderId);
               } else if (data?.id) {
-                const doc = entries.find(e => e.id === data.id);
+                const doc = allDocuments.find(e => e.id === data.id);
                 if (doc) {
                   handleDocumentExpand(doc);
                 }
@@ -1624,7 +1671,7 @@ export default function Dashboard() {
               setShowMobileSidebarSheet(false);
             }}
             selectedDocumentId={expandedEntry?.id}
-            documents={entries}
+            documents={allDocuments}
             onDocumentMove={async (docId, folderId) => {
               await updateEntry(docId, { folder_id: folderId });
             }}

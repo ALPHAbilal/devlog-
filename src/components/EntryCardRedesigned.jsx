@@ -2,9 +2,11 @@ import { useState, useRef, useMemo } from 'react';
 import { optimizedBlockLoader } from '../utils/optimizedBlockLoader';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Check, MoreVertical, Star } from 'lucide-react';
+import { GripVertical, Check, MoreVertical } from 'lucide-react';
 import { useTouchGestures } from '../hooks/useTouchGestures';
 import { generateActivityData } from '../utils/activityData';
+import CardContainer from './CardContainer';
+import FavoriteIndicator from './FavoriteIndicator';
 
 export default function EntryCardRedesigned({ entry, onExpand, isSelected = false, onSelect, selectionMode = false, onContextMenu }) {
   const [touchActive, setTouchActive] = useState(false);
@@ -80,23 +82,20 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         if (node) gestureRef.current = node;
       }}
       style={style}
-      onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className={`group relative bg-gradient-to-br from-[#1a2942]/60 to-[#0f1d32]/60 backdrop-blur-sm
-                 rounded-xl border border-white/10 hover:border-emerald-500/30
-                 transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/10
-                 cursor-pointer overflow-hidden self-start
-                 touch-manipulation select-none
-                 ${isDragging ? 'opacity-0' : ''}
-                 ${isSelected ? 'ring-2 ring-emerald-500 shadow-lg shadow-emerald-500/20' : ''}
-                 ${touchActive ? 'scale-[0.98]' : ''}`}
+      className={`
+        touch-manipulation select-none
+        ${isDragging ? 'opacity-0' : ''}
+        ${isSelected ? 'ring-2 ring-emerald-500 shadow-lg shadow-emerald-500/20' : ''}
+        ${touchActive ? 'scale-[0.98]' : ''}
+      `}
     >
-      {/* Hover gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/0
-                      group-hover:from-emerald-500/10 group-hover:to-transparent
-                      transition-all duration-300 pointer-events-none" />
+      {/* Use CardContainer wrapper */}
+      <CardContainer onClick={handleClick}>
+        {/* Favorite Indicator */}
+        <FavoriteIndicator isFavorite={entry.isFavorite} />
 
       {/* Drag Handle - Hidden on mobile */}
       <div
@@ -126,14 +125,6 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         <MoreVertical size={16} className="text-white/60" />
       </button>
 
-      {/* Favorite Star Indicator */}
-      {entry.isFavorite && (
-        <div className="absolute top-3 right-3 z-10">
-          <Star className="w-4 h-4 text-blue-200/60 fill-blue-400/20
-                          drop-shadow-[0_2px_8px_rgba(59,130,246,0.5)]" />
-        </div>
-      )}
-
       {/* Selection Indicator */}
       {isSelected && (
         <div className="absolute top-3 right-3 bg-emerald-500 rounded-full p-1.5 shadow-lg z-20
@@ -142,14 +133,15 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         </div>
       )}
 
+      {/* Card Content */}
       <div className="relative p-5 flex flex-col h-full min-h-[140px]">
-        {/* Title */}
+        {/* Title - exact spacing from Figma */}
         <h3 className="text-white/90 mb-4 group-hover:text-white transition-colors
                        line-clamp-3 min-h-[4.5rem] flex items-start pr-6 leading-snug">
           {entry.title}
         </h3>
 
-        {/* Chart visualization */}
+        {/* Chart visualization - 20 bars */}
         {hasChart && (
           <div className="mt-auto h-16 flex items-end gap-1 px-1 pb-1">
             {activityData.map((value, i) => (
@@ -174,12 +166,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
           </p>
         )}
       </div>
-
-      {/* Accent line on hover */}
-      <div className="absolute bottom-0 left-0 right-0 h-0.5
-                      bg-gradient-to-r from-emerald-500/0 via-emerald-500/0 to-emerald-500/0
-                      group-hover:from-emerald-500/50 group-hover:via-emerald-500 group-hover:to-emerald-500/50
-                      transition-all duration-500" />
+      </CardContainer>
     </div>
   );
 }

@@ -72,5 +72,6 @@
       }
     ]
   },
-  "includeCoAuthoredBy": true
+  "includeCoAuthoredBy": true,
+  "MAX_MCP_OUTPUT_TOKENS": 100000
 }

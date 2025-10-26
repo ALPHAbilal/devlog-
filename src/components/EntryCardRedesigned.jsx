@@ -69,7 +69,11 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
   };
 
   // Generate activity data for chart visualization
-  const activityData = useMemo(() => generateActivityData(entry), [entry]);
+  const activityData = useMemo(() => {
+    const fullData = generateActivityData(entry);
+    // Take last 20 weeks to match Figma design (20 bars)
+    return fullData.slice(-20);
+  }, [entry]);
 
   // Check if document has chart data (has activity or blocks)
   const hasChart = entry.blocks && entry.blocks.length > 0;

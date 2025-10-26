@@ -5,6 +5,7 @@ import { loadDocumentsPaginated } from '../utils/storage/storageWrapper';
 /**
  * Hook for paginated dashboard document loading with infinite scroll
  * Modeled after usePaginatedBlockLoader.js pattern
+ * Updated: 2025-10-26
  *
  * @param {Object} options - Configuration options
  * @param {number} options.pageSize - Documents per page (default: 50)

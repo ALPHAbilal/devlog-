@@ -400,26 +400,15 @@ export default function Dashboard() {
         // Store ALL documents for sidebar (includes documents in folders)
         setAllDocuments(mergedEntries);
 
-        // Combine folders (from useFolders hook) with documents for grid display
-        // Only show root-level folders (no parent_id) and root-level documents (no folder_id)
-        const rootFolders = (folders || [])  // Use folders from hook state
-          .filter(folder => !folder.parent_id)  // Only root folders
-          .map(folder => ({
-            ...folder,
-            type: 'folder',  // Add type field for DocumentGridRedesigned to recognize
-            items: folder.children || []  // Include nested structure for FolderCard
-          }));
-
+        // Note: Folders are combined with documents in the re-combine effect (lines 503-547)
+        // This ensures folders are always included regardless of load timing
+        // For now, just set root documents - folders will be added by re-combine effect
         const rootDocuments = mergedEntries
           .filter(doc => !doc.folder_id)  // Only root-level documents
           .map(doc => ({ ...doc, type: 'document' }));  // Add type field
 
-        // Combine and sort by position
-        const combined = [...rootFolders, ...rootDocuments]
-          .sort((a, b) => (a.position || 0) - (b.position || 0));
-
-        console.log(`Dashboard: Combined ${rootFolders.length} folders with ${rootDocuments.length} documents`);
-        setEntries(combined);
+        console.log(`[DEBUG-DASHBOARD] Initial load: ${rootDocuments.length} root documents (folders will be combined by re-combine effect)`);
+        setEntries(rootDocuments);
       } else {
         // Initialize with example entry
         const initialEntries = [
@@ -500,27 +489,16 @@ export default function Dashboard() {
     }
   }, [isPulling, updateStorageInfo]);
 
-  // Re-combine entries when folders finish loading (fixes race condition)
+  // Combine folders and documents whenever either changes (eliminates race condition)
   useEffect(() => {
-    // Only re-combine if:
-    // 1. Folders have loaded (not empty)
-    // 2. We already have documents (from initial load)
-    if (!folders || folders.length === 0 || allDocuments.length === 0) {
-      console.log(`[DEBUG-DASHBOARD] Skipping re-combine: folders=${folders?.length || 0}, docs=${allDocuments.length}`);
+    // Wait for both data sources to be ready
+    if (!allDocuments || allDocuments.length === 0) {
+      console.log(`[DEBUG-DASHBOARD] Waiting for documents to load: ${allDocuments?.length || 0}`);
       return;
     }
 
-    // Check if entries already include folders
-    const hasFolders = entries.some(e => e.type === 'folder');
-    if (hasFolders) {
-      console.log(`[DEBUG-DASHBOARD] Skipping re-combine: Already have ${entries.filter(e => e.type === 'folder').length} folders`);
-      return; // Already combined, don't duplicate
-    }
-
-    console.log(`[DEBUG-DASHBOARD] Re-combining: ${folders.length} folders with ${allDocuments.length} documents`);
-
-    // Get root folders
-    const rootFolders = folders
+    // Get root folders (if any exist)
+    const rootFolders = (folders || [])
       .filter(f => !f.parent_id)
       .map(f => ({
         ...f,
@@ -528,23 +506,24 @@ export default function Dashboard() {
         items: f.children || []
       }));
 
-    // Get documents that aren't in folders (use allDocuments, not entries)
+    // Get root documents (not in any folder)
     const rootDocs = allDocuments
       .filter(doc => !doc.folder_id)
       .map(doc => ({ ...doc, type: 'document' }));
 
-    // Combine and sort
+    // Combine and sort by position
     const combined = [...rootFolders, ...rootDocs]
       .sort((a, b) => (a.position || 0) - (b.position || 0));
 
-    console.log(`Dashboard: Re-combined ${rootFolders.length} folders with ${rootDocs.length} documents`);
-    console.log('[DEBUG-DASHBOARD] Sample items:', {
-      firstFolder: rootFolders[0] ? { name: rootFolders[0].name, type: rootFolders[0].type } : 'none',
-      firstDoc: rootDocs[0] ? { title: rootDocs[0].title, type: rootDocs[0].type } : 'none',
-      totalItems: combined.length
+    console.log(`[DEBUG-DASHBOARD] Combined: ${rootFolders.length} folders + ${rootDocs.length} documents = ${combined.length} total items`);
+    console.log('[DEBUG-DASHBOARD] Sample:', {
+      firstFolder: rootFolders[0]?.name || 'none',
+      firstDoc: rootDocs[0]?.title || 'none',
+      foldersState: folders?.length || 0
     });
+
     setEntries(combined);
-  }, [folders, allDocuments, isLoading]); // Trigger when folders, documents, or loading state change
+  }, [folders, allDocuments]); // Re-run whenever folders OR documents change
 
   // Load entries on mount
   useEffect(() => {

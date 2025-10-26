@@ -538,6 +538,11 @@ export default function Dashboard() {
       .sort((a, b) => (a.position || 0) - (b.position || 0));
 
     console.log(`Dashboard: Re-combined ${rootFolders.length} folders with ${rootDocs.length} documents`);
+    console.log('[DEBUG-DASHBOARD] Sample items:', {
+      firstFolder: rootFolders[0] ? { name: rootFolders[0].name, type: rootFolders[0].type } : 'none',
+      firstDoc: rootDocs[0] ? { title: rootDocs[0].title, type: rootDocs[0].type } : 'none',
+      totalItems: combined.length
+    });
     setEntries(combined);
   }, [folders, allDocuments, isLoading]); // Trigger when folders, documents, or loading state change
 
@@ -949,7 +954,8 @@ export default function Dashboard() {
   }, []);
 
   // Filter entries based on search, selected tags, and project
-  const filteredEntries = entries.filter(entry => {
+  const filteredEntries = useMemo(() => {
+    const filtered = entries.filter(entry => {
     // First filter by project
     const matchesProject = 
       selectedProjectId === null || // Show all
@@ -1023,7 +1029,17 @@ export default function Dashboard() {
     
     return matchesProject && matchesSearch && matchesTags;
   });
-  
+
+    console.log('[DEBUG-DASHBOARD] Filtered results:', {
+      totalEntries: entries.length,
+      filtered: filtered.length,
+      folders: filtered.filter(e => e.type === 'folder').length,
+      documents: filtered.filter(e => e.type === 'document').length
+    });
+
+    return filtered;
+  }, [entries, selectedProjectId, searchTerm, selectedTags, getFullBlockText]);
+
   // Log search summary
   useEffect(() => {
     if (searchTerm && searchTerm.length > 0) {

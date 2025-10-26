@@ -97,75 +97,75 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         {/* Favorite Indicator */}
         <FavoriteIndicator isFavorite={entry.isFavorite} />
 
-      {/* Drag Handle - Hidden on mobile */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="hidden lg:block absolute -left-8 top-1/2 -translate-y-1/2 p-2
-                   bg-[#0a1628]/80 hover:bg-[#1a2942] backdrop-blur-sm
-                   rounded-l-lg transition-all duration-200
-                   cursor-grab active:cursor-grabbing
-                   opacity-0 group-hover:opacity-100
-                   hover:shadow-md border border-white/10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <GripVertical size={20} className="text-white/40 hover:text-emerald-400 transition-colors" />
-      </div>
-
-      {/* Mobile Context Menu Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onContextMenu?.(entry);
-        }}
-        className="lg:hidden absolute top-3 right-3 p-2 z-20
-                   hover:bg-white/10 active:bg-white/20
-                   rounded-lg transition-colors"
-      >
-        <MoreVertical size={16} className="text-white/60" />
-      </button>
-
-      {/* Selection Indicator */}
-      {isSelected && (
-        <div className="absolute top-3 right-3 bg-emerald-500 rounded-full p-1.5 shadow-lg z-20
-                        animate-in fade-in zoom-in duration-200">
-          <Check size={14} className="text-white" strokeWidth={3} />
+        {/* Drag Handle - Hidden on mobile */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="hidden lg:block absolute -left-8 top-1/2 -translate-y-1/2 p-2
+                     bg-[#0a1628]/80 hover:bg-[#1a2942] backdrop-blur-sm
+                     rounded-l-lg transition-all duration-200
+                     cursor-grab active:cursor-grabbing
+                     opacity-0 group-hover:opacity-100
+                     hover:shadow-md border border-white/10"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical size={20} className="text-white/40 hover:text-emerald-400 transition-colors" />
         </div>
-      )}
 
-      {/* Card Content */}
-      <div className="relative p-5 flex flex-col h-full min-h-[140px]">
-        {/* Title - exact spacing from Figma */}
-        <h3 className="text-white/90 mb-4 group-hover:text-white transition-colors
-                       line-clamp-3 min-h-[4.5rem] flex items-start pr-6 leading-snug">
-          {entry.title}
-        </h3>
+        {/* Mobile Context Menu Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onContextMenu?.(entry);
+          }}
+          className="lg:hidden absolute top-3 right-3 p-2 z-20
+                     hover:bg-white/10 active:bg-white/20
+                     rounded-lg transition-colors"
+        >
+          <MoreVertical size={16} className="text-white/60" />
+        </button>
 
-        {/* Chart visualization - 20 bars */}
-        {hasChart && (
-          <div className="mt-auto h-16 flex items-end gap-1 px-1 pb-1">
-            {activityData.map((value, i) => (
-              <div
-                key={i}
-                className="flex-1 bg-gradient-to-t from-emerald-500/40 to-emerald-400/30 rounded-t
-                           group-hover:from-emerald-500/60 group-hover:to-emerald-400/50
-                           transition-all duration-300 shadow-sm shadow-emerald-500/20"
-                style={{
-                  height: `${value}%`,
-                  transitionDelay: `${i * 20}ms`
-                }}
-              />
-            ))}
+        {/* Selection Indicator */}
+        {isSelected && (
+          <div className="absolute top-3 right-3 bg-emerald-500 rounded-full p-1.5 shadow-lg z-20
+                          animate-in fade-in zoom-in duration-200">
+            <Check size={14} className="text-white" strokeWidth={3} />
           </div>
         )}
 
-        {/* Preview text for documents without chart */}
-        {!hasChart && (
-          <p className="mt-auto text-white/60 text-sm line-clamp-2 leading-relaxed">
-            {entry.preview || 'Click to start editing...'}
-          </p>
-        )}
-      </div>
+        {/* Card Content */}
+        <div className="relative p-5 flex flex-col h-full min-h-[140px]">
+          {/* Title - exact spacing from Figma */}
+          <h3 className="text-white/90 mb-4 group-hover:text-white transition-colors
+                         line-clamp-3 min-h-[4.5rem] flex items-start pr-6 leading-snug">
+            {entry.title}
+          </h3>
+
+          {/* Chart visualization - 20 bars */}
+          {hasChart && (
+            <div className="mt-auto h-16 flex items-end gap-1 px-1 pb-1">
+              {activityData.map((value, i) => (
+                <div
+                  key={i}
+                  className="flex-1 bg-gradient-to-t from-emerald-500/40 to-emerald-400/30 rounded-t
+                             group-hover:from-emerald-500/60 group-hover:to-emerald-400/50
+                             transition-all duration-300 shadow-sm shadow-emerald-500/20"
+                  style={{
+                    height: `${value}%`,
+                    transitionDelay: `${i * 20}ms`
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Preview text for documents without chart */}
+          {!hasChart && (
+            <p className="mt-auto text-white/60 text-sm line-clamp-2 leading-relaxed">
+              {entry.preview || 'Click to start editing...'}
+            </p>
+          )}
+        </div>
       </CardContainer>
     </div>
   );

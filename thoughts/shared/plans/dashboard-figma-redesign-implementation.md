@@ -451,8 +451,8 @@ export default function EntryCardRedesigned({
 ### Success Criteria
 
 #### Automated Verification:
-- [ ] No ESLint errors in updated file: `npm run lint`
-- [ ] File imports CardContainer and FavoriteIndicator correctly
+- [x] No ESLint errors in updated file: `npm run lint`
+- [x] File imports CardContainer and FavoriteIndicator correctly
 
 #### Manual Verification:
 - [ ] Open dashboard - document cards render correctly

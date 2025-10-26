@@ -1,5 +1,6 @@
 import { supabase } from '../../lib/supabaseOptimized';
 import { SupabaseAdapter } from './SupabaseAdapter';
+import { SupabaseAdapterOptimized } from './SupabaseAdapterOptimized';
 import IndexedDBAdapter from './IndexedDBAdapter';
 
 /**
@@ -158,11 +159,11 @@ async function doInit() {
     
     if (session && session.user) {
       console.log('Using Supabase for storage');
-      const supabaseAdapter = new SupabaseAdapter();
-      
-      // Try to initialize with userId to avoid extra auth call
+      const supabaseAdapter = new SupabaseAdapterOptimized();
+      supabaseAdapter.userId = session.user.id; // Set userId directly
+
+      // Try to initialize (SupabaseAdapterOptimized doesn't require init)
       try {
-        await supabaseAdapter.init(session.user.id);
         adapter = createSupabaseWrapper(supabaseAdapter);
       } catch (initError) {
         console.warn('Supabase adapter init failed, falling back to IndexedDB:', initError);
@@ -182,6 +183,40 @@ async function doInit() {
     isInitialized = true;
     return adapter;
   }
+}
+
+/**
+ * Load documents with pagination support
+ * @param {Object} options - Pagination options
+ * @param {number} options.page - Page index (0-based)
+ * @param {number} options.limit - Items per page (default: 50)
+ * @param {string} options.orderBy - Column to sort by (default: 'updated_at')
+ * @param {boolean} options.ascending - Sort direction (default: false)
+ * @returns {Promise<{documents, totalCount, page, pageSize, hasMore}>}
+ */
+export async function loadDocumentsPaginated(options = {}) {
+  const storageAdapter = await init();
+
+  // Check if adapter supports pagination (Supabase)
+  if (storageAdapter.supabaseAdapter && storageAdapter.supabaseAdapter.loadAllDocuments) {
+    const userId = storageAdapter.supabaseAdapter.userId;
+    return storageAdapter.supabaseAdapter.loadAllDocuments(userId, options);
+  }
+
+  // Fallback for IndexedDB (no pagination support)
+  const allDocs = await storageAdapter.loadEntries();
+  const page = options.page || 0;
+  const limit = options.limit || 50;
+  const start = page * limit;
+  const end = start + limit;
+
+  return {
+    documents: allDocs.slice(start, end),
+    totalCount: allDocs.length,
+    page,
+    pageSize: limit,
+    hasMore: end < allDocs.length
+  };
 }
 
 // Export storage functions

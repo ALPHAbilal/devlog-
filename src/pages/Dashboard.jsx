@@ -37,6 +37,7 @@ import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 import TrialBanner from '../components/TrialBanner';
 import useDocumentOrganization from '../hooks/useDocumentOrganization';
 import { useFolders } from '../hooks/useFolders';
+import { usePaginatedDashboard } from '../hooks/usePaginatedDashboard';
 import { 
   DndContext, 
   closestCenter,
@@ -72,6 +73,25 @@ export default function Dashboard() {
 
   // Folders hook - folders are auto-loaded by the hook
   const { folders, refreshFolders } = useFolders();
+
+  // Initialize pagination hook for documents
+  const {
+    documents: paginatedDocuments,
+    documentsWithSkeletons,
+    isLoading: isLoadingDocuments,
+    isLoadingMore,
+    hasMore,
+    loadMore,
+    loadInitial,
+    checkLoadMore,
+    progress
+  } = usePaginatedDashboard({
+    pageSize: 50,
+    orderBy: 'updated_at',
+    ascending: false,
+    enableInfiniteScroll: true,
+    preloadNextPage: true
+  });
 
   // Check for expired trial
   useEffect(() => {
@@ -498,6 +518,13 @@ export default function Dashboard() {
     }
   }, [isPulling, updateStorageInfo]);
 
+  // Sync paginated documents to allDocuments state
+  useEffect(() => {
+    if (paginatedDocuments && paginatedDocuments.length > 0) {
+      setAllDocuments(paginatedDocuments);
+    }
+  }, [paginatedDocuments]);
+
   // Combine folders and documents whenever either changes (eliminates race condition)
   useEffect(() => {
     // Wait for both data sources to be ready
@@ -585,17 +612,26 @@ export default function Dashboard() {
     setEntries(combined);
   }, [folders, allDocuments]); // Re-run whenever folders OR documents change
 
-  // Load entries on mount
+  // Load initial documents on mount
   useEffect(() => {
-    let isMounted = true;
-    
-    loadEntries();
-    
-    return () => {
-      isMounted = false;
+    if (user?.id) {
+      loadInitial();
+    }
+  }, [user?.id, loadInitial]);
+
+  // Add infinite scroll event listener
+  useEffect(() => {
+    const scrollElement = document.querySelector('.dashboard-scroll-container');
+    if (!scrollElement) return;
+
+    const handleScroll = () => {
+      checkLoadMore(scrollElement);
     };
-  }, [loadEntries]);
-  
+
+    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollElement.removeEventListener('scroll', handleScroll);
+  }, [checkLoadMore]);
+
   // Sync URL with document state
   useEffect(() => {
     if (documentId && entries.length > 0) {
@@ -1297,8 +1333,8 @@ export default function Dashboard() {
   }
 
   // Show skeleton UI while loading for better perceived performance
-  // Show loading skeleton only during initial load
-  if (isLoading && !isInitialized.current) {
+  // Show loading skeleton only during initial load (when no documents yet)
+  if (isLoadingDocuments && paginatedDocuments.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32] p-6">
         <div className="flex gap-6 h-[calc(100vh-3rem)] max-w-[1800px] mx-auto">
@@ -1539,7 +1575,7 @@ export default function Dashboard() {
               <div className="flex-1 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
                 <div
                   ref={pullToRefreshRef}
-                  className="h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative"
+                  className="dashboard-scroll-container h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative"
                   style={{
                     scrollbarWidth: 'thin',
                     scrollbarColor: 'rgba(16, 185, 129, 0.3) rgba(255, 255, 255, 0.05)',
@@ -1573,6 +1609,30 @@ export default function Dashboard() {
                         setShowMobileContextMenu(true);
                       } : undefined}
                     />
+
+                    {/* Infinite Scroll Loading State */}
+                    {isLoadingMore && (
+                      <div className="py-6 flex justify-center">
+                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                          <div className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+                          <span>Loading more documents...</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* End of List Indicator */}
+                    {!hasMore && paginatedDocuments.length > 0 && !searchTerm && (
+                      <div className="py-6 text-center text-sm text-gray-500">
+                        You've reached the end • {progress.loaded} documents loaded
+                      </div>
+                    )}
+
+                    {/* Progress Indicator (shows while more to load) */}
+                    {hasMore && paginatedDocuments.length > 0 && !searchTerm && (
+                      <div className="py-2 text-center text-xs text-gray-500">
+                        Showing {progress.loaded} of {progress.total} documents ({Math.round(progress.percentage)}%)
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

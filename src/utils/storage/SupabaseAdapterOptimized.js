@@ -55,6 +55,53 @@ export class SupabaseAdapterOptimized {
   }
 
   /**
+   * Get documents without pagination (backwards compatibility)
+   * Returns all documents for the user
+   */
+  async getDocuments() {
+    if (!this.userId) {
+      console.error('SupabaseAdapterOptimized: No userId set');
+      return [];
+    }
+
+    const cacheKey = `docs:${this.userId}:all`;
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const { data, error } = await this.supabase
+        .from('documents')
+        .select('id, title, tags, created_at, updated_at, metadata, is_template, project_id, folder_id, position')
+        .eq('user_id', this.userId)
+        .is('deleted_at', null)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform to app format
+      const documents = (data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        preview: doc.metadata?.preview || 'Click to view document...',
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        tags: doc.tags || [],
+        isTemplate: doc.is_template || false,
+        projectId: doc.project_id,
+        folder_id: doc.folder_id,
+        position: doc.position,
+        metadata: doc.metadata || {}
+      }));
+
+      this.setCache(cacheKey, documents);
+      return documents;
+    } catch (error) {
+      console.error('Error getting documents:', error);
+      return [];
+    }
+  }
+
+  /**
    * Load all documents with pagination and caching
    */
   async loadAllDocuments(userId, options = {}) {
@@ -88,8 +135,23 @@ export class SupabaseAdapterOptimized {
 
       if (result.error) throw result.error;
 
+      // Transform to app format
+      const documents = (result.data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        preview: doc.metadata?.preview || 'Click to view document...',
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        tags: doc.tags || [],
+        isTemplate: doc.is_template || false,
+        projectId: doc.project_id,
+        folder_id: doc.folder_id,
+        position: doc.position,
+        metadata: doc.metadata || {}
+      }));
+
       const response = {
-        documents: result.data,
+        documents,
         totalCount: result.count,
         page,
         pageSize: limit,
@@ -102,6 +164,60 @@ export class SupabaseAdapterOptimized {
       console.error('Error loading documents:', error);
       throw error;
     }
+  }
+
+  /**
+   * Get single document with blocks (alias for loadDocument)
+   */
+  async getDocument(documentId) {
+    return this.loadDocument(documentId);
+  }
+
+  /**
+   * Delete document
+   */
+  async deleteDocument(documentId) {
+    this.clearCache(`doc:${documentId}`);
+    this.clearCache(`docs:`); // Clear all document caches
+
+    try {
+      const { error } = await this.supabase
+        .from('documents')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', documentId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get blocks for a document
+   */
+  async getBlocks(documentId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('blocks')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('position', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting blocks:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Invalidate cache for debugging/testing
+   */
+  invalidateCache() {
+    this.cache.clear();
   }
 
   /**

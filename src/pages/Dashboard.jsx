@@ -362,25 +362,36 @@ export default function Dashboard() {
   // Create a ref to track if we're currently loading
   const loadingRef = useRef(false);
   
-  // Load entries function - accessible from multiple places
+  // Load entries function - now uses pagination hook internally
   const loadEntries = useCallback(async () => {
+    console.log('Dashboard: loadEntries() called - triggering paginated load');
+    await loadInitial();
+
+    // Also refresh folders
+    if (refreshFolders) {
+      await refreshFolders();
+    }
+  }, [loadInitial, refreshFolders]);
+
+  // OLD IMPLEMENTATION - REMOVED (now using pagination)
+  const loadEntriesOLD = useCallback(async () => {
     // Prevent concurrent loads
     if (loadingRef.current || (isInitialized.current && !isPulling)) {
       console.log('Dashboard: Skipping load - already loading or initialized');
       return;
     }
-    
+
     loadingRef.current = true;
     const startTime = performance.now();
     console.log('Dashboard: Starting to load entries...');
     setIsLoading(true);
-    
+
     try {
       // Ensure storage is initialized
       const initStart = performance.now();
       await storageWrapper.init();
       console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
-      
+
       // Load documents (folders are auto-loaded by useFolders hook)
       const loadStart = performance.now();
       const savedEntries = await storageWrapper.getEntries();

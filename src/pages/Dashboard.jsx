@@ -1038,7 +1038,7 @@ export default function Dashboard() {
     });
 
     return filtered;
-  }, [entries, selectedProjectId, searchTerm, selectedTags, getFullBlockText]);
+  }, [entries, selectedProjectId, searchTerm, selectedTags]);
 
   // Log search summary
   useEffect(() => {

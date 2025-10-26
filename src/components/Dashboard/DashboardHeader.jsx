@@ -17,7 +17,7 @@ export default function DashboardHeader({
   const navigate = useNavigate();
 
   return (
-    <div className="bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6 flex-shrink-0">
+    <div className="relative z-10 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6 flex-shrink-0">
       {/* Top Row */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -66,7 +66,7 @@ export default function DashboardHeader({
 
             {/* Profile Dropdown */}
             {showProfileMenu && (
-              <div className="absolute right-0 mt-1 w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="absolute right-0 mt-1 w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden z-[100] animate-in fade-in slide-in-from-top-1 duration-150">
                 <div className="p-3 border-b border-white/10">
                   <p className="text-sm leading-none text-white/90">
                     {user?.user_metadata?.full_name || 'Developer'}

@@ -8,6 +8,9 @@ import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
 import VirtualizedGrid from '../components/VirtualizedGrid';
 import DocumentGridRedesigned from '../components/DocumentGridRedesigned';
+import DocumentCardSkeleton from '../components/DocumentCardSkeleton';
+import FolderCardSkeleton from '../components/FolderCardSkeleton';
+import SidebarSkeleton from '../components/SidebarSkeleton';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import ProjectCard from '../components/ProjectCard';
 // import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
@@ -1297,58 +1300,63 @@ export default function Dashboard() {
   // Show loading skeleton only during initial load
   if (isLoading && !isInitialized.current) {
     return (
-      <div className="h-screen overflow-hidden flex flex-col
-                      bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32]">
-        {/* Header Skeleton */}
-        <header className="flex-shrink-0 z-30 relative
-                          bg-[#0a1628]/40 backdrop-blur-xl
-                          border-b border-white/5
-                          shadow-2xl shadow-black/20">
-          {/* Top Row */}
-          <div className="flex items-center justify-between px-4 md:px-6 py-4">
-            <div className="flex items-center gap-3 ml-0 lg:ml-[288px]">
-              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
-              <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
-            </div>
-            <div className="flex items-center gap-3 mr-2 md:mr-8">
-              <div className="h-9 w-20 bg-white/10 rounded-lg animate-pulse" />
-              <div className="h-9 w-9 bg-white/10 rounded-lg animate-pulse" />
-            </div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32] p-6">
+        <div className="flex gap-6 h-[calc(100vh-3rem)] max-w-[1800px] mx-auto">
+          {/* Sidebar Skeleton */}
+          <SidebarSkeleton />
 
-        {/* Search Bar Skeleton */}
-        <div className="flex-shrink-0 px-4 md:px-6 py-4 ml-0 lg:ml-[288px]">
-          <div className="h-12 max-w-3xl bg-white/5 border border-white/10 rounded-xl animate-pulse" />
-        </div>
+          {/* Main Content */}
+          <div className="flex-1 flex flex-col gap-6 min-w-0">
+            {/* Header Skeleton */}
+            <div className="bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
+                  <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-20 bg-white/10 rounded-lg animate-pulse" />
+                  <div className="h-9 w-9 bg-white/10 rounded-lg animate-pulse" />
+                </div>
+              </div>
+            </div>
 
-        {/* Content Skeleton */}
-        <div className="flex-1 min-h-0 px-4 md:px-6 pb-4 ml-0 lg:ml-[288px]">
-          <div className="h-full bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl
-                          border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
-            <div className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(i => (
-                  <div
-                    key={i}
-                    className="bg-gradient-to-br from-[#1a2942]/40 to-[#0f1d32]/40
-                               rounded-xl border border-white/10 p-5 h-[140px]
-                               animate-pulse"
-                  >
-                    {/* Title skeleton */}
-                    <div className="h-4 bg-white/10 rounded w-3/4 mb-4" />
-                    {/* Chart skeleton */}
-                    <div className="mt-auto h-16 flex items-end gap-1">
-                      {[...Array(20)].map((_, j) => (
-                        <div
-                          key={j}
-                          className="flex-1 bg-emerald-500/20 rounded-t"
-                          style={{ height: `${Math.random() * 100}%` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+            {/* Documents Grid Skeleton */}
+            <div className="flex-1 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
+              <div className="p-6 h-full overflow-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 items-start auto-rows-max">
+                  {/* Mix of folders and documents like in real dashboard */}
+                  <FolderCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <FolderCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <FolderCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <FolderCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <FolderCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <FolderCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                  <DocumentCardSkeleton />
+                </div>
               </div>
             </div>
           </div>

@@ -20,7 +20,7 @@ export default function ProjectExplorerRedesigned({
   const [favoritesExpanded, setFavoritesExpanded] = useState(true);
 
   // Use existing folders hook (no backend changes)
-  const { folders } = useFolders();
+  const { folders, createFolder } = useFolders();
 
   // Toggle folder expansion
   const toggleFolder = (id) => {
@@ -60,6 +60,9 @@ export default function ProjectExplorerRedesigned({
 
     // Add documents to their folders
     documents.forEach(doc => {
+      // Skip if this is a folder (from entries array)
+      if (doc.type === 'folder') return;
+
       if (doc.folder_id && folderMap.has(doc.folder_id)) {
         const folder = folderMap.get(doc.folder_id);
         folder.children.push({
@@ -71,7 +74,23 @@ export default function ProjectExplorerRedesigned({
       }
     });
 
-    return rootFolders;
+    // Add root documents (documents without folder_id) to root level
+    const rootDocuments = documents
+      .filter(doc => doc.type !== 'folder' && !doc.folder_id)
+      .map(doc => ({
+        ...doc,
+        type: 'document',
+        name: doc.title
+      }));
+
+    // Combine root folders and root documents
+    const combined = [...rootFolders, ...rootDocuments];
+    console.log('[DEBUG-SIDEBAR] Folder tree built:', {
+      totalFolders: rootFolders.length,
+      totalRootDocuments: rootDocuments.length,
+      combinedTotal: combined.length
+    });
+    return combined;
   }, [folders, documents]);
 
   // Get favorite folders
@@ -84,6 +103,27 @@ export default function ProjectExplorerRedesigned({
     if (item.type === 'document') {
       onDocumentSelect?.(item);
     }
+  };
+
+  // Handle create new folder
+  const handleCreateFolder = async () => {
+    console.log('[DEBUG-SIDEBAR] Create folder button clicked');
+    const folderName = prompt('Enter folder name:');
+    if (folderName && folderName.trim()) {
+      console.log('[DEBUG-SIDEBAR] Creating folder:', folderName.trim());
+      await createFolder(folderName.trim(), null); // null = root folder
+    }
+  };
+
+  // Handle context menu (for now, just show alert - can be expanded later)
+  const handleContextMenu = (item) => {
+    // TODO: Implement proper context menu with actions like:
+    // - Rename folder/document
+    // - Delete folder/document
+    // - Move to another folder
+    // - Add to favorites
+    console.log('[DEBUG-SIDEBAR] Context menu clicked for:', item.name || item.title, item);
+    alert(`Context menu for: ${item.name || item.title}\n\nActions coming soon:\n- Rename\n- Delete\n- Move\n- Favorite`);
   };
 
   // Collapsed sidebar view
@@ -159,6 +199,7 @@ export default function ProjectExplorerRedesigned({
                     isFavorite={true}
                     isLast={index === favoriteFolders.length - 1}
                     onItemClick={handleItemClick}
+                    onContextMenu={handleContextMenu}
                   />
                 ))}
               </div>
@@ -181,7 +222,7 @@ export default function ProjectExplorerRedesigned({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                console.log('Create new root folder');
+                handleCreateFolder();
               }}
               className="opacity-0 group-hover:opacity-100 hover:bg-emerald-500/20 rounded p-1 transition-all duration-200 hover:scale-110"
               title="New Folder"
@@ -206,6 +247,7 @@ export default function ProjectExplorerRedesigned({
                   isFavorite={false}
                   isLast={index === folderTree.length - 1}
                   onItemClick={handleItemClick}
+                  onContextMenu={handleContextMenu}
                 />
               ))}
             </div>

@@ -8,7 +8,8 @@ export default function SidebarTreeItem({
   depth = 0,
   isFavorite = false,
   isLast = false,
-  onItemClick
+  onItemClick,
+  onContextMenu
 }) {
   const hasChildren = item.children && item.children.length > 0;
   const isFile = item.type === 'file' || item.type === 'document';
@@ -82,6 +83,20 @@ export default function SidebarTreeItem({
           {item.name || item.title}
         </span>
 
+        {/* Context Menu Button (Hover Dots) */}
+        {onContextMenu && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onContextMenu(item);
+            }}
+            className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200 flex-shrink-0"
+            title="More options"
+          >
+            <MoreHorizontal className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
+          </button>
+        )}
+
         {/* Count badge */}
         {itemCount > 0 && (
           <span className="text-[11px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded-md group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0 border border-white/5">
@@ -108,6 +123,7 @@ export default function SidebarTreeItem({
                 isFavorite={child.favorite || child.isFavorite}
                 isLast={index === item.children.length - 1}
                 onItemClick={onItemClick}
+                onContextMenu={onContextMenu}
               />
             ))}
           </div>

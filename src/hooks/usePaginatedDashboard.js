@@ -76,7 +76,16 @@ export function usePaginatedDashboard(options = {}) {
    * Load next page of documents (infinite scroll)
    */
   const loadMore = useCallback(async () => {
+    console.log('usePaginatedDashboard: loadMore() called', {
+      userId: user?.id,
+      loadingRef: loadingRef.current,
+      hasMore,
+      isLoadingMore,
+      currentPage
+    });
+
     if (!user?.id || loadingRef.current || !hasMore || isLoadingMore) {
+      console.log('usePaginatedDashboard: loadMore() blocked by conditions');
       return;
     }
 
@@ -86,12 +95,16 @@ export function usePaginatedDashboard(options = {}) {
 
     try {
       const nextPage = currentPage + 1;
+      console.log(`usePaginatedDashboard: Loading page ${nextPage}`);
+
       const result = await loadDocumentsPaginated({
         page: nextPage,
         limit: pageSize,
         orderBy,
         ascending
       });
+
+      console.log(`usePaginatedDashboard: Loaded ${result.documents.length} documents, hasMore: ${result.hasMore}`);
 
       setDocuments(prev => [...prev, ...result.documents]);
       setHasMore(result.hasMore);
@@ -102,7 +115,7 @@ export function usePaginatedDashboard(options = {}) {
         preloadNextPageInBackground(nextPage + 1);
       }
     } catch (err) {
-      console.error('Error loading more documents:', err);
+      console.error('usePaginatedDashboard: Error loading more documents:', err);
       setError(err);
     } finally {
       setIsLoadingMore(false);
@@ -136,7 +149,23 @@ export function usePaginatedDashboard(options = {}) {
    * Auto-triggered when infinite scroll enabled
    */
   const checkLoadMore = useCallback((scrollElement) => {
-    if (!scrollElement || !hasMore || isLoadingMore || !enableInfiniteScroll) {
+    if (!scrollElement) {
+      console.log('usePaginatedDashboard: No scroll element');
+      return;
+    }
+
+    if (!hasMore) {
+      console.log('usePaginatedDashboard: No more documents to load');
+      return;
+    }
+
+    if (isLoadingMore) {
+      console.log('usePaginatedDashboard: Already loading more');
+      return;
+    }
+
+    if (!enableInfiniteScroll) {
+      console.log('usePaginatedDashboard: Infinite scroll disabled');
       return;
     }
 
@@ -144,7 +173,17 @@ export function usePaginatedDashboard(options = {}) {
     const scrollPosition = scrollTop + clientHeight;
     const threshold = scrollHeight - 200; // Load 200px before bottom
 
+    console.log('usePaginatedDashboard: Scroll check:', {
+      scrollTop,
+      scrollHeight,
+      clientHeight,
+      scrollPosition,
+      threshold,
+      shouldLoad: scrollPosition >= threshold
+    });
+
     if (scrollPosition >= threshold) {
+      console.log('usePaginatedDashboard: Triggering loadMore()');
       loadMore();
     }
   }, [hasMore, isLoadingMore, enableInfiniteScroll, loadMore]);

@@ -623,12 +623,14 @@ export default function Dashboard() {
     setEntries(combined);
   }, [folders, allDocuments]); // Re-run whenever folders OR documents change
 
-  // Load initial documents on mount
+  // Load initial documents on mount - moved to hook initialization
   useEffect(() => {
-    if (user?.id) {
+    console.log('[DEBUG-INIT] Dashboard mounted, user:', user?.id, 'paginatedDocs:', paginatedDocuments.length);
+    if (user?.id && paginatedDocuments.length === 0 && !isLoadingDocuments) {
+      console.log('[DEBUG-INIT] Triggering loadInitial()');
       loadInitial();
     }
-  }, [user?.id, loadInitial]);
+  }, [user?.id]);
 
   // Add infinite scroll event listener
   useEffect(() => {

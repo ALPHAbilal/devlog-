@@ -1,253 +1,95 @@
-index-BzOsBv_Z.js:26 Using optimized Supabase client
-index-BzOsBv_Z.js:26 IndexedDB initialized successfully
-index-BzOsBv_Z.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-BzOsBv_Z.js:26 Persistent storage granted
-index-BzOsBv_Z.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-BzOsBv_Z.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-BzOsBv_Z.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Filtered results: {totalEntries: 0, filtered: 0, folders: 0, documents: 0}
-index-BzOsBv_Z.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 0, totalRootDocuments: 0, combinedTotal: 0}
-index-BzOsBv_Z.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-BzOsBv_Z.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
-index-BzOsBv_Z.js:26 Using Supabase for storage
-index-BzOsBv_Z.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 0, totalRootDocuments: 0, combinedTotal: 0}
-index-BzOsBv_Z.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-BzOsBv_Z.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 0, totalRootDocuments: 43, combinedTotal: 43}
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Combined: 0 folders + 43 documents = 43 total items
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Filtered results: {totalEntries: 43, filtered: 43, folders: 0, documents: 43}
-index-BzOsBv_Z.js:26 Loaded 82 folders (37 root folders)
-index-BzOsBv_Z.js:26 Loaded 82 folders (37 root folders)
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "seo thing": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-29T20:15:18.803Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "problems": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-29T10:22:16.769Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-29T10:22:16.769Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-10-25T12:30:33.238Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (6)": 1 subfolders + 0 documents = 1 items, most recent: 2025-10-25T12:30:33.238Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:15:00.803Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T10:15:42.785Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:34:43.643Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-16T16:34:43.643Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (5)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-27T21:28:30.123Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:15:55.163Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (4)": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T23:05:23.478Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-28T11:22:51.739Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2025-10-25T12:30:26.729Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2025-10-26T14:54:52.947Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-21T14:15:13.552Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-16T14:54:36.506Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T12:10:37.944Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-28T13:52:23.039Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-20T14:24:48.758Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:00:46.063Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:36:39.300Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:12:50.604Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 3 subfolders + 0 documents = 3 items, most recent: 2025-07-20T17:00:46.063Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:10.232Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-20T17:01:31.529Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "new folder 4": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:53:22.558Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "wow": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T21:23:40.667Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "another test": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T07:15:16.472Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-24T21:23:40.667Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:45:08.652Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:45:08.652Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 5 documents = 5 items, most recent: 2025-09-02T21:19:36.310Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:58:39.132Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T11:11:07.255Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
-index-BzOsBv_Z.js:26 [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2025-08-26T06:25:45.292Z
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Combined: 37 folders + 43 documents = 80 total items
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
-index-BzOsBv_Z.js:26 [DEBUG-DASHBOARD] Filtered results: {totalEntries: 80, filtered: 80, folders: 37, documents: 43}
-index-BzOsBv_Z.js:26 Loaded 82 folders (37 root folders)
-index-BzOsBv_Z.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 37, totalRootDocuments: 43, combinedTotal: 80}
-index-BzOsBv_Z.js:26 [Supabase] Auth event: SIGNED_IN
-index-BzOsBv_Z.js:26 [AuthContext] Auth state change received: SIGNED_IN {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1ca6da7e-23b1-4b71-9e5b-10cbb1ab6d3b', type: 'text', hasContent: true, contentType: 'string', contentLength: 372, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '9b00c046-6724-4e62-ac4b-49c70ecbe007', type: 'heading', hasContent: true, contentType: 'string', contentLength: 36, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '613e1eed-50bb-45f9-bb98-e02522a2a42d', type: 'text', hasContent: true, contentType: 'string', contentLength: 145, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '574dc72d-252f-4c72-96a1-4b5348f3692b', type: 'heading', hasContent: true, contentType: 'string', contentLength: 17, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '33092634-b052-41e8-a24e-a0bd55add31c', type: 'text', hasContent: true, contentType: 'string', contentLength: 532, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'c57cde09-afed-4cd3-9d6e-8ca7b693e6c6', type: 'heading', hasContent: true, contentType: 'string', contentLength: 17, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '3116fc83-3f2a-46a3-94a6-bce0bbb4cb91', type: 'text', hasContent: true, contentType: 'string', contentLength: 781, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '43684c2a-b362-4f3a-9af4-b574bd5e855a', type: 'heading', hasContent: true, contentType: 'string', contentLength: 31, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '9b5378e0-a1f6-4c70-a3f7-a8706518c75f', type: 'heading', hasContent: true, contentType: 'string', contentLength: 41, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '478d110f-2e6c-4eeb-82a4-78ba2965e052', type: 'table', hasContent: true, contentType: 'string', contentLength: 403, …}
-index-BzOsBv_Z.js:26 BlockSerializer: Table has legacy markdown format, converting to structured data
-(anonymous) @ index-BzOsBv_Z.js:26
-LH @ index-BzOsBv_Z.js:118
-transformBlockFromDB @ index-BzOsBv_Z.js:120
-(anonymous) @ index-BzOsBv_Z.js:120
-preloadDocuments @ index-BzOsBv_Z.js:120
-await in preloadDocuments
-E @ index-BzOsBv_Z.js:1146
-ck @ index-BzOsBv_Z.js:106
-(anonymous) @ index-BzOsBv_Z.js:106
-Qi @ index-BzOsBv_Z.js:106
-$0 @ index-BzOsBv_Z.js:106
-Q0 @ index-BzOsBv_Z.js:107
-s5 @ index-BzOsBv_Z.js:107
-r @ index-BzOsBv_Z.js:26
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7e9b4871-6b3d-4ff1-bb36-b40e096d16d0', type: 'heading', hasContent: true, contentType: 'string', contentLength: 42, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'c473613f-787e-4e19-b18b-81f9dc76bcf0', type: 'text', hasContent: true, contentType: 'string', contentLength: 1417, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '2853bf8d-8929-44bf-a92b-a9cfc579046b', type: 'heading', hasContent: true, contentType: 'string', contentLength: 27, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '881d27d6-bf30-4895-a731-039962ef5dd2', type: 'code', hasContent: true, contentType: 'string', contentLength: 905, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '614bbf2d-bc2d-453c-be61-03fe445171ea', type: 'heading', hasContent: true, contentType: 'string', contentLength: 41, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '5eb5f849-6ccb-4e59-97d0-508a5c361126', type: 'text', hasContent: true, contentType: 'string', contentLength: 884, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e0b9de47-62fe-44e9-bd95-6b617290b089', type: 'heading', hasContent: true, contentType: 'string', contentLength: 27, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8212956e-ce64-42ea-a3b8-c681de49cef6', type: 'heading', hasContent: true, contentType: 'string', contentLength: 24, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'adab3980-9e1c-4242-bbce-d664c8243dc0', type: 'table', hasContent: true, contentType: 'string', contentLength: 538, …}
-index-BzOsBv_Z.js:26 BlockSerializer: Table has legacy markdown format, converting to structured data
-(anonymous) @ index-BzOsBv_Z.js:26
-LH @ index-BzOsBv_Z.js:118
-transformBlockFromDB @ index-BzOsBv_Z.js:120
-(anonymous) @ index-BzOsBv_Z.js:120
-preloadDocuments @ index-BzOsBv_Z.js:120
-await in preloadDocuments
-E @ index-BzOsBv_Z.js:1146
-ck @ index-BzOsBv_Z.js:106
-(anonymous) @ index-BzOsBv_Z.js:106
-Qi @ index-BzOsBv_Z.js:106
-$0 @ index-BzOsBv_Z.js:106
-Q0 @ index-BzOsBv_Z.js:107
-s5 @ index-BzOsBv_Z.js:107
-r @ index-BzOsBv_Z.js:26
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '23779d71-45ca-4510-bcdd-cae901707d58', type: 'heading', hasContent: true, contentType: 'string', contentLength: 16, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '29cd61ca-d0ed-4de9-91a6-3ec9f8ad746d', type: 'table', hasContent: true, contentType: 'string', contentLength: 297, …}
-index-BzOsBv_Z.js:26 BlockSerializer: Table has legacy markdown format, converting to structured data
-(anonymous) @ index-BzOsBv_Z.js:26
-LH @ index-BzOsBv_Z.js:118
-transformBlockFromDB @ index-BzOsBv_Z.js:120
-(anonymous) @ index-BzOsBv_Z.js:120
-preloadDocuments @ index-BzOsBv_Z.js:120
-await in preloadDocuments
-E @ index-BzOsBv_Z.js:1146
-ck @ index-BzOsBv_Z.js:106
-(anonymous) @ index-BzOsBv_Z.js:106
-Qi @ index-BzOsBv_Z.js:106
-$0 @ index-BzOsBv_Z.js:106
-Q0 @ index-BzOsBv_Z.js:107
-s5 @ index-BzOsBv_Z.js:107
-r @ index-BzOsBv_Z.js:26
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'deae3e43-b69d-449a-a2fc-86196a9987e5', type: 'heading', hasContent: true, contentType: 'string', contentLength: 27, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7d8f896a-06f3-4831-9d1b-c6e75d0563e5', type: 'table', hasContent: true, contentType: 'string', contentLength: 476, …}
-index-BzOsBv_Z.js:26 BlockSerializer: Table has legacy markdown format, converting to structured data
-(anonymous) @ index-BzOsBv_Z.js:26
-LH @ index-BzOsBv_Z.js:118
-transformBlockFromDB @ index-BzOsBv_Z.js:120
-(anonymous) @ index-BzOsBv_Z.js:120
-preloadDocuments @ index-BzOsBv_Z.js:120
-await in preloadDocuments
-E @ index-BzOsBv_Z.js:1146
-ck @ index-BzOsBv_Z.js:106
-(anonymous) @ index-BzOsBv_Z.js:106
-Qi @ index-BzOsBv_Z.js:106
-$0 @ index-BzOsBv_Z.js:106
-Q0 @ index-BzOsBv_Z.js:107
-s5 @ index-BzOsBv_Z.js:107
-r @ index-BzOsBv_Z.js:26
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '78194dac-5775-40df-ba41-be6cdd623c0e', type: 'heading', hasContent: true, contentType: 'string', contentLength: 28, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'a94dd671-77c2-4f73-83d3-22afb051e262', type: 'heading', hasContent: true, contentType: 'string', contentLength: 34, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '572c01e7-8016-4d59-ae4d-26b0b23d0ec9', type: 'text', hasContent: true, contentType: 'string', contentLength: 745, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'ea43fbd7-1c98-47c0-a2c7-eaa3bd442fde', type: 'heading', hasContent: true, contentType: 'string', contentLength: 20, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'a6d4e5ab-e4b3-4ebd-aa5c-ebb41179c710', type: 'heading', hasContent: true, contentType: 'string', contentLength: 29, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8d2d2916-4491-4791-900c-f81ba14e870e', type: 'text', hasContent: true, contentType: 'string', contentLength: 667, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '61739d3e-cc50-4842-8c84-5a69ecd17684', type: 'heading', hasContent: true, contentType: 'string', contentLength: 44, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '499b1d74-d9d6-4591-8127-f3ddf3ad602c', type: 'text', hasContent: true, contentType: 'string', contentLength: 561, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '13f69738-14e4-4d3e-9e45-02eee5fe7021', type: 'heading', hasContent: true, contentType: 'string', contentLength: 24, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '8fb639e4-5f72-4901-aeb7-a18dd2899bf6', type: 'text', hasContent: true, contentType: 'string', contentLength: 400, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7c8920cc-1c70-49fa-b3b6-de8dcdc6e468', type: 'heading', hasContent: true, contentType: 'string', contentLength: 16, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'c0413d51-6667-4434-9edb-d624fba9e24e', type: 'text', hasContent: true, contentType: 'string', contentLength: 215, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'c6792eae-135e-49d7-89e4-c2f17372d10b', type: 'heading', hasContent: true, contentType: 'string', contentLength: 45, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '51ea6d2d-4ebe-4f29-aefe-485326126ea5', type: 'text', hasContent: true, contentType: 'string', contentLength: 531, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '29d7c77b-721c-4f63-a584-7017c280ecd2', type: 'heading', hasContent: true, contentType: 'string', contentLength: 17, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '7ad95b69-cc59-4a5a-a52b-6bcd53648ca6', type: 'text', hasContent: true, contentType: 'string', contentLength: 849, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '5cc2930b-b3c3-48f7-919b-457fdb6d3e90', type: 'heading', hasContent: true, contentType: 'string', contentLength: 21, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e0925a2a-af94-4b74-9a3f-07edca3a783d', type: 'text', hasContent: true, contentType: 'string', contentLength: 580, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e6db889e-1e7a-4037-8c2a-2e56e29a8468', type: 'heading', hasContent: true, contentType: 'string', contentLength: 23, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '5cb6f227-cc6b-40bb-a069-e1c634406556', type: 'text', hasContent: true, contentType: 'string', contentLength: 735, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'b2b1e84d-52ee-42f3-816f-10abb3b1651d', type: 'heading', hasContent: true, contentType: 'string', contentLength: 21, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'd8f343b8-e918-4ded-bbf4-286441e303ff', type: 'text', hasContent: true, contentType: 'string', contentLength: 710, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '3edd6180-d080-4d5b-8bf1-117570c27af5', type: 'heading', hasContent: true, contentType: 'string', contentLength: 24, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '1ca473e8-0b7c-4b26-94cf-0c393b643134', type: 'todo', hasContent: true, contentType: 'string', contentLength: 890, …}
-index-BzOsBv_Z.js:26 BlockSerializer: Error deserializing block 1ca473e8-0b7c-4b26-94cf-0c393b643134: SyntaxError: Unexpected token 'E', "Extract Ap"... is not valid JSON
-    at JSON.parse (<anonymous>)
-    at LH (index-BzOsBv_Z.js:119:483)
-    at GD.transformBlockFromDB (index-BzOsBv_Z.js:120:226)
-    at index-BzOsBv_Z.js:120:908
-    at Array.reduce (<anonymous>)
-    at GD.preloadDocuments (index-BzOsBv_Z.js:120:826)
-(anonymous) @ index-BzOsBv_Z.js:26
-LH @ index-BzOsBv_Z.js:119
-transformBlockFromDB @ index-BzOsBv_Z.js:120
-(anonymous) @ index-BzOsBv_Z.js:120
-preloadDocuments @ index-BzOsBv_Z.js:120
-await in preloadDocuments
-E @ index-BzOsBv_Z.js:1146
-ck @ index-BzOsBv_Z.js:106
-(anonymous) @ index-BzOsBv_Z.js:106
-Qi @ index-BzOsBv_Z.js:106
-$0 @ index-BzOsBv_Z.js:106
-Q0 @ index-BzOsBv_Z.js:107
-s5 @ index-BzOsBv_Z.js:107
-r @ index-BzOsBv_Z.js:26
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '76515974-e15f-4974-a748-762b51318229', type: 'heading', hasContent: true, contentType: 'string', contentLength: 32, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'dd41c4bb-3da6-4b67-a5d2-7ea467fc63b3', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'c22b7c21-0aba-408c-9a4f-68cbff4d30f2', type: 'heading', hasContent: true, contentType: 'string', contentLength: 16, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'f9fe8db3-1b17-4f18-8338-46af040dda46', type: 'text', hasContent: true, contentType: 'string', contentLength: 1067, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'a3483cc2-94a4-4b5e-bbee-86019de4ba8b', type: 'text', hasContent: true, contentType: 'string', contentLength: 0, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'f4dfb667-3350-4594-8045-a1d2fe01c460', type: 'code', hasContent: true, contentType: 'string', contentLength: 1067, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'd3399fd4-0df5-4442-b859-4d47af193dea', type: 'heading', hasContent: true, contentType: 'string', contentLength: 69, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '6de25095-8809-46e1-a54b-54b6defa0b81', type: 'code', hasContent: true, contentType: 'string', contentLength: 8123, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'd76fe445-3fef-4497-9e0f-a38e0e94e6c9', type: 'code', hasContent: true, contentType: 'string', contentLength: 573, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e39ce89d-78e2-4b37-a120-6058830023b0', type: 'text', hasContent: true, contentType: 'string', contentLength: 5482, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e522f538-07f8-4966-a6d3-7d0308b4f356', type: 'code', hasContent: true, contentType: 'string', contentLength: 5482, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e39ce89d-78e2-4b37-a120-6058830023b0', type: 'text', hasContent: true, contentType: 'string', contentLength: 5482, …}
-index-BzOsBv_Z.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'e522f538-07f8-4966-a6d3-7d0308b4f356', type: 'code', hasContent: true, contentType: 'string', contentLength: 5482, …}
-index-BzOsBv_Z.js:26 [Supabase] Auth event: SIGNED_IN
-index-BzOsBv_Z.js:26 [AuthContext] Auth state change received: SIGNED_IN {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+21:59:12.212 Running build in Washington, D.C., USA (East) – iad1
+21:59:12.213 Build machine configuration: 2 cores, 8 GB
+21:59:12.401 Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 74bf099)
+21:59:13.073 Warning: Failed to fetch one or more git submodules
+21:59:13.073 Cloning completed: 672.000ms
+21:59:13.244 Restored build cache from previous deployment (4QvGaSzaPH1ycyzPdBDTVEgJHPRG)
+21:59:13.662 Running "vercel build"
+21:59:14.036 Vercel CLI 48.6.0
+21:59:14.853 Installing dependencies...
+21:59:16.055 
+21:59:16.057 up to date in 959ms
+21:59:16.057 
+21:59:16.058 76 packages are looking for funding
+21:59:16.058   run `npm fund` for details
+21:59:16.189 
+21:59:16.189 > journey-log-compass@0.0.0 build
+21:59:16.189 > vite build
+21:59:16.190 
+21:59:16.813 [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+21:59:16.851 [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
+21:59:17.189 transforming...
+21:59:27.542 [32m✓[39m 3208 modules transformed.
+21:59:28.765 rendering chunks...
+21:59:28.874 [33m[esbuild css minify]
+21:59:28.874 ▲ [WARNING] Expected "{" but found "," [css-syntax-error]
+21:59:28.874 
+21:59:28.874     <stdin>:3278:23:
+21:59:28.874       3278 │   @keyframes code-float,
+21:59:28.874            │                        ^
+21:59:28.874            ╵                        {
+21:59:28.874 
+21:59:28.875 [39m
+21:59:31.579 computing gzip size...
+21:59:31.847 [2mdist/[22m[32mindex.html                                   [39m[1m[2m    9.39 kB[22m[1m[22m[2m │ gzip:   2.74 kB[22m
+21:59:31.848 [2mdist/[22m[2massets/[22m[35mIssueTrackerBlock-CKpco3Rq.css        [39m[1m[2m    6.25 kB[22m[1m[22m[2m │ gzip:   1.59 kB[22m
+21:59:31.849 [2mdist/[22m[2massets/[22m[35mindex-DosOw2lB.css                    [39m[1m[2m  407.53 kB[22m[1m[22m[2m │ gzip:  53.79 kB[22m
+21:59:31.849 [2mdist/[22m[2massets/[22m[36mAIConversationSaver-ByzTAiNm.js       [39m[1m[2m   10.30 kB[22m[1m[22m[2m │ gzip:   2.61 kB[22m[2m │ map:    18.48 kB[22m
+21:59:31.849 [2mdist/[22m[2massets/[22m[36mPricingSection-B3SIoVfy.js            [39m[1m[2m   10.47 kB[22m[1m[22m[2m │ gzip:   3.72 kB[22m[2m │ map:    26.06 kB[22m
+21:59:31.849 [2mdist/[22m[2massets/[22m[36mNotionAlternative-DAPWyHUn.js         [39m[1m[2m   12.11 kB[22m[1m[22m[2m │ gzip:   3.23 kB[22m[2m │ map:    24.16 kB[22m
+21:59:31.850 [2mdist/[22m[2massets/[22m[36mAIConversationManagement-eeH3HH4Z.js  [39m[1m[2m   21.27 kB[22m[1m[22m[2m │ gzip:   4.70 kB[22m[2m │ map:    40.60 kB[22m
+21:59:31.850 [2mdist/[22m[2massets/[22m[36mDevLogVsNotion-CzV0tIw3.js            [39m[1m[2m   25.55 kB[22m[1m[22m[2m │ gzip:   4.76 kB[22m[2m │ map:    52.15 kB[22m
+21:59:31.850 [2mdist/[22m[2massets/[22m[36mVersionTrackBlock-BAjy41hc.js         [39m[1m[2m   36.43 kB[22m[1m[22m[2m │ gzip:  10.93 kB[22m[2m │ map:   145.15 kB[22m
+21:59:31.850 [2mdist/[22m[2massets/[22m[36mIssueTrackerBlock-Cr147cVg.js         [39m[1m[2m   48.74 kB[22m[1m[22m[2m │ gzip:  14.35 kB[22m[2m │ map:   181.29 kB[22m
+21:59:31.850 [2mdist/[22m[2massets/[22m[36mindex-RB7HZUAu.js                     [39m[1m[33m1,525.42 kB[39m[22m[2m │ gzip: 455.25 kB[22m[2m │ map: 6,374.90 kB[22m
+21:59:31.850 [33m
+21:59:31.851 (!) Some chunks are larger than 500 kB after minification. Consider:
+21:59:31.851 - Using dynamic import() to code-split the application
+21:59:31.851 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+21:59:31.851 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+21:59:31.864 [sentry-vite-plugin] Error: An error occurred. Couldn't finish all operations: Error: Command failed: /vercel/path0/node_modules/@sentry/cli-linux-x64/bin/sentry-cli releases new 74bf0997870c90495cbe584475fe275307aa6086
+21:59:31.865 error: API request failed
+21:59:31.865 
+21:59:31.865 Caused by:
+21:59:31.865     sentry reported an error: You do not have permission to perform this action. (http status: 403)
+21:59:31.865 
+21:59:31.866 Add --log-level=[info|debug] or export SENTRY_LOG_LEVEL=[info|debug] to see more output.
+21:59:31.866 Please attach the full debug log to all bug reports.
+21:59:31.866 
+21:59:31.866     at genericNodeError (node:internal/errors:983:15)
+21:59:31.866     at wrappedFn (node:internal/errors:537:14)
+21:59:31.867     at ChildProcess.exithandler (node:child_process:417:12)
+21:59:31.867     at ChildProcess.emit (node:events:519:28)
+21:59:31.867     at maybeClose (node:internal/child_process:1101:16)
+21:59:31.867     at Socket.<anonymous> (node:internal/child_process:456:11)
+21:59:31.867     at Socket.emit (node:events:519:28)
+21:59:31.867     at Pipe.<anonymous> (node:net:346:12) {
+21:59:31.867   code: 1,
+21:59:31.867   killed: false,
+21:59:31.867   signal: null,
+21:59:31.867   cmd: '/vercel/path0/node_modules/@sentry/cli-linux-x64/bin/sentry-cli releases new 74bf0997870c90495cbe584475fe275307aa6086'
+21:59:31.867 }
+21:59:31.964 > Found 16 files
+21:59:31.967 > Analyzing 16 sources
+21:59:31.983 > Adding source map references
+21:59:32.499 > Bundled 16 files for upload
+21:59:32.499 > Bundle ID: eaef88bd-74a0-5d1b-ba74-8d7111491615
+21:59:32.606 error: API request failed
+21:59:32.607 
+21:59:32.607 Caused by:
+21:59:32.607     sentry reported an error: You do not have permission to perform this action. (http status: 403)
+21:59:32.607 
+21:59:32.608 Add --log-level=[info|debug] or export SENTRY_LOG_LEVEL=[info|debug] to see more output.
+21:59:32.608 Please attach the full debug log to all bug reports.
+21:59:32.611 [sentry-vite-plugin] Error: An error occurred. Couldn't finish all operations: Error: Command --header sentry-trace:e4a72371a64846e6a6cd632c9851ce49-8e7afe24e1bc1802-1 --header baggage:sentry-environment=production,sentry-release=3.6.1,sentry-public_key=4c2bae7d9fbc413e8f7385f55c515d51,sentry-trace_id=e4a72371a64846e6a6cd632c9851ce49,sentry-sample_rate=1,sentry-transaction=Sentry%20Bundler%20Plugin%20execution,sentry-sampled=true sourcemaps upload --release 74bf0997870c90495cbe584475fe275307aa6086 /tmp/sentry-bundler-plugin-upload-kloCCN --ignore node_modules --no-rewrite failed with exit code 1
+21:59:32.612     at ChildProcess.<anonymous> (/vercel/path0/node_modules/@sentry/cli/js/helper.js:343:18)
+21:59:32.615     at ChildProcess.emit (node:events:519:28)
+21:59:32.615     at ChildProcess._handle.onexit (node:internal/child_process:293:12)
+21:59:32.623 [32m✓ built in 15.78s[39m
+21:59:34.815 Build Completed in /vercel/output [20s]
+21:59:35.018 Deploying outputs...
+21:59:42.030 Deployment completed
+21:59:42.836 Creating build cache...
+22:00:11.622 Created build cache: 28.778s
+22:00:11.623 Uploading build cache [52.91 MB]
+22:00:12.312 Build cache uploaded: 696.277ms

@@ -33,6 +33,7 @@ import { useSidebar } from '../contexts/SidebarContext';
 import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 import TrialBanner from '../components/TrialBanner';
 import useDocumentOrganization from '../hooks/useDocumentOrganization';
+import { useFolders } from '../hooks/useFolders';
 import { 
   DndContext, 
   closestCenter,
@@ -64,7 +65,10 @@ export default function Dashboard() {
   // Analytics hooks
   const { trackEvent } = useAnalytics();
   const { trackDocumentEvent, startDocumentTimer, endDocumentTimer } = useDocumentAnalytics();
-  
+
+  // Folders hook - for fetching and managing folders
+  const { folders, loadFolders } = useFolders();
+
   // Check for expired trial
   useEffect(() => {
     if (!user || !trialStatus) return;
@@ -353,12 +357,18 @@ export default function Dashboard() {
       await storageWrapper.init();
       console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
       
-      // Load entries
+      // Load entries and folders in parallel
       const loadStart = performance.now();
-      const savedEntries = await storageWrapper.getEntries();
-      console.log(`Dashboard: Loaded ${savedEntries?.length || 0} entries (${Math.round(performance.now() - loadStart)}ms)`);
+      const [savedEntries, foldersData] = await Promise.all([
+        storageWrapper.getEntries(),
+        loadFolders().catch(err => {
+          console.warn('Dashboard: Failed to load folders:', err);
+          return []; // Return empty array on error, don't block document loading
+        })
+      ]);
+      console.log(`Dashboard: Loaded ${savedEntries?.length || 0} documents and ${foldersData?.length || 0} folders (${Math.round(performance.now() - loadStart)}ms)`);
       console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
-      
+
       if (savedEntries && savedEntries.length > 0) {
         // Check session cache first for any cached documents
         const cachedDocs = sessionCache.getAllDocuments();
@@ -391,8 +401,27 @@ export default function Dashboard() {
           }
           return entry;
         });
-        
-        setEntries(mergedEntries);
+
+        // Combine folders with documents for grid display
+        // Only show root-level folders (no parent_id) and root-level documents (no folder_id)
+        const rootFolders = (foldersData || [])
+          .filter(folder => !folder.parent_id)  // Only root folders
+          .map(folder => ({
+            ...folder,
+            type: 'folder',  // Add type field for DocumentGridRedesigned to recognize
+            items: folder.children || []  // Include nested structure for FolderCard
+          }));
+
+        const rootDocuments = mergedEntries
+          .filter(doc => !doc.folder_id)  // Only root-level documents
+          .map(doc => ({ ...doc, type: 'document' }));  // Add type field
+
+        // Combine and sort by position
+        const combined = [...rootFolders, ...rootDocuments]
+          .sort((a, b) => (a.position || 0) - (b.position || 0));
+
+        console.log(`Dashboard: Combined ${rootFolders.length} folders with ${rootDocuments.length} documents`);
+        setEntries(combined);
       } else {
         // Initialize with example entry
         const initialEntries = [
@@ -429,7 +458,21 @@ export default function Dashboard() {
             updatedAt: new Date().toISOString()
           }
         ];
-        setEntries(initialEntries);
+
+        // Even with no documents, check if there are folders
+        const rootFolders = (foldersData || [])
+          .filter(folder => !folder.parent_id)
+          .map(folder => ({
+            ...folder,
+            type: 'folder',
+            items: folder.children || []
+          }));
+
+        // Combine initial entries with any existing folders
+        const combined = [...rootFolders, ...initialEntries.map(e => ({ ...e, type: 'document' }))]
+          .sort((a, b) => (a.position || 0) - (b.position || 0));
+
+        setEntries(combined);
         await storageWrapper.saveEntries(initialEntries);
       }
       

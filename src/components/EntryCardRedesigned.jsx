@@ -68,18 +68,19 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
     setTimeout(() => setTouchActive(false), 100);
   };
 
-  // Generate activity data for chart visualization - always show for all documents
+  // Generate activity data for chart visualization based on REAL document data
   const activityData = useMemo(() => {
-    // Generate 20 bars for chart visualization (matching Figma design)
-    const data = [];
-    for (let i = 0; i < 20; i++) {
-      // Generate realistic activity bars based on document age and characteristics
-      const baseHeight = 20 + Math.random() * 60; // 20-80% range
-      const variation = Math.sin(i * 0.5) * 15; // Wave pattern
-      data.push(Math.max(5, Math.min(95, baseHeight + variation)));
-    }
-    return data;
-  }, [entry.id]); // Regenerate based on entry.id for consistency
+    // Use existing activityData.js which analyzes real document properties:
+    // - entry.createdAt (creation date)
+    // - entry.updatedAt (last update date)
+    // - entry.blocks (block count and types)
+    const fullData = generateActivityData(entry);
+    // Take last 20 weeks to match Figma design (20 bars)
+    return fullData.slice(-20).map(value => {
+      // Convert 0-20 scale to 0-100 percentage for bar height
+      return Math.max(5, Math.min(95, (value / 20) * 100));
+    });
+  }, [entry.id, entry.updatedAt, entry.createdAt]); // Regenerate when document changes
 
   // Always show chart for all documents (matching Figma design)
   const hasChart = true;

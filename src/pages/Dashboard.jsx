@@ -402,12 +402,18 @@ export default function Dashboard() {
 
         // Note: Folders are combined with documents in the re-combine effect (lines 503-547)
         // This ensures folders are always included regardless of load timing
-        // For now, just set root documents - folders will be added by re-combine effect
+        // For now, just set root documents sorted by recent action - folders will be added by re-combine effect
         const rootDocuments = mergedEntries
           .filter(doc => !doc.folder_id)  // Only root-level documents
-          .map(doc => ({ ...doc, type: 'document' }));  // Add type field
+          .map(doc => ({ ...doc, type: 'document' }))  // Add type field
+          .sort((a, b) => {
+            // Sort by most recent activity
+            const aTime = new Date(a.updatedAt || a.createdAt || 0);
+            const bTime = new Date(b.updatedAt || b.createdAt || 0);
+            return bTime - aTime;  // Descending (most recent first)
+          });
 
-        console.log(`[DEBUG-DASHBOARD] Initial load: ${rootDocuments.length} root documents (folders will be combined by re-combine effect)`);
+        console.log(`[DEBUG-DASHBOARD] Initial load: ${rootDocuments.length} root documents sorted by recent action (folders will be combined by re-combine effect)`);
         setEntries(rootDocuments);
       } else {
         // Initialize with example entry
@@ -513,13 +519,26 @@ export default function Dashboard() {
         ...folderDocs          // Documents in this folder
       ];
 
-      console.log(`[DEBUG-FOLDER] Folder "${folder.name}": ${populatedChildren.length} subfolders + ${folderDocs.length} documents = ${combinedItems.length} items`);
+      // Find the most recent activity in this folder (either folder update or any document/subfolder update)
+      const allTimestamps = [
+        folder.updated_at,
+        folder.created_at,
+        ...folderDocs.map(doc => doc.updatedAt || doc.createdAt),
+        ...populatedChildren.map(child => child.effectiveUpdatedAt || child.updated_at || child.created_at)
+      ].filter(Boolean).map(t => new Date(t));
+
+      const mostRecentActivity = allTimestamps.length > 0
+        ? new Date(Math.max(...allTimestamps))
+        : new Date(folder.created_at || 0);
+
+      console.log(`[DEBUG-FOLDER] Folder "${folder.name}": ${populatedChildren.length} subfolders + ${folderDocs.length} documents = ${combinedItems.length} items, most recent: ${mostRecentActivity.toISOString()}`);
 
       return {
         ...folder,
         type: 'folder',
         title: folder.name,  // FolderCard expects 'title' field
-        items: combinedItems
+        items: combinedItems,
+        effectiveUpdatedAt: mostRecentActivity  // Used for sorting - reflects most recent activity in folder or its contents
       };
     };
 
@@ -533,16 +552,32 @@ export default function Dashboard() {
       .filter(doc => !doc.folder_id)
       .map(doc => ({ ...doc, type: 'document' }));
 
-    // Combine and sort by position
-    const combined = [...rootFolders, ...rootDocs]
-      .sort((a, b) => (a.position || 0) - (b.position || 0));
+    // Sort by most recent action (updated/created, NOT opened)
+    // For documents: updatedAt, createdAt
+    // For folders: effectiveUpdatedAt (includes activity from documents inside)
+    const combined = [...rootFolders, ...rootDocs].sort((a, b) => {
+      // Get the most recent timestamp for each item
+      // Folders use effectiveUpdatedAt which includes their contents' activity
+      const aTime = new Date(
+        a.effectiveUpdatedAt || a.updatedAt || a.updated_at || a.createdAt || a.created_at || 0
+      );
+      const bTime = new Date(
+        b.effectiveUpdatedAt || b.updatedAt || b.updated_at || b.createdAt || b.created_at || 0
+      );
+
+      // Sort descending (most recent first)
+      return bTime - aTime;
+    });
 
     console.log(`[DEBUG-DASHBOARD] Combined: ${rootFolders.length} folders + ${rootDocs.length} documents = ${combined.length} total items`);
-    console.log('[DEBUG-DASHBOARD] Sample:', {
-      firstFolder: rootFolders[0]?.name || 'none',
-      firstDoc: rootDocs[0]?.title || 'none',
-      foldersState: folders?.length || 0
-    });
+    console.log('[DEBUG-DASHBOARD] Sorted by recent action - first 3 items:',
+      combined.slice(0, 3).map(item => ({
+        name: item.title || item.name,
+        type: item.type,
+        updated: item.updatedAt || item.updated_at,
+        created: item.createdAt || item.created_at
+      }))
+    );
 
     setEntries(combined);
   }, [folders, allDocuments]); // Re-run whenever folders OR documents change

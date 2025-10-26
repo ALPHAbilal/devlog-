@@ -242,14 +242,41 @@ export function deserializeBlock(block) {
       case 'table':
         // Restore table data
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          deserialized.data = parsed.data || {
-            headers: ['Column 1', 'Column 2'],
-            rows: [['', '']],
-            columnAlignments: ['left', 'left']
-          };
+          try {
+            const parsed = typeof block.content === 'string'
+              ? JSON.parse(block.content)
+              : block.content;
+            deserialized.data = parsed.data || {
+              headers: ['Column 1', 'Column 2'],
+              rows: [['', '']],
+              columnAlignments: ['left', 'left']
+            };
+          } catch (e) {
+            // Legacy format: content is markdown string with pipes
+            console.warn('BlockSerializer: Table has legacy markdown format, converting to structured data');
+            // Parse markdown table to structured data
+            const lines = block.content.split('\n').filter(line => line.trim());
+            if (lines.length >= 2) {
+              // First line is headers
+              const headers = lines[0].split('|').map(h => h.trim()).filter(h => h);
+              // Skip separator line (line with dashes)
+              const rows = lines.slice(2).map(line =>
+                line.split('|').map(c => c.trim()).filter(c => c !== '')
+              );
+              deserialized.data = {
+                headers,
+                rows,
+                columnAlignments: headers.map(() => 'left')
+              };
+            } else {
+              // Cannot parse, use default
+              deserialized.data = {
+                headers: ['Column 1', 'Column 2'],
+                rows: [['', '']],
+                columnAlignments: ['left', 'left']
+              };
+            }
+          }
         } else {
           deserialized.data = {
             headers: ['Column 1', 'Column 2'],

@@ -1,159 +1,35 @@
-index-D-M-4BFD.js:26 Using optimized Supabase client
-index-D-M-4BFD.js:26 IndexedDB initialized successfully
-index-D-M-4BFD.js:26 Persistent storage granted
-index-D-M-4BFD.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-D-M-4BFD.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-D-M-4BFD.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-D-M-4BFD.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-D-M-4BFD.js:26 ErrorBoundary caught: ReferenceError: getFullBlockText is not defined
-    at SC (index-D-M-4BFD.js:1284:1354)
-    at zy (index-D-M-4BFD.js:106:34201)
-    at r0 (index-D-M-4BFD.js:106:62975)
-    at m_ (index-D-M-4BFD.js:106:73542)
-    at F_ (index-D-M-4BFD.js:106:107682)
-    at yI (index-D-M-4BFD.js:106:106741)
-    at T0 (index-D-M-4BFD.js:106:106571)
-    at P_ (index-D-M-4BFD.js:106:103662)
-    at tk (index-D-M-4BFD.js:106:115178)
-    at MessagePort.ne (index-D-M-4BFD.js:91:1593)Caused by: React ErrorBoundary ReferenceError: getFullBlockText is not defined
-    at SC (index-D-M-4BFD.js:1274:3498)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at ab (index-D-M-4BFD.js:651:499)
-    at lF (index-D-M-4BFD.js:74:3968)
-    at vF (index-D-M-4BFD.js:74:7879)
-    at sentryRoute(vF) (<anonymous>)
-    at Gre (index-D-M-4BFD.js:1557:2916)
-    at Lte (index-D-M-4BFD.js:988:2547)
-    at rH (index-D-M-4BFD.js:116:48152)
-    at tH (index-D-M-4BFD.js:116:46349)
-    at eH (index-D-M-4BFD.js:116:44094)
-    at yF (index-D-M-4BFD.js:74:7263)
-    at jF (index-D-M-4BFD.js:83:874)
-    at $re (index-D-M-4BFD.js:1548:780)
-    at Wre (<anonymous>) {componentStack: '\n    at SC (https://www.devlog.design/assets/index…ex-D-M-4BFD.js:1548:780)\n    at Wre (<anonymous>)'}
-(anonymous) @ index-D-M-4BFD.js:26
-componentDidCatch @ index-D-M-4BFD.js:1548
-M.componentDidCatch.a.callback @ index-D-M-4BFD.js:106
-s1 @ index-D-M-4BFD.js:106
-a1 @ index-D-M-4BFD.js:106
-v_ @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-G_ @ index-D-M-4BFD.js:106
-V_ @ index-D-M-4BFD.js:106
-B_ @ index-D-M-4BFD.js:106
-P_ @ index-D-M-4BFD.js:106
-tk @ index-D-M-4BFD.js:106
-ne @ index-D-M-4BFD.js:91
-index-D-M-4BFD.js:1548 Error Report
-index-D-M-4BFD.js:26 Error: ReferenceError: getFullBlockText is not defined
-    at SC (index-D-M-4BFD.js:1284:1354)
-    at zy (index-D-M-4BFD.js:106:34201)
-    at r0 (index-D-M-4BFD.js:106:62975)
-    at m_ (index-D-M-4BFD.js:106:73542)
-    at F_ (index-D-M-4BFD.js:106:107682)
-    at yI (index-D-M-4BFD.js:106:106741)
-    at T0 (index-D-M-4BFD.js:106:106571)
-    at P_ (index-D-M-4BFD.js:106:103662)
-    at tk (index-D-M-4BFD.js:106:115178)
-    at MessagePort.ne (index-D-M-4BFD.js:91:1593)Caused by: React ErrorBoundary ReferenceError: getFullBlockText is not defined
-    at SC (index-D-M-4BFD.js:1274:3498)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at ab (index-D-M-4BFD.js:651:499)
-    at lF (index-D-M-4BFD.js:74:3968)
-    at vF (index-D-M-4BFD.js:74:7879)
-    at sentryRoute(vF) (<anonymous>)
-    at Gre (index-D-M-4BFD.js:1557:2916)
-    at Lte (index-D-M-4BFD.js:988:2547)
-    at rH (index-D-M-4BFD.js:116:48152)
-    at tH (index-D-M-4BFD.js:116:46349)
-    at eH (index-D-M-4BFD.js:116:44094)
-    at yF (index-D-M-4BFD.js:74:7263)
-    at jF (index-D-M-4BFD.js:83:874)
-    at $re (index-D-M-4BFD.js:1548:780)
-    at Wre (<anonymous>)
-(anonymous) @ index-D-M-4BFD.js:26
-reportError @ index-D-M-4BFD.js:1548
-componentDidCatch @ index-D-M-4BFD.js:1548
-M.componentDidCatch.a.callback @ index-D-M-4BFD.js:106
-s1 @ index-D-M-4BFD.js:106
-a1 @ index-D-M-4BFD.js:106
-v_ @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-G_ @ index-D-M-4BFD.js:106
-V_ @ index-D-M-4BFD.js:106
-B_ @ index-D-M-4BFD.js:106
-P_ @ index-D-M-4BFD.js:106
-tk @ index-D-M-4BFD.js:106
-ne @ index-D-M-4BFD.js:91
-index-D-M-4BFD.js:26 Component Stack: 
-    at SC (https://www.devlog.design/assets/index-D-M-4BFD.js:1274:3498)
-    at div (<anonymous>)
-    at div (<anonymous>)
-    at ab (https://www.devlog.design/assets/index-D-M-4BFD.js:651:499)
-    at lF (https://www.devlog.design/assets/index-D-M-4BFD.js:74:3968)
-    at vF (https://www.devlog.design/assets/index-D-M-4BFD.js:74:7879)
-    at sentryRoute(vF) (<anonymous>)
-    at Gre (https://www.devlog.design/assets/index-D-M-4BFD.js:1557:2916)
-    at Lte (https://www.devlog.design/assets/index-D-M-4BFD.js:988:2547)
-    at rH (https://www.devlog.design/assets/index-D-M-4BFD.js:116:48152)
-    at tH (https://www.devlog.design/assets/index-D-M-4BFD.js:116:46349)
-    at eH (https://www.devlog.design/assets/index-D-M-4BFD.js:116:44094)
-    at yF (https://www.devlog.design/assets/index-D-M-4BFD.js:74:7263)
-    at jF (https://www.devlog.design/assets/index-D-M-4BFD.js:83:874)
-    at $re (https://www.devlog.design/assets/index-D-M-4BFD.js:1548:780)
-    at Wre (<anonymous>)
-(anonymous) @ index-D-M-4BFD.js:26
-reportError @ index-D-M-4BFD.js:1548
-componentDidCatch @ index-D-M-4BFD.js:1548
-M.componentDidCatch.a.callback @ index-D-M-4BFD.js:106
-s1 @ index-D-M-4BFD.js:106
-a1 @ index-D-M-4BFD.js:106
-v_ @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-G_ @ index-D-M-4BFD.js:106
-V_ @ index-D-M-4BFD.js:106
-B_ @ index-D-M-4BFD.js:106
-P_ @ index-D-M-4BFD.js:106
-tk @ index-D-M-4BFD.js:106
-ne @ index-D-M-4BFD.js:91
-index-D-M-4BFD.js:26 Props: {children: {…}}
-(anonymous) @ index-D-M-4BFD.js:26
-reportError @ index-D-M-4BFD.js:1548
-componentDidCatch @ index-D-M-4BFD.js:1548
-M.componentDidCatch.a.callback @ index-D-M-4BFD.js:106
-s1 @ index-D-M-4BFD.js:106
-a1 @ index-D-M-4BFD.js:106
-v_ @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-ho @ index-D-M-4BFD.js:106
-k_ @ index-D-M-4BFD.js:106
-G_ @ index-D-M-4BFD.js:106
-V_ @ index-D-M-4BFD.js:106
-B_ @ index-D-M-4BFD.js:106
-P_ @ index-D-M-4BFD.js:106
-tk @ index-D-M-4BFD.js:106
-ne @ index-D-M-4BFD.js:91
+index-N1sJ7_2j.js:26 Using optimized Supabase client
+index-N1sJ7_2j.js:26 SW registered: ServiceWorkerRegistration
+index-N1sJ7_2j.js:26 IndexedDB initialized successfully
+index-N1sJ7_2j.js:26 Persistent storage granted
+index-N1sJ7_2j.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-N1sJ7_2j.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-N1sJ7_2j.js:26 [AuthContext] Auth state change received: INITIAL_SESSION Object
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Filtered results: Object
+index-N1sJ7_2j.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
+index-N1sJ7_2j.js:26 Dashboard: Starting to load entries...
+index-N1sJ7_2j.js:26 Using Supabase for storage
+index-N1sJ7_2j.js:26 SupabaseAdapter: Init with provided userId 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-N1sJ7_2j.js:26 Dashboard: Storage initialized (4ms)
+index-N1sJ7_2j.js:26 SupabaseAdapter: getDocuments called
+index-N1sJ7_2j.js:26 SupabaseAdapter: Querying documents for user 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-N1sJ7_2j.js:26 Loaded 82 folders (37 root folders)
+index-N1sJ7_2j.js:26 SupabaseAdapter: Documents query completed in 503ms
+index-N1sJ7_2j.js:26 SupabaseAdapter: Found 251 documents
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
+index-N1sJ7_2j.js:26 SupabaseAdapter: Found 0 unsynced documents in IndexedDB
+index-N1sJ7_2j.js:26 SupabaseAdapter: Total documents after merge: 251
+index-N1sJ7_2j.js:26 SupabaseAdapter: Returning 251 documents
+index-N1sJ7_2j.js:26 Dashboard: Loaded 251 documents (526ms)
+index-N1sJ7_2j.js:26 Dashboard: Total load time: 531ms
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Initial load: 202 root documents (folders will be combined by re-combine effect)
+index-N1sJ7_2j.js:26 SupabaseAdapter: Getting projects...
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Filtered results: Object
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Combined: 37 folders + 202 documents = 239 total items
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Sample: ObjectfirstDoc: "API Keys Settings Migration - Integration of /settings/api into /settings"firstFolder: "devlog"foldersState: 37[[Prototype]]: Object
+index-N1sJ7_2j.js:26 [DEBUG-DASHBOARD] Filtered results: Object
+index-N1sJ7_2j.js:26 SupabaseAdapter: Found 3 projects
+index-N1sJ7_2j.js:26 Dashboard: Loaded 3 projects
+index-N1sJ7_2j.js:26 Dashboard: Setting isLoading to false
+index-N1sJ7_2j.js:26 [DEBUG-SIDEBAR] Folder tree built: Object

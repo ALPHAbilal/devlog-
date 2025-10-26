@@ -497,14 +497,36 @@ export default function Dashboard() {
       return;
     }
 
-    // Get root folders (if any exist)
+    // Helper function to populate folder with its documents recursively
+    const populateFolderWithDocuments = (folder) => {
+      // Get documents that belong to this folder
+      const folderDocs = allDocuments
+        .filter(doc => doc.folder_id === folder.id)
+        .map(doc => ({ ...doc, type: 'document' }));
+
+      // Recursively populate children folders
+      const populatedChildren = (folder.children || []).map(populateFolderWithDocuments);
+
+      // Combine subfolder children with documents
+      const combinedItems = [
+        ...populatedChildren,  // Subfolders (now with their documents)
+        ...folderDocs          // Documents in this folder
+      ];
+
+      console.log(`[DEBUG-FOLDER] Folder "${folder.name}": ${populatedChildren.length} subfolders + ${folderDocs.length} documents = ${combinedItems.length} items`);
+
+      return {
+        ...folder,
+        type: 'folder',
+        title: folder.name,  // FolderCard expects 'title' field
+        items: combinedItems
+      };
+    };
+
+    // Get root folders and populate with documents
     const rootFolders = (folders || [])
       .filter(f => !f.parent_id)
-      .map(f => ({
-        ...f,
-        type: 'folder',
-        items: f.children || []
-      }));
+      .map(populateFolderWithDocuments);
 
     // Get root documents (not in any folder)
     const rootDocs = allDocuments

@@ -3,6 +3,30 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Folders Appearing Empty in Dashboard
+**Symptom**: Only empty folders appear in dashboard grid, folders with documents don't show or appear empty
+**Root Cause**: `useFolders` hook only populates `folder.children` with subfolders, NOT documents
+**Fix**: Recursively populate folder.items with both children folders AND documents filtered by folder_id
+**Location**: Dashboard.jsx lines 500-529
+**Code**:
+```javascript
+const populateFolderWithDocuments = (folder) => {
+  const folderDocs = allDocuments
+    .filter(doc => doc.folder_id === folder.id)
+    .map(doc => ({ ...doc, type: 'document' }));
+  const populatedChildren = (folder.children || []).map(populateFolderWithDocuments);
+  return {
+    ...folder,
+    type: 'folder',
+    title: folder.name,  // FolderCard expects 'title'
+    items: [...populatedChildren, ...folderDocs]
+  };
+};
+```
+**Key**: Must map `name` to `title`, combine subfolders + documents, process recursively
+**Saved**: 3+ hours debugging
+**Date**: 2025-10-26
+
 ### Container Before Component
 **Symptom**: Component error, slow performance, state issues
 **Fix**: ALWAYS check parent/wrapper component first

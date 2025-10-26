@@ -700,9 +700,10 @@ export default function Dashboard() {
   // Handle document link clicks
   useEffect(() => {
     window.handleDocumentLink = (documentTitle) => {
-      // Find the document by title
-      const linkedDoc = entries.find(entry => 
-        entry.title.toLowerCase() === documentTitle.toLowerCase()
+      // Find the document by title (skip folders)
+      const linkedDoc = entries.find(entry =>
+        entry.type !== 'folder' &&
+        entry.title?.toLowerCase() === documentTitle.toLowerCase()
       );
       
       if (linkedDoc) {
@@ -958,29 +959,32 @@ export default function Dashboard() {
     // Then filter by search term
     const matchesSearch = searchTerm === '' || (() => {
       const lowerSearchTerm = searchTerm.toLowerCase();
-      
+
+      // Get the display name (folders use 'name', documents use 'title')
+      const displayName = entry.title || entry.name || '';
+
       // Log search start
       if (searchTerm && searchTerm.length > 0) {
-        console.log(`\n📄 Checking document: "${entry.title}"`);
+        console.log(`\n📄 Checking ${entry.type || 'document'}: "${displayName}"`);
       }
-      
-      // Check title
-      const titleMatch = entry.title.toLowerCase().includes(lowerSearchTerm);
+
+      // Check title/name
+      const titleMatch = displayName && displayName.toLowerCase().includes(lowerSearchTerm);
       if (searchTerm) {
-        console.log(`  ✓ Title match: ${titleMatch ? '✅' : '❌'} (title: "${entry.title}")`);
+        console.log(`  ✓ Title match: ${titleMatch ? '✅' : '❌'} (title: "${displayName}")`);
       }
       if (titleMatch) return true;
-      
-      // Check preview
+
+      // Check preview (only for documents)
       const previewMatch = entry.preview && entry.preview.toLowerCase().includes(lowerSearchTerm);
       if (searchTerm) {
         const previewSnippet = entry.preview ? entry.preview.substring(0, 50) + '...' : 'No preview';
         console.log(`  ✓ Preview match: ${previewMatch ? '✅' : '❌'} (preview: "${previewSnippet}")`);
       }
       if (previewMatch) return true;
-      
-      // Check tags
-      const tagsMatch = entry.tags?.some(tag => tag.toLowerCase().includes(lowerSearchTerm));
+
+      // Check tags (only for documents)
+      const tagsMatch = entry.tags?.some(tag => tag && tag.toLowerCase().includes(lowerSearchTerm));
       if (searchTerm) {
         console.log(`  ✓ Tags match: ${tagsMatch ? '✅' : '❌'} (tags: [${entry.tags?.join(', ') || 'none'}])`);
       }

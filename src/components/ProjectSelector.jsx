@@ -18,7 +18,7 @@ export default function ProjectSelector({
 
   // Filter projects based on search
   const filteredProjects = projects.filter(project =>
-    project.title.toLowerCase().includes(searchTerm.toLowerCase())
+    project.title?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Close dropdown when clicking outside

@@ -7,9 +7,10 @@ export default function DocumentLinkModal({ isOpen, onClose, onSelect, entries }
   const modalRef = useRef(null);
   const searchInputRef = useRef(null);
 
-  // Filter entries based on search
+  // Filter entries based on search (skip folders, only documents)
   const filteredEntries = entries.filter(entry =>
-    entry.title.toLowerCase().includes(search.toLowerCase())
+    entry.type !== 'folder' &&
+    entry.title?.toLowerCase().includes(search.toLowerCase())
   );
 
   // Add option to create new document if search doesn't match

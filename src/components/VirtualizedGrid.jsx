@@ -402,7 +402,7 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
       
       {/* Title */}
       <h3 className="text-text-primary text-[13px] font-medium mb-1 line-clamp-1 leading-tight">
-        {highlightText(entry.title, searchTerm)}
+        {highlightText(entry.title || entry.name || 'Untitled', searchTerm)}
       </h3>
       
       {/* Activity Sparkline - smaller for compact cards */}

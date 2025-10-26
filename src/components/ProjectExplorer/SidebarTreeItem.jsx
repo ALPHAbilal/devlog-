@@ -1,0 +1,118 @@
+import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal } from 'lucide-react';
+
+export default function SidebarTreeItem({
+  item,
+  isExpanded,
+  onToggle,
+  expandedFolders,
+  depth = 0,
+  isFavorite = false,
+  isLast = false,
+  onItemClick
+}) {
+  const hasChildren = item.children && item.children.length > 0;
+  const isFile = item.type === 'file' || item.type === 'document';
+  const itemCount = item.count || (item.children ? item.children.length : 0);
+
+  const handleClick = () => {
+    if (isFile) {
+      // Handle file/document click
+      onItemClick?.(item);
+    } else {
+      // Toggle folder
+      onToggle?.(item.id);
+    }
+  };
+
+  return (
+    <div className="relative">
+      {/* Tree guide lines */}
+      {depth > 0 && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-px bg-gradient-to-b from-white/10 via-white/5 to-transparent"
+          style={{ left: `${(depth - 1) * 16 + 20}px` }}
+        />
+      )}
+
+      <div
+        className={`
+          flex items-center gap-2 py-1.5 px-2 text-sm transition-all duration-200 group relative
+          ${isFile ? 'text-white/60 hover:text-white/90' : 'text-white/70 hover:text-white/95'}
+          ${!isFile ? 'cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent rounded-lg' : 'cursor-pointer hover:bg-white/[0.03] rounded-lg'}
+        `}
+        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+        onClick={handleClick}
+        title={item.name || item.title}
+      >
+        {/* Chevron for folders with children */}
+        {!isFile && hasChildren && (
+          <ChevronRight
+            className={`
+              w-3.5 h-3.5 text-white/40 transition-all duration-300 flex-shrink-0
+              ${isExpanded ? 'rotate-90 text-emerald-400/80' : 'group-hover:text-white/60'}
+            `}
+          />
+        )}
+
+        {/* Spacer for folders without children */}
+        {!isFile && !hasChildren && (
+          <div className="w-3.5 h-3.5 flex-shrink-0" />
+        )}
+
+        {/* Icon */}
+        {isFile ? (
+          <FileText className="w-3.5 h-3.5 text-white/30 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0" />
+        ) : isExpanded ? (
+          <FolderOpen className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-all duration-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" />
+        ) : (
+          <Folder className={`
+            w-4 h-4 flex-shrink-0 transition-all duration-200
+            ${isFavorite
+              ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
+              : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
+            }
+          `} />
+        )}
+
+        {/* Name */}
+        <span className={`
+          flex-1 truncate transition-all duration-200 text-[13px]
+          ${isFile ? 'group-hover:translate-x-0.5' : ''}
+        `}>
+          {item.name || item.title}
+        </span>
+
+        {/* Count badge */}
+        {itemCount > 0 && (
+          <span className="text-[11px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded-md group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0 border border-white/5">
+            {itemCount}
+          </span>
+        )}
+
+        {/* Hover indicator line */}
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-gradient-to-b from-emerald-400 to-emerald-500 rounded-full group-hover:h-4 transition-all duration-200 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+      </div>
+
+      {/* Render children recursively with smooth animation */}
+      {!isFile && isExpanded && hasChildren && (
+        <div className="overflow-hidden animate-in slide-in-from-top-1 duration-200">
+          <div className="space-y-0.5 py-0.5">
+            {item.children.map((child, index) => (
+              <SidebarTreeItem
+                key={child.id}
+                item={child}
+                isExpanded={expandedFolders.has(child.id)}
+                onToggle={onToggle}
+                expandedFolders={expandedFolders}
+                depth={depth + 1}
+                isFavorite={child.favorite || child.isFavorite}
+                isLast={index === item.children.length - 1}
+                onItemClick={onItemClick}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

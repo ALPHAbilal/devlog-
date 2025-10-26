@@ -66,8 +66,8 @@ export default function Dashboard() {
   const { trackEvent } = useAnalytics();
   const { trackDocumentEvent, startDocumentTimer, endDocumentTimer } = useDocumentAnalytics();
 
-  // Folders hook - for fetching and managing folders
-  const { folders, loadFolders } = useFolders();
+  // Folders hook - folders are auto-loaded by the hook
+  const { folders, refreshFolders } = useFolders();
 
   // Check for expired trial
   useEffect(() => {
@@ -357,16 +357,10 @@ export default function Dashboard() {
       await storageWrapper.init();
       console.log(`Dashboard: Storage initialized (${Math.round(performance.now() - initStart)}ms)`);
       
-      // Load entries and folders in parallel
+      // Load documents (folders are auto-loaded by useFolders hook)
       const loadStart = performance.now();
-      const [savedEntries, foldersData] = await Promise.all([
-        storageWrapper.getEntries(),
-        loadFolders().catch(err => {
-          console.warn('Dashboard: Failed to load folders:', err);
-          return []; // Return empty array on error, don't block document loading
-        })
-      ]);
-      console.log(`Dashboard: Loaded ${savedEntries?.length || 0} documents and ${foldersData?.length || 0} folders (${Math.round(performance.now() - loadStart)}ms)`);
+      const savedEntries = await storageWrapper.getEntries();
+      console.log(`Dashboard: Loaded ${savedEntries?.length || 0} documents (${Math.round(performance.now() - loadStart)}ms)`);
       console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
 
       if (savedEntries && savedEntries.length > 0) {
@@ -402,9 +396,9 @@ export default function Dashboard() {
           return entry;
         });
 
-        // Combine folders with documents for grid display
+        // Combine folders (from useFolders hook) with documents for grid display
         // Only show root-level folders (no parent_id) and root-level documents (no folder_id)
-        const rootFolders = (foldersData || [])
+        const rootFolders = (folders || [])  // Use folders from hook state
           .filter(folder => !folder.parent_id)  // Only root folders
           .map(folder => ({
             ...folder,
@@ -460,7 +454,7 @@ export default function Dashboard() {
         ];
 
         // Even with no documents, check if there are folders
-        const rootFolders = (foldersData || [])
+        const rootFolders = (folders || [])  // Use folders from hook state
           .filter(folder => !folder.parent_id)
           .map(folder => ({
             ...folder,

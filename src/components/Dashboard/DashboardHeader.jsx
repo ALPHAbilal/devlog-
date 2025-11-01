@@ -35,17 +35,29 @@ export default function DashboardHeader({
   // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event) => {
+      console.log('[DEBUG-1] Click detected, showProfileMenu:', showProfileMenu);
+      console.log('[DEBUG-1] Click target:', event.target);
+      console.log('[DEBUG-1] Menu ref contains target:', menuRef.current?.contains(event.target));
+      console.log('[DEBUG-1] Profile button contains target:', profileButtonRef.current?.contains(event.target));
+
       if (showProfileMenu &&
           menuRef.current &&
           !menuRef.current.contains(event.target) &&
           profileButtonRef.current &&
           !profileButtonRef.current.contains(event.target)) {
+        console.log('[DEBUG-1] Closing menu via click outside');
         setShowProfileMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    if (showProfileMenu) {
+      console.log('[DEBUG-1] Adding click outside listener');
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      console.log('[DEBUG-1] Removing click outside listener');
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [showProfileMenu, setShowProfileMenu]);
 
   return (
@@ -86,7 +98,11 @@ export default function DashboardHeader({
           {/* Profile Menu */}
           <button
             ref={profileButtonRef}
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            onClick={() => {
+              console.log('[DEBUG-1] Profile button clicked, current state:', showProfileMenu);
+              setShowProfileMenu(!showProfileMenu);
+              console.log('[DEBUG-1] Profile menu toggled to:', !showProfileMenu);
+            }}
             className="h-9 w-9 rounded-lg p-0 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all flex items-center justify-center"
           >
             <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
@@ -120,9 +136,14 @@ export default function DashboardHeader({
 
               <div className="p-1">
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    console.log('[DEBUG-1] Settings button clicked');
+                    console.log('[DEBUG-1] Event:', e);
+                    console.log('[DEBUG-1] setShowProfileMenu:', setShowProfileMenu);
+                    console.log('[DEBUG-1] navigate:', navigate);
                     setShowProfileMenu(false);
                     navigate('/settings');
+                    console.log('[DEBUG-1] Navigation called');
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
                 >
@@ -133,9 +154,14 @@ export default function DashboardHeader({
                 <div className="h-px bg-white/10 my-1" />
 
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    console.log('[DEBUG-1] Sign Out button clicked');
+                    console.log('[DEBUG-1] Event:', e);
+                    console.log('[DEBUG-1] setShowProfileMenu:', setShowProfileMenu);
+                    console.log('[DEBUG-1] onSignOut:', onSignOut);
                     setShowProfileMenu(false);
                     onSignOut();
+                    console.log('[DEBUG-1] onSignOut called');
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
                 >

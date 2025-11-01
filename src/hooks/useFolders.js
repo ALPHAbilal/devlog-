@@ -231,11 +231,12 @@ export function useFolders() {
 
       // Update cache with the actual new value
       foldersCache = updatedFolders;
-      
+
       toast.success('Folder created');
-      
-      // Refresh in background
-      loadFolders(true);
+
+      // DON'T refresh immediately - let optimistic update stand
+      // The next natural refresh will sync with database
+      // loadFolders(true); // REMOVED: Was overwriting optimistic update
       return data;
     } catch (error) {
       console.error('Error creating folder:', error);
@@ -283,11 +284,11 @@ export function useFolders() {
         return updatedFolders;
       });
       foldersCache = updatedFolders;
-      
+
       toast.success('Folder updated');
-      
-      // Refresh in background
-      loadFolders(true);
+
+      // DON'T refresh immediately - let optimistic update stand
+      // loadFolders(true); // REMOVED: Was overwriting optimistic update
     } catch (error) {
       console.error('Error updating folder:', error);
       
@@ -351,11 +352,11 @@ export function useFolders() {
         return updatedFolders;
       });
       foldersCache = updatedFolders;
-      
+
       toast.success('Folder deleted');
-      
-      // Refresh in background
-      loadFolders(true);
+
+      // DON'T refresh immediately - let optimistic update stand
+      // loadFolders(true); // REMOVED: Was overwriting optimistic update
       return true;
     } catch (error) {
       console.error('Error deleting folder:', error);

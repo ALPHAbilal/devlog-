@@ -235,6 +235,7 @@ export default function Dashboard() {
     
     const newEntry = {
       id: crypto.randomUUID(),
+      user_id: user.id, // CRITICAL: Required for RLS policy
       title: title,
       // preview removed - not stored in database, calculated from blocks when needed
       blocks: [defaultBlock], // Always start with at least one block

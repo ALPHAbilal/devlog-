@@ -401,10 +401,10 @@ export class SupabaseAdapterOptimized {
       const result = await deduplicateRequest(cacheKey, async () => {
         return this.supabase
           .from('documents')
-          .select('id, title, preview, tags, updated_at')
+          .select('id, title, tags, updated_at')
           .eq('user_id', userId)
           .is('deleted_at', null)
-          .or(`title.ilike.%${query}%,preview.ilike.%${query}%`)
+          .or(`title.ilike.%${query}%`)
           .order('updated_at', { ascending: false })
           .limit(limit);
       });

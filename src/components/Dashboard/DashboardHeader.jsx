@@ -21,72 +21,38 @@ export default function DashboardHeader({
   const menuRef = useRef(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
 
-  // [DEBUG-3] Log all props on mount
-  useEffect(() => {
-    console.log('[DEBUG-3] DashboardHeader mounted with props:', {
-      hasUser: !!user,
-      userEmail: user?.email,
-      hasOnSignOut: !!onSignOut,
-      onSignOutType: typeof onSignOut,
-      hasSetShowProfileMenu: !!setShowProfileMenu,
-      setShowProfileMenuType: typeof setShowProfileMenu,
-      showProfileMenu,
-      hasNavigate: !!navigate
-    });
-  }, []);
-
   // Update menu position when it opens
   useEffect(() => {
-    console.log('[DEBUG-4] Menu position effect triggered', {
-      showProfileMenu,
-      hasButtonRef: !!profileButtonRef.current
-    });
     if (showProfileMenu && profileButtonRef.current) {
       const rect = profileButtonRef.current.getBoundingClientRect();
-      const newPosition = {
+      setMenuPosition({
         top: rect.bottom + 4,
         right: window.innerWidth - rect.right
-      };
-      console.log('[DEBUG-4] Setting menu position', newPosition);
-      setMenuPosition(newPosition);
+      });
     }
   }, [showProfileMenu]);
 
   // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event) => {
-      console.log('[DEBUG-3] Click-outside handler fired', {
-        showProfileMenu,
-        hasMenuRef: !!menuRef.current,
-        hasProfileButtonRef: !!profileButtonRef.current,
-        targetElement: event.target.tagName,
-        targetClass: event.target.className,
-        menuContainsTarget: menuRef.current?.contains(event.target),
-        buttonContainsTarget: profileButtonRef.current?.contains(event.target)
-      });
-
       // Only close if clicking OUTSIDE both menu and profile button
       if (showProfileMenu &&
           menuRef.current &&
           !menuRef.current.contains(event.target) &&
           profileButtonRef.current &&
           !profileButtonRef.current.contains(event.target)) {
-        console.log('[DEBUG-3] Closing menu from click-outside');
         setShowProfileMenu(false);
       }
     };
 
     if (showProfileMenu) {
-      console.log('[DEBUG-3] Adding click-outside listener with delay');
-      // CRITICAL: Delay listener to NEXT event loop tick
+      // CRITICAL: Delay listener to next event loop tick
       // This prevents the same click that opened the menu from closing it
       const timerId = setTimeout(() => {
-        console.log('[DEBUG-3] Click-outside listener actually added');
         document.addEventListener('click', handleClickOutside);
       }, 0);
 
       return () => {
-        console.log('[DEBUG-3] Removing click-outside listener');
         clearTimeout(timerId);
         document.removeEventListener('click', handleClickOutside);
       };
@@ -131,17 +97,7 @@ export default function DashboardHeader({
           {/* Profile Menu */}
           <button
             ref={profileButtonRef}
-            onClick={(e) => {
-              console.log('[DEBUG-4] Profile button clicked', {
-                currentState: showProfileMenu,
-                willBecome: !showProfileMenu,
-                target: e.target.tagName,
-                currentTarget: e.currentTarget.tagName,
-                eventPhase: e.eventPhase,
-                timeStamp: e.timeStamp
-              });
-              setShowProfileMenu(!showProfileMenu);
-            }}
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="h-9 w-9 rounded-lg p-0 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all flex items-center justify-center"
           >
             <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
@@ -162,8 +118,6 @@ export default function DashboardHeader({
                 zIndex: 9999
               }}
               className="w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150"
-              onMouseEnter={() => console.log('[DEBUG-4] Mouse entered menu')}
-              onMouseLeave={() => console.log('[DEBUG-4] Mouse left menu')}
             >
               <div className="p-3 border-b border-white/10">
                 <p className="text-sm leading-none text-white/90">
@@ -176,18 +130,9 @@ export default function DashboardHeader({
 
               <div className="p-1">
                 <button
-                  onClick={(e) => {
-                    console.log('[DEBUG-3] Settings button CLICKED', {
-                      hasSetShowProfileMenu: !!setShowProfileMenu,
-                      hasNavigate: !!navigate,
-                      eventType: e.type,
-                      eventPhase: e.eventPhase,
-                      target: e.target.tagName
-                    });
+                  onClick={() => {
                     setShowProfileMenu(false);
-                    console.log('[DEBUG-3] Calling navigate("/settings")');
                     navigate('/settings');
-                    console.log('[DEBUG-3] Navigate called');
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
                 >
@@ -198,19 +143,9 @@ export default function DashboardHeader({
                 <div className="h-px bg-white/10 my-1" />
 
                 <button
-                  onClick={(e) => {
-                    console.log('[DEBUG-3] Sign Out button CLICKED', {
-                      hasOnSignOut: !!onSignOut,
-                      onSignOutType: typeof onSignOut,
-                      hasSetShowProfileMenu: !!setShowProfileMenu,
-                      eventType: e.type,
-                      eventPhase: e.eventPhase,
-                      target: e.target.tagName
-                    });
+                  onClick={() => {
                     setShowProfileMenu(false);
-                    console.log('[DEBUG-3] Calling onSignOut()');
                     onSignOut();
-                    console.log('[DEBUG-3] onSignOut called');
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
                 >

@@ -236,7 +236,7 @@ export default function Dashboard() {
     const newEntry = {
       id: crypto.randomUUID(),
       title: title,
-      preview: 'Click to start writing...',
+      // preview removed - not stored in database, calculated from blocks when needed
       blocks: [defaultBlock], // Always start with at least one block
       tags: [],
       folder_id: folderId, // Add folder_id to the document
@@ -465,7 +465,7 @@ export default function Dashboard() {
           {
             id: crypto.randomUUID(),
             title: 'Getting Started with Journey Logger',
-            preview: 'Welcome to Journey Logger! Click to start documenting your developer journey...',
+            // preview removed - will be calculated from blocks when needed
             blocks: [
               {
                 id: crypto.randomUUID(),
@@ -820,11 +820,11 @@ export default function Dashboard() {
             const newEntry = {
               id: crypto.randomUUID(),
               title: selected.title,
-              preview: 'Click to start writing...',
+              // preview removed - not stored in database
               blocks: [],
               tags: [],
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
+              created_at: new Date().toISOString(), // Use snake_case for database
+              updated_at: new Date().toISOString(), // Use snake_case for database
               metadata: {
                 syncStatus: 'pending',
                 createdLocally: true

@@ -204,6 +204,7 @@ export function useFolders() {
 
       // Optimistic update
       const optimisticFolder = { ...data, children: [] };
+      let updatedFolders;
       if (parentId) {
         // Add to parent's children
         const updateParent = (folders) => {
@@ -217,13 +218,19 @@ export function useFolders() {
             return folder;
           });
         };
-        setFolders(prev => updateParent(prev));
+        setFolders(prev => {
+          updatedFolders = updateParent(prev);
+          return updatedFolders;
+        });
       } else {
-        setFolders(prev => [...prev, optimisticFolder]);
+        setFolders(prev => {
+          updatedFolders = [...prev, optimisticFolder];
+          return updatedFolders;
+        });
       }
-      
-      // Update cache
-      foldersCache = folders;
+
+      // Update cache with the actual new value
+      foldersCache = updatedFolders;
       
       toast.success('Folder created');
       
@@ -269,9 +276,13 @@ export function useFolders() {
           return folder;
         });
       };
-      
-      setFolders(prev => updateFolderInTree(prev));
-      foldersCache = folders;
+
+      let updatedFolders;
+      setFolders(prev => {
+        updatedFolders = updateFolderInTree(prev);
+        return updatedFolders;
+      });
+      foldersCache = updatedFolders;
       
       toast.success('Folder updated');
       
@@ -333,9 +344,13 @@ export function useFolders() {
             return folder;
           });
       };
-      
-      setFolders(prev => removeFolderFromTree(prev));
-      foldersCache = folders;
+
+      let updatedFolders;
+      setFolders(prev => {
+        updatedFolders = removeFolderFromTree(prev);
+        return updatedFolders;
+      });
+      foldersCache = updatedFolders;
       
       toast.success('Folder deleted');
       

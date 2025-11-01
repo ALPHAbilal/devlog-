@@ -1,7 +1,125 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Optimized "New" Button Performance with Optimistic UI
+## Current Task: Debugging Profile Menu Buttons (Third Attempt)
+Status: 🔄 IN PROGRESS - Removed container stopPropagation + capture phase listener
+Date: 2025-11-01
+
+### Issue Report
+After TWO previous fix attempts, profile menu Settings and Sign Out buttons STILL not responding.
+- First fix: Changed mousedown → click event
+- Second fix: Added stopPropagation to buttons
+- Both fixes didn't work - buttons still silent
+
+### Root Cause Analysis (Third Investigation)
+
+**New Discovery**: Container stopPropagation was blocking button events!
+
+From DashboardHeader.jsx inspection:
+```javascript
+// Line 109 - THE BLOCKER
+<div
+  ref={menuRef}
+  onClick={(e) => e.stopPropagation()}  // ❌ Prevents button clicks from working!
+  style={{...}}
+>
+  {/* Settings and Sign Out buttons inside */}
+</div>
+```
+
+**Why This Blocks Buttons**:
+1. Click Settings button
+2. Event bubbles up to container div
+3. Container's `onClick={(e) => e.stopPropagation()}` fires
+4. stopPropagation prevents event from continuing (even though we want buttons to handle it)
+5. React's synthetic event system gets confused
+6. Button onClick handler never executes properly
+
+### Solution Applied (DashboardHeader.jsx:35-68, 105-116)
+
+**Three-Part Fix**:
+
+1. **Removed stopPropagation from menu container** (line 109):
+```javascript
+// BEFORE
+<div
+  ref={menuRef}
+  onClick={(e) => e.stopPropagation()}  // ❌ BLOCKING
+  style={{...}}
+>
+
+// AFTER
+<div
+  ref={menuRef}
+  style={{...}}  // ✅ No stopPropagation on container
+>
+```
+
+2. **Added capture phase to click-outside listener** (line 60):
+```javascript
+// Use capture phase (true parameter) + setTimeout for proper event order
+const timerId = setTimeout(() => {
+  document.addEventListener('click', handleClickOutside, true);  // ✅ Capture phase
+}, 0);
+```
+
+3. **Added DEBUG-2 logging to track execution**:
+```javascript
+const handleClickOutside = (event) => {
+  console.log('[DEBUG-2] Click-outside handler triggered');
+  console.log('[DEBUG-2] Event target:', event.target);
+  console.log('[DEBUG-2] Menu contains target:', menuRef.current?.contains(event.target));
+  console.log('[DEBUG-2] Profile button contains target:', profileButtonRef.current?.contains(event.target));
+
+  if (showProfileMenu && ...) {
+    console.log('[DEBUG-2] Closing menu from click-outside');
+    setShowProfileMenu(false);
+  } else {
+    console.log('[DEBUG-2] Click was inside menu or profile button, keeping menu open');
+  }
+};
+```
+
+### Event Flow with Fix
+
+**Proper Execution Order**:
+1. User clicks Settings button
+2. React synthetic onClick fires → logs `[DEBUG-2] Settings button clicked`
+3. Button handler executes: close menu, navigate to /settings
+4. Event continues to bubble
+5. Capture phase click-outside listener fires (but menu already closing)
+
+**Key Technical Details**:
+- **Capture phase (true parameter)**: Events handled top-down instead of bottom-up
+- **setTimeout(0)**: Ensures React event handlers are registered first
+- **stopPropagation in buttons**: Prevents interference from other handlers
+- **No stopPropagation in container**: Allows events to flow naturally
+
+### Testing Status
+Waiting for user to test and share console logs with DEBUG-2 output.
+
+Expected console output when clicking Settings:
+```
+[DEBUG-2] Settings button clicked
+[DEBUG-2] Event phase: 3
+[DEBUG-2] Event target: <button ...>
+[DEBUG-2] Current target: <button ...>
+[DEBUG-2] Navigate called
+[DEBUG-2] Click-outside handler triggered
+[DEBUG-2] Event target: <button ...>
+[DEBUG-2] Menu contains target: true
+[DEBUG-2] Click was inside menu or profile button, keeping menu open
+```
+
+### Next Steps
+1. User tests Settings and Sign Out buttons
+2. Share [DEBUG-2] console logs
+3. If working: Remove all DEBUG-2 logging (no legacy code)
+4. If still broken: Deeper investigation needed
+
+---
+
+## Previous Task: Optimized "New" Button Performance with Optimistic UI
 Status: ✅ COMPLETED - Reduced perceived delay from 814ms to <50ms
 Date: 2025-11-01
 

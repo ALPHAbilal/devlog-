@@ -278,27 +278,47 @@ export class SupabaseAdapterOptimized {
    * Save document with intelligent batching
    */
   async saveDocument(document) {
-    // MILESTONE 3: Check if Smart Sync is active for this document
-    if (document.blocks && window.__smartSyncManagers) {
-      const smartSyncManager = window.__smartSyncManagers.get(document.id);
-      if (smartSyncManager) {
-        console.log('SupabaseAdapterOptimized: Smart Sync is handling blocks for', document.id);
-        // Remove blocks from the save operation
-        const { blocks, ...documentWithoutBlocks } = document;
-        document = { ...documentWithoutBlocks, blocks: undefined };
+    // CRITICAL FIX: Always strip blocks from document saves
+    // Blocks are stored in a separate table, not as a column in documents
+    // This prevents "blocks column not found" errors (PGRST204)
+    let blocksToSave = null;
+    if (document.blocks) {
+      blocksToSave = document.blocks;
+      const { blocks, ...documentWithoutBlocks } = document;
+      document = documentWithoutBlocks;
+
+      // If Smart Sync is active, it will handle block saves
+      if (window.__smartSyncManagers) {
+        const smartSyncManager = window.__smartSyncManagers.get(document.id);
+        if (smartSyncManager) {
+          console.log('SupabaseAdapterOptimized: Smart Sync is handling blocks for', document.id);
+          blocksToSave = null; // Smart Sync will handle it
+        }
       }
     }
-    
+
     // Clear relevant caches
     this.clearCache(`doc:${document.id}`);
     this.clearCache(`docs:${document.user_id}`);
 
     // Add to batch queue
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       this.batchQueue.push({
         type: 'document',
         data: document,
-        resolve,
+        resolve: async (result) => {
+          // After document is saved, save blocks if needed
+          if (blocksToSave && blocksToSave.length > 0) {
+            try {
+              console.log('SupabaseAdapterOptimized: Saving blocks separately for new document', document.id);
+              await this.saveBlocks(document.id, blocksToSave);
+            } catch (blockError) {
+              console.error('Error saving blocks for new document:', blockError);
+              // Don't fail the whole operation if blocks fail - document was saved
+            }
+          }
+          resolve(result);
+        },
         reject
       });
 

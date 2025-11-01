@@ -303,19 +303,9 @@ export default function Dashboard() {
       });
   }, [entries, trackDocumentEvent]);
 
-  // Handle click outside for profile menu
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (showProfileMenu && !e.target.closest('.profile-menu-container')) {
-        setShowProfileMenu(false);
-      }
-    };
-
-    if (showProfileMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showProfileMenu]);
+  // NOTE: Click-outside handler removed - now handled by DashboardHeader component
+  // The old handler was using mousedown and looking for .profile-menu-container class
+  // which no longer exists after moving to Portal-based menu rendering
 
   // Keyboard shortcuts
   useEffect(() => {

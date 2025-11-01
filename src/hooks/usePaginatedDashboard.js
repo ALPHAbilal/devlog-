@@ -41,18 +41,35 @@ export function usePaginatedDashboard(options = {}) {
    * Load initial page of documents
    */
   const loadInitial = useCallback(async () => {
-    if (!user?.id || loadingRef.current) return;
+    console.log('usePaginatedDashboard: loadInitial() CALLED', {
+      userId: user?.id,
+      loadingRef: loadingRef.current,
+      pageSize,
+      orderBy
+    });
+
+    if (!user?.id || loadingRef.current) {
+      console.log('usePaginatedDashboard: loadInitial() BLOCKED - no user or already loading');
+      return;
+    }
 
     loadingRef.current = true;
     setIsLoading(true);
     setError(null);
 
     try {
+      console.log('usePaginatedDashboard: Calling loadDocumentsPaginated with page 0');
       const result = await loadDocumentsPaginated({
         page: 0,
         limit: pageSize,
         orderBy,
         ascending
+      });
+
+      console.log('usePaginatedDashboard: Got result:', {
+        documentCount: result.documents?.length,
+        totalCount: result.totalCount,
+        hasMore: result.hasMore
       });
 
       setDocuments(result.documents);
@@ -65,7 +82,7 @@ export function usePaginatedDashboard(options = {}) {
         preloadNextPageInBackground(1);
       }
     } catch (err) {
-      console.error('Error loading initial documents:', err);
+      console.error('usePaginatedDashboard: Error loading initial documents:', err);
       setError(err);
     } finally {
       setIsLoading(false);

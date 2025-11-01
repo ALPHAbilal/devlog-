@@ -255,7 +255,6 @@ export default function Dashboard() {
       console.log('New document saved to IndexedDB immediately');
     } catch (error) {
       console.error('Failed to save to IndexedDB:', error);
-      toast.warning('Document created but local backup failed. Document will sync to cloud.');
     }
     
     // Invalidate cache to ensure new document appears
@@ -275,8 +274,7 @@ export default function Dashboard() {
     try {
       await storageWrapper.saveDocument(newEntry);
       console.log('New document saved successfully');
-      toast.success('Document created');
-
+      
       // Track document creation
       trackDocumentEvent('created', newEntry.id, {
         folder_id: folderId || 'root',
@@ -291,7 +289,6 @@ export default function Dashboard() {
         hint: error.hint,
         status: error.status
       });
-      toast.error(`Failed to save document: ${error.message || 'Unknown error'}`);
     }
     
     // Update local state
@@ -368,7 +365,14 @@ export default function Dashboard() {
   // Load entries function - now uses pagination hook internally
   const loadEntries = useCallback(async () => {
     console.log('Dashboard: loadEntries() called - triggering paginated load');
-    await loadInitial();
+
+    // Call loadInitial directly - it's already a stable reference from the hook
+    if (loadInitial) {
+      console.log('Dashboard: Calling loadInitial from hook');
+      await loadInitial();
+    } else {
+      console.error('Dashboard: loadInitial is undefined!');
+    }
 
     // Also refresh folders
     if (refreshFolders) {

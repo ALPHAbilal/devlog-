@@ -378,11 +378,12 @@ export default function Dashboard() {
       console.error('Dashboard: loadInitial is undefined!');
     }
 
-    // Also refresh folders
-    if (refreshFolders) {
-      await refreshFolders();
-    }
-  }, [loadInitial, refreshFolders]);
+    // DON'T refresh folders here - causes race condition with optimistic updates
+    // Folders are auto-loaded by useFolders hook and updated optimistically
+    // if (refreshFolders) {
+    //   await refreshFolders();
+    // }
+  }, [loadInitial]);
 
   // OLD IMPLEMENTATION - REMOVED (now using pagination)
   const loadEntriesOLD = useCallback(async () => {

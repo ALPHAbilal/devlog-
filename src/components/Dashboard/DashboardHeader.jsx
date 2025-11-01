@@ -71,11 +71,17 @@ export default function DashboardHeader({
     };
 
     if (showProfileMenu) {
-      console.log('[DEBUG-3] Adding click-outside listener');
-      // Use 'click' event in bubble phase (default) - button onClick fires first
-      document.addEventListener('click', handleClickOutside);
+      console.log('[DEBUG-3] Adding click-outside listener with delay');
+      // CRITICAL: Delay listener to NEXT event loop tick
+      // This prevents the same click that opened the menu from closing it
+      const timerId = setTimeout(() => {
+        console.log('[DEBUG-3] Click-outside listener actually added');
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
+
       return () => {
         console.log('[DEBUG-3] Removing click-outside listener');
+        clearTimeout(timerId);
         document.removeEventListener('click', handleClickOutside);
       };
     }

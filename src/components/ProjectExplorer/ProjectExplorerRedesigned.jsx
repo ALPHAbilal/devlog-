@@ -34,48 +34,36 @@ export default function ProjectExplorerRedesigned({
     setExpandedFolders(newExpanded);
   };
 
-  // Build folder tree structure from existing data
+  // Build folder tree - useFolders already returns a tree structure with children
+  // We just need to add documents to the folders and include root documents
   const folderTree = useMemo(() => {
-    const folderMap = new Map();
-    const rootFolders = [];
-
-    // First pass: create map of all folders
-    folders.forEach(folder => {
-      folderMap.set(folder.id, {
-        ...folder,
-        type: 'folder',
-        children: [],
-        count: 0
-      });
-    });
-
-    // Second pass: build tree structure
-    folders.forEach(folder => {
-      const node = folderMap.get(folder.id);
-      if (folder.parent_id && folderMap.has(folder.parent_id)) {
-        folderMap.get(folder.parent_id).children.push(node);
-      } else {
-        rootFolders.push(node);
-      }
-    });
-
-    // Add documents to their folders
-    documents.forEach(doc => {
-      // Skip if this is a folder (from entries array)
-      if (doc.type === 'folder') return;
-
-      if (doc.folder_id && folderMap.has(doc.folder_id)) {
-        const folder = folderMap.get(doc.folder_id);
-        folder.children.push({
+    // Helper to recursively add documents to folders in the tree
+    const addDocumentsToFolder = (folder) => {
+      // Find documents that belong to this folder
+      const folderDocs = documents
+        .filter(doc => doc.type !== 'folder' && doc.folder_id === folder.id)
+        .map(doc => ({
           ...doc,
           type: 'document',
           name: doc.title
-        });
-        folder.count = folder.children.length;
-      }
-    });
+        }));
 
-    // Add root documents (documents without folder_id) to root level
+      // Recursively process children folders
+      const updatedChildren = (folder.children || []).map(addDocumentsToFolder);
+
+      // Combine children folders with documents
+      return {
+        ...folder,
+        type: 'folder',
+        children: [...updatedChildren, ...folderDocs],
+        count: updatedChildren.length + folderDocs.length
+      };
+    };
+
+    // Process all root folders (useFolders already returns tree structure)
+    const rootFoldersWithDocs = folders.map(addDocumentsToFolder);
+
+    // Add root documents (documents without folder_id)
     const rootDocuments = documents
       .filter(doc => doc.type !== 'folder' && !doc.folder_id)
       .map(doc => ({
@@ -85,9 +73,9 @@ export default function ProjectExplorerRedesigned({
       }));
 
     // Combine root folders and root documents
-    const combined = [...rootFolders, ...rootDocuments];
+    const combined = [...rootFoldersWithDocs, ...rootDocuments];
     console.log('[DEBUG-SIDEBAR] Folder tree built:', {
-      totalFolders: rootFolders.length,
+      totalFolders: rootFoldersWithDocs.length,
       totalRootDocuments: rootDocuments.length,
       combinedTotal: combined.length
     });

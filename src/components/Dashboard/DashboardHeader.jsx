@@ -37,12 +37,18 @@ export default function DashboardHeader({
 
   // Update menu position when it opens
   useEffect(() => {
+    console.log('[DEBUG-4] Menu position effect triggered', {
+      showProfileMenu,
+      hasButtonRef: !!profileButtonRef.current
+    });
     if (showProfileMenu && profileButtonRef.current) {
       const rect = profileButtonRef.current.getBoundingClientRect();
-      setMenuPosition({
+      const newPosition = {
         top: rect.bottom + 4,
         right: window.innerWidth - rect.right
-      });
+      };
+      console.log('[DEBUG-4] Setting menu position', newPosition);
+      setMenuPosition(newPosition);
     }
   }, [showProfileMenu]);
 
@@ -125,10 +131,14 @@ export default function DashboardHeader({
           {/* Profile Menu */}
           <button
             ref={profileButtonRef}
-            onClick={() => {
-              console.log('[DEBUG-3] Profile button clicked', {
+            onClick={(e) => {
+              console.log('[DEBUG-4] Profile button clicked', {
                 currentState: showProfileMenu,
-                willBecome: !showProfileMenu
+                willBecome: !showProfileMenu,
+                target: e.target.tagName,
+                currentTarget: e.currentTarget.tagName,
+                eventPhase: e.eventPhase,
+                timeStamp: e.timeStamp
               });
               setShowProfileMenu(!showProfileMenu);
             }}
@@ -152,6 +162,8 @@ export default function DashboardHeader({
                 zIndex: 9999
               }}
               className="w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150"
+              onMouseEnter={() => console.log('[DEBUG-4] Mouse entered menu')}
+              onMouseLeave={() => console.log('[DEBUG-4] Mouse left menu')}
             >
               <div className="p-3 border-b border-white/10">
                 <p className="text-sm leading-none text-white/90">

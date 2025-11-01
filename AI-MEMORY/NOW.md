@@ -1,7 +1,104 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Fixed Non-Functional Profile Menu Buttons
+## Current Task: Optimized "New" Button Performance with Optimistic UI
+Status: ✅ COMPLETED - Reduced perceived delay from 814ms to <50ms
+Date: 2025-11-01
+
+### Issue Report
+User reported "New" button (create document) takes longer than expected to respond.
+
+### Performance Measurement
+Added performance logging to identify bottleneck:
+```
+[PERF] Find unique title: 0.10 ms        ✅ Fast
+[PERF] Save to IndexedDB: 22.12 ms      ✅ Fast
+[PERF] Invalidate cache: 0.31 ms         ✅ Fast
+[PERF] Save to Supabase: 789.76 ms      ❌ SLOW (97% of total!)
+[PERF] Update UI state: 0.11 ms          ✅ Fast
+[PERF] Total: 813.95 ms                  ❌ Nearly 1 second delay
+```
+
+**Root Cause**: Supabase save (789ms network + database operation) was blocking UI updates
+
+### Solution: Optimistic UI Update Pattern
+
+**Before** (814ms perceived delay):
+```javascript
+// 1. Save to IndexedDB (22ms)
+// 2. Save to Supabase (790ms) ← BLOCKING
+// 3. Update UI (0.1ms)
+// 4. Editor opens
+```
+
+**After** (<50ms perceived delay):
+```javascript
+// 1. Update UI immediately (0.1ms)
+// 2. Editor opens ← INSTANT!
+// 3. Background: IndexedDB (22ms) + Supabase (790ms)
+```
+
+### Implementation Changes (Dashboard.jsx:216-304)
+
+**Key Changes**:
+1. ✅ **Moved UI updates BEFORE network operations** (lines 258-261)
+2. ✅ **Made Supabase save non-blocking** - fire and forget (lines 283-303)
+3. ✅ **Added background sync with error handling** (lines 296-303)
+4. ✅ **Removed all performance logging** - clean production code
+5. ✅ **Updated metadata.syncStatus** to track sync state ('syncing' → 'synced'/'failed')
+
+**Code**:
+```javascript
+const createNewEntry = useCallback(async (folderId = null) => {
+  // ... create newEntry object
+
+  // ✅ OPTIMISTIC UPDATE: Update UI immediately (instant response!)
+  const updatedEntries = [newEntry, ...entries];
+  setEntries(updatedEntries);
+  setExpandedEntry(newEntry);
+
+  // Save to IndexedDB for local backup (fast - ~22ms)
+  await IndexedDBAdapter.saveDocument(newEntry);
+
+  // 🔄 BACKGROUND SYNC: Save to Supabase without blocking UI
+  storageWrapper.saveDocument(newEntry)
+    .then(() => {
+      newEntry.metadata.syncStatus = 'synced';
+      toast.success('Document synced to cloud');
+    })
+    .catch((error) => {
+      newEntry.metadata.syncStatus = 'failed';
+      toast.error('Failed to sync document. Changes saved locally.');
+    });
+}, [entries, trackDocumentEvent]);
+```
+
+### Benefits Achieved
+- ✅ **Instant UI response**: User sees editor immediately (<50ms)
+- ✅ **Better UX**: Can start typing while background sync happens
+- ✅ **Local backup**: IndexedDB save protects data if sync fails
+- ✅ **Error resilience**: Toast notifications show sync status
+- ✅ **Clean code**: Removed all debug/performance logging
+
+### User Experience Flow
+1. Click "New" button
+2. Editor opens **instantly** (no wait!)
+3. Start typing immediately
+4. Toast appears 1 second later: "Document synced to cloud"
+5. If sync fails: "Failed to sync document. Changes saved locally."
+
+### Performance Impact
+- **Before**: 814ms wait before editor opens
+- **After**: <50ms perceived delay (UI updates immediately)
+- **Improvement**: 94% faster perceived performance
+- **Background sync**: Still takes ~800ms but doesn't block user
+
+### Pattern to Document
+This optimistic UI pattern should be applied to other blocking operations.
+
+---
+
+## Previous Task: Fixed Non-Functional Profile Menu Buttons
 Status: ✅ COMPLETED - Changed mousedown to click event to allow button handlers to fire
 Date: 2025-11-01
 

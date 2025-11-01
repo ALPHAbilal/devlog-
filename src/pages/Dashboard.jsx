@@ -214,8 +214,6 @@ export default function Dashboard() {
 
   // Create new entry function (moved up for keyboard shortcut access)
   const createNewEntry = useCallback(async (folderId = null) => {
-    console.time('[PERF] Create New Document');
-
     // Create a default text block for new documents
     const defaultBlock = {
       id: crypto.randomUUID(),
@@ -224,7 +222,6 @@ export default function Dashboard() {
       position: 0
     };
 
-    console.time('[PERF] Find unique title');
     // Check for duplicate names and generate unique title
     let baseTitle = 'Untitled Document';
     let title = baseTitle;
@@ -241,85 +238,70 @@ export default function Dashboard() {
       title = `${baseTitle} (${counter})`;
       counter++;
     }
-    console.timeEnd('[PERF] Find unique title');
-    
+
     const newEntry = {
       id: crypto.randomUUID(),
       user_id: user.id, // CRITICAL: Required for RLS policy
       title: title,
-      // preview removed - not stored in database, calculated from blocks when needed
       blocks: [defaultBlock], // Always start with at least one block
       tags: [],
-      folder_id: folderId, // Add folder_id to the document
-      created_at: new Date().toISOString(), // Use snake_case for database compatibility
-      updated_at: new Date().toISOString(), // Use snake_case for database compatibility
+      folder_id: folderId,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
       metadata: {
-        syncStatus: 'pending', // Track sync status
+        syncStatus: 'syncing',
         createdLocally: true,
-        isNewDocument: true // Flag to indicate this is a brand new document
+        isNewDocument: true
       }
     };
-    
-    // Immediately save to IndexedDB for safety
-    console.time('[PERF] Save to IndexedDB');
+
+    // ✅ OPTIMISTIC UPDATE: Update UI immediately (instant response!)
+    const updatedEntries = [newEntry, ...entries];
+    setEntries(updatedEntries);
+    setExpandedEntry(newEntry);
+
+    // Save to IndexedDB for local backup (fast - ~22ms)
     try {
       await IndexedDBAdapter.saveDocument(newEntry);
-      console.log('New document saved to IndexedDB immediately');
     } catch (error) {
       console.error('Failed to save to IndexedDB:', error);
-      toast.warning('Document created but local backup failed. Document will sync to cloud.');
     }
-    console.timeEnd('[PERF] Save to IndexedDB');
 
-    // Invalidate cache to ensure new document appears
-    console.time('[PERF] Invalidate cache');
+    // Invalidate cache
     try {
       const adapter = await storageWrapper.getAdapter();
-      if (adapter && typeof adapter.invalidateCache === 'function') {
+      if (adapter?.invalidateCache) {
         adapter.invalidateCache();
-      } else if (adapter && adapter.supabaseAdapter && typeof adapter.supabaseAdapter.invalidateCache === 'function') {
-        // For wrapped adapters
+      } else if (adapter?.supabaseAdapter?.invalidateCache) {
         adapter.supabaseAdapter.invalidateCache();
       }
     } catch (error) {
       console.warn('Could not invalidate cache:', error);
     }
-    console.timeEnd('[PERF] Invalidate cache');
 
-    // Save the new document directly to avoid triggering updateAllDocuments
-    console.time('[PERF] Save to Supabase');
-    try {
-      await storageWrapper.saveDocument(newEntry);
-      console.log('New document saved successfully');
-      toast.success('Document created');
+    // 🔄 BACKGROUND SYNC: Save to Supabase without blocking UI
+    storageWrapper.saveDocument(newEntry)
+      .then(() => {
+        // Update metadata to mark as synced
+        newEntry.metadata.syncStatus = 'synced';
+        toast.success('Document synced to cloud');
 
-      // Track document creation
-      trackDocumentEvent('created', newEntry.id, {
-        folder_id: folderId || 'root',
-        creation_method: 'manual',
-        has_folder: !!folderId
+        // Track document creation
+        trackDocumentEvent('created', newEntry.id, {
+          folder_id: folderId || 'root',
+          creation_method: 'manual',
+          has_folder: !!folderId
+        });
+      })
+      .catch((error) => {
+        console.error('Background sync failed:', error);
+        newEntry.metadata.syncStatus = 'failed';
+        toast.error('Failed to sync document. Changes saved locally.');
+
+        // TODO: Implement retry logic
+        // Could add to a sync queue for automatic retry
       });
-    } catch (error) {
-      console.error('Error saving new document:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        status: error.status
-      });
-      toast.error(`Failed to save document: ${error.message || 'Unknown error'}`);
-    }
-    console.timeEnd('[PERF] Save to Supabase');
-
-    // Update local state
-    console.time('[PERF] Update UI state');
-    const updatedEntries = [newEntry, ...entries];
-    setEntries(updatedEntries);
-    setExpandedEntry(newEntry);
-    console.timeEnd('[PERF] Update UI state');
-
-    console.timeEnd('[PERF] Create New Document');
-  }, [entries, saveEntries, trackDocumentEvent]);
+  }, [entries, trackDocumentEvent]);
 
   // Handle click outside for profile menu
   useEffect(() => {

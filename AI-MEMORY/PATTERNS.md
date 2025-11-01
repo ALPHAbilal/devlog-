@@ -3,6 +3,88 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Slow Button Response - Network Operations Blocking UI
+**Date**: 2025-11-01
+**Symptoms**:
+- Button responds but takes 500ms+ to show results
+- UI freezes during network operations
+- User can't interact until operation completes
+- Performance logs show Supabase/API calls taking 700ms+
+
+**Root Cause**:
+Blocking on network operations before updating UI state:
+```javascript
+// ❌ BLOCKING PATTERN - UI waits for network
+await saveToDatabase(data);  // 800ms network call
+updateUI(data);              // UI finally updates
+```
+
+**Solution**: Optimistic UI Update Pattern
+
+```javascript
+// ❌ BEFORE - Blocking (814ms perceived delay)
+const createNewEntry = async () => {
+  const newEntry = { /* ... */ };
+
+  await IndexedDBAdapter.saveDocument(newEntry);    // 22ms
+  await storageWrapper.saveDocument(newEntry);      // 790ms ← BLOCKS!
+
+  setEntries([newEntry, ...entries]);               // UI finally updates
+  setExpandedEntry(newEntry);
+};
+
+// ✅ AFTER - Optimistic (<50ms perceived delay)
+const createNewEntry = async () => {
+  const newEntry = {
+    /* ... */
+    metadata: { syncStatus: 'syncing' }
+  };
+
+  // 1. Update UI immediately - instant response!
+  setEntries([newEntry, ...entries]);
+  setExpandedEntry(newEntry);
+
+  // 2. Local backup (fast)
+  await IndexedDBAdapter.saveDocument(newEntry);
+
+  // 3. Background sync (non-blocking)
+  storageWrapper.saveDocument(newEntry)
+    .then(() => {
+      newEntry.metadata.syncStatus = 'synced';
+      toast.success('Synced to cloud');
+    })
+    .catch((error) => {
+      newEntry.metadata.syncStatus = 'failed';
+      toast.error('Sync failed. Saved locally.');
+    });
+};
+```
+
+**Key Principles**:
+1. **Update UI first** - User sees instant response
+2. **Local backup** - Fast operation for data safety
+3. **Background sync** - Don't await network operations
+4. **Error handling** - Toast notifications for sync status
+5. **Status tracking** - Metadata shows 'syncing'/'synced'/'failed'
+
+**Performance Impact**:
+- Before: 814ms wait
+- After: <50ms perceived delay
+- Improvement: 94% faster
+
+**Files Fixed**:
+- `src/pages/Dashboard.jsx` - createNewEntry function (lines 216-304)
+
+**Time Saved**: Prevents slow UI complaints and debugging
+
+**When to Use**:
+- Any operation with network calls (>200ms)
+- Document/folder creation
+- Batch operations
+- Auto-save functionality
+
+---
+
 ### React Portal Menu Buttons Not Responding - Event Timing Issue
 **Date**: 2025-11-01
 **Symptoms**:

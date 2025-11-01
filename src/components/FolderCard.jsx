@@ -89,7 +89,7 @@ export default function FolderCard({
             <div className="flex items-center gap-2">
               <span className="text-xs text-white/40 bg-white/5 px-2 py-1 rounded-md
                              group-hover:bg-white/10 transition-colors">
-                {totalCount} {totalCount === 1 ? 'item' : 'items'}
+                {totalCount} {totalCount === 1 ? 'doc' : 'docs'}
               </span>
             </div>
           </div>

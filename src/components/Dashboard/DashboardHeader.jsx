@@ -18,6 +18,7 @@ export default function DashboardHeader({
 }) {
   const navigate = useNavigate();
   const profileButtonRef = useRef(null);
+  const menuRef = useRef(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
 
   // Update menu position when it opens
@@ -30,6 +31,22 @@ export default function DashboardHeader({
       });
     }
   }, [showProfileMenu]);
+
+  // Handle click outside to close menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showProfileMenu &&
+          menuRef.current &&
+          !menuRef.current.contains(event.target) &&
+          profileButtonRef.current &&
+          !profileButtonRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showProfileMenu, setShowProfileMenu]);
 
   return (
     <div className="relative z-50 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6 flex-shrink-0">
@@ -82,6 +99,8 @@ export default function DashboardHeader({
           {/* Profile Dropdown rendered via Portal */}
           {showProfileMenu && createPortal(
             <div
+              ref={menuRef}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 position: 'fixed',
                 top: `${menuPosition.top}px`,
@@ -101,7 +120,10 @@ export default function DashboardHeader({
 
               <div className="p-1">
                 <button
-                  onClick={() => navigate('/settings')}
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    navigate('/settings');
+                  }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
                 >
                   <Settings className="w-4 h-4" />
@@ -111,7 +133,10 @@ export default function DashboardHeader({
                 <div className="h-px bg-white/10 my-1" />
 
                 <button
-                  onClick={onSignOut}
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    onSignOut();
+                  }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />

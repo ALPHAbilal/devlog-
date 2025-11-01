@@ -1566,20 +1566,6 @@ export default function Dashboard() {
                         </div>
                       </div>
                     )}
-
-                    {/* End of List Indicator */}
-                    {!hasMore && paginatedDocuments.length > 0 && !searchTerm && (
-                      <div className="py-6 text-center text-sm text-gray-500">
-                        You've reached the end • {progress.loaded} documents loaded
-                      </div>
-                    )}
-
-                    {/* Progress Indicator (shows while more to load) */}
-                    {hasMore && paginatedDocuments.length > 0 && !searchTerm && (
-                      <div className="py-2 text-center text-xs text-gray-500">
-                        Showing {progress.loaded} of {progress.total} documents ({Math.round(progress.percentage)}%)
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>

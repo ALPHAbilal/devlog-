@@ -1,3 +1,5 @@
+import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, Plus, Settings, LogOut, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,6 +17,19 @@ export default function DashboardHeader({
   isMobile
 }) {
   const navigate = useNavigate();
+  const profileButtonRef = useRef(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+
+  // Update menu position when it opens
+  useEffect(() => {
+    if (showProfileMenu && profileButtonRef.current) {
+      const rect = profileButtonRef.current.getBoundingClientRect();
+      setMenuPosition({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right
+      });
+    }
+  }, [showProfileMenu]);
 
   return (
     <div className="relative z-50 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6 flex-shrink-0">
@@ -52,52 +67,60 @@ export default function DashboardHeader({
           </button>
 
           {/* Profile Menu */}
-          <div className="relative profile-menu-container">
-            <button
-              onClick={() => setShowProfileMenu(!showProfileMenu)}
-              className="h-9 w-9 rounded-lg p-0 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all flex items-center justify-center"
+          <button
+            ref={profileButtonRef}
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            className="h-9 w-9 rounded-lg p-0 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all flex items-center justify-center"
+          >
+            <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-xs font-medium">
+                {user?.email?.charAt(0).toUpperCase() || 'D'}
+              </span>
+            </div>
+          </button>
+
+          {/* Profile Dropdown rendered via Portal */}
+          {showProfileMenu && createPortal(
+            <div
+              style={{
+                position: 'fixed',
+                top: `${menuPosition.top}px`,
+                right: `${menuPosition.right}px`,
+                zIndex: 9999
+              }}
+              className="w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150"
             >
-              <div className="h-6 w-6 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-medium">
-                  {user?.email?.charAt(0).toUpperCase() || 'D'}
-                </span>
+              <div className="p-3 border-b border-white/10">
+                <p className="text-sm leading-none text-white/90">
+                  {user?.user_metadata?.full_name || 'Developer'}
+                </p>
+                <p className="text-xs leading-none text-white/50 mt-1">
+                  {user?.email || 'developer@devlog.app'}
+                </p>
               </div>
-            </button>
 
-            {/* Profile Dropdown */}
-            {showProfileMenu && (
-              <div className="absolute right-0 mt-1 w-56 bg-[#1a2942]/95 backdrop-blur-xl border-white/10 border rounded-xl shadow-xl shadow-black/20 overflow-hidden z-[9999] animate-in fade-in slide-in-from-top-1 duration-150">
-                <div className="p-3 border-b border-white/10">
-                  <p className="text-sm leading-none text-white/90">
-                    {user?.user_metadata?.full_name || 'Developer'}
-                  </p>
-                  <p className="text-xs leading-none text-white/50 mt-1">
-                    {user?.email || 'developer@devlog.app'}
-                  </p>
-                </div>
+              <div className="p-1">
+                <button
+                  onClick={() => navigate('/settings')}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
+                >
+                  <Settings className="w-4 h-4" />
+                  Settings
+                </button>
 
-                <div className="p-1">
-                  <button
-                    onClick={() => navigate('/settings')}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
-                  >
-                    <Settings className="w-4 h-4" />
-                    Settings
-                  </button>
+                <div className="h-px bg-white/10 my-1" />
 
-                  <div className="h-px bg-white/10 my-1" />
-
-                  <button
-                    onClick={onSignOut}
-                    className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Sign out
-                  </button>
-                </div>
+                <button
+                  onClick={onSignOut}
+                  className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign out
+                </button>
               </div>
-            )}
-          </div>
+            </div>,
+            document.body
+          )}
         </div>
       </div>
 

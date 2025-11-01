@@ -3,6 +3,237 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Popup Menus Appearing Behind Other Elements - Z-Index/Overflow Fix
+**Date**: 2025-11-01
+**Symptoms**:
+- Three-dot context menu in sidebar appears behind main content area
+- Profile dropdown menu bottom portion hidden behind docs/folders container
+- High z-index values (z-50, z-[9999]) not working
+
+**Root Causes**:
+1. Parent containers with `overflow-hidden` clip absolutely positioned children
+2. New CSS stacking contexts isolate z-index hierarchies
+3. Absolute positioning keeps elements inside parent DOM tree
+
+**Solution**: Use React Portal to render menus directly to `document.body`
+
+**Files Fixed**:
+1. `src/components/ProjectExplorer/SidebarTreeItem.jsx` - Subfolder context menu
+2. `src/components/Dashboard/DashboardHeader.jsx` - Profile dropdown
+
+**Implementation Pattern**:
+```javascript
+// 1. Add imports
+import { createPortal } from 'react-dom';
+import { useRef, useState, useEffect } from 'react';
+
+// 2. Add refs and state for position tracking
+const buttonRef = useRef(null);
+const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+// 3. Calculate position when opening menu
+onClick={(e) => {
+  e.stopPropagation();
+  if (!showMenu && buttonRef.current) {
+    const rect = buttonRef.current.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + 4,
+      left: rect.left  // or right: window.innerWidth - rect.right
+    });
+  }
+  setShowMenu(!showMenu);
+}}
+
+// 4. Render menu via Portal with fixed positioning
+{showMenu && createPortal(
+  <div
+    style={{
+      position: 'fixed',
+      top: `${menuPosition.top}px`,
+      left: `${menuPosition.left}px`,
+      zIndex: 9999
+    }}
+    className="bg-[#1a2942]/95 backdrop-blur-xl ..."
+  >
+    {/* Menu content */}
+  </div>,
+  document.body
+)}
+```
+
+**Why Portal Fixes It**:
+- Escapes all parent `overflow-hidden` containers
+- Renders outside DOM hierarchy (directly in body)
+- No stacking context interference
+- `position: fixed` relative to viewport, not parent
+- Click-outside handlers still work properly
+
+**Key Changes Made**:
+1. **SidebarTreeItem.jsx**:
+   - Added `createPortal` import
+   - Added `buttonRef` and `menuPosition` state
+   - Removed old `<div className="relative">` wrapper
+   - Replaced absolute positioned menu with Portal version
+   - Completely removed old dropdown code (lines 105-176 replaced)
+
+2. **DashboardHeader.jsx**:
+   - Added `useRef`, `useState`, `useEffect`, `createPortal` imports
+   - Added `profileButtonRef` and `menuPosition` state
+   - Added `useEffect` to calculate position when menu opens
+   - Removed old `<div className="relative profile-menu-container">` wrapper
+   - Replaced absolute positioned dropdown with Portal version
+   - Completely removed old dropdown code (lines 54-100 replaced)
+
+**Time Saved**: 2-3 hours (prevents repeated z-index debugging)
+**Performance Impact**: None - Portal is React's recommended pattern for modals/overlays
+
+**Common Overflow Containers Found**:
+- ProjectExplorerRedesigned: `overflow-hidden` on lines 167, 206
+- Dashboard main content: `overflow-hidden` on line 1387
+- Sidebar scroll area: `overflow-y-auto` on line 272
+
+**Lesson Learned**:
+- Never rely on z-index alone for overlays within `overflow-hidden` parents
+- Always use React Portal for menus, modals, tooltips that need to escape parent bounds
+- `position: absolute` keeps elements in parent DOM tree - use `position: fixed` + Portal
+- Check entire parent chain for overflow properties when debugging z-index issues
+
+---
+
+### Sidebar Document/Folder Creation Fails - Complete Fix (6 Bugs)
+**Date**: 2025-11-01
+**Symptoms**:
+- Document creation fails with 403 RLS error
+- Subfolders don't appear after creation (even after reload)
+- Documents don't appear immediately after creation
+**Root Causes**: Six interconnected bugs in the creation/update flow
+**Debugging Time**: 4+ hours across multiple sessions
+
+#### Bug #1: Missing user_id Causing RLS Rejection
+**Location**: Dashboard.jsx:238 (createNewEntry function)
+**Symptom**: `403 Forbidden - new row violates row-level security policy for table "documents"`
+**Root Cause**: Document object missing `user_id` field required by Supabase RLS
+**Fix**:
+```javascript
+const newEntry = {
+  id: crypto.randomUUID(),
+  user_id: user.id, // CRITICAL: Required for RLS policy
+  title: title,
+  blocks: [defaultBlock],
+  // ...
+};
+```
+**Lesson**: Always include user_id when creating database records with RLS enabled
+
+#### Bug #2: Invalid Database Columns
+**Location**: Dashboard.jsx:756 (saveDocument operation)
+**Symptom**: `PGRST204 - Could not find the 'blocks' column`
+**Root Cause**: Trying to save `blocks` (separate table) and `updatedAt` (wrong case) columns
+**Fix**:
+```javascript
+// ❌ BEFORE:
+const documentToSave = { ...updatedEntry, blocks: undefined };
+
+// ✅ AFTER:
+const { blocks, updatedAt, ...documentToSave } = updatedEntry;
+```
+**Lesson**: Use destructuring to properly remove fields, not `undefined` assignment
+
+#### Bug #3: Async State Cache Corruption
+**Location**: useFolders.js:226, 285, 353
+**Symptom**: Cache gets stale state values, optimistic updates don't persist
+**Root Cause**: `setState` is async - cache updated with OLD state value
+**Fix**:
+```javascript
+// ❌ BEFORE:
+setFolders(prev => updateParent(prev));
+foldersCache = folders; // BUG: 'folders' is the OLD state!
+
+// ✅ AFTER:
+let updatedFolders;
+setFolders(prev => {
+  updatedFolders = updateParent(prev);
+  return updatedFolders;
+});
+foldersCache = updatedFolders; // Now using actual NEW value
+```
+**Lesson**: Capture the updated value when using functional setState
+
+#### Bug #4: Immediate loadFolders() Overwrites Optimistic Updates
+**Location**: useFolders.js:238, 291, 359 (createFolder, updateFolder, deleteFolder)
+**Symptom**: Optimistic update shows briefly then disappears
+**Root Cause**: `loadFolders(true)` called immediately after optimistic update, overwrites it
+**Fix**: Remove the immediate refresh calls
+```javascript
+// ❌ BEFORE:
+toast.success('Folder created');
+loadFolders(true); // Overwrites optimistic update!
+
+// ✅ AFTER:
+toast.success('Folder created');
+// DON'T refresh immediately - let optimistic update stand
+```
+**Lesson**: Don't refresh data immediately after optimistic updates
+
+#### Bug #5: loadEntries() Triggers Unwanted Folder Refresh
+**Location**: Dashboard.jsx:383 (loadEntries function)
+**Symptom**: Subfolders disappear when documents are created
+**Root Cause**: Document creation triggers loadEntries → refreshFolders → overwrites optimistic update
+**Fix**:
+```javascript
+// ❌ BEFORE:
+if (refreshFolders) {
+  await refreshFolders(); // Race condition!
+}
+
+// ✅ AFTER:
+// DON'T refresh folders here - causes race condition
+// Folders auto-loaded by useFolders hook
+```
+**Lesson**: Avoid cascading refresh calls that race with optimistic updates
+
+#### Bug #6: Tree Structure Destroyed on Every Render
+**Location**: ProjectExplorerRedesigned.jsx:43-60 (folderTree useMemo)
+**Symptom**: Subfolders never appear, even after page reload
+**Root Cause**: ProjectExplorer destroyed tree structure by rebuilding from wrong data format
+**Problem**:
+```javascript
+// useFolders returns TREE structure (root folders with children)
+// But ProjectExplorer tried to rebuild as if it was FLAT array:
+
+folders.forEach(folder => { // Only iterates ROOT folders!
+  folderMap.set(folder.id, {
+    ...folder,
+    children: [], // ❌ DESTROYS existing children!
+  });
+});
+```
+**Fix**: Use the tree structure directly instead of rebuilding
+```javascript
+const addDocumentsToFolder = (folder) => {
+  // Recursively process existing children (already populated!)
+  const updatedChildren = (folder.children || []).map(addDocumentsToFolder);
+
+  // Just add documents to existing structure
+  return {
+    ...folder,
+    children: [...updatedChildren, ...folderDocs]
+  };
+};
+```
+**Lesson**: Understand data structure contracts between components - don't assume format
+
+**Complete Fix Timeline**:
+1. Added user_id to document creation
+2. Removed invalid columns from save operation
+3. Fixed async state cache corruption
+4. Removed immediate loadFolders calls (3 locations)
+5. Removed refreshFolders from loadEntries
+6. Fixed tree rebuilding logic to preserve structure
+
+**Impact**: All folder/document creation now works instantly with optimistic updates
+**Saved**: 6+ hours debugging, prevents data loss, improves UX significantly
+
 ### Folders Appearing Empty in Dashboard
 **Symptom**: Only empty folders appear in dashboard grid, folders with documents don't show or appear empty
 **Root Cause**: `useFolders` hook only populates `folder.children` with subfolders, NOT documents

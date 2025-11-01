@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal, FolderPlus, FilePlus, Trash2 } from 'lucide-react';
 
 export default function SidebarTreeItem({
@@ -18,7 +19,9 @@ export default function SidebarTreeItem({
 
   // State for dropdown menu
   const [showMenu, setShowMenu] = useState(false);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const menuRef = useRef(null);
+  const buttonRef = useRef(null);
 
   // Click-outside handler to close menu
   useEffect(() => {
@@ -102,78 +105,89 @@ export default function SidebarTreeItem({
           {item.name || item.title}
         </span>
 
-        {/* Context Menu Button and Dropdown */}
-        <div className="relative">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowMenu(!showMenu);
-            }}
-            className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200 flex-shrink-0"
-            title="More options"
-          >
-            <MoreHorizontal className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
-          </button>
+        {/* Context Menu Button */}
+        <button
+          ref={buttonRef}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!showMenu && buttonRef.current) {
+              const rect = buttonRef.current.getBoundingClientRect();
+              setMenuPosition({
+                top: rect.bottom + 4,
+                left: rect.left
+              });
+            }
+            setShowMenu(!showMenu);
+          }}
+          className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200 flex-shrink-0"
+          title="More options"
+        >
+          <MoreHorizontal className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
+        </button>
 
-          {/* Dropdown menu */}
-          {showMenu && (
-            <div
-              ref={menuRef}
-              className="absolute right-0 top-full mt-1 bg-[#1a2942]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl w-48 py-1 z-50"
-              onClick={(e) => e.stopPropagation()}
+        {/* Dropdown menu rendered via Portal */}
+        {showMenu && createPortal(
+          <div
+            ref={menuRef}
+            style={{
+              position: 'fixed',
+              top: `${menuPosition.top}px`,
+              left: `${menuPosition.left}px`,
+              zIndex: 9999
+            }}
+            className="bg-[#1a2942]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl w-48 py-1 animate-in fade-in slide-in-from-top-1 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {!isFile && (
+              <>
+                <button
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    if (onContextMenu) {
+                      onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
+                        { ...item, action: 'newFolder' });
+                    }
+                  }}
+                >
+                  <FolderPlus className="w-4 h-4 text-blue-400" />
+                  <span>New Folder</span>
+                </button>
+                <button
+                  className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowMenu(false);
+                    if (onContextMenu) {
+                      onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
+                        { ...item, action: 'newFile' });
+                    }
+                  }}
+                >
+                  <FilePlus className="w-4 h-4 text-emerald-400" />
+                  <span>New Document</span>
+                </button>
+                <div className="h-px bg-white/10 my-1" />
+              </>
+            )}
+            <button
+              className="flex items-center gap-2 px-3 py-2 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/10 w-full text-left transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(false);
+                if (onContextMenu) {
+                  onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
+                    { ...item, action: 'delete' });
+                }
+              }}
             >
-              {/* Show folder actions only for folders */}
-              {!isFile && (
-                <>
-                  <button
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMenu(false);
-                      if (onContextMenu) {
-                        onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
-                          { ...item, action: 'newFolder' });
-                      }
-                    }}
-                  >
-                    <FolderPlus className="w-4 h-4 text-blue-400" />
-                    <span>New Folder</span>
-                  </button>
-                  <button
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMenu(false);
-                      if (onContextMenu) {
-                        onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
-                          { ...item, action: 'newFile' });
-                      }
-                    }}
-                  >
-                    <FilePlus className="w-4 h-4 text-emerald-400" />
-                    <span>New Document</span>
-                  </button>
-                  <div className="h-px bg-white/10 my-1" />
-                </>
-              )}
-              {/* Delete action for both folders and documents */}
-              <button
-                className="flex items-center gap-2 px-3 py-2 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/10 w-full text-left transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                  if (onContextMenu) {
-                    onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
-                      { ...item, action: 'delete' });
-                  }
-                }}
-              >
-                <Trash2 className="w-4 h-4" />
-                <span>Delete</span>
-              </button>
-            </div>
-          )}
-        </div>
+              <Trash2 className="w-4 h-4" />
+              <span>Delete</span>
+            </button>
+          </div>,
+          document.body
+        )}
 
         {/* Count badge */}
         {itemCount > 0 && (

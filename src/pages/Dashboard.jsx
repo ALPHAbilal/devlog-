@@ -240,8 +240,8 @@ export default function Dashboard() {
       blocks: [defaultBlock], // Always start with at least one block
       tags: [],
       folder_id: folderId, // Add folder_id to the document
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      created_at: new Date().toISOString(), // Use snake_case for database compatibility
+      updated_at: new Date().toISOString(), // Use snake_case for database compatibility
       metadata: {
         syncStatus: 'pending', // Track sync status
         createdLocally: true,

@@ -752,14 +752,15 @@ export default function Dashboard() {
     const saveOperation = async () => {
       try {
         // Only save non-block updates (title, tags, etc.)
-        const documentToSave = { ...updatedEntry, blocks: undefined };
-          
+        // Remove blocks, updatedAt (camelCase), and any other non-database fields
+        const { blocks, updatedAt, ...documentToSave } = updatedEntry;
+
         console.log('Dashboard: Saving metadata only (no blocks):', {
           id: documentToSave.id,
           title: documentToSave.title,
           hasBlocks: false
         });
-          
+
         await storageWrapper.saveDocument(documentToSave);
         // Update storage info after save
         updateStorageInfo();

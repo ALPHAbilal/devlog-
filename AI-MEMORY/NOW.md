@@ -1,7 +1,165 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Fixed Sidebar Document/Folder Creation (6-Bug Marathon)
+## Current Task: Fixed Popup Menu Z-Index Issues with React Portal (+ Legacy Code Cleanup)
+Status: ✅ COMPLETED - Both menus now appear properly on top of all content!
+Date: 2025-11-01
+**Critical Fix**: Removed duplicate legacy code in Dashboard.jsx that was preventing Portal fix from working
+
+### What Was Fixed
+Two popup menus were appearing **behind** other UI elements instead of on top:
+1. **Subfolder three-dot menu** - Context menu in sidebar appeared behind main content
+2. **Profile dropdown menu** - Bottom portion hidden behind docs/folders container
+
+### Root Cause Analysis
+**The Problem**: CSS stacking context and overflow clipping
+1. **overflow-hidden clips children**: Parent containers with `overflow-hidden` clip absolutely positioned menus
+2. **Stacking contexts isolate z-index**: Even `z-[9999]` doesn't work across stacking context boundaries
+3. **Absolute positioning is relative**: Keeps elements inside parent DOM tree
+
+**Why High Z-Index Failed**:
+- `z-50` on three-dot menu: Clipped by `overflow-hidden` parents
+- `z-[9999]` on profile menu: Still behind content due to stacking context
+- Problem containers:
+  - ProjectExplorerRedesigned.jsx: `overflow-hidden` on lines 167, 206
+  - Dashboard main content: `overflow-hidden` on line 1387
+
+### Solution Applied: React Portal Pattern
+**Used React Portal to escape parent DOM tree**:
+- Renders menus directly to `document.body`
+- `position: fixed` relative to viewport (not parent)
+- Escapes ALL `overflow-hidden` containers
+- No stacking context interference
+
+### Files Modified
+
+#### 1. SidebarTreeItem.jsx
+**Changes**:
+```javascript
+// Added imports
+import { createPortal } from 'react-dom';
+
+// Added position tracking
+const buttonRef = useRef(null);
+const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+// Calculate position on button click
+const rect = buttonRef.current.getBoundingClientRect();
+setMenuPosition({ top: rect.bottom + 4, left: rect.left });
+
+// Render via Portal
+{showMenu && createPortal(
+  <div style={{ position: 'fixed', top: menuPosition.top, left: menuPosition.left, zIndex: 9999 }}>
+    {/* Menu content */}
+  </div>,
+  document.body
+)}
+```
+**Old Code Removed**: Entire `<div className="relative">` wrapper and absolute positioned dropdown (lines 105-176)
+
+#### 2. DashboardHeader.jsx
+**Changes**:
+```javascript
+// Added imports
+import { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+// Added position tracking
+const profileButtonRef = useRef(null);
+const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+
+// Calculate position via useEffect
+useEffect(() => {
+  if (showProfileMenu && profileButtonRef.current) {
+    const rect = profileButtonRef.current.getBoundingClientRect();
+    setMenuPosition({
+      top: rect.bottom + 4,
+      right: window.innerWidth - rect.right
+    });
+  }
+}, [showProfileMenu]);
+
+// Render via Portal
+{showProfileMenu && createPortal(
+  <div style={{ position: 'fixed', top: menuPosition.top, right: menuPosition.right, zIndex: 9999 }}>
+    {/* Menu content */}
+  </div>,
+  document.body
+)}
+```
+**Old Code Removed**: `<div className="relative profile-menu-container">` wrapper and absolute positioned dropdown (lines 54-100)
+
+### Benefits Achieved
+✅ **Visual correctness**: Menus now appear on top of all content
+✅ **Clean implementation**: No z-index hacks or workarounds needed
+✅ **Maintainable**: Standard React pattern for overlays
+✅ **Performance**: No impact - Portal is React's recommended approach
+✅ **Future-proof**: Works with any parent overflow/transform changes
+
+### Pattern Documented
+Added comprehensive section to PATTERNS.md: "Popup Menus Appearing Behind Other Elements - Z-Index/Overflow Fix"
+- Complete implementation pattern for other menus
+- Before/after code examples
+- Why Portal fixes it
+- Common overflow containers to watch for
+
+### Critical Follow-Up Fix: Legacy Code Removal
+**Issue Discovered**: After implementing Portal fix, profile menu STILL appeared behind UI
+**Root Cause**: Dashboard.jsx had **DUPLICATE LEGACY CODE** (lines 1500-1598) that was rendering instead of DashboardHeader component
+- Legacy code used `z-50` absolute positioning
+- Created conflict with Portal-based menu
+- User reported: "sidebar popup displaying well, but profile popup isn't fixed"
+
+**Fix Applied**:
+```javascript
+// ❌ REMOVED: Lines 1500-1598 - entire legacy header implementation
+// - Profile button with relative wrapper
+// - Absolute positioned dropdown with z-50
+// - Search bar duplicate
+
+// ✅ REPLACED WITH: DashboardHeader component import and usage
+import DashboardHeader from '../components/Dashboard/DashboardHeader';
+
+<DashboardHeader
+  entries={entries}
+  searchTerm={searchTerm}
+  onSearchChange={(e) => setSearchTerm(e.target.value)}
+  searchBarRef={searchBarRef}
+  user={user}
+  showProfileMenu={showProfileMenu}
+  setShowProfileMenu={setShowProfileMenu}
+  onSignOut={signOut}
+  onCreateNew={() => createNewEntry()}
+  onToggleMobileSidebar={() => {/*...*/}}
+  isMobile={isMobile}
+/>
+```
+
+**Legacy Code Removed**: 98 lines completely deleted (1500-1598)
+- Profile dropdown with `z-50`
+- Header structure duplication
+- Search bar duplication
+- Menu button duplication
+
+**Why This Was Critical**:
+- DashboardHeader component existed with Portal fix
+- But Dashboard.jsx wasn't using it - rendering legacy code instead
+- User saw Portal menu behind legacy container
+- **Violated strict rule**: "No legacy code at all" - must remove old when adding new
+
+**Lesson Learned**:
+- Always search for existing implementations before fixing in wrong place
+- When component exists, ensure it's actually being used
+- Check for duplicate/legacy code that might override fixes
+- Complete cleanup = import component + remove all old code
+
+### Time Saved
+**2-3 hours** - Prevents repeated z-index debugging for future popup menus
+**1 hour** - Prevents confusion from duplicate implementations
+
+---
+
+## Previous Task: Fixed Sidebar Document/Folder Creation (6-Bug Marathon)
 Status: ✅ COMPLETED - All creation operations work instantly with optimistic updates!
 Date: 2025-11-01
 

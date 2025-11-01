@@ -111,8 +111,13 @@ export default function ProjectExplorerRedesigned({
     console.log('[DEBUG-SIDEBAR] Create folder button clicked');
     const folderName = prompt('Enter folder name:');
     if (folderName && folderName.trim()) {
-      console.log('[DEBUG-SIDEBAR] Creating folder:', folderName.trim());
-      await createFolder(folderName.trim(), null); // null = root folder
+      console.log('[DEBUG-SIDEBAR] Creating root folder:', folderName.trim());
+      const result = await createFolder(folderName.trim(), null); // null = root folder
+      if (result) {
+        console.log('[DEBUG-SIDEBAR] Root folder created successfully:', result.id);
+      } else {
+        console.error('[DEBUG-SIDEBAR] Root folder creation failed or returned null');
+      }
     }
   };
 
@@ -133,7 +138,13 @@ export default function ProjectExplorerRedesigned({
     console.log('[DEBUG-SIDEBAR] Creating nested folder in parent:', parentId);
     const folderName = prompt('Enter folder name:');
     if (folderName && folderName.trim()) {
-      await createFolder(folderName.trim(), parentId);
+      console.log('[DEBUG-SIDEBAR] Starting folder creation...');
+      const result = await createFolder(folderName.trim(), parentId);
+      if (result) {
+        console.log('[DEBUG-SIDEBAR] Folder created successfully:', result.id);
+      } else {
+        console.error('[DEBUG-SIDEBAR] Folder creation failed or returned null');
+      }
     }
   };
 

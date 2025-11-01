@@ -161,20 +161,30 @@ export function useFolders() {
 
   // Create folder
   const createFolder = useCallback(async (name, parentId = null) => {
-    if (!user?.id) return null;
+    if (!user?.id) {
+      console.error('[useFolders] Cannot create folder - no authenticated user');
+      toast.error('You must be signed in to create folders');
+      return null;
+    }
 
     try {
       // Get parent path if exists
       let path = name;
       if (parentId) {
-        const parent = await supabase
+        const { data, error } = await supabase
           .from('folders')
           .select('path')
           .eq('id', parentId)
           .single();
-        
-        if (parent.data) {
-          path = `${parent.data.path}/${name}`;
+
+        if (error) {
+          console.error('Failed to fetch parent folder:', error);
+          toast.error('Parent folder not found');
+          return null;
+        }
+
+        if (data) {
+          path = `${data.path}/${name}`;
         }
       }
 

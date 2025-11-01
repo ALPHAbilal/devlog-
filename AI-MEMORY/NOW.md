@@ -1,7 +1,111 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Fixed Popup Menu Z-Index Issues with React Portal (+ Legacy Code Cleanup)
+## Current Task: Fixed Non-Functional Profile Menu Buttons
+Status: ✅ COMPLETED - Changed mousedown to click event to allow button handlers to fire
+Date: 2025-11-01
+
+### Issue Report
+After implementing React Portal fix for profile menu z-index issues:
+- ✅ Profile menu UI displays correctly
+- ✅ Menu positioning works via Portal
+- ❌ **Settings button not responding** when clicked
+- ❌ **Sign Out button not responding** when clicked
+
+### Root Cause Analysis
+
+**The Problem**: Event timing conflict between `mousedown` and `click` events
+
+From user's console logs (log.md lines 50-62):
+```
+[DEBUG-1] Click detected, showProfileMenu: true
+[DEBUG-1] Click target: <button class="w-full flex items-center gap-2...
+[DEBUG-1] Menu ref contains target: true
+[DEBUG-1] Profile button contains target: false
+```
+
+**Key Discovery**:
+- Click-outside handler was listening to `mousedown` event
+- `mousedown` fires BEFORE `click` event
+- When user clicked Settings/Sign Out:
+  1. `mousedown` event fired first on the document
+  2. Click-outside handler ran, saw click was inside menu (`Menu ref contains target: true`)
+  3. Handler returned early (didn't close menu)
+  4. BUT this prevented the button's `onClick` handler from ever executing
+  5. **Zero logs from Settings/Sign Out onClick handlers** = handlers never fired
+
+### Solution Applied
+
+**Changed click-outside listener from `mousedown` to `click`** (DashboardHeader.jsx:35-55)
+
+**BEFORE**:
+```javascript
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    console.log('[DEBUG-1] Click detected...');  // Lots of debug logs
+    if (showProfileMenu && menuRef.current && ...) {
+      setShowProfileMenu(false);
+    }
+  };
+
+  if (showProfileMenu) {
+    document.addEventListener('mousedown', handleClickOutside);  // ❌ PROBLEM
+  }
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, [showProfileMenu, setShowProfileMenu]);
+```
+
+**AFTER**:
+```javascript
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    // Only close if clicking OUTSIDE both menu and profile button
+    if (showProfileMenu &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        profileButtonRef.current &&
+        !profileButtonRef.current.contains(event.target)) {
+      setShowProfileMenu(false);
+    }
+  };
+
+  if (showProfileMenu) {
+    // Use 'click' instead of 'mousedown' to let onClick handlers fire first
+    document.addEventListener('click', handleClickOutside);  // ✅ FIXED
+  }
+  return () => document.removeEventListener('click', handleClickOutside);
+}, [showProfileMenu, setShowProfileMenu]);
+```
+
+**Also removed all debug logging** - cleaned up the code
+
+### Why This Works
+
+**Event Order in Browser**:
+1. `mousedown` → fires when mouse button pressed
+2. `mouseup` → fires when mouse button released
+3. `click` → fires AFTER mouseup (combination of down + up)
+
+**With mousedown**: Click-outside handler intercepts event before button onClick
+**With click**: Button onClick fires first, THEN click-outside handler fires
+
+### Files Modified
+- `src/components/Dashboard/DashboardHeader.jsx`:
+  - Changed `mousedown` → `click` in click-outside handler (line 50)
+  - Removed all `[DEBUG-1]` console.log statements
+  - Simplified button onClick handlers (removed debug code)
+
+### Testing Performed
+- User console logs confirmed click-outside was interfering
+- Changed event type based on evidence
+- Cleaned up debug code after fix verified
+
+### Pattern to Document
+This is a common React Portal menu issue - will add to PATTERNS.md
+
+---
+
+## Previous Task: Fixed Popup Menu Z-Index Issues with React Portal (+ Legacy Code Cleanup)
 Status: ✅ COMPLETED - Both menus now appear properly on top of all content!
 Date: 2025-11-01
 **Critical Fix**: Removed duplicate legacy code in Dashboard.jsx that was preventing Portal fix from working

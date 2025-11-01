@@ -214,6 +214,8 @@ export default function Dashboard() {
 
   // Create new entry function (moved up for keyboard shortcut access)
   const createNewEntry = useCallback(async (folderId = null) => {
+    console.time('[PERF] Create New Document');
+
     // Create a default text block for new documents
     const defaultBlock = {
       id: crypto.randomUUID(),
@@ -221,23 +223,25 @@ export default function Dashboard() {
       content: '',
       position: 0
     };
-    
+
+    console.time('[PERF] Find unique title');
     // Check for duplicate names and generate unique title
     let baseTitle = 'Untitled Document';
     let title = baseTitle;
     let counter = 2;
-    
+
     // Get all documents in the same folder (or root if no folder)
-    const documentsInSameLevel = entries.filter(doc => 
-      doc.folder_id === folderId && 
+    const documentsInSameLevel = entries.filter(doc =>
+      doc.folder_id === folderId &&
       !doc.deleted_at
     );
-    
+
     // Keep checking until we find a unique name
     while (documentsInSameLevel.some(doc => doc.title === title)) {
       title = `${baseTitle} (${counter})`;
       counter++;
     }
+    console.timeEnd('[PERF] Find unique title');
     
     const newEntry = {
       id: crypto.randomUUID(),
@@ -257,6 +261,7 @@ export default function Dashboard() {
     };
     
     // Immediately save to IndexedDB for safety
+    console.time('[PERF] Save to IndexedDB');
     try {
       await IndexedDBAdapter.saveDocument(newEntry);
       console.log('New document saved to IndexedDB immediately');
@@ -264,8 +269,10 @@ export default function Dashboard() {
       console.error('Failed to save to IndexedDB:', error);
       toast.warning('Document created but local backup failed. Document will sync to cloud.');
     }
-    
+    console.timeEnd('[PERF] Save to IndexedDB');
+
     // Invalidate cache to ensure new document appears
+    console.time('[PERF] Invalidate cache');
     try {
       const adapter = await storageWrapper.getAdapter();
       if (adapter && typeof adapter.invalidateCache === 'function') {
@@ -277,8 +284,10 @@ export default function Dashboard() {
     } catch (error) {
       console.warn('Could not invalidate cache:', error);
     }
-    
+    console.timeEnd('[PERF] Invalidate cache');
+
     // Save the new document directly to avoid triggering updateAllDocuments
+    console.time('[PERF] Save to Supabase');
     try {
       await storageWrapper.saveDocument(newEntry);
       console.log('New document saved successfully');
@@ -300,11 +309,16 @@ export default function Dashboard() {
       });
       toast.error(`Failed to save document: ${error.message || 'Unknown error'}`);
     }
-    
+    console.timeEnd('[PERF] Save to Supabase');
+
     // Update local state
+    console.time('[PERF] Update UI state');
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
     setExpandedEntry(newEntry);
+    console.timeEnd('[PERF] Update UI state');
+
+    console.timeEnd('[PERF] Create New Document');
   }, [entries, saveEntries, trackDocumentEvent]);
 
   // Handle click outside for profile menu

@@ -3,6 +3,70 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### React Portal Menu Buttons Not Responding - Event Timing Issue
+**Date**: 2025-11-01
+**Symptoms**:
+- Portal-rendered menu displays correctly
+- Menu positioning works properly
+- Buttons inside menu don't respond to clicks
+- No console logs from button onClick handlers
+- Click-outside handler logs show it's firing
+
+**Root Cause**:
+Event timing conflict - `mousedown` event fires BEFORE `click` event:
+1. User clicks button inside menu
+2. Document `mousedown` listener fires first
+3. Click-outside handler runs, sees click is inside menu, returns early
+4. This prevents button's `onClick` (which uses `click` event) from ever firing
+5. Menu stays open, button action never executes
+
+**Solution**: Change click-outside handler from `mousedown` to `click`
+
+```javascript
+// ❌ WRONG - mousedown intercepts before button onClick
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (showMenu && menuRef.current && !menuRef.current.contains(event.target)) {
+      setShowMenu(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);  // PROBLEM
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, [showMenu]);
+
+// ✅ CORRECT - click fires after button onClick handlers
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (showMenu && menuRef.current && !menuRef.current.contains(event.target)) {
+      setShowMenu(false);
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);  // FIXED
+  return () => document.removeEventListener('click', handleClickOutside);
+}, [showMenu]);
+```
+
+**Why This Works**:
+Browser event order:
+1. `mousedown` → Mouse button pressed
+2. `mouseup` → Mouse button released
+3. `click` → Fires AFTER mouseup (combination event)
+
+With `mousedown`: Click-outside intercepts before button onClick
+With `click`: Button onClick fires first, menu closes after
+
+**Files Fixed**:
+- `src/components/Dashboard/DashboardHeader.jsx` - Profile menu Settings/Sign Out buttons
+
+**Time Saved**: 1-2 hours debugging event propagation issues
+
+**Debugging Tip**:
+If Portal menu buttons don't work, check console for onClick handler logs. If missing but click-outside logs appear, it's an event timing issue.
+
+---
+
 ### Popup Menus Appearing Behind Other Elements - Z-Index/Overflow Fix
 **Date**: 2025-11-01
 **Symptoms**:

@@ -13,6 +13,7 @@ import FolderCardSkeleton from '../components/FolderCardSkeleton';
 import SidebarSkeleton from '../components/SidebarSkeleton';
 import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
 import DashboardHeader from '../components/Dashboard/DashboardHeader';
+import ConfirmDialog from '../components/ConfirmDialog';
 import ProjectCard from '../components/ProjectCard';
 // import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
 // import ProjectExplorerV2 from '../components/ProjectExplorer/ProjectExplorerV2';
@@ -116,6 +117,10 @@ export default function Dashboard() {
   const [contextMenuTarget, setContextMenuTarget] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const searchBarRef = useRef(null);
+
+  // Confirmation dialog state
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmDialogConfig, setConfirmDialogConfig] = useState({ title: '', message: '', onConfirm: null });
 
   // Check if we're in projects view
   const isProjectsView = location.search.includes('view=projects');
@@ -906,22 +911,26 @@ export default function Dashboard() {
     }
   }, [projects, toast]);
   
-  const handleDeleteProject = useCallback(async (project) => {
-    if (!confirm(`Are you sure you want to delete "${project.title}"? Documents will be moved to uncategorized.`)) {
-      return;
-    }
-    
-    try {
-      await storageWrapper.deleteProject(project.id);
-      setProjects(projects.filter(p => p.id !== project.id));
-      if (selectedProjectId === project.id) {
-        setSelectedProjectId(null);
+  const handleDeleteProject = useCallback((project) => {
+    setConfirmDialogConfig({
+      title: 'Delete Project',
+      message: `Are you sure you want to delete "${project.title}"? Documents will be moved to uncategorized. This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          await storageWrapper.deleteProject(project.id);
+          setProjects(projects.filter(p => p.id !== project.id));
+          if (selectedProjectId === project.id) {
+            setSelectedProjectId(null);
+          }
+          toast.success('Project deleted successfully');
+        } catch (error) {
+          console.error('Error deleting project:', error);
+          toast.error('Failed to delete project');
+        }
+        setShowConfirmDialog(false);
       }
-      toast.success('Project deleted successfully');
-    } catch (error) {
-      console.error('Error deleting project:', error);
-      toast.error('Failed to delete project');
-    }
+    });
+    setShowConfirmDialog(true);
   }, [projects, selectedProjectId, toast]);
 
   const handleToggleFavorite = useCallback(async (project) => {
@@ -1326,14 +1335,20 @@ export default function Dashboard() {
                 // Update the document's folder_id
                 await updateEntry(docId, { folder_id: folderId });
               }}
-              onDocumentDelete={async (document) => {
+              onDocumentDelete={(document) => {
                 const docId = document.id || document;
-                if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                  await deleteEntry(docId);
-                  // Refresh the entries list
-                  await loadEntries();
-                  toast.success('Document deleted successfully');
-                }
+                setConfirmDialogConfig({
+                  title: 'Delete Document',
+                  message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
+                  onConfirm: async () => {
+                    await deleteEntry(docId);
+                    // Refresh the entries list
+                    await loadEntries();
+                    toast.success('Document deleted successfully');
+                    setShowConfirmDialog(false);
+                  }
+                });
+                setShowConfirmDialog(true);
               }}
             />
           </div>
@@ -1484,13 +1499,19 @@ export default function Dashboard() {
                 onDocumentMove={async (docId, folderId) => {
                   await updateEntry(docId, { folder_id: folderId });
                 }}
-                onDocumentDelete={async (document) => {
+                onDocumentDelete={(document) => {
                   const docId = document.id || document;
-                  if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                    await deleteEntry(docId);
-                    await loadEntries();
-                    toast.success('Document deleted successfully');
-                  }
+                  setConfirmDialogConfig({
+                    title: 'Delete Document',
+                    message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
+                    onConfirm: async () => {
+                      await deleteEntry(docId);
+                      await loadEntries();
+                      toast.success('Document deleted successfully');
+                      setShowConfirmDialog(false);
+                    }
+                  });
+                  setShowConfirmDialog(true);
                 }}
               />
             </div>
@@ -1733,13 +1754,19 @@ export default function Dashboard() {
             onDocumentMove={async (docId, folderId) => {
               await updateEntry(docId, { folder_id: folderId });
             }}
-            onDocumentDelete={async (document) => {
+            onDocumentDelete={(document) => {
               const docId = document.id || document;
-              if (confirm(`Are you sure you want to delete "${document.title || 'this document'}"?`)) {
-                await deleteEntry(docId);
-                await loadEntries();
-                toast.success('Document deleted successfully');
-              }
+              setConfirmDialogConfig({
+                title: 'Delete Document',
+                message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
+                onConfirm: async () => {
+                  await deleteEntry(docId);
+                  await loadEntries();
+                  toast.success('Document deleted successfully');
+                  setShowConfirmDialog(false);
+                }
+              });
+              setShowConfirmDialog(true);
             }}
           />
         </MobileBottomSheet>
@@ -1772,16 +1799,33 @@ export default function Dashboard() {
           destructiveAction={{
             icon: FileText,
             label: 'Delete Document',
-            onClick: async () => {
-              if (confirm(`Delete "${contextMenuTarget.title}"?`)) {
-                await deleteEntry(contextMenuTarget.id);
-                await loadEntries();
-                toast.success('Document deleted');
-              }
+            onClick: () => {
+              setConfirmDialogConfig({
+                title: 'Delete Document',
+                message: `Are you sure you want to delete "${contextMenuTarget.title}"? This action cannot be undone.`,
+                onConfirm: async () => {
+                  await deleteEntry(contextMenuTarget.id);
+                  await loadEntries();
+                  toast.success('Document deleted');
+                  setShowConfirmDialog(false);
+                }
+              });
+              setShowConfirmDialog(true);
             }
           }}
         />
       )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={confirmDialogConfig.onConfirm}
+        title={confirmDialogConfig.title}
+        message={confirmDialogConfig.message}
+        confirmText="Delete"
+        variant="danger"
+      />
     </DndContext>
   );
 }

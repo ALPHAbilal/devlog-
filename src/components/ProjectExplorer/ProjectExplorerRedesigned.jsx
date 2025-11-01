@@ -4,6 +4,8 @@ import { useFolders } from '../../hooks/useFolders';
 import SidebarSectionHeader from './SidebarSectionHeader';
 import SidebarTreeItem from './SidebarTreeItem';
 import SidebarCollapseButton from './SidebarCollapseButton';
+import InputModal from '../InputModal';
+import ConfirmDialog from '../ConfirmDialog';
 
 export default function ProjectExplorerRedesigned({
   onDocumentSelect,
@@ -19,6 +21,12 @@ export default function ProjectExplorerRedesigned({
   const [expandedFolders, setExpandedFolders] = useState(new Set(['1']));
   const [explorerExpanded, setExplorerExpanded] = useState(true);
   const [favoritesExpanded, setFavoritesExpanded] = useState(true);
+
+  // Modal state
+  const [showInputModal, setShowInputModal] = useState(false);
+  const [inputModalConfig, setInputModalConfig] = useState({ title: '', onConfirm: null, parentId: null });
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmDialogConfig, setConfirmDialogConfig] = useState({ title: '', message: '', onConfirm: null });
 
   // Use existing folders hook (no backend changes)
   const { folders, createFolder, deleteFolder } = useFolders();
@@ -95,18 +103,23 @@ export default function ProjectExplorerRedesigned({
   };
 
   // Handle create new folder
-  const handleCreateFolder = async () => {
+  const handleCreateFolder = () => {
     console.log('[DEBUG-SIDEBAR] Create folder button clicked');
-    const folderName = prompt('Enter folder name:');
-    if (folderName && folderName.trim()) {
-      console.log('[DEBUG-SIDEBAR] Creating root folder:', folderName.trim());
-      const result = await createFolder(folderName.trim(), null); // null = root folder
-      if (result) {
-        console.log('[DEBUG-SIDEBAR] Root folder created successfully:', result.id);
-      } else {
-        console.error('[DEBUG-SIDEBAR] Root folder creation failed or returned null');
-      }
-    }
+    setInputModalConfig({
+      title: 'Create New Folder',
+      onConfirm: async (folderName) => {
+        console.log('[DEBUG-SIDEBAR] Creating root folder:', folderName);
+        const result = await createFolder(folderName, null); // null = root folder
+        if (result) {
+          console.log('[DEBUG-SIDEBAR] Root folder created successfully:', result.id);
+        } else {
+          console.error('[DEBUG-SIDEBAR] Root folder creation failed or returned null');
+        }
+        setShowInputModal(false);
+      },
+      parentId: null
+    });
+    setShowInputModal(true);
   };
 
   // Handle context menu actions
@@ -122,18 +135,23 @@ export default function ProjectExplorerRedesigned({
   };
 
   // Create nested folder (inside another folder)
-  const handleCreateNestedFolder = async (parentId) => {
+  const handleCreateNestedFolder = (parentId) => {
     console.log('[DEBUG-SIDEBAR] Creating nested folder in parent:', parentId);
-    const folderName = prompt('Enter folder name:');
-    if (folderName && folderName.trim()) {
-      console.log('[DEBUG-SIDEBAR] Starting folder creation...');
-      const result = await createFolder(folderName.trim(), parentId);
-      if (result) {
-        console.log('[DEBUG-SIDEBAR] Folder created successfully:', result.id);
-      } else {
-        console.error('[DEBUG-SIDEBAR] Folder creation failed or returned null');
-      }
-    }
+    setInputModalConfig({
+      title: 'Create New Subfolder',
+      onConfirm: async (folderName) => {
+        console.log('[DEBUG-SIDEBAR] Starting folder creation...');
+        const result = await createFolder(folderName, parentId);
+        if (result) {
+          console.log('[DEBUG-SIDEBAR] Folder created successfully:', result.id);
+        } else {
+          console.error('[DEBUG-SIDEBAR] Folder creation failed or returned null');
+        }
+        setShowInputModal(false);
+      },
+      parentId
+    });
+    setShowInputModal(true);
   };
 
   // Create document in folder
@@ -144,21 +162,27 @@ export default function ProjectExplorerRedesigned({
   };
 
   // Delete folder or document
-  const handleDeleteItem = async (item) => {
+  const handleDeleteItem = (item) => {
     const itemName = item.name || item.title || 'this item';
-    const confirmMessage = item.type === 'folder'
-      ? `Delete folder "${itemName}" and all its contents?`
-      : `Delete document "${itemName}"?`;
+    const isFolder = item.type === 'folder';
 
-    if (confirm(confirmMessage)) {
-      console.log('[DEBUG-SIDEBAR] Deleting item:', item);
+    setConfirmDialogConfig({
+      title: isFolder ? 'Delete Folder' : 'Delete Document',
+      message: isFolder
+        ? `Are you sure you want to delete "${itemName}" and all its contents? This action cannot be undone.`
+        : `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+      onConfirm: async () => {
+        console.log('[DEBUG-SIDEBAR] Deleting item:', item);
 
-      if (item.type === 'folder') {
-        await deleteFolder(item.id);
-      } else if (item.type === 'document' && onDocumentDelete) {
-        await onDocumentDelete(item);
+        if (item.type === 'folder') {
+          await deleteFolder(item.id);
+        } else if (item.type === 'document' && onDocumentDelete) {
+          await onDocumentDelete(item);
+        }
+        setShowConfirmDialog(false);
       }
-    }
+    });
+    setShowConfirmDialog(true);
   };
 
   // Collapsed sidebar view
@@ -292,6 +316,26 @@ export default function ProjectExplorerRedesigned({
 
       {/* Bottom spacer */}
       <div className="h-4 flex-shrink-0" />
+
+      {/* Modals */}
+      <InputModal
+        isOpen={showInputModal}
+        onClose={() => setShowInputModal(false)}
+        onConfirm={inputModalConfig.onConfirm}
+        title={inputModalConfig.title}
+        placeholder="Enter folder name..."
+        confirmText="Create"
+      />
+
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={confirmDialogConfig.onConfirm}
+        title={confirmDialogConfig.title}
+        message={confirmDialogConfig.message}
+        confirmText="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

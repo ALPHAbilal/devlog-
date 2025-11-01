@@ -35,35 +35,20 @@ export default function DashboardHeader({
   // Handle click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event) => {
-      console.log('[DEBUG-2] Click-outside handler triggered');
-      console.log('[DEBUG-2] Event target:', event.target);
-      console.log('[DEBUG-2] Menu contains target:', menuRef.current?.contains(event.target));
-      console.log('[DEBUG-2] Profile button contains target:', profileButtonRef.current?.contains(event.target));
-
       // Only close if clicking OUTSIDE both menu and profile button
       if (showProfileMenu &&
           menuRef.current &&
           !menuRef.current.contains(event.target) &&
           profileButtonRef.current &&
           !profileButtonRef.current.contains(event.target)) {
-        console.log('[DEBUG-2] Closing menu from click-outside');
         setShowProfileMenu(false);
-      } else {
-        console.log('[DEBUG-2] Click was inside menu or profile button, keeping menu open');
       }
     };
 
     if (showProfileMenu) {
-      // Use 'click' with capture phase to let button handlers fire first
-      // Slight delay ensures React synthetic events process first
-      const timerId = setTimeout(() => {
-        document.addEventListener('click', handleClickOutside, true);
-      }, 0);
-
-      return () => {
-        clearTimeout(timerId);
-        document.removeEventListener('click', handleClickOutside, true);
-      };
+      // Use 'click' event in bubble phase (default) - button onClick fires first
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
     }
   }, [showProfileMenu, setShowProfileMenu]);
 
@@ -138,15 +123,9 @@ export default function DashboardHeader({
 
               <div className="p-1">
                 <button
-                  onClick={(e) => {
-                    console.log('[DEBUG-2] Settings button clicked');
-                    console.log('[DEBUG-2] Event phase:', e.eventPhase);
-                    console.log('[DEBUG-2] Event target:', e.target);
-                    console.log('[DEBUG-2] Current target:', e.currentTarget);
-                    e.stopPropagation(); // Stop event from reaching click-outside handler
+                  onClick={() => {
                     setShowProfileMenu(false);
                     navigate('/settings');
-                    console.log('[DEBUG-2] Navigate called');
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-white/70 hover:text-white/90 hover:bg-white/5 focus:bg-white/5 focus:text-white/90 rounded transition-colors text-sm cursor-pointer"
                 >
@@ -157,15 +136,9 @@ export default function DashboardHeader({
                 <div className="h-px bg-white/10 my-1" />
 
                 <button
-                  onClick={(e) => {
-                    console.log('[DEBUG-2] Sign Out button clicked');
-                    console.log('[DEBUG-2] Event phase:', e.eventPhase);
-                    console.log('[DEBUG-2] Event target:', e.target);
-                    console.log('[DEBUG-2] Current target:', e.currentTarget);
-                    e.stopPropagation(); // Stop event from reaching click-outside handler
+                  onClick={() => {
                     setShowProfileMenu(false);
                     onSignOut();
-                    console.log('[DEBUG-2] onSignOut called');
                   }}
                   className="w-full flex items-center gap-2 px-2 py-1.5 text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10 focus:text-red-300 rounded transition-colors text-sm cursor-pointer"
                 >

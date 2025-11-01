@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Star, FolderPlus, PanelLeft } from 'lucide-react';
+import { Star, FolderPlus, PanelLeft, FilePlus, Trash2 } from 'lucide-react';
 import { useFolders } from '../../hooks/useFolders';
 import SidebarSectionHeader from './SidebarSectionHeader';
 import SidebarTreeItem from './SidebarTreeItem';
@@ -9,6 +9,7 @@ export default function ProjectExplorerRedesigned({
   onDocumentSelect,
   selectedDocumentId,
   documents = [],
+  onDocumentDelete,
   isCollapsed = false,
   onToggleCollapse,
   className = '',
@@ -20,7 +21,7 @@ export default function ProjectExplorerRedesigned({
   const [favoritesExpanded, setFavoritesExpanded] = useState(true);
 
   // Use existing folders hook (no backend changes)
-  const { folders, createFolder } = useFolders();
+  const { folders, createFolder, deleteFolder } = useFolders();
 
   // Toggle folder expansion
   const toggleFolder = (id) => {
@@ -115,15 +116,50 @@ export default function ProjectExplorerRedesigned({
     }
   };
 
-  // Handle context menu (for now, just show alert - can be expanded later)
-  const handleContextMenu = (item) => {
-    // TODO: Implement proper context menu with actions like:
-    // - Rename folder/document
-    // - Delete folder/document
-    // - Move to another folder
-    // - Add to favorites
-    console.log('[DEBUG-SIDEBAR] Context menu clicked for:', item.name || item.title, item);
-    alert(`Context menu for: ${item.name || item.title}\n\nActions coming soon:\n- Rename\n- Delete\n- Move\n- Favorite`);
+  // Handle context menu actions
+  const handleContextMenu = (e, item) => {
+    // e is a fake event object, item contains the action
+    if (item.action === 'newFolder') {
+      handleCreateNestedFolder(item.id);
+    } else if (item.action === 'newFile') {
+      handleCreateDocument(item.id);
+    } else if (item.action === 'delete') {
+      handleDeleteItem(item);
+    }
+  };
+
+  // Create nested folder (inside another folder)
+  const handleCreateNestedFolder = async (parentId) => {
+    console.log('[DEBUG-SIDEBAR] Creating nested folder in parent:', parentId);
+    const folderName = prompt('Enter folder name:');
+    if (folderName && folderName.trim()) {
+      await createFolder(folderName.trim(), parentId);
+    }
+  };
+
+  // Create document in folder
+  const handleCreateDocument = (folderId) => {
+    console.log('[DEBUG-SIDEBAR] Creating document in folder:', folderId);
+    // Send action to Dashboard to create document
+    onDocumentSelect?.({ action: 'create', folderId: folderId });
+  };
+
+  // Delete folder or document
+  const handleDeleteItem = async (item) => {
+    const itemName = item.name || item.title || 'this item';
+    const confirmMessage = item.type === 'folder'
+      ? `Delete folder "${itemName}" and all its contents?`
+      : `Delete document "${itemName}"?`;
+
+    if (confirm(confirmMessage)) {
+      console.log('[DEBUG-SIDEBAR] Deleting item:', item);
+
+      if (item.type === 'folder') {
+        await deleteFolder(item.id);
+      } else if (item.type === 'document' && onDocumentDelete) {
+        await onDocumentDelete(item);
+      }
+    }
   };
 
   // Collapsed sidebar view

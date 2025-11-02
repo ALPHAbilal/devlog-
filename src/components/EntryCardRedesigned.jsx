@@ -4,7 +4,6 @@ import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Check, MoreVertical } from 'lucide-react';
 import { useTouchGestures } from '../hooks/useTouchGestures';
-import { generateActivityData } from '../utils/activityData';
 import CardContainer from './CardContainer';
 import FavoriteIndicator from './FavoriteIndicator';
 
@@ -68,19 +67,37 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
     setTimeout(() => setTouchActive(false), 100);
   };
 
-  // Generate activity data for chart visualization based on REAL document data
+  // Generate activity data from REAL audit logs
   const activityData = useMemo(() => {
-    // Use existing activityData.js which analyzes real document properties:
-    // - entry.createdAt (creation date)
-    // - entry.updatedAt (last update date)
-    // - entry.blocks (block count and types)
-    const fullData = generateActivityData(entry);
-    // Take last 20 weeks to match Figma design (20 bars)
-    return fullData.slice(-20).map(value => {
-      // Convert 0-20 scale to 0-100 percentage for bar height
-      return Math.max(5, Math.min(95, (value / 20) * 100));
+    if (!entry.recentActivity || entry.recentActivity.length === 0) {
+      // No activity data yet (new document or audit just started)
+      // Show minimal bars to indicate no recent edits
+      return Array(20).fill(5);
+    }
+
+    // Group recent activity by week to generate 20-week timeline
+    const weeks = 20;
+    const weekCounts = new Array(weeks).fill(0);
+    const now = new Date();
+
+    entry.recentActivity.forEach(activity => {
+      const activityDate = new Date(activity.ts);
+      const weeksSince = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24 * 7));
+
+      if (weeksSince >= 0 && weeksSince < weeks) {
+        // Increment count for this week (most recent = index 19)
+        weekCounts[weeks - 1 - weeksSince]++;
+      }
     });
-  }, [entry.id, entry.updatedAt, entry.createdAt]); // Regenerate when document changes
+
+    // Normalize to 0-100 scale for bar height (with minimum 5% for visibility)
+    const maxCount = Math.max(...weekCounts, 1);
+    return weekCounts.map(count => {
+      if (count === 0) return 5; // Minimum height for empty weeks
+      const percentage = (count / maxCount) * 90; // Scale to 90% max
+      return Math.max(10, percentage + 5); // 10-95% range with 5% baseline
+    });
+  }, [entry.recentActivity]); // Regenerate when activity changes
 
   // Always show chart for all documents (matching Figma design)
   const hasChart = true;
@@ -152,7 +169,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
             {entry.title}
           </h3>
 
-          {/* Chart visualization - 20 bars */}
+          {/* Chart visualization - 20 bars showing real activity from audit logs */}
           {hasChart && (
             <div className="mt-auto h-16 flex items-end gap-1 px-1 pb-1">
               {activityData.map((value, i) => (
@@ -165,6 +182,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
                     height: `${value}%`,
                     transitionDelay: `${i * 20}ms`
                   }}
+                  title={`Week ${i + 1}: ${value > 5 ? 'Active' : 'No activity'}`}
                 />
               ))}
             </div>

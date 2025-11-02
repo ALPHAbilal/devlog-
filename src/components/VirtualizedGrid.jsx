@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import EntryCard from './EntryCard';
 import EntryCardRedesigned from './EntryCardRedesigned';
 import Sparkline from './Sparkline';
-import { generateActivityData } from '../utils/activityData';
 import { useTouchGestures } from '../hooks/useTouchGestures';
 import './VirtualizedGrid.css';
 
@@ -323,8 +322,33 @@ export default function VirtualizedGrid({
 
 // Compact version of EntryCard
 function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onSelect, selectionMode = false }) {
-  // Generate activity data for the sparkline
-  const activityData = useMemo(() => generateActivityData(entry), [entry]);
+  // Generate activity data from real audit logs (same logic as EntryCardRedesigned)
+  const activityData = useMemo(() => {
+    if (!entry.recentActivity || entry.recentActivity.length === 0) {
+      // No activity data yet - show minimal activity
+      return Array(20).fill(5);
+    }
+
+    // Group by week (simplified version for compact card)
+    const weeks = 20;
+    const weekCounts = new Array(weeks).fill(0);
+    const now = new Date();
+
+    entry.recentActivity.forEach(activity => {
+      const activityDate = new Date(activity.ts);
+      const weeksSince = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24 * 7));
+      if (weeksSince >= 0 && weeksSince < weeks) {
+        weekCounts[weeks - 1 - weeksSince]++;
+      }
+    });
+
+    // Normalize to 0-100 scale
+    const maxCount = Math.max(...weekCounts, 1);
+    return weekCounts.map(count => {
+      if (count === 0) return 5;
+      return Math.max(10, (count / maxCount) * 90 + 5);
+    });
+  }, [entry.recentActivity]);
   
   const formatDate = (dateString) => {
     const date = new Date(dateString);

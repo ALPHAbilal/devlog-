@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { loadDocumentsPaginated } from '../utils/storage/storageWrapper';
+import { getDocumentsWithRealActivity } from '../lib/supabase-optimizations';
 
 /**
  * Hook for paginated dashboard document loading with infinite scroll
@@ -58,39 +59,65 @@ export function usePaginatedDashboard(options = {}) {
     setError(null);
 
     try {
-      console.log('usePaginatedDashboard: Calling loadDocumentsPaginated with page 0');
-      const result = await loadDocumentsPaginated({
-        page: 0,
+      console.log('usePaginatedDashboard: Calling getDocumentsWithRealActivity with page 0');
+      const documents = await getDocumentsWithRealActivity({
+        userId: user.id,
         limit: pageSize,
-        orderBy,
-        ascending
+        offset: 0
       });
 
-      console.log('usePaginatedDashboard: Got result:', {
-        documentCount: result.documents?.length,
-        totalCount: result.totalCount,
-        hasMore: result.hasMore
+      console.log('usePaginatedDashboard: Got real activity documents:', {
+        documentCount: documents?.length,
+        sampleActivity: documents[0]?.recent_activity
       });
+
+      // Transform to match existing interface and add real activity data
+      const transformed = documents.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        folder_id: doc.folder_id,
+        position: doc.doc_position,
+        metadata: doc.metadata,
+        tags: doc.tags,
+        blockCount: doc.block_count,
+        // NEW: Real activity data from audit logs
+        lastEdited: doc.last_edited,
+        editCount7d: doc.edit_count_7d,
+        editCount30d: doc.edit_count_30d,
+        recentActivity: doc.recent_activity || []
+      }));
+
+      // Get total count (separate query for accurate pagination)
+      // This will be cached by Supabase for performance
+      const allDocs = await getDocumentsWithRealActivity({
+        userId: user.id,
+        limit: 1000, // Get enough to know total count
+        offset: 0
+      });
+      const totalCount = allDocs.length;
 
       // Deduplicate initial documents (safety check)
-      const uniqueDocs = result.documents.reduce((acc, doc) => {
+      const uniqueDocs = transformed.reduce((acc, doc) => {
         if (!acc.find(d => d.id === doc.id)) {
           acc.push(doc);
         }
         return acc;
       }, []);
 
-      if (uniqueDocs.length !== result.documents.length) {
-        console.warn(`usePaginatedDashboard: Initial load had ${result.documents.length - uniqueDocs.length} duplicates`);
+      if (uniqueDocs.length !== transformed.length) {
+        console.warn(`usePaginatedDashboard: Initial load had ${transformed.length - uniqueDocs.length} duplicates`);
       }
 
       setDocuments(uniqueDocs);
-      setTotalCount(result.totalCount);
-      setHasMore(result.hasMore);
+      setTotalCount(totalCount);
+      const hasMoreDocs = (0 + 1) * pageSize < totalCount;
+      setHasMore(hasMoreDocs);
       setCurrentPage(0);
 
       // Preload next page in background
-      if (preloadNextPage && result.hasMore) {
+      if (preloadNextPage && hasMoreDocs) {
         preloadNextPageInBackground(1);
       }
     } catch (err) {
@@ -127,31 +154,50 @@ export function usePaginatedDashboard(options = {}) {
       const nextPage = currentPage + 1;
       console.log(`usePaginatedDashboard: Loading page ${nextPage}`);
 
-      const result = await loadDocumentsPaginated({
-        page: nextPage,
+      const documents = await getDocumentsWithRealActivity({
+        userId: user.id,
         limit: pageSize,
-        orderBy,
-        ascending
+        offset: nextPage * pageSize
       });
 
-      console.log(`usePaginatedDashboard: Loaded ${result.documents.length} documents, hasMore: ${result.hasMore}`);
+      // Transform to match existing interface
+      const transformed = documents.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        folder_id: doc.folder_id,
+        position: doc.doc_position,
+        metadata: doc.metadata,
+        tags: doc.tags,
+        blockCount: doc.block_count,
+        // NEW: Real activity data from audit logs
+        lastEdited: doc.last_edited,
+        editCount7d: doc.edit_count_7d,
+        editCount30d: doc.edit_count_30d,
+        recentActivity: doc.recent_activity || []
+      }));
+
+      console.log(`usePaginatedDashboard: Loaded ${transformed.length} documents`);
 
       // Deduplicate documents by ID before appending (prevents race condition duplicates)
       setDocuments(prev => {
         const existingIds = new Set(prev.map(d => d.id));
-        const newDocs = result.documents.filter(d => !existingIds.has(d.id));
+        const newDocs = transformed.filter(d => !existingIds.has(d.id));
 
-        if (newDocs.length !== result.documents.length) {
-          console.warn(`usePaginatedDashboard: Filtered out ${result.documents.length - newDocs.length} duplicate documents`);
+        if (newDocs.length !== transformed.length) {
+          console.warn(`usePaginatedDashboard: Filtered out ${transformed.length - newDocs.length} duplicate documents`);
         }
 
         return [...prev, ...newDocs];
       });
-      setHasMore(result.hasMore);
+
+      const hasMoreDocs = (nextPage + 1) * pageSize < totalCount;
+      setHasMore(hasMoreDocs);
       setCurrentPage(nextPage);
 
       // Preload next page in background
-      if (preloadNextPage && result.hasMore) {
+      if (preloadNextPage && hasMoreDocs) {
         preloadNextPageInBackground(nextPage + 1);
       }
     } catch (err) {
@@ -167,22 +213,21 @@ export function usePaginatedDashboard(options = {}) {
    * Preload next page in background (non-blocking)
    */
   const preloadNextPageInBackground = useCallback((page) => {
-    if (preloadingRef.current) return;
+    if (preloadingRef.current || !user?.id) return;
 
     preloadingRef.current = true;
 
     // Fire and forget - don't await, don't update state
-    loadDocumentsPaginated({
-      page,
+    getDocumentsWithRealActivity({
+      userId: user.id,
       limit: pageSize,
-      orderBy,
-      ascending
+      offset: page * pageSize
     }).then(() => {
       preloadingRef.current = false;
     }).catch(() => {
       preloadingRef.current = false;
     });
-  }, [pageSize, orderBy, ascending]);
+  }, [user?.id, pageSize]);
 
   /**
    * Check if should load more based on scroll position

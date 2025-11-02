@@ -210,9 +210,86 @@ export async function updateDocumentCache(documentId: string) {
 
 export async function rebuildUserCaches(): Promise<number> {
   const { data, error } = await supabase.rpc('rebuild_user_caches');
-  
+
   if (error) throw error;
   return data || 0;
+}
+
+// =====================================================
+// Real Activity Statistics (Audit-Based)
+// =====================================================
+
+interface DocumentActivity {
+  week_start: string;
+  edit_count: number;
+  blocks_added: number;
+  blocks_modified: number;
+  blocks_deleted: number;
+  total_changes: number;
+}
+
+interface UserActivityStats {
+  total_edits: number;
+  documents_modified: number;
+  blocks_created: number;
+  blocks_modified: number;
+  most_active_day: string;
+  avg_daily_edits: number;
+}
+
+interface DocumentWithRealActivity {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  folder_id: string | null;
+  doc_position: number;
+  metadata: Record<string, any>;
+  tags: string[];
+  block_count: number;
+  last_edited: string | null;
+  edit_count_7d: number;
+  edit_count_30d: number;
+  recent_activity: any[] | null;
+}
+
+export async function getDocumentActivity(
+  documentId: string,
+  weeks: number = 20
+): Promise<DocumentActivity[]> {
+  const { data, error } = await supabase.rpc('get_document_activity', {
+    p_document_id: documentId,
+    p_weeks: weeks
+  });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getUserActivityStats(
+  userId: string
+): Promise<UserActivityStats | null> {
+  const { data, error } = await supabase.rpc('get_user_activity_stats', {
+    p_user_id: userId
+  });
+
+  if (error) throw error;
+  return data && data.length > 0 ? data[0] : null;
+}
+
+export async function getDocumentsWithRealActivity(options: {
+  userId: string;
+  limit?: number;
+  offset?: number;
+} = { userId: '', limit: 50, offset: 0 }): Promise<DocumentWithRealActivity[]> {
+  const { data, error } = await supabase.rpc('get_documents_with_real_activity', {
+    p_user_id: options.userId,
+    p_limit: options.limit || 50,
+    p_offset: options.offset || 0
+  });
+
+  if (error) throw error;
+  return data || [];
 }
 
 // Example usage in a React component:

@@ -326,7 +326,10 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
   const activityData = useMemo(() => {
     if (!entry.recentActivity || entry.recentActivity.length === 0) {
       // No activity data yet - show minimal activity
-      return Array(30).fill(5);
+      return {
+        percentages: Array(30).fill(5),
+        counts: Array(30).fill(0)
+      };
     }
 
     // Group by DAY to show last 30 days of activity
@@ -348,12 +351,17 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
 
     // Use logarithmic scaling to emphasize differences
     const maxCount = Math.max(...dayCounts, 1);
-    return dayCounts.map(count => {
+    const percentages = dayCounts.map(count => {
       if (count === 0) return 5;
       const logScale = Math.log(count + 1) / Math.log(maxCount + 1);
       const percentage = logScale * 90;
       return Math.max(15, percentage + 5);
     });
+
+    return {
+      percentages,
+      counts: dayCounts
+    };
   }, [entry.recentActivity]);
   
   const formatDate = (dateString) => {
@@ -438,7 +446,8 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
       {/* Activity wave chart - compact version */}
       <div className="mb-1">
         <ActivityWaveChart
-          data={activityData}
+          data={activityData.percentages}
+          counts={activityData.counts}
           width={200}
           height={60}
           className="opacity-50 group-hover:opacity-90 transition-opacity duration-300"

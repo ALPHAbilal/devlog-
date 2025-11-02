@@ -1,23 +1,25 @@
 import { useMemo } from 'react';
 
 /**
- * ActivityWaveChart - Stepped wave visualization for document activity
+ * ActivityWaveChart - Smooth wave visualization for document activity
  * Matches Figma design: https://www.figma.com/design/vm4zgEWrWUCuEbGzuNCuWq/Untitled?node-id=3-1346
  *
- * @param {Array<number>} data - Array of 30 values (0-100) representing daily activity
+ * @param {Array<number>} data - Array of 30 values (0-100) representing daily activity percentages
+ * @param {Array<number>} counts - Array of 30 actual edit counts for tooltips
  * @param {number|string} width - Chart width (number for px, 'full' for 100%, default: 'full')
  * @param {number} height - Chart height in pixels (default: 80)
  * @param {string} className - Additional CSS classes
  */
 export default function ActivityWaveChart({
   data,
+  counts,
   width = 'full',
   height = 80,
   className = ''
 }) {
   // Calculate actual width for SVG viewBox
   const viewBoxWidth = width === 'full' ? 300 : width;
-  // Generate SVG path for stepped wave
+  // Generate SVG path for smooth wave using bezier curves
   const wavePath = useMemo(() => {
     if (!data || data.length === 0) return '';
 
@@ -25,29 +27,38 @@ export default function ActivityWaveChart({
     const stepWidth = viewBoxWidth / points;
     const padding = 4; // Padding from edges
 
-    // Create stepped wave path
+    // Generate coordinate points
+    const coordinates = data.map((value, i) => ({
+      x: padding + (i * stepWidth) + (stepWidth / 2), // Center of each segment
+      y: height - (value / 100 * (height - padding * 2)) - padding
+    }));
+
+    // Start path from bottom left
     let path = `M ${padding},${height}`;
 
-    data.forEach((value, i) => {
-      const x = padding + (i * stepWidth);
-      const y = height - (value / 100 * (height - padding * 2)) - padding;
+    // Line to first point
+    path += ` L ${coordinates[0].x},${coordinates[0].y}`;
 
-      if (i === 0) {
-        path += ` L ${x},${y}`;
-      } else {
-        // Create step effect
-        const prevX = padding + ((i - 1) * stepWidth);
-        path += ` L ${prevX},${y} L ${x},${y}`;
-      }
-    });
+    // Create smooth curve through all points using quadratic bezier
+    for (let i = 1; i < coordinates.length; i++) {
+      const current = coordinates[i];
+      const prev = coordinates[i - 1];
 
-    // Close the path at bottom right
+      // Control point is midway between points
+      const cpX = (prev.x + current.x) / 2;
+      const cpY = (prev.y + current.y) / 2;
+
+      path += ` Q ${prev.x},${prev.y} ${cpX},${cpY}`;
+      path += ` Q ${cpX},${cpY} ${current.x},${current.y}`;
+    }
+
+    // Close path at bottom right
     path += ` L ${viewBoxWidth - padding},${height} Z`;
 
     return path;
   }, [data, viewBoxWidth, height]);
 
-  // Generate overlay wave for depth effect (50% height)
+  // Generate overlay wave for depth effect (50% height) with smooth curves
   const overlayPath = useMemo(() => {
     if (!data || data.length === 0) return '';
 
@@ -56,19 +67,29 @@ export default function ActivityWaveChart({
     const padding = 4;
     const overlayHeight = height * 0.5; // 50% of total height
 
+    // Generate coordinate points for overlay
+    const coordinates = data.map((value, i) => ({
+      x: padding + (i * stepWidth) + (stepWidth / 2),
+      y: height - (value / 100 * (overlayHeight - padding * 2)) - padding
+    }));
+
+    // Start path from bottom left
     let path = `M ${padding},${height}`;
 
-    data.forEach((value, i) => {
-      const x = padding + (i * stepWidth);
-      const y = height - (value / 100 * (overlayHeight - padding * 2)) - padding;
+    // Line to first point
+    path += ` L ${coordinates[0].x},${coordinates[0].y}`;
 
-      if (i === 0) {
-        path += ` L ${x},${y}`;
-      } else {
-        const prevX = padding + ((i - 1) * stepWidth);
-        path += ` L ${prevX},${y} L ${x},${y}`;
-      }
-    });
+    // Create smooth curve through all points
+    for (let i = 1; i < coordinates.length; i++) {
+      const current = coordinates[i];
+      const prev = coordinates[i - 1];
+
+      const cpX = (prev.x + current.x) / 2;
+      const cpY = (prev.y + current.y) / 2;
+
+      path += ` Q ${prev.x},${prev.y} ${cpX},${cpY}`;
+      path += ` Q ${cpX},${cpY} ${current.x},${current.y}`;
+    }
 
     path += ` L ${viewBoxWidth - padding},${height} Z`;
 
@@ -119,13 +140,21 @@ export default function ActivityWaveChart({
 
       {/* Tooltip hover areas for each day */}
       <div className="absolute inset-0 flex">
-        {data.map((value, i) => (
-          <div
-            key={i}
-            className="flex-1 cursor-pointer"
-            title={`${30 - i} days ago: ${value > 5 ? Math.round((value - 5) / 90 * 100) + ' edits' : 'No activity'}`}
-          />
-        ))}
+        {data.map((value, i) => {
+          const editCount = counts ? counts[i] : 0;
+          const daysAgo = 30 - i;
+          const tooltipText = editCount === 0
+            ? `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago: No activity`
+            : `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago: ${editCount} ${editCount === 1 ? 'edit' : 'edits'}`;
+
+          return (
+            <div
+              key={i}
+              className="flex-1 cursor-pointer"
+              title={tooltipText}
+            />
+          );
+        })}
       </div>
     </div>
   );

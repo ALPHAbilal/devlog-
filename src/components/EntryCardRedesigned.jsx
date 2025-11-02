@@ -73,7 +73,10 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
     if (!entry.recentActivity || entry.recentActivity.length === 0) {
       // No activity data yet (new document or audit just started)
       // Show minimal wave to indicate no recent edits
-      return Array(30).fill(5);
+      return {
+        percentages: Array(30).fill(5),
+        counts: Array(30).fill(0)
+      };
     }
 
     // Group recent activity by DAY to show last 30 days of activity
@@ -97,7 +100,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
 
     // Use logarithmic scaling to emphasize differences between 1, 2, 5, 10+ edits
     const maxCount = Math.max(...dayCounts, 1);
-    return dayCounts.map(count => {
+    const percentages = dayCounts.map(count => {
       if (count === 0) return 5; // Empty days
 
       // Logarithmic scale: 1 edit = 20%, 2 = 35%, 5 = 60%, 10 = 80%, 20+ = 95%
@@ -105,6 +108,11 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
       const percentage = logScale * 90; // Scale to 90% max
       return Math.max(15, percentage + 5); // 15-95% range
     });
+
+    return {
+      percentages,
+      counts: dayCounts
+    };
   }, [entry.recentActivity]); // Regenerate when activity changes
 
   // Always show wave chart for all documents (matching Figma design)
@@ -177,11 +185,12 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
             {entry.title}
           </h3>
 
-          {/* Chart visualization - Stepped wave showing DAILY activity from audit logs */}
+          {/* Chart visualization - Smooth wave showing DAILY activity from audit logs */}
           {hasChart && (
             <div className="mt-auto">
               <ActivityWaveChart
-                data={activityData}
+                data={activityData.percentages}
+                counts={activityData.counts}
                 height={80}
                 className="group-hover:opacity-100 transition-opacity duration-300"
               />

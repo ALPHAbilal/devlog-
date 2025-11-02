@@ -433,30 +433,42 @@ export class SupabaseAdapterOptimized {
   }
 
   /**
-   * Search documents with full-text search
+   * Search documents using full-text search across titles, tags, and block content
+   * @param {string} userId - User ID
+   * @param {string} query - Search query
+   * @param {object} options - Search options
+   * @param {number} options.limit - Maximum results (default: 50)
+   * @param {number} options.offset - Offset for pagination (default: 0)
+   * @returns {Promise<Array>} Array of documents with match_reason and match_score
    */
   async searchDocuments(userId, query, options = {}) {
-    const { limit = 20 } = options;
-    const cacheKey = `search:${userId}:${query}:${limit}`;
+    const { limit = 50, offset = 0 } = options;
+    const cacheKey = `search:${userId}:${query}:${limit}:${offset}`;
     const cached = this.getCached(cacheKey);
     if (cached) return cached;
 
     try {
       const result = await deduplicateRequest(cacheKey, async () => {
-        return this.supabase
-          .from('documents')
-          .select('id, title, tags, updated_at')
-          .eq('user_id', userId)
-          .is('deleted_at', null)
-          .or(`title.ilike.%${query}%`)
-          .order('updated_at', { ascending: false })
-          .limit(limit);
+        // Call the full-text search RPC function
+        const { data, error } = await this.supabase.rpc('search_documents_with_blocks', {
+          p_user_id: userId,
+          p_search_query: query,
+          p_limit: limit,
+          p_offset: offset
+        });
+
+        if (error) throw error;
+
+        return { data, error: null };
       });
 
       if (result.error) throw result.error;
 
-      this.setCache(cacheKey, result.data);
-      return result.data;
+      // Sort by relevance score (highest first)
+      const sorted = result.data.sort((a, b) => b.match_score - a.match_score);
+
+      this.setCache(cacheKey, sorted);
+      return sorted;
     } catch (error) {
       console.error('Error searching documents:', error);
       throw error;

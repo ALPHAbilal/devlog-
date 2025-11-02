@@ -18,7 +18,7 @@ RETURNS TABLE (
   metadata JSONB,
   project_id UUID,
   folder_id UUID,
-  position INTEGER,
+  "position" INTEGER,
   is_template BOOLEAN,
   match_reason TEXT,
   match_score REAL
@@ -47,7 +47,7 @@ BEGIN
       d.metadata,
       d.project_id,
       d.folder_id,
-      d.position,
+      d."position",
       d.is_template,
       'all'::TEXT as match_reason,
       1.0::REAL as match_score
@@ -78,7 +78,7 @@ BEGIN
       d.metadata,
       d.project_id,
       d.folder_id,
-      d.position,
+      d."position",
       d.is_template,
       'title'::TEXT as match_reason,
       ts_rank(to_tsvector('english', coalesce(d.title, '')), v_query_tsquery) as match_score
@@ -102,7 +102,7 @@ BEGIN
       d.metadata,
       d.project_id,
       d.folder_id,
-      d.position,
+      d."position",
       d.is_template,
       'tags'::TEXT as match_reason,
       0.8::REAL as match_score
@@ -127,7 +127,7 @@ BEGIN
       d.metadata,
       d.project_id,
       d.folder_id,
-      d.position,
+      d."position",
       d.is_template,
       'blocks'::TEXT as match_reason,
       ts_rank(
@@ -144,7 +144,7 @@ BEGIN
         OR b.content ILIKE '%' || p_search_query || '%'
       )
     GROUP BY d.id, d.title, d.tags, d.created_at, d.updated_at, 
-             d.metadata, d.project_id, d.folder_id, d.position, d.is_template
+             d.metadata, d.project_id, d.folder_id, d."position", d.is_template
   )
   SELECT DISTINCT ON (id)
     id,
@@ -155,7 +155,7 @@ BEGIN
     metadata,
     project_id,
     folder_id,
-    position,
+    "position",
     is_template,
     match_reason,
     MAX(match_score) OVER (PARTITION BY id) as match_score

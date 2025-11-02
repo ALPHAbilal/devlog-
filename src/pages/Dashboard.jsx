@@ -61,6 +61,10 @@ export default function Dashboard() {
   const [allDocuments, setAllDocuments] = useState([]); // All documents for sidebar (includes docs in folders)
   const [expandedEntry, setExpandedEntry] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  // Server-side search state
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [linkCallback, setLinkCallback] = useState(null);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -637,6 +641,50 @@ export default function Dashboard() {
     }
   }, [user?.id]);
 
+  // Server-side search effect
+  useEffect(() => {
+    // Clear results when search term is empty
+    if (!searchTerm || searchTerm.trim() === '') {
+      setSearchResults([]);
+      setSearchError(null);
+      return;
+    }
+
+    // Debounce search by 300ms
+    const searchTimer = setTimeout(async () => {
+      setIsSearching(true);
+      setSearchError(null);
+
+      try {
+        const adapter = await storageWrapper.getAdapter();
+        const results = await adapter.searchDocuments(user.id, searchTerm.trim(), {
+          limit: 100,
+          offset: 0
+        });
+
+        // Convert results to match entry format (add type field)
+        const formattedResults = results.map(doc => ({
+          ...doc,
+          type: 'document',
+          updatedAt: doc.updated_at,
+          createdAt: doc.created_at
+        }));
+
+        setSearchResults(formattedResults);
+        console.log(`[Dashboard] Search found ${formattedResults.length} results for "${searchTerm}"`);
+      } catch (error) {
+        console.error('[Dashboard] Search error:', error);
+        setSearchError(error.message);
+        // Fallback: keep showing paginated documents
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(searchTimer);
+  }, [searchTerm, user?.id]);
+
   // Add infinite scroll event listener
   useEffect(() => {
     const scrollElement = document.querySelector('.dashboard-scroll-container');
@@ -1005,172 +1053,60 @@ export default function Dashboard() {
     setShowProjectModal(true);
   }, []);
 
-  // Helper function to extract all searchable text content from blocks
-  const getFullTextContent = useCallback((entry) => {
-    // If blocks are not loaded (undefined), return empty string
-    // This handles the case where documents are loaded without blocks for performance
-    if (!entry.blocks) return '';
-    
-    // If blocks is an empty array, that's valid - the document just has no blocks
-    if (entry.blocks.length === 0) return '';
-    
-    const textParts = [];
-    
-    entry.blocks.forEach(block => {
-      switch (block.type) {
-        case 'text':
-        case 'heading':
-          if (block.content) textParts.push(block.content);
-          break;
-        case 'code':
-          if (block.filePath) textParts.push(block.filePath);
-          if (block.content) textParts.push(block.content);
-          break;
-        case 'ai':
-          if (block.messages && Array.isArray(block.messages)) {
-            block.messages.forEach(msg => {
-              if (msg.content) textParts.push(msg.content);
-            });
-          }
-          break;
-        case 'table':
-          if (block.data?.rows) {
-            block.data.rows.forEach(row => {
-              if (Array.isArray(row)) {
-                textParts.push(row.join(' '));
-              }
-            });
-          }
-          if (block.data?.headers) {
-            textParts.push(block.data.headers.join(' '));
-          }
-          break;
-        case 'todo':
-          if (block.data?.todos && Array.isArray(block.data.todos)) {
-            block.data.todos.forEach(todo => {
-              if (todo.text) textParts.push(todo.text);
-            });
-          }
-          break;
-        case 'filetree':
-          if (block.treeData) {
-            const extractFileNames = (items) => {
-              items.forEach(item => {
-                if (item.name) textParts.push(item.name);
-                if (item.children) extractFileNames(item.children);
-              });
-            };
-            extractFileNames(block.treeData);
-          }
-          break;
-      }
-      
-      // Also check for tags in blocks
-      if (block.tags && Array.isArray(block.tags)) {
-        textParts.push(block.tags.join(' '));
-      }
-    });
-    
-    return textParts.join(' ').toLowerCase();
-  }, []);
-
-  // Filter entries based on search, selected tags, and project
-  const filteredEntries = useMemo(() => {
-    const filtered = entries.filter(entry => {
-    // First filter by project
-    const matchesProject = 
-      selectedProjectId === null || // Show all
-      (selectedProjectId === 'uncategorized' && !entry.project_id) || // Uncategorized
-      entry.project_id === selectedProjectId; // Specific project
-    
-    // Then filter by search term
-    const matchesSearch = searchTerm === '' || (() => {
-      const lowerSearchTerm = searchTerm.toLowerCase();
-
-      // Get the display name (folders use 'name', documents use 'title')
-      const displayName = entry.title || entry.name || '';
-
-      // Log search start
-      if (searchTerm && searchTerm.length > 0) {
-        console.log(`\n📄 Checking ${entry.type || 'document'}: "${displayName}"`);
-      }
-
-      // Check title/name
-      const titleMatch = displayName && displayName.toLowerCase().includes(lowerSearchTerm);
-      if (searchTerm) {
-        console.log(`  ✓ Title match: ${titleMatch ? '✅' : '❌'} (title: "${displayName}")`);
-      }
-      if (titleMatch) return true;
-
-      // Check preview (only for documents)
-      const previewMatch = entry.preview && entry.preview.toLowerCase().includes(lowerSearchTerm);
-      if (searchTerm) {
-        const previewSnippet = entry.preview ? entry.preview.substring(0, 50) + '...' : 'No preview';
-        console.log(`  ✓ Preview match: ${previewMatch ? '✅' : '❌'} (preview: "${previewSnippet}")`);
-      }
-      if (previewMatch) return true;
-
-      // Check tags (only for documents)
-      const tagsMatch = entry.tags?.some(tag => tag && tag.toLowerCase().includes(lowerSearchTerm));
-      if (searchTerm) {
-        console.log(`  ✓ Tags match: ${tagsMatch ? '✅' : '❌'} (tags: [${entry.tags?.join(', ') || 'none'}])`);
-      }
-      if (tagsMatch) return true;
-      
-      // Check full content of all blocks (only if blocks are loaded)
-      // If blocks are not loaded (undefined), we can't search their content
-      let contentMatch = false;
-      if (entry.blocks !== undefined) {
-        const blocksLoaded = true;
-        const fullContent = getFullTextContent(entry);
-        contentMatch = fullContent && fullContent.includes(lowerSearchTerm);
-        if (searchTerm) {
-          console.log(`  ✓ Blocks loaded: ✅ (${entry.blocks.length} blocks)`);
-          const contentSnippet = fullContent ? fullContent.substring(0, 100) + '...' : 'No content';
-          console.log(`  ✓ Content match: ${contentMatch ? '✅' : '❌'} (content: "${contentSnippet}")`);
+  // Determine which entries to display: search results or paginated documents
+  const displayEntries = useMemo(() => {
+    // If searching, use search results (already filtered server-side)
+    if (searchTerm && searchTerm.trim() !== '') {
+      // Apply client-side filters (project, tag) to search results
+      return searchResults.filter(entry => {
+        // Apply project filter
+        if (selectedProjectId !== null) {
+          if (selectedProjectId === 'uncategorized' && entry.project_id) return false;
+          if (selectedProjectId !== 'uncategorized' && entry.project_id !== selectedProjectId) return false;
         }
-      } else {
-        if (searchTerm) {
-          console.log(`  ✓ Blocks loaded: ❌ (blocks not loaded for performance)`);
-          console.log(`  ✓ Content match: ⏭️  (skipped - blocks not loaded)`);
+        
+        // Apply tag filter
+        if (selectedTags.length > 0) {
+          if (!selectedTags.every(tag => entry.tags?.includes(tag))) return false;
         }
-      }
-      
-      const matched = titleMatch || previewMatch || tagsMatch || contentMatch;
-      if (searchTerm) {
-        console.log(`  ➡️  Result: ${matched ? '✅ MATCHED' : '❌ NOT MATCHED'}`);
-      }
-      
-      return matched;
-    })();
-    
-    // Finally filter by selected tags (if any)
-    const matchesTags = selectedTags.length === 0 ||
-      selectedTags.every(tag => entry.tags?.includes(tag));
-    
-    return matchesProject && matchesSearch && matchesTags;
-  });
+        
+        return true;
+      });
+    }
 
-    console.log('[DEBUG-DASHBOARD] Filtered results:', {
-      totalEntries: entries.length,
-      filtered: filtered.length,
-      folders: filtered.filter(e => e.type === 'folder').length,
-      documents: filtered.filter(e => e.type === 'document').length
+    // Otherwise, use regular paginated documents with filters
+    return entries.filter(entry => {
+      // Apply project filter
+      if (selectedProjectId !== null) {
+        if (selectedProjectId === 'uncategorized' && entry.project_id) return false;
+        if (selectedProjectId !== 'uncategorized' && entry.project_id !== selectedProjectId) return false;
+      }
+      
+      // Apply tag filter
+      if (selectedTags.length > 0) {
+        if (!selectedTags.every(tag => entry.tags?.includes(tag))) return false;
+      }
+      
+      return true;
     });
-
-    return filtered;
-  }, [entries, selectedProjectId, searchTerm, selectedTags]);
+  }, [searchTerm, searchResults, entries, selectedProjectId, selectedTags]);
+  
+  // Keep filteredEntries for compatibility (alias to displayEntries)
+  const filteredEntries = displayEntries;
 
   // Log search summary
   useEffect(() => {
     if (searchTerm && searchTerm.length > 0) {
       console.log(`\n🔍 Search Results for: "${searchTerm}"`);
-      console.log(`📊 Summary: ${entries.length} documents searched, ${filteredEntries.length} matched`);
-      if (filteredEntries.length === 0) {
-        console.log(`💡 Tip: Try opening documents to load their full content for deeper search`);
+      console.log(`📊 Summary: ${filteredEntries.length} results found`);
+      if (isSearching) {
+        console.log(`⏳ Searching...`);
+      }
+      if (searchError) {
+        console.error(`❌ Search error: ${searchError}`);
       }
     }
-  }, [searchTerm, filteredEntries.length, entries.length]);
+  }, [searchTerm, filteredEntries.length, isSearching, searchError]);
   
   // Count uncategorized documents
   const uncategorizedCount = entries.filter(entry => !entry.project_id).length;
@@ -1574,6 +1510,13 @@ export default function Dashboard() {
                       </div>
                     </div>
                   )}
+                  {searchTerm && searchResults.length > 0 && !isSearching && (
+                    <div className="px-6 mb-4">
+                      <p className="text-sm text-gray-600">
+                        Found <strong>{searchResults.length}</strong> document{searchResults.length !== 1 ? 's' : ''} matching "<strong>{searchTerm}</strong>"
+                      </p>
+                    </div>
+                  )}
                   <div className="p-6">
                     <DocumentGridRedesigned
                       entries={filteredEntries}
@@ -1606,49 +1549,59 @@ export default function Dashboard() {
       </div>
 
       {/* Empty State */}
-      {filteredEntries.length === 0 && searchTerm && (
+      {displayEntries.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center max-w-md">
-            <p className="text-text-secondary text-lg mb-2">
-              No documents found matching "{searchTerm}"
-            </p>
-            <p className="text-text-secondary/70 text-sm mb-4">
-              Search includes document titles, preview text, and tags. 
-              Full document content search requires opening the document first.
-            </p>
-            <button
-              onClick={() => setSearchTerm('')}
-              className="text-accent-green hover:text-accent-green/80 text-sm"
-            >
-              Clear search
-            </button>
+            {isSearching ? (
+              <div className="flex flex-col items-center gap-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+                <p className="text-text-secondary">Searching...</p>
+              </div>
+            ) : searchTerm && searchTerm.trim() !== '' ? (
+              <div className="flex flex-col items-center gap-4">
+                <Search className="w-16 h-16 text-gray-400" />
+                <h3 className="text-lg font-medium text-text-primary">No documents found</h3>
+                <p className="text-text-secondary">
+                  No documents match your search for "<strong>{searchTerm}</strong>"
+                </p>
+                <p className="text-sm text-text-secondary/70">
+                  Try different keywords or clear your search to see all documents.
+                </p>
+                {searchError && (
+                  <p className="text-sm text-red-500 mt-2">Error: {searchError}</p>
+                )}
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="text-accent-green hover:text-accent-green/80 text-sm mt-2"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-4">
+                <FileText className="w-16 h-16 text-gray-400" />
+                <h2 className="text-2xl font-light text-text-primary mb-4">
+                  Welcome to Journey Logger
+                </h2>
+                <p className="text-text-secondary mb-8 max-w-md">
+                  Start documenting your developer journey with powerful blocks, 
+                  markdown support, and interconnected knowledge.
+                </p>
+                <button
+                  onClick={() => createNewEntry()}
+                  className="inline-flex items-center gap-2 px-6 py-3 
+                             bg-accent-green text-dark-primary rounded-lg
+                             hover:bg-accent-green/80 transition-colors"
+                >
+                  <Plus size={20} />
+                  Create Your First Document
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Initial Empty State */}
-      {entries.length === 0 && !searchTerm && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-light text-text-primary mb-4">
-              Welcome to Journey Logger
-            </h2>
-            <p className="text-text-secondary mb-8 max-w-md">
-              Start documenting your developer journey with powerful blocks, 
-              markdown support, and interconnected knowledge.
-            </p>
-            <button
-              onClick={() => createNewEntry()}
-              className="inline-flex items-center gap-2 px-6 py-3 
-                         bg-accent-green text-dark-primary rounded-lg
-                         hover:bg-accent-green/80 transition-colors"
-            >
-              <Plus size={20} />
-              Create Your First Document
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Document Link Modal */}
       <DocumentLinkModal

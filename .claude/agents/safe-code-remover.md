@@ -2,7 +2,7 @@
 name: safe-code-remover
 description: "Executes safe removal of legacy code based on detection report. Creates git backups, validates changes, and provides rollback capability. Only removes code marked as safe in the report."
 tools: Bash, Edit, Read, Write, Grep, Glob, LS
-model: sonnet
+model: claude-sonnet-4-5-20250929
 ---
 
 🗑️ Safe Code Remover (Execution Agent)

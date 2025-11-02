@@ -2,7 +2,7 @@
 name: directory-detector
 description: "Detects directory structure issues and generates a structured report. Does NOT delete or modify files. Creates a detailed markdown report for review."
 tools: Bash, Glob, Grep, Read, LS
-model: haiku
+model: claude-sonnet-4-5-20250929
 ---
 
 🔍 Directory Structure Detector (Report Only)

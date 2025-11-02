@@ -2,7 +2,7 @@
 name: directory-cleaner
 description: "Executes cleanup based on a detection report. Only deletes/moves items marked in the report. Requires explicit user approval."
 tools: Bash, Edit, Read, LS, Write
-model: haiku
+model: claude-sonnet-4-5-20250929
 ---
 
 🧹 Directory Cleaner (Report-Based)

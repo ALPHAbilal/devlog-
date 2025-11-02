@@ -639,15 +639,38 @@ export default function Dashboard() {
   // Add infinite scroll event listener
   useEffect(() => {
     const scrollElement = document.querySelector('.dashboard-scroll-container');
-    if (!scrollElement) return;
+    if (!scrollElement) {
+      console.log('[PAGINATION-SCROLL] ⚠️ Scroll container not found');
+      return;
+    }
 
+    console.log('[PAGINATION-SCROLL] ✅ Scroll listener attached to:', {
+      element: '.dashboard-scroll-container',
+      hasMore,
+      currentPage,
+      totalDocuments: paginatedDocuments?.length
+    });
+
+    let scrollCount = 0;
     const handleScroll = () => {
+      scrollCount++;
+      if (scrollCount % 10 === 0) { // Log every 10th scroll to avoid spam
+        console.log(`[PAGINATION-SCROLL] 📜 Scroll event #${scrollCount}:`, {
+          scrollTop: scrollElement.scrollTop,
+          scrollHeight: scrollElement.scrollHeight,
+          clientHeight: scrollElement.clientHeight,
+          distanceFromBottom: scrollElement.scrollHeight - (scrollElement.scrollTop + scrollElement.clientHeight)
+        });
+      }
       checkLoadMore(scrollElement);
     };
 
     scrollElement.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scrollElement.removeEventListener('scroll', handleScroll);
-  }, [checkLoadMore]);
+    return () => {
+      console.log('[PAGINATION-SCROLL] 🔌 Scroll listener detached');
+      scrollElement.removeEventListener('scroll', handleScroll);
+    };
+  }, [checkLoadMore, hasMore, currentPage, paginatedDocuments?.length]);
 
   // Sync URL with document state
   useEffect(() => {
@@ -1569,7 +1592,46 @@ export default function Dashboard() {
                       <div className="py-6 flex justify-center">
                         <div className="flex items-center gap-3 text-sm text-gray-400">
                           <div className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-                          <span>Loading more documents...</span>
+                          <span>Loading more documents... ({progress.loaded}/{progress.total} - {progress.percentage.toFixed(0)}%)</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pagination Debug Indicator (DEV ONLY) */}
+                    {paginatedDocuments?.length > 0 && (
+                      <div className="fixed bottom-4 right-4 bg-gray-900/95 text-white px-4 py-3 rounded-lg shadow-lg border border-emerald-500/30 text-xs font-mono z-50">
+                        <div className="font-semibold text-emerald-400 mb-2">📊 Pagination Debug</div>
+                        <div className="space-y-1">
+                          <div className="flex justify-between gap-4">
+                            <span className="text-gray-400">Loaded:</span>
+                            <span className="text-white font-semibold">{progress.loaded} / {progress.total}</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-gray-400">Current Page:</span>
+                            <span className="text-white font-semibold">{currentPage}</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-gray-400">Page Size:</span>
+                            <span className="text-white font-semibold">50</span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-gray-400">Has More:</span>
+                            <span className={hasMore ? "text-emerald-400" : "text-red-400"}>
+                              {hasMore ? "✓ Yes" : "✗ No"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-gray-400">Progress:</span>
+                            <span className="text-white font-semibold">{progress.percentage.toFixed(1)}%</span>
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-gray-700">
+                            <div className="flex justify-between gap-4">
+                              <span className="text-gray-400">Loading:</span>
+                              <span className={isLoadingMore ? "text-yellow-400" : "text-gray-500"}>
+                                {isLoadingMore ? "⏳ Yes" : "No"}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     )}

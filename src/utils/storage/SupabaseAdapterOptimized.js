@@ -105,8 +105,8 @@ export class SupabaseAdapterOptimized {
    * Load all documents with pagination and caching
    */
   async loadAllDocuments(userId, options = {}) {
-    const { 
-      page = 0, 
+    const {
+      page = 0,
       limit = this.pageSize,
       orderBy = 'updated_at',
       ascending = false,
@@ -114,11 +114,40 @@ export class SupabaseAdapterOptimized {
     } = options;
 
     const cacheKey = `docs:${userId}:${page}:${limit}:${orderBy}:${ascending}`;
+
+    console.log('[PAGINATION-DB] 🔍 loadAllDocuments called:', {
+      page,
+      limit,
+      offset: page * limit,
+      range: `${page * limit} to ${(page + 1) * limit - 1}`,
+      orderBy,
+      ascending,
+      cacheKey
+    });
+
     const cached = this.getCached(cacheKey);
-    if (cached) return cached;
+    if (cached) {
+      console.log('[PAGINATION-DB] ✅ Cache HIT - returning cached data:', {
+        documentCount: cached.documents?.length,
+        totalCount: cached.totalCount,
+        hasMore: cached.hasMore
+      });
+      return cached;
+    }
+
+    console.log('[PAGINATION-DB] ❌ Cache MISS - querying database');
 
     try {
       const result = await deduplicateRequest(cacheKey, async () => {
+        console.log('[PAGINATION-DB] 📡 Executing Supabase query:', {
+          table: 'documents',
+          userId,
+          range: `${page * limit} to ${(page + 1) * limit - 1}`,
+          orderBy,
+          ascending,
+          includeDeleted
+        });
+
         let query = this.supabase
           .from('documents')
           .select('*', { count: 'exact' })
@@ -134,6 +163,12 @@ export class SupabaseAdapterOptimized {
       });
 
       if (result.error) throw result.error;
+
+      console.log('[PAGINATION-DB] ✅ Query successful:', {
+        rowsReturned: result.data?.length,
+        totalCount: result.count,
+        hasMore: (page + 1) * limit < result.count
+      });
 
       // Transform to app format
       const documents = (result.data || []).map(doc => ({
@@ -158,10 +193,19 @@ export class SupabaseAdapterOptimized {
         hasMore: (page + 1) * limit < result.count
       };
 
+      console.log('[PAGINATION-DB] 💾 Caching response and returning:', {
+        documentCount: documents.length,
+        totalCount: response.totalCount,
+        page: response.page,
+        pageSize: response.pageSize,
+        hasMore: response.hasMore,
+        percentageLoaded: response.totalCount > 0 ? ((page + 1) * limit / response.totalCount * 100).toFixed(1) + '%' : '0%'
+      });
+
       this.setCache(cacheKey, response);
       return response;
     } catch (error) {
-      console.error('Error loading documents:', error);
+      console.error('[PAGINATION-DB] ❌ Error loading documents:', error);
       throw error;
     }
   }

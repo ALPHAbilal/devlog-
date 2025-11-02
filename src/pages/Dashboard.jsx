@@ -86,7 +86,8 @@ export default function Dashboard() {
     loadMore,
     loadInitial,
     checkLoadMore,
-    progress
+    progress,
+    currentPage
   } = usePaginatedDashboard({
     pageSize: 50,
     orderBy: 'updated_at',

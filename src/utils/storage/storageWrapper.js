@@ -287,15 +287,28 @@ export async function searchEntries(query) {
  * @returns {Promise<Array>} Array of documents with match_reason and match_score
  */
 export async function searchDocuments(userId, query, options = {}) {
+  console.log('🔍 [storageWrapper.searchDocuments] CALLED - VERSION: 2025-11-02-v2', {
+    userId,
+    query,
+    options,
+    timestamp: new Date().toISOString()
+  });
+
   const storageAdapter = await init();
 
   // If using Supabase adapter with searchDocuments support
   if (storageAdapter.supabaseAdapter && storageAdapter.supabaseAdapter.searchDocuments) {
-    return await storageAdapter.supabaseAdapter.searchDocuments(userId, query, options);
+    console.log('✅ [storageWrapper.searchDocuments] Using Supabase full-text search');
+    const results = await storageAdapter.supabaseAdapter.searchDocuments(userId, query, options);
+    console.log('✅ [storageWrapper.searchDocuments] Results:', {
+      count: results.length,
+      firstResult: results[0]
+    });
+    return results;
   }
 
   // Fallback to client-side search for IndexedDB or older adapters
-  console.warn('Full-text search not available, falling back to client-side search');
+  console.warn('⚠️ [storageWrapper.searchDocuments] Full-text search not available, falling back to client-side search');
   const allEntries = await storageAdapter.loadEntries();
   const lowerQuery = query.toLowerCase();
   const filtered = allEntries.filter(entry =>
@@ -304,11 +317,17 @@ export async function searchDocuments(userId, query, options = {}) {
   );
 
   // Add mock match_reason and match_score for compatibility
-  return filtered.map(doc => ({
+  const results = filtered.map(doc => ({
     ...doc,
     match_reason: 'title',
     match_score: 1.0
   }));
+
+  console.log('✅ [storageWrapper.searchDocuments] Fallback results:', {
+    count: results.length
+  });
+
+  return results;
 }
 
 // Reset function for logout

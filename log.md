@@ -1,332 +1,335 @@
-index-Cn2OeIy0.js:26 Using optimized Supabase client
-index-Cn2OeIy0.js:26 IndexedDB initialized successfully
-index-Cn2OeIy0.js:26 Persistent storage granted
-index-Cn2OeIy0.js:26 [Supabase] Restored existing session: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf
-index-Cn2OeIy0.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-Cn2OeIy0.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf'}
-index-Cn2OeIy0.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 0, totalRootDocuments: 0, combinedTotal: 0}
-index-Cn2OeIy0.js:26 Loading folders for user: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf
-index-Cn2OeIy0.js:26 Loading folders for user: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf
-index-Cn2OeIy0.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
-index-Cn2OeIy0.js:26 [DEBUG-INIT] Dashboard mounted, user: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf paginatedDocs: 0
-index-Cn2OeIy0.js:26 [DEBUG-INIT] Triggering loadInitial()
-index-Cn2OeIy0.js:26 usePaginatedDashboard: loadInitial() CALLED {userId: '6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf', loadingRef: false, pageSize: 50, orderBy: 'updated_at'}
-index-Cn2OeIy0.js:26 usePaginatedDashboard: Calling getDocumentsWithRealActivity with page 0
-index-Cn2OeIy0.js:26 [PAGINATION-SCROLL] ✅ Scroll listener attached to: {element: '.dashboard-scroll-container', hasMore: true, currentPage: 0, totalDocuments: 0}
-index-Cn2OeIy0.js:26 Loaded 15 folders (5 root folders)
-index-Cn2OeIy0.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
-index-Cn2OeIy0.js:26 Loaded 15 folders (5 root folders)
-index-Cn2OeIy0.js:26 usePaginatedDashboard: Got real activity documents: {documentCount: 14, sampleActivity: Array(9), documentsWithActivity: 2, allDocumentIds: Array(14)}
-index-Cn2OeIy0.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-Cn2OeIy0.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 5, totalRootDocuments: 0, combinedTotal: 5}
-index-Cn2OeIy0.js:26 [PAGINATION-SCROLL] 🔌 Scroll listener detached
-index-Cn2OeIy0.js:26 [PAGINATION-SCROLL] ✅ Scroll listener attached to: {element: '.dashboard-scroll-container', hasMore: false, currentPage: 0, totalDocuments: 14}
-index-Cn2OeIy0.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 5, totalRootDocuments: 9, combinedTotal: 14}
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "is it working": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:35:34.463Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "hello": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-01T13:35:34.463Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "say hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T12:19:40.131Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "the first test": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-01T13:35:34.463Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T12:39:22.665Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "aha": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T12:53:03.837Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "another one": 2 subfolders + 2 documents = 4 items, most recent: 2025-11-01T12:53:17.841Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "scsc": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T15:11:07.987Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "jjj": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-01T15:11:07.987Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "hoo": 1 subfolders + 1 documents = 2 items, most recent: 2025-11-01T15:11:07.987Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "another one": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:00:35.616Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "maha": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:28:07.354Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "new condiftion": 2 subfolders + 2 documents = 4 items, most recent: 2025-11-02T15:46:05.421Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "maha 22": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:28:41.576Z
-index-Cn2OeIy0.js:26 [DEBUG-FOLDER] Folder "maha": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-01T13:28:41.576Z
-index-Cn2OeIy0.js:26 [DEBUG-DASHBOARD] Combined: 5 folders + 9 documents = 14 total items
-index-Cn2OeIy0.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
-index-Cn2OeIy0.js:26 
-🔍 Search Results for: "h"
-index-Cn2OeIy0.js:26 📊 Summary: 0 results found
-index-Cn2OeIy0.js:26 
-🔍 Search Results for: "h"
-index-Cn2OeIy0.js:26 📊 Summary: 0 results found
-index-Cn2OeIy0.js:26 ⏳ Searching...
-index-Cn2OeIy0.js:26 Using Supabase for storage
-index-Cn2OeIy0.js:26 [Dashboard] Search error: TypeError: (intermediate value).searchDocuments is not a function
-    at index-Cn2OeIy0.js:1289:2514
-(anonymous) @ index-Cn2OeIy0.js:26
-(anonymous) @ index-Cn2OeIy0.js:1289
+index-CQnkPh9q.js:26 Using optimized Supabase client
+index-CQnkPh9q.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-CQnkPh9q.js:26 IndexedDB initialized successfully
+index-CQnkPh9q.js:26 Persistent storage granted
+index-CQnkPh9q.js:26 [Supabase] Restored existing session: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf
+index-CQnkPh9q.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-CQnkPh9q.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf'}
+index-CQnkPh9q.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 0, totalRootDocuments: 0, combinedTotal: 0}
+index-CQnkPh9q.js:26 Loading folders for user: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf
+index-CQnkPh9q.js:26 Loading folders for user: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf
+index-CQnkPh9q.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
+index-CQnkPh9q.js:26 [DEBUG-INIT] Dashboard mounted, user: 6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf paginatedDocs: 0
+index-CQnkPh9q.js:26 [DEBUG-INIT] Triggering loadInitial()
+index-CQnkPh9q.js:26 usePaginatedDashboard: loadInitial() CALLED {userId: '6c2cacf6-0ec9-40e4-b8aa-170984d1c7bf', loadingRef: false, pageSize: 50, orderBy: 'updated_at'}
+index-CQnkPh9q.js:26 usePaginatedDashboard: Calling getDocumentsWithRealActivity with page 0
+index-CQnkPh9q.js:26 [PAGINATION-SCROLL] ✅ Scroll listener attached to: {element: '.dashboard-scroll-container', hasMore: true, currentPage: 0, totalDocuments: 0}
+index-CQnkPh9q.js:26 Loaded 15 folders (5 root folders)
+index-CQnkPh9q.js:26 usePaginatedDashboard: Got real activity documents: {documentCount: 14, sampleActivity: Array(1), documentsWithActivity: 3, allDocumentIds: Array(14)}
+index-CQnkPh9q.js:26 Loaded 15 folders (5 root folders)
+index-CQnkPh9q.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
+index-CQnkPh9q.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 5, totalRootDocuments: 0, combinedTotal: 5}
+index-CQnkPh9q.js:26 [PAGINATION-SCROLL] 🔌 Scroll listener detached
+index-CQnkPh9q.js:26 [PAGINATION-SCROLL] ✅ Scroll listener attached to: {element: '.dashboard-scroll-container', hasMore: false, currentPage: 0, totalDocuments: 14}
+index-CQnkPh9q.js:26 [DEBUG-SIDEBAR] Folder tree built: {totalFolders: 5, totalRootDocuments: 9, combinedTotal: 14}
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "is it working": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:35:34.463Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "hello": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-01T13:35:34.463Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "say hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T12:19:40.131Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "the first test": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-01T13:35:34.463Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T12:39:22.665Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "aha": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T12:53:03.837Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "another one": 2 subfolders + 2 documents = 4 items, most recent: 2025-11-01T12:53:17.841Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "scsc": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T15:11:07.987Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "jjj": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-01T15:11:07.987Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "hoo": 1 subfolders + 1 documents = 2 items, most recent: 2025-11-01T15:11:07.987Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "another one": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:00:35.616Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "maha": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:28:07.354Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "new condiftion": 2 subfolders + 2 documents = 4 items, most recent: 2025-11-02T15:46:05.421Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "maha 22": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T13:28:41.576Z
+index-CQnkPh9q.js:26 [DEBUG-FOLDER] Folder "maha": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-01T13:28:41.576Z
+index-CQnkPh9q.js:26 [DEBUG-DASHBOARD] Combined: 5 folders + 9 documents = 14 total items
+index-CQnkPh9q.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
+index-CQnkPh9q.js:26 
+🔍 Search Results for: "n"
+index-CQnkPh9q.js:26 📊 Summary: 0 results found
+index-CQnkPh9q.js:26 
+🔍 Search Results for: "no"
+index-CQnkPh9q.js:26 📊 Summary: 0 results found
+index-CQnkPh9q.js:26 
+🔍 Search Results for: "no"
+index-CQnkPh9q.js:26 📊 Summary: 0 results found
+index-CQnkPh9q.js:26 ⏳ Searching...
+index-CQnkPh9q.js:26 Using Supabase for storage
+index-CQnkPh9q.js:26 [Dashboard] Search error: TypeError: (intermediate value).searchDocuments is not a function
+    at index-CQnkPh9q.js:1289:2514
+(anonymous) @ index-CQnkPh9q.js:26
+(anonymous) @ index-CQnkPh9q.js:1289
 await in (anonymous)
-r @ index-Cn2OeIy0.js:26
+r @ index-CQnkPh9q.js:26
 setTimeout
-(anonymous) @ index-Cn2OeIy0.js:29
-(anonymous) @ index-Cn2OeIy0.js:1289
-Hd @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-ek @ index-Cn2OeIy0.js:106
-Mp @ index-Cn2OeIy0.js:106
-Z_ @ index-Cn2OeIy0.js:106
-Y_ @ index-Cn2OeIy0.js:106
-F_ @ index-Cn2OeIy0.js:106
-U_ @ index-Cn2OeIy0.js:106
-ik @ index-Cn2OeIy0.js:106
-Xd @ index-Cn2OeIy0.js:106
-Dp @ index-Cn2OeIy0.js:106
-Qi @ index-Cn2OeIy0.js:106
-F0 @ index-Cn2OeIy0.js:106
-tv @ index-Cn2OeIy0.js:107
-a5 @ index-Cn2OeIy0.js:107
-r @ index-Cn2OeIy0.js:26
-index-Cn2OeIy0.js:26 
-🔍 Search Results for: "h"
-index-Cn2OeIy0.js:26 📊 Summary: 0 results found
-index-Cn2OeIy0.js:26 ❌ Search error: (intermediate value).searchDocuments is not a function
-(anonymous) @ index-Cn2OeIy0.js:26
-(anonymous) @ index-Cn2OeIy0.js:1290
-Hd @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-ek @ index-Cn2OeIy0.js:106
-(anonymous) @ index-Cn2OeIy0.js:106
-te @ index-Cn2OeIy0.js:91
-index-Cn2OeIy0.js:26 
-🔍 Search Results for: "he"
-index-Cn2OeIy0.js:26 📊 Summary: 0 results found
-index-Cn2OeIy0.js:26 ❌ Search error: (intermediate value).searchDocuments is not a function
-(anonymous) @ index-Cn2OeIy0.js:26
-(anonymous) @ index-Cn2OeIy0.js:1290
-Hd @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-ek @ index-Cn2OeIy0.js:106
-Mp @ index-Cn2OeIy0.js:106
-Z_ @ index-Cn2OeIy0.js:106
-Y_ @ index-Cn2OeIy0.js:106
-F_ @ index-Cn2OeIy0.js:106
-U_ @ index-Cn2OeIy0.js:106
-ik @ index-Cn2OeIy0.js:106
-Xd @ index-Cn2OeIy0.js:106
-Dp @ index-Cn2OeIy0.js:106
-Qi @ index-Cn2OeIy0.js:106
-F0 @ index-Cn2OeIy0.js:106
-tv @ index-Cn2OeIy0.js:107
-a5 @ index-Cn2OeIy0.js:107
-r @ index-Cn2OeIy0.js:26
-index-Cn2OeIy0.js:26 [Dashboard] Search error: TypeError: (intermediate value).searchDocuments is not a function
-    at index-Cn2OeIy0.js:1289:2514
-(anonymous) @ index-Cn2OeIy0.js:26
-(anonymous) @ index-Cn2OeIy0.js:1289
+(anonymous) @ index-CQnkPh9q.js:29
+(anonymous) @ index-CQnkPh9q.js:1289
+Hd @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+ek @ index-CQnkPh9q.js:106
+Mp @ index-CQnkPh9q.js:106
+Z_ @ index-CQnkPh9q.js:106
+Y_ @ index-CQnkPh9q.js:106
+F_ @ index-CQnkPh9q.js:106
+U_ @ index-CQnkPh9q.js:106
+ik @ index-CQnkPh9q.js:106
+Xd @ index-CQnkPh9q.js:106
+Dp @ index-CQnkPh9q.js:106
+Qi @ index-CQnkPh9q.js:106
+F0 @ index-CQnkPh9q.js:106
+tv @ index-CQnkPh9q.js:107
+a5 @ index-CQnkPh9q.js:107
+r @ index-CQnkPh9q.js:26
+index-CQnkPh9q.js:26 
+🔍 Search Results for: "no"
+index-CQnkPh9q.js:26 📊 Summary: 0 results found
+index-CQnkPh9q.js:26 ❌ Search error: (intermediate value).searchDocuments is not a function
+(anonymous) @ index-CQnkPh9q.js:26
+(anonymous) @ index-CQnkPh9q.js:1290
+Hd @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+ek @ index-CQnkPh9q.js:106
+(anonymous) @ index-CQnkPh9q.js:106
+te @ index-CQnkPh9q.js:91
+index-CQnkPh9q.js:26 
+🔍 Search Results for: "now"
+index-CQnkPh9q.js:26 📊 Summary: 0 results found
+index-CQnkPh9q.js:26 ❌ Search error: (intermediate value).searchDocuments is not a function
+(anonymous) @ index-CQnkPh9q.js:26
+(anonymous) @ index-CQnkPh9q.js:1290
+Hd @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+ek @ index-CQnkPh9q.js:106
+Mp @ index-CQnkPh9q.js:106
+Z_ @ index-CQnkPh9q.js:106
+Y_ @ index-CQnkPh9q.js:106
+F_ @ index-CQnkPh9q.js:106
+U_ @ index-CQnkPh9q.js:106
+ik @ index-CQnkPh9q.js:106
+Xd @ index-CQnkPh9q.js:106
+Dp @ index-CQnkPh9q.js:106
+Qi @ index-CQnkPh9q.js:106
+F0 @ index-CQnkPh9q.js:106
+tv @ index-CQnkPh9q.js:107
+a5 @ index-CQnkPh9q.js:107
+r @ index-CQnkPh9q.js:26
+index-CQnkPh9q.js:26 [Dashboard] Search error: TypeError: (intermediate value).searchDocuments is not a function
+    at index-CQnkPh9q.js:1289:2514
+(anonymous) @ index-CQnkPh9q.js:26
+(anonymous) @ index-CQnkPh9q.js:1289
 await in (anonymous)
-r @ index-Cn2OeIy0.js:26
+r @ index-CQnkPh9q.js:26
 setTimeout
-(anonymous) @ index-Cn2OeIy0.js:29
-(anonymous) @ index-Cn2OeIy0.js:1289
-Hd @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-Ua @ index-Cn2OeIy0.js:106
-O_ @ index-Cn2OeIy0.js:106
-ek @ index-Cn2OeIy0.js:106
-Mp @ index-Cn2OeIy0.js:106
-Z_ @ index-Cn2OeIy0.js:106
-Y_ @ index-Cn2OeIy0.js:106
-F_ @ index-Cn2OeIy0.js:106
-U_ @ index-Cn2OeIy0.js:106
-ik @ index-Cn2OeIy0.js:106
-Xd @ index-Cn2OeIy0.js:106
-Dp @ index-Cn2OeIy0.js:106
-Qi @ index-Cn2OeIy0.js:106
-F0 @ index-Cn2OeIy0.js:106
-tv @ index-Cn2OeIy0.js:107
-a5 @ index-Cn2OeIy0.js:107
-r @ index-Cn2OeIy0.js:26
+(anonymous) @ index-CQnkPh9q.js:29
+(anonymous) @ index-CQnkPh9q.js:1289
+Hd @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+Ua @ index-CQnkPh9q.js:106
+O_ @ index-CQnkPh9q.js:106
+ek @ index-CQnkPh9q.js:106
+Mp @ index-CQnkPh9q.js:106
+Z_ @ index-CQnkPh9q.js:106
+Y_ @ index-CQnkPh9q.js:106
+F_ @ index-CQnkPh9q.js:106
+U_ @ index-CQnkPh9q.js:106
+ik @ index-CQnkPh9q.js:106
+Xd @ index-CQnkPh9q.js:106
+Dp @ index-CQnkPh9q.js:106
+Qi @ index-CQnkPh9q.js:106
+F0 @ index-CQnkPh9q.js:106
+tv @ index-CQnkPh9q.js:107
+a5 @ index-CQnkPh9q.js:107
+r @ index-CQnkPh9q.js:26

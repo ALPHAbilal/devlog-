@@ -3,6 +3,77 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Full-Text Search "searchDocuments is not a function" Error
+**Date**: 2025-11-02
+**Symptoms**:
+- `TypeError: (intermediate value).searchDocuments is not a function`
+- Error occurs when typing in search box after 300ms debounce
+- Dashboard tries to call `adapter.searchDocuments()`
+- Console shows: `[Dashboard] Search error: TypeError...`
+
+**Root Cause**:
+Method exists in `SupabaseAdapterOptimized.js` but not exposed through `storageWrapper.js`. The wrapper creates an interface layer but was missing the `searchDocuments` method.
+
+**Solution**: Add searchDocuments to storageWrapper
+
+```javascript
+// File: src/utils/storage/storageWrapper.js
+
+// 1. Add the function export
+export async function searchDocuments(userId, query, options = {}) {
+  const storageAdapter = await init();
+
+  if (storageAdapter.supabaseAdapter && storageAdapter.supabaseAdapter.searchDocuments) {
+    return await storageAdapter.supabaseAdapter.searchDocuments(userId, query, options);
+  }
+
+  // Fallback for IndexedDB
+  console.warn('Full-text search not available, falling back to client-side search');
+  const allEntries = await storageAdapter.loadEntries();
+  const lowerQuery = query.toLowerCase();
+  const filtered = allEntries.filter(entry =>
+    entry.title?.toLowerCase().includes(lowerQuery) ||
+    entry.content?.toLowerCase().includes(lowerQuery)
+  );
+
+  return filtered.map(doc => ({
+    ...doc,
+    match_reason: 'title',
+    match_score: 1.0
+  }));
+}
+
+// 2. Export in storageWrapper object
+export const storageWrapper = {
+  // ... other methods
+  searchDocuments,  // ← ADD THIS
+  // ...
+};
+```
+
+**Additional Issues Found**:
+- SQL function had ambiguous column reference error
+- Fixed by fully qualifying column names with `document_matches.` prefix
+- Migration file: `supabase/migrations/20251102201500_add_full_text_search.sql`
+
+**Verification**:
+```sql
+-- Verify function works
+SELECT id, title, match_reason, match_score
+FROM search_documents_with_blocks(
+  'USER_ID'::uuid,
+  'search term',
+  10,
+  0
+);
+```
+
+**Related Files**:
+- `src/utils/storage/storageWrapper.js` - Add wrapper method
+- `src/utils/storage/SupabaseAdapterOptimized.js` - Has the implementation
+- `src/pages/Dashboard.jsx` - Calls the method
+- `supabase/migrations/20251102201500_add_full_text_search.sql` - Database function
+
 ### Slow Button Response - Network Operations Blocking UI
 **Date**: 2025-11-01
 **Symptoms**:

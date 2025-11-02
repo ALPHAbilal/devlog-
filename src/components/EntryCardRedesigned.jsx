@@ -177,23 +177,26 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
           </div>
         )}
 
-        {/* Card Content */}
-        <div className="relative p-5 flex flex-col h-full min-h-[200px]">
-          {/* Title - exact spacing from Figma */}
-          <h3 className="text-white/90 mb-3 group-hover:text-white transition-colors
-                         line-clamp-2 flex items-start pr-6 leading-snug">
-            {entry.title}
-          </h3>
+        {/* Card Content - Figma constraints: 160px card, 20px padding, 120px content */}
+        <div className="relative p-5 flex flex-col h-full">
+          {/* Title Zone: 22-45px (1-2 lines max) with 12px margin */}
+          <div style={{ minHeight: '22px', maxHeight: '45px', marginBottom: '12px' }}>
+            <h3 className="text-white/90 group-hover:text-white transition-colors
+                           line-clamp-2 leading-snug pr-6"
+                style={{ fontSize: '16px', fontWeight: '500', lineHeight: '1.4' }}>
+              {entry.title}
+            </h3>
+          </div>
 
-          {/* Chart visualization - Smooth wave showing DAILY activity from audit logs */}
+          {/* Chart Zone: 63-86px (safe area 65-70px) */}
           {hasChart && (
-            <div className="mt-auto w-full">
-              <div className="bg-white/5 rounded-lg backdrop-blur-sm overflow-hidden">
+            <div style={{ flex: '1', minHeight: '63px', maxHeight: '86px' }}>
+              <div className="h-full overflow-hidden rounded-lg">
                 <ActivityWaveChart
                   data={activityData.percentages}
                   counts={activityData.counts}
-                  height={80}
-                  className="group-hover:opacity-100 transition-opacity duration-300"
+                  height={70}
+                  className="transition-opacity duration-300"
                 />
               </div>
             </div>

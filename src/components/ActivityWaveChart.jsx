@@ -2,147 +2,105 @@ import { useMemo } from 'react';
 
 /**
  * ActivityWaveChart - Smooth wave visualization for document activity
- * Matches Figma design: https://www.figma.com/design/vm4zgEWrWUCuEbGzuNCuWq/Untitled?node-id=3-1346
+ * Matches Figma design constraints: Card 160px, Chart zone 63-86px
  *
  * @param {Array<number>} data - Array of 30 values (0-100) representing daily activity percentages
  * @param {Array<number>} counts - Array of 30 actual edit counts for tooltips
- * @param {number|string} width - Chart width (number for px, 'full' for 100%, default: 'full')
- * @param {number} height - Chart height in pixels (default: 80)
+ * @param {number} height - Chart height in pixels (default: 70)
  * @param {string} className - Additional CSS classes
  */
 export default function ActivityWaveChart({
   data,
   counts,
-  width = 'full',
-  height = 80,
+  height = 70,
   className = ''
 }) {
-  // Calculate actual width for SVG viewBox
-  const viewBoxWidth = width === 'full' ? 300 : width;
-  // Generate SVG path for smooth wave using bezier curves
+  // Fixed viewBox dimensions for consistent scaling
+  const viewBoxWidth = 300;
+  const viewBoxHeight = 70;
+  // Generate SVG path for wave - simple line path matching Figma
   const wavePath = useMemo(() => {
     if (!data || data.length === 0) return '';
 
-    const points = data.length;
-    const stepWidth = viewBoxWidth / points;
-    const padding = 4; // Padding from edges
+    const padding = 10;
+    const maxHeight = 50;
 
-    // Generate coordinate points
-    const coordinates = data.map((value, i) => ({
-      x: padding + (i * stepWidth) + (stepWidth / 2), // Center of each segment
-      y: height - (value / 100 * (height - padding * 2)) - padding
-    }));
+    // Generate path - start from bottom left
+    let path = `M 0 ${viewBoxHeight}`;
 
-    // Start path from bottom left
-    let path = `M ${padding},${height}`;
-
-    // Line to first point
-    path += ` L ${coordinates[0].x},${coordinates[0].y}`;
-
-    // Create smooth curve through all points using quadratic bezier
-    for (let i = 1; i < coordinates.length; i++) {
-      const current = coordinates[i];
-      const prev = coordinates[i - 1];
-
-      // Control point is midway between points
-      const cpX = (prev.x + current.x) / 2;
-      const cpY = (prev.y + current.y) / 2;
-
-      path += ` Q ${prev.x},${prev.y} ${cpX},${cpY}`;
-      path += ` Q ${cpX},${cpY} ${current.x},${current.y}`;
-    }
+    // Create line segments for each data point
+    data.forEach((value, i) => {
+      const x = (i / 29) * viewBoxWidth;
+      const normalizedHeight = (value / 100) * maxHeight;
+      const y = viewBoxHeight - normalizedHeight - padding;
+      path += ` L ${x} ${y}`;
+    });
 
     // Close path at bottom right
-    path += ` L ${viewBoxWidth - padding},${height} Z`;
+    path += ` L ${viewBoxWidth} ${viewBoxHeight} Z`;
 
     return path;
-  }, [data, viewBoxWidth, height]);
+  }, [data]);
 
-  // Generate overlay wave for depth effect (50% height) with smooth curves
-  const overlayPath = useMemo(() => {
+  // Generate stroke line path - follows the wave contour
+  const strokePath = useMemo(() => {
     if (!data || data.length === 0) return '';
 
-    const points = data.length;
-    const stepWidth = viewBoxWidth / points;
-    const padding = 4;
-    const overlayHeight = height * 0.5; // 50% of total height
+    const padding = 10;
+    const maxHeight = 50;
 
-    // Generate coordinate points for overlay
-    const coordinates = data.map((value, i) => ({
-      x: padding + (i * stepWidth) + (stepWidth / 2),
-      y: height - (value / 100 * (overlayHeight - padding * 2)) - padding
-    }));
+    // Start from first point (not bottom)
+    const firstValue = data[0];
+    const firstY = viewBoxHeight - (firstValue / 100) * maxHeight - padding;
+    let path = `M 0 ${firstY}`;
 
-    // Start path from bottom left
-    let path = `M ${padding},${height}`;
-
-    // Line to first point
-    path += ` L ${coordinates[0].x},${coordinates[0].y}`;
-
-    // Create smooth curve through all points
-    for (let i = 1; i < coordinates.length; i++) {
-      const current = coordinates[i];
-      const prev = coordinates[i - 1];
-
-      const cpX = (prev.x + current.x) / 2;
-      const cpY = (prev.y + current.y) / 2;
-
-      path += ` Q ${prev.x},${prev.y} ${cpX},${cpY}`;
-      path += ` Q ${cpX},${cpY} ${current.x},${current.y}`;
-    }
-
-    path += ` L ${viewBoxWidth - padding},${height} Z`;
+    // Create line segments for each data point
+    data.forEach((value, i) => {
+      const x = (i / 29) * viewBoxWidth;
+      const normalizedHeight = (value / 100) * maxHeight;
+      const y = viewBoxHeight - normalizedHeight - padding;
+      path += ` L ${x} ${y}`;
+    });
 
     return path;
-  }, [data, viewBoxWidth, height]);
+  }, [data]);
 
   return (
-    <div
-      className={`relative ${width === 'full' ? 'w-full' : ''} ${className}`}
-      style={{
-        width: width === 'full' ? '100%' : `${width}px`,
-        height: `${height}px`
-      }}
-    >
+    <div className={`relative w-full ${className}`} style={{ height: `${height}px` }}>
       <svg
-        width="100%"
-        height="100%"
-        viewBox={`0 0 ${viewBoxWidth} ${height}`}
-        className="absolute inset-0"
+        className="w-full h-full"
+        viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
         preserveAspectRatio="none"
       >
-        {/* Base wave - lighter color */}
-        <path
-          d={wavePath}
-          fill="url(#baseGradient)"
-          className="transition-opacity duration-300"
-        />
-
-        {/* Overlay wave - creates depth effect */}
-        <path
-          d={overlayPath}
-          fill="url(#overlayGradient)"
-          className="transition-opacity duration-300"
-        />
-
-        {/* Gradients matching Figma design */}
         <defs>
-          <linearGradient id="baseGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(96, 165, 250, 0.3)" />
-            <stop offset="100%" stopColor="rgba(96, 165, 250, 0.1)" />
-          </linearGradient>
-          <linearGradient id="overlayGradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="rgba(96, 165, 250, 0.6)" />
-            <stop offset="100%" stopColor="rgba(96, 165, 250, 0.3)" />
+          <linearGradient id="waveGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="rgb(96, 165, 250)" stopOpacity="0.6" />
+            <stop offset="100%" stopColor="rgb(96, 165, 250)" stopOpacity="0.2" />
           </linearGradient>
         </defs>
+
+        {/* Filled area */}
+        <path
+          d={wavePath}
+          fill="url(#waveGradient)"
+          className="transition-all duration-500"
+        />
+
+        {/* Stroke line on top */}
+        <path
+          d={strokePath}
+          fill="none"
+          stroke="rgb(96, 165, 250)"
+          strokeWidth="2"
+          className="transition-all duration-500"
+        />
       </svg>
 
       {/* Tooltip hover areas for each day */}
       <div className="absolute inset-0 flex">
-        {data.map((value, i) => {
+        {data && data.map((value, i) => {
           const editCount = counts ? counts[i] : 0;
-          const daysAgo = 30 - i;
+          const daysAgo = 29 - i;
           const tooltipText = editCount === 0
             ? `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago: No activity`
             : `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago: ${editCount} ${editCount === 1 ? 'edit' : 'edits'}`;

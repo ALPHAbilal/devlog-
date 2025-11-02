@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Chart Demo - Devlog</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #0a1628 0%, #1a2942 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .title {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* Document Card */
+    .document-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(26, 41, 66, 0.6) 0%, rgba(15, 29, 50, 0.6) 100%);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .document-card:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      box-shadow: 0 20px 40px rgba(16, 185, 129, 0.1);
+      transform: translateY(-2px);
+    }
+
+    /* Gradient overlay on hover */
+    .document-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0) 0%, rgba(16, 185, 129, 0) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .document-card:hover::before {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+      opacity: 1;
+    }
+
+    /* Bottom accent line */
+    .document-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+        rgba(16, 185, 129, 0) 0%,
+        rgba(16, 185, 129, 0) 100%
+      );
+      transition: all 0.5s ease;
+    }
+
+    .document-card:hover::after {
+      background: linear-gradient(90deg,
+        rgba(16, 185, 129, 0.5) 0%,
+        rgba(16, 185, 129, 1) 50%,
+        rgba(16, 185, 129, 0.5) 100%
+      );
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    /* Title */
+    .card-title {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      padding-right: 24px;
+    }
+
+    /* Chart Container */
+    .chart-wrapper {
+      margin-top: auto;
+      width: 100%;
+    }
+
+    .chart-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+    }
+
+    .activity-chart {
+      position: relative;
+      width: 100%;
+      height: 80px;
+    }
+
+    .activity-chart svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Info Panel */
+    .info-panel {
+      margin-top: 24px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info-title {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .info-label {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 12px;
+    }
+
+    .info-value {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 6px 10px;
+      background: rgb(96, 165, 250);
+      color: white;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -100%) translateY(-8px);
+      transition: opacity 0.2s ease;
+      z-index: 10;
+    }
+
+    .tooltip.visible {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 class="title">Activity Chart Demo</h1>
+
+    <!-- Document Card -->
+    <div class="document-card">
+      <div class="card-content">
+        <!-- Title -->
+        <h3 class="card-title">Sample Document with Activity Chart</h3>
+
+        <!-- Chart -->
+        <div class="chart-wrapper">
+          <div class="chart-container">
+            <div class="activity-chart" id="activityChart">
+              <!-- SVG will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="info-panel">
+      <div class="info-title">Chart Data Info</div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Total Edits</span>
+          <span class="info-value" id="totalEdits">0</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Active Days</span>
+          <span class="info-value" id="activeDays">0</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Max Edits/Day</span>
+          <span class="info-value" id="maxEdits">0</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Avg Edits/Day</span>
+          <span class="info-value" id="avgEdits">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Generate mock activity data for last 30 days
+    function generateActivityData() {
+      const data = [];
+      const today = new Date();
+
+      for (let i = 0; i < 30; i++) {
+        // Create varied activity pattern
+        let edits = 0;
+
+        // Recent activity (last 7 days) - higher activity
+        if (i < 7) {
+          edits = Math.floor(Math.random() * 8) + 2; // 2-10 edits
+        }
+        // Last 2 weeks - moderate activity
+        else if (i < 14) {
+          edits = Math.floor(Math.random() * 5) + 1; // 1-6 edits
+        }
+        // Older activity - sporadic
+        else {
+          edits = Math.random() > 0.6 ? Math.floor(Math.random() * 4) : 0; // 0-4 edits
+        }
+
+        data.push({
+          day: i,
+          edits: edits,
+          percentage: edits === 0 ? 5 : Math.min(15 + (edits / 10) * 85, 95)
+        });
+      }
+
+      return data.reverse(); // Most recent first
+    }
+
+    // Create SVG wave chart
+    function createWaveChart(data) {
+      const container = document.getElementById('activityChart');
+      const width = 300;
+      const height = 80;
+      const padding = 4;
+
+      // Calculate stats
+      const totalEdits = data.reduce((sum, d) => sum + d.edits, 0);
+      const activeDays = data.filter(d => d.edits > 0).length;
+      const maxEdits = Math.max(...data.map(d => d.edits));
+      const avgEdits = (totalEdits / 30).toFixed(1);
+
+      // Update info panel
+      document.getElementById('totalEdits').textContent = totalEdits;
+      document.getElementById('activeDays').textContent = activeDays;
+      document.getElementById('maxEdits').textContent = maxEdits;
+      document.getElementById('avgEdits').textContent = avgEdits;
+
+      // Create SVG
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.setAttribute('preserveAspectRatio', 'none');
+
+      // Create gradient
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      gradient.setAttribute('id', 'waveGradient');
+      gradient.setAttribute('x1', '0%');
+      gradient.setAttribute('y1', '0%');
+      gradient.setAttribute('x2', '0%');
+      gradient.setAttribute('y2', '100%');
+
+      const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop1.setAttribute('offset', '0%');
+      stop1.setAttribute('stop-color', 'rgba(96, 165, 250, 0.3)');
+
+      const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop2.setAttribute('offset', '100%');
+      stop2.setAttribute('stop-color', 'rgba(96, 165, 250, 0.1)');
+
+      gradient.appendChild(stop1);
+      gradient.appendChild(stop2);
+      defs.appendChild(gradient);
+      svg.appendChild(defs);
+
+      // Generate path coordinates
+      const points = data.map((d, i) => {
+        const x = padding + (i / 29) * (width - padding * 2);
+        const normalizedHeight = (d.percentage / 100) * (height - padding * 2);
+        const y = height - normalizedHeight - padding;
+        return { x, y, edits: d.edits, day: i };
+      });
+
+      // Create filled area path
+      let areaPath = `M ${padding},${height}`;
+      areaPath += ` L ${points[0].x},${points[0].y}`;
+
+      // Smooth curve through points
+      for (let i = 1; i < points.length; i++) {
+        const current = points[i];
+        const prev = points[i - 1];
+        const cpX = (prev.x + current.x) / 2;
+        const cpY = (prev.y + current.y) / 2;
+
+        areaPath += ` Q ${prev.x},${prev.y} ${cpX},${cpY}`;
+        areaPath += ` Q ${cpX},${cpY} ${current.x},${current.y}`;
+      }
+
+      areaPath += ` L ${width - padding},${height} Z`;
+
+      // Create area
+      const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      area.setAttribute('d', areaPath);
+      area.setAttribute('fill', 'url(#waveGradient)');
+      svg.appendChild(area);
+
+      // Create stroke line
+      let linePath = `M ${points[0].x},${points[0].y}`;
+      for (let i = 1; i < points.length; i++) {
+        const current = points[i];
+        const prev = points[i - 1];
+        const cpX = (prev.x + current.x) / 2;
+        const cpY = (prev.y + current.y) / 2;
+
+        linePath += ` Q ${prev.x},${prev.y} ${cpX},${cpY}`;
+        linePath += ` Q ${cpX},${cpY} ${current.x},${current.y}`;
+      }
+
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      line.setAttribute('d', linePath);
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke', 'rgba(96, 165, 250, 1)');
+      line.setAttribute('stroke-width', '2');
+      svg.appendChild(line);
+
+      // Add interactive overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position: absolute; inset: 0; display: flex;';
+
+      // Create tooltip
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      container.appendChild(tooltip);
+
+      points.forEach((point, i) => {
+        const segment = document.createElement('div');
+        segment.style.cssText = 'flex: 1; cursor: pointer;';
+
+        const daysAgo = 29 - i;
+        const tooltipText = point.edits === 0
+          ? `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago: No activity`
+          : `${daysAgo} ${daysAgo === 1 ? 'day' : 'days'} ago: ${point.edits} ${point.edits === 1 ? 'edit' : 'edits'}`;
+
+        segment.addEventListener('mouseenter', (e) => {
+          tooltip.textContent = tooltipText;
+          tooltip.style.left = `${(i / 29) * 100}%`;
+          tooltip.classList.add('visible');
+        });
+
+        segment.addEventListener('mouseleave', () => {
+          tooltip.classList.remove('visible');
+        });
+
+        overlay.appendChild(segment);
+      });
+
+      container.appendChild(svg);
+      container.appendChild(overlay);
+    }
+
+    // Initialize
+    const activityData = generateActivityData();
+    createWaveChart(activityData);
+  </script>
+</body>
+</html>

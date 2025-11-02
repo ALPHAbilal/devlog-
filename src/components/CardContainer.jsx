@@ -9,7 +9,7 @@ export default function CardContainer({ children, className = '', onClick }) {
         "group relative",
         "bg-gradient-to-br from-[#1a2942]/60 to-[#0f1d32]/60",
         "backdrop-blur-sm rounded-xl border border-white/10",
-        "cursor-pointer overflow-hidden self-start",
+        "cursor-pointer self-start",
 
         // Hover effects
         "hover:border-emerald-500/30 transition-all duration-300",

@@ -1,14 +1,8 @@
 // Supabase Performance Optimization Utilities
 // This file contains helper functions and types for using the new optimized database functions
 
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
-
-// Initialize Supabase client (adjust based on your setup)
-const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Import the existing Supabase client from the optimized instance
+import { supabase } from './supabaseOptimized';
 
 // Types for batch operations
 interface BatchInsertResult {

@@ -912,6 +912,162 @@ All advanced block tools now working:
 - ✅ **Batching Implemented**: Large documents now work with 20-block batches
 - ⚠️ **Only Known Issue**: Very large documents (100+ blocks) may hit connection limits
 
+### Dashboard Pagination Duplicate Documents - React 19 Race Condition
+**Date**: 2025-11-01
+**Symptom**:
+- Document count shows 351/251 (139.8%) instead of 100%
+- Same pages loading multiple times (duplicate "Loading page X" logs)
+- Progress counter exceeds total count
+
+**Root Cause**: React 19 concurrent rendering causes `loadMore()` race condition:
+1. User scrolls fast → multiple scroll events
+2. `checkLoadMore()` called multiple times before `loadingRef` updates
+3. Same page loaded 2+ times (e.g., "Loading page 4" appears twice)
+4. Documents appended multiple times → duplicates in state
+
+**Evidence from Logs**:
+```
+usePaginatedDashboard: Loading page 4
+usePaginatedDashboard: Loading page 4  ← DUPLICATE!
+usePaginatedDashboard: Filtered out 50 duplicate documents
+```
+
+**Solution**: Deduplication on State Update
+
+```javascript
+// ❌ BEFORE - Race condition allows duplicates
+setDocuments(prev => [...prev, ...result.documents]);
+
+// ✅ AFTER - Deduplicate by ID before appending
+setDocuments(prev => {
+  const existingIds = new Set(prev.map(d => d.id));
+  const newDocs = result.documents.filter(d => !existingIds.has(d.id));
+
+  if (newDocs.length !== result.documents.length) {
+    console.warn(`Filtered out ${result.documents.length - newDocs.length} duplicates`);
+  }
+
+  return [...prev, ...newDocs];
+});
+```
+
+**Files Fixed**:
+- `src/hooks/usePaginatedDashboard.js:127-137` - Load more deduplication
+- `src/hooks/usePaginatedDashboard.js:75-86` - Initial load deduplication
+
+**Why Deduplication Instead of Better Locking**:
+1. React 19 concurrent features can bypass ref checks
+2. Network delays cause unpredictable timing
+3. Deduplication makes append **idempotent** (correct semantic fix)
+4. Defense in depth prevents data corruption
+
+**Performance Impact**:
+- Time Complexity: O(n + m) where n = existing, m = new
+- Space Complexity: O(n) for Set
+- Negligible for <10,000 documents
+- No user-visible delay
+
+**Results**:
+- Before: 351/251 documents (duplicates)
+- After: 251/251 documents (correct)
+- Warnings logged when duplicates filtered
+- Pagination works correctly across 6 pages (0-5)
+
+**Monitoring**:
+Console warns when duplicates caught:
+```
+usePaginatedDashboard: Filtered out 50 duplicate documents
+```
+
+**Key Lessons**:
+1. React 19 concurrent rendering needs defensive coding
+2. Idempotent operations are safer than perfect locking
+3. Set-based deduplication is fast and reliable
+4. Always log when defensive code triggers (indicates underlying issue)
+
+**Saved**: 2+ hours debugging race conditions, prevents data corruption
+
+---
+
+### Pagination Implementation Verification - Adding Debug Logging
+**Date**: 2025-11-01
+**Symptom**: Need to verify pagination is actually working (not just implemented code)
+
+**Solution**: Multi-layer strategic logging with visual indicator
+
+**Layers of Logging**:
+
+1. **Hook Layer** (`usePaginatedDashboard.js`):
+```javascript
+console.log('usePaginatedDashboard: loadInitial() CALLED', { pageSize, orderBy });
+console.log('usePaginatedDashboard: Loading page ${nextPage}');
+console.log('usePaginatedDashboard: Loaded ${count} documents, hasMore: ${hasMore}');
+```
+
+2. **Database Layer** (`SupabaseAdapterOptimized.js`):
+```javascript
+console.log('[PAGINATION-DB] 🔍 loadAllDocuments called:', { page, range: '0 to 49' });
+console.log('[PAGINATION-DB] ❌ Cache MISS / ✅ Cache HIT');
+console.log('[PAGINATION-DB] 📡 Executing Supabase query');
+console.log('[PAGINATION-DB] ✅ Query successful:', { rowsReturned, totalCount, hasMore });
+console.log('[PAGINATION-DB] 💾 Caching response:', { percentageLoaded });
+```
+
+3. **Scroll Layer** (`Dashboard.jsx`):
+```javascript
+console.log('[PAGINATION-SCROLL] ✅ Scroll listener attached');
+console.log('[PAGINATION-SCROLL] 📜 Scroll event #10:', { distanceFromBottom });
+```
+
+4. **Visual Debug Panel** (temporary, bottom-right):
+```jsx
+<div className="fixed bottom-4 right-4 bg-gray-900/95 text-white">
+  <div>Documents: {loaded} / {total}</div>
+  <div>Current Page: {currentPage}</div>
+  <div>Has More: {hasMore ? "✓" : "✗"}</div>
+  <div>Progress: {percentage}%</div>
+</div>
+```
+
+**What to Look For (Proof of Working)**:
+```
+✅ Initial load: page 0, range "0 to 49"
+✅ 50 documents loaded
+✅ Scroll events detected
+✅ loadMore() triggered near bottom
+✅ Page 1: range "50 to 99"
+✅ hasMore: false when complete
+✅ Cache hits on subsequent loads
+```
+
+**Expected Log Sequence**:
+```
+usePaginatedDashboard: loadInitial() CALLED
+[PAGINATION-DB] 🔍 loadAllDocuments called: { page: 0, range: '0 to 49' }
+[PAGINATION-DB] ❌ Cache MISS
+[PAGINATION-DB] 📡 Executing Supabase query
+[PAGINATION-DB] ✅ Query successful: { rowsReturned: 50, totalCount: 251 }
+[PAGINATION-SCROLL] ✅ Scroll listener attached
+[User scrolls]
+[PAGINATION-SCROLL] 📜 Scroll event #10
+usePaginatedDashboard: Triggering loadMore()
+[PAGINATION-DB] 🔍 loadAllDocuments called: { page: 1, range: '50 to 99' }
+```
+
+**Cleanup After Verification**:
+1. Remove visual debug panel (temporary UI element)
+2. Keep database/hook logs (useful for production debugging)
+3. Or remove all logs if noise is concern
+
+**Files Modified**:
+- `src/hooks/usePaginatedDashboard.js` - Hook logging (already existed)
+- `src/utils/storage/SupabaseAdapterOptimized.js` - Database logging
+- `src/pages/Dashboard.jsx` - Scroll logging + debug panel
+
+**Saved**: 1+ hour - proves implementation actually works vs just exists
+
+---
+
 ## 📝 How to Add New Patterns
 
 When you discover a new pattern, add it here immediately:

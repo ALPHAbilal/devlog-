@@ -656,8 +656,8 @@ export default function Dashboard() {
       setSearchError(null);
 
       try {
-        const adapter = await storageWrapper.getAdapter();
-        const results = await adapter.searchDocuments(user.id, searchTerm.trim(), {
+        // Call searchDocuments directly on storageWrapper (not on adapter)
+        const results = await storageWrapper.searchDocuments(user.id, searchTerm.trim(), {
           limit: 100,
           offset: 0
         });

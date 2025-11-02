@@ -102,12 +102,13 @@ export default function ActivityWaveChart({
       style={{
         width: width === 'full' ? '100%' : `${width}px`,
         height: `${height}px`,
+        minHeight: `${height}px`,
         maxWidth: '100%'
       }}
     >
       <svg
         width="100%"
-        height={height}
+        height="100%"
         viewBox={`0 0 ${viewBoxWidth} ${height}`}
         className="absolute inset-0"
         preserveAspectRatio="none"

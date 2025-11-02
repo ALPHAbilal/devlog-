@@ -178,7 +178,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         )}
 
         {/* Card Content */}
-        <div className="relative p-5 flex flex-col h-full min-h-[180px]">
+        <div className="relative p-5 flex flex-col h-full min-h-[200px]">
           {/* Title - exact spacing from Figma */}
           <h3 className="text-white/90 mb-3 group-hover:text-white transition-colors
                          line-clamp-2 flex items-start pr-6 leading-snug">
@@ -187,11 +187,11 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
 
           {/* Chart visualization - Smooth wave showing DAILY activity from audit logs */}
           {hasChart && (
-            <div className="mt-auto w-full">
+            <div className="mt-auto w-full flex-shrink-0" style={{ minHeight: '80px' }}>
               <ActivityWaveChart
                 data={activityData.percentages}
                 counts={activityData.counts}
-                height={60}
+                height={80}
                 className="group-hover:opacity-100 transition-opacity duration-300"
               />
             </div>

@@ -3,60 +3,85 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
-### Activity Chart Not Fitting WIDTH in Document Card
+### Activity Chart Appearing as Thin Flat Line (Compressed/Squashed)
 **Date**: 2025-11-02
 **Symptoms**:
-- Activity wave chart (statistics) not fitting properly in card width
-- Chart may appear cut off, overflowing, or not stretching to full available width
-- User reports "the width what i'm intrested in" / "statistics aren't showing as it should be please make it fit the zone"
+- Activity wave chart (statistics) renders as a very thin horizontal line/bar
+- Chart appears "squashed" or compressed vertically
+- Wave pattern not visible - looks awkward/flat instead of showing activity peaks and valleys
+- User reports "still the same thing" / "it's look awkward" with screenshot showing flat bar
 
 **Root Cause**:
-Chart wrapper and SVG container didn't have explicit width constraints to ensure proper fitting within card boundaries:
-1. Chart wrapper div lacked `w-full` class to take full parent width
-2. ActivityWaveChart container lacked `maxWidth: 100%` to prevent overflow
-3. SVG uses `preserveAspectRatio="none"` which stretches to container, but container width wasn't properly constrained
+Chart container was being collapsed by flex layout and didn't have proper height constraints:
+1. Chart wrapper div didn't have `flex-shrink-0` - was being compressed by flex container
+2. Chart wrapper lacked explicit `minHeight` - flex was collapsing it
+3. SVG had numeric height attribute instead of "100%" - prevented proper filling of container
+4. ActivityWaveChart container lacked `minHeight` to enforce sizing
+5. Card min-height was too small for comfortable chart display
 
-**Solution**: Add explicit width constraints at both wrapper and component level
+**Solution**: Add height constraints at multiple levels to prevent compression
 
 ```jsx
-// File: src/components/EntryCardRedesigned.jsx (line 190)
+// File: src/components/EntryCardRedesigned.jsx
 
-// Add w-full to chart wrapper to ensure full width
-<div className="mt-auto w-full">  // Added w-full
+// 1. Increase card minimum height (line 181)
+<div className="relative p-5 flex flex-col h-full min-h-[200px]">  // Was 180px
+
+// 2. Add flex-shrink-0 and minHeight to chart wrapper (line 190)
+<div className="mt-auto w-full flex-shrink-0" style={{ minHeight: '80px' }}>
   <ActivityWaveChart
     data={activityData.percentages}
     counts={activityData.counts}
-    height={60}
+    height={80}  // Restored to 80px from 60px
     className="group-hover:opacity-100 transition-opacity duration-300"
   />
 </div>
 ```
 
 ```jsx
-// File: src/components/ActivityWaveChart.jsx (lines 100-106)
+// File: src/components/ActivityWaveChart.jsx
 
-// Add maxWidth constraint to prevent overflow
+// 3. Add minHeight to chart container (lines 100-107)
 <div
   className={`relative overflow-hidden rounded-[10px] bg-white/5 ${width === 'full' ? 'w-full' : ''} ${className}`}
   style={{
     width: width === 'full' ? '100%' : `${width}px`,
     height: `${height}px`,
-    maxWidth: '100%'  // Added this
+    minHeight: `${height}px`,  // Added this
+    maxWidth: '100%'
   }}
+>
+
+// 4. Change SVG height to "100%" (line 111)
+<svg
+  width="100%"
+  height="100%"  // Was: height={height} - now fills container properly
+  viewBox={`0 0 ${viewBoxWidth} ${height}`}
+  className="absolute inset-0"
+  preserveAspectRatio="none"
 >
 ```
 
-**How This Works**:
-1. `w-full` on wrapper ensures chart takes full available width within the padded card content
-2. `width: 100%` on chart div ensures it fills the wrapper
-3. `maxWidth: 100%` prevents any overflow beyond parent boundaries
-4. SVG `preserveAspectRatio="none"` stretches wave to fit container width perfectly
-5. Card padding (p-5) provides 20px spacing on sides, chart fits within that
+**Why This Works**:
+1. **`flex-shrink-0`** prevents flex container from compressing the chart wrapper
+2. **`minHeight: '80px'`** on wrapper ensures chart has guaranteed vertical space
+3. **`minHeight: ${height}px`** on ActivityWaveChart container prevents CSS collapse
+4. **SVG `height="100%"`** makes SVG fill its container instead of using fixed pixel height
+5. **Card `min-h-[200px]`** provides enough total space for title + chart + padding
 
-**Additional Optimizations Applied**:
-- Reduced chart height from 80px to 60px for better proportion
-- Reduced title from line-clamp-3 to line-clamp-2
-- Increased card min-height from 160px to 180px
+**Layout Math**:
+- Card min-height: 200px
+- Title: ~48px (2 lines)
+- Chart container: 80px (enforced with minHeight)
+- Padding: 40px (p-5)
+- Margin: 12px (mb-3)
+- **Total used**: ~180px
+- **Buffer**: 20px (allows comfortable display)
+
+**Visual Result**:
+- Chart now displays as proper wave with visible peaks and valleys
+- Activity patterns clearly visible instead of flat line
+- Professional appearance matching design intent
 
 **Related Files**:
 - `src/components/EntryCardRedesigned.jsx` - Card layout and chart rendering

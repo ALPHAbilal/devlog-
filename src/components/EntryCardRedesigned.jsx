@@ -182,7 +182,6 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
             <div className="mt-auto">
               <ActivityWaveChart
                 data={activityData}
-                width={258}
                 height={80}
                 className="group-hover:opacity-100 transition-opacity duration-300"
               />

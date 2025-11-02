@@ -5,22 +5,24 @@ import { useMemo } from 'react';
  * Matches Figma design: https://www.figma.com/design/vm4zgEWrWUCuEbGzuNCuWq/Untitled?node-id=3-1346
  *
  * @param {Array<number>} data - Array of 30 values (0-100) representing daily activity
- * @param {number} width - Chart width in pixels (default: 258)
+ * @param {number|string} width - Chart width (number for px, 'full' for 100%, default: 'full')
  * @param {number} height - Chart height in pixels (default: 80)
  * @param {string} className - Additional CSS classes
  */
 export default function ActivityWaveChart({
   data,
-  width = 258,
+  width = 'full',
   height = 80,
   className = ''
 }) {
+  // Calculate actual width for SVG viewBox
+  const viewBoxWidth = width === 'full' ? 300 : width;
   // Generate SVG path for stepped wave
   const wavePath = useMemo(() => {
     if (!data || data.length === 0) return '';
 
     const points = data.length;
-    const stepWidth = width / points;
+    const stepWidth = viewBoxWidth / points;
     const padding = 4; // Padding from edges
 
     // Create stepped wave path
@@ -40,17 +42,17 @@ export default function ActivityWaveChart({
     });
 
     // Close the path at bottom right
-    path += ` L ${width - padding},${height} Z`;
+    path += ` L ${viewBoxWidth - padding},${height} Z`;
 
     return path;
-  }, [data, width, height]);
+  }, [data, viewBoxWidth, height]);
 
   // Generate overlay wave for depth effect (50% height)
   const overlayPath = useMemo(() => {
     if (!data || data.length === 0) return '';
 
     const points = data.length;
-    const stepWidth = width / points;
+    const stepWidth = viewBoxWidth / points;
     const padding = 4;
     const overlayHeight = height * 0.5; // 50% of total height
 
@@ -68,21 +70,25 @@ export default function ActivityWaveChart({
       }
     });
 
-    path += ` L ${width - padding},${height} Z`;
+    path += ` L ${viewBoxWidth - padding},${height} Z`;
 
     return path;
-  }, [data, width, height]);
+  }, [data, viewBoxWidth, height]);
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[10px] bg-white/5 ${className}`}
-      style={{ width: `${width}px`, height: `${height}px` }}
+      className={`relative overflow-hidden rounded-[10px] bg-white/5 ${width === 'full' ? 'w-full' : ''} ${className}`}
+      style={{
+        width: width === 'full' ? '100%' : `${width}px`,
+        height: `${height}px`
+      }}
     >
       <svg
-        width={width}
+        width="100%"
         height={height}
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox={`0 0 ${viewBoxWidth} ${height}`}
         className="absolute inset-0"
+        preserveAspectRatio="none"
       >
         {/* Base wave - lighter color */}
         <path

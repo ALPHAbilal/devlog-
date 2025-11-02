@@ -72,7 +72,19 @@ export function usePaginatedDashboard(options = {}) {
         hasMore: result.hasMore
       });
 
-      setDocuments(result.documents);
+      // Deduplicate initial documents (safety check)
+      const uniqueDocs = result.documents.reduce((acc, doc) => {
+        if (!acc.find(d => d.id === doc.id)) {
+          acc.push(doc);
+        }
+        return acc;
+      }, []);
+
+      if (uniqueDocs.length !== result.documents.length) {
+        console.warn(`usePaginatedDashboard: Initial load had ${result.documents.length - uniqueDocs.length} duplicates`);
+      }
+
+      setDocuments(uniqueDocs);
       setTotalCount(result.totalCount);
       setHasMore(result.hasMore);
       setCurrentPage(0);
@@ -124,7 +136,17 @@ export function usePaginatedDashboard(options = {}) {
 
       console.log(`usePaginatedDashboard: Loaded ${result.documents.length} documents, hasMore: ${result.hasMore}`);
 
-      setDocuments(prev => [...prev, ...result.documents]);
+      // Deduplicate documents by ID before appending (prevents race condition duplicates)
+      setDocuments(prev => {
+        const existingIds = new Set(prev.map(d => d.id));
+        const newDocs = result.documents.filter(d => !existingIds.has(d.id));
+
+        if (newDocs.length !== result.documents.length) {
+          console.warn(`usePaginatedDashboard: Filtered out ${result.documents.length - newDocs.length} duplicate documents`);
+        }
+
+        return [...prev, ...newDocs];
+      });
       setHasMore(result.hasMore);
       setCurrentPage(nextPage);
 

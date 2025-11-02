@@ -1604,8 +1604,15 @@ export default function Dashboard() {
                         <div className="font-semibold text-emerald-400 mb-2">📊 Pagination Debug</div>
                         <div className="space-y-1">
                           <div className="flex justify-between gap-4">
-                            <span className="text-gray-400">Loaded:</span>
-                            <span className="text-white font-semibold">{progress.loaded} / {progress.total}</span>
+                            <span className="text-gray-400">Documents:</span>
+                            <span className={progress.loaded > progress.total ? "text-red-400 font-semibold" : "text-white font-semibold"}>
+                              {progress.loaded} / {progress.total}
+                              {progress.loaded > progress.total && " ⚠️"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between gap-4">
+                            <span className="text-gray-400">Total Entries:</span>
+                            <span className="text-white font-semibold">{entries.length} (+ folders)</span>
                           </div>
                           <div className="flex justify-between gap-4">
                             <span className="text-gray-400">Current Page:</span>
@@ -1622,8 +1629,10 @@ export default function Dashboard() {
                             </span>
                           </div>
                           <div className="flex justify-between gap-4">
-                            <span className="text-gray-400">Progress:</span>
-                            <span className="text-white font-semibold">{progress.percentage.toFixed(1)}%</span>
+                            <span className="text-gray-400">Doc Progress:</span>
+                            <span className={progress.percentage > 100 ? "text-red-400 font-semibold" : "text-white font-semibold"}>
+                              {Math.min(progress.percentage, 100).toFixed(1)}%
+                            </span>
                           </div>
                           <div className="mt-2 pt-2 border-t border-gray-700">
                             <div className="flex justify-between gap-4">
@@ -1633,6 +1642,13 @@ export default function Dashboard() {
                               </span>
                             </div>
                           </div>
+                          {progress.loaded > progress.total && (
+                            <div className="mt-2 pt-2 border-t border-red-500/30">
+                              <div className="text-red-400 text-[10px]">
+                                ⚠️ Duplicates detected!
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}

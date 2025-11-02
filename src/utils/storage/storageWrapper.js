@@ -273,10 +273,42 @@ export async function searchEntries(query) {
   // Fallback search for adapters without search method
   const allEntries = await storageAdapter.loadEntries();
   const lowerQuery = query.toLowerCase();
-  return allEntries.filter(entry => 
+  return allEntries.filter(entry =>
     entry.title?.toLowerCase().includes(lowerQuery) ||
     entry.content?.toLowerCase().includes(lowerQuery)
   );
+}
+
+/**
+ * Search documents using full-text search (server-side)
+ * @param {string} userId - User ID
+ * @param {string} query - Search query
+ * @param {object} options - Search options
+ * @returns {Promise<Array>} Array of documents with match_reason and match_score
+ */
+export async function searchDocuments(userId, query, options = {}) {
+  const storageAdapter = await init();
+
+  // If using Supabase adapter with searchDocuments support
+  if (storageAdapter.supabaseAdapter && storageAdapter.supabaseAdapter.searchDocuments) {
+    return await storageAdapter.supabaseAdapter.searchDocuments(userId, query, options);
+  }
+
+  // Fallback to client-side search for IndexedDB or older adapters
+  console.warn('Full-text search not available, falling back to client-side search');
+  const allEntries = await storageAdapter.loadEntries();
+  const lowerQuery = query.toLowerCase();
+  const filtered = allEntries.filter(entry =>
+    entry.title?.toLowerCase().includes(lowerQuery) ||
+    entry.content?.toLowerCase().includes(lowerQuery)
+  );
+
+  // Add mock match_reason and match_score for compatibility
+  return filtered.map(doc => ({
+    ...doc,
+    match_reason: 'title',
+    match_score: 1.0
+  }));
 }
 
 // Reset function for logout
@@ -304,6 +336,7 @@ export const storageWrapper = {
   saveDocument,
   deleteEntry,
   searchEntries,
+  searchDocuments,
   getAdapter,
   // Backward compatibility aliases
   getEntries: loadEntries,

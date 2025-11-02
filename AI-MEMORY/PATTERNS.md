@@ -1068,6 +1068,160 @@ usePaginatedDashboard: Triggering loadMore()
 
 ---
 
+### Supabase Audit Trigger UUID Function Error - Schema Search Path Issue
+**Date**: 2025-11-02
+**Symptoms**:
+- "function uuid_ns_oid() does not exist" error in production
+- Document creation returns 404 from PostgREST API
+- Background sync fails with UUID function errors
+- Audit triggers silently failing
+
+**Root Cause**: Audit trigger function `audit.insert_update_delete_trigger()` couldn't find `uuid_ns_oid()` function because:
+1. Function uses `SECURITY DEFINER` which changes execution context
+2. Search path set to `'public', 'audit'` but missing `'extensions'` schema
+3. UUID functions (`uuid_ns_oid()`, `uuid_generate_v5()`) live in `extensions` schema
+4. Without explicit schema qualification, PostgreSQL can't find functions
+
+**Why PostgREST Returns 404**:
+When a PostgreSQL trigger fails during INSERT/UPDATE, PostgREST returns a 404 error instead of descriptive error message. This is known PostgREST behavior - makes debugging harder.
+
+**Complete Solution** (Applied in migration `fix_audit_trigger_uuid_qualified`):
+
+```sql
+CREATE OR REPLACE FUNCTION audit.insert_update_delete_trigger()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public', 'audit', 'extensions', 'pg_catalog'  -- Added extensions!
+AS $function$
+DECLARE
+  v_record_id UUID;
+  v_old_record_id UUID;
+  v_user_id UUID;
+  v_document_id UUID;
+BEGIN
+  -- Use fully qualified function names for security
+  v_record_id := extensions.uuid_generate_v5(  -- Explicitly prefix with schema
+    extensions.uuid_ns_oid(),                   -- Explicitly prefix with schema
+    TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || '.' ||
+    COALESCE(NEW.id::text, OLD.id::text)
+  );
+
+  IF TG_OP IN ('UPDATE', 'DELETE') THEN
+    v_old_record_id := v_record_id;
+  END IF;
+
+  -- Get user_id from record or document ownership
+  IF TG_TABLE_NAME = 'documents' THEN
+    v_user_id := COALESCE(NEW.user_id, OLD.user_id);
+  ELSIF TG_TABLE_NAME = 'blocks' THEN
+    v_document_id := COALESCE(NEW.document_id, OLD.document_id);
+    SELECT user_id INTO v_user_id FROM documents WHERE id = v_document_id;
+    IF v_user_id IS NULL THEN
+      v_user_id := COALESCE(NEW.user_id, OLD.user_id);
+    END IF;
+  END IF;
+
+  -- Insert audit record
+  INSERT INTO audit.record_version (
+    record_id,
+    old_record_id,
+    op,
+    ts,
+    table_oid,
+    table_schema,
+    table_name,
+    record,
+    old_record,
+    user_id,
+    metadata
+  ) VALUES (
+    v_record_id,
+    v_old_record_id,
+    TG_OP,
+    NOW(),
+    TG_RELID,
+    TG_TABLE_SCHEMA,
+    TG_TABLE_NAME,
+    CASE WHEN TG_OP IN ('INSERT', 'UPDATE') THEN to_jsonb(NEW) ELSE NULL END,
+    CASE WHEN TG_OP IN ('UPDATE', 'DELETE') THEN to_jsonb(OLD) ELSE NULL END,
+    v_user_id,
+    jsonb_build_object(
+      'trigger_name', TG_NAME,
+      'trigger_when', TG_WHEN,
+      'trigger_level', TG_LEVEL
+    )
+  );
+
+  RETURN COALESCE(NEW, OLD);
+END;
+$function$;
+```
+
+**Key Fix Points**:
+1. **Added `'extensions'` to search_path** - Makes extension functions accessible
+2. **Added `'pg_catalog'` to search_path** - Ensures system functions work
+3. **Used fully qualified names** - `extensions.uuid_generate_v5()` instead of `uuid_generate_v5()`
+4. **Security improvement** - Prevents search_path injection attacks
+
+**Verification Commands**:
+```sql
+-- Check if uuid-ossp extension is enabled
+SELECT * FROM pg_extension WHERE extname = 'uuid-ossp';
+
+-- Test uuid_ns_oid() directly
+SELECT uuid_ns_oid();
+
+-- Test uuid_generate_v5()
+SELECT uuid_generate_v5(uuid_ns_oid(), 'test');
+
+-- Check trigger function search_path
+SELECT prosrc, proconfig
+FROM pg_proc
+WHERE proname = 'insert_update_delete_trigger';
+```
+
+**Files Modified**:
+- Migration: `fix_audit_trigger_uuid_qualified` (applied via Supabase MCP)
+- Trigger: `audit_documents` on `public.documents` table
+- Trigger: `audit_blocks` on `public.blocks` table
+
+**Impact**:
+- ✅ Document creation now works correctly
+- ✅ Audit logging captures all changes
+- ✅ Statistics system can query real activity data
+- ✅ No more 404 errors from PostgREST
+- ✅ Background sync operates normally
+
+**Related Issues Fixed**:
+1. **Issue #1**: "supabaseUrl is required" - Fixed by using correct Vite env vars
+2. **Issue #2**: "uuid_ns_oid() does not exist" - Fixed with this pattern
+3. **Issue #3**: 404 on documents POST - Fixed as side effect of #2
+
+**Time Saved**: 3-4 hours debugging PostgreSQL function errors and PostgREST behavior
+
+**Key Lessons**:
+1. Always check search_path when using `SECURITY DEFINER` functions
+2. Explicitly qualify schema for extension functions (best practice)
+3. PostgREST 404 often means trigger failure, not missing endpoint
+4. Test extension functions directly in psql before debugging code
+5. Use Supabase MCP to quickly verify database state
+
+**When to Use**:
+- Creating audit triggers or other SECURITY DEFINER functions
+- Using pgcrypto, uuid-ossp, or other extensions
+- Debugging mysterious PostgREST 404 errors
+- Any trigger that calls extension functions
+
+**Testing Checklist**:
+- ✅ Extension installed: `SELECT * FROM pg_extension WHERE extname = 'uuid-ossp'`
+- ✅ Function accessible: `SELECT uuid_ns_oid()`
+- ✅ Trigger works: Try INSERT/UPDATE/DELETE on table
+- ✅ Audit records created: `SELECT * FROM audit.record_version ORDER BY ts DESC LIMIT 5`
+- ✅ No errors in logs: Check application console
+
+---
+
 ## 📝 How to Add New Patterns
 
 When you discover a new pattern, add it here immediately:

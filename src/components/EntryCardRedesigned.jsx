@@ -69,9 +69,16 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
 
   // Generate activity data from REAL audit logs
   const activityData = useMemo(() => {
+    console.log(`[ACTIVITY-DEBUG] Document "${entry.title}":`, {
+      hasRecentActivity: !!entry.recentActivity,
+      activityCount: entry.recentActivity?.length || 0,
+      sampleActivity: entry.recentActivity?.[0]
+    });
+
     if (!entry.recentActivity || entry.recentActivity.length === 0) {
       // No activity data yet (new document or audit just started)
       // Show minimal bars to indicate no recent edits
+      console.log(`[ACTIVITY-DEBUG] No activity for "${entry.title}", showing minimal bars`);
       return Array(20).fill(5);
     }
 

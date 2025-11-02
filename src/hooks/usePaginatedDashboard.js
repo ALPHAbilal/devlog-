@@ -68,7 +68,9 @@ export function usePaginatedDashboard(options = {}) {
 
       console.log('usePaginatedDashboard: Got real activity documents:', {
         documentCount: documents?.length,
-        sampleActivity: documents[0]?.recent_activity
+        sampleActivity: documents[0]?.recent_activity,
+        documentsWithActivity: documents?.filter(d => d.recent_activity && d.recent_activity.length > 0).length,
+        allDocumentIds: documents?.map(d => ({ id: d.id, title: d.title, activityCount: d.recent_activity?.length || 0 }))
       });
 
       // Transform to match existing interface and add real activity data

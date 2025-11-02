@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import EntryCard from './EntryCard';
 import EntryCardRedesigned from './EntryCardRedesigned';
-import Sparkline from './Sparkline';
+import ActivityWaveChart from './ActivityWaveChart';
 import { useTouchGestures } from '../hooks/useTouchGestures';
 import './VirtualizedGrid.css';
 
@@ -322,31 +322,37 @@ export default function VirtualizedGrid({
 
 // Compact version of EntryCard
 function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onSelect, selectionMode = false }) {
-  // Generate activity data from real audit logs (same logic as EntryCardRedesigned)
+  // Generate activity data from real audit logs - DAILY granularity (same as EntryCardRedesigned)
   const activityData = useMemo(() => {
     if (!entry.recentActivity || entry.recentActivity.length === 0) {
       // No activity data yet - show minimal activity
-      return Array(20).fill(5);
+      return Array(30).fill(5);
     }
 
-    // Group by week (simplified version for compact card)
-    const weeks = 20;
-    const weekCounts = new Array(weeks).fill(0);
+    // Group by DAY to show last 30 days of activity
+    const days = 30;
+    const dayCounts = new Array(days).fill(0);
     const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
 
     entry.recentActivity.forEach(activity => {
       const activityDate = new Date(activity.ts);
-      const weeksSince = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24 * 7));
-      if (weeksSince >= 0 && weeksSince < weeks) {
-        weekCounts[weeks - 1 - weeksSince]++;
+      activityDate.setHours(0, 0, 0, 0); // Start of activity day
+
+      const daysSince = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24));
+
+      if (daysSince >= 0 && daysSince < days) {
+        dayCounts[days - 1 - daysSince]++;
       }
     });
 
-    // Normalize to 0-100 scale
-    const maxCount = Math.max(...weekCounts, 1);
-    return weekCounts.map(count => {
+    // Use logarithmic scaling to emphasize differences
+    const maxCount = Math.max(...dayCounts, 1);
+    return dayCounts.map(count => {
       if (count === 0) return 5;
-      return Math.max(10, (count / maxCount) * 90 + 5);
+      const logScale = Math.log(count + 1) / Math.log(maxCount + 1);
+      const percentage = logScale * 90;
+      return Math.max(15, percentage + 5);
     });
   }, [entry.recentActivity]);
   
@@ -429,12 +435,12 @@ function CompactEntryCard({ entry, onExpand, searchTerm, isSelected = false, onS
         {highlightText(entry.title || entry.name || 'Untitled', searchTerm)}
       </h3>
       
-      {/* Activity Sparkline - smaller for compact cards */}
+      {/* Activity wave chart - compact version */}
       <div className="mb-1">
-        <Sparkline 
-          data={activityData} 
-          width={200} 
-          height={20}
+        <ActivityWaveChart
+          data={activityData}
+          width={200}
+          height={60}
           className="opacity-50 group-hover:opacity-90 transition-opacity duration-300"
         />
       </div>

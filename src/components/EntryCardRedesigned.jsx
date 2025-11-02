@@ -6,6 +6,7 @@ import { GripVertical, Check, MoreVertical } from 'lucide-react';
 import { useTouchGestures } from '../hooks/useTouchGestures';
 import CardContainer from './CardContainer';
 import FavoriteIndicator from './FavoriteIndicator';
+import ActivityWaveChart from './ActivityWaveChart';
 
 export default function EntryCardRedesigned({ entry, onExpand, isSelected = false, onSelect, selectionMode = false, onContextMenu }) {
   const [touchActive, setTouchActive] = useState(false);
@@ -67,46 +68,46 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
     setTimeout(() => setTouchActive(false), 100);
   };
 
-  // Generate activity data from REAL audit logs
+  // Generate activity data from REAL audit logs - DAILY granularity
   const activityData = useMemo(() => {
-    console.log(`[ACTIVITY-DEBUG] Document "${entry.title}":`, {
-      hasRecentActivity: !!entry.recentActivity,
-      activityCount: entry.recentActivity?.length || 0,
-      sampleActivity: entry.recentActivity?.[0]
-    });
-
     if (!entry.recentActivity || entry.recentActivity.length === 0) {
       // No activity data yet (new document or audit just started)
-      // Show minimal bars to indicate no recent edits
-      console.log(`[ACTIVITY-DEBUG] No activity for "${entry.title}", showing minimal bars`);
-      return Array(20).fill(5);
+      // Show minimal wave to indicate no recent edits
+      return Array(30).fill(5);
     }
 
-    // Group recent activity by week to generate 20-week timeline
-    const weeks = 20;
-    const weekCounts = new Array(weeks).fill(0);
+    // Group recent activity by DAY to show last 30 days of activity
+    // This shows DAILY work intensity - multiple edits in one day = higher wave
+    const days = 30;
+    const dayCounts = new Array(days).fill(0);
     const now = new Date();
+    now.setHours(0, 0, 0, 0); // Start of today
 
     entry.recentActivity.forEach(activity => {
       const activityDate = new Date(activity.ts);
-      const weeksSince = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24 * 7));
+      activityDate.setHours(0, 0, 0, 0); // Start of activity day
 
-      if (weeksSince >= 0 && weeksSince < weeks) {
-        // Increment count for this week (most recent = index 19)
-        weekCounts[weeks - 1 - weeksSince]++;
+      const daysSince = Math.floor((now - activityDate) / (1000 * 60 * 60 * 24));
+
+      if (daysSince >= 0 && daysSince < days) {
+        // Increment count for this day (most recent = index 29)
+        dayCounts[days - 1 - daysSince]++;
       }
     });
 
-    // Normalize to 0-100 scale for bar height (with minimum 5% for visibility)
-    const maxCount = Math.max(...weekCounts, 1);
-    return weekCounts.map(count => {
-      if (count === 0) return 5; // Minimum height for empty weeks
-      const percentage = (count / maxCount) * 90; // Scale to 90% max
-      return Math.max(10, percentage + 5); // 10-95% range with 5% baseline
+    // Use logarithmic scaling to emphasize differences between 1, 2, 5, 10+ edits
+    const maxCount = Math.max(...dayCounts, 1);
+    return dayCounts.map(count => {
+      if (count === 0) return 5; // Empty days
+
+      // Logarithmic scale: 1 edit = 20%, 2 = 35%, 5 = 60%, 10 = 80%, 20+ = 95%
+      const logScale = Math.log(count + 1) / Math.log(maxCount + 1);
+      const percentage = logScale * 90; // Scale to 90% max
+      return Math.max(15, percentage + 5); // 15-95% range
     });
   }, [entry.recentActivity]); // Regenerate when activity changes
 
-  // Always show chart for all documents (matching Figma design)
+  // Always show wave chart for all documents (matching Figma design)
   const hasChart = true;
 
   return (
@@ -169,29 +170,22 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         )}
 
         {/* Card Content */}
-        <div className="relative p-5 flex flex-col h-full min-h-[140px]">
+        <div className="relative p-5 flex flex-col h-full min-h-[160px]">
           {/* Title - exact spacing from Figma */}
           <h3 className="text-white/90 mb-4 group-hover:text-white transition-colors
                          line-clamp-3 min-h-[4.5rem] flex items-start pr-6 leading-snug">
             {entry.title}
           </h3>
 
-          {/* Chart visualization - 20 bars showing real activity from audit logs */}
+          {/* Chart visualization - Stepped wave showing DAILY activity from audit logs */}
           {hasChart && (
-            <div className="mt-auto h-16 flex items-end gap-1 px-1 pb-1">
-              {activityData.map((value, i) => (
-                <div
-                  key={i}
-                  className="flex-1 bg-gradient-to-t from-emerald-500/40 to-emerald-400/30 rounded-t
-                             group-hover:from-emerald-500/60 group-hover:to-emerald-400/50
-                             transition-all duration-300 shadow-sm shadow-emerald-500/20"
-                  style={{
-                    height: `${value}%`,
-                    transitionDelay: `${i * 20}ms`
-                  }}
-                  title={`Week ${i + 1}: ${value > 5 ? 'Active' : 'No activity'}`}
-                />
-              ))}
+            <div className="mt-auto">
+              <ActivityWaveChart
+                data={activityData}
+                width={258}
+                height={80}
+                className="group-hover:opacity-100 transition-opacity duration-300"
+              />
             </div>
           )}
 

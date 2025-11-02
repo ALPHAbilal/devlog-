@@ -187,7 +187,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
 
           {/* Chart visualization - Smooth wave showing DAILY activity from audit logs */}
           {hasChart && (
-            <div className="mt-auto">
+            <div className="mt-auto w-full">
               <ActivityWaveChart
                 data={activityData.percentages}
                 counts={activityData.counts}

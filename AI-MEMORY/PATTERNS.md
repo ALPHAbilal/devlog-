@@ -3,46 +3,60 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
-### Activity Chart Not Fitting in Document Card
+### Activity Chart Not Fitting WIDTH in Document Card
 **Date**: 2025-11-02
 **Symptoms**:
-- Activity wave chart (statistics) appears cut off or overflowing
-- Chart not displaying properly within card boundaries
-- User reports "statistics aren't showing as it should be please make it fit the zone"
+- Activity wave chart (statistics) not fitting properly in card width
+- Chart may appear cut off, overflowing, or not stretching to full available width
+- User reports "the width what i'm intrested in" / "statistics aren't showing as it should be please make it fit the zone"
 
 **Root Cause**:
-Card layout had insufficient height allocation for both title and chart:
-- Card min-height: 160px
-- Title min-height: 72px (4.5rem with line-clamp-3)
-- Chart height: 80px
-- Padding: 40px vertical (p-5 = 20px top + 20px bottom)
-- Margin bottom on title: 16px (mb-4)
-- **Total needed**: 72 + 80 + 40 + 16 = 208px (but only had 160px!)
+Chart wrapper and SVG container didn't have explicit width constraints to ensure proper fitting within card boundaries:
+1. Chart wrapper div lacked `w-full` class to take full parent width
+2. ActivityWaveChart container lacked `maxWidth: 100%` to prevent overflow
+3. SVG uses `preserveAspectRatio="none"` which stretches to container, but container width wasn't properly constrained
 
-**Solution**: Optimize spacing and increase card height
+**Solution**: Add explicit width constraints at both wrapper and component level
+
 ```jsx
-// File: src/components/EntryCardRedesigned.jsx
+// File: src/components/EntryCardRedesigned.jsx (line 190)
 
-// 1. Increase card minimum height (line 181)
-<div className="relative p-5 flex flex-col h-full min-h-[180px]">  // Was 160px
-
-// 2. Reduce title height (line 183-184)
-<h3 className="text-white/90 mb-3 group-hover:text-white transition-colors
-               line-clamp-2 flex items-start pr-6 leading-snug">  // Was line-clamp-3, mb-4
-
-// 3. Reduce chart height (line 194)
-<ActivityWaveChart
-  height={60}  // Was 80
-  ...
-/>
+// Add w-full to chart wrapper to ensure full width
+<div className="mt-auto w-full">  // Added w-full
+  <ActivityWaveChart
+    data={activityData.percentages}
+    counts={activityData.counts}
+    height={60}
+    className="group-hover:opacity-100 transition-opacity duration-300"
+  />
+</div>
 ```
 
-**New Layout Math**:
-- Title: ~2 lines = ~48px (line-clamp-2)
-- Chart: 60px
-- Padding: 40px
-- Margin: 12px (mb-3)
-- **Total**: 48 + 60 + 40 + 12 = 160px (fits comfortably in 180px min-height)
+```jsx
+// File: src/components/ActivityWaveChart.jsx (lines 100-106)
+
+// Add maxWidth constraint to prevent overflow
+<div
+  className={`relative overflow-hidden rounded-[10px] bg-white/5 ${width === 'full' ? 'w-full' : ''} ${className}`}
+  style={{
+    width: width === 'full' ? '100%' : `${width}px`,
+    height: `${height}px`,
+    maxWidth: '100%'  // Added this
+  }}
+>
+```
+
+**How This Works**:
+1. `w-full` on wrapper ensures chart takes full available width within the padded card content
+2. `width: 100%` on chart div ensures it fills the wrapper
+3. `maxWidth: 100%` prevents any overflow beyond parent boundaries
+4. SVG `preserveAspectRatio="none"` stretches wave to fit container width perfectly
+5. Card padding (p-5) provides 20px spacing on sides, chart fits within that
+
+**Additional Optimizations Applied**:
+- Reduced chart height from 80px to 60px for better proportion
+- Reduced title from line-clamp-3 to line-clamp-2
+- Increased card min-height from 160px to 180px
 
 **Related Files**:
 - `src/components/EntryCardRedesigned.jsx` - Card layout and chart rendering

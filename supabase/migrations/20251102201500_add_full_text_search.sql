@@ -146,21 +146,21 @@ BEGIN
     GROUP BY d.id, d.title, d.tags, d.created_at, d.updated_at, 
              d.metadata, d.project_id, d.folder_id, d."position", d.is_template
   )
-  SELECT DISTINCT ON (id)
-    id,
-    title,
-    tags,
-    created_at,
-    updated_at,
-    metadata,
-    project_id,
-    folder_id,
-    "position",
-    is_template,
-    match_reason,
-    MAX(match_score) OVER (PARTITION BY id) as match_score
+  SELECT DISTINCT ON (document_matches.id)
+    document_matches.id,
+    document_matches.title,
+    document_matches.tags,
+    document_matches.created_at,
+    document_matches.updated_at,
+    document_matches.metadata,
+    document_matches.project_id,
+    document_matches.folder_id,
+    document_matches."position",
+    document_matches.is_template,
+    document_matches.match_reason,
+    MAX(document_matches.match_score) OVER (PARTITION BY document_matches.id) as match_score
   FROM document_matches
-  ORDER BY id, match_score DESC, updated_at DESC
+  ORDER BY document_matches.id, document_matches.match_score DESC, document_matches.updated_at DESC
   LIMIT p_limit
   OFFSET p_offset;
 END;

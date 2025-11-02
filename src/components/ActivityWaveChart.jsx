@@ -98,12 +98,10 @@ export default function ActivityWaveChart({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[10px] bg-white/5 ${width === 'full' ? 'w-full' : ''} ${className}`}
+      className={`relative ${width === 'full' ? 'w-full' : ''} ${className}`}
       style={{
         width: width === 'full' ? '100%' : `${width}px`,
-        height: `${height}px`,
-        minHeight: `${height}px`,
-        maxWidth: '100%'
+        height: `${height}px`
       }}
     >
       <svg

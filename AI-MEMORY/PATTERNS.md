@@ -3,89 +3,104 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
-### Activity Chart Appearing as Thin Flat Line (Compressed/Squashed)
+### Activity Chart Not Matching Figma Design
 **Date**: 2025-11-02
 **Symptoms**:
-- Activity wave chart (statistics) renders as a very thin horizontal line/bar
-- Chart appears "squashed" or compressed vertically
-- Wave pattern not visible - looks awkward/flat instead of showing activity peaks and valleys
-- User reports "still the same thing" / "it's look awkward" with screenshot showing flat bar
+- Activity wave chart doesn't match the Figma design specifications
+- Chart may appear flat, awkward, or not properly styled
+- User reports "not what i want" and provides Figma link: https://www.figma.com/make/1k8C4mdimNH6f6BGzx9bCy
 
 **Root Cause**:
-Chart container was being collapsed by flex layout and didn't have proper height constraints:
-1. Chart wrapper div didn't have `flex-shrink-0` - was being compressed by flex container
-2. Chart wrapper lacked explicit `minHeight` - flex was collapsing it
-3. SVG had numeric height attribute instead of "100%" - prevented proper filling of container
-4. ActivityWaveChart container lacked `minHeight` to enforce sizing
-5. Card min-height was too small for comfortable chart display
+Chart implementation didn't match the Figma design structure:
+1. Chart lacked the dedicated container with `bg-white/5 rounded-lg backdrop-blur-sm` background
+2. Chart container had redundant styling that should be on parent
+3. SVG sizing and container structure didn't match Figma specs
 
-**Solution**: Add height constraints at multiple levels to prevent compression
+**Solution**: Match Figma design structure exactly
+
+**From Figma Design Analysis** (using Figma MCP):
+```jsx
+// Figma structure from document-card.tsx:
+<div className="bg-white/5 rounded-lg backdrop-blur-sm overflow-hidden">
+  <ActivityChart data={activityData} variant="wave" />
+</div>
+
+// ActivityChart (wave variant):
+- Fixed height: h-20 (80px)
+- SVG with viewBox="0 0 300 80" and preserveAspectRatio="none"
+- Filled path with gradient
+- Stroke line on top
+- Interactive circles on hover
+- Tooltip positioning
+```
+
+**Implementation Fix**:
 
 ```jsx
-// File: src/components/EntryCardRedesigned.jsx
+// File: src/components/EntryCardRedesigned.jsx (lines 189-200)
 
-// 1. Increase card minimum height (line 181)
-<div className="relative p-5 flex flex-col h-full min-h-[200px]">  // Was 180px
-
-// 2. Add flex-shrink-0 and minHeight to chart wrapper (line 190)
-<div className="mt-auto w-full flex-shrink-0" style={{ minHeight: '80px' }}>
-  <ActivityWaveChart
-    data={activityData.percentages}
-    counts={activityData.counts}
-    height={80}  // Restored to 80px from 60px
-    className="group-hover:opacity-100 transition-opacity duration-300"
-  />
-</div>
+{/* Chart visualization - matches Figma design */}
+{hasChart && (
+  <div className="mt-auto w-full">
+    {/* Chart container with Figma styling */}
+    <div className="bg-white/5 rounded-lg backdrop-blur-sm overflow-hidden">
+      <ActivityWaveChart
+        data={activityData.percentages}
+        counts={activityData.counts}
+        height={80}
+        className="group-hover:opacity-100 transition-opacity duration-300"
+      />
+    </div>
+  </div>
+)}
 ```
 
 ```jsx
-// File: src/components/ActivityWaveChart.jsx
+// File: src/components/ActivityWaveChart.jsx (lines 100-106)
 
-// 3. Add minHeight to chart container (lines 100-107)
+// Simplified container - styling moved to parent
 <div
-  className={`relative overflow-hidden rounded-[10px] bg-white/5 ${width === 'full' ? 'w-full' : ''} ${className}`}
+  className={`relative ${width === 'full' ? 'w-full' : ''} ${className}`}
   style={{
     width: width === 'full' ? '100%' : `${width}px`,
-    height: `${height}px`,
-    minHeight: `${height}px`,  // Added this
-    maxWidth: '100%'
+    height: `${height}px`
   }}
 >
-
-// 4. Change SVG height to "100%" (line 111)
-<svg
-  width="100%"
-  height="100%"  // Was: height={height} - now fills container properly
-  viewBox={`0 0 ${viewBoxWidth} ${height}`}
-  className="absolute inset-0"
-  preserveAspectRatio="none"
->
+  <svg
+    width="100%"
+    height="100%"  // Fills container
+    viewBox={`0 0 ${viewBoxWidth} ${height}`}
+    className="absolute inset-0"
+    preserveAspectRatio="none"
+  >
 ```
 
-**Why This Works**:
-1. **`flex-shrink-0`** prevents flex container from compressing the chart wrapper
-2. **`minHeight: '80px'`** on wrapper ensures chart has guaranteed vertical space
-3. **`minHeight: ${height}px`** on ActivityWaveChart container prevents CSS collapse
-4. **SVG `height="100%"`** makes SVG fill its container instead of using fixed pixel height
-5. **Card `min-h-[200px]`** provides enough total space for title + chart + padding
+**Key Design Principles from Figma**:
+1. **Dedicated Chart Container**: Chart wrapped in styled container with rounded corners and subtle background
+2. **Clean Separation**: Chart component focuses on visualization, parent handles container styling
+3. **Proper SVG Sizing**: SVG uses percentage-based sizing to fill container responsively
+4. **80px Height**: Standard height across all chart variants for consistency
 
-**Layout Math**:
-- Card min-height: 200px
-- Title: ~48px (2 lines)
-- Chart container: 80px (enforced with minHeight)
-- Padding: 40px (p-5)
-- Margin: 12px (mb-3)
-- **Total used**: ~180px
-- **Buffer**: 20px (allows comfortable display)
+**Layout Structure**:
+```
+Card (min-h-[200px])
+  └─ Content (p-5 flex flex-col)
+      ├─ Title (line-clamp-2, mb-3)
+      └─ Chart Wrapper (mt-auto w-full)
+          └─ Chart Container (bg-white/5 rounded-lg)
+              └─ ActivityWaveChart (h-20 = 80px)
+```
 
 **Visual Result**:
-- Chart now displays as proper wave with visible peaks and valleys
-- Activity patterns clearly visible instead of flat line
-- Professional appearance matching design intent
+- Chart matches Figma design exactly
+- Proper container with rounded corners and subtle background
+- Wave displays at correct 80px height
+- Professional appearance with backdrop blur effect
 
 **Related Files**:
-- `src/components/EntryCardRedesigned.jsx` - Card layout and chart rendering
-- `src/components/ActivityWaveChart.jsx` - Chart component (SVG visualization)
+- `src/components/EntryCardRedesigned.jsx` - Card layout with chart container
+- `src/components/ActivityWaveChart.jsx` - SVG wave visualization
+- Figma source: `components/activity-chart.tsx` and `components/document-card.tsx`
 
 ### Full-Text Search "searchDocuments is not a function" Error
 **Date**: 2025-11-02

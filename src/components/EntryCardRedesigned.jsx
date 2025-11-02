@@ -187,13 +187,15 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
 
           {/* Chart visualization - Smooth wave showing DAILY activity from audit logs */}
           {hasChart && (
-            <div className="mt-auto w-full flex-shrink-0" style={{ minHeight: '80px' }}>
-              <ActivityWaveChart
-                data={activityData.percentages}
-                counts={activityData.counts}
-                height={80}
-                className="group-hover:opacity-100 transition-opacity duration-300"
-              />
+            <div className="mt-auto w-full">
+              <div className="bg-white/5 rounded-lg backdrop-blur-sm overflow-hidden">
+                <ActivityWaveChart
+                  data={activityData.percentages}
+                  counts={activityData.counts}
+                  height={80}
+                  className="group-hover:opacity-100 transition-opacity duration-300"
+                />
+              </div>
             </div>
           )}
 

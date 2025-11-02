@@ -3,6 +3,51 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Activity Chart Not Fitting in Document Card
+**Date**: 2025-11-02
+**Symptoms**:
+- Activity wave chart (statistics) appears cut off or overflowing
+- Chart not displaying properly within card boundaries
+- User reports "statistics aren't showing as it should be please make it fit the zone"
+
+**Root Cause**:
+Card layout had insufficient height allocation for both title and chart:
+- Card min-height: 160px
+- Title min-height: 72px (4.5rem with line-clamp-3)
+- Chart height: 80px
+- Padding: 40px vertical (p-5 = 20px top + 20px bottom)
+- Margin bottom on title: 16px (mb-4)
+- **Total needed**: 72 + 80 + 40 + 16 = 208px (but only had 160px!)
+
+**Solution**: Optimize spacing and increase card height
+```jsx
+// File: src/components/EntryCardRedesigned.jsx
+
+// 1. Increase card minimum height (line 181)
+<div className="relative p-5 flex flex-col h-full min-h-[180px]">  // Was 160px
+
+// 2. Reduce title height (line 183-184)
+<h3 className="text-white/90 mb-3 group-hover:text-white transition-colors
+               line-clamp-2 flex items-start pr-6 leading-snug">  // Was line-clamp-3, mb-4
+
+// 3. Reduce chart height (line 194)
+<ActivityWaveChart
+  height={60}  // Was 80
+  ...
+/>
+```
+
+**New Layout Math**:
+- Title: ~2 lines = ~48px (line-clamp-2)
+- Chart: 60px
+- Padding: 40px
+- Margin: 12px (mb-3)
+- **Total**: 48 + 60 + 40 + 12 = 160px (fits comfortably in 180px min-height)
+
+**Related Files**:
+- `src/components/EntryCardRedesigned.jsx` - Card layout and chart rendering
+- `src/components/ActivityWaveChart.jsx` - Chart component (SVG visualization)
+
 ### Full-Text Search "searchDocuments is not a function" Error
 **Date**: 2025-11-02
 **Symptoms**:

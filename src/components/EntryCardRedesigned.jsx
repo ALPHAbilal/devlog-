@@ -178,10 +178,10 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
         )}
 
         {/* Card Content */}
-        <div className="relative p-5 flex flex-col h-full min-h-[160px]">
+        <div className="relative p-5 flex flex-col h-full min-h-[180px]">
           {/* Title - exact spacing from Figma */}
-          <h3 className="text-white/90 mb-4 group-hover:text-white transition-colors
-                         line-clamp-3 min-h-[4.5rem] flex items-start pr-6 leading-snug">
+          <h3 className="text-white/90 mb-3 group-hover:text-white transition-colors
+                         line-clamp-2 flex items-start pr-6 leading-snug">
             {entry.title}
           </h3>
 
@@ -191,7 +191,7 @@ export default function EntryCardRedesigned({ entry, onExpand, isSelected = fals
               <ActivityWaveChart
                 data={activityData.percentages}
                 counts={activityData.counts}
-                height={80}
+                height={60}
                 className="group-hover:opacity-100 transition-opacity duration-300"
               />
             </div>

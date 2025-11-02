@@ -671,9 +671,7 @@ export default function Dashboard() {
         }));
 
         setSearchResults(formattedResults);
-        console.log(`[Dashboard] Search found ${formattedResults.length} results for "${searchTerm}"`);
       } catch (error) {
-        console.error('[Dashboard] Search error:', error);
         setSearchError(error.message);
         // Fallback: keep showing paginated documents
         setSearchResults([]);
@@ -1093,20 +1091,6 @@ export default function Dashboard() {
   
   // Keep filteredEntries for compatibility (alias to displayEntries)
   const filteredEntries = displayEntries;
-
-  // Log search summary
-  useEffect(() => {
-    if (searchTerm && searchTerm.length > 0) {
-      console.log(`\n🔍 Search Results for: "${searchTerm}"`);
-      console.log(`📊 Summary: ${filteredEntries.length} results found`);
-      if (isSearching) {
-        console.log(`⏳ Searching...`);
-      }
-      if (searchError) {
-        console.error(`❌ Search error: ${searchError}`);
-      }
-    }
-  }, [searchTerm, filteredEntries.length, isSearching, searchError]);
   
   // Count uncategorized documents
   const uncategorizedCount = entries.filter(entry => !entry.project_id).length;
@@ -1508,13 +1492,6 @@ export default function Dashboard() {
                       <div className="text-white/60 text-sm">
                         {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
                       </div>
-                    </div>
-                  )}
-                  {searchTerm && searchResults.length > 0 && !isSearching && (
-                    <div className="px-6 mb-4">
-                      <p className="text-sm text-gray-600">
-                        Found <strong>{searchResults.length}</strong> document{searchResults.length !== 1 ? 's' : ''} matching "<strong>{searchTerm}</strong>"
-                      </p>
                     </div>
                   )}
                   <div className="p-6">

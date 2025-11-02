@@ -52,9 +52,15 @@ export const storageWrapper = {
 ```
 
 **Additional Issues Found**:
-- SQL function had ambiguous column reference error
-- Fixed by fully qualifying column names with `document_matches.` prefix
-- Migration file: `supabase/migrations/20251102201500_add_full_text_search.sql`
+1. **SQL function had ambiguous column reference error**
+   - Fixed by fully qualifying column names with `document_matches.` prefix
+   - Migration file: `supabase/migrations/20251102201500_add_full_text_search.sql`
+
+2. **Dashboard calling adapter directly instead of wrapper** (2025-11-02)
+   - Dashboard was calling: `const adapter = await storageWrapper.getAdapter(); adapter.searchDocuments(...)`
+   - This bypassed the wrapper and called the underlying adapter (MultiLayerStorage/IndexedDB) which doesn't have `searchDocuments`
+   - **Fix**: Call wrapper directly: `storageWrapper.searchDocuments(userId, query, options)`
+   - File: `src/pages/Dashboard.jsx` line 659-663
 
 **Verification**:
 ```sql

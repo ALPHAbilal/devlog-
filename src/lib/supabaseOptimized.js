@@ -14,6 +14,13 @@ const STORAGE_KEY = 'sb-zqcjipwiznesnbgbocnu-auth-token';
  * - Smart refresh handling
  * - Connection pooling
  * - Request deduplication
+ * - Automatic token refresh (no inactivity timeout)
+ *
+ * Session Management:
+ * Sessions persist indefinitely through automatic token refresh.
+ * No forced logout due to inactivity - users stay signed in as long as
+ * their tokens can be refreshed. This is ideal for developer tools where
+ * users frequently switch between applications.
  */
 class OptimizedSupabaseClient {
   constructor() {
@@ -27,7 +34,9 @@ class OptimizedSupabaseClient {
     this.refreshPromise = null; // Track ongoing refresh
     this.lastRefreshTime = 0;
     this.sessionTimeout = null;
-    this.inactivityTimeout = 30 * 60 * 1000; // 30 minutes default
+    // Inactivity timeout disabled - rely on Supabase's automatic token refresh
+    // Sessions will remain active as long as tokens can be refreshed
+    this.inactivityTimeout = 0; // 0 = disabled (previously 30 minutes)
   }
 
   /**
@@ -238,10 +247,18 @@ class OptimizedSupabaseClient {
 
   /**
    * Set up activity monitoring for session timeout
+   * Note: Activity monitoring is currently disabled (inactivityTimeout = 0)
+   * This method is kept for potential future use if timeout needs to be re-enabled
    */
   setupActivityMonitoring() {
+    // Skip setup if inactivity timeout is disabled
+    if (this.inactivityTimeout === 0) {
+      console.log('[Supabase] Activity monitoring disabled - sessions use automatic token refresh');
+      return;
+    }
+
     const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
-    
+
     const handleActivity = () => {
       this.resetInactivityTimer();
     };
@@ -249,7 +266,7 @@ class OptimizedSupabaseClient {
     activityEvents.forEach(event => {
       document.addEventListener(event, handleActivity, { passive: true });
     });
-    
+
     // Clean up on window unload
     window.addEventListener('beforeunload', () => {
       activityEvents.forEach(event => {
@@ -295,6 +312,11 @@ class OptimizedSupabaseClient {
 
   /**
    * Set custom inactivity timeout
+   * @param {number} minutes - Minutes until timeout (0 = disabled)
+   *
+   * Note: By default, inactivity timeout is disabled (0).
+   * Sessions rely on Supabase's automatic token refresh instead.
+   * Only enable this if your application has specific security requirements.
    */
   setInactivityTimeout(minutes) {
     // 0 means never timeout

@@ -193,6 +193,13 @@ export default function SettingsClaude() {
   const [showPasswordSheet, setShowPasswordSheet] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
+  // Authentication provider detection
+  // user.app_metadata.provider is set by Supabase for OAuth users (google, github, etc.)
+  // For email/password users, it's undefined or 'email'
+  const authProvider = user?.app_metadata?.provider;
+  const isOAuthUser = authProvider && authProvider !== 'email';
+  const isEmailPasswordUser = !authProvider || authProvider === 'email';
+
   // API Keys management state
   const [apiKeys, setApiKeys] = useState([]);
   const [apiKeysLoading, setApiKeysLoading] = useState(true);
@@ -489,42 +496,60 @@ export default function SettingsClaude() {
               </SettingGroup>
 
               <SettingGroup title="Security">
-                {isMobile ? (
-                  <button 
-                    className="password-trigger-btn"
-                    onClick={() => setShowPasswordSheet(true)}
-                  >
-                    <Lock size={20} />
-                    <span>Change Password</span>
-                  </button>
+                {isEmailPasswordUser ? (
+                  // Show password change for email/password users
+                  isMobile ? (
+                    <button
+                      className="password-trigger-btn"
+                      onClick={() => setShowPasswordSheet(true)}
+                    >
+                      <Lock size={20} />
+                      <span>Change Password</span>
+                    </button>
+                  ) : (
+                    <form onSubmit={handlePasswordChange} className="password-form">
+                      <div className="form-field">
+                        <label htmlFor="new-password">New Password</label>
+                        <input
+                          id="new-password"
+                          type="password"
+                          value={passwordForm.new}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
+                          placeholder="Enter new password"
+                          required
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label htmlFor="confirm-password">Confirm Password</label>
+                        <input
+                          id="confirm-password"
+                          type="password"
+                          value={passwordForm.confirm}
+                          onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
+                          placeholder="Confirm new password"
+                          required
+                        />
+                      </div>
+                      <Button type="submit" disabled={isLoading}>
+                        Update Password
+                      </Button>
+                    </form>
+                  )
                 ) : (
-                  <form onSubmit={handlePasswordChange} className="password-form">
-                    <div className="form-field">
-                      <label htmlFor="new-password">New Password</label>
-                      <input
-                        id="new-password"
-                        type="password"
-                        value={passwordForm.new}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, new: e.target.value })}
-                        placeholder="Enter new password"
-                        required
-                      />
+                  // Show OAuth provider info for OAuth users
+                  <div className="oauth-auth-info">
+                    <div className="setting-item">
+                      <div className="setting-content">
+                        <label className="setting-label">Authentication Method</label>
+                        <p className="setting-value" style={{ textTransform: 'capitalize' }}>
+                          {authProvider} OAuth
+                        </p>
+                        <p className="setting-description">
+                          Your password is managed by {authProvider}. Sign in to your {authProvider} account to change your password.
+                        </p>
+                      </div>
                     </div>
-                    <div className="form-field">
-                      <label htmlFor="confirm-password">Confirm Password</label>
-                      <input
-                        id="confirm-password"
-                        type="password"
-                        value={passwordForm.confirm}
-                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm: e.target.value })}
-                        placeholder="Confirm new password"
-                        required
-                      />
-                    </div>
-                    <Button type="submit" disabled={isLoading}>
-                      Update Password
-                    </Button>
-                  </form>
+                  </div>
                 )}
               </SettingGroup>
 
@@ -770,8 +795,8 @@ export default function SettingsClaude() {
         </div>
       )}
       
-      {/* Mobile Bottom Sheet for Password Change */}
-      {isMobile && (
+      {/* Mobile Bottom Sheet for Password Change - Only for email/password users */}
+      {isMobile && isEmailPasswordUser && (
         <MobileBottomSheet
           isOpen={showPasswordSheet}
           onClose={() => {
@@ -805,8 +830,8 @@ export default function SettingsClaude() {
                 />
               </div>
               <div className="mobile-actions">
-                <Button 
-                  type="button" 
+                <Button
+                  type="button"
                   variant="secondary"
                   onClick={() => {
                     setShowPasswordSheet(false);

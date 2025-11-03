@@ -86,19 +86,38 @@ export default function InlineActionBar({
   }, []);
   
   const handleMouseLeave = useCallback((e) => {
-    // Don't hide if moving to dropdown - with safe DOM checking
+    // Don't hide if moving to dropdown - with bulletproof DOM checking
+    // Fix for production error: "Failed to execute 'contains' on 'Node': parameter 1 is not of type 'Node'"
     if (e.relatedTarget && containerRef.current) {
       try {
-        // Ensure relatedTarget is a valid Node before calling contains
-        if (e.relatedTarget instanceof Node && containerRef.current.contains(e.relatedTarget)) {
-          return;
+        // Triple safety check before calling contains():
+        // 1. relatedTarget exists (already checked above)
+        // 2. containerRef.current exists (already checked above)
+        // 3. relatedTarget is a DOM Node with contains method
+        // 4. relatedTarget has nodeType property (definitive Node check)
+        if (
+          e.relatedTarget &&
+          typeof e.relatedTarget === 'object' &&
+          'nodeType' in e.relatedTarget &&
+          e.relatedTarget.nodeType === 1 && // ELEMENT_NODE = 1
+          containerRef.current &&
+          typeof containerRef.current.contains === 'function'
+        ) {
+          // Now safe to call contains with a guaranteed Element node
+          if (containerRef.current.contains(e.relatedTarget)) {
+            return; // Mouse moved within container - don't hide
+          }
         }
       } catch (err) {
-        // Silently handle edge cases where contains might fail
-        console.debug('InlineActionBar: Safe handling of mouse leave', err);
+        // Silently handle edge cases where contains might still fail
+        // Log only in development for debugging
+        if (process.env.NODE_ENV === 'development') {
+          console.debug('InlineActionBar: Safe handling of mouse leave', err);
+        }
       }
     }
-    
+
+    // Mouse left the container - hide after delay
     hideTimeoutRef.current = setTimeout(() => {
       setShowMenu(false);
       setShowDropdown(false);

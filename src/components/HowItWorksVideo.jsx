@@ -2,15 +2,14 @@ import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { staggerContainer, staggerItem } from '../utils/animations';
+import InstantCaptureDemo from './InstantCaptureDemo';
 
 const showcaseItems = [
   {
     id: 'capture',
     title: 'Instant Capture',
     description: 'Paste code snippets, save solutions, and document fixes in seconds. No formatting required.',
-    videoUrl: '/videos/capture-demo.mp4', // Replace with actual video URL
-    gifUrl: '/gifs/capture-demo.gif', // Fallback GIF
-    posterUrl: '/images/capture-poster.jpg', // Video poster
+    customComponent: <InstantCaptureDemo />, // NEW: Use live animated demo
     accentColor: 'rgba(255, 255, 255, 0.03)', // Subtle mono accent
   },
   {
@@ -40,6 +39,42 @@ function VideoShowcaseItem({ item, index }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: false, margin: "-100px" });
+
+  // If this item has a custom component, render it instead
+  if (item.customComponent) {
+    return (
+      <motion.div
+        ref={containerRef}
+        className={`showcase-item ${index % 2 === 1 ? 'showcase-item-reverse' : ''}`}
+        variants={staggerItem}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-50px" }}
+      >
+        {/* Content Section */}
+        <div className="showcase-content">
+          <h3 className="showcase-title">{item.title}</h3>
+          <p className="showcase-description">{item.description}</p>
+
+          <motion.div
+            className="showcase-features"
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="feature-tag">No setup required</div>
+            <div className="feature-tag">Works instantly</div>
+          </motion.div>
+        </div>
+
+        {/* Custom Component Section */}
+        <div className="showcase-media">
+          {item.customComponent}
+        </div>
+      </motion.div>
+    );
+  }
 
   // Auto-play when in view
   useEffect(() => {
@@ -89,8 +124,8 @@ function VideoShowcaseItem({ item, index }) {
       <div className="showcase-content">
         <h3 className="showcase-title">{item.title}</h3>
         <p className="showcase-description">{item.description}</p>
-        
-        <motion.div 
+
+        <motion.div
           className="showcase-features"
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -131,7 +166,7 @@ function VideoShowcaseItem({ item, index }) {
               <source src={item.videoUrl.replace('.mp4', '.webm')} type="video/webm" />
             </video>
           )}
-          
+
           {/* Video Controls Overlay */}
           {!useGif && (
             <motion.div
@@ -147,7 +182,7 @@ function VideoShowcaseItem({ item, index }) {
               >
                 {isPlaying ? <Pause size={20} /> : <Play size={20} />}
               </button>
-              
+
               <button
                 onClick={handleFullscreen}
                 className="control-button fullscreen"
@@ -157,7 +192,7 @@ function VideoShowcaseItem({ item, index }) {
               </button>
             </motion.div>
           )}
-          
+
           {/* Decorative Elements */}
           <div className="media-decoration media-decoration-1" />
           <div className="media-decoration media-decoration-2" />

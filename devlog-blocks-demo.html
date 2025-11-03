@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Devlog Blocks - UI Demo</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Prism.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        // Configure Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-primary': '#0a1628',
+                        'dark-secondary': '#1e3a5f',
+                        'accent-green': '#10b981',
+                        'text-primary': '#e0e7ff',
+                        'text-secondary': '#94a3b8',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom CSS Variables */
+        :root {
+            --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+            --step-1: clamp(1.125rem, 1.05rem + 0.375vw, 1.5rem);
+            --step-2: clamp(1.333rem, 1.2rem + 0.666vw, 1.875rem);
+            --step-3: clamp(1.777rem, 1.5rem + 1.385vw, 2.5rem);
+            --step-4: clamp(2.369rem, 1.8rem + 2.845vw, 3.333rem);
+            --line-height-tight: 1.2;
+            --line-height-normal: 1.58;
+            --line-height-loose: 1.8;
+        }
+
+        body {
+            background-color: #0a1628;
+            color: #e0e7ff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 58, 95, 0.2);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(30, 58, 95, 0.5);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(30, 58, 95, 0.7);
+        }
+
+        /* Custom Animations */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Code Block Styling */
+        pre[class*="language-"] {
+            background: transparent !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        code[class*="language-"] {
+            background: transparent !important;
+            color: #e0e7ff !important;
+            text-shadow: none !important;
+        }
+
+        /* Issue Tracker Timeline */
+        .issue-timeline-line {
+            position: absolute;
+            left: 12px;
+            top: 1.5rem;
+            bottom: 1.5rem;
+            width: 2px;
+            background: #2a3648;
+        }
+
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid;
+            background: #1a2638;
+        }
+
+        .timeline-dot.status-active {
+            border-color: #ef4444;
+        }
+
+        .timeline-dot.status-in-progress {
+            border-color: #3b82f6;
+        }
+
+        .timeline-dot.status-solved {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        /* Fluid Typography */
+        .heading-1 {
+            font-size: var(--step-4);
+            line-height: var(--line-height-tight);
+        }
+
+        .heading-2 {
+            font-size: var(--step-3);
+            line-height: var(--line-height-tight);
+        }
+
+        .heading-3 {
+            font-size: var(--step-2);
+            line-height: var(--line-height-tight);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-8">
+    <div class="max-w-6xl mx-auto space-y-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4 text-accent-green">Devlog Blocks UI Demo</h1>
+            <p class="text-text-secondary">All 11 block types from the Devlog document editor</p>
+        </div>
+
+        <!-- Block 1: TextBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">1. TextBlock</h2>
+            <div class="relative rounded-lg border border-dark-secondary/50 bg-dark-secondary/20 hover:bg-dark-secondary/30 transition-all duration-200 cursor-text">
+                <div class="text-text-primary p-4 rounded-lg">
+                    <div class="space-y-2">
+                        <p class="leading-relaxed">
+                            This is a <strong class="font-bold">text block</strong> with <em class="italic">markdown</em> support.
+                            You can use <code class="px-1.5 py-0.5 bg-dark-secondary/50 text-accent-green rounded text-sm font-mono">inline code</code>,
+                            create <a href="#" class="text-accent-green underline hover:text-accent-green/80">links</a>,
+                            and even add <span class="line-through">strikethrough text</span>.
+                        </p>
+                        <p class="leading-relaxed">
+                            Type '/' for commands like /h1, /h2, /code, /table, etc.
+                        </p>
+                    </div>
+                    <div class="flex gap-2 mt-3">
+                        <span class="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded">#documentation</span>
+                        <span class="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded">#demo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 2: CodeBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">2. CodeBlock</h2>
+            <div class="group relative pt-2">
+                <!-- File path badge -->
+                <div class="absolute -top-3 left-0 text-xs text-accent-green/80 bg-dark-primary px-2 py-1 rounded-t font-mono z-30 border border-accent-green/30 border-b-0">
+                    src/components/Block.jsx
+                </div>
+
+                <!-- Top-right controls -->
+                <div class="absolute top-2 right-2 flex items-center gap-2 z-20">
+                    <button class="px-2 py-1 text-xs bg-dark-primary/80 rounded text-text-secondary hover:text-text-primary flex items-center gap-1">
+                        JavaScript
+                        <i data-lucide="chevron-down" class="w-3 h-3"></i>
+                    </button>
+                    <button class="p-1 hover:bg-dark-secondary rounded opacity-0 group-hover:opacity-100 transition-opacity bg-dark-primary/80">
+                        <i data-lucide="copy" class="w-4 h-4 text-text-secondary"></i>
+                    </button>
+                </div>
+
+                <!-- Code container -->
+                <div class="bg-dark-primary rounded-lg overflow-hidden border border-dark-secondary/50">
+                    <div class="flex">
+                        <!-- Line numbers -->
+                        <div class="select-none text-text-secondary text-sm font-mono p-4 pr-0 text-right border-r border-dark-secondary/50 leading-6">
+                            <div>1</div>
+                            <div>2</div>
+                            <div>3</div>
+                            <div>4</div>
+                            <div>5</div>
+                        </div>
+                        <!-- Code -->
+                        <pre class="flex-1 p-4 pl-4 overflow-x-auto font-mono text-sm"><code class="language-javascript">function Block({ block, onUpdate }) {
+  const [isEditing, setIsEditing] = useState(false);
+
+  return <div className="block">{block.content}</div>;
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 3: HeadingBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">3. HeadingBlock</h2>
+            <div class="space-y-4">
+                <div class="text-text-primary cursor-text hover:bg-dark-secondary/30 rounded px-2 py-1 transition-colors">
+                    <h1 class="heading-1 font-bold">Heading Level 1</h1>
+                </div>
+                <div class="text-text-primary cursor-text hover:bg-dark-secondary/30 rounded px-2 py-1 transition-colors">
+                    <h2 class="heading-2 font-semibold">Heading Level 2</h2>
+                </div>
+                <div class="text-text-primary cursor-text hover:bg-dark-secondary/30 rounded px-2 py-1 transition-colors">
+                    <h3 class="heading-3 font-medium">Heading Level 3</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 4: AIBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">4. AIBlock (Conversation)</h2>
+            <div class="ai-block-container space-y-6 bg-dark-secondary/20 rounded-lg p-4">
+                <!-- Header -->
+                <div class="flex items-center gap-2 text-text-secondary">
+                    <i data-lucide="bot" class="w-5 h-5"></i>
+                    <span class="text-sm">AI Conversation</span>
+                    <span class="text-xs">(2 messages)</span>
+                    <div class="flex-grow h-px bg-dark-secondary/30"></div>
+                </div>
+
+                <!-- Messages -->
+                <div class="space-y-4">
+                    <!-- User Message -->
+                    <div class="flex gap-3 flex-row-reverse">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 border-2 border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="user" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <div class="flex-1 max-w-[85%]">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-sm font-semibold text-blue-400">You</span>
+                            </div>
+                            <div class="rounded-lg px-4 py-3 bg-dark-secondary/40 border border-dark-secondary/60 border-l-4 border-l-blue-500">
+                                <div class="text-text-primary">
+                                    How do I implement a new block type in Devlog?
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Message -->
+                    <div class="flex gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-accent-green/20 to-accent-green/10 border-2 border-accent-green/30 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="sparkles" class="w-5 h-5 text-accent-green"></i>
+                        </div>
+                        <div class="flex-1 max-w-[85%]">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="text-sm font-semibold text-accent-green">AI Assistant</span>
+                            </div>
+                            <div class="rounded-lg px-4 py-3 bg-gradient-to-br from-dark-secondary/20 to-dark-secondary/10 border border-dark-secondary/30 border-l-4 border-l-accent-green">
+                                <div class="text-text-primary space-y-2">
+                                    <p>To create a new block type, follow these steps:</p>
+                                    <ol class="list-decimal list-inside space-y-1">
+                                        <li>Create a new component in <code class="px-1 py-0.5 bg-dark-secondary/50 text-accent-green/80 text-sm rounded font-mono">src/components/blocks/</code></li>
+                                        <li>Add the block type to the mapping in <code class="px-1 py-0.5 bg-dark-secondary/50 text-accent-green/80 text-sm rounded font-mono">Block.jsx</code></li>
+                                        <li>Implement the render logic with proper styling</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 5: TableBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">5. TableBlock</h2>
+            <div class="group relative">
+                <!-- Controls -->
+                <div class="absolute -top-8 right-0 flex items-center gap-1.5 opacity-60 hover:opacity-100">
+                    <button class="px-2.5 py-1 text-xs rounded-md font-medium transition-all bg-accent-green/20 text-accent-green border border-accent-green/30">
+                        <i data-lucide="table" class="w-3 h-3 inline"></i> Header
+                    </button>
+                    <button class="p-1.5 rounded-md bg-dark-secondary/50 text-text-secondary hover:bg-dark-secondary/80 hover:text-text-primary transition-all">
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                    </button>
+                    <button class="p-1.5 rounded-md bg-dark-secondary/50 text-text-secondary hover:bg-dark-secondary/80 hover:text-text-primary transition-all">
+                        <i data-lucide="download" class="w-3 h-3"></i>
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="bg-dark-primary/50 backdrop-blur-sm rounded-lg overflow-hidden border border-dark-secondary/30 shadow-lg">
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-gradient-to-r from-dark-secondary/20 to-dark-secondary/10 border-b border-dark-secondary/30">
+                                    <td class="px-3 py-2 font-medium text-text-primary/90">Feature</td>
+                                    <td class="px-3 py-2 font-medium text-text-primary/90">Status</td>
+                                    <td class="px-3 py-2 font-medium text-text-primary/90">Priority</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-dark-secondary/20 hover:bg-dark-secondary/10 transition-colors">
+                                    <td class="px-3 py-2 text-text-primary/80">Block System</td>
+                                    <td class="px-3 py-2 text-text-primary/80">Complete</td>
+                                    <td class="px-3 py-2 text-text-primary/80">High</td>
+                                </tr>
+                                <tr class="border-b border-dark-secondary/20 hover:bg-dark-secondary/10 transition-colors">
+                                    <td class="px-3 py-2 text-text-primary/80">Markdown Support</td>
+                                    <td class="px-3 py-2 text-text-primary/80">Complete</td>
+                                    <td class="px-3 py-2 text-text-primary/80">High</td>
+                                </tr>
+                                <tr class="border-b border-dark-secondary/20 hover:bg-dark-secondary/10 transition-colors">
+                                    <td class="px-3 py-2 text-text-primary/80">Drag & Drop</td>
+                                    <td class="px-3 py-2 text-text-primary/80">In Progress</td>
+                                    <td class="px-3 py-2 text-text-primary/80">Medium</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 6: TodoBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">6. TodoBlock</h2>
+            <div class="w-full">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-medium text-text-primary">Tasks</h3>
+                        <div class="flex items-center gap-4 text-text-secondary text-sm mt-1">
+                            <span>3 total • 1 done</span>
+                            <div class="w-24 h-1.5 bg-dark-secondary/50 rounded-full overflow-hidden">
+                                <div class="h-full bg-accent-green transition-all duration-300" style="width: 33%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="flex items-center gap-1 px-3 py-1.5 bg-accent-green/10 text-accent-green rounded hover:bg-accent-green/20 transition-colors text-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add Task
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-dark-secondary/50">
+                                <th class="text-left py-2 px-3 text-xs font-medium text-text-secondary w-8"></th>
+                                <th class="text-left py-2 px-3 text-xs font-medium text-text-secondary">Task</th>
+                                <th class="text-left py-2 px-3 text-xs font-medium text-text-secondary">Status</th>
+                                <th class="text-left py-2 px-3 text-xs font-medium text-text-secondary">Priority</th>
+                                <th class="text-left py-2 px-3 text-xs font-medium text-text-secondary">Due Date</th>
+                                <th class="text-left py-2 px-3 text-xs font-medium text-text-secondary w-20">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-dark-secondary/30 hover:bg-dark-secondary/10 transition-colors">
+                                <td class="px-3 py-2">
+                                    <i data-lucide="grip-vertical" class="w-4 h-4 text-text-secondary/50 cursor-move"></i>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-text-primary">Implement new block types</td>
+                                <td class="px-3 py-2">
+                                    <span class="px-2 py-1 rounded text-xs font-medium bg-blue-400/10 text-blue-400">In Progress</span>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <span class="inline-flex items-center gap-1 text-xs text-red-400">🔴 High</span>
+                                </td>
+                                <td class="px-3 py-2 text-xs text-text-secondary">2025-11-10</td>
+                                <td class="px-3 py-2">
+                                    <button class="p-1 text-text-secondary/50 hover:text-red-400 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-dark-secondary/30 hover:bg-dark-secondary/10 transition-colors">
+                                <td class="px-3 py-2">
+                                    <i data-lucide="grip-vertical" class="w-4 h-4 text-text-secondary/50 cursor-move"></i>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-text-primary">Write documentation</td>
+                                <td class="px-3 py-2">
+                                    <span class="px-2 py-1 rounded text-xs font-medium bg-green-400/10 text-green-400">Done</span>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <span class="inline-flex items-center gap-1 text-xs text-yellow-400">🟡 Medium</span>
+                                </td>
+                                <td class="px-3 py-2 text-xs text-text-secondary">2025-11-05</td>
+                                <td class="px-3 py-2">
+                                    <button class="p-1 text-text-secondary/50 hover:text-red-400 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="border-b border-dark-secondary/30 hover:bg-dark-secondary/10 transition-colors">
+                                <td class="px-3 py-2">
+                                    <i data-lucide="grip-vertical" class="w-4 h-4 text-text-secondary/50 cursor-move"></i>
+                                </td>
+                                <td class="px-3 py-2 text-sm text-text-primary">Add unit tests</td>
+                                <td class="px-3 py-2">
+                                    <span class="px-2 py-1 rounded text-xs font-medium bg-gray-400/10 text-gray-400">Todo</span>
+                                </td>
+                                <td class="px-3 py-2">
+                                    <span class="inline-flex items-center gap-1 text-xs text-blue-400">🔵 Low</span>
+                                </td>
+                                <td class="px-3 py-2 text-xs text-text-secondary">2025-11-15</td>
+                                <td class="px-3 py-2">
+                                    <button class="p-1 text-text-secondary/50 hover:text-red-400 transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 7: FileTreeBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">7. FileTreeBlock</h2>
+            <div class="bg-dark-secondary/20 rounded-lg p-4">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="folder" class="w-5 h-5 text-text-secondary"></i>
+                        <span class="text-sm text-text-secondary">File Tree</span>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button class="p-1.5 hover:bg-dark-secondary/50 rounded text-text-secondary/60 hover:text-accent-green transition-colors">
+                            <i data-lucide="folder-plus" class="w-4 h-4"></i>
+                        </button>
+                        <button class="p-1.5 hover:bg-dark-secondary/50 rounded text-text-secondary/60 hover:text-accent-green transition-colors">
+                            <i data-lucide="file-plus" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tree -->
+                <div class="space-y-1">
+                    <!-- Folder: src -->
+                    <div>
+                        <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-dark-secondary/30 transition-all duration-200 group">
+                            <i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-text-secondary/30 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                            <i data-lucide="chevron-right" class="w-4 h-4 text-text-secondary/60 transition-transform"></i>
+                            <i data-lucide="folder" class="w-4 h-4 text-text-secondary/60"></i>
+                            <span class="flex-1 text-sm text-text-primary">src</span>
+                        </div>
+
+                        <!-- Nested files -->
+                        <div class="ml-8 space-y-1">
+                            <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-dark-secondary/30 transition-all duration-200 group">
+                                <i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-text-secondary/30 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                <i data-lucide="file-code" class="w-4 h-4 text-accent-green"></i>
+                                <span class="flex-1 text-sm text-text-primary">App.jsx</span>
+                                <span class="text-xs text-text-secondary/50">1.2kb</span>
+                            </div>
+                            <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-dark-secondary/30 transition-all duration-200 group">
+                                <i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-text-secondary/30 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                <i data-lucide="file-code" class="w-4 h-4 text-accent-green"></i>
+                                <span class="flex-1 text-sm text-text-primary">Block.jsx</span>
+                                <span class="text-xs text-text-secondary/50">3.4kb</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File: package.json -->
+                    <div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-dark-secondary/30 transition-all duration-200 group">
+                        <i data-lucide="grip-vertical" class="w-3.5 h-3.5 text-text-secondary/30 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                        <i data-lucide="file-code" class="w-4 h-4 text-text-secondary"></i>
+                        <span class="flex-1 text-sm text-text-primary">package.json</span>
+                        <span class="text-xs text-text-secondary/50">892b</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 8: ImageBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">8. ImageBlock (Gallery)</h2>
+            <div class="rounded-lg border border-dark-secondary/50 p-4">
+                <!-- Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2 text-text-secondary">
+                        <i data-lucide="grid-3x3" class="w-4 h-4"></i>
+                        <span class="text-sm">3 images</span>
+                    </div>
+                    <button class="px-3 py-1.5 bg-dark-secondary/50 text-text-secondary hover:bg-dark-secondary hover:text-text-primary rounded transition-all text-sm flex items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add more
+                    </button>
+                </div>
+
+                <!-- Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Image 1 -->
+                    <div class="group relative rounded-lg overflow-hidden bg-dark-secondary/30">
+                        <div class="relative w-full h-48 bg-gradient-to-br from-accent-green/20 to-accent-green/5 flex items-center justify-center">
+                            <i data-lucide="image" class="w-12 h-12 text-accent-green/40"></i>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-1.5 bg-dark-primary/90 rounded hover:bg-dark-primary text-text-secondary hover:text-text-primary transition-all">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                            <button class="p-1.5 bg-dark-primary/90 rounded hover:bg-red-500/20 text-text-secondary hover:text-red-400 transition-all">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-dark-primary to-transparent">
+                            <p class="text-xs text-text-secondary/80 truncate">Image placeholder 1</p>
+                        </div>
+                    </div>
+
+                    <!-- Image 2 -->
+                    <div class="group relative rounded-lg overflow-hidden bg-dark-secondary/30">
+                        <div class="relative w-full h-48 bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center">
+                            <i data-lucide="image" class="w-12 h-12 text-blue-400/40"></i>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-1.5 bg-dark-primary/90 rounded hover:bg-dark-primary text-text-secondary hover:text-text-primary transition-all">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                            <button class="p-1.5 bg-dark-primary/90 rounded hover:bg-red-500/20 text-text-secondary hover:text-red-400 transition-all">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-dark-primary to-transparent">
+                            <p class="text-xs text-text-secondary/80 truncate">Image placeholder 2</p>
+                        </div>
+                    </div>
+
+                    <!-- Image 3 -->
+                    <div class="group relative rounded-lg overflow-hidden bg-dark-secondary/30">
+                        <div class="relative w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                            <i data-lucide="image" class="w-12 h-12 text-purple-400/40"></i>
+                        </div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-primary/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div class="absolute top-2 right-2 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="p-1.5 bg-dark-primary/90 rounded hover:bg-dark-primary text-text-secondary hover:text-text-primary transition-all">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                            </button>
+                            <button class="p-1.5 bg-dark-primary/90 rounded hover:bg-red-500/20 text-text-secondary hover:text-red-400 transition-all">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-dark-primary to-transparent">
+                            <p class="text-xs text-text-secondary/80 truncate">Image placeholder 3</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 9: InlineImageBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">9. InlineImageBlock</h2>
+            <div class="text-text-primary">
+                <p class="leading-relaxed">
+                    This is regular text with an inline image
+                    <span class="inline-block align-middle my-1 group relative">
+                        <span class="inline-block h-5 w-auto max-w-[60px] bg-gradient-to-br from-accent-green/20 to-accent-green/5 border border-dark-secondary/50 hover:border-accent-green/50 rounded cursor-zoom-in transition-colors px-2 py-0.5 text-xs text-accent-green/60 flex items-center">
+                            <i data-lucide="image" class="w-3 h-3"></i>
+                        </span>
+                    </span>
+                    embedded within the paragraph. You can click to expand it.
+                </p>
+            </div>
+        </div>
+
+        <!-- Block 10: VersionTrackBlock (Simplified) -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">10. VersionTrackBlock</h2>
+            <div class="bg-dark-primary rounded-lg border-2 border-dark-secondary flex h-[400px]">
+                <!-- Sidebar -->
+                <div class="w-64 bg-dark-secondary border-r-2 border-dark-secondary flex flex-col">
+                    <div class="px-3 py-2 border-b border-dark-secondary/50 flex items-center justify-between">
+                        <span class="text-xs font-medium text-text-secondary">FILES</span>
+                        <button class="p-1 hover:bg-dark-primary/50 rounded transition-colors">
+                            <i data-lucide="plus" class="w-3.5 h-3.5 text-text-secondary"></i>
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2">
+                        <div class="flex items-center gap-1 px-2 py-1 text-sm hover:bg-dark-primary/50 transition-colors rounded cursor-pointer text-text-secondary">
+                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            <i data-lucide="folder" class="w-4 h-4"></i>
+                            <span>src</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main content -->
+                <div class="flex-1 flex flex-col">
+                    <div class="px-4 py-3 border-b border-dark-secondary/50 bg-dark-secondary flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="git-branch" class="w-4 h-4 text-text-secondary"></i>
+                            <span class="text-sm text-text-secondary">main</span>
+                        </div>
+                        <button class="px-3 py-1 text-sm text-text-secondary hover:text-text-primary hover:bg-dark-primary/50 rounded border border-dark-secondary/50">
+                            Edit code
+                        </button>
+                    </div>
+
+                    <!-- Canvas area placeholder -->
+                    <div class="h-32 bg-dark-primary border-b border-dark-secondary flex items-center justify-center">
+                        <div class="text-text-secondary/50 text-sm">Metro Map Visualization Canvas</div>
+                    </div>
+
+                    <!-- Code editor area -->
+                    <div class="flex-1 bg-dark-primary flex items-center justify-center">
+                        <div class="text-center">
+                            <i data-lucide="file-text" class="w-12 h-12 mx-auto mb-3 text-dark-secondary"></i>
+                            <p class="text-text-secondary/70 text-sm mb-2">No file selected</p>
+                            <p class="text-text-secondary/70 text-xs">Create or select a file to start editing</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Block 11: IssueTrackerBlock -->
+        <div class="block-section">
+            <h2 class="text-xl font-semibold mb-4 text-accent-green">11. IssueTrackerBlock</h2>
+            <div class="bg-dark-secondary/30 backdrop-blur-sm rounded-xl p-6 border border-dark-primary/50 max-h-[500px] flex flex-col">
+                <!-- Milestone -->
+                <div class="flex items-center gap-2 mb-4">
+                    <i data-lucide="target" class="w-5 h-5 text-green-500"></i>
+                    <h3 class="text-lg font-semibold text-white">Version 1.0 Release</h3>
+                </div>
+
+                <!-- Issues timeline -->
+                <div class="flex-1 overflow-y-auto">
+                    <div class="relative" style="position: relative;">
+                        <!-- Timeline line -->
+                        <div class="issue-timeline-line"></div>
+
+                        <!-- Issue 1 -->
+                        <div class="grid gap-6 mb-8" style="grid-template-columns: 24px 1fr;">
+                            <div class="flex justify-center pt-1">
+                                <div class="timeline-dot status-solved"></div>
+                            </div>
+                            <div>
+                                <div class="bg-dark-primary/50 backdrop-blur-sm rounded-lg p-3 border border-dark-secondary/30">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <button class="text-text-secondary hover:text-text-primary transition-colors">
+                                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                                        </button>
+                                        <h4 class="flex-1 text-text-primary font-medium">Authentication bug fixed</h4>
+                                        <i data-lucide="check" class="w-4 h-4 text-green-500"></i>
+                                    </div>
+                                    <p class="text-sm text-text-secondary/80 leading-relaxed ml-6">
+                                        Users were unable to login on mobile devices. Fixed JWT validation logic.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Issue 2 -->
+                        <div class="grid gap-6 mb-8" style="grid-template-columns: 24px 1fr;">
+                            <div class="flex justify-center pt-1">
+                                <div class="timeline-dot status-in-progress"></div>
+                            </div>
+                            <div>
+                                <div class="bg-dark-primary/50 backdrop-blur-sm rounded-lg p-3 border border-dark-secondary/30">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <button class="text-text-secondary hover:text-text-primary transition-colors">
+                                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                        </button>
+                                        <h4 class="flex-1 text-text-primary font-medium">Performance optimization needed</h4>
+                                        <i data-lucide="clock" class="w-4 h-4 text-blue-500"></i>
+                                    </div>
+                                    <p class="text-sm text-text-secondary/80 leading-relaxed ml-6">
+                                        Dashboard loads slowly with large datasets. Investigating lazy loading solutions.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Issue 3 -->
+                        <div class="grid gap-6" style="grid-template-columns: 24px 1fr;">
+                            <div class="flex justify-center pt-1">
+                                <div class="timeline-dot status-active"></div>
+                            </div>
+                            <div>
+                                <div class="bg-dark-primary/50 backdrop-blur-sm rounded-lg p-3 border border-dark-secondary/30">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <button class="text-text-secondary hover:text-text-primary transition-colors">
+                                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                        </button>
+                                        <h4 class="flex-1 text-text-primary font-medium">Add export functionality</h4>
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>
+                                    </div>
+                                    <p class="text-sm text-text-secondary/80 leading-relaxed ml-6">
+                                        Users need ability to export documents to PDF and Markdown formats.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add issue button -->
+                <button class="mt-4 w-full py-3 border-2 border-dashed border-dark-secondary/50 rounded-lg text-text-secondary hover:text-accent-green hover:border-accent-green/50 transition-all flex items-center justify-center gap-2 text-sm font-medium">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add Issue
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center pt-12 pb-4 text-text-secondary/50 text-sm">
+            <p>Devlog Blocks Demo - All 11 block types • Created from research on 2025-11-03</p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Initialize Prism for syntax highlighting
+        if (typeof Prism !== 'undefined') {
+            Prism.highlightAll();
+        }
+
+        // Add basic interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Devlog Blocks Demo loaded successfully!');
+
+            // Add click handlers for collapsible sections (can be expanded)
+            const chevrons = document.querySelectorAll('[data-lucide="chevron-right"]');
+            chevrons.forEach(chevron => {
+                chevron.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    // Rotate chevron
+                    this.style.transform = this.style.transform === 'rotate(90deg)' ? 'rotate(0deg)' : 'rotate(90deg)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

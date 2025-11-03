@@ -3,6 +3,46 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Activity Chart Display Issue - Dashboard vs Demo (160px Constraint Solution)
+**Date**: 2025-11-02
+**Symptoms**:
+- Activity wave chart appears compressed/flat in dashboard cards
+- Demo HTML shows chart perfectly but dashboard looks "very very different"
+- Chart appears as thin line instead of prominent wave
+
+**Root Causes Identified**:
+1. **VirtualizedGrid height constraint** (160px) vs card content requirements (200px) = 40px shortfall
+2. **Double overflow clipping** - CardContainer AND chart wrapper both had `overflow-hidden`
+3. **Chart not designed for 160px constraint** - was designed for 200px card
+
+**Solution Strategy**: Design chart to FIT within 160px instead of increasing grid height
+
+**Implementation** (Figma Make design applied):
+1. **Removed double overflow** - CardContainer.jsx line 12: removed `overflow-hidden`
+2. **Applied Figma constraints** - EntryCardRedesigned.jsx:
+   ```jsx
+   // Card content: 120px available (160px - 40px padding)
+   // Title zone: 22-45px (1-2 lines) + 12px margin = 34-57px
+   // Chart zone: flex: 1, minHeight: 63px, maxHeight: 86px
+   <div style={{ flex: '1', minHeight: '63px', maxHeight: '86px' }}>
+     <ActivityWaveChart height={70} />
+   </div>
+   ```
+3. **Simplified ActivityWaveChart** - ActivityWaveChart.jsx:
+   - Fixed viewBox: `0 0 300 70` (was dynamic)
+   - Simplified path generation: straight L commands (was quadratic bezier)
+   - Single gradient layer (removed overlay wave)
+   - Height: 70px (was 80px)
+
+**Files Changed**:
+- `src/components/CardContainer.jsx` (line 12)
+- `src/components/EntryCardRedesigned.jsx` (lines 180-203)
+- `src/components/ActivityWaveChart.jsx` (complete rewrite to match Figma)
+
+**Result**: Chart displays prominently within 160px card constraint, matching demo appearance.
+
+**Key Learning**: When faced with layout constraints, redesign within constraints rather than fighting them.
+
 ### Activity Chart Not Matching Figma Design
 **Date**: 2025-11-02
 **Symptoms**:

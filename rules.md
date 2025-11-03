@@ -23,7 +23,7 @@
 **For ANY error in ANY language/framework:**
 
 ```markdown
-□ 0. AI-MEMORY CHECK (MUST DO FIRST)
+□ 0. AI-MEMORY CHECK (MUST DO FIRST))
    - [ ] Checked /AI-MEMORY/PATTERNS.md for known issues?
    - [ ] Checked /AI-MEMORY/NOW.md for current work context?
    - [ ] Checked /AI-MEMORY/DECISIONS.md for architecture rationale?

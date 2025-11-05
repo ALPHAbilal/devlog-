@@ -475,12 +475,14 @@ export default function ExpandedView({
     });
     
     // Check if this is a significant update that needs saving
-    const needsSave = updates.content !== undefined || 
-                     updates.data !== undefined || 
+    const needsSave = updates.content !== undefined ||
+                     updates.data !== undefined ||
                      updates.metadata !== undefined ||
                      updates.tags !== undefined ||
                      updates.messages !== undefined ||     // AI blocks
-                     updates.treeData !== undefined ||     // FileTree blocks  
+                     updates.treeData !== undefined ||     // FileTree blocks
+                     updates.snapshots !== undefined ||    // FileTree snapshots
+                     updates.currentSnapshotId !== undefined || // FileTree snapshot ID
                      updates.images !== undefined ||       // Image blocks
                      updates.items !== undefined ||        // Todo blocks
                      updates.url !== undefined ||          // InlineImage blocks

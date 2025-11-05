@@ -1606,6 +1606,64 @@ WHERE proname = 'insert_update_delete_trigger';
 
 ---
 
+### Missing NPM Dependency During Build - Radix UI Popover
+**Date**: 2025-11-05
+**Symptom**: Vercel build fails with "Rollup failed to resolve import @radix-ui/react-popover"
+**Root Cause**: Component imports package but it's not in package.json dependencies
+**Error Message**:
+```
+[vite]: Rollup failed to resolve import "@radix-ui/react-popover" from "/vercel/path0/src/components/blocks/FileTreeBlock.jsx".
+This is most likely unintended because it can break your application at runtime.
+```
+
+**Complete Solution**:
+1. **Container Check**: Always check package.json (one level above import)
+2. **Add Dependency**: Add missing package to dependencies (not devDependencies)
+3. **Version Match**: Use same version as other Radix UI packages for consistency
+
+```json
+// package.json
+{
+  "dependencies": {
+    "@radix-ui/react-popover": "^1.1.6",  // Add this line
+    // ... other dependencies
+  }
+}
+```
+
+**Why This Happens**:
+- Developer adds import in code during feature implementation
+- Forgets to add package to package.json
+- Works in dev if package already installed in node_modules
+- Fails in production when building from clean state
+
+**Verification**:
+```bash
+# Check if package is installed
+npm ls @radix-ui/react-popover
+
+# Install if missing
+npm install @radix-ui/react-popover
+```
+
+**Files Affected**:
+- `package.json` - Add dependency here
+- `src/components/blocks/FileTreeBlock.jsx` - Uses the import
+
+**Prevention**:
+- Always check package.json after adding new imports
+- Use IDE extensions that warn about missing dependencies
+- Review package.json in PR checklist
+
+**Time Saved**: 15-30 minutes debugging build failures
+**Impact**: Prevents deployment failures and production outages
+
+**Related Patterns**:
+- Import Not Defined Error (similar root cause)
+- Environment Variables Not Loading (different missing config type)
+
+---
+
 ## 📝 How to Add New Patterns
 
 When you discover a new pattern, add it here immediately:

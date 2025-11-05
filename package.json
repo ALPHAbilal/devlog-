@@ -15,6 +15,7 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@gitgraph/react": "^1.6.0",
+    "@radix-ui/react-popover": "^1.1.6",
     "@sentry/react": "^9.40.0",
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",

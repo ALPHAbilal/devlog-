@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Type, Code, MessageSquare, Heading, Folder, Table, CheckSquare, GitBranch } from 'lucide-react';
+import { Type, Code, MessageSquare, Heading, Folder, Table, CheckSquare } from 'lucide-react';
 
 const blockTypes = [
   { type: 'text', label: 'Text', icon: Type },
@@ -9,7 +9,6 @@ const blockTypes = [
   { type: 'todo', label: 'Todo List', icon: CheckSquare },
   { type: 'ai', label: 'AI Chat', icon: MessageSquare },
   { type: 'filetree', label: 'File Tree', icon: Folder },
-  { type: 'version-track', label: 'Version Track', icon: GitBranch },
 ];
 
 export default function BlockTypeSelector({ onSelect, onClose }) {

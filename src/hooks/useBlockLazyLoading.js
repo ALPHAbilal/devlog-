@@ -15,8 +15,7 @@ export function useBlockLazyLoading(blockType, options = {}) {
   
   // Determine if this block type is heavy and needs lazy loading
   const isHeavyBlock = [
-    'version-track',
-    'issue-tracker', 
+    'issue-tracker',
     'ai',
     'filetree'
   ].includes(blockType);

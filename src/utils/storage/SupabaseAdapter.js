@@ -1065,8 +1065,8 @@ export class SupabaseAdapter {
       baseBlock.versionOf = block.version_of;
     }
 
-    // For blocks that use 'data' property (table, todo, template, version-track, issue-tracker), restore it from metadata
-    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'version-track' || block.type === 'issue-tracker') {
+    // For blocks that use 'data' property (table, todo, template, issue-tracker), restore it from metadata
+    if (block.type === 'table' || block.type === 'todo' || block.type === 'template' || block.type === 'issue-tracker') {
       baseBlock.data = block.metadata || {};
       // console.log(`🟧 SupabaseAdapter: Restoring data property for ${block.type} block:`, {
       //   blockId: block.id,
@@ -1142,16 +1142,6 @@ export class SupabaseAdapter {
         dbBlock.metadata[key] = block[key];
       }
     });
-
-    // Generate content preview for version-track blocks
-    if (block.type === 'version-track' && block.data?.repository) {
-      const repo = block.data.repository;
-      const versionCount = Object.keys(repo.versions || {}).length;
-      const branchCount = Object.keys(repo.branches || {}).length;
-      const currentVersion = repo.HEAD ? repo.versions[repo.HEAD] : null;
-      
-      dbBlock.content = `Version Control: ${versionCount} versions, ${branchCount} branches${currentVersion ? ` - Latest: "${currentVersion.message}"` : ''}`;
-    }
 
     return dbBlock;
   }

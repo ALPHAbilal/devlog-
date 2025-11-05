@@ -125,7 +125,6 @@ src/
 │   │   ├── ImageBlock.jsx      # Image display
 │   │   ├── InlineImageBlock.jsx # Inline image blocks
 │   │   ├── AIBlockRefined.jsx  # AI conversation blocks (used as AIBlock)
-│   │   ├── OptimizedVersionTrackBlock.jsx  # Version tracking
 │   │   └── OptimizedIssueTrackerBlock.jsx  # Issue tracking
 │   │
 │   ├── Block.jsx               # Main block renderer/coordinator
@@ -284,6 +283,8 @@ src/
 - `src/components/blocks/GitGraphBranching.jsx` - Git graph visualization (unused)
 - `src/components/blocks/TimelineBranch.jsx` - Timeline branch (unused)
 - `src/components/blocks/IssueTrackerBlock.jsx` - Replaced by OptimizedIssueTrackerBlock.jsx
+- `src/components/blocks/VersionTrackBlock.jsx` - DELETED 2025-11-05 (version tracking feature removed)
+- `src/components/blocks/OptimizedVersionTrackBlock.jsx` - DELETED 2025-11-05 (version tracking feature removed)
 
 #### Contexts
 - `src/contexts/AuthContext.jsx` - Replaced by AuthContextOptimized.jsx

@@ -10,7 +10,6 @@ import TableBlock from './blocks/TableBlock';
 import TodoBlock from './blocks/TodoBlock';
 import ImageBlock from './blocks/ImageBlock';
 import InlineImageBlock from './blocks/InlineImageBlock';
-import OptimizedVersionTrackBlock from './blocks/OptimizedVersionTrackBlock';
 import OptimizedIssueTrackerBlock from './blocks/OptimizedIssueTrackerBlock';
 import BlockDivider from './BlockDivider';
 import InlineActionBar from './InlineActionBar';
@@ -27,7 +26,6 @@ const blockComponents = {
   todo: TodoBlock,
   image: ImageBlock,
   'inline-image': InlineImageBlock,
-  'version-track': OptimizedVersionTrackBlock,
   'issue-tracker': OptimizedIssueTrackerBlock,
 };
 
@@ -45,8 +43,6 @@ const getEstimatedHeight = (block) => {
     case 'ai':
       const messageCount = block.messages?.length || 0;
       return Math.max(200, messageCount * 100);
-    case 'version-track':
-      return 400;
     case 'issue-tracker':
       return 350;
     case 'table':

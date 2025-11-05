@@ -141,6 +141,36 @@ Sentry.captureException(error, {
 
 ---
 
+## Version-Track Block Type Removed (2025-11-05)
+
+**Status**: DELETED
+**Reason**: Unused feature, complex implementation, maintenance burden
+**Blocks deleted**: 43 blocks (~2% of total)
+**Migration**: `remove_version_track_block_type.sql`
+
+**What was removed**:
+- `OptimizedVersionTrackBlock.jsx` and `VersionTrackBlock.jsx` components
+- 40+ references across codebase
+- Database constraint updated to exclude 'version-track'
+- Demo file `filetree-version-tracker-demo.html` deleted
+
+**If referenced in old code**:
+- Block type no longer exists
+- Database constraint prevents creation
+- Old blocks were permanently deleted (43 blocks total)
+- Any code attempting to create version-track blocks will fail with constraint error
+
+**Files cleaned**:
+- Block.jsx, BlockTypeSelector.jsx, AddBlockRow.jsx, MobileAddBlockRow.jsx
+- ExpandedViewEnhanced.jsx, TextBlock.jsx, LazyBlockSkeleton.jsx
+- useBlockLazyLoading.js, blockSerializer.js
+- SupabaseAdapter.js, blockStreamer.js, performanceUtils.js
+- VirtualizedExpandedView.jsx, ExpandedView.jsx (legacy)
+- devlog-mcp-remote/src/tools.ts (MCP server)
+- CLAUDE.md documentation
+
+---
+
 ### Activity Chart Display Issue - Dashboard vs Demo (160px Constraint Solution)
 **Date**: 2025-11-02
 **Symptoms**:

@@ -32,18 +32,7 @@ function serializeBlockContent(block: any): string {
         milestone: block.milestone || block.data?.milestone || '',
         issues: block.issues || block.data?.issues || []
       });
-      
-    case 'version-track':
-    case 'versionTrack':
-      // Version track wraps data in a data object
-      return JSON.stringify({
-        data: block.data || {
-          repository: null,
-          commits: [],
-          branches: []
-        }
-      });
-      
+
     case 'filetree':
     case 'file-tree':
       // File tree stores tree structure

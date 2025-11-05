@@ -1,8 +1,7 @@
 import React from 'react';
-import { 
-  GitBranch, 
-  CheckSquare, 
-  MessageSquare, 
+import {
+  CheckSquare,
+  MessageSquare,
   FileText,
   Loader2
 } from 'lucide-react';
@@ -14,19 +13,6 @@ import {
 export default function LazyBlockSkeleton({ blockType, estimatedHeight = 200 }) {
   const getSkeletonContent = () => {
     switch (blockType) {
-      case 'version-track':
-        return (
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-dark-secondary/30 rounded-lg">
-              <GitBranch size={20} className="text-blue-400/60" />
-            </div>
-            <div className="flex-1">
-              <div className="h-4 bg-dark-secondary/40 rounded w-48 mb-2"></div>
-              <div className="h-3 bg-dark-secondary/30 rounded w-32"></div>
-            </div>
-          </div>
-        );
-        
       case 'issue-tracker':
         return (
           <div className="flex items-center gap-3 mb-4">
@@ -94,25 +80,7 @@ export default function LazyBlockSkeleton({ blockType, estimatedHeight = 200 }) 
         <div className="h-3 bg-dark-secondary/30 rounded w-full"></div>
         <div className="h-3 bg-dark-secondary/30 rounded w-5/6"></div>
         <div className="h-3 bg-dark-secondary/30 rounded w-3/4"></div>
-        
-        {blockType === 'version-track' && (
-          <>
-            {/* Metro map skeleton */}
-            <div className="mt-6 p-4 bg-dark-secondary/20 rounded-lg">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-3 h-3 bg-blue-400/40 rounded-full"></div>
-                <div className="h-2 bg-blue-400/30 rounded flex-1"></div>
-                <div className="w-3 h-3 bg-green-400/40 rounded-full"></div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-400/40 rounded-full"></div>
-                <div className="h-2 bg-purple-400/30 rounded flex-1"></div>
-                <div className="w-3 h-3 bg-red-400/40 rounded-full"></div>
-              </div>
-            </div>
-          </>
-        )}
-        
+
         {blockType === 'ai' && (
           <>
             {/* Chat messages skeleton */}

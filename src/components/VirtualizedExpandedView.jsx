@@ -31,8 +31,6 @@ const getEstimatedHeight = (block) => {
     case 'ai':
       const messageCount = block.messages?.length || 0;
       return Math.max(200, messageCount * 100);
-    case 'version-track':
-      return 400; // Heavy component, fixed height
     case 'issue-tracker':
       return 350; // Heavy component, fixed height
     case 'table':
@@ -189,11 +187,6 @@ export default function VirtualizedExpandedView({
       newBlock.messages = [];
     } else if (type === 'heading') {
       newBlock.level = 2;
-    } else if (type === 'version-track') {
-      newBlock.title = 'New Version Track';
-      newBlock.versions = [];
-      newBlock.currentVersion = null;
-      newBlock.viewMode = 'metro';
     }
 
     let updatedBlocks;

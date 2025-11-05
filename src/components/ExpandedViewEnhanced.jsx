@@ -51,8 +51,6 @@ const getEstimatedHeight = (block) => {
     case 'ai':
       const messageCount = block.messages?.length || 0;
       return Math.max(200, messageCount * 100);
-    case 'version-track':
-      return 400; // Heavy component, fixed height for performance
     case 'issue-tracker':
       return 350; // Heavy component, fixed height for performance
     case 'table':

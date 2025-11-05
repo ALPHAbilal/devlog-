@@ -105,17 +105,6 @@ export function serializeBlock(block) {
       });
       break;
 
-    case 'version-track':
-      // Version tracking blocks store repository data
-      serialized.content = JSON.stringify({
-        data: block.data || {
-          repository: null,
-          commits: [],
-          branches: []
-        }
-      });
-      break;
-
     case 'inlineImage':
       // Inline image blocks
       serialized.content = JSON.stringify({
@@ -371,26 +360,6 @@ export function deserializeBlock(block) {
         }
         break;
 
-      case 'version-track':
-        // Restore version tracking data
-        if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          deserialized.data = parsed.data || {
-            repository: null,
-            commits: [],
-            branches: []
-          };
-        } else {
-          deserialized.data = {
-            repository: null,
-            commits: [],
-            branches: []
-          };
-        }
-        break;
-
       case 'inlineImage':
         // Restore inline image data
         if (block.content) {
@@ -467,10 +436,7 @@ export function validateBlock(block) {
     
     case 'filetree':
       return Array.isArray(block.treeData);
-    
-    case 'version-track':
-      return block.data !== undefined;
-    
+
     case 'inlineImage':
       return typeof block.url === 'string';
     

@@ -187,8 +187,8 @@ function generateRecommendations(blockStats, memoryAnalysis) {
   }
 
   // Check for heavy blocks
-  const heavyBlocks = blockStats.filter(block => 
-    ['version-track', 'ai', 'issue-tracker'].includes(block.blockType) && 
+  const heavyBlocks = blockStats.filter(block =>
+    ['ai', 'issue-tracker'].includes(block.blockType) &&
     block.renderCount > 3
   );
   if (heavyBlocks.length > 2) {

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FileTree with Snapshot Timeline - Devlog Style</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Tailwind Custom Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'dark-base': '#050b14',
+            'dark-primary': '#0a1628',
+            'dark-secondary': '#1a2844',
+            'dark-accent': '#2d3e5f',
+            'accent-green': '#10b981',
+            'accent-green-light': '#34d399',
+            'accent-green-dark': '#059669',
+            'text-primary': '#f8fafc',
+            'text-secondary': '#cbd5e1',
+            'text-tertiary': '#94a3b8',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #0a1628 0%, #050b14 100%);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+    }
+
+    /* Glassmorphism */
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    }
+
+    /* Timeline connector line */
+    .timeline-line {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(
+        to right,
+        rgba(16, 185, 129, 0.3),
+        rgba(16, 185, 129, 0.1),
+        rgba(16, 185, 129, 0.3)
+      );
+      z-index: 0;
+    }
+
+    /* Snapshot circle */
+    .snapshot-circle {
+      position: relative;
+      z-index: 10;
+      cursor: pointer;
+      transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .snapshot-circle:hover {
+      transform: scale(1.2);
+    }
+
+    .snapshot-circle.active {
+      transform: scale(1.3);
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+    }
+
+    /* Add snapshot button pulse */
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    .add-snapshot-btn::before {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border: 2px solid rgba(16, 185, 129, 0.5);
+      border-radius: 50%;
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Smooth transitions */
+    * {
+      transition: background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+                  border-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* File tree hover effects */
+    .tree-item {
+      transition: all 200ms ease;
+    }
+
+    .tree-item:hover {
+      background: rgba(26, 40, 68, 0.3);
+    }
+
+    /* Snapshot tooltip */
+    .snapshot-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .snapshot-circle:hover .snapshot-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-12px);
+    }
+
+    /* Fade in animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+<body class="min-h-screen p-8">
+
+  <div class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-bold text-text-primary mb-2">
+        FileTree with Snapshot Timeline
+      </h1>
+      <p class="text-text-secondary">
+        Track directory evolution over time with visual snapshots
+      </p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="glass rounded-2xl overflow-hidden">
+
+      <!-- File Tree Section -->
+      <div class="p-6 border-b border-dark-secondary/50">
+
+        <!-- Tree Header -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <i data-lucide="folder" class="text-accent-green w-5 h-5"></i>
+            <span class="text-text-secondary font-medium">Project Structure</span>
+            <span id="snapshotIndicator" class="text-xs bg-accent-green/20 text-accent-green px-2 py-1 rounded">
+              Snapshot 3 - Current
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              class="p-2 hover:bg-dark-secondary/50 rounded text-text-secondary/60
+                     hover:text-accent-green transition-colors"
+              title="Add folder">
+              <i data-lucide="folder-plus" class="w-4 h-4"></i>
+            </button>
+            <button
+              class="p-2 hover:bg-dark-secondary/50 rounded text-text-secondary/60
+                     hover:text-text-primary transition-colors"
+              title="Add file">
+              <i data-lucide="file-plus" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- File Tree -->
+        <div id="fileTree" class="space-y-1">
+          <!-- Loading state will be replaced by snapshot data -->
+        </div>
+      </div>
+
+      <!-- Snapshot Timeline Section -->
+      <div class="p-6 bg-dark-secondary/20">
+        <div class="mb-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4 text-text-secondary"></i>
+            <span class="text-sm font-medium text-text-secondary">Snapshot Timeline</span>
+            <span class="text-xs text-text-tertiary">3 snapshots saved</span>
+          </div>
+          <button
+            onclick="openSnapshotModal()"
+            class="px-3 py-1.5 bg-accent-green/10 hover:bg-accent-green/20
+                   border border-accent-green/30 hover:border-accent-green/50
+                   text-accent-green text-sm rounded-lg font-medium transition-all
+                   flex items-center gap-2">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            Create Snapshot
+          </button>
+        </div>
+
+        <!-- Timeline Container -->
+        <div class="relative py-8 px-4">
+          <!-- Timeline Line -->
+          <div class="timeline-line"></div>
+
+          <!-- Snapshots -->
+          <div class="flex justify-between items-center relative">
+
+            <!-- Snapshot 1 -->
+            <div class="snapshot-circle flex flex-col items-center" onclick="loadSnapshot(1)">
+              <div class="snapshot-tooltip glass rounded-lg px-3 py-2 text-xs">
+                <div class="font-semibold text-text-primary mb-1">Initial Setup</div>
+                <div class="text-text-tertiary">2 files • 3 days ago</div>
+              </div>
+              <div class="w-12 h-12 rounded-full bg-dark-secondary border-2 border-accent-green/50
+                          flex items-center justify-center mb-2">
+                <i data-lucide="folder" class="w-5 h-5 text-accent-green/70"></i>
+              </div>
+              <span class="text-xs text-text-tertiary">Jan 1</span>
+            </div>
+
+            <!-- Snapshot 2 -->
+            <div class="snapshot-circle flex flex-col items-center" onclick="loadSnapshot(2)">
+              <div class="snapshot-tooltip glass rounded-lg px-3 py-2 text-xs">
+                <div class="font-semibold text-text-primary mb-1">Added Components</div>
+                <div class="text-text-tertiary">5 files • 2 days ago</div>
+              </div>
+              <div class="w-12 h-12 rounded-full bg-dark-secondary border-2 border-accent-green/50
+                          flex items-center justify-center mb-2">
+                <i data-lucide="git-branch" class="w-5 h-5 text-accent-green/70"></i>
+              </div>
+              <span class="text-xs text-text-tertiary">Jan 2</span>
+            </div>
+
+            <!-- Snapshot 3 (Current) -->
+            <div class="snapshot-circle active flex flex-col items-center" onclick="loadSnapshot(3)">
+              <div class="snapshot-tooltip glass rounded-lg px-3 py-2 text-xs">
+                <div class="font-semibold text-text-primary mb-1">Full Implementation</div>
+                <div class="text-text-tertiary">8 files • Current</div>
+              </div>
+              <div class="w-14 h-14 rounded-full bg-accent-green/20 border-3 border-accent-green
+                          flex items-center justify-center mb-2 shadow-lg shadow-accent-green/30">
+                <i data-lucide="circle-check" class="w-6 h-6 text-accent-green"></i>
+              </div>
+              <span class="text-xs text-accent-green font-medium">Today</span>
+            </div>
+
+            <!-- Add Snapshot Button -->
+            <div class="snapshot-circle flex flex-col items-center relative" onclick="openSnapshotModal()">
+              <div class="snapshot-tooltip glass rounded-lg px-3 py-2 text-xs">
+                <div class="font-semibold text-text-primary">Create new snapshot</div>
+              </div>
+              <div class="add-snapshot-btn relative w-12 h-12 rounded-full
+                          bg-dark-secondary/50 border-2 border-dashed border-accent-green/30
+                          hover:border-accent-green/60 hover:bg-accent-green/10
+                          flex items-center justify-center mb-2 transition-all">
+                <i data-lucide="plus" class="w-5 h-5 text-accent-green/60"></i>
+              </div>
+              <span class="text-xs text-text-tertiary">New</span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Timeline Stats -->
+        <div class="mt-6 grid grid-cols-3 gap-4">
+          <div class="bg-dark-primary/30 rounded-lg p-3 text-center">
+            <div class="text-2xl font-bold text-text-primary mb-1">3</div>
+            <div class="text-xs text-text-secondary">Snapshots</div>
+          </div>
+          <div class="bg-dark-primary/30 rounded-lg p-3 text-center">
+            <div class="text-2xl font-bold text-text-primary mb-1">8</div>
+            <div class="text-xs text-text-secondary">Current Files</div>
+          </div>
+          <div class="bg-dark-primary/30 rounded-lg p-3 text-center">
+            <div class="text-2xl font-bold text-accent-green mb-1">+6</div>
+            <div class="text-xs text-text-secondary">Since Start</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="glass rounded-lg p-4 fade-in-up" style="animation-delay: 0.1s">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-lg bg-accent-green/20 flex items-center justify-center">
+            <i data-lucide="camera" class="w-5 h-5 text-accent-green"></i>
+          </div>
+          <h3 class="font-semibold text-text-primary">Snapshot Points</h3>
+        </div>
+        <p class="text-sm text-text-secondary">Save complete directory state at any moment in time</p>
+      </div>
+
+      <div class="glass rounded-lg p-4 fade-in-up" style="animation-delay: 0.2s">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-lg bg-accent-green/20 flex items-center justify-center">
+            <i data-lucide="history" class="w-5 h-5 text-accent-green"></i>
+          </div>
+          <h3 class="font-semibold text-text-primary">Time Travel</h3>
+        </div>
+        <p class="text-sm text-text-secondary">Navigate through your project's evolution visually</p>
+      </div>
+
+      <div class="glass rounded-lg p-4 fade-in-up" style="animation-delay: 0.3s">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-10 h-10 rounded-lg bg-accent-green/20 flex items-center justify-center">
+            <i data-lucide="git-compare" class="w-5 h-5 text-accent-green"></i>
+          </div>
+          <h3 class="font-semibold text-text-primary">Compare States</h3>
+        </div>
+        <p class="text-sm text-text-secondary">See what changed between any two snapshots</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Snapshot Modal -->
+  <div id="snapshotModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm
+                                 flex items-center justify-center p-8 hidden"
+       style="z-index: 9999;">
+    <div class="glass rounded-xl max-w-md w-full p-6 fade-in-up">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-text-primary">Create Snapshot</h2>
+        <button onclick="closeSnapshotModal()"
+                class="p-2 hover:bg-dark-secondary/50 rounded text-text-secondary">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-text-secondary mb-2">
+            Snapshot Name
+          </label>
+          <input
+            type="text"
+            id="snapshotName"
+            placeholder="e.g., Feature Complete"
+            class="w-full bg-dark-primary/50 border border-dark-secondary/50
+                   focus:border-accent-green/50 rounded-lg px-4 py-2.5
+                   text-text-primary placeholder-text-tertiary
+                   focus:outline-none focus:ring-2 focus:ring-accent-green/20">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-text-secondary mb-2">
+            Description (Optional)
+          </label>
+          <textarea
+            id="snapshotDescription"
+            placeholder="Describe what changed in this snapshot..."
+            rows="3"
+            class="w-full bg-dark-primary/50 border border-dark-secondary/50
+                   focus:border-accent-green/50 rounded-lg px-4 py-2.5
+                   text-text-primary placeholder-text-tertiary
+                   focus:outline-none focus:ring-2 focus:ring-accent-green/20
+                   resize-none"></textarea>
+        </div>
+
+        <div class="bg-dark-primary/30 rounded-lg p-4">
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="text-text-secondary">Files to snapshot</span>
+            <span class="text-accent-green font-medium">8 files</span>
+          </div>
+          <div class="text-xs text-text-tertiary">
+            All files in the current directory structure will be saved
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            onclick="closeSnapshotModal()"
+            class="flex-1 px-4 py-2.5 bg-dark-secondary/50 hover:bg-dark-secondary
+                   text-text-secondary rounded-lg font-medium transition-all">
+            Cancel
+          </button>
+          <button
+            onclick="createSnapshot()"
+            class="flex-1 px-4 py-2.5 bg-accent-green hover:bg-accent-green/90
+                   text-dark-primary rounded-lg font-medium transition-all
+                   flex items-center justify-center gap-2 shadow-lg shadow-accent-green/20">
+            <i data-lucide="camera" class="w-4 h-4"></i>
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Initialize Lucide Icons -->
+  <script>
+    lucide.createIcons();
+  </script>
+
+  <!-- Interactive JavaScript -->
+  <script>
+    // Sample snapshot data
+    const snapshots = {
+      1: {
+        name: 'Initial Setup',
+        date: 'Jan 1, 2025',
+        files: [
+          { id: '1', name: 'src', isFolder: true, children: [
+            { id: '2', name: 'index.js', isFolder: false }
+          ]},
+          { id: '3', name: 'package.json', isFolder: false }
+        ]
+      },
+      2: {
+        name: 'Added Components',
+        date: 'Jan 2, 2025',
+        files: [
+          { id: '1', name: 'src', isFolder: true, children: [
+            { id: '2', name: 'index.js', isFolder: false },
+            { id: '4', name: 'components', isFolder: true, children: [
+              { id: '5', name: 'Header.jsx', isFolder: false },
+              { id: '6', name: 'Footer.jsx', isFolder: false }
+            ]}
+          ]},
+          { id: '3', name: 'package.json', isFolder: false },
+          { id: '7', name: 'README.md', isFolder: false }
+        ]
+      },
+      3: {
+        name: 'Full Implementation',
+        date: 'Today',
+        files: [
+          { id: '1', name: 'src', isFolder: true, children: [
+            { id: '2', name: 'index.js', isFolder: false },
+            { id: '4', name: 'components', isFolder: true, children: [
+              { id: '5', name: 'Header.jsx', isFolder: false },
+              { id: '6', name: 'Footer.jsx', isFolder: false },
+              { id: '8', name: 'Sidebar.jsx', isFolder: false }
+            ]},
+            { id: '9', name: 'utils', isFolder: true, children: [
+              { id: '10', name: 'helpers.js', isFolder: false }
+            ]}
+          ]},
+          { id: '3', name: 'package.json', isFolder: false },
+          { id: '7', name: 'README.md', isFolder: false },
+          { id: '11', name: '.gitignore', isFolder: false }
+        ]
+      }
+    };
+
+    let currentSnapshot = 3;
+
+    // Render file tree
+    function renderFileTree(files, level = 0) {
+      return files.map(file => {
+        const indent = level * 20;
+        const isFolder = file.isFolder || file.children;
+
+        let html = `
+          <div class="tree-item flex items-center gap-2 py-2 px-3 rounded-lg cursor-pointer"
+               style="padding-left: ${indent + 12}px">
+            ${isFolder ?
+              `<i data-lucide="folder" class="w-4 h-4 text-accent-green/60"></i>` :
+              `<i data-lucide="file" class="w-4 h-4 text-text-secondary"></i>`
+            }
+            <span class="text-text-primary text-sm">${file.name}</span>
+          </div>
+        `;
+
+        if (file.children && file.children.length > 0) {
+          html += renderFileTree(file.children, level + 1);
+        }
+
+        return html;
+      }).join('');
+    }
+
+    // Load snapshot
+    function loadSnapshot(snapshotId) {
+      currentSnapshot = snapshotId;
+      const snapshot = snapshots[snapshotId];
+
+      // Update indicator
+      document.getElementById('snapshotIndicator').textContent =
+        `Snapshot ${snapshotId} - ${snapshot.name}`;
+
+      // Update file tree
+      const fileTreeHTML = renderFileTree(snapshot.files);
+      document.getElementById('fileTree').innerHTML = fileTreeHTML;
+
+      // Re-initialize icons
+      lucide.createIcons();
+
+      // Update active snapshot circle
+      document.querySelectorAll('.snapshot-circle').forEach((circle, index) => {
+        if (index === snapshotId - 1) {
+          circle.classList.add('active');
+        } else {
+          circle.classList.remove('active');
+        }
+      });
+    }
+
+    // Open snapshot modal
+    function openSnapshotModal() {
+      document.getElementById('snapshotModal').classList.remove('hidden');
+      document.getElementById('snapshotName').focus();
+
+      // Re-initialize icons in modal
+      setTimeout(() => lucide.createIcons(), 100);
+    }
+
+    // Close snapshot modal
+    function closeSnapshotModal() {
+      document.getElementById('snapshotModal').classList.add('hidden');
+      document.getElementById('snapshotName').value = '';
+      document.getElementById('snapshotDescription').value = '';
+    }
+
+    // Create new snapshot
+    function createSnapshot() {
+      const name = document.getElementById('snapshotName').value;
+      const description = document.getElementById('snapshotDescription').value;
+
+      if (!name.trim()) {
+        alert('Please enter a snapshot name');
+        return;
+      }
+
+      // Show success notification
+      alert(`Snapshot created successfully!\n\nName: ${name}\nDescription: ${description || 'None'}\n\nIn a real implementation, this would save the current file tree state.`);
+
+      closeSnapshotModal();
+    }
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSnapshotModal();
+      }
+    });
+
+    // Initialize with current snapshot
+    window.addEventListener('load', () => {
+      loadSnapshot(3);
+    });
+  </script>
+</body>
+</html>

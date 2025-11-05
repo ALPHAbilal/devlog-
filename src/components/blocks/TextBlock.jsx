@@ -416,8 +416,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     '/code': { type: 'block', blockType: 'code' },
     '/ai': { type: 'block', blockType: 'ai' },
     '/todo': { type: 'block', blockType: 'todo' },
-    '/image': { type: 'block', blockType: 'image' },
-    '/version-track': { type: 'block', blockType: 'version-track' }
+    '/image': { type: 'block', blockType: 'image' }
   };
 
   const handleChange = (e) => {

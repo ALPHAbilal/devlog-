@@ -545,13 +545,17 @@ function FileTreeBlock({ block, onUpdate }) {
   useEffect(() => {
     if (block._needsInitialSnapshotSave && snapshots.length > 0) {
       // Save initial snapshot to database (one-time operation)
+      // CRITICAL: Pass snapshots as top-level fields for serialization
       onUpdate(block.id, {
         treeData: treeData,
         metadata: {
           ...(block.metadata || {}),
           snapshots: snapshots,
           currentSnapshotId: currentSnapshotId
-        }
+        },
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
       });
 
       // Clear flag to prevent repeated saves (modify block object directly)
@@ -617,9 +621,13 @@ function FileTreeBlock({ block, onUpdate }) {
     }
 
     // Persist to database via onUpdate
+    // CRITICAL: Pass snapshots as top-level fields for serialization
     onUpdate(block.id, {
       treeData: treeData,
-      metadata: metadataToSave
+      metadata: metadataToSave,
+      snapshots: updatedSnapshots,
+      currentSnapshotId: newSnapshot.id,
+      snapshotLimit: maxSnapshots
     });
   };
 
@@ -641,13 +649,17 @@ function FileTreeBlock({ block, onUpdate }) {
     setCurrentSnapshotId(snapshotId);
 
     // CRITICAL FIX #2: Preserve existing metadata fields
+    // CRITICAL: Pass snapshots as top-level fields for serialization
     onUpdate(block.id, {
       treeData: restoredTree,
       metadata: {
         ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
         snapshots: snapshots,
         currentSnapshotId: snapshotId
-      }
+      },
+      snapshots: snapshots,
+      currentSnapshotId: snapshotId,
+      snapshotLimit: block.metadata?.snapshotLimit || 50
     });
   };
 
@@ -668,13 +680,17 @@ function FileTreeBlock({ block, onUpdate }) {
     }
 
     // CRITICAL FIX #2: Preserve existing metadata fields
+    // CRITICAL: Pass snapshots as top-level fields for serialization
     onUpdate(block.id, {
       treeData: treeData,
       metadata: {
         ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
         snapshots: updatedSnapshots,
         currentSnapshotId: newCurrentId
-      }
+      },
+      snapshots: updatedSnapshots,
+      currentSnapshotId: newCurrentId,
+      snapshotLimit: block.metadata?.snapshotLimit || 50
     });
   };
 
@@ -703,7 +719,10 @@ function FileTreeBlock({ block, onUpdate }) {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      }
+      },
+      snapshots: snapshots,
+      currentSnapshotId: currentSnapshotId,
+      snapshotLimit: block.metadata?.snapshotLimit || 50
     });
   };
 
@@ -805,7 +824,10 @@ function FileTreeBlock({ block, onUpdate }) {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      }
+      },
+      snapshots: snapshots,
+      currentSnapshotId: currentSnapshotId,
+      snapshotLimit: block.metadata?.snapshotLimit || 50
     });
   };
 
@@ -848,7 +870,10 @@ function FileTreeBlock({ block, onUpdate }) {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      }
+      },
+      snapshots: snapshots,
+      currentSnapshotId: currentSnapshotId,
+      snapshotLimit: block.metadata?.snapshotLimit || 50
     });
   };
 
@@ -891,7 +916,10 @@ function FileTreeBlock({ block, onUpdate }) {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      }
+      },
+      snapshots: snapshots,
+      currentSnapshotId: currentSnapshotId,
+      snapshotLimit: block.metadata?.snapshotLimit || 50
     });
   };
 

@@ -210,7 +210,7 @@ class SmartSyncManager {
    * Handle a change from the user
    * This is the main entry point for all changes
    */
-  async handleChange(blockId, content, action = 'UPDATE', blockType = null, position = null) {
+  async handleChange(blockId, content, action = 'UPDATE', blockType = null, position = null, metadata = null) {
     // Sophisticated tracing - log what we're receiving
     console.log('🚀 SmartSync.handleChange INPUT:', {
       blockId,
@@ -219,6 +219,7 @@ class SmartSyncManager {
       position,
       contentLength: content?.length,
       contentPreview: content?.substring(0, 100),
+      hasMetadata: !!metadata,
       timestamp: Date.now(),
       // Add validation check
       hasRequiredFields: !!(blockType && (position !== null && position !== undefined))
@@ -230,6 +231,7 @@ class SmartSyncManager {
       action,
       blockType, // CRITICAL: Add block type
       position,  // CRITICAL: Add position
+      metadata,  // CRITICAL: Add metadata for snapshots and other JSONB data
       documentId: this.documentId,
       timestamp: Date.now(),
       synced: false
@@ -342,6 +344,7 @@ class SmartSyncManager {
             action: change.action,
             block_type: change.blockType, // CRITICAL: Send block type
             position: change.position,     // CRITICAL: Send position
+            metadata: change.metadata,     // CRITICAL: Send metadata for snapshots
             timestamp: change.timestamp
           }))
         });

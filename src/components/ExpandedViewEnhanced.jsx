@@ -535,14 +535,15 @@ export default function ExpandedView({
         if (updatedBlock) {
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
-          
-          // Smart Sync handles everything - pass the normalized content WITH type and position
+
+          // Smart Sync handles everything - pass the normalized content WITH type, position, and metadata
           smartSyncManagerRef.current.handleChange(
             blockId,
             serializedBlock.content, // Send normalized content field
             'UPDATE',
             updatedBlock.type,       // CRITICAL: Send block type
-            updatedBlock.position    // CRITICAL: Use the block's actual position, not array index
+            updatedBlock.position,   // CRITICAL: Use the block's actual position, not array index
+            serializedBlock.metadata // CRITICAL: Send metadata for snapshots and other JSONB data
           ).then(() => {
             // Update sync status will happen automatically via the interval
           }).catch(error => {
@@ -686,13 +687,14 @@ export default function ExpandedView({
     if (smartSyncManagerRef.current) {
       // Serialize the block to normalize data structure
       const serializedBlock = serializeBlock(duplicatedBlock);
-      
+
       smartSyncManagerRef.current.handleChange(
         duplicatedBlock.id,
         serializedBlock.content, // Send normalized content field
         'CREATE',
         duplicatedBlock.type,    // CRITICAL: Send block type
-        duplicatedBlock.position // CRITICAL: Send position
+        duplicatedBlock.position, // CRITICAL: Send position
+        serializedBlock.metadata // CRITICAL: Send metadata
       ).catch(error => {
         console.error('Smart Sync duplicate error:', error);
       });
@@ -984,10 +986,16 @@ export default function ExpandedView({
     if (smartSyncManagerRef.current) {
       const convertedBlock = updatedBlocks.find(b => b.id === blockId);
       if (convertedBlock) {
+        // Serialize the block to normalize data structure
+        const serializedBlock = serializeBlock(convertedBlock);
+
         smartSyncManagerRef.current.handleChange(
           blockId,
-          JSON.stringify(convertedBlock),
-          'UPDATE'
+          serializedBlock.content, // Send normalized content field
+          'UPDATE',
+          convertedBlock.type,     // CRITICAL: Send block type
+          convertedBlock.position, // CRITICAL: Send position
+          serializedBlock.metadata // CRITICAL: Send metadata
         ).catch(error => {
           console.error('Smart Sync convert error:', error);
         });
@@ -1067,13 +1075,14 @@ export default function ExpandedView({
       
       // Serialize the block to normalize data structure
       const serializedBlock = serializeBlock(newBlock);
-      
+
       smartSyncManagerRef.current.handleChange(
         newBlock.id,
         serializedBlock.content, // Send normalized content field
         'CREATE',
         newBlock.type,           // CRITICAL: Send block type
-        newBlock.position        // CRITICAL: Send position
+        newBlock.position,       // CRITICAL: Send position
+        serializedBlock.metadata // CRITICAL: Send metadata
       ).catch(error => {
         console.error('Smart Sync add block error:', error);
       });
@@ -1121,13 +1130,14 @@ export default function ExpandedView({
       if (smartSyncManagerRef.current) {
         // Serialize the block to normalize data structure
         const serializedBlock = serializeBlock(newBlock);
-        
+
         smartSyncManagerRef.current.handleChange(
           newBlock.id,
           serializedBlock.content, // Send normalized content field
           'CREATE',
           newBlock.type,           // CRITICAL: Send block type
-          newBlock.position        // CRITICAL: Send position
+          newBlock.position,       // CRITICAL: Send position
+          serializedBlock.metadata // CRITICAL: Send metadata
         ).catch(error => {
           console.error('Smart Sync add below error:', error);
         });
@@ -1175,10 +1185,16 @@ export default function ExpandedView({
       
       // CRITICAL FIX: Call Smart Sync for inline new block
       if (smartSyncManagerRef.current) {
+        // Serialize the block to normalize data structure
+        const serializedBlock = serializeBlock(newBlock);
+
         smartSyncManagerRef.current.handleChange(
           newBlock.id,
-          JSON.stringify(newBlock),
-          'CREATE'
+          serializedBlock.content, // Send normalized content field
+          'CREATE',
+          newBlock.type,           // CRITICAL: Send block type
+          newBlock.position,       // CRITICAL: Send position
+          serializedBlock.metadata // CRITICAL: Send metadata
         ).catch(error => {
           console.error('Smart Sync inline add error:', error);
         });

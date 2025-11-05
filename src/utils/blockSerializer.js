@@ -124,6 +124,11 @@ export function serializeBlock(block) {
       // Metadata field: snapshot history
       // CRITICAL FIX #2 & #5: Preserve existing metadata and add error handling
       try {
+        // DEBUG: Log what we're serializing
+        console.log('[DEBUG-SERIALIZE] FileTree block.snapshots:', block.snapshots);
+        console.log('[DEBUG-SERIALIZE] FileTree block.currentSnapshotId:', block.currentSnapshotId);
+        console.log('[DEBUG-SERIALIZE] FileTree block.metadata:', block.metadata);
+
         serialized.metadata = {
           ...(block.metadata || {}),  // Preserve existing fields (last_sync, etc.)
           snapshots: (block.snapshots || []).map(snapshot => ({
@@ -137,6 +142,9 @@ export function serializeBlock(block) {
           currentSnapshotId: block.currentSnapshotId || null,
           snapshotLimit: block.snapshotLimit || 50
         };
+
+        console.log('[DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots:', serialized.metadata.snapshots);
+        console.log('[DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId:', serialized.metadata.currentSnapshotId);
       } catch (error) {
         console.error('FileTree serialization error:', error);
         // Fallback: preserve existing metadata without snapshots

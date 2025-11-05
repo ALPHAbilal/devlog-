@@ -406,13 +406,24 @@ export function deserializeBlock(block) {
 
         // Restore snapshots from metadata
         const meta = block.metadata || {};
+
+        // DEBUG: Log what we're deserializing
+        console.log('[DEBUG-DESERIALIZE] FileTree block.id:', block.id);
+        console.log('[DEBUG-DESERIALIZE] FileTree block.metadata:', block.metadata);
+        console.log('[DEBUG-DESERIALIZE] FileTree meta.snapshots:', meta.snapshots);
+        console.log('[DEBUG-DESERIALIZE] FileTree meta.currentSnapshotId:', meta.currentSnapshotId);
+
         deserialized.snapshots = meta.snapshots || [];
         deserialized.currentSnapshotId = meta.currentSnapshotId || null;
         deserialized.snapshotLimit = meta.snapshotLimit || 50;
 
+        console.log('[DEBUG-DESERIALIZE] FileTree deserialized.snapshots:', deserialized.snapshots);
+        console.log('[DEBUG-DESERIALIZE] FileTree deserialized.currentSnapshotId:', deserialized.currentSnapshotId);
+
         // CRITICAL FIX #4: Backward compatibility with persistence flag
         // Create initial snapshot if none exist, but mark it for save
         if (deserialized.snapshots.length === 0 && deserialized.treeData.length > 0) {
+          console.log('[DEBUG-DESERIALIZE] FileTree: Creating initial snapshot (backward compatibility)');
           deserialized.snapshots = [{
             id: 'initial',
             timestamp: Date.now(),

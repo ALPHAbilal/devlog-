@@ -1002,7 +1002,7 @@ function FileTreeBlock({ block, onUpdate }) {
               </button>
             </PopoverTrigger>
             <PopoverContent
-              className="w-80 bg-dark-primary border border-dark-secondary/60 p-3 shadow-xl"
+              className="w-80 bg-dark-primary border border-dark-secondary/60 p-3 shadow-xl z-[9999]"
               align="end"
               sideOffset={8}
             >

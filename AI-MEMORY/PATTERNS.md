@@ -1606,6 +1606,99 @@ WHERE proname = 'insert_update_delete_trigger';
 
 ---
 
+### Temporal Dead Zone in Production - Helper Functions Before useState
+**Date**: 2025-11-05
+**Severity**: 🔴 CRITICAL - Production crash in FileTreeBlock
+**Symptom**: `ReferenceError: Cannot access 'A' before initialization` in production (minified)
+**Root Cause**: Helper functions defined AFTER useState that calls them
+**Location**: FileTreeBlock.jsx - `sanitizeTreeForSnapshot` called in useState initializer
+
+**Error in Production**:
+```
+Block Error Boundary caught an error:
+ReferenceError: Cannot access 'A' before initialization
+blockType: 'filetree'
+blockId: 'c6457b3a-e81f-48e4-adc6-2a6165510778'
+```
+
+**Why It Works in Dev But Fails in Production**:
+1. Dev mode uses unminified code with different hoisting behavior
+2. Production minifier creates variable `A` for the helper function
+3. Temporal Dead Zone (TDZ) prevents access before declaration
+4. `useState(() => sanitizeTreeForSnapshot(...))` executes immediately on component mount
+5. Function not yet initialized → crash
+
+**The Mistake**:
+```javascript
+// ❌ WRONG - Function called before definition
+function FileTreeBlock({ block, onUpdate }) {
+  const [snapshots, setSnapshots] = useState(() => {
+    return [{
+      tree: sanitizeTreeForSnapshot(block.treeData)  // Called here!
+    }];
+  });
+
+  // Defined 70 lines later - TOO LATE!
+  const sanitizeTreeForSnapshot = (nodes) => { /* ... */ };
+}
+```
+
+**The Fix**:
+```javascript
+// ✅ CORRECT - Define helpers BEFORE useState
+function FileTreeBlock({ block, onUpdate }) {
+  // Helper functions (MUST be defined before useState to avoid TDZ)
+  const sanitizeTreeForSnapshot = (nodes) => {
+    if (!Array.isArray(nodes)) return [];
+    return nodes.map(node => ({
+      id: node.id,
+      name: node.name,
+      isFolder: node.isFolder,
+      children: node.children ? sanitizeTreeForSnapshot(node.children) : undefined,
+    }));
+  };
+
+  const countNodes = (nodes) => { /* ... */ };
+  const formatTimestamp = (timestamp) => { /* ... */ };
+
+  // NOW safe to use in useState initializer
+  const [snapshots, setSnapshots] = useState(() => {
+    return [{
+      tree: sanitizeTreeForSnapshot(block.treeData)  // Works!
+    }];
+  });
+}
+```
+
+**Key Rules**:
+1. **Always define helper functions BEFORE any hooks that use them**
+2. **Never call a function in useState initializer if it's defined later**
+3. **Test production builds, not just dev mode** (`npm run build && npm run preview`)
+4. **Minification changes execution order** - TDZ errors appear in production
+
+**Files Fixed**:
+- `src/components/blocks/FileTreeBlock.jsx:455-491` - Moved helpers to top
+
+**Verification**:
+```bash
+# Build and test locally
+npm run build
+npm run preview
+
+# Check browser console for errors
+# Open FileTree block in dashboard
+```
+
+**Impact**:
+- Before: FileTree blocks crash in production
+- After: All FileTree blocks render correctly
+- User Experience: No more "Something went wrong" error boundaries
+
+**Time Saved**: 2+ hours debugging minified production code
+**Related Patterns**: Import Not Defined Error (similar hoisting issue)
+
+---
+
 ### Missing NPM Dependency During Build - Radix UI Popover
 **Date**: 2025-11-05
 **Symptom**: Vercel build fails with "Rollup failed to resolve import @radix-ui/react-popover"

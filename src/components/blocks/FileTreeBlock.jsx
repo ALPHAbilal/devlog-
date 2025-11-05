@@ -453,6 +453,43 @@ function TreeNode({ node, level = 0, onUpdate, onDelete, onAddChild, onMove, onE
 }
 
 function FileTreeBlock({ block, onUpdate }) {
+  // Helper functions (MUST be defined before useState to avoid TDZ in production)
+
+  // Helper: Remove file content from tree nodes for snapshots
+  const sanitizeTreeForSnapshot = (nodes) => {
+    if (!Array.isArray(nodes)) return [];
+    return nodes.map(node => ({
+      id: node.id,
+      name: node.name,
+      isFolder: node.isFolder,
+      children: node.children ? sanitizeTreeForSnapshot(node.children) : undefined,
+      // Exclude content field to save space
+    }));
+  };
+
+  // Helper: Count total nodes in tree
+  const countNodes = (nodes) => {
+    if (!Array.isArray(nodes)) return 0;
+    return nodes.reduce((acc, node) => {
+      return acc + 1 + (node.children ? countNodes(node.children) : 0);
+    }, 0);
+  };
+
+  // Helper: Format timestamp as relative time
+  const formatTimestamp = (timestamp) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(timestamp).toLocaleDateString();
+  };
+
   // Performance monitoring
   useEffect(() => {
     console.log(`📁 FileTreeBlock ${block.id} rendered at ${new Date().toISOString()}`);
@@ -521,41 +558,6 @@ function FileTreeBlock({ block, onUpdate }) {
       block._needsInitialSnapshotSave = false;
     }
   }, [block._needsInitialSnapshotSave, snapshots.length]);
-
-  // Helper: Remove file content from tree nodes for snapshots
-  const sanitizeTreeForSnapshot = (nodes) => {
-    if (!Array.isArray(nodes)) return [];
-    return nodes.map(node => ({
-      id: node.id,
-      name: node.name,
-      isFolder: node.isFolder,
-      children: node.children ? sanitizeTreeForSnapshot(node.children) : undefined,
-      // Exclude content field to save space
-    }));
-  };
-
-  // Helper: Count total nodes in tree
-  const countNodes = (nodes) => {
-    if (!Array.isArray(nodes)) return 0;
-    return nodes.reduce((acc, node) => {
-      return acc + 1 + (node.children ? countNodes(node.children) : 0);
-    }, 0);
-  };
-
-  // Helper: Format timestamp as relative time
-  const formatTimestamp = (timestamp) => {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return 'Just now';
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return new Date(timestamp).toLocaleDateString();
-  };
 
   // Create snapshot of current tree state
   const createSnapshot = (label, comment) => {

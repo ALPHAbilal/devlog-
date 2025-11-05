@@ -1,7 +1,18 @@
+/**
+ * @typedef {Object} Snapshot
+ * @property {string} id - Unique identifier (timestamp-based)
+ * @property {number} timestamp - Unix timestamp in milliseconds
+ * @property {string} label - Human-readable name
+ * @property {Array} tree - Complete tree structure (no file content)
+ * @property {string} [changes] - Delta summary (e.g., "+3 items")
+ * @property {string} [comment] - Optional user note (max 200 chars)
+ */
+
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, ChevronDown, Folder, FolderOpen, File, Plus, X, Check, Grip, Code, FileText, Eye, Edit3 } from 'lucide-react';
+import { ChevronRight, ChevronDown, Folder, FolderOpen, File, Plus, X, Check, Grip, Code, FileText, Eye, Edit3, Camera, Clock, RotateCcw, MessageSquare } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
+import { Popover, PopoverContent, PopoverTrigger } from '@radix-ui/react-popover';
 
 // File content editor modal
 function FileContentEditor({ file, onSave, onClose }) {
@@ -446,13 +457,224 @@ function FileTreeBlock({ block, onUpdate }) {
   useEffect(() => {
     console.log(`📁 FileTreeBlock ${block.id} rendered at ${new Date().toISOString()}`);
   }, [block.id]);
-  
+
   const [treeData, setTreeData] = useState(block.treeData || [
     { id: '1', name: 'src', isFolder: true, children: [] }
   ]);
   const [editingFile, setEditingFile] = useState(null);
   const [rootDragOver, setRootDragOver] = useState(false);
   const [rootDropPosition, setRootDropPosition] = useState(null);
+
+  // Snapshot management
+  const [snapshots, setSnapshots] = useState(() => {
+    // Initialize from block metadata or create initial snapshot
+    const existingSnapshots = block.metadata?.snapshots || [];
+    if (existingSnapshots.length === 0) {
+      return [{
+        id: 'initial',
+        timestamp: Date.now(),
+        label: 'Initial state',
+        tree: sanitizeTreeForSnapshot(block.treeData || [])
+      }];
+    }
+    return existingSnapshots;
+  });
+
+  const [currentSnapshotId, setCurrentSnapshotId] = useState(
+    block.metadata?.currentSnapshotId || 'initial'
+  );
+
+  const [snapshotPopoverOpen, setSnapshotPopoverOpen] = useState(false);
+  const [snapshotComment, setSnapshotComment] = useState('');
+
+  // CRITICAL FIX #1: Sync state when block.metadata changes externally
+  useEffect(() => {
+    const externalSnapshots = block.metadata?.snapshots;
+    const externalCurrentId = block.metadata?.currentSnapshotId;
+
+    if (externalSnapshots && Array.isArray(externalSnapshots)) {
+      // Only update if different (avoid infinite loops)
+      if (JSON.stringify(externalSnapshots) !== JSON.stringify(snapshots)) {
+        setSnapshots(externalSnapshots);
+      }
+    }
+
+    if (externalCurrentId && externalCurrentId !== currentSnapshotId) {
+      setCurrentSnapshotId(externalCurrentId);
+    }
+  }, [block.metadata?.snapshots, block.metadata?.currentSnapshotId]);
+
+  // CRITICAL FIX #4: Persist initial snapshot for old blocks (backward compatibility)
+  useEffect(() => {
+    if (block._needsInitialSnapshotSave && snapshots.length > 0) {
+      // Save initial snapshot to database (one-time operation)
+      onUpdate(block.id, {
+        treeData: treeData,
+        metadata: {
+          ...(block.metadata || {}),
+          snapshots: snapshots,
+          currentSnapshotId: currentSnapshotId
+        }
+      });
+
+      // Clear flag to prevent repeated saves (modify block object directly)
+      block._needsInitialSnapshotSave = false;
+    }
+  }, [block._needsInitialSnapshotSave, snapshots.length]);
+
+  // Helper: Remove file content from tree nodes for snapshots
+  const sanitizeTreeForSnapshot = (nodes) => {
+    if (!Array.isArray(nodes)) return [];
+    return nodes.map(node => ({
+      id: node.id,
+      name: node.name,
+      isFolder: node.isFolder,
+      children: node.children ? sanitizeTreeForSnapshot(node.children) : undefined,
+      // Exclude content field to save space
+    }));
+  };
+
+  // Helper: Count total nodes in tree
+  const countNodes = (nodes) => {
+    if (!Array.isArray(nodes)) return 0;
+    return nodes.reduce((acc, node) => {
+      return acc + 1 + (node.children ? countNodes(node.children) : 0);
+    }, 0);
+  };
+
+  // Helper: Format timestamp as relative time
+  const formatTimestamp = (timestamp) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days < 7) return `${days}d ago`;
+    return new Date(timestamp).toLocaleDateString();
+  };
+
+  // Create snapshot of current tree state
+  const createSnapshot = (label, comment) => {
+    const previousTree = snapshots[snapshots.length - 1]?.tree || [];
+    const previousCount = countNodes(previousTree);
+    const currentCount = countNodes(treeData);
+
+    // Calculate change delta
+    let changes = '';
+    if (currentCount > previousCount) {
+      changes = `+${currentCount - previousCount} items`;
+    } else if (currentCount < previousCount) {
+      changes = `${currentCount - previousCount} items`;
+    }
+
+    // Create snapshot with structure only (no file content)
+    const newSnapshot = {
+      id: Date.now().toString(),
+      timestamp: Date.now(),
+      label: label || `Snapshot ${snapshots.length}`,
+      tree: sanitizeTreeForSnapshot(treeData),
+      changes: changes || undefined,
+      comment: comment || undefined,
+    };
+
+    // Enforce 50-snapshot limit (CRITICAL FIX #3: Fixed pruning logic)
+    const updatedSnapshots = [...snapshots, newSnapshot];
+    const maxSnapshots = block.metadata?.snapshotLimit || 50;
+    while (updatedSnapshots.length > maxSnapshots) {
+      // Remove oldest (but never remove 'initial')
+      const indexToRemove = updatedSnapshots.findIndex(s => s.id !== 'initial');
+      if (indexToRemove >= 0) {  // FIX: Changed from > 0 to >= 0
+        updatedSnapshots.splice(indexToRemove, 1);
+      } else {
+        break; // Safety: don't infinite loop
+      }
+    }
+
+    setSnapshots(updatedSnapshots);
+    setCurrentSnapshotId(newSnapshot.id);
+
+    // CRITICAL FIX #2: Preserve existing metadata fields (last_sync, sync_timestamp)
+    // CRITICAL FIX #6: Validate JSONB size before save
+    const metadataToSave = {
+      ...(block.metadata || {}),  // Preserve existing fields
+      snapshots: updatedSnapshots,
+      currentSnapshotId: newSnapshot.id,
+      snapshotLimit: maxSnapshots
+    };
+
+    // Check size (approximate - 1MB = 1,048,576 bytes)
+    const metadataSize = JSON.stringify(metadataToSave).length;
+    if (metadataSize > 1048576) {
+      console.error('FileTree: Snapshot metadata exceeds 1MB limit:', metadataSize);
+      // Don't save - would fail in database
+      return;
+    }
+
+    // Persist to database via onUpdate
+    onUpdate(block.id, {
+      treeData: treeData,
+      metadata: metadataToSave
+    });
+  };
+
+  // Restore tree to a previous snapshot
+  const restoreSnapshot = (snapshotId) => {
+    const snapshot = snapshots.find(s => s.id === snapshotId);
+    if (!snapshot) return;
+
+    // CRITICAL FIX #5: Add error handling for deep clone
+    let restoredTree;
+    try {
+      restoredTree = JSON.parse(JSON.stringify(snapshot.tree));
+    } catch (error) {
+      console.error('FileTree: Failed to restore snapshot', error);
+      return;
+    }
+
+    setTreeData(restoredTree);
+    setCurrentSnapshotId(snapshotId);
+
+    // CRITICAL FIX #2: Preserve existing metadata fields
+    onUpdate(block.id, {
+      treeData: restoredTree,
+      metadata: {
+        ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
+        snapshots: snapshots,
+        currentSnapshotId: snapshotId
+      }
+    });
+  };
+
+  // Delete a snapshot (protects initial and last)
+  const deleteSnapshot = (snapshotId) => {
+    // Protection: Cannot delete initial snapshot or last remaining
+    if (snapshotId === 'initial' || snapshots.length <= 1) return;
+
+    const updatedSnapshots = snapshots.filter(s => s.id !== snapshotId);
+    setSnapshots(updatedSnapshots);
+
+    // If deleting current snapshot, switch to previous
+    let newCurrentId = currentSnapshotId;
+    if (currentSnapshotId === snapshotId) {
+      const deletedIndex = snapshots.findIndex(s => s.id === snapshotId);
+      newCurrentId = snapshots[deletedIndex - 1]?.id || snapshots[0].id;
+      setCurrentSnapshotId(newCurrentId);
+    }
+
+    // CRITICAL FIX #2: Preserve existing metadata fields
+    onUpdate(block.id, {
+      treeData: treeData,
+      metadata: {
+        ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
+        snapshots: updatedSnapshots,
+        currentSnapshotId: newCurrentId
+      }
+    });
+  };
 
   // Generate unique ID
   const generateId = () => crypto.randomUUID();
@@ -473,7 +695,14 @@ function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = updateTree(treeData);
     setTreeData(newTree);
-    onUpdate(block.id, { treeData: newTree });
+    onUpdate(block.id, {
+      treeData: newTree,
+      metadata: {
+        ...(block.metadata || {}),
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId
+      }
+    });
   };
 
   // Update file content
@@ -568,7 +797,14 @@ function FileTreeBlock({ block, onUpdate }) {
     }
 
     setTreeData(newTree);
-    onUpdate(block.id, { treeData: newTree });
+    onUpdate(block.id, {
+      treeData: newTree,
+      metadata: {
+        ...(block.metadata || {}),
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId
+      }
+    });
   };
 
   // Remove node from tree (returns new tree without the node)
@@ -604,7 +840,14 @@ function FileTreeBlock({ block, onUpdate }) {
   const removeNode = (nodeId) => {
     const newTree = removeNodeFromTree(treeData, nodeId);
     setTreeData(newTree);
-    onUpdate(block.id, { treeData: newTree });
+    onUpdate(block.id, {
+      treeData: newTree,
+      metadata: {
+        ...(block.metadata || {}),
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId
+      }
+    });
   };
 
   // Add child node
@@ -640,7 +883,14 @@ function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = [...treeData, newNode];
     setTreeData(newTree);
-    onUpdate(block.id, { treeData: newTree });
+    onUpdate(block.id, {
+      treeData: newTree,
+      metadata: {
+        ...(block.metadata || {}),
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId
+      }
+    });
   };
 
   // Root level drag handlers
@@ -722,8 +972,202 @@ function FileTreeBlock({ block, onUpdate }) {
         </div>
       </div>
 
+      {/* Snapshot Timeline */}
+      <div className="mb-4 bg-dark-primary/30 rounded-lg p-2">
+        {/* Header with snapshot count and camera button */}
+        <div className="flex items-center gap-2 mb-2">
+          <div className="p-1 bg-dark-secondary/40 rounded flex items-center justify-center">
+            <Clock size={14} className="text-accent-green/80" />
+          </div>
+          <span className="text-xs text-text-secondary/70">
+            Snapshots · {snapshots.length}
+          </span>
+          {/* "Viewing history" badge when not on latest */}
+          {currentSnapshotId !== snapshots[snapshots.length - 1]?.id && (
+            <div className="flex items-center gap-1 ml-2 px-2 py-0.5 bg-orange-400/20 rounded text-xs text-orange-400">
+              <RotateCcw size={10} />
+              <span>Viewing history</span>
+            </div>
+          )}
+          {/* Camera button with popover */}
+          <Popover open={snapshotPopoverOpen} onOpenChange={setSnapshotPopoverOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className="ml-auto p-1.5 bg-dark-secondary/30 hover:bg-accent-green/10 rounded text-accent-green/70 hover:text-accent-green transition-all border border-dark-secondary/40 hover:border-accent-green/30"
+                title="Create snapshot"
+              >
+                <Camera size={14} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent
+              className="w-80 bg-dark-primary border border-dark-secondary/60 p-3 shadow-xl"
+              align="end"
+              sideOffset={8}
+            >
+              <div className="space-y-3">
+                {/* Popover header */}
+                <div className="flex items-center gap-2">
+                  <div className="p-1 bg-dark-secondary/40 rounded">
+                    <Camera size={12} className="text-accent-green" />
+                  </div>
+                  <h4 className="text-sm text-text-primary">Create Snapshot</h4>
+                </div>
+
+                {/* Comment input */}
+                <div className="space-y-2">
+                  <label className="text-xs text-text-secondary/80 flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <MessageSquare size={10} />
+                      Comment (optional)
+                    </span>
+                    <span className={`text-xs ${
+                      snapshotComment.length > 200 ? 'text-orange-400' :
+                      snapshotComment.length > 150 ? 'text-text-secondary/60' :
+                      'text-text-secondary/40'
+                    }`}>
+                      {snapshotComment.length}/200
+                    </span>
+                  </label>
+                  <textarea
+                    value={snapshotComment}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 200) {
+                        setSnapshotComment(e.target.value);
+                      }
+                    }}
+                    placeholder="Add a note about this snapshot..."
+                    className="w-full bg-dark-secondary/40 text-text-primary px-3 py-2 rounded border border-dark-secondary/40 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent-green/50 focus:border-accent-green/50 transition-all placeholder:text-text-secondary/40"
+                    rows={3}
+                    maxLength={200}
+                    autoFocus
+                  />
+                  <div className="text-xs text-text-secondary/50">
+                    Keep it concise
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setSnapshotPopoverOpen(false);
+                      setSnapshotComment('');
+                    }}
+                    className="px-3 py-2 bg-dark-secondary/40 text-text-secondary rounded hover:bg-dark-secondary/60 transition-colors text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      createSnapshot(undefined, snapshotComment);
+                      setSnapshotComment('');
+                      setSnapshotPopoverOpen(false);
+                    }}
+                    className="flex-1 px-3 py-2 bg-accent-green text-dark-primary rounded hover:bg-accent-green/90 transition-colors text-sm flex items-center justify-center gap-2"
+                  >
+                    <Camera size={12} />
+                    <span>Create Snapshot</span>
+                  </button>
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Timeline visualization */}
+        <div className="flex items-center gap-2 overflow-x-auto pt-3 pb-3 px-2 scrollbar-thin scrollbar-thumb-dark-secondary/50 scrollbar-track-transparent">
+          {snapshots.map((snapshot, index) => (
+            <div key={snapshot.id} className="flex items-center gap-1 shrink-0">
+              <div className="relative group">
+                {/* Snapshot node button */}
+                <button
+                  onClick={() => restoreSnapshot(snapshot.id)}
+                  className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all shrink-0 ${
+                    currentSnapshotId === snapshot.id
+                      ? 'bg-accent-green text-dark-primary ring-2 ring-accent-green/40'
+                      : 'bg-dark-secondary/50 text-text-secondary/60 hover:bg-dark-secondary hover:text-text-secondary'
+                  }`}
+                  title={`${snapshot.label} - ${formatTimestamp(snapshot.timestamp)}`}
+                >
+                  <span className="text-xs">{index + 1}</span>
+                  {/* Comment indicator badge */}
+                  {snapshot.comment && (
+                    <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-dark-primary rounded-full flex items-center justify-center border border-dark-secondary/40">
+                      <MessageSquare size={8} className="text-accent-green" />
+                    </div>
+                  )}
+                </button>
+
+                {/* Hover tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 bg-dark-primary rounded text-xs text-text-primary opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20 shadow-lg border border-dark-secondary/40" style={{ maxWidth: '250px' }}>
+                  <div className="whitespace-nowrap">{snapshot.label}</div>
+                  <div className="text-text-secondary/60 text-xs whitespace-nowrap">
+                    {formatTimestamp(snapshot.timestamp)}
+                  </div>
+                  {snapshot.changes && (
+                    <div className="text-accent-green/80 text-xs whitespace-nowrap">
+                      {snapshot.changes}
+                    </div>
+                  )}
+                  {snapshot.comment && (
+                    <div className="mt-1 pt-1 border-t border-dark-secondary/30 text-text-secondary/90 text-xs">
+                      <div className="flex items-start gap-1">
+                        <MessageSquare size={10} className="text-accent-green/60 mt-0.5 shrink-0" />
+                        <span className="break-words max-h-20 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-secondary/50 scrollbar-track-transparent">
+                          {snapshot.comment}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  {/* Tooltip arrow */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-dark-primary" />
+                </div>
+
+                {/* Delete button (on hover, except initial & last) */}
+                {snapshot.id !== 'initial' && snapshots.length > 1 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteSnapshot(snapshot.id);
+                    }}
+                    className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dark-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-400 hover:text-dark-primary z-20 border border-dark-secondary/30"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+              </div>
+
+              {/* Connection line between nodes */}
+              {index < snapshots.length - 1 && (
+                <div className="w-4 h-0.5 bg-dark-secondary/50" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Current snapshot comment display */}
+        {(() => {
+          const currentSnapshot = snapshots.find(s => s.id === currentSnapshotId);
+          return currentSnapshot?.comment ? (
+            <div className="mt-2 px-3 py-2 bg-dark-secondary/30 rounded border border-dark-secondary/40">
+              <div className="flex items-start gap-2">
+                <MessageSquare size={12} className="text-accent-green/80 mt-0.5 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-xs text-text-secondary/60 mb-0.5">
+                    {currentSnapshot.label}
+                  </div>
+                  <div className="text-sm text-text-primary/90 max-h-16 overflow-y-auto scrollbar-thin scrollbar-thumb-dark-secondary/50 scrollbar-track-transparent break-words">
+                    {currentSnapshot.comment}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null;
+        })()}
+      </div>
+
       {/* Tree view */}
-      <div 
+      <div
         className="space-y-1 min-h-[100px] relative"
         onDragOver={handleRootDragOver}
         onDragLeave={handleRootDragLeave}

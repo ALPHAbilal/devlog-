@@ -1,16 +1,33 @@
 /**
  * Block Serialization Utility
- * 
+ *
  * Provides a robust serialization/deserialization layer for different block types
  * to ensure consistent data storage in the Smart Sync system.
- * 
+ *
  * @module blockSerializer
  */
 
 /**
+ * Helper: Remove file content from tree nodes for snapshot storage
+ * @param {Array} nodes - Tree nodes to sanitize
+ * @returns {Array} Sanitized nodes without content field
+ */
+function sanitizeTreeForSnapshot(nodes) {
+  if (!Array.isArray(nodes)) return [];
+  return nodes.map(node => ({
+    id: node.id,
+    name: node.name,
+    isFolder: node.isFolder !== undefined ? node.isFolder : node.type === 'folder',
+    type: node.type || (node.isFolder ? 'folder' : 'file'),
+    children: node.children ? sanitizeTreeForSnapshot(node.children) : undefined,
+    // Explicitly exclude content field
+  }));
+}
+
+/**
  * Serializes a block for storage in the database
  * Normalizes all block-specific fields into a unified content structure
- * 
+ *
  * @param {Object} block - The block to serialize
  * @returns {Object} The serialized block with normalized content field
  */
@@ -98,11 +115,33 @@ export function serializeBlock(block) {
       break;
 
     case 'filetree':
-      // File tree blocks store tree structure
+      // Content field: current tree structure
       serialized.content = JSON.stringify({
         treeData: block.treeData || [],
         expanded: block.expanded || []
       });
+
+      // Metadata field: snapshot history
+      // CRITICAL FIX #2 & #5: Preserve existing metadata and add error handling
+      try {
+        serialized.metadata = {
+          ...(block.metadata || {}),  // Preserve existing fields (last_sync, etc.)
+          snapshots: (block.snapshots || []).map(snapshot => ({
+            id: snapshot.id,
+            timestamp: snapshot.timestamp,
+            label: snapshot.label,
+            tree: sanitizeTreeForSnapshot(snapshot.tree),
+            changes: snapshot.changes,
+            comment: snapshot.comment
+          })),
+          currentSnapshotId: block.currentSnapshotId || null,
+          snapshotLimit: block.snapshotLimit || 50
+        };
+      } catch (error) {
+        console.error('FileTree serialization error:', error);
+        // Fallback: preserve existing metadata without snapshots
+        serialized.metadata = block.metadata || {};
+      }
       break;
 
     case 'inlineImage':
@@ -329,28 +368,26 @@ export function deserializeBlock(block) {
         break;
 
       case 'filetree':
-        // Restore file tree data
+        // Restore tree data from content
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
+          const parsed = typeof block.content === 'string'
+            ? JSON.parse(block.content)
             : block.content;
-          
-          // Handle both formats:
+
+          // Handle multiple formats:
           // 1. Proper format: {treeData: [...], expanded: {...}}
           // 2. Direct tree format: {name: "root", type: "folder", children: [...]}
-          
+
           if (parsed.treeData !== undefined) {
-            // Proper format with treeData property
             deserialized.treeData = parsed.treeData || [];
             deserialized.expanded = parsed.expanded || {};
           } else if (parsed.name && parsed.type) {
-            // Direct tree object - wrap it in an array
-            console.log('🌲 FileTree: Converting direct tree object to array format', parsed);
+            // Direct tree object - wrap in array
+            console.log('🌲 FileTree: Converting direct tree object to array format');
             deserialized.treeData = [parsed];
             deserialized.expanded = {};
           } else {
-            // Unknown format, default to empty
-            console.warn('🌲 FileTree: Unknown content format, defaulting to empty', parsed);
+            console.warn('🌲 FileTree: Unknown content format, defaulting to empty');
             deserialized.treeData = [];
             deserialized.expanded = {};
           }
@@ -358,6 +395,29 @@ export function deserializeBlock(block) {
           deserialized.treeData = [];
           deserialized.expanded = {};
         }
+
+        // Restore snapshots from metadata
+        const meta = block.metadata || {};
+        deserialized.snapshots = meta.snapshots || [];
+        deserialized.currentSnapshotId = meta.currentSnapshotId || null;
+        deserialized.snapshotLimit = meta.snapshotLimit || 50;
+
+        // CRITICAL FIX #4: Backward compatibility with persistence flag
+        // Create initial snapshot if none exist, but mark it for save
+        if (deserialized.snapshots.length === 0 && deserialized.treeData.length > 0) {
+          deserialized.snapshots = [{
+            id: 'initial',
+            timestamp: Date.now(),
+            label: 'Initial state',
+            tree: sanitizeTreeForSnapshot(deserialized.treeData)
+          }];
+          deserialized.currentSnapshotId = 'initial';
+
+          // CRITICAL: Flag that we need to persist this initial snapshot
+          // The component should check this flag and trigger save on mount
+          deserialized._needsInitialSnapshotSave = true;
+        }
+
         break;
 
       case 'inlineImage':

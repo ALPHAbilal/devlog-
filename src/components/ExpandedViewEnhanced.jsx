@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue, memo } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
-import { VariableSizeList as List } from 'react-window';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
@@ -23,49 +23,56 @@ import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
-// [VIRT-DEBUG] Verify List import at module load time
-console.log('[VIRT-DEBUG-IMPORT] List component imported:', typeof List, List);
+// [VIRT-DEBUG] Verify useVirtualizer import at module load time
+console.log('[VIRT-DEBUG-IMPORT] useVirtualizer hook imported:', typeof useVirtualizer);
 
-// Cache for block heights for virtualization
-const blockHeightCache = new Map();
 const DEFAULT_BLOCK_HEIGHT = 150;
 const ADD_BUTTON_HEIGHT = 40;
 
 // Get estimated height for different block types
+// TanStack Virtual handles height caching automatically via ResizeObserver
+// Better initial estimates = less layout shift = smoother scrolling
 const getEstimatedHeight = (block) => {
   if (!block) return DEFAULT_BLOCK_HEIGHT;
-  
-  // Use cached height if available
-  const cacheKey = `${block.id}-${block.type}`;
-  if (blockHeightCache.has(cacheKey)) {
-    return blockHeightCache.get(cacheKey);
-  }
 
-  // Estimate based on block type
+  // More accurate estimates based on block type and content
   switch (block.type) {
     case 'text':
-      const lineCount = (block.content || '').split('\n').length;
-      return Math.max(100, lineCount * 24 + 40);
+      // Estimate based on content length if available
+      const textLength = block.content?.length || 0;
+      if (textLength > 500) return 200;
+      if (textLength > 200) return 150;
+      return 100;
+
     case 'heading':
-      return 80;
+      return block.data?.level === 1 ? 80 : 60;
+
     case 'code':
-      const codeLines = (block.content || '').split('\n').length;
-      return Math.max(150, codeLines * 20 + 60);
+      // Estimate based on line count if available
+      const lines = block.content?.split('\n').length || 10;
+      return Math.min(lines * 24 + 100, 600);
+
     case 'ai':
-      const messageCount = block.messages?.length || 0;
-      return Math.max(200, messageCount * 100);
-    case 'issue-tracker':
-      return 350; // Heavy component, fixed height for performance
+      // AI blocks tend to be large
+      return 500;
+
     case 'table':
       return 300;
+
     case 'todo':
-      const todoCount = block.todos?.length || 0;
-      return Math.max(100, todoCount * 40 + 60);
+      return 200;
+
+    case 'filetree':
+      // Depends on tree depth, but usually large
+      return 600;
+
     case 'image':
     case 'inline-image':
-      return 300;
-    case 'filetree':
-      return 250;
+      return 400;
+
+    case 'issue-tracker':
+      return 400;
+
     default:
       return DEFAULT_BLOCK_HEIGHT;
   }
@@ -192,59 +199,36 @@ export default function ExpandedView({
   const saveStatusTimeoutRef = useRef(null);
   const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
   const smartSyncManagerRef = useRef(null);
-  
-  // Virtualization refs
-  const listRef = useRef();
-  const itemHeights = useRef({});
-  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
 
-  // Methods for share, delete, and view mode are now handled internally
-  
-  // Handle window resize for virtualization
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Get item size for virtual list
-  const getItemSize = useCallback((index) => {
-    // Check if we have a measured height
-    if (itemHeights.current[index]) {
-      return itemHeights.current[index];
-    }
-    
-    // Return estimated height
-    if (blocks[index]) {
-      return getEstimatedHeight(blocks[index]) + ADD_BUTTON_HEIGHT;
-    }
-    
-    return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
-  }, [blocks]);
+  // Configure TanStack virtualizer
+  const rowVirtualizer = useVirtualizer({
+    count: blocks.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: (index) => {
+      // Estimate based on block type
+      const block = blocks[index];
+      if (!block) return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
+      return getEstimatedHeight(block) + ADD_BUTTON_HEIGHT;
+    },
+    overscan: 3, // Render 3 extra blocks outside viewport
+    measureElement: (element) => {
+      // TanStack will call this automatically via ref
+      return element?.getBoundingClientRect().height ?? 0;
+    },
+  });
 
-  // Set measured height after render
-  const setItemSize = useCallback((index, size) => {
-    if (itemHeights.current[index] !== size) {
-      const oldHeight = itemHeights.current[index];
-      itemHeights.current[index] = size;
-
-      // [VIRT-DEBUG-4] Log height measurement updates
-      if (blocks[index]) {
-        console.log(`[VIRT-DEBUG-4] Measured block ${index + 1} (${blocks[index].type}): ${size}px ${oldHeight ? `(was ${oldHeight}px)` : '(first measure)'}`);
-      }
-
-      if (listRef.current) {
-        listRef.current.resetAfterIndex(index);
-      }
-    }
-  }, [blocks]);
+  // [VIRT-DEBUG-2] Log virtualizer info
+  console.log('[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE (TanStack)');
+  console.log('[VIRT-DEBUG-2] Total blocks:', blocks.length);
+  console.log('[VIRT-DEBUG-2] Total height:', rowVirtualizer.getTotalSize(), 'px');
+  console.log('[VIRT-DEBUG-2] Overscan count: 3 blocks');
   
   // Create a memoized block renderer component to avoid closure issues
-  const BlockRenderer = memo(({ 
-    block, 
-    index, 
+  // React 19: ref can be accepted as a regular prop without forwardRef
+  const BlockRenderer = memo(({
+    block,
+    index,
+    ref,  // React 19: ref is just a regular prop now
     style,
     isMobileView,
     focusedBlockId,
@@ -252,27 +236,17 @@ export default function ExpandedView({
     selectorPosition,
     draggedBlockId,
     dropTargetId,
-    dropPosition,
-    onMeasure
+    dropPosition
   }) => {
     const isBlockFocused = focusedBlockId === null ? null : focusedBlockId === block.id;
     const isShowingSelector = showBlockSelector && selectorPosition === block.id;
 
     return (
-      <div 
+      <div
+        ref={ref}  // Pass ref directly (React 19 allows this!)
+        data-index={index}  // Required for TanStack to identify element
         style={style}
         className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
-        ref={(el) => {
-          if (el && !block?.isLoading) {
-            // Use ResizeObserver for more accurate height measurement
-            requestAnimationFrame(() => {
-              const height = el.getBoundingClientRect().height;
-              if (height > 0) {
-                onMeasure(index, height);
-              }
-            });
-          }
-        }}
       >
         {block?.isLoading ? (
           <OptimizedBlockSkeleton 
@@ -337,45 +311,6 @@ export default function ExpandedView({
     );
   });
 
-  // Row renderer for virtual list - stable reference
-  const VirtualRow = useCallback(({ index, style }) => {
-    const block = blocks[index];
-    if (!block) return null;
-
-    // [VIRT-DEBUG-1] Log which blocks are being rendered by virtualization
-    console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) at position ${style.top}`);
-
-    return (
-      <BlockRenderer
-        block={block}
-        index={index}
-        style={style}
-        isMobileView={isMobileView}
-        focusedBlockId={focusedBlockId}
-        showBlockSelector={showBlockSelector}
-        selectorPosition={selectorPosition}
-        draggedBlockId={draggedBlockId}
-        dropTargetId={dropTargetId}
-        dropPosition={dropPosition}
-        onMeasure={setItemSize}
-      />
-    );
-  }, [
-    blocks,
-    isMobileView,
-    focusedBlockId,
-    showBlockSelector,
-    selectorPosition,
-    draggedBlockId,
-    dropTargetId,
-    dropPosition,
-    setItemSize
-  ]);
-  
-  // Calculate list height (subtract header and footer space)
-  const listHeight = useMemo(() => {
-    return windowHeight - 350; // Account for header, tags, buttons, and footer
-  }, [windowHeight]);
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
   // Also sync when title changes from parent (after save confirmation)
@@ -627,20 +562,8 @@ export default function ExpandedView({
       });
     }
     
-    // Clear cached height for deleted block
-    blocks.forEach(block => {
-      if (block.id === blockId) {
-        blockHeightCache.delete(`${block.id}-${block.type}`);
-      }
-    });
-    
     // Use the loader's removeBlock method
     removeBlock(blockId);
-    
-    // Reset virtualization cache after deletion
-    if (listRef.current) {
-      listRef.current.resetAfterIndex(0);
-    }
     
     // Call Smart Sync for delete operation
     if (smartSyncManagerRef.current) {
@@ -989,9 +912,6 @@ export default function ExpandedView({
   const convertBlock = useCallback((blockId, newType, meta = {}) => {
     const updatedBlocks = blocks.map((block, index) => {
       if (block.id === blockId) {
-        // Clear old cached height
-        blockHeightCache.delete(`${block.id}-${block.type}`);
-        
         // Preserve content if possible
         const newBlock = {
           ...block,
@@ -1019,11 +939,6 @@ export default function ExpandedView({
     startTransition(() => {
       updateLoadedBlocks(updatedBlocks);
     });
-    
-    // Reset list cache after conversion
-    if (listRef.current) {
-      listRef.current.resetAfterIndex(0);
-    }
     
     // CRITICAL FIX: Call Smart Sync for block type conversion
     if (smartSyncManagerRef.current) {
@@ -1640,33 +1555,48 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Virtualized Block List */}
-          {blocks.length > 0 ? (
-            (() => {
-              const validBlocks = blocks.filter(b => b !== null && b !== undefined);
-              // [VIRT-DEBUG-2] Log virtualization activation
-              console.log(`[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE`);
-              console.log(`[VIRT-DEBUG-2] Total blocks: ${validBlocks.length}`);
-              console.log(`[VIRT-DEBUG-2] List height: ${listHeight || 600}px`);
-              console.log(`[VIRT-DEBUG-2] Overscan count: 3 blocks`);
-              console.log(`[VIRT-DEBUG-2] Expected rendered blocks: ~${Math.ceil((listHeight || 600) / 200) + 6} (visible + overscan)`);
-              console.log(`[VIRT-DEBUG-2] Check console for [VIRT-DEBUG-1] logs showing which blocks render`);
+          {/* Virtualized Block List with TanStack */}
+          {blocks.length > 0 && (
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const block = blocks[virtualRow.index];
+                if (!block) return null;
 
-              return (
-                <List
-                  ref={listRef}
-                  height={listHeight || 600}
-                  itemCount={validBlocks.length}
-                  itemSize={getItemSize}
-                  width="100%"
-                  overscanCount={3}
-                  className="virtual-list"
-                >
-                  {VirtualRow}
-                </List>
-              );
-            })()
-          ) : null}
+                // [VIRT-DEBUG-1] Log which blocks render
+                console.log(`[VIRT-DEBUG-1] Rendering block ${virtualRow.index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) at position ${virtualRow.start}px`);
+
+                return (
+                  <BlockRenderer
+                    key={virtualRow.key}
+                    ref={rowVirtualizer.measureElement}
+                    block={block}
+                    index={virtualRow.index}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    data-index={virtualRow.index}
+                    isMobileView={isMobileView}
+                    focusedBlockId={focusedBlockId}
+                    showBlockSelector={showBlockSelector}
+                    selectorPosition={selectorPosition}
+                    draggedBlockId={draggedBlockId}
+                    dropTargetId={dropTargetId}
+                    dropPosition={dropPosition}
+                  />
+                );
+              })}
+            </div>
+          )}
 
           {/* Load More Indicator for Paginated Documents */}
           {shouldUsePagination && hasMore && (

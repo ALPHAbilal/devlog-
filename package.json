@@ -20,6 +20,7 @@
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.46.2",
+    "@tanstack/react-virtual": "^3.10.8",
     "clsx": "^2.1.1",
     "dexie": "^4.0.10",
     "framer-motion": "^12.23.6",
@@ -34,8 +35,6 @@
     "react-dom": "^19.1.0",
     "react-katex": "^3.0.1",
     "react-router-dom": "^6.28.2",
-    "react-window": "^1.8.11",
-    "react-window-infinite-loader": "^1.0.10",
     "tailwind-merge": "^2.5.5",
     "zustand": "^4.5.0"
   },

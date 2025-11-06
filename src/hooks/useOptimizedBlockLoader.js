@@ -150,11 +150,16 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
       // Check if updates would actually change anything
       let hasChanges = false;
+      const changedKeys = [];
       for (const key in updates) {
         if (existingBlock[key] !== updates[key]) {
           hasChanges = true;
-          break;
+          changedKeys.push(key);
         }
+      }
+
+      if (changedKeys.length > 0) {
+        console.log('[BLOCK-UPDATE-DEBUG] Changed keys:', changedKeys, 'for block:', blockId.substring(0, 8));
       }
 
       // If nothing changed, return the SAME array to prevent re-renders

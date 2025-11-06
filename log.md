@@ -1,237 +1,315 @@
-index-CWin7v6p.js:26 Using optimized Supabase client
-index-CWin7v6p.js:26 [VIRT-DEBUG-IMPORT] Virtuoso component imported: object
-index-CWin7v6p.js:26 IndexedDB initialized successfully
-index-CWin7v6p.js:26 Persistent storage granted
-index-CWin7v6p.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-CWin7v6p.js:26 [Supabase] Activity monitoring disabled - sessions use automatic token refresh
-index-CWin7v6p.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-CWin7v6p.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-CWin7v6p.js:26 Using Supabase for storage
-index-CWin7v6p.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 0
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: []
-index-CWin7v6p.js:26 SessionCache: Cached 39 blocks for document 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 39
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: (3) ['e9a03bd4', '77e804ac', 'd699315e']
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] 📦 Blocks loaded: 39 total
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Block types: filetree, issue-tracker, code, heading, filetree, filetree, image, ai, text, heading, code, heading, ai, issue-tracker, image, ai, code, table, issue-tracker, ai, issue-tracker, image, code, ai, image, code, heading, text, text, ai, issue-tracker, issue-tracker, table, filetree, heading, code, text, filetree, heading
-index-CWin7v6p.js:26 SmartSync: IndexedDB initialized
-index-CWin7v6p.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:27:58.928Z
-index-CWin7v6p.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:27:58.929Z
-index-CWin7v6p.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:27:58.932Z
-index-CWin7v6p.js:26 📝 TextBlock 52dc7d70-d8de-4445-ae88-59fc6c7ec39e rendered at 2025-11-06T23:27:58.935Z
-index-CWin7v6p.js:26 📌 HeadingBlock f4002c15-f286-4e03-ad16-b4cc75119511 rendered at 2025-11-06T23:27:58.937Z
-index-CWin7v6p.js:26 💻 CodeBlock 9475f731-854e-4257-b4d4-fb5f743a2b5f rendered at 2025-11-06T23:27:58.939Z
-index-CWin7v6p.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:27:59.041Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:27:59.184Z
-index-CWin7v6p.js:26 ExpandedView: Initial load period complete, enabling saves
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ DOM VERIFICATION:
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Total blocks: 39
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Rendered in DOM: 8
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Virtualization ratio: 79.5% blocks NOT rendered
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only 8/39 blocks in DOM!
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (5) ['treeData', 'metadata', 'snapshots', 'currentSnapshotId', 'snapshotLimit'] for block: e9a03bd4
-index-CWin7v6p.js:26 [BLOCK-UPDATE] Changes detected, updating block: e9a03bd4
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', hasContent: true, hasMessages: false, hasImages: false, …}
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree block.snapshots: [{…}]
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree block.metadata: {last_sync: '2025-11-06T23:22:11.764394+00:00', snapshots: Array(1), snapshotLimit: 50, sync_timestamp: 1762471317815, currentSnapshotId: 'initial'}
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: [{…}]
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', position: 1, contentLength: 178, contentPreview: '{"treeData":[{"id":"1","name":"src","isFolder":true,"children":[{"id":"3fd1cef2-6800-44c7-a64f-29b1b'}
-index-CWin7v6p.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', action: 'UPDATE', blockType: 'filetree', position: 1, contentLength: 178, …}
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 39
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: (3) ['e9a03bd4', '77e804ac', 'd699315e']
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] 📦 Blocks loaded: 39 total
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Block types: filetree, issue-tracker, code, heading, filetree, filetree, image, ai, text, heading, code, heading, ai, issue-tracker, image, ai, code, table, issue-tracker, ai, issue-tracker, image, code, ai, image, code, heading, text, text, ai, issue-tracker, issue-tracker, table, filetree, heading, code, text, filetree, heading
-index-CWin7v6p.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:28:02.347Z
-index-CWin7v6p.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:28:02.349Z
-index-CWin7v6p.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:28:02.352Z
-index-CWin7v6p.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:28:02.436Z
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ DOM VERIFICATION:
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Total blocks: 39
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Rendered in DOM: 8
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Virtualization ratio: 79.5% blocks NOT rendered
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only 8/39 blocks in DOM!
-index-CWin7v6p.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (2) ['treeData', 'metadata'] for block: e9a03bd4
-index-CWin7v6p.js:26 [BLOCK-UPDATE] Changes detected, updating block: e9a03bd4
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', hasContent: true, hasMessages: false, hasImages: false, …}
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree block.snapshots: [{…}]
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree block.metadata: {last_sync: '2025-11-06T23:22:11.764394+00:00', snapshots: Array(1), snapshotLimit: 50, sync_timestamp: 1762471317815, currentSnapshotId: 'initial'}
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: [{…}]
-index-CWin7v6p.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', position: 1, contentLength: 181, contentPreview: '{"treeData":[{"id":"1","name":"src","isFolder":true,"children":[{"id":"3fd1cef2-6800-44c7-a64f-29b1b'}
-index-CWin7v6p.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', action: 'UPDATE', blockType: 'filetree', position: 1, contentLength: 181, …}
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 39
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: (3) ['e9a03bd4', '77e804ac', 'd699315e']
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] 📦 Blocks loaded: 39 total
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Block types: filetree, issue-tracker, code, heading, filetree, filetree, image, ai, text, heading, code, heading, ai, issue-tracker, image, ai, code, table, issue-tracker, ai, issue-tracker, image, code, ai, image, code, heading, text, text, ai, issue-tracker, issue-tracker, table, filetree, heading, code, text, filetree, heading
-index-CWin7v6p.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:28:05.015Z
-index-CWin7v6p.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:28:05.017Z
-index-CWin7v6p.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:28:05.021Z
-index-CWin7v6p.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:28:05.112Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ DOM VERIFICATION:
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Total blocks: 39
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Rendered in DOM: 8
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Virtualization ratio: 79.5% blocks NOT rendered
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only 8/39 blocks in DOM!
-index-CWin7v6p.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
-index-CWin7v6p.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 126, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762471686039","title":"","description":"","code":"","status"'}
-index-CWin7v6p.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 126, …}
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 39
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: (3) ['e9a03bd4', '77e804ac', 'd699315e']
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] 📦 Blocks loaded: 39 total
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Block types: filetree, issue-tracker, code, heading, filetree, filetree, image, ai, text, heading, code, heading, ai, issue-tracker, image, ai, code, table, issue-tracker, ai, issue-tracker, image, code, ai, image, code, heading, text, text, ai, issue-tracker, issue-tracker, table, filetree, heading, code, text, filetree, heading
-index-CWin7v6p.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:28:06.096Z
-index-CWin7v6p.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:28:06.101Z
-index-CWin7v6p.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:28:06.105Z
-index-CWin7v6p.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:28:06.203Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
-index-CWin7v6p.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:28:06.338Z
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ DOM VERIFICATION:
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Total blocks: 39
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Rendered in DOM: 8
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Virtualization ratio: 79.5% blocks NOT rendered
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only 8/39 blocks in DOM!
-index-CWin7v6p.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
-index-CWin7v6p.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 218, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762471686039","title":"","description":"","code":"","status"'}
-index-CWin7v6p.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 218, …}
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 39
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: (3) ['e9a03bd4', '77e804ac', 'd699315e']
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] 📦 Blocks loaded: 39 total
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Block types: filetree, issue-tracker, code, heading, filetree, filetree, image, ai, text, heading, code, heading, ai, issue-tracker, image, ai, code, table, issue-tracker, ai, issue-tracker, image, code, ai, image, code, heading, text, text, ai, issue-tracker, issue-tracker, table, filetree, heading, code, text, filetree, heading
-index-CWin7v6p.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:28:08.071Z
-index-CWin7v6p.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:28:08.073Z
-index-CWin7v6p.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:28:08.074Z
-index-CWin7v6p.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:28:08.142Z
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 📝 TextBlock 52dc7d70-d8de-4445-ae88-59fc6c7ec39e rendered at 2025-11-06T23:28:08.881Z
-index-CWin7v6p.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:28:08.900Z
-index-CWin7v6p.js:26 📁 FileTreeBlock 4c29205b-93cd-4db2-9675-cff1c7395db2 rendered at 2025-11-06T23:28:08.963Z
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ DOM VERIFICATION:
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Total blocks: 39
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Rendered in DOM: 10
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Virtualization ratio: 74.4% blocks NOT rendered
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only 10/39 blocks in DOM!
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (2) ['content', 'level'] for block: b457ab50
-index-CWin7v6p.js:26 [BLOCK-UPDATE] Changes detected, updating block: b457ab50
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'b457ab50-84f0-417a-a8ac-d26192c65b19', type: 'heading', hasContent: true, hasMessages: false, hasImages: false, …}
-index-CWin7v6p.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'b457ab50-84f0-417a-a8ac-d26192c65b19', type: 'heading', position: 4, contentLength: 8, contentPreview: 'dfdfdfdf'}
-index-CWin7v6p.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'b457ab50-84f0-417a-a8ac-d26192c65b19', action: 'UPDATE', blockType: 'heading', position: 4, contentLength: 8, …}
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-CWin7v6p.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-CWin7v6p.js:26 [DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed
-index-CWin7v6p.js:26 [DEBUG-FLICKER] Block count: 39
-index-CWin7v6p.js:26 [DEBUG-FLICKER] First 3 block IDs: (3) ['e9a03bd4', '77e804ac', 'd699315e']
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] 📦 Blocks loaded: 39 total
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Block types: filetree, issue-tracker, code, heading, filetree, filetree, image, ai, text, heading, code, heading, ai, issue-tracker, image, ai, code, table, issue-tracker, ai, issue-tracker, image, code, ai, image, code, heading, text, text, ai, issue-tracker, issue-tracker, table, filetree, heading, code, text, filetree, heading
-index-CWin7v6p.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:28:11.091Z
-index-CWin7v6p.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:28:11.096Z
-index-CWin7v6p.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:28:11.105Z
-index-CWin7v6p.js:26 📝 TextBlock 52dc7d70-d8de-4445-ae88-59fc6c7ec39e rendered at 2025-11-06T23:28:11.110Z
-index-CWin7v6p.js:26 📌 HeadingBlock f4002c15-f286-4e03-ad16-b4cc75119511 rendered at 2025-11-06T23:28:11.161Z
-index-CWin7v6p.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:28:11.229Z
-index-CWin7v6p.js:26 📁 FileTreeBlock 4c29205b-93cd-4db2-9675-cff1c7395db2 rendered at 2025-11-06T23:28:11.232Z
-index-CWin7v6p.js:26 💻 CodeBlock 9475f731-854e-4257-b4d4-fb5f743a2b5f rendered at 2025-11-06T23:28:11.276Z
-index-CWin7v6p.js:26 📌 HeadingBlock d73f2885-12a0-4a0c-afee-71c8aadb9b58 rendered at 2025-11-06T23:28:11.280Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ DOM VERIFICATION:
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Total blocks: 39
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Rendered in DOM: 14
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] Virtualization ratio: 64.1% blocks NOT rendered
-index-CWin7v6p.js:26 [VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only 14/39 blocks in DOM!
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:28:15.441Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 SmartSync: Syncing 5 changes
-index-CWin7v6p.js:26 SmartSync: Changes being sent: (5) [{…}, {…}, {…}, {…}, {…}]
-index-CWin7v6p.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-CWin7v6p.js:26 📝 TextBlock 52dc7d70-d8de-4445-ae88-59fc6c7ec39e rendered at 2025-11-06T23:28:16.220Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 📌 HeadingBlock f4002c15-f286-4e03-ad16-b4cc75119511 rendered at 2025-11-06T23:28:16.246Z
-index-CWin7v6p.js:26 💻 CodeBlock 9475f731-854e-4257-b4d4-fb5f743a2b5f rendered at 2025-11-06T23:28:16.446Z
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
-index-CWin7v6p.js:26 📌 HeadingBlock d73f2885-12a0-4a0c-afee-71c8aadb9b58 rendered at 2025-11-06T23:28:16.464Z
-index-CWin7v6p.js:26 🤖 AIBlock f8b60b80-b732-471f-b962-8d18dcab5caf rendered at 2025-11-06T23:28:16.576Z
-index-CWin7v6p.js:26 SmartSync: RPC response: {total: 5, errors: Array(0), success: true, processed: 5, timestamp: 1762471696602.509}
-index-CWin7v6p.js:26 [SYNC-DEBUG] Full RPC Response: {
-  "total": 5,
+index-DIcoA2As.js:26 Using optimized Supabase client
+index-DIcoA2As.js:26 [VIRT-DEBUG-IMPORT] Virtuoso component imported: object
+index-DIcoA2As.js:26 IndexedDB initialized successfully
+index-DIcoA2As.js:26 Persistent storage granted
+index-DIcoA2As.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DIcoA2As.js:26 [Supabase] Activity monitoring disabled - sessions use automatic token refresh
+index-DIcoA2As.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-DIcoA2As.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+index-DIcoA2As.js:26 Using Supabase for storage
+index-DIcoA2As.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ⚠️ Changes detected - creating new blocks array
+index-DIcoA2As.js:26 SessionCache: Cached 39 blocks for document 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ⚠️ Changes detected - creating new blocks array
+index-DIcoA2As.js:26 SmartSync: IndexedDB initialized
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:08.037Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:08.038Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:08.039Z
+index-DIcoA2As.js:26 📝 TextBlock 52dc7d70-d8de-4445-ae88-59fc6c7ec39e rendered at 2025-11-06T23:33:08.040Z
+index-DIcoA2As.js:26 📌 HeadingBlock f4002c15-f286-4e03-ad16-b4cc75119511 rendered at 2025-11-06T23:33:08.043Z
+index-DIcoA2As.js:26 💻 CodeBlock 9475f731-854e-4257-b4d4-fb5f743a2b5f rendered at 2025-11-06T23:33:08.046Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:08.143Z
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:08.242Z
+index-DIcoA2As.js:26 ExpandedView: Initial load period complete, enabling saves
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:14.597Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:14.598Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:14.600Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:14.677Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:16.292Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:16.293Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:16.295Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:16.364Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 126, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762471998033","title":"","description":"","code":"","status"'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 126, …}
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:18.096Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:18.097Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:18.098Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:18.171Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 126, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762471999681","title":"","description":"","code":"","status"'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 126, …}
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:19.718Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:19.719Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:19.721Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:19.798Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 126, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762472000631","title":"","description":"","code":"","status"'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 126, …}
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:20.669Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:20.670Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:20.671Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:20.749Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:21.971Z
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:23.838Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:23.840Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:23.842Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:23.922Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:24.004Z
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:24.663Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:24.664Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:24.666Z
+index-DIcoA2As.js:26 SmartSync: Syncing 3 changes
+index-DIcoA2As.js:26 SmartSync: Changes being sent: (3) [{…}, {…}, {…}]
+index-DIcoA2As.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:24.743Z
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:24.744Z
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 SmartSync: RPC response: {total: 3, errors: Array(0), success: true, processed: 3, timestamp: 1762472005042.65}
+index-DIcoA2As.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 3,
   "errors": [],
   "success": true,
-  "processed": 5,
-  "timestamp": 1762471696602.509
+  "processed": 3,
+  "timestamp": 1762472005042.65
 }
-index-CWin7v6p.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 968bfca9-5a3a-4408-96f5-741f09aa4b08
-index-CWin7v6p.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
-index-CWin7v6p.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
-index-CWin7v6p.js:26 [SYNC-DEBUG] Change 1: {action: 'UPDATE', block_id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', block_type: 'filetree', position: 1, has_type: true, …}
-index-CWin7v6p.js:26 [SYNC-DEBUG] Change 2: {action: 'UPDATE', block_id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', block_type: 'filetree', position: 1, has_type: true, …}
-index-CWin7v6p.js:26 [SYNC-DEBUG] Change 3: {action: 'UPDATE', block_id: '77e804ac-be61-43db-be10-81962ab915f8', block_type: 'issue-tracker', position: 2, has_type: true, …}
-index-CWin7v6p.js:26 [SYNC-DEBUG] Change 4: {action: 'UPDATE', block_id: '77e804ac-be61-43db-be10-81962ab915f8', block_type: 'issue-tracker', position: 2, has_type: true, …}
-index-CWin7v6p.js:26 [SYNC-DEBUG] Change 5: {action: 'UPDATE', block_id: 'b457ab50-84f0-417a-a8ac-d26192c65b19', block_type: 'heading', position: 4, has_type: true, …}
-index-CWin7v6p.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
-index-CWin7v6p.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
-index-CWin7v6p.js:26 [SYNC-DEBUG] Changes that were sent: (5) [{…}, {…}, {…}, {…}, {…}]
-index-CWin7v6p.js:26 SmartSync: Successfully synced 5 changes
-index-CWin7v6p.js:26 SmartSync: Cleaned up 5 old synced changes
-index-CWin7v6p.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-DIcoA2As.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-DIcoA2As.js:26 [SYNC-DEBUG] Change 1: {action: 'UPDATE', block_id: '77e804ac-be61-43db-be10-81962ab915f8', block_type: 'issue-tracker', position: 2, has_type: true, …}
+index-DIcoA2As.js:26 [SYNC-DEBUG] Change 2: {action: 'UPDATE', block_id: '77e804ac-be61-43db-be10-81962ab915f8', block_type: 'issue-tracker', position: 2, has_type: true, …}
+index-DIcoA2As.js:26 [SYNC-DEBUG] Change 3: {action: 'UPDATE', block_id: '77e804ac-be61-43db-be10-81962ab915f8', block_type: 'issue-tracker', position: 2, has_type: true, …}
+index-DIcoA2As.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-DIcoA2As.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-DIcoA2As.js:26 [SYNC-DEBUG] Changes that were sent: (3) [{…}, {…}, {…}]
+index-DIcoA2As.js:26 SmartSync: Successfully synced 3 changes
+index-DIcoA2As.js:26 SmartSync: Cleaned up 3 old synced changes
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (3) ['content', 'language', 'filePath'] for block: d699315e
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: d699315e
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'd699315e-9f8f-4841-9d79-5b43c4a74c78', type: 'code', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'd699315e-9f8f-4841-9d79-5b43c4a74c78', type: 'code', position: 3, contentLength: 58, contentPreview: 'xcxperfect timing here \nperfect timing here fdghdfgg\ngfhgf'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'd699315e-9f8f-4841-9d79-5b43c4a74c78', action: 'UPDATE', blockType: 'code', position: 3, contentLength: 58, …}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] Block changed: d699315e position: 3
+index-DIcoA2As.js:26 [ANTI-FLICKER] ⚠️ Changes detected - creating new blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:32.253Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:32.255Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:32.257Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:32.333Z
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:32.333Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (5) ['treeData', 'metadata', 'snapshots', 'currentSnapshotId', 'snapshotLimit'] for block: e9a03bd4
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: e9a03bd4
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.metadata: {last_sync: '2025-11-06T23:28:16.602509+00:00', snapshots: Array(1), snapshotLimit: 50, sync_timestamp: 1762471682333, currentSnapshotId: 'initial'}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', position: 1, contentLength: 178, contentPreview: '{"treeData":[{"id":"1","name":"src","isFolder":true,"children":[{"id":"c2442209-7715-447d-bcd4-c9ed6'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', action: 'UPDATE', blockType: 'filetree', position: 1, contentLength: 178, …}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:35.115Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:35.118Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:35.121Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:35.203Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (2) ['treeData', 'metadata'] for block: e9a03bd4
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: e9a03bd4
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.metadata: {last_sync: '2025-11-06T23:28:16.602509+00:00', snapshots: Array(1), snapshotLimit: 50, sync_timestamp: 1762471682333, currentSnapshotId: 'initial'}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', position: 1, contentLength: 177, contentPreview: '{"treeData":[{"id":"1","name":"src","isFolder":true,"children":[{"id":"3d6e3a6d-a610-4302-9c7d-bee18'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', action: 'UPDATE', blockType: 'filetree', position: 1, contentLength: 177, …}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:36.019Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:36.020Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:36.022Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:36.091Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (2) ['treeData', 'metadata'] for block: e9a03bd4
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: e9a03bd4
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.metadata: {last_sync: '2025-11-06T23:28:16.602509+00:00', snapshots: Array(1), snapshotLimit: 50, sync_timestamp: 1762471682333, currentSnapshotId: 'initial'}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', position: 1, contentLength: 178, contentPreview: '{"treeData":[{"id":"1","name":"src","isFolder":true,"children":[]},{"id":"a54f3720-b17d-47ae-8aa9-81'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', action: 'UPDATE', blockType: 'filetree', position: 1, contentLength: 178, …}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:38.344Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:38.347Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:38.349Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:38.426Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: (2) ['treeData', 'metadata'] for block: e9a03bd4
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: e9a03bd4
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree block.metadata: {last_sync: '2025-11-06T23:28:16.602509+00:00', snapshots: Array(1), snapshotLimit: 50, sync_timestamp: 1762471682333, currentSnapshotId: 'initial'}
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: [{…}]
+index-DIcoA2As.js:26 [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', type: 'filetree', position: 1, contentLength: 179, contentPreview: '{"treeData":[{"id":"1","name":"src","isFolder":true,"children":[]},{"id":"378f3fde-46be-4eaf-8b74-e5'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a', action: 'UPDATE', blockType: 'filetree', position: 1, contentLength: 179, …}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:39.187Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:39.189Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:39.192Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:39.266Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:40.316Z
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 225, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762472000631","title":"","description":"","code":"","status"'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 225, …}
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:41.009Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:41.013Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:41.020Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:41.141Z
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:41.142Z
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 📝 TextBlock 52dc7d70-d8de-4445-ae88-59fc6c7ec39e rendered at 2025-11-06T23:33:41.786Z
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 📁 FileTreeBlock 4c29205b-93cd-4db2-9675-cff1c7395db2 rendered at 2025-11-06T23:33:41.811Z
+index-DIcoA2As.js:26 📌 HeadingBlock f4002c15-f286-4e03-ad16-b4cc75119511 rendered at 2025-11-06T23:33:41.823Z
+index-DIcoA2As.js:26 💻 CodeBlock 9475f731-854e-4257-b4d4-fb5f743a2b5f rendered at 2025-11-06T23:33:41.886Z
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: ['data'] for block: 77e804ac
+index-DIcoA2As.js:26 [BLOCK-UPDATE] Changes detected, updating block: 77e804ac
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize INPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
+index-DIcoA2As.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '77e804ac-be61-43db-be10-81962ab915f8', type: 'issue-tracker', position: 2, contentLength: 225, contentPreview: '{"milestone":"","issues":[{"id":"issue-1762472000631","title":"","description":"","code":"","status"'}
+index-DIcoA2As.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', action: 'UPDATE', blockType: 'issue-tracker', position: 2, contentLength: 225, …}
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Document ID: 968bfca9-5a3a-4408-96f5-741f09aa4b08
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-DIcoA2As.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-DIcoA2As.js:26 [ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array
+index-DIcoA2As.js:26 💻 CodeBlock d699315e-9f8f-4841-9d79-5b43c4a74c78 rendered at 2025-11-06T23:33:43.235Z
+index-DIcoA2As.js:26 📌 HeadingBlock b457ab50-84f0-417a-a8ac-d26192c65b19 rendered at 2025-11-06T23:33:43.237Z
+index-DIcoA2As.js:26 🌆 ImageBlock b003954b-4c2b-4cd2-b6a9-79f1cfd1e936 rendered at 2025-11-06T23:33:43.239Z
+index-DIcoA2As.js:26 📁 FileTreeBlock e9a03bd4-cd82-4dcc-a6d9-24e4d67d4f8a rendered at 2025-11-06T23:33:43.322Z
+index-DIcoA2As.js:26 📁 FileTreeBlock a169854a-b83b-431d-ab96-393b0cd8ce8f rendered at 2025-11-06T23:33:43.334Z
+index-DIcoA2As.js:26 🎯 IssueTrackerBlock initialization: {blockId: '77e804ac-be61-43db-be10-81962ab915f8', hasData: true, milestone: '', issuesCount: 1, rawBlock: {…}}
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED
+index-DIcoA2As.js:26 FileTreeBlock memo: PREVENTED

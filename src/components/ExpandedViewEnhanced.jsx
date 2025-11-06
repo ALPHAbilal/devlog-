@@ -87,10 +87,21 @@ export default function ExpandedView({
     progress = null,
     preloadNearbyDocuments = () => {}
   } = loader;
-  
+
+  const prevBlocksRef = useRef(null);
+
   // We'll use loadedBlocks directly instead of duplicating state
   // Memoize blocks array to prevent unnecessary re-renders
-  const blocks = useMemo(() => loadedBlocks || [], [loadedBlocks]);
+  const blocks = useMemo(() => {
+    const result = loadedBlocks || [];
+    console.log(`[BLOCKS-MEMO] Blocks array updated: ${result.length} blocks`);
+    if (prevBlocksRef.current) {
+      const sameReferences = result.filter((block, i) => prevBlocksRef.current[i] === block).length;
+      console.log(`[BLOCKS-MEMO] Block reference stability: ${sameReferences}/${result.length} blocks same`);
+    }
+    prevBlocksRef.current = result;
+    return result;
+  }, [loadedBlocks]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
   const [title, setTitle] = useState(entry.title);

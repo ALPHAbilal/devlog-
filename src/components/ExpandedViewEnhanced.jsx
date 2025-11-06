@@ -222,11 +222,15 @@ export default function ExpandedView({
     },
   });
 
-  // [VIRT-DEBUG-2] Log virtualizer info
-  console.log('[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE (TanStack)');
-  console.log('[VIRT-DEBUG-2] Total blocks:', blocks.length);
-  console.log('[VIRT-DEBUG-2] Total height:', rowVirtualizer.getTotalSize(), 'px');
-  console.log('[VIRT-DEBUG-2] Overscan count: 3 blocks');
+  // [VIRT-DEBUG-2] Log virtualizer info (moved to useEffect to prevent render loop)
+  useEffect(() => {
+    if (blocks.length > 0) {
+      console.log('[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE (TanStack)');
+      console.log('[VIRT-DEBUG-2] Total blocks:', blocks.length);
+      console.log('[VIRT-DEBUG-2] Total height:', rowVirtualizer.getTotalSize(), 'px');
+      console.log('[VIRT-DEBUG-2] Overscan count: 3 blocks');
+    }
+  }, [blocks.length, rowVirtualizer]);
   
   // Create a memoized block renderer component to avoid closure issues
   // React 19: ref can be accepted as a regular prop without forwardRef

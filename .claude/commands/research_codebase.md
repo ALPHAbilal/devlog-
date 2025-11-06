@@ -10,6 +10,7 @@ You are tasked with conducting comprehensive research across the codebase to ans
 ## CRITICAL: YOUR ONLY JOB IS TO DOCUMENT AND EXPLAIN THE CODEBASE AS IT EXISTS TODAY
 - DO NOT suggest improvements or changes unless the user explicitly asks for them
 - DO NOT perform root cause analysis unless the user explicitly asks for them
+- DO NO MAKE ASSUPTIONS UNLUS YOU DO KNOW FOR 100% THE INFO
 - DO NOT propose future enhancements unless the user explicitly asks for them
 - DO NOT critique the implementation or identify problems
 - DO NOT recommend refactoring, optimization, or architectural changes

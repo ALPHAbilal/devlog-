@@ -186,9 +186,9 @@ export default function Dashboard() {
       blocks: undefined // Force block loader to fetch all blocks
     };
     setExpandedEntry(documentForEdit);
-    
+
     // Update URL to reflect the opened document
-    navigate(`/dashboard/${document.id}`, { replace: true });
+    navigate(`/document/${document.id}`, { replace: true });
   }, [navigate]);
 
   // Update storage info
@@ -719,21 +719,13 @@ export default function Dashboard() {
     };
   }, [checkLoadMore, hasMore, currentPage, paginatedDocuments?.length]);
 
-  // Sync URL with document state
+  // Redirect old /dashboard/:id URLs to new /document/:id route for backwards compatibility
   useEffect(() => {
-    if (documentId && entries.length > 0) {
-      const doc = entries.find(e => e.id === documentId);
-      if (doc && !expandedEntry) {
-        setExpandedEntry(doc);
-        // Don't track here - ExpandedViewEnhanced will track the view event
-        // This prevents duplicate tracking
-        startDocumentTimer('editing', doc.id);
-      } else if (!doc && documentId) {
-        // Document not found, redirect to dashboard
-        navigate('/dashboard', { replace: true });
-      }
+    if (documentId) {
+      // Redirect to new document route
+      navigate(`/document/${documentId}`, { replace: true });
     }
-  }, [documentId, entries, expandedEntry, navigate, trackDocumentEvent, startDocumentTimer]);
+  }, [documentId, navigate]);
 
 
   // Update entry
@@ -1296,7 +1288,7 @@ export default function Dashboard() {
             allEntries={entries}
             onNavigateToDocument={(newEntry) => {
               setExpandedEntry(newEntry);
-              navigate(`/dashboard/${newEntry.id}`, { replace: true });
+              navigate(`/document/${newEntry.id}`, { replace: true });
             }}
           />
         </main>

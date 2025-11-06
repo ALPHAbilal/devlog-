@@ -18,6 +18,7 @@ import Landing from './pages/Landing';
 import Privacy from './pages/Privacy';
 import Terms from './pages/Terms';
 import SharedDocument from './pages/SharedDocument';
+import DocumentPage from './pages/DocumentPage';
 import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
 import CookieConsentBanner from './components/CookieConsentBanner';
@@ -213,6 +214,11 @@ function AppContent() {
       <Route path="/dashboard/:documentId" element={
         <Layout>
           <Dashboard />
+        </Layout>
+      } />
+      <Route path="/document/:documentId" element={
+        <Layout>
+          <DocumentPage />
         </Layout>
       } />
       <Route path="/settings" element={<SettingsClaude />} />

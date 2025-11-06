@@ -1,6 +1,6 @@
--- Migration: Fix batch_sync_changes to include type and position fields
--- Purpose: Resolve "null value in column type violates not-null constraint" error
--- Issue: The function was not inserting block type and position, causing database constraint violations
+-- Migration: Fix batch_sync_changes to preserve metadata from client
+-- Purpose: Allow snapshots and other JSONB metadata to persist to database
+-- Issue: The function was hardcoding metadata, throwing away client-sent data
 
 CREATE OR REPLACE FUNCTION batch_sync_changes(
   p_document_id UUID,
@@ -23,7 +23,7 @@ BEGIN
       -- Handle different action types
       CASE v_change->>'action'
         WHEN 'UPDATE', 'CREATE' THEN
-          -- Parse metadata from client if provided
+          -- CRITICAL FIX: Parse metadata from client if provided
           BEGIN
             v_client_metadata := CASE
               WHEN v_change->>'metadata' IS NOT NULL
@@ -38,8 +38,6 @@ BEGIN
           INSERT INTO blocks (
             id,
             document_id,
-            type,              -- CRITICAL FIX: Add type field
-            position,          -- CRITICAL FIX: Add position field
             content,
             metadata,
             updated_at
@@ -47,10 +45,8 @@ BEGIN
           VALUES (
             (v_change->>'block_id')::UUID,
             p_document_id,
-            v_change->>'block_type',  -- CRITICAL FIX: Map block_type from payload
-            COALESCE((v_change->>'position')::INT, 0),  -- CRITICAL FIX: Map position from payload
             v_change->>'content',
-            -- Merge client metadata with sync tracking
+            -- CRITICAL FIX: Merge client metadata with sync tracking
             v_client_metadata || jsonb_build_object(
               'last_sync', now(),
               'sync_timestamp', (v_change->>'timestamp')::BIGINT
@@ -59,9 +55,8 @@ BEGIN
           )
           ON CONFLICT (id) DO UPDATE
           SET
-            type = EXCLUDED.type,        -- CRITICAL FIX: Update type on conflict
-            position = EXCLUDED.position,  -- CRITICAL FIX: Update position on conflict
             content = EXCLUDED.content,
+            -- CRITICAL FIX: Preserve client metadata, update sync tracking
             metadata = EXCLUDED.metadata,
             updated_at = EXCLUDED.updated_at
           WHERE blocks.updated_at < EXCLUDED.updated_at; -- Prevent older changes from overwriting
@@ -76,7 +71,11 @@ BEGIN
           -- Update block position
           UPDATE blocks
           SET
-            position = (v_change->>'position')::INT,  -- CRITICAL FIX: Use actual position column
+            metadata = jsonb_set(
+              COALESCE(metadata, '{}'::jsonb),
+              '{position}',
+              to_jsonb((v_change->>'position')::INT)
+            ),
             updated_at = to_timestamp((v_change->>'timestamp')::BIGINT / 1000)
           WHERE id = (v_change->>'block_id')::UUID
             AND document_id = p_document_id;
@@ -138,7 +137,7 @@ END;
 $$;
 
 -- Add comment for documentation
-COMMENT ON FUNCTION batch_sync_changes IS 'Processes multiple block changes in a single transaction. Updated to preserve client metadata and include type/position fields.';
+COMMENT ON FUNCTION batch_sync_changes IS 'Processes multiple block changes in a single transaction. Updated to preserve client metadata including snapshots.';
 
 -- Grant execute permission to authenticated users
 GRANT EXECUTE ON FUNCTION batch_sync_changes TO authenticated;

@@ -208,18 +208,39 @@ export default function ExpandedView({
     return Math.ceil(getEstimatedHeight(block) + ADD_BUTTON_HEIGHT);
   }, [blocks]);
 
-  // Configure TanStack virtualizer with measure element override
+  // Stable height measurement to prevent oscillation loops
+  const heightCache = useRef(new Map());
+
+  const measureElement = useCallback((element) => {
+    if (!element) return 0;
+
+    const index = element.getAttribute('data-index');
+    const currentHeight = Math.ceil(element.getBoundingClientRect().height);
+
+    // Get cached height for this index
+    const cachedHeight = heightCache.current.get(index);
+
+    if (cachedHeight) {
+      // If height difference is small (oscillation), stick with cached value
+      const heightDiff = Math.abs(currentHeight - cachedHeight);
+      if (heightDiff < 60) { // Threshold to prevent 50px oscillations
+        return cachedHeight;
+      }
+    }
+
+    // Cache the new height
+    heightCache.current.set(index, currentHeight);
+    return currentHeight;
+  }, []);
+
+  // Configure TanStack virtualizer with stable height strategy
   const rowVirtualizer = useVirtualizer({
     count: blocks.length,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize, // Use memoized function
     overscan: 3, // Render 3 extra blocks outside viewport
-    // Override measureElement to round measurements (prevents floating-point loop)
-    measureElement: (el) => {
-      if (!el) return 0;
-      // Round to nearest integer to prevent floating-point precision issues
-      return Math.ceil(el.getBoundingClientRect().height);
-    },
+    useAnimationFrameWithResizeObserver: true, // Built-in fix for measurement loops
+    measureElement, // Stable height strategy to prevent oscillations
   });
 
   // [VIRT-DEBUG-2] Log virtualizer info (moved to useEffect to prevent render loop)

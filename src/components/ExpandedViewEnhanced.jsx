@@ -143,9 +143,8 @@ export default function ExpandedView({
   const [isDeleting, setIsDeleting] = useState(false);
   const [hoveredBlockId, setHoveredBlockId] = useState(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [saveStatus, setSaveStatus] = useState(null);
+  // REMOVED: saveStatus - dead code that caused unnecessary re-renders
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
-  const saveStatusTimeoutRef = useRef(null);
   // Smart Sync manager reference (does NOT use state to avoid re-renders)
   // SyncStatusIndicator component handles status polling independently
   const smartSyncManagerRef = useRef(null);
@@ -457,8 +456,8 @@ export default function ExpandedView({
             // Update sync status will happen automatically via the interval
           }).catch(error => {
             console.error('Smart Sync error:', error);
-            setSaveStatus('error');
-            setTimeout(() => setSaveStatus(null), 3000);
+            // REMOVED: setSaveStatus - was causing unnecessary re-renders
+            // SyncStatusIndicator will show the error state automatically
           });
         }
       }

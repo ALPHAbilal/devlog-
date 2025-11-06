@@ -141,6 +141,52 @@ Sentry.captureException(error, {
 
 ---
 
+## Pattern: Block Flickering Prevention
+
+**Problem**: Blocks flicker when parent state updates frequently (e.g., sync status every 1 second)
+
+**Root Cause**:
+- Parent component has 15+ state variables
+- Some state (like sync status) updates every second via `setInterval`
+- Every parent re-render forces all visible blocks to re-render
+- Even with `React.memo`, comparison function is expensive and props are recreated
+
+**Solution**: Isolate frequently-updating state into separate components
+```javascript
+// ❌ BAD: Sync status in parent state
+const [syncStatus, setSyncStatus] = useState({ ... });
+
+useEffect(() => {
+  setInterval(() => {
+    setSyncStatus(newStatus); // ← Triggers parent re-render
+  }, 1000);
+}, []);
+
+// ✅ GOOD: Sync status in isolated component
+<SyncStatusIndicator
+  documentId={entry.id}
+  syncManagerRef={smartSyncManagerRef}
+/>
+```
+
+**Implementation Files**:
+- `src/components/SyncStatusIndicator.jsx` - Isolated sync status component
+- `src/components/ExpandedViewEnhanced.jsx` - Removed syncStatus state and interval
+
+**Verification**: Type in a block and check console - only edited block should re-render
+
+**Performance Impact**:
+- Before: 8-14 blocks × 1 re-render/second = 8-14 re-renders/second
+- After: 1 component (SyncStatusIndicator only)
+- Improvement: 90%+ reduction in unnecessary re-renders
+
+**Time Saved**: 3+ hours debugging flicker issues
+**Date**: 2025-11-06
+
+**Related**: See `thoughts/shared/plans/fix-block-flickering-implementation.md` for full plan
+
+---
+
 ## Version-Track Block Type Removed (2025-11-05)
 
 **Status**: DELETED

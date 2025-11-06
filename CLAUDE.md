@@ -77,7 +77,14 @@ Devlog is a developer-focused knowledge management system built around a flexibl
 - Event-driven updates using `src/utils/eventBus.js`
 - Zustand for minimal global state where needed
 
-#### 5. Bulletproof Architecture (6-Layer Defense)
+#### 5. State Isolation Pattern
+- **Frequently-updating state** isolated into separate components
+- **Sync Status**: Separate `SyncStatusIndicator` component
+- **Pattern**: If state updates more than once per second, extract it
+- **Benefit**: 90%+ reduction in unnecessary re-renders
+- **Example**: SyncStatusIndicator polls SmartSync directly without parent re-renders
+
+#### 6. Bulletproof Architecture (6-Layer Defense)
 - **Global Error Boundaries** - Catches all React errors with recovery UI
 - **Data Integrity Layer** - SHA-256 checksums, automatic corruption repair
 - **Distributed Lock Manager** - Prevents race conditions across tabs

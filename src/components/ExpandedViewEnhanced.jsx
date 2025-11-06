@@ -90,34 +90,40 @@ export default function ExpandedView({
   
   // We'll use loadedBlocks directly instead of duplicating state
   // Memoize blocks array to prevent unnecessary re-renders
+  // Use a ref to store previous blocks for deep comparison
+  const prevBlocksRef = useRef(null);
+
   const blocks = useMemo(() => {
     const result = loadedBlocks || [];
 
-    // [DEBUG-FLICKER] Log when blocks array re-creates
-    console.log(`[DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed`);
-    console.log(`[DEBUG-FLICKER] Block count: ${result.length}`);
-    console.log(`[DEBUG-FLICKER] First 3 block IDs:`, result.slice(0, 3).map(b => b?.id?.substring(0, 8)));
+    // NUCLEAR FIX: Deep equality check to prevent unnecessary re-renders
+    // Only return new array if blocks actually changed (not just reference)
+    if (prevBlocksRef.current && prevBlocksRef.current.length === result.length) {
+      let hasActualChanges = false;
 
-    // [VIRT-DEBUG-5] Log blocks loaded for virtualization
-    if (result.length > 0) {
-      console.log(`[VIRT-DEBUG-5] 📦 Blocks loaded: ${result.length} total`);
-      console.log(`[VIRT-DEBUG-5] Block types: ${result.map(b => b.type).join(', ')}`);
+      for (let i = 0; i < result.length; i++) {
+        const prev = prevBlocksRef.current[i];
+        const curr = result[i];
 
-      // After a brief delay, count actual DOM nodes
-      setTimeout(() => {
-        const renderedNodes = document.querySelectorAll('[data-block-id]').length;
-        console.log(`[VIRT-DEBUG-5] ✅ DOM VERIFICATION:`);
-        console.log(`[VIRT-DEBUG-5] Total blocks: ${result.length}`);
-        console.log(`[VIRT-DEBUG-5] Rendered in DOM: ${renderedNodes}`);
-        console.log(`[VIRT-DEBUG-5] Virtualization ratio: ${((1 - renderedNodes / result.length) * 100).toFixed(1)}% blocks NOT rendered`);
-        if (renderedNodes < result.length) {
-          console.log(`[VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only ${renderedNodes}/${result.length} blocks in DOM!`);
-        } else {
-          console.log(`[VIRT-DEBUG-5] ⚠️ ALL BLOCKS RENDERED - Virtualization may not be active!`);
+        // Compare essential properties that should trigger re-render
+        if (prev.id !== curr.id ||
+            prev.content !== curr.content ||
+            prev.type !== curr.type ||
+            prev.position !== curr.position) {
+          hasActualChanges = true;
+          console.log('[ANTI-FLICKER] Block changed:', curr.id?.substring(0, 8), 'position:', curr.position);
+          break;
         }
-      }, 1000);
+      }
+
+      if (!hasActualChanges) {
+        console.log('[ANTI-FLICKER] ✅ No actual changes detected - using cached blocks array');
+        return prevBlocksRef.current; // Return SAME reference to prevent Virtuoso re-render
+      }
     }
 
+    console.log('[ANTI-FLICKER] ⚠️ Changes detected - creating new blocks array');
+    prevBlocksRef.current = result;
     return result;
   }, [loadedBlocks]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);

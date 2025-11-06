@@ -214,18 +214,73 @@ export default function ExpandedView({
       </div>
     );
   }, (prevProps, nextProps) => {
-    // Only re-render if these specific props changed
-    return (
-      prevProps.block === nextProps.block &&
-      prevProps.index === nextProps.index &&
-      prevProps.isMobileView === nextProps.isMobileView &&
-      prevProps.focusedBlockId === nextProps.focusedBlockId &&
-      prevProps.showBlockSelector === nextProps.showBlockSelector &&
-      prevProps.selectorPosition === nextProps.selectorPosition &&
-      prevProps.draggedBlockId === nextProps.draggedBlockId &&
-      prevProps.dropTargetId === nextProps.dropTargetId &&
-      prevProps.dropPosition === nextProps.dropPosition
-    );
+    // DEV ONLY: Log what caused re-render
+    if (import.meta.env.DEV) {
+      const reasons = [];
+      if (prevProps.block !== nextProps.block) reasons.push('block');
+      if (prevProps.index !== nextProps.index) reasons.push('index');
+
+      const prevFocused = prevProps.focusedBlockId === prevProps.block.id;
+      const nextFocused = nextProps.focusedBlockId === nextProps.block.id;
+      if (prevFocused !== nextFocused) reasons.push('focus');
+
+      const prevDragged = prevProps.draggedBlockId === prevProps.block.id;
+      const nextDragged = nextProps.draggedBlockId === nextProps.block.id;
+      if (prevDragged !== nextDragged) reasons.push('drag');
+
+      const prevDropTarget = prevProps.dropTargetId === prevProps.block.id;
+      const nextDropTarget = nextProps.dropTargetId === nextProps.block.id;
+      if (prevDropTarget !== nextDropTarget) reasons.push('dropTarget');
+
+      if (prevDropTarget && nextDropTarget && prevProps.dropPosition !== nextProps.dropPosition) {
+        reasons.push('dropPosition');
+      }
+
+      const prevShowingSelector = prevProps.showBlockSelector && prevProps.selectorPosition === prevProps.block.id;
+      const nextShowingSelector = nextProps.showBlockSelector && nextProps.selectorPosition === nextProps.block.id;
+      if (prevShowingSelector !== nextShowingSelector) reasons.push('selector');
+
+      if (prevProps.isMobileView !== nextProps.isMobileView) reasons.push('mobileView');
+
+      if (reasons.length > 0) {
+        console.log(`[MEMO-DEBUG] Block ${nextProps.block.id.substring(0, 8)} re-render: ${reasons.join(', ')}`);
+      }
+    }
+
+    // Fast path: Check most frequently changing props first
+    // Block reference changes most often (content edits)
+    if (prevProps.block !== nextProps.block) return false;
+    if (prevProps.index !== nextProps.index) return false;
+
+    // Check if THIS block is affected by focus changes
+    const prevFocused = prevProps.focusedBlockId === prevProps.block.id;
+    const nextFocused = nextProps.focusedBlockId === nextProps.block.id;
+    if (prevFocused !== nextFocused) return false;
+
+    // Check if THIS block is affected by drag operations
+    const prevDragged = prevProps.draggedBlockId === prevProps.block.id;
+    const nextDragged = nextProps.draggedBlockId === nextProps.block.id;
+    if (prevDragged !== nextDragged) return false;
+
+    const prevDropTarget = prevProps.dropTargetId === prevProps.block.id;
+    const nextDropTarget = nextProps.dropTargetId === nextProps.block.id;
+    if (prevDropTarget !== nextDropTarget) return false;
+
+    // Only check dropPosition if this block is the drop target
+    if (prevDropTarget && nextDropTarget) {
+      if (prevProps.dropPosition !== nextProps.dropPosition) return false;
+    }
+
+    // Check if THIS block is showing the selector
+    const prevShowingSelector = prevProps.showBlockSelector && prevProps.selectorPosition === prevProps.block.id;
+    const nextShowingSelector = nextProps.showBlockSelector && nextProps.selectorPosition === nextProps.block.id;
+    if (prevShowingSelector !== nextShowingSelector) return false;
+
+    // Rarely changes
+    if (prevProps.isMobileView !== nextProps.isMobileView) return false;
+
+    // All checks passed - skip re-render
+    return true;
   });
 
 
@@ -1480,13 +1535,18 @@ export default function ExpandedView({
               style={{ height: '100%' }}
               data={blocks}
               defaultItemHeight={150}
-              increaseViewportBy={{ top: 200, bottom: 600 }}
+              increaseViewportBy={{ top: 400, bottom: 800 }}
+              skipAnimationFrameInResizeObserver={true}
               computeItemKey={(index, block) => block.id}
               itemContent={(index, block) => {
                 if (!block) return null;
 
                 if (import.meta.env.DEV) {
-                  console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)})`);
+                  // Count renders per block
+                  if (!window.BLOCK_RENDER_COUNT) window.BLOCK_RENDER_COUNT = {};
+                  window.BLOCK_RENDER_COUNT[block.id] = (window.BLOCK_RENDER_COUNT[block.id] || 0) + 1;
+
+                  console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) - Render #${window.BLOCK_RENDER_COUNT[block.id]}`);
                 }
 
                 return (

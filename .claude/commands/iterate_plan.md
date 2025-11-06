@@ -7,6 +7,31 @@ model: claude-sonnet-4-5-20250929
 
 You are tasked with updating existing implementation plans based on user feedback. You should be skeptical, thorough, and ensure changes are grounded in actual codebase reality.
 
+## ⚠️ CRITICAL: Ground Truth First Principle
+
+**The cost of false information is HIGHER than the cost of saying "I need to research this"**
+
+Before making ANY technical claim:
+1. **Read the actual code** - Don't assume based on patterns or common practices
+2. **Verify against documentation** - Check official docs, not memory
+3. **Admit uncertainty** - Say "I need to verify X" if you're not 100% certain
+4. **Provide proof** - Every claim needs a file:line reference or doc link
+
+**Examples of GOOD behavior**:
+- ❌ User: "Does the container have height?"
+- ✅ You: "I need to check the actual container implementation. Let me read ExpandedViewEnhanced.jsx and trace its parent components..."
+
+**Examples of BAD behavior**:
+- ❌ User: "Does the container have height?"
+- ❌ You: "Yes, the container should have height because flex containers typically..." ← **WRONG! This is an assumption**
+
+**Remember**: Plans are used for implementation. False information in a plan causes:
+- Wasted developer time debugging why "it should work"
+- Loss of trust in the planning process
+- Potential system failures
+
+Saying "I need 10 minutes to verify this" is **always better** than guessing.
+
 ## Initial Response
 
 When this command is invoked:
@@ -92,21 +117,31 @@ If the user's feedback requires understanding new code patterns or validating as
 
 Before making changes, confirm your understanding:
 
+**CRITICAL - Separate Facts from Uncertainties:**
+
 ```
 Based on your feedback, I understand you want to:
 - [Change 1 with specific detail]
 - [Change 2 with specific detail]
 
-My research found:
-- [Relevant code pattern or constraint]
-- [Important discovery that affects the change]
+My research found (VERIFIED by reading code):
+- ✅ [Specific finding with file:line reference]
+- ✅ [Another verified fact with proof]
+
+Things I need to research before proceeding:
+- ⚠️ [Specific uncertainty - what file/aspect needs investigation]
+- ⚠️ [Another thing that requires verification]
+
+OR if everything is verified:
 
 I plan to update the plan by:
-1. [Specific modification to make]
-2. [Another modification]
+1. [Specific modification to make] - Based on [file:line] showing [what]
+2. [Another modification] - Based on [verification source]
 
 Does this align with your intent?
 ```
+
+**Do NOT proceed if you have unverified assumptions. If you listed items under "Things I need to research", STOP and do the research first.**
 
 Get user confirmation before proceeding.
 
@@ -155,40 +190,74 @@ Get user confirmation before proceeding.
 
 ## Important Guidelines
 
-1. **Be Skeptical**:
+1. **NEVER ASSUME - ALWAYS VERIFY**:
+   - ❌ **FORBIDDEN**: Making technical claims without verifying them in the actual codebase
+   - ❌ **FORBIDDEN**: Guessing about code structure, API behavior, or implementation details
+   - ❌ **FORBIDDEN**: Saying something "should work" or "probably works" without checking
+   - ✅ **REQUIRED**: If you don't know something for certain, say "I need to research this in the codebase"
+   - ✅ **REQUIRED**: Read actual code files before making claims about them
+   - ✅ **REQUIRED**: Verify every technical statement against real code before presenting
+
+   **Examples of what NOT to do**:
+   - "The container probably has height defined" → Must check actual CSS/HTML
+   - "This should use the existing scroll container" → Must verify how scroll is currently implemented
+   - "Virtuoso will automatically work with..." → Must check Virtuoso docs and current implementation
+
+   **Examples of what TO do**:
+   - "I need to check the actual container structure in ExpandedViewEnhanced.jsx before answering"
+   - "Let me verify this in the documentation before making a recommendation"
+   - "I should read the current implementation to see how scrolling works"
+
+2. **Verification Checklist - Use Before Presenting ANY Technical Information**:
+
+   Before presenting findings, ask yourself:
+   - [ ] Did I READ the actual code file(s) being discussed?
+   - [ ] Did I verify this claim against documentation (if applicable)?
+   - [ ] Am I making ANY assumptions about how something works?
+   - [ ] Can I point to a specific line number/file that proves this claim?
+   - [ ] If I'm uncertain about ANYTHING, did I explicitly say "I need to research this"?
+
+   **If you answer NO to any of these questions, DO NOT proceed. Stop and research first.**
+
+3. **Be Skeptical**:
    - Don't blindly accept change requests that seem problematic
    - Question vague feedback - ask for clarification
-   - Verify technical feasibility with code research
+   - Verify technical feasibility with code research (ALWAYS)
    - Point out potential conflicts with existing plan phases
+   - Challenge your own assumptions - if you "think" something is true, verify it
 
-2. **Be Surgical**:
+4. **Be Surgical**:
    - Make precise edits, not wholesale rewrites
    - Preserve good content that doesn't need changing
    - Only research what's necessary for the specific changes
    - Don't over-engineer the updates
 
-3. **Be Thorough**:
+5. **Be Thorough**:
    - Read the entire existing plan before making changes
    - Research code patterns if changes require new technical understanding
    - Ensure updated sections maintain quality standards
    - Verify success criteria are still measurable
+   - **CRITICAL**: Verify every technical claim before including it in the plan
 
-4. **Be Interactive**:
+6. **Be Interactive**:
    - Confirm understanding before making changes
    - Show what you plan to change before doing it
    - Allow course corrections
    - Don't disappear into research without communicating
+   - **If uncertain, SAY SO**: "I need to verify X in the codebase before continuing"
 
-5. **Track Progress**:
+7. **Track Progress**:
    - Use TodoWrite to track update tasks if complex
    - Update todos as you complete research
    - Mark tasks complete when done
 
-6. **No Open Questions**:
+8. **No Open Questions - But Admit When You Need Research**:
    - If the requested change raises questions, ASK
-   - Research or get clarification immediately
+   - If you need to verify something, SAY "I need to research this" instead of guessing
    - Do NOT update the plan with unresolved questions
-   - Every change must be complete and actionable
+   - Do NOT update the plan with unverified assumptions
+   - Every change must be complete, actionable, AND VERIFIED
+   - **Better to say "I need 5 minutes to verify this" than to give false information**
 
 ## Success Criteria Guidelines
 

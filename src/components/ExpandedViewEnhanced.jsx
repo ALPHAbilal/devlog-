@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue, memo } from 'react';
 import { flushSync } from 'react-dom';
 import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { Virtuoso } from 'react-virtuoso';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
@@ -23,60 +23,8 @@ import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
-// [VIRT-DEBUG] Verify useVirtualizer import at module load time
-console.log('[VIRT-DEBUG-IMPORT] useVirtualizer hook imported:', typeof useVirtualizer);
-
-const DEFAULT_BLOCK_HEIGHT = 150;
-const ADD_BUTTON_HEIGHT = 40;
-
-// Get estimated height for different block types
-// TanStack Virtual handles height caching automatically via ResizeObserver
-// Better initial estimates = less layout shift = smoother scrolling
-const getEstimatedHeight = (block) => {
-  if (!block) return DEFAULT_BLOCK_HEIGHT;
-
-  // More accurate estimates based on block type and content
-  switch (block.type) {
-    case 'text':
-      // Estimate based on content length if available
-      const textLength = block.content?.length || 0;
-      if (textLength > 500) return 200;
-      if (textLength > 200) return 150;
-      return 100;
-
-    case 'heading':
-      return block.data?.level === 1 ? 80 : 60;
-
-    case 'code':
-      // Estimate based on line count if available
-      const lines = block.content?.split('\n').length || 10;
-      return Math.min(lines * 24 + 100, 600);
-
-    case 'ai':
-      // AI blocks tend to be large
-      return 500;
-
-    case 'table':
-      return 300;
-
-    case 'todo':
-      return 200;
-
-    case 'filetree':
-      // Depends on tree depth, but usually large
-      return 600;
-
-    case 'image':
-    case 'inline-image':
-      return 400;
-
-    case 'issue-tracker':
-      return 400;
-
-    default:
-      return DEFAULT_BLOCK_HEIGHT;
-  }
-};
+// [VIRT-DEBUG] Verify Virtuoso import at module load time
+console.log('[VIRT-DEBUG-IMPORT] Virtuoso component imported:', typeof Virtuoso);
 
 export default function ExpandedView({
   entry,
@@ -200,66 +148,10 @@ export default function ExpandedView({
   const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
   const smartSyncManagerRef = useRef(null);
 
-  // Memoize estimateSize to prevent infinite render loop
-  const estimateSize = useCallback((index) => {
-    // Estimate based on block type
-    const block = blocks[index];
-    if (!block) return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
-    return Math.ceil(getEstimatedHeight(block) + ADD_BUTTON_HEIGHT);
-  }, [blocks]);
-
-  // Stable height measurement to prevent oscillation loops
-  const heightCache = useRef(new Map());
-
-  const measureElement = useCallback((element) => {
-    if (!element) return 0;
-
-    const index = element.getAttribute('data-index');
-    const currentHeight = Math.ceil(element.getBoundingClientRect().height);
-
-    // Get cached height for this index
-    const cachedHeight = heightCache.current.get(index);
-
-    if (cachedHeight) {
-      // If height difference is small (oscillation), stick with cached value
-      const heightDiff = Math.abs(currentHeight - cachedHeight);
-      if (heightDiff < 60) { // Threshold to prevent 50px oscillations
-        return cachedHeight;
-      }
-    }
-
-    // Cache the new height
-    heightCache.current.set(index, currentHeight);
-    return currentHeight;
-  }, []);
-
-  // Configure TanStack virtualizer with stable height strategy
-  const rowVirtualizer = useVirtualizer({
-    count: blocks.length,
-    getScrollElement: () => scrollContainerRef.current,
-    estimateSize, // Use memoized function
-    overscan: 3, // Render 3 extra blocks outside viewport
-    useAnimationFrameWithResizeObserver: true, // Built-in fix for measurement loops
-    measureElement, // Stable height strategy to prevent oscillations
-  });
-
-  // [VIRT-DEBUG-2] Log virtualizer info (moved to useEffect to prevent render loop)
-  useEffect(() => {
-    if (blocks.length > 0) {
-      console.log('[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE (TanStack)');
-      console.log('[VIRT-DEBUG-2] Total blocks:', blocks.length);
-      console.log('[VIRT-DEBUG-2] Total height:', rowVirtualizer.getTotalSize(), 'px');
-      console.log('[VIRT-DEBUG-2] Overscan count: 3 blocks');
-    }
-  }, [blocks.length, rowVirtualizer]);
-  
   // Create a memoized block renderer component to avoid closure issues
-  // React 19: ref can be accepted as a regular prop without forwardRef
   const BlockRenderer = memo(({
     block,
     index,
-    ref,  // React 19: ref is just a regular prop now
-    style,
     isMobileView,
     focusedBlockId,
     showBlockSelector,
@@ -272,12 +164,7 @@ export default function ExpandedView({
     const isShowingSelector = showBlockSelector && selectorPosition === block.id;
 
     return (
-      <div
-        ref={ref}  // Pass ref directly (React 19 allows this!)
-        data-index={index}  // Required for TanStack to identify element
-        style={style}
-        className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
-      >
+      <div className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
         {block?.isLoading ? (
           <OptimizedBlockSkeleton 
             type={block.type} 
@@ -1585,36 +1472,28 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Virtualized Block List with TanStack */}
+          {/* Virtualized Block List with React Virtuoso */}
           {blocks.length > 0 && (
-            <div
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: '100%',
-                position: 'relative',
-              }}
-            >
-              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-                const block = blocks[virtualRow.index];
+            <Virtuoso
+              useWindowScroll={false}
+              customScrollParent={scrollContainerRef.current}
+              style={{ height: '100%' }}
+              data={blocks}
+              defaultItemHeight={150}
+              increaseViewportBy={{ top: 200, bottom: 600 }}
+              computeItemKey={(index, block) => block.id}
+              itemContent={(index, block) => {
                 if (!block) return null;
 
-                // [VIRT-DEBUG-1] Log which blocks render
-                console.log(`[VIRT-DEBUG-1] Rendering block ${virtualRow.index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) at position ${virtualRow.start}px`);
+                if (import.meta.env.DEV) {
+                  console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)})`);
+                }
 
                 return (
                   <BlockRenderer
-                    key={virtualRow.key}
-                    ref={rowVirtualizer.measureElement}
+                    key={block.id}
                     block={block}
-                    index={virtualRow.index}
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      transform: `translateY(${virtualRow.start}px)`,
-                    }}
-                    data-index={virtualRow.index}
+                    index={index}
                     isMobileView={isMobileView}
                     focusedBlockId={focusedBlockId}
                     showBlockSelector={showBlockSelector}
@@ -1624,8 +1503,8 @@ export default function ExpandedView({
                     dropPosition={dropPosition}
                   />
                 );
-              })}
-            </div>
+              }}
+            />
           )}
 
           {/* Load More Indicator for Paginated Documents */}

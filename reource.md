@@ -1,558 +1,272 @@
-# Error Impact Analysis - What's Breaking and Why
+Yes, for your **document editor use case with dynamic content**, there are **better alternatives** than TanStack Virtual. Based on your specific problem (components with internal animations/state causing height oscillations), here are the recommended solutions:
 
-Generated: 2025-11-04
+## Best Solution: React Virtuoso
 
-## Your Question: "What exactly would these fixes prevent?"
+**React Virtuoso** is specifically designed for your exact use case and is the industry standard for document editors with dynamic content.[1][2]
 
-Based on your blocks analysis, here are the **weakest aspects causing real production errors** and what fixing them would actually solve.
+### Why Virtuoso is Perfect for Your Problem
 
----
+**Built for Dynamic Heights**[2][1]
+- Automatically handles components that change size after mount
+- No oscillation issues with expanding/collapsing components
+- ResizeObserver is intelligently debounced
+- Handles animations and transitions gracefully
 
-## 🔴 CRITICAL ISSUE #1: No PropTypes = Silent Data Corruption Errors
+**Document Editor Optimized**[1]
+- Used by Notion-like applications[3]
+- Handles rich text editors (Lexical, ProseMirror, TipTap)[4][5]
+- Works seamlessly with interactive blocks
+- Supports components with internal state
 
-**Score: 2/10 across ALL blocks (F grade)**
+**Zero Configuration for Dynamic Content**[2]
+```jsx
+import { Virtuoso } from 'react-virtuoso';
 
-### What Errors You're Seeing NOW:
-
-```
-❌ "Cannot read property 'content' of undefined"
-❌ "block.data is undefined"
-❌ "TypeError: onUpdate is not a function"
-❌ "TypeError: Cannot read properties of null"
-❌ Random crashes when passing wrong data types
-```
-
-### Why This Happens:
-
-**Example from TextBlock.jsx:**
-```javascript
-// Current code (NO validation)
-const TextBlock = ({ block, onUpdate, allBlocks, onConvert }) => {
-  // If block is undefined/null/wrong shape = CRASH
-  const content = block.content; // ❌ Crashes if block is undefined
-
-  // If onUpdate is not a function = CRASH
-  onUpdate(block.id, { content: newContent }); // ❌ Crashes if onUpdate is undefined
-};
-```
-
-### What Happens in Production:
-
-1. **Parent component passes wrong prop type:**
-   ```javascript
-   // Bug somewhere in parent code
-   <TextBlock
-     block={null}  // ❌ Should be object, passed null
-     onUpdate={undefined}  // ❌ Forgot to pass function
-   />
-   ```
-
-2. **Block tries to access properties:**
-   ```javascript
-   const content = block.content; // ❌ CRASH: Cannot read property 'content' of null
-   ```
-
-3. **Entire document crashes** - not just the block, but everything
-
-### What PropTypes Would Fix:
-
-```javascript
-// ✅ With PropTypes
-TextBlock.propTypes = {
-  block: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    content: PropTypes.string,
-    data: PropTypes.object
-  }).isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  allBlocks: PropTypes.array
-};
-```
-
-**Errors Prevented:**
-- ✅ Console warning BEFORE crash: "Warning: Failed prop type: The prop `block` is marked as required in `TextBlock`, but its value is `null`"
-- ✅ You catch bugs in development, not production
-- ✅ Know WHICH component and WHICH prop is wrong
-- ✅ Prevents 90% of "undefined is not an object" errors
-
-**Real Impact: Prevents silent data corruption and catches bugs immediately in development**
-
----
-
-## 🔴 CRITICAL ISSUE #2: No Error Boundaries = One Block Crashes Entire Document
-
-**Score: 5-6/10 across all blocks (C/C+ grade)**
-
-### What Errors You're Seeing NOW:
-
-```
-❌ White screen of death - entire app crashes
-❌ "Uncaught Error: Minified React error"
-❌ Lose ALL work when ONE block has an issue
-❌ Can't recover - must reload page
-```
-
-### Why This Happens:
-
-**Current behavior without error boundaries:**
-
-```javascript
-// In ExpandedViewEnhanced.jsx
-{blocks.map(block => (
-  <Block key={block.id} block={block} onUpdate={handleUpdate} />
-))}
-```
-
-**If ANY block throws an error:**
-1. CodeBlock syntax highlighting fails → ❌ ENTIRE document crashes
-2. ImageBlock upload error → ❌ ENTIRE document crashes
-3. TableBlock data corruption → ❌ ENTIRE document crashes
-4. AIBlock parsing error → ❌ ENTIRE document crashes
-
-### Real Scenario:
-
-```javascript
-// CodeBlock.jsx - Line 540 (Prism syntax highlighting)
-<Highlight {...defaultProps} code={content} language={language}>
-  {/* ❌ If language is invalid or code has edge case = CRASH */}
-</Highlight>
-```
-
-**User Experience:**
-1. User types code with weird syntax
-2. Prism throws error trying to highlight
-3. 💥 **Entire document disappears** (white screen)
-4. User loses context, has to reload
-5. Might lose unsaved changes in OTHER blocks
-
-### What Error Boundaries Would Fix:
-
-```javascript
-// ✅ Wrap each block
-{blocks.map(block => (
-  <BlockErrorBoundary key={block.id} blockId={block.id}>
-    <Block block={block} onUpdate={handleUpdate} />
-  </BlockErrorBoundary>
-))}
-```
-
-**Error Boundary Component (YOU ALREADY HAVE THIS at src/components/BlockErrorBoundary.jsx!):**
-```javascript
-class BlockErrorBoundary extends React.Component {
-  state = { hasError: false };
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error, errorInfo) {
-    console.error('Block crashed:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="block-error">
-          ⚠️ This block encountered an error
-          <button onClick={() => this.setState({ hasError: false })}>
-            Try Again
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
+function DocumentEditor({ blocks }) {
+  return (
+    <Virtuoso
+      data={blocks}
+      itemContent={(index, block) => (
+        <FileTreeBlock 
+          data={block}
+          // No need for data-index or measureElement!
+          // Virtuoso handles everything automatically
+        />
+      )}
+    />
+  );
 }
 ```
 
-**Errors Prevented:**
-- ✅ One block fails → other blocks keep working
-- ✅ User sees error message instead of white screen
-- ✅ Can retry or remove broken block
-- ✅ Don't lose work in other blocks
-- ✅ Graceful degradation
+### Key Differences from TanStack Virtual
 
-**Real Impact: Prevents catastrophic failures. One broken block doesn't destroy entire document.**
+| Feature | TanStack Virtual | React Virtuoso |
+|---------|------------------|----------------|
+| **Dynamic Heights** | Manual with measureElement[6] | Automatic, built-in[1][2] |
+| **ResizeObserver** | Aggressive, causes loops[7] | Intelligent debouncing[1] |
+| **Animations** | Causes oscillations | Handles gracefully[1] |
+| **Learning Curve** | Steep, headless approach | Simple, opinionated[2] |
+| **Document Editors** | Not designed for this[6] | Primary use case[1][2] |
+| **Performance** | Need React.memo everywhere[8] | Optimized out of box[1] |
 
----
+## Alternative Solutions
 
-## 🔴 CRITICAL ISSUE #3: Direct localStorage Access = Crashes in Private Browsing
+### 2. React Window with Custom Logic (Not Recommended)
 
-**Found in: CodeBlock, TextBlock, TableBlock, FileTreeBlock**
+If you must stick with virtualization libraries, react-window requires extensive customization for your use case:[9][10]
 
-### What Errors You're Seeing NOW:
+```jsx
+// Complex workaround needed
+const [heights, setHeights] = useState({});
+const listRef = useRef();
 
-```
-❌ "QuotaExceededError: The quota has been exceeded"
-❌ "SecurityError: The operation is insecure"
-❌ Blocks fail to save in Safari private mode
-❌ Random crashes when storage is full
-```
+const getItemSize = (index) => heights[index] || 299;
 
-### Why This Happens:
-
-**Example from CodeBlock.jsx (lines 106-120):**
-```javascript
-// ❌ NO ERROR HANDLING
-const getAllFilePaths = useCallback(() => {
-  const paths = new Set();
-
-  // Direct localStorage access - can throw SecurityError
-  const documentsJson = localStorage.getItem('journeyLoggerEntries');
-  const documents = JSON.parse(documentsJson || '[]'); // Can throw SyntaxError
-
-  // If above fails = ENTIRE BLOCK CRASHES
-}, []);
+// Need manual debouncing to prevent loops
+const debouncedResize = useDebouncedCallback((index, size) => {
+  setHeights(prev => ({ ...prev, [index]: size }));
+  listRef.current?.resetAfterIndex(index);
+}, 100);
 ```
 
-**Example from TextBlock.jsx (lines 64-80):**
-```javascript
-// ❌ NO ERROR HANDLING
-const recentEmojis = JSON.parse(
-  localStorage.getItem('recentEmojis') || '[]'
-); // Can fail in private browsing
+This approach is **fragile** and still prone to issues.[10][9]
+
+### 3. No Virtualization for Document Editors (Recommended Alternative)
+
+Many modern document editors **don't use virtualization at all**:[11][4]
+
+**Why No Virtualization Works**[11][4]
+- Modern browsers handle 1000+ DOM nodes efficiently
+- Document editors rarely exceed this threshold in viewport
+- Simpler code, no measurement issues
+- Better for SEO and accessibility
+
+**Optimization Strategies Instead**[4][11]
+```jsx
+// Use pagination/infinite scroll instead
+function DocumentEditor({ blocks }) {
+  const visibleBlocks = useInfiniteScroll(blocks, {
+    threshold: 100, // Load more when near end
+    initialLoad: 50  // Start with 50 blocks
+  });
+
+  return (
+    <div>
+      {visibleBlocks.map(block => (
+        <FileTreeBlock 
+          key={block.id}
+          data={block}
+          // No virtualization complexity!
+        />
+      ))}
+    </div>
+  );
+}
 ```
 
-### Real Scenarios Where This Fails:
+### 4. Lexical Editor with Built-in Virtualization
 
-1. **Safari Private Browsing:**
-   ```javascript
-   localStorage.setItem('key', 'value');
-   // ❌ Throws: "SecurityError: The operation is insecure"
-   ```
+If you're building a rich text editor specifically, **Lexical** has built-in optimization:[5][4]
 
-2. **Storage Quota Exceeded:**
-   ```javascript
-   localStorage.setItem('largeData', hugeString);
-   // ❌ Throws: "QuotaExceededError"
-   ```
+```jsx
+import { LexicalComposer } from '@lexical/react/LexicalComposer';
+import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
 
-3. **Corrupted localStorage:**
-   ```javascript
-   const data = JSON.parse(localStorage.getItem('key'));
-   // ❌ Throws: "SyntaxError: Unexpected token" if data is corrupted
-   ```
-
-### What Safe localStorage Wrapper Would Fix:
-
-```javascript
-// ✅ Safe wrapper
-const safeLocalStorage = {
-  getItem: (key, defaultValue = null) => {
-    try {
-      const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : defaultValue;
-    } catch (error) {
-      console.error(`Error reading localStorage key "${key}":`, error);
-      return defaultValue;
-    }
-  },
-
-  setItem: (key, value) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch (error) {
-      if (error.name === 'QuotaExceededError') {
-        console.error('Storage quota exceeded');
-        // Could trigger cleanup or show user message
-      } else if (error.name === 'SecurityError') {
-        console.error('Storage access denied (private browsing?)');
-      }
-      return false;
-    }
-  }
-};
+// Lexical handles large documents internally
+// No external virtualization needed
+<LexicalComposer initialConfig={config}>
+  <RichTextPlugin
+    contentEditable={<ContentEditable />}
+    placeholder={<Placeholder />}
+  />
+</LexicalComposer>
 ```
 
-**Using it:**
-```javascript
-// ✅ Safe usage in blocks
-const recentEmojis = safeLocalStorage.getItem('recentEmojis', []);
-// Never crashes, always returns safe default
+Lexical's internal optimization handles:
+- Lazy rendering of nodes[4]
+- Efficient DOM updates[4]
+- No height measurement issues[4]
+
+## Recommended Action Plan
+
+### For Document Editors (Your Use Case)
+
+**Option 1: Use React Virtuoso** (Recommended)[1][2]
+```bash
+npm install react-virtuoso
 ```
 
-**Errors Prevented:**
-- ✅ No crashes in private browsing mode
-- ✅ Graceful handling of storage quota errors
-- ✅ Handles corrupted localStorage data
-- ✅ Fallback to defaults when storage unavailable
-- ✅ User gets error message instead of crash
+```jsx
+import { Virtuoso } from 'react-virtuoso';
 
-**Real Impact: Blocks work reliably across ALL browsers and modes. No more mysterious crashes.**
-
----
-
-## 🔴 HIGH IMPACT ISSUE #4: Performance Logs in Production = Console Spam + Slowdowns
-
-**Score: All blocks do this (11/11)**
-
-### What Problems You're Seeing NOW:
-
-```
-❌ Console flooded with 100+ render logs
-❌ Performance degradation in production
-❌ Hard to debug actual issues
-❌ Unprofessional when users open console
+function DocumentEditor({ blocks }) {
+  return (
+    <Virtuoso
+      style={{ height: '100vh' }}
+      data={blocks}
+      itemContent={(index, block) => (
+        <FileTreeBlock data={block} />
+      )}
+      increaseViewportBy={{ top: 200, bottom: 600 }}
+    />
+  );
+}
 ```
 
-### Why This Happens:
+**Benefits**:
+- Solves your oscillation problem completely[1]
+- No manual height tracking needed[2][1]
+- Works with animations and internal state[1]
+- Battle-tested in production editors[1]
 
-**Every single block does this:**
+**Option 2: Remove Virtualization** (Simple Alternative)[11]
+```jsx
+// For < 500 blocks in viewport
+function DocumentEditor({ blocks }) {
+  const [visibleBlocks, setVisibleBlocks] = useState(blocks.slice(0, 50));
+  
+  useInfiniteScroll(() => {
+    setVisibleBlocks(prev => [...prev, ...blocks.slice(prev.length, prev.length + 50)]);
+  });
 
-```javascript
-// TextBlock.jsx (line 15)
-useEffect(() => {
-  console.log(`📝 TextBlock ${block.id} rendered at ${new Date().toISOString()}`);
-}, [block.id]);
-
-// CodeBlock.jsx (line 30)
-useEffect(() => {
-  console.log(`💻 CodeBlock ${block.id} rendered at ${new Date().toISOString()}`);
-}, [block.id]);
-
-// TableBlock.jsx (line 100)
-useEffect(() => {
-  console.log(`📊 TableBlock ${block.id} rendered`);
-  console.log('Data:', block.data);
-  console.log('Headers:', headers);
-  console.log('Rows:', rows);
-}, [block.id, block.data, headers, rows]);
+  return (
+    <div>
+      {visibleBlocks.map(block => (
+        <FileTreeBlock key={block.id} data={block} />
+      ))}
+    </div>
+  );
+}
 ```
 
-### Real Impact in Production:
+### Why TanStack Virtual Isn't Right for You
 
-**User has document with 50 blocks:**
-- 50 blocks × multiple re-renders = **500+ console logs per minute**
-- Each `console.log()` costs ~0.1ms
-- 500 logs = **50ms wasted** (half your 100ms interaction budget!)
-- User opens console → sees wall of useless logs
-- Can't debug real issues because logs are buried
+TanStack Virtual is designed for:[6][12]
+- **Static content** (tweets, comments, feeds)
+- **Server-rendered lists** (data doesn't change)
+- **Read-only virtualization** (tables, grids)
 
-### What Conditional Logging Would Fix:
+It's **NOT** designed for:[7][6]
+- Rich text editors with dynamic content
+- Interactive blocks with internal state
+- Animated components that change height
+- Document editing experiences
 
-```javascript
-// ✅ Development only
-useEffect(() => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`📝 TextBlock ${block.id} rendered`);
-  }
-}, [block.id]);
-```
+## Production Examples
 
-**Or better - use a debug flag:**
-```javascript
-// ✅ Can enable/disable in production if needed
-const DEBUG = process.env.NODE_ENV === 'development' && window.DEBUG_BLOCKS;
+**Using React Virtuoso**:[2][1]
+- Notion clones[3]
+- Collaborative editors[4]
+- Document management systems[1]
 
-useEffect(() => {
-  if (DEBUG) {
-    console.log(`📝 TextBlock ${block.id} rendered`);
-  }
-}, [block.id]);
-```
+**Not Using Virtualization**:[11][4]
+- Google Docs (uses pagination)
+- Medium editor (lazy loads)
+- Lexical-based editors[5][4]
 
-**Errors Prevented:**
-- ✅ Clean console in production
-- ✅ ~50ms performance improvement on large documents
-- ✅ Professional appearance
-- ✅ Can still debug with DEBUG flag when needed
-- ✅ Real errors stand out instead of being buried
+## Final Recommendation
 
-**Real Impact: Faster app, cleaner debugging experience, professional polish.**
+**Switch to React Virtuoso**. It will solve your height oscillation problem immediately because it's specifically designed for dynamic content in document editors. The API is simpler, it handles ResizeObserver intelligently, and it's battle-tested in production applications similar to yours.[2][1]
 
----
+If React Virtuoso doesn't work for some reason, **remove virtualization entirely** and use simple infinite scroll for better performance and developer experience.[11]
 
-## 🔴 MEDIUM IMPACT ISSUE #5: Missing Cleanup = Memory Leaks + Stale State
-
-**Found in: Multiple blocks with event listeners**
-
-### What Errors You're Seeing NOW:
-
-```
-❌ "Warning: Can't perform a React state update on an unmounted component"
-❌ Memory usage keeps growing
-❌ App gets slower over time
-❌ Multiple event handlers firing for same action
-```
-
-### Why This Happens:
-
-**Good news: Most of your blocks DO cleanup correctly!**
-
-But there are some edge cases. Example from TodoBlock.jsx:
-
-```javascript
-// ✅ GOOD - Has cleanup
-useEffect(() => {
-  const handleGlobalKeyDown = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      addTodo();
-    }
-  };
-  document.addEventListener('keydown', handleGlobalKeyDown);
-  return () => document.removeEventListener('keydown', handleGlobalKeyDown);
-}, [editingCell]); // ✅ Good cleanup
-```
-
-**But watch for timeouts without cleanup:**
-```javascript
-// ❌ BAD - Timeout not cleaned up if component unmounts
-setTimeout(() => {
-  setSaving(false); // Could setState on unmounted component
-}, 2000);
-```
-
-**Should be:**
-```javascript
-// ✅ GOOD
-useEffect(() => {
-  const timeoutId = setTimeout(() => {
-    setSaving(false);
-  }, 2000);
-
-  return () => clearTimeout(timeoutId); // Cleanup
-}, []);
-```
-
-### Memory Leak Scenario:
-
-1. User opens document with ImageBlock
-2. Starts uploading 10 large images
-3. Switches to different document mid-upload
-4. ImageBlock unmounts but upload continues
-5. Upload completes → tries to call `setState` on unmounted component
-6. ❌ Warning + memory leak
-
-**Real Impact: Your blocks are actually pretty good on cleanup! This is NOT your biggest issue.**
-
----
-
-## 📊 Priority Ranking by Error Impact
-
-### 🥇 **Fix First: Error Boundaries** (2-4 hours)
-**Impact: MASSIVE - Prevents catastrophic failures**
-
-You ALREADY have `BlockErrorBoundary.jsx` in your codebase! Just need to wrap blocks with it.
-
-```javascript
-// In ExpandedViewEnhanced.jsx
-{blocks.map(block => (
-  <BlockErrorBoundary key={block.id} blockId={block.id}>
-    <Block block={block} onUpdate={handleUpdate} />
-  </BlockErrorBoundary>
-))}
-```
-
-**Prevents:**
-- ✅ White screen of death
-- ✅ Losing all work when one block fails
-- ✅ Cascade failures
-
----
-
-### 🥈 **Fix Second: Safe localStorage Wrapper** (3-4 hours)
-**Impact: HIGH - Prevents browser-specific crashes**
-
-Create one utility file, replace all direct localStorage calls.
-
-**Prevents:**
-- ✅ Safari private browsing crashes
-- ✅ Storage quota errors
-- ✅ Corrupted data crashes
-
----
-
-### 🥉 **Fix Third: PropTypes** (8 hours)
-**Impact: MEDIUM-HIGH - Catches bugs in development**
-
-Add PropTypes to all 11 blocks.
-
-**Prevents:**
-- ✅ Silent data corruption
-- ✅ Type mismatch errors
-- ✅ "undefined is not an object" errors
-
----
-
-### 4️⃣ **Fix Fourth: Conditional Logging** (2 hours)
-**Impact: MEDIUM - Performance + polish**
-
-Wrap all console.logs in development check.
-
-**Prevents:**
-- ✅ Console spam
-- ✅ Performance degradation
-- ✅ Unprofessional appearance
-
----
-
-## 🎯 Quick Win: Error Boundaries + localStorage Wrapper (6 hours total)
-
-These two fixes would eliminate **80% of your production errors** with minimal effort:
-
-1. **Error Boundaries** - You already have the component!
-2. **localStorage Wrapper** - One utility file, find/replace in blocks
-
-**Before:**
-- ❌ One block error = entire document crashes
-- ❌ Safari private mode = app unusable
-- ❌ Storage full = random crashes
-
-**After:**
-- ✅ One block error = just that block shows error message
-- ✅ Safari private mode = app works, just warns about storage
-- ✅ Storage full = graceful degradation with user message
-
----
-
-## 💡 Recommendation Based on "I Experience Many Errors"
-
-**Start Here (This Weekend - 6 hours):**
-
-1. ✅ **Use your existing BlockErrorBoundary** (2 hours)
-   - Wrap blocks in ExpandedViewEnhanced.jsx
-   - Test with intentional errors
-   - Immediate stability improvement
-
-2. ✅ **Create safeLocalStorage utility** (4 hours)
-   - One file: `src/utils/safeLocalStorage.js`
-   - Replace direct calls in CodeBlock, TextBlock, FileTreeBlock
-   - Test in Safari private mode
-
-**This will fix 80% of your error issues.**
-
-**Then Later (Next Sprint):**
-
-3. ✅ **Add PropTypes** (8 hours over a week)
-   - One block per day
-   - Start with most complex: FileTreeBlock, AIBlock, TableBlock
-   - Catches remaining type errors
-
-4. ✅ **Conditional Logging** (2 hours)
-   - Find/replace across all blocks
-   - Quick polish
-
----
-
-## 🚀 Expected Results
-
-**After Error Boundaries + localStorage Wrapper:**
-- 80% fewer production crashes
-- No more white screen of death
-- Works in all browsers/modes
-- Graceful error recovery
-
-**After PropTypes:**
-- 90% fewer "undefined" errors
-- Catch bugs in development
-- Better developer experience
-
-**After All Fixes:**
-- Stable, production-ready blocks
-- Professional error handling
-- Happy users 😊
-
----
-
-*Want me to implement these fixes? I can start with Error Boundaries + localStorage wrapper right now (6 hour task).*
+[1](https://virtuoso.dev)
+[2](https://github.com/petyosi/react-virtuoso)
+[3](https://github.com/mohammedmohsin203/Notion-Clone-7)
+[4](https://mortenson.coffee/blog/collaborative-text-editing-scratch-lexical)
+[5](https://liveblocks.io/docs/ready-made-features/multiplayer-editing/text-editor/lexical)
+[6](https://github.com/TanStack/virtual/issues/659)
+[7](https://github.com/TanStack/virtual/issues/531)
+[8](https://github.com/tannerlinsley/react-virtual/issues/139)
+[9](https://stackoverflow.com/questions/63083570/react-virtualized-infinite-loop-of-scrollbar-disappearing-reappearing)
+[10](https://stackoverflow.com/questions/40988410/react-virtualized-autosizer-height-issue)
+[11](https://froala.com/blog/general/how-to-optimize-the-load-time-of-your-rich-text-editor/)
+[12](https://tanstack.com/virtual/latest/docs/api/virtualizer)
+[13](https://academic.oup.com/bioinformatics/article/26/7/966/212410)
+[14](http://thesai.org/Publications/ViewPaper?Volume=15&Issue=4&Code=IJACSA&SerialNo=35)
+[15](http://ijarsct.co.in/Paper15666.pdf)
+[16](http://link.springer.com/10.1007/s11554-020-01048-w)
+[17](https://jcheminf.biomedcentral.com/articles/10.1186/1758-2946-4-17)
+[18](https://www.semanticscholar.org/paper/9ee5b0fbfb59f6d05c5ba07c4582b7afbd253dfe)
+[19](https://eajournals.org/ijliss/vol11-issue-3-2025/integration-of-ai-chatbot-into-librarys-operations-opportunities-or-threats-to-librarians-role/)
+[20](https://muse.jhu.edu/article/572803)
+[21](http://portal.acm.org/citation.cfm?doid=147001.147008)
+[22](https://nbpublish.com/library_read_article.php?id=39547)
+[23](https://arxiv.org/pdf/2401.15510.pdf)
+[24](http://arxiv.org/pdf/2111.12785.pdf)
+[25](https://ejournals.bc.edu/index.php/ital/article/download/3219/2832)
+[26](https://pmc.ncbi.nlm.nih.gov/articles/PMC11627126/)
+[27](http://arxiv.org/pdf/2407.03027.pdf)
+[28](https://arxiv.org/html/2403.13711v1)
+[29](https://arxiv.org/pdf/2312.16973.pdf)
+[30](http://article.sciencepublishinggroup.com/pdf/10.11648.j.iotcc.20170504.12.pdf)
+[31](https://www.nutrient.io/guides/document-authoring/)
+[32](https://github.com/Xta1neR/Live_Text_Editor)
+[33](https://www.leadtools.com/sdk/document/document-editor-html5)
+[34](https://apryse.com/capabilities/page-manipulation)
+[35](https://get.almanac.io/blog/open-source-document-editor)
+[36](https://demos.devexpress.com/ASPNetCore/Demo/RichEdit/DynamicContent/)
+[37](https://www.syncfusion.com/document-sdk)
+[38](https://www.youtube.com/watch?v=ZgstesimYN0)
+[39](https://ijsrem.com/download/codox-a-real-time-collaborative-document-editing-platform-2/)
+[40](https://www.tandfonline.com/doi/full/10.1080/10286632.2022.2137160)
+[41](http://www.liverpooluniversitypress.co.uk/doi/10.1093/fs/knv069)
+[42](https://www.bloomsburycollections.com/monograph?docid=b-9781350353596)
+[43](https://muse.jhu.edu/article/930067)
+[44](http://modernhistory.ru/f/stelmak_3.pdf)
+[45](https://onlinelibrary.wiley.com/doi/10.1111/all.14725)
+[46](https://scholarlypublishingcollective.org/austrian-american-history/article/6/1/44/351765/To-Realize-in-America-What-Has-Become-Impossible)
+[47](https://www.semanticscholar.org/paper/3a91ef7a434fb8cbcaf64813663b48b97e13a811)
+[48](https://onlinelibrary.wiley.com/doi/10.1111/pai.13918)
+[49](https://arxiv.org/html/2410.16472v1)
+[50](https://arxiv.org/pdf/2501.17887.pdf)
+[51](https://arxiv.org/html/2309.15337)
+[52](https://arxiv.org/pdf/2311.18057.pdf)
+[53](https://arxiv.org/html/2410.15504v1)
+[54](https://www.jstatsoft.org/index.php/jss/article/view/v046i03/v46i03.pdf)
+[55](http://arxiv.org/pdf/2408.09869.pdf)
+[56](https://codesandbox.io/s/react-virtuoso-example-ww2nh6)
+[57](https://github.com/radishmouse/react-document-editor)
+[58](https://www.npmjs.com/package/@virtuoso.dev/react-monaco-editor)
+[59](https://www.youtube.com/watch?v=LsQpSGQ-sq4)
+[60](https://discuss.codemirror.net/t/improve-scroll-performance-tradeoff/8825)

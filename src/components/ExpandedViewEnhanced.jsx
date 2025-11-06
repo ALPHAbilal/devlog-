@@ -95,18 +95,24 @@ export default function ExpandedView({
   
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
-  
+
+  // [VIRT-DEBUG-0] Log loading strategy
+  console.log(`[VIRT-DEBUG-0] 📋 Document Loading Strategy`);
+  console.log(`[VIRT-DEBUG-0] Document ID: ${entry.id}`);
+  console.log(`[VIRT-DEBUG-0] Block count: ${entry.blockCount || 'unknown'}`);
+  console.log(`[VIRT-DEBUG-0] Using: ${shouldUsePagination ? 'PAGINATED loader (50+ blocks)' : 'OPTIMIZED loader (<50 blocks)'}`);
+
   // Always call both hooks to maintain hook order, but only use one
   const paginatedLoader = usePaginatedBlockLoader(entry.id, entry, {
     pageSize: 50,
     enableInfiniteScroll: true,
     skip: !shouldUsePagination
   });
-  
+
   const optimizedLoader = useOptimizedBlockLoader(entry.id, entry, {
     skip: shouldUsePagination
   });
-  
+
   // Select which loader to use
   const loader = shouldUsePagination ? paginatedLoader : optimizedLoader;
   
@@ -126,7 +132,31 @@ export default function ExpandedView({
   
   // We'll use loadedBlocks directly instead of duplicating state
   // Memoize blocks array to prevent unnecessary re-renders
-  const blocks = useMemo(() => loadedBlocks || [], [loadedBlocks]);
+  const blocks = useMemo(() => {
+    const result = loadedBlocks || [];
+
+    // [VIRT-DEBUG-5] Log blocks loaded for virtualization
+    if (result.length > 0) {
+      console.log(`[VIRT-DEBUG-5] 📦 Blocks loaded: ${result.length} total`);
+      console.log(`[VIRT-DEBUG-5] Block types: ${result.map(b => b.type).join(', ')}`);
+
+      // After a brief delay, count actual DOM nodes
+      setTimeout(() => {
+        const renderedNodes = document.querySelectorAll('[data-block-id]').length;
+        console.log(`[VIRT-DEBUG-5] ✅ DOM VERIFICATION:`);
+        console.log(`[VIRT-DEBUG-5] Total blocks: ${result.length}`);
+        console.log(`[VIRT-DEBUG-5] Rendered in DOM: ${renderedNodes}`);
+        console.log(`[VIRT-DEBUG-5] Virtualization ratio: ${((1 - renderedNodes / result.length) * 100).toFixed(1)}% blocks NOT rendered`);
+        if (renderedNodes < result.length) {
+          console.log(`[VIRT-DEBUG-5] ✅ VIRTUALIZATION WORKING - Only ${renderedNodes}/${result.length} blocks in DOM!`);
+        } else {
+          console.log(`[VIRT-DEBUG-5] ⚠️ ALL BLOCKS RENDERED - Virtualization may not be active!`);
+        }
+      }, 1000);
+    }
+
+    return result;
+  }, [loadedBlocks]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
   const [title, setTitle] = useState(entry.title);
@@ -194,12 +224,19 @@ export default function ExpandedView({
   // Set measured height after render
   const setItemSize = useCallback((index, size) => {
     if (itemHeights.current[index] !== size) {
+      const oldHeight = itemHeights.current[index];
       itemHeights.current[index] = size;
+
+      // [VIRT-DEBUG-4] Log height measurement updates
+      if (blocks[index]) {
+        console.log(`[VIRT-DEBUG-4] Measured block ${index + 1} (${blocks[index].type}): ${size}px ${oldHeight ? `(was ${oldHeight}px)` : '(first measure)'}`);
+      }
+
       if (listRef.current) {
         listRef.current.resetAfterIndex(index);
       }
     }
-  }, []);
+  }, [blocks]);
   
   // Create a memoized block renderer component to avoid closure issues
   const BlockRenderer = memo(({ 
@@ -302,6 +339,9 @@ export default function ExpandedView({
     const block = blocks[index];
     if (!block) return null;
 
+    // [VIRT-DEBUG-1] Log which blocks are being rendered by virtualization
+    console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) at position ${style.top}`);
+
     return (
       <BlockRenderer
         block={block}
@@ -318,14 +358,14 @@ export default function ExpandedView({
       />
     );
   }, [
-    blocks, 
-    isMobileView, 
-    focusedBlockId, 
-    showBlockSelector, 
-    selectorPosition, 
-    draggedBlockId, 
-    dropTargetId, 
-    dropPosition, 
+    blocks,
+    isMobileView,
+    focusedBlockId,
+    showBlockSelector,
+    selectorPosition,
+    draggedBlockId,
+    dropTargetId,
+    dropPosition,
     setItemSize
   ]);
   
@@ -1600,20 +1640,38 @@ export default function ExpandedView({
           {/* Virtualized Block List with fallback */}
           {blocks.length > 0 ? (
             List ? (
-              <List
-                ref={listRef}
-                height={listHeight || 600}
-                itemCount={blocks.filter(b => b !== null && b !== undefined).length}
-                itemSize={getItemSize}
-                width="100%"
-                overscanCount={3}
-                className="virtual-list"
-              >
-                {VirtualRow}
-              </List>
+              (() => {
+                const validBlocks = blocks.filter(b => b !== null && b !== undefined);
+                // [VIRT-DEBUG-2] Log virtualization activation
+                console.log(`[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE`);
+                console.log(`[VIRT-DEBUG-2] Total blocks: ${validBlocks.length}`);
+                console.log(`[VIRT-DEBUG-2] List height: ${listHeight || 600}px`);
+                console.log(`[VIRT-DEBUG-2] Overscan count: 3 blocks`);
+                console.log(`[VIRT-DEBUG-2] Expected rendered blocks: ~${Math.ceil((listHeight || 600) / 200) + 6} (visible + overscan)`);
+                console.log(`[VIRT-DEBUG-2] Check console for [VIRT-DEBUG-1] logs showing which blocks render`);
+
+                return (
+                  <List
+                    ref={listRef}
+                    height={listHeight || 600}
+                    itemCount={validBlocks.length}
+                    itemSize={getItemSize}
+                    width="100%"
+                    overscanCount={3}
+                    className="virtual-list"
+                  >
+                    {VirtualRow}
+                  </List>
+                );
+              })()
             ) : (
-              // Fallback to non-virtualized rendering if List component not available
-              blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
+              (() => {
+                // [VIRT-DEBUG-3] Log fallback (non-virtualized) rendering
+                console.log(`[VIRT-DEBUG-3] ⚠️ FALLBACK MODE - Virtualization NOT active`);
+                console.log(`[VIRT-DEBUG-3] Rendering ALL ${blocks.length} blocks (non-virtualized)`);
+                console.log(`[VIRT-DEBUG-3] This is BAD for performance with many blocks!`);
+
+                return blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
                 <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
                   {block?.isLoading ? (
                     <OptimizedBlockSkeleton 
@@ -1662,7 +1720,8 @@ export default function ExpandedView({
                     </>
                   )}
                 </div>
-              ))
+              ));
+              })())
             )
           ) : (
             <div style={{ minHeight: listHeight || 600 }} className="flex items-center justify-center">

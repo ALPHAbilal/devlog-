@@ -182,8 +182,8 @@ export default function ExpandedView({
                 onUpdate={updateBlock}
                 onDelete={deleteBlock}
                 onDuplicate={duplicateBlock}
-                onMoveUp={(id) => moveBlock(id, 'up')}
-                onMoveDown={(id) => moveBlock(id, 'down')}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
                 canMoveUp={index > 0}
                 canMoveDown={index < blocks.length - 1}
                 isMobileView={isMobileView}
@@ -676,6 +676,10 @@ export default function ExpandedView({
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
   }, [blocks, updateLoadedBlocks]);
+
+  // Memoized move handlers to prevent breaking React.memo on Block components
+  const handleMoveUp = useCallback((blockId) => moveBlock(blockId, 'up'), [moveBlock]);
+  const handleMoveDown = useCallback((blockId) => moveBlock(blockId, 'down'), [moveBlock]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {

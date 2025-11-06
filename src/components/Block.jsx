@@ -362,6 +362,26 @@ function Block({
 
 // Memoize Block component to prevent unnecessary re-renders
 export default memo(Block, (prevProps, nextProps) => {
+  // Debug logging to find what's breaking memo
+  const changes = [];
+  if (prevProps.block.id !== nextProps.block.id) changes.push('id');
+  if (prevProps.block.data !== nextProps.block.data) changes.push('data');
+  if (prevProps.block.content !== nextProps.block.content) changes.push('content');
+  if (prevProps.block.type !== nextProps.block.type) changes.push('type');
+  if (prevProps.canMoveUp !== nextProps.canMoveUp) changes.push('canMoveUp');
+  if (prevProps.canMoveDown !== nextProps.canMoveDown) changes.push('canMoveDown');
+  if (prevProps.index !== nextProps.index) changes.push('index');
+  if (prevProps.isFocused !== nextProps.isFocused) changes.push('isFocused');
+  if (prevProps.draggedBlockId !== nextProps.draggedBlockId) changes.push('draggedBlockId');
+  if (prevProps.dropTargetId !== nextProps.dropTargetId) changes.push('dropTargetId');
+  if (prevProps.dropPosition !== nextProps.dropPosition) changes.push('dropPosition');
+
+  if (changes.length > 0) {
+    console.log(`[BLOCK-MEMO] ${nextProps.block.type}Block ${nextProps.block.id.substring(0,8)} - Props changed:`, changes.join(', '));
+  } else {
+    console.log(`[BLOCK-MEMO] ${nextProps.block.type}Block ${nextProps.block.id.substring(0,8)} - PREVENTED`);
+  }
+
   // Fast path: if block reference didn't change and it's the same content, skip
   if (prevProps.block === nextProps.block) {
     // Still need to check focus and drag states

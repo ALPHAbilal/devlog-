@@ -14,7 +14,6 @@ import { sessionCache } from '../utils/sessionCache';
 import { serializeBlock } from '../utils/blockSerializer';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogSimple } from './ShareDialogSimple';
-import SaveIndicator from './SaveIndicator';
 import SyncStatusIndicator from './SyncStatusIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
@@ -1261,9 +1260,6 @@ export default function ExpandedView({
             </div>
             {/* View Mode Toggle and Actions */}
             <div className="flex items-center gap-3">
-              {/* Save Status Indicator */}
-              <SaveIndicator status={saveStatus} />
-              
               {/* Progress Indicator for Large Documents */}
               {shouldUsePagination && progress && progress.total > 0 && (
                 <div className="flex items-center gap-2 text-xs text-text-secondary/60">

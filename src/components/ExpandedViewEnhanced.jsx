@@ -1326,24 +1326,29 @@ export default function ExpandedView({
               )}
               
               {/* Sync Status Indicator */}
-              <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-dark-secondary/30">
+              <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-dark-secondary/30
+                              transition-all duration-200">
                 {!syncStatus.online ? (
-                  <span className="text-xs text-yellow-400 flex items-center gap-1">
+                  <span className="text-xs text-yellow-400 flex items-center gap-1
+                                   transition-opacity duration-200 animate-in fade-in">
                     <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
                     Offline
                   </span>
                 ) : syncStatus.syncing ? (
-                  <span className="text-xs text-blue-400 flex items-center gap-1">
+                  <span className="text-xs text-blue-400 flex items-center gap-1
+                                   transition-opacity duration-200 animate-in fade-in">
                     <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
                     Syncing
                   </span>
                 ) : syncStatus.pending > 0 ? (
-                  <span className="text-xs text-amber-400 flex items-center gap-1">
+                  <span className="text-xs text-amber-400 flex items-center gap-1
+                                   transition-opacity duration-200 animate-in fade-in">
                     <span className="w-2 h-2 bg-amber-400 rounded-full" />
                     {syncStatus.pending} pending
                   </span>
                 ) : (
-                  <span className="text-xs text-green-400 flex items-center gap-1">
+                  <span className="text-xs text-green-400 flex items-center gap-1
+                                   transition-opacity duration-200 animate-in fade-in">
                     <span className="w-2 h-2 bg-green-400 rounded-full" />
                     Saved
                   </span>
@@ -1532,7 +1537,7 @@ export default function ExpandedView({
             <Virtuoso
               useWindowScroll={false}
               customScrollParent={scrollContainerRef.current}
-              style={{ height: '100%' }}
+              style={{ height: '100%', willChange: 'contents' }}
               data={blocks}
               defaultItemHeight={150}
               increaseViewportBy={{ top: 400, bottom: 800 }}

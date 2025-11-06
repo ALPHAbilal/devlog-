@@ -1251,9 +1251,13 @@ function FileTreeBlock({ block, onUpdate }) {
 
 // Memoize FileTreeBlock to prevent unnecessary re-renders
 export default memo(FileTreeBlock, (prevProps, nextProps) => {
-  const willPreventRerender = 
+  const willPreventRerender =
     prevProps.block.id === nextProps.block.id &&
-    prevProps.block.data === nextProps.block.data;
-  
+    prevProps.block.data === nextProps.block.data &&
+    prevProps.isFocused === nextProps.isFocused; // ✅ Added: Check if focus state for THIS block changed
+
+  // Debug log to verify memo is working (remove after verification)
+  console.log('FileTreeBlock memo:', willPreventRerender ? 'PREVENTED' : 'ALLOWED');
+
   return willPreventRerender;
 });

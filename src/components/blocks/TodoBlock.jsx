@@ -441,8 +441,12 @@ function TodoBlock({ block, onUpdate }) {
 
 // Memoize TodoBlock to prevent unnecessary re-renders
 export default memo(TodoBlock, (prevProps, nextProps) => {
-  const willPreventRerender = 
+  const willPreventRerender =
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.data?.todos === nextProps.block.data?.todos;
-  
+
+  // Debug log to verify memo is working (remove after verification)
+  console.log('TodoBlock memo:', willPreventRerender ? 'PREVENTED' : 'ALLOWED');
+
+  return willPreventRerender; // ✅ Fixed: Now returns the comparison result
 });

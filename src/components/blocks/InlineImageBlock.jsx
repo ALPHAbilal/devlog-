@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, memo } from 'react'; // ✅ Add memo import
 import { Image as ImageIcon, X, Upload, Edit2 } from 'lucide-react';
 import InlineImage from '../InlineImage';
 import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
 import { useAuth } from '../../contexts/AuthContextOptimized';
 
-export default function InlineImageBlock({ block, onUpdate, onDelete, isFocused }) {
+function InlineImageBlock({ block, onUpdate, onDelete, isFocused }) { // ✅ Remove export default
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [altText, setAltText] = useState(block.alt || '');
@@ -182,3 +182,17 @@ export default function InlineImageBlock({ block, onUpdate, onDelete, isFocused 
     </span>
   );
 }
+
+// Memoize InlineImageBlock to prevent unnecessary re-renders
+export default memo(InlineImageBlock, (prevProps, nextProps) => {
+  const willPreventRerender =
+    prevProps.block.id === nextProps.block.id &&
+    prevProps.block.url === nextProps.block.url &&
+    prevProps.block.alt === nextProps.block.alt &&
+    prevProps.isFocused === nextProps.isFocused;
+
+  // Debug log to verify memo is working (remove after verification)
+  console.log('InlineImageBlock memo:', willPreventRerender ? 'PREVENTED' : 'ALLOWED');
+
+  return willPreventRerender;
+});

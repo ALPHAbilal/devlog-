@@ -419,11 +419,6 @@ export default function ExpandedView({
     //   dataContent: updates.data
     // });
     
-    // Use the loader's updateBlock method
-    startTransition(() => {
-      updateSingleBlock(blockId, updates);
-    });
-    
     // Check if this is a significant update that needs saving
     const needsSave = updates.content !== undefined ||
                      updates.data !== undefined ||
@@ -440,49 +435,27 @@ export default function ExpandedView({
                      updates.language !== undefined ||     // Code blocks
                      updates.filePath !== undefined ||     // Code blocks
                      updates.level !== undefined;          // Heading blocks
-    
+
+    // Use the loader's updateBlock method
+    startTransition(() => {
+      updateSingleBlock(blockId, updates);
+    });
+
     // Skip saves during initial load
     if (needsSave && !isInitialLoadRef.current) {
-      // Get the updated blocks for auto-save
-      const updatedBlocks = blocks.map((block, index) => {
-        if (!block) return null; // Defensive check for undefined blocks
-        if (block.id === blockId) {
+      // Use Smart Sync for saving - get current block and apply updates
+      if (smartSyncManagerRef.current) {
+        const currentBlock = blocks.find(b => b.id === blockId);
+        if (currentBlock) {
           // Remove isNew flag when updating a block (user has interacted with it)
-          const { isNew, ...blockWithoutNew } = block;
-          const updatedBlock = { 
-            ...blockWithoutNew, 
+          const { isNew, ...blockWithoutNew } = currentBlock;
+          const updatedBlock = {
+            ...blockWithoutNew,
             ...updates,
             // Use stored position if available, otherwise use array index
-            position: block.position !== undefined ? block.position : index
+            position: currentBlock.position !== undefined ? currentBlock.position : blocks.indexOf(currentBlock)
           };
-          
-          // console.log('🟩 ExpandedViewEnhanced: Block before and after update:', {
-          //   blockId: blockId,
-          //   blockType: block.type,
-          //   before: block,
-          //   after: updatedBlock,
-          //   hadData: !!block.data,
-          //   hasData: !!updatedBlock.data
-          // });
-          
-          return updatedBlock;
-        }
-        // Don't override existing positions
-        return block.position !== undefined ? block : { ...block, position: index };
-      }).filter(Boolean); // Remove any null blocks
-      
-      // console.log('🟩 ExpandedViewEnhanced: Passing to autoSaveManager:', {
-      //   entryId: entry.id,
-      //   blocksCount: updatedBlocks.length,
-      //   updatedBlockId: blockId,
-      //   updatedBlock: updatedBlocks.find(b => b.id === blockId)
-      // });
-      
-      // Use Smart Sync for saving
-      if (smartSyncManagerRef.current) {
-        // Get the specific block that was updated
-        const updatedBlock = updatedBlocks.find(b => b.id === blockId);
-        if (updatedBlock) {
+
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
 
@@ -503,12 +476,6 @@ export default function ExpandedView({
           });
         }
       }
-      
-      // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
-      // if (onUpdate) {
-      //   setIsInternalUpdate(true);
-      //   onUpdate(entry.id, { blocks: updatedBlocks });
-      // }
     }
   }, [blocks, updateSingleBlock]);
 

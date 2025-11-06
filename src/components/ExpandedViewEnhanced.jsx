@@ -1721,7 +1721,7 @@ export default function ExpandedView({
                   )}
                 </div>
               ));
-              })())
+              })()
             )
           ) : (
             <div style={{ minHeight: listHeight || 600 }} className="flex items-center justify-center">

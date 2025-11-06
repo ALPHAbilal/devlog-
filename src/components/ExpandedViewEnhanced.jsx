@@ -205,16 +205,21 @@ export default function ExpandedView({
     // Estimate based on block type
     const block = blocks[index];
     if (!block) return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
-    return getEstimatedHeight(block) + ADD_BUTTON_HEIGHT;
+    return Math.ceil(getEstimatedHeight(block) + ADD_BUTTON_HEIGHT);
   }, [blocks]);
 
-  // Configure TanStack virtualizer
+  // Configure TanStack virtualizer with measure element override
   const rowVirtualizer = useVirtualizer({
     count: blocks.length,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize, // Use memoized function
     overscan: 3, // Render 3 extra blocks outside viewport
-    // measureElement will be called via ref - no need to specify here
+    // Override measureElement to round measurements (prevents floating-point loop)
+    measureElement: (el) => {
+      if (!el) return 0;
+      // Round to nearest integer to prevent floating-point precision issues
+      return Math.ceil(el.getBoundingClientRect().height);
+    },
   });
 
   // [VIRT-DEBUG-2] Log virtualizer info

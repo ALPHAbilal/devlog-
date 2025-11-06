@@ -662,6 +662,37 @@ export default function ExpandedView({
   const handleMoveUp = useCallback((blockId) => moveBlock(blockId, 'up'), [moveBlock]);
   const handleMoveDown = useCallback((blockId) => moveBlock(blockId, 'down'), [moveBlock]);
 
+  // Memoize Virtuoso's computeItemKey to prevent re-creating all blocks on every render
+  const computeItemKey = useCallback((index, block) => block.id, []);
+
+  // Memoize Virtuoso's itemContent to prevent re-creating all blocks on every render
+  const renderBlockItem = useCallback((index, block) => {
+    if (!block) return null;
+
+    if (import.meta.env.DEV) {
+      // Count renders per block
+      if (!window.BLOCK_RENDER_COUNT) window.BLOCK_RENDER_COUNT = {};
+      window.BLOCK_RENDER_COUNT[block.id] = (window.BLOCK_RENDER_COUNT[block.id] || 0) + 1;
+
+      console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) - Render #${window.BLOCK_RENDER_COUNT[block.id]}`);
+    }
+
+    return (
+      <BlockRenderer
+        key={block.id}
+        block={block}
+        index={index}
+        isMobileView={isMobileView}
+        focusedBlockId={focusedBlockId}
+        showBlockSelector={showBlockSelector}
+        selectorPosition={selectorPosition}
+        draggedBlockId={draggedBlockId}
+        dropTargetId={dropTargetId}
+        dropPosition={dropPosition}
+      />
+    );
+  }, [blocks.length, isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
+
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {
     if (dragScrollInterval.current) return;
@@ -1437,33 +1468,8 @@ export default function ExpandedView({
               defaultItemHeight={150}
               increaseViewportBy={{ top: 400, bottom: 800 }}
               skipAnimationFrameInResizeObserver={true}
-              computeItemKey={(index, block) => block.id}
-              itemContent={(index, block) => {
-                if (!block) return null;
-
-                if (import.meta.env.DEV) {
-                  // Count renders per block
-                  if (!window.BLOCK_RENDER_COUNT) window.BLOCK_RENDER_COUNT = {};
-                  window.BLOCK_RENDER_COUNT[block.id] = (window.BLOCK_RENDER_COUNT[block.id] || 0) + 1;
-
-                  console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) - Render #${window.BLOCK_RENDER_COUNT[block.id]}`);
-                }
-
-                return (
-                  <BlockRenderer
-                    key={block.id}
-                    block={block}
-                    index={index}
-                    isMobileView={isMobileView}
-                    focusedBlockId={focusedBlockId}
-                    showBlockSelector={showBlockSelector}
-                    selectorPosition={selectorPosition}
-                    draggedBlockId={draggedBlockId}
-                    dropTargetId={dropTargetId}
-                    dropPosition={dropPosition}
-                  />
-                );
-              }}
+              computeItemKey={computeItemKey}
+              itemContent={renderBlockItem}
             />
           )}
 

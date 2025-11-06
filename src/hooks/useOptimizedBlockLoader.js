@@ -149,12 +149,29 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       const existingBlock = prevBlocks[blockIndex];
 
       // Check if updates would actually change anything
+      // Use deep comparison for objects (data, metadata, etc.)
       let hasChanges = false;
       const changedKeys = [];
+
       for (const key in updates) {
-        if (existingBlock[key] !== updates[key]) {
-          hasChanges = true;
-          changedKeys.push(key);
+        const existingValue = existingBlock[key];
+        const newValue = updates[key];
+
+        // Deep compare objects
+        if (typeof newValue === 'object' && newValue !== null &&
+            typeof existingValue === 'object' && existingValue !== null) {
+          const existingJSON = JSON.stringify(existingValue);
+          const newJSON = JSON.stringify(newValue);
+          if (existingJSON !== newJSON) {
+            hasChanges = true;
+            changedKeys.push(key);
+          }
+        } else {
+          // Shallow compare primitives
+          if (existingValue !== newValue) {
+            hasChanges = true;
+            changedKeys.push(key);
+          }
         }
       }
 

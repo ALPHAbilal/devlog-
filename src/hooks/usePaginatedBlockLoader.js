@@ -166,11 +166,30 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
       const existingBlock = prevBlocks[blockIndex];
 
       // Check if updates would actually change anything
+      // Use deep comparison for objects (data, metadata, etc.)
       let hasChanges = false;
+
       for (const key in updates) {
-        if (existingBlock[key] !== updates[key]) {
-          hasChanges = true;
-          break;
+        const existingValue = existingBlock[key];
+        const newValue = updates[key];
+
+        // Deep compare objects
+        if (typeof newValue === 'object' && newValue !== null &&
+            typeof existingValue === 'object' && existingValue !== null) {
+          const existingJSON = JSON.stringify(existingValue);
+          const newJSON = JSON.stringify(newValue);
+          if (existingJSON !== newJSON) {
+            hasChanges = true;
+            console.log('[BLOCK-UPDATE-PAGINATED-DEBUG] Object changed:', key, 'for block:', blockId.substring(0, 8));
+            break;
+          }
+        } else {
+          // Shallow compare primitives
+          if (existingValue !== newValue) {
+            hasChanges = true;
+            console.log('[BLOCK-UPDATE-PAGINATED-DEBUG] Value changed:', key, 'for block:', blockId.substring(0, 8));
+            break;
+          }
         }
       }
 

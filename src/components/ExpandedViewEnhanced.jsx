@@ -93,6 +93,11 @@ export default function ExpandedView({
   const blocks = useMemo(() => {
     const result = loadedBlocks || [];
 
+    // [DEBUG-FLICKER] Log when blocks array re-creates
+    console.log(`[DEBUG-FLICKER] blocks useMemo re-ran - loadedBlocks changed`);
+    console.log(`[DEBUG-FLICKER] Block count: ${result.length}`);
+    console.log(`[DEBUG-FLICKER] First 3 block IDs:`, result.slice(0, 3).map(b => b?.id?.substring(0, 8)));
+
     // [VIRT-DEBUG-5] Log blocks loaded for virtualization
     if (result.length > 0) {
       console.log(`[VIRT-DEBUG-5] 📦 Blocks loaded: ${result.length} total`);

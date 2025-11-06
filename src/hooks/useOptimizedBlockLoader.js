@@ -141,11 +141,35 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
   // Function to update a single block
   const updateBlock = (blockId, updates) => {
-    setBlocks(prevBlocks => 
-      prevBlocks.map(block => 
+    setBlocks(prevBlocks => {
+      // Find the block to update
+      const blockIndex = prevBlocks.findIndex(b => b.id === blockId);
+      if (blockIndex === -1) return prevBlocks; // Block not found, return same array
+
+      const existingBlock = prevBlocks[blockIndex];
+
+      // Check if updates would actually change anything
+      let hasChanges = false;
+      for (const key in updates) {
+        if (existingBlock[key] !== updates[key]) {
+          hasChanges = true;
+          break;
+        }
+      }
+
+      // If nothing changed, return the SAME array to prevent re-renders
+      if (!hasChanges) {
+        console.log('[BLOCK-UPDATE] No changes detected, preventing re-render');
+        return prevBlocks;
+      }
+
+      console.log('[BLOCK-UPDATE] Changes detected, updating block:', blockId.substring(0, 8));
+
+      // Only create new array if something actually changed
+      return prevBlocks.map(block =>
         block.id === blockId ? { ...block, ...updates } : block
-      )
-    );
+      );
+    });
   };
 
   // Function to remove a block

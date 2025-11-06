@@ -158,14 +158,40 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
 
   // Function to update a single block
   const updateBlock = useCallback((blockId, updates) => {
-    setBlocks(prevBlocks => 
-      prevBlocks.map(block => 
+    setBlocks(prevBlocks => {
+      // Find the block to update
+      const blockIndex = prevBlocks.findIndex(b => b.id === blockId);
+      if (blockIndex === -1) return prevBlocks; // Block not found, return same array
+
+      const existingBlock = prevBlocks[blockIndex];
+
+      // Check if updates would actually change anything
+      let hasChanges = false;
+      for (const key in updates) {
+        if (existingBlock[key] !== updates[key]) {
+          hasChanges = true;
+          break;
+        }
+      }
+
+      // If nothing changed, return the SAME array to prevent re-renders
+      if (!hasChanges) {
+        console.log('[BLOCK-UPDATE-PAGINATED] No changes detected, preventing re-render');
+        return prevBlocks;
+      }
+
+      console.log('[BLOCK-UPDATE-PAGINATED] Changes detected, updating block:', blockId.substring(0, 8));
+
+      // Only create new array if something actually changed
+      const newBlocks = prevBlocks.map(block =>
         block.id === blockId ? { ...block, ...updates } : block
-      )
-    );
-    
-    // Update in paginated cache
-    paginatedBlockLoader.updateBlockInCache(documentId, blockId, updates);
+      );
+
+      // Update in paginated cache
+      paginatedBlockLoader.updateBlockInCache(documentId, blockId, updates);
+
+      return newBlocks;
+    });
   }, [documentId]);
 
   // Function to remove a block

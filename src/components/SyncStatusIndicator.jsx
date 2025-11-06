@@ -1,0 +1,79 @@
+import { useState, useEffect, useRef } from 'react';
+
+/**
+ * Isolated sync status indicator that subscribes directly to SmartSync
+ * Updates without causing parent component re-renders
+ *
+ * This component solves the block flickering issue by extracting the
+ * frequently-updating sync status state (updates every 1 second) into
+ * its own component. This prevents the parent ExpandedViewEnhanced from
+ * re-rendering every second, which was causing all visible blocks to flicker.
+ */
+export default function SyncStatusIndicator({ documentId, syncManagerRef }) {
+  // Local state - isolated from parent
+  const [syncStatus, setSyncStatus] = useState({
+    pending: 0,
+    syncing: false,
+    online: navigator.onLine
+  });
+
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (!documentId || !syncManagerRef?.current) return;
+
+    // Poll sync status - updates only this component
+    intervalRef.current = setInterval(() => {
+      if (syncManagerRef.current) {
+        const status = syncManagerRef.current.getSyncStatus();
+        setSyncStatus(prevStatus => {
+          // Only update if values actually changed
+          if (!prevStatus ||
+              prevStatus.pending !== status.pending ||
+              prevStatus.syncing !== status.syncing ||
+              prevStatus.online !== status.online) {
+            return status;
+          }
+          return prevStatus;
+        });
+      }
+    }, 1000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [documentId, syncManagerRef]);
+
+  return (
+    <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-dark-secondary/30
+                    transition-all duration-200">
+      {!syncStatus.online ? (
+        <span className="text-xs text-yellow-400 flex items-center gap-1
+                         transition-opacity duration-200 animate-in fade-in">
+          <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+          Offline
+        </span>
+      ) : syncStatus.syncing ? (
+        <span className="text-xs text-blue-400 flex items-center gap-1
+                         transition-opacity duration-200 animate-in fade-in">
+          <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+          Syncing
+        </span>
+      ) : syncStatus.pending > 0 ? (
+        <span className="text-xs text-amber-400 flex items-center gap-1
+                         transition-opacity duration-200 animate-in fade-in">
+          <span className="w-2 h-2 bg-amber-400 rounded-full" />
+          {syncStatus.pending} pending
+        </span>
+      ) : (
+        <span className="text-xs text-green-400 flex items-center gap-1
+                         transition-opacity duration-200 animate-in fade-in">
+          <span className="w-2 h-2 bg-green-400 rounded-full" />
+          Saved
+        </span>
+      )}
+    </div>
+  );
+}

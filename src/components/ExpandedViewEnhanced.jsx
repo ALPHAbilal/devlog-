@@ -15,6 +15,7 @@ import { serializeBlock } from '../utils/blockSerializer';
 import storageWrapper from '../utils/storage/storageWrapper';
 import { ShareDialogSimple } from './ShareDialogSimple';
 import SaveIndicator from './SaveIndicator';
+import SyncStatusIndicator from './SyncStatusIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
 import MobileBottomSheet from './MobileBottomSheet';
@@ -145,7 +146,8 @@ export default function ExpandedView({
   const [saveStatus, setSaveStatus] = useState(null);
   const isInitialLoadRef = useRef(true); // Track initial load to prevent saves
   const saveStatusTimeoutRef = useRef(null);
-  const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
+  // Smart Sync manager reference (does NOT use state to avoid re-renders)
+  // SyncStatusIndicator component handles status polling independently
   const smartSyncManagerRef = useRef(null);
 
   // Create a memoized block renderer component to avoid closure issues
@@ -301,30 +303,16 @@ export default function ExpandedView({
   }, []);
 
   // Initialize Smart Sync for this document
+  // NOTE: Sync status polling moved to SyncStatusIndicator component
+  // This prevents parent re-renders that caused block flickering
+  // See: src/components/SyncStatusIndicator.jsx
   useEffect(() => {
     if (!entry.id) return;
-    
+
     // Get or create Smart Sync manager for this document
     const syncManager = getSmartSyncManager(entry.id);
     smartSyncManagerRef.current = syncManager;
-    
-    // Update sync status periodically (only if changed)
-    const statusInterval = setInterval(() => {
-      if (smartSyncManagerRef.current) {
-        const status = smartSyncManagerRef.current.getSyncStatus();
-        setSyncStatus(prevStatus => {
-          // Only update if values actually changed
-          if (!prevStatus || 
-              prevStatus.pending !== status.pending ||
-              prevStatus.syncing !== status.syncing ||
-              prevStatus.online !== status.online) {
-            return status;
-          }
-          return prevStatus;
-        });
-      }
-    }, 1000);
-    
+
     // Load any snapshot for quick initialization
     if (syncManager) {
       syncManager.loadLatestSnapshot().then(snapshot => {
@@ -333,10 +321,8 @@ export default function ExpandedView({
         }
       });
     }
-    
-    return () => {
-      clearInterval(statusInterval);
-    };
+
+    // No interval needed - SyncStatusIndicator handles that
   }, [entry.id]);
 
   // Check for unsaved changes on mount
@@ -1292,35 +1278,11 @@ export default function ExpandedView({
                 </div>
               )}
               
-              {/* Sync Status Indicator */}
-              <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-dark-secondary/30
-                              transition-all duration-200">
-                {!syncStatus.online ? (
-                  <span className="text-xs text-yellow-400 flex items-center gap-1
-                                   transition-opacity duration-200 animate-in fade-in">
-                    <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                    Offline
-                  </span>
-                ) : syncStatus.syncing ? (
-                  <span className="text-xs text-blue-400 flex items-center gap-1
-                                   transition-opacity duration-200 animate-in fade-in">
-                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-                    Syncing
-                  </span>
-                ) : syncStatus.pending > 0 ? (
-                  <span className="text-xs text-amber-400 flex items-center gap-1
-                                   transition-opacity duration-200 animate-in fade-in">
-                    <span className="w-2 h-2 bg-amber-400 rounded-full" />
-                    {syncStatus.pending} pending
-                  </span>
-                ) : (
-                  <span className="text-xs text-green-400 flex items-center gap-1
-                                   transition-opacity duration-200 animate-in fade-in">
-                    <span className="w-2 h-2 bg-green-400 rounded-full" />
-                    Saved
-                  </span>
-                )}
-              </div>
+              {/* Sync Status Indicator - Isolated Component */}
+              <SyncStatusIndicator
+                documentId={entry.id}
+                syncManagerRef={smartSyncManagerRef}
+              />
 
               {/* Share Button */}
               <button

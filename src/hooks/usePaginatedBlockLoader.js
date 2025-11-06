@@ -206,6 +206,10 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
         block.id === blockId ? { ...block, ...updates } : block
       );
 
+      // Verify reference stability for unchanged blocks
+      const unchangedCount = newBlocks.filter((block, i) => block === prevBlocks[i]).length;
+      console.log(`[BLOCK-REF-STABILITY] ${unchangedCount}/${newBlocks.length} blocks kept same reference`);
+
       // Update in paginated cache
       paginatedBlockLoader.updateBlockInCache(documentId, blockId, updates);
 

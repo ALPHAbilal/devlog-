@@ -188,9 +188,15 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       console.log('[BLOCK-UPDATE] Changes detected, updating block:', blockId.substring(0, 8));
 
       // Only create new array if something actually changed
-      return prevBlocks.map(block =>
+      const newBlocks = prevBlocks.map(block =>
         block.id === blockId ? { ...block, ...updates } : block
       );
+
+      // Verify reference stability for unchanged blocks
+      const unchangedCount = newBlocks.filter((block, i) => block === prevBlocks[i]).length;
+      console.log(`[BLOCK-REF-STABILITY] ${unchangedCount}/${newBlocks.length} blocks kept same reference`);
+
+      return newBlocks;
     });
   };
 

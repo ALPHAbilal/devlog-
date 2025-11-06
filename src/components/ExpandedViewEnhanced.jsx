@@ -296,14 +296,8 @@ export default function ExpandedView({
     setTags(entry.tags || []);
   }, [entry.id, entry.title, entry.tags]);
   
-  // Cleanup save status timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveStatusTimeoutRef.current) {
-        clearTimeout(saveStatusTimeoutRef.current);
-      }
-    };
-  }, []);
+  // REMOVED: saveStatusTimeoutRef cleanup - no longer needed
+  // SyncStatusIndicator now handles all save status display
 
   // Initialize Smart Sync for this document
   // NOTE: Sync status polling moved to SyncStatusIndicator component
@@ -1095,29 +1089,15 @@ export default function ExpandedView({
     }
   }, [blocks, updateLoadedBlocks, handleAddBelowBlock]);
 
-  // Helper function for saving with status updates
+  // Helper function for saving (status now handled by SyncStatusIndicator)
   const saveWithStatus = async (updates, description = 'changes') => {
-    setSaveStatus('saving');
     try {
       const result = await onUpdate(entry.id, updates);
-      
-      // Check if saved to cloud or locally
-      if (result?.savedToCloud === false) {
-        setSaveStatus('offline');
-      } else {
-        setSaveStatus('saved');
-      }
-      
-      // Clear status after 2 seconds
-      if (saveStatusTimeoutRef.current) {
-        clearTimeout(saveStatusTimeoutRef.current);
-      }
-      saveStatusTimeoutRef.current = setTimeout(() => {
-        setSaveStatus(null);
-      }, 2000);
+      // SyncStatusIndicator automatically shows save status
+      return result;
     } catch (error) {
       console.error(`Failed to save ${description}:`, error);
-      setSaveStatus('error');
+      // SyncStatusIndicator will show error state
       throw error;
     }
   };

@@ -200,21 +200,21 @@ export default function ExpandedView({
   const [syncStatus, setSyncStatus] = useState({ pending: 0, syncing: false, online: navigator.onLine });
   const smartSyncManagerRef = useRef(null);
 
+  // Memoize estimateSize to prevent infinite render loop
+  const estimateSize = useCallback((index) => {
+    // Estimate based on block type
+    const block = blocks[index];
+    if (!block) return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
+    return getEstimatedHeight(block) + ADD_BUTTON_HEIGHT;
+  }, [blocks]);
+
   // Configure TanStack virtualizer
   const rowVirtualizer = useVirtualizer({
     count: blocks.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) => {
-      // Estimate based on block type
-      const block = blocks[index];
-      if (!block) return DEFAULT_BLOCK_HEIGHT + ADD_BUTTON_HEIGHT;
-      return getEstimatedHeight(block) + ADD_BUTTON_HEIGHT;
-    },
+    estimateSize, // Use memoized function
     overscan: 3, // Render 3 extra blocks outside viewport
-    measureElement: (element) => {
-      // TanStack will call this automatically via ref
-      return element?.getBoundingClientRect().height ?? 0;
-    },
+    // measureElement will be called via ref - no need to specify here
   });
 
   // [VIRT-DEBUG-2] Log virtualizer info

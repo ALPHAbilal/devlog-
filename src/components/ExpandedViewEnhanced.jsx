@@ -23,6 +23,9 @@ import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 
+// [VIRT-DEBUG] Verify List import at module load time
+console.log('[VIRT-DEBUG-IMPORT] List component imported:', typeof List, List);
+
 // Cache for block heights for virtualization
 const blockHeightCache = new Map();
 const DEFAULT_BLOCK_HEIGHT = 150;
@@ -1637,97 +1640,33 @@ export default function ExpandedView({
             </>
           )}
           
-          {/* Virtualized Block List with fallback */}
+          {/* Virtualized Block List */}
           {blocks.length > 0 ? (
-            List ? (
-              (() => {
-                const validBlocks = blocks.filter(b => b !== null && b !== undefined);
-                // [VIRT-DEBUG-2] Log virtualization activation
-                console.log(`[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE`);
-                console.log(`[VIRT-DEBUG-2] Total blocks: ${validBlocks.length}`);
-                console.log(`[VIRT-DEBUG-2] List height: ${listHeight || 600}px`);
-                console.log(`[VIRT-DEBUG-2] Overscan count: 3 blocks`);
-                console.log(`[VIRT-DEBUG-2] Expected rendered blocks: ~${Math.ceil((listHeight || 600) / 200) + 6} (visible + overscan)`);
-                console.log(`[VIRT-DEBUG-2] Check console for [VIRT-DEBUG-1] logs showing which blocks render`);
+            (() => {
+              const validBlocks = blocks.filter(b => b !== null && b !== undefined);
+              // [VIRT-DEBUG-2] Log virtualization activation
+              console.log(`[VIRT-DEBUG-2] ✅ VIRTUALIZATION ACTIVE`);
+              console.log(`[VIRT-DEBUG-2] Total blocks: ${validBlocks.length}`);
+              console.log(`[VIRT-DEBUG-2] List height: ${listHeight || 600}px`);
+              console.log(`[VIRT-DEBUG-2] Overscan count: 3 blocks`);
+              console.log(`[VIRT-DEBUG-2] Expected rendered blocks: ~${Math.ceil((listHeight || 600) / 200) + 6} (visible + overscan)`);
+              console.log(`[VIRT-DEBUG-2] Check console for [VIRT-DEBUG-1] logs showing which blocks render`);
 
-                return (
-                  <List
-                    ref={listRef}
-                    height={listHeight || 600}
-                    itemCount={validBlocks.length}
-                    itemSize={getItemSize}
-                    width="100%"
-                    overscanCount={3}
-                    className="virtual-list"
-                  >
-                    {VirtualRow}
-                  </List>
-                );
-              })()
-            ) : (
-              (() => {
-                // [VIRT-DEBUG-3] Log fallback (non-virtualized) rendering
-                console.log(`[VIRT-DEBUG-3] ⚠️ FALLBACK MODE - Virtualization NOT active`);
-                console.log(`[VIRT-DEBUG-3] Rendering ALL ${blocks.length} blocks (non-virtualized)`);
-                console.log(`[VIRT-DEBUG-3] This is BAD for performance with many blocks!`);
-
-                return blocks.filter(block => block !== null && block !== undefined).map((block, index) => (
-                <div key={block?.id || `block-${index}`} className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
-                  {block?.isLoading ? (
-                    <OptimizedBlockSkeleton 
-                      type={block.type} 
-                      estimatedHeight={block.estimatedHeight || 100}
-                    />
-                  ) : (
-                    <>
-                      <BlockErrorBoundary 
-                        blockType={block?.type} 
-                        blockId={block?.id}
-                      >
-                        <Block
-                          block={block}
-                          index={index}
-                          onUpdate={updateBlock}
-                          onDelete={deleteBlock}
-                          onDuplicate={duplicateBlock}
-                          onMoveUp={(id) => moveBlock(id, 'up')}
-                          onMoveDown={(id) => moveBlock(id, 'down')}
-                          canMoveUp={index > 0}
-                          canMoveDown={index < blocks.length - 1}
-                          isMobileView={isMobileView}
-                          onAddBelow={(data) => handleInlineBlockAdd(index, data)}
-                          onConvert={convertBlock}
-                          showAddButton={true}
-                          isFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
-                          onFocus={setFocusedBlockId}
-                          allBlocks={blocks}
-                          onDragStart={handleDragStart}
-                          onDragEnd={handleDragEnd}
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                          draggedBlockId={draggedBlockId}
-                          dropTargetId={dropTargetId}
-                          dropPosition={dropPosition}
-                        />
-                      </BlockErrorBoundary>
-                      <AddBlockRow
-                        show={showBlockSelector && selectorPosition === block.id}
-                        onSelect={(type) => addBlock(type, block.id)}
-                        onClose={() => setShowBlockSelector(false)}
-                        isMobileView={isMobileView}
-                      />
-                    </>
-                  )}
-                </div>
-              ));
-              })()
-            )
-          ) : (
-            <div style={{ minHeight: listHeight || 600 }} className="flex items-center justify-center">
-              <p className="text-text-secondary">No blocks yet. Add one below.</p>
-            </div>
-          )}
+              return (
+                <List
+                  ref={listRef}
+                  height={listHeight || 600}
+                  itemCount={validBlocks.length}
+                  itemSize={getItemSize}
+                  width="100%"
+                  overscanCount={3}
+                  className="virtual-list"
+                >
+                  {VirtualRow}
+                </List>
+              );
+            })()
+          ) : null}
 
           {/* Load More Indicator for Paginated Documents */}
           {shouldUsePagination && hasMore && (

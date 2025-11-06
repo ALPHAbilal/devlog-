@@ -93,22 +93,7 @@ function Block({
   const BlockComponent = blockComponents[block.type] || TextBlock;
   const { isMobile } = useResponsive();
   const useMobileControls = isMobileView || isMobile;
-  
-  // Debug logging for props
-  useEffect(() => {
-    console.log('[BLOCK] Component mounted/updated:', {
-      blockId: block.id,
-      blockType: block.type,
-      hasOnMoveUp: !!onMoveUp,
-      hasOnMoveDown: !!onMoveDown,
-      canMoveUp,
-      canMoveDown,
-      isFocused,
-      index,
-      timestamp: Date.now()
-    });
-  }, [block.id, onMoveUp, onMoveDown, isFocused]);
-  
+
   // Use lazy loading for heavy blocks
   const { 
     targetRef: lazyRef, 

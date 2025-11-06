@@ -45,20 +45,7 @@ export default function InlineActionBar({
   const [isMobile, setIsMobile] = useState(false);
   const hideTimeoutRef = useRef(null);
   const containerRef = useRef(null);
-  
-  // Debug logging on mount and prop changes
-  useEffect(() => {
-    console.log('[INLINE-ACTION] Props received:', {
-      blockId,
-      hasOnMoveUp: !!onMoveUp,
-      hasOnMoveDown: !!onMoveDown,
-      canMoveUp,
-      canMoveDown,
-      isVisible,
-      timestamp: Date.now()
-    });
-  }, [blockId, onMoveUp, onMoveDown, canMoveUp, canMoveDown, isVisible]);
-  
+
   // Use click outside hook for dropdown
   const dropdownRef = useClickOutside(() => {
     setShowDropdown(false);

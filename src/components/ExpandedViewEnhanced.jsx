@@ -1030,6 +1030,8 @@ export default function ExpandedView({
   }, [blocks, updateLoadedBlocks, focusedBlockId]);
 
   const handleAddBelowBlock = useCallback((blockIdOrData) => {
+    console.log('[ADD-BELOW-DEBUG] handleAddBelowBlock called with:', blockIdOrData, 'type:', typeof blockIdOrData);
+
     // If a block object is passed (from TextBlock paste), create it directly
     if (typeof blockIdOrData === 'object' && blockIdOrData.type) {
       // Find the TextBlock that called this function
@@ -1093,6 +1095,8 @@ export default function ExpandedView({
 
   // Memoized callback for inline block addition from Block component
   const handleInlineBlockAdd = useCallback((blockIndex, data) => {
+    console.log('[INLINE-ADD-DEBUG] handleInlineBlockAdd called with index:', blockIndex, 'data:', data, 'type:', typeof data);
+
     if (typeof data === 'object' && data.type) {
       // Direct block creation from TextBlock
       const newBlock = {

@@ -134,17 +134,27 @@ function ExpandedView({
     // TEMPORARILY REMOVED DEV CHECK FOR PRODUCTION DEBUGGING
     console.log(`[BLOCKS-MEMO] Blocks array updated: ${result.length} blocks`);
     if (prevBlocksRef.current && prevBlocksRef.current.length > 0) {
-      const sameReferences = result.filter((block, i) => prevBlocksRef.current[i] === block).length;
+      // CRITICAL FIX: Compare by block.id, NOT by index position
+      // When blocks are inserted, indices shift, but IDs stay the same
+      const prevBlocksMap = new Map(prevBlocksRef.current.map(b => [b.id, b]));
+      const sameReferences = result.filter(block => {
+        const prevBlock = prevBlocksMap.get(block.id);
+        return prevBlock === block; // Same object reference
+      }).length;
+      
       const percentSame = result.length > 0 ? Math.round((sameReferences / result.length) * 100) : 0;
       const status = percentSame >= 80 ? '✅ GOOD' : percentSame >= 50 ? '⚠️ MEDIUM' : '🔴 LOW';
-      console.log(`[BLOCKS-MEMO] Reference stability: ${sameReferences}/${result.length} (${percentSame}%) ${status}`);
+      console.log(`[BLOCKS-MEMO] Reference stability BY ID: ${sameReferences}/${result.length} (${percentSame}%) ${status}`);
       
       // Show which blocks got new references (only first 10 for brevity)
       if (sameReferences < result.length) {
-        const changedIndices = result
-          .map((block, i) => prevBlocksRef.current[i] !== block ? i : null)
-          .filter(i => i !== null);
-        console.log(`[BLOCKS-MEMO] Blocks with new refs at indices: [${changedIndices.slice(0, 10).join(', ')}]${changedIndices.length > 10 ? ` +${changedIndices.length - 10} more` : ''}`);
+        const changedBlocks = result
+          .filter(block => {
+            const prevBlock = prevBlocksMap.get(block.id);
+            return !prevBlock || prevBlock !== block;
+          })
+          .map(b => b.id.substring(0, 8));
+        console.log(`[BLOCKS-MEMO] Blocks with new refs (by ID): [${changedBlocks.slice(0, 10).join(', ')}]${changedBlocks.length > 10 ? ` +${changedBlocks.length - 10} more` : ''}`);
       }
     }
     prevBlocksRef.current = result;

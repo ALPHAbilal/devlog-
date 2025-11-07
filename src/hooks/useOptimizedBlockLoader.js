@@ -131,45 +131,59 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   // OPTIMIZATION: Preserve block object references to prevent unnecessary re-renders
   const updateBlocks = (newBlocks) => {
     setBlocks(prevBlocks => {
-      // If previous blocks is empty or same length, create new array
+      // If previous blocks is empty, just add positions
       if (!prevBlocks || prevBlocks.length === 0) {
-        return newBlocks.map((block, index) => ({
+        const withPositions = newBlocks.map((block, index) => ({
           ...block,
           position: block.position !== undefined ? block.position : index
         }));
+        // Update caches
+        sessionCache.updateBlocks(documentId, withPositions);
+        optimizedBlockLoader.clearCache(documentId);
+        return withPositions;
       }
 
       // Preserve references for unchanged blocks
       const blocksWithPositions = newBlocks.map((newBlock, index) => {
         const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
 
-        // If block exists and has same content, reuse the reference
-        if (prevBlock &&
-            prevBlock.content === newBlock.content &&
-            prevBlock.type === newBlock.type &&
-            prevBlock.metadata === newBlock.metadata) {
-          // Only update position if needed
-          if (prevBlock.position !== index) {
+        // If block exists and content unchanged, reuse reference
+        // For new blocks or blocks with new IDs, prevBlock will be undefined
+        if (prevBlock) {
+          // Check if content actually changed (deep comparison not needed - string compare)
+          const contentSame = prevBlock.content === newBlock.content;
+          const typeSame = prevBlock.type === newBlock.type;
+          const positionSame = prevBlock.position === index;
+
+          // If nothing changed, reuse exact reference
+          if (contentSame && typeSame && positionSame) {
+            return prevBlock;
+          }
+
+          // If only position changed, update just position
+          if (contentSame && typeSame && !positionSame) {
             return { ...prevBlock, position: index };
           }
-          return prevBlock; // Reuse exact same reference
+
+          // Content or type changed, create new object
+          return {
+            ...newBlock,
+            position: index
+          };
         }
 
-        // Block is new or changed, create new object
+        // New block, assign position
         return {
           ...newBlock,
-          position: newBlock.position !== undefined ? newBlock.position : index
+          position: index
         };
       });
 
-      return blocksWithPositions;
-    });
-
-    // Update caches with final blocks
-    setBlocks(finalBlocks => {
-      sessionCache.updateBlocks(documentId, finalBlocks);
+      // Update caches
+      sessionCache.updateBlocks(documentId, blocksWithPositions);
       optimizedBlockLoader.clearCache(documentId);
-      return finalBlocks;
+
+      return blocksWithPositions;
     });
   };
 

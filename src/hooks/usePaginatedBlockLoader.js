@@ -151,6 +151,9 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
     setBlocks(prevBlocks => {
       // If previous blocks is empty, just use new blocks
       if (!prevBlocks || prevBlocks.length === 0) {
+        // Update caches
+        paginatedBlockLoader.clearCache(documentId);
+        sessionCache.updateBlocks(documentId, newBlocks);
         return newBlocks;
       }
 
@@ -158,27 +161,31 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
       const updatedBlocks = newBlocks.map((newBlock, index) => {
         const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
 
-        // If block exists and has same content, reuse the reference
-        if (prevBlock &&
-            prevBlock.content === newBlock.content &&
-            prevBlock.type === newBlock.type &&
-            prevBlock.metadata === newBlock.metadata &&
-            prevBlock.position === newBlock.position) {
-          return prevBlock; // Reuse exact same reference
+        // If block exists, check if content changed
+        if (prevBlock) {
+          const contentSame = prevBlock.content === newBlock.content;
+          const typeSame = prevBlock.type === newBlock.type;
+          const positionSame = prevBlock.position === newBlock.position;
+
+          // If nothing changed, reuse exact reference
+          if (contentSame && typeSame && positionSame) {
+            return prevBlock;
+          }
+
+          // Something changed, use new object
+          return newBlock;
         }
 
-        // Block is new or changed, use new object
+        // New block, use new object
         return newBlock;
       });
 
+      // Update caches
+      paginatedBlockLoader.clearCache(documentId);
+      sessionCache.updateBlocks(documentId, updatedBlocks);
+
       return updatedBlocks;
     });
-
-    // Update cache - clear and let it rebuild on next load
-    paginatedBlockLoader.clearCache(documentId);
-    
-    // Update session cache as well
-    sessionCache.updateBlocks(documentId, newBlocks);
   }, [documentId]);
 
   // Function to update a single block

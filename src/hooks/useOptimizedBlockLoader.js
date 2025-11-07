@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, startTransition } from 'react';
+import { useState, useEffect, useRef, useCallback, startTransition } from 'react';
 import { optimizedBlockLoader, OptimizedBlockLoader } from '../utils/optimizedBlockLoader';
 import { sessionCache } from '../utils/sessionCache';
 
@@ -123,7 +123,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
   // Function to update blocks (for edits)
   // OPTIMIZATION: Preserve block object references to prevent unnecessary re-renders
-  const updateBlocks = (newBlocks) => {
+  const updateBlocks = useCallback((newBlocks) => {
     if (import.meta.env.DEV) {
       console.log('[UPDATE-BLOCKS-CALLED] updateBlocks invoked with', newBlocks.length, 'blocks');
     }
@@ -198,7 +198,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
       return optimizedBlocks;
     });
-  };
+  }, [documentId]);
 
   // Function to update a single block
   const updateBlock = (blockId, updates) => {

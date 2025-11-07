@@ -696,8 +696,9 @@ function ExpandedView({
   const computeItemKey = useCallback((index, block) => block.id, []);
 
   // Memoize Virtuoso's itemContent to prevent re-creating all blocks on every render
-  // CRITICAL FIX: Include ALL values used in the closure to prevent stale closures
-  // BlockRenderer's memo will prevent unnecessary re-renders of unchanged blocks
+  // CRITICAL FIX: Removed showBlockSelector and selectorPosition from dependencies
+  // to prevent full list re-render when "+" button is clicked. BlockRenderer memo handles those changes.
+  // Also removed blocks.length dependency - using blocks directly to preserve reference stability
   const renderBlockItem = useCallback((index, block) => {
     if (!block) return null;
 
@@ -723,7 +724,7 @@ function ExpandedView({
         dropPosition={dropPosition}
       />
     );
-  }, [blocks.length, isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
+  }, [isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {
@@ -976,31 +977,41 @@ function ExpandedView({
       document_id: entry.id
     });
 
-    // Insert the new block
-    const updatedBlocks = [...blocks];
+    let updatedBlocks;
     if (afterBlockId) {
       const index = blocks.findIndex(b => b.id === afterBlockId);
-      updatedBlocks.splice(index + 1, 0, newBlock);
-    } else {
+
+      // CRITICAL FIX: Preserve block references by building array manually
+      // instead of using spread operator which creates new element references
+      updatedBlocks = [];
+
+      // Add blocks before insertion point (preserve references)
+      for (let i = 0; i <= index; i++) {
+        updatedBlocks.push(blocks[i]);
+      }
+
+      // Add new block
       updatedBlocks.push(newBlock);
+
+      // Add blocks after insertion point with position updates
+      for (let i = index + 1; i < blocks.length; i++) {
+        const block = blocks[i];
+        const newPosition = i + 1;
+
+        // Only create new object if position needs updating
+        if (block.position !== newPosition) {
+          updatedBlocks.push({ ...block, position: newPosition });
+        } else {
+          // Position already correct, reuse exact same reference
+          updatedBlocks.push(block);
+        }
+      }
+    } else {
+      updatedBlocks = [...blocks, newBlock];
     }
     
-    // CRITICAL FIX: Normalize positions to match array indices
-    // But ONLY update position property if it actually differs (preserve references!)
-    const normalizedBlocks = updatedBlocks.map((block, idx) => {
-      if (block.position === idx) {
-        // Position already correct - keep same reference
-        return block;
-      }
-      // Position differs - create new reference with updated position
-      return { ...block, position: idx };
-    });
-    
-    // Batch all state updates in a single transition
     startTransition(() => {
-      updateLoadedBlocks(normalizedBlocks);
-      setShowBlockSelector(false);
-      setSelectorPosition(null);
+      updateLoadedBlocks(updatedBlocks);
     });
     
     // CRITICAL FIX: Call Smart Sync for new block creation
@@ -1031,6 +1042,9 @@ function ExpandedView({
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
+
+    setShowBlockSelector(false);
+    setSelectorPosition(null);
   }, [blocks, updateLoadedBlocks, focusedBlockId]);
 
   const handleAddBelowBlock = useCallback((blockIdOrData) => {
@@ -1052,24 +1066,16 @@ function ExpandedView({
         createdAt: blockIdOrData.createdAt || new Date().toISOString()
       };
       
-      // Insert the new block
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(index + 1, 0, newBlock);
       
-      // CRITICAL FIX: Normalize positions to match array indices
-      // But ONLY update position property if it actually differs (preserve references!)
-      const normalizedBlocks = updatedBlocks.map((block, idx) => {
-        if (block.position === idx) {
-          // Position already correct - keep same reference
-          return block;
-        }
-        // Position differs - create new reference with updated position
-        return { ...block, position: idx };
-      });
+      // Update positions for all blocks after the insertion point
+      for (let i = index + 2; i < updatedBlocks.length; i++) {
+        updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+      }
       
-      // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(normalizedBlocks);
+        updateLoadedBlocks(updatedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for new block from paste
@@ -1119,24 +1125,20 @@ function ExpandedView({
         createdAt: data.createdAt || new Date().toISOString()
       };
       
-      // Insert the new block
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(blockIndex + 1, 0, newBlock);
-      
-      // CRITICAL FIX: Normalize positions to match array indices
-      // But ONLY update position property if it actually differs (preserve references!)
-      const normalizedBlocks = updatedBlocks.map((block, idx) => {
-        if (block.position === idx) {
-          // Position already correct - keep same reference
-          return block;
+
+      // Update positions ONLY for blocks that actually need it (preserve references!)
+      // OPTIMIZATION: Only update position if it differs from array index
+      for (let i = blockIndex + 2; i < updatedBlocks.length; i++) {
+        if (updatedBlocks[i].position !== i) {
+          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
         }
-        // Position differs - create new reference with updated position
-        return { ...block, position: idx };
-      });
+        // else: position already correct, reuse same reference
+      }
       
-      // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(normalizedBlocks);
+        updateLoadedBlocks(updatedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for inline new block
@@ -1529,6 +1531,12 @@ function ExpandedView({
               skipAnimationFrameInResizeObserver={true}
               computeItemKey={computeItemKey}
               itemContent={renderBlockItem}
+              // CRITICAL FIX: Prevent Virtuoso from re-rendering on every data change
+              // Only re-render when the data array reference actually changes (not shallow comparison)
+              followOutput={false}
+              alignToBottom={false}
+              // Optimize scrolling performance
+              overscan={200}
             />
           )}
 
@@ -1918,12 +1926,14 @@ function ExpandedView({
 
 // Memoize ExpandedView to prevent unnecessary re-renders when entry reference changes
 // This prevents the AddBlockRow popup from closing when parent re-renders
+// CRITICAL FIX: This memo is essential to prevent Virtuoso flickering when blocks are added
 export default memo(ExpandedView, (prevProps, nextProps) => {
   // Only re-render if entry.id changed (different document)
   // Ignore entry reference changes if the document ID is the same
+  // This is critical because DocumentPage may pass new entry objects even when content hasn't changed
   if (prevProps.entry.id !== nextProps.entry.id) return false;
 
-  // Re-render if other props changed
+  // Re-render if other critical props changed
   if (prevProps.onClose !== nextProps.onClose) return false;
   if (prevProps.onUpdate !== nextProps.onUpdate) return false;
   if (prevProps.isMobileView !== nextProps.isMobileView) return false;

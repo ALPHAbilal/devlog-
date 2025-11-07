@@ -117,10 +117,43 @@ export default function DocumentPage() {
   /**
    * Handle document updates
    * Optimistically update local state and sync to storage
+   * 
+   * CRITICAL FIX: Only update if document reference actually changed
+   * This prevents flickering when adding blocks (Virtuoso re-render issue)
    */
-  const handleUpdate = useCallback((updatedDocument) => {
-    setDocument(updatedDocument);
-    // Note: Actual save is handled by ExpandedViewEnhanced's auto-save
+  const handleUpdate = useCallback((documentId, updates) => {
+    // If updates is null, it's a delete operation - ignore it
+    if (updates === null) {
+      return;
+    }
+    
+    // Only update document state if there are actual changes
+    // This prevents unnecessary re-renders that cause Virtuoso flickering
+    setDocument(prevDoc => {
+      if (!prevDoc) return prevDoc;
+      
+      // If no updates provided, don't change anything
+      if (!updates) return prevDoc;
+      
+      // Check if any values actually changed
+      let hasChanges = false;
+      for (const key in updates) {
+        if (prevDoc[key] !== updates[key]) {
+          hasChanges = true;
+          break;
+        }
+      }
+      
+      // If nothing changed, return the same reference to prevent re-render
+      if (!hasChanges) {
+        return prevDoc;
+      }
+      
+      // Only create new object if there are actual changes
+      return { ...prevDoc, ...updates };
+    });
+    
+    // Note: Actual save is handled by ExpandedViewEnhanced's auto-save (SmartSync)
   }, []);
 
   /**

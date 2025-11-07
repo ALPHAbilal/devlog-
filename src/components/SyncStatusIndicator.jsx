@@ -20,7 +20,12 @@ export default function SyncStatusIndicator({ documentId, syncManagerRef }) {
   const intervalRef = useRef(null);
 
   useEffect(() => {
-    if (!documentId || !syncManagerRef?.current) return;
+    if (!documentId || !syncManagerRef?.current) {
+      console.log('[SYNC-STATUS-POLL] ⚠️ Missing documentId or syncManagerRef, polling disabled');
+      return;
+    }
+
+    console.log('[SYNC-STATUS-POLL] ✅ Starting status polling for document:', documentId);
 
     // Poll sync status - updates only this component
     intervalRef.current = setInterval(() => {
@@ -32,8 +37,13 @@ export default function SyncStatusIndicator({ documentId, syncManagerRef }) {
               prevStatus.pending !== status.pending ||
               prevStatus.syncing !== status.syncing ||
               prevStatus.online !== status.online) {
+            console.log('[SYNC-STATUS-POLL] 🔄 Status changed, updating UI:', {
+              from: prevStatus,
+              to: status
+            });
             return status;
           }
+          console.log('[SYNC-STATUS-POLL] ➡️ Status unchanged:', status);
           return prevStatus;
         });
       }
@@ -41,6 +51,7 @@ export default function SyncStatusIndicator({ documentId, syncManagerRef }) {
 
     return () => {
       if (intervalRef.current) {
+        console.log('[SYNC-STATUS-POLL] 🛑 Stopping status polling');
         clearInterval(intervalRef.current);
       }
     };

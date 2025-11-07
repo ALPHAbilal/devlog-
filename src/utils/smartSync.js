@@ -257,6 +257,7 @@ class SmartSyncManager {
 
       // Step 2: Add to batch queue
       this.batchQueue.push(change);
+      console.log('[SYNC-QUEUE-ADD] ✅ Change added to queue, size now:', this.batchQueue.length);
 
       // Step 3: Schedule smart sync
       this.scheduleSmartSync();
@@ -280,26 +281,29 @@ class SmartSyncManager {
 
     // Don't sync if offline
     if (isOffline) {
-      console.log('SmartSync: Offline, delaying sync');
+      console.log('[SYNC-SCHEDULE] ❌ Offline, delaying sync');
       return;
     }
 
     // Decision tree for optimal sync timing
     if (queueSize >= this.BATCH_SIZE * 0.8) {
       // Approaching batch limit - sync soon
-      console.log('SmartSync: Near batch limit, syncing soon');
+      console.log('[SYNC-SCHEDULE] 🚀 Near batch limit, syncing in 1 second');
       setTimeout(() => this.executeBatchSync(), 1000);
     } else if (userIsIdle && queueSize > 0) {
       // User is idle - perfect time to sync
-      console.log('SmartSync: User idle, syncing');
+      console.log('[SYNC-SCHEDULE] ⏸️ User idle, calling idleSync (2s debounce)');
       this.idleSync();
     } else if (timeSinceLastSync > this.MAX_SYNC_INTERVAL && queueSize > 0) {
       // Too long since last sync - force sync
-      console.log('SmartSync: Max interval reached, forcing sync');
+      console.log('[SYNC-SCHEDULE] ⏰ Max interval reached (30s), calling throttledSync');
       this.throttledSync();
     } else if (queueSize > 0) {
       // Have changes, wait for more to batch
+      console.log('[SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)');
       this.debouncedSync();
+    } else {
+      console.log('[SYNC-SCHEDULE] ℹ️ Queue empty, nothing to schedule');
     }
   }
 
@@ -567,12 +571,14 @@ class SmartSyncManager {
    * Get sync status for UI indicators
    */
   getSyncStatus() {
-    return {
+    const status = {
       pending: this.batchQueue.length,
       syncing: this.syncInProgress,
       lastSync: this.lastSyncTime,
       online: navigator.onLine
     };
+    console.log('[SYNC-STATUS-GET] 📊 Status requested:', status);
+    return status;
   }
 
   /**

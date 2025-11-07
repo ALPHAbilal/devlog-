@@ -408,6 +408,13 @@ export default function ExpandedView({
 
     // Skip saves during initial load
     if (needsSave && !isInitialLoadRef.current) {
+      console.log('[SYNC-CHANGE-RECEIVED] 📥 Block update received:', {
+        blockId: blockId.substring(0, 8) + '...',
+        updates: Object.keys(updates),
+        needsSave,
+        smartSyncExists: !!smartSyncManagerRef.current
+      });
+
       // Use Smart Sync for saving - get current block and apply updates
       if (smartSyncManagerRef.current) {
         const currentBlock = blocks.find(b => b.id === blockId);
@@ -424,6 +431,14 @@ export default function ExpandedView({
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
 
+          console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with:', {
+            blockId: blockId.substring(0, 8) + '...',
+            action: 'UPDATE',
+            blockType: updatedBlock.type,
+            position: updatedBlock.position,
+            contentLength: serializedBlock.content?.length
+          });
+
           // Smart Sync handles everything - pass the normalized content WITH type, position, and metadata
           smartSyncManagerRef.current.handleChange(
             blockId,
@@ -433,13 +448,27 @@ export default function ExpandedView({
             updatedBlock.position,   // CRITICAL: Use the block's actual position, not array index
             serializedBlock.metadata // CRITICAL: Send metadata for snapshots and other JSONB data
           ).then(() => {
+            console.log('[SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully');
             // Update sync status will happen automatically via the interval
           }).catch(error => {
-            console.error('Smart Sync error:', error);
+            console.error('[SYNC-CHANGE-RECEIVED] ❌ Smart Sync error:', error);
             // REMOVED: setSaveStatus - was causing unnecessary re-renders
             // SyncStatusIndicator will show the error state automatically
           });
+        } else {
+          console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ Block not found in blocks array:', blockId);
         }
+      } else {
+        console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ smartSyncManagerRef.current is null/undefined');
+      }
+    } else {
+      if (!needsSave) {
+        console.log('[SYNC-CHANGE-RECEIVED] ℹ️ Update skipped (needsSave=false):', {
+          blockId: blockId.substring(0, 8) + '...',
+          updates: Object.keys(updates)
+        });
+      } else if (isInitialLoadRef.current) {
+        console.log('[SYNC-CHANGE-RECEIVED] ⏳ Update skipped (initial load protection active)');
       }
     }
   }, [blocks, updateSingleBlock]);

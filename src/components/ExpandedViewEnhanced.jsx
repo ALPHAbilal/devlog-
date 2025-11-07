@@ -1082,15 +1082,60 @@ function ExpandedView({
       wrappedInTransition: true
     });
     
-    console.log('[ADD-BLOCK-CRITICAL] About to call updateLoadedBlocks:', {
-      functionType: typeof updateLoadedBlocks,
-      functionName: updateLoadedBlocks?.name || 'anonymous',
-      blocksCount: updatedBlocks.length,
-      hasFunction: !!updateLoadedBlocks
+    // CRITICAL FIX: Preserve block references by reusing existing objects
+    // Only create new references for blocks that actually changed
+    console.log('[ADD-BLOCK-REF-PRESERVE] Starting reference preservation:', {
+      totalBlocks: updatedBlocks.length,
+      currentBlocksCount: blocks.length
+    });
+    
+    const preservedBlocks = updatedBlocks.map((block, index) => {
+      // For the new block, always return it as is
+      if (block === newBlock) {
+        console.log('[ADD-BLOCK-REF-PRESERVE] New block at index:', index);
+        return block;
+      }
+      
+      // For existing blocks, find the corresponding block in the old array
+      const oldBlock = blocks.find(b => b.id === block.id);
+      
+      if (!oldBlock) {
+        console.log('[ADD-BLOCK-REF-PRESERVE] Block not found in old array:', block.id);
+        return block;
+      }
+      
+      // Check if content, type, and metadata are the same
+      const contentSame = oldBlock.content === block.content;
+      const typeSame = oldBlock.type === block.type;
+      const metadataSame = JSON.stringify(oldBlock.metadata) === JSON.stringify(block.metadata);
+      
+      // If everything is the same, return the OLD reference
+      if (contentSame && typeSame && metadataSame) {
+        console.log('[ADD-BLOCK-REF-PRESERVE] Preserving reference for block:', {
+          id: block.id,
+          oldIndex: blocks.indexOf(oldBlock),
+          newIndex: index
+        });
+        return oldBlock; // CRITICAL: Return old reference to preserve React.memo
+      }
+      
+      // If something changed, return the new block
+      console.log('[ADD-BLOCK-REF-PRESERVE] Block changed, using new reference:', {
+        id: block.id,
+        contentSame,
+        typeSame,
+        metadataSame
+      });
+      return block;
+    });
+    
+    console.log('[ADD-BLOCK-REF-PRESERVE] Reference preservation complete:', {
+      totalBlocks: preservedBlocks.length,
+      preservedCount: preservedBlocks.filter((b, i) => b === blocks.find(ob => ob.id === b.id)).length
     });
     
     startTransition(() => {
-      updateLoadedBlocks(updatedBlocks);
+      updateLoadedBlocks(preservedBlocks);
       setShowBlockSelector(false);
       setSelectorPosition(null);
     });
@@ -1157,12 +1202,49 @@ function ExpandedView({
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(index + 1, 0, newBlock);
       
-      // CRITICAL FIX: Don't normalize all positions - it breaks references!
-      // Position will be set by SmartSync based on array index when saving
+      // CRITICAL FIX: Preserve block references by reusing existing objects
+      console.log('[ADD-BELOW-REF-PRESERVE] Starting reference preservation:', {
+        totalBlocks: updatedBlocks.length,
+        currentBlocksCount: blocks.length
+      });
+      
+      const preservedBlocks = updatedBlocks.map((block, idx) => {
+        // For the new block, always return it as is
+        if (block === newBlock) {
+          console.log('[ADD-BELOW-REF-PRESERVE] New block at index:', idx);
+          return block;
+        }
+        
+        // For existing blocks, find the corresponding block in the old array
+        const oldBlock = blocks.find(b => b.id === block.id);
+        
+        if (!oldBlock) {
+          console.log('[ADD-BELOW-REF-PRESERVE] Block not found in old array:', block.id);
+          return block;
+        }
+        
+        // Check if content, type, and metadata are the same
+        const contentSame = oldBlock.content === block.content;
+        const typeSame = oldBlock.type === block.type;
+        const metadataSame = JSON.stringify(oldBlock.metadata) === JSON.stringify(block.metadata);
+        
+        // If everything is the same, return the OLD reference
+        if (contentSame && typeSame && metadataSame) {
+          return oldBlock; // CRITICAL: Return old reference to preserve React.memo
+        }
+        
+        // If something changed, return the new block
+        return block;
+      });
+      
+      console.log('[ADD-BELOW-REF-PRESERVE] Reference preservation complete:', {
+        totalBlocks: preservedBlocks.length,
+        preservedCount: preservedBlocks.filter((b, i) => b === blocks.find(ob => ob.id === b.id)).length
+      });
       
       // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(updatedBlocks);
+        updateLoadedBlocks(preservedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for new block from paste
@@ -1237,12 +1319,49 @@ function ExpandedView({
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(blockIndex + 1, 0, newBlock);
       
-      // CRITICAL FIX: Don't normalize all positions - it breaks references!
-      // Position will be set by SmartSync based on array index when saving
+      // CRITICAL FIX: Preserve block references by reusing existing objects
+      console.log('[INLINE-ADD-REF-PRESERVE] Starting reference preservation:', {
+        totalBlocks: updatedBlocks.length,
+        currentBlocksCount: blocks.length
+      });
+      
+      const preservedBlocks = updatedBlocks.map((block, idx) => {
+        // For the new block, always return it as is
+        if (block === newBlock) {
+          console.log('[INLINE-ADD-REF-PRESERVE] New block at index:', idx);
+          return block;
+        }
+        
+        // For existing blocks, find the corresponding block in the old array
+        const oldBlock = blocks.find(b => b.id === block.id);
+        
+        if (!oldBlock) {
+          console.log('[INLINE-ADD-REF-PRESERVE] Block not found in old array:', block.id);
+          return block;
+        }
+        
+        // Check if content, type, and metadata are the same
+        const contentSame = oldBlock.content === block.content;
+        const typeSame = oldBlock.type === block.type;
+        const metadataSame = JSON.stringify(oldBlock.metadata) === JSON.stringify(block.metadata);
+        
+        // If everything is the same, return the OLD reference
+        if (contentSame && typeSame && metadataSame) {
+          return oldBlock; // CRITICAL: Return old reference to preserve React.memo
+        }
+        
+        // If something changed, return the new block
+        return block;
+      });
+      
+      console.log('[INLINE-ADD-REF-PRESERVE] Reference preservation complete:', {
+        totalBlocks: preservedBlocks.length,
+        preservedCount: preservedBlocks.filter((b, i) => b === blocks.find(ob => ob.id === b.id)).length
+      });
       
       // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(updatedBlocks);
+        updateLoadedBlocks(preservedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for inline new block

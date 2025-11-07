@@ -138,19 +138,24 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       const optimizedBlocks = newBlocks.map((newBlock, index) => {
         const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
 
-        // If block exists and content unchanged, reuse reference
+        // If block exists, check if we should reuse reference
         if (prevBlock) {
-          // Check if content actually changed
+          // SUPER CRITICAL: If it's the exact same object reference, just return it!
+          // This happens when we splice() the array in addBlock/moveBlock
+          if (prevBlock === newBlock) {
+            return prevBlock;  // ✅ SAME OBJECT - KEEP IT!
+          }
+
+          // Different object with same ID - check if content changed
           const contentSame = prevBlock.content === newBlock.content;
           const typeSame = prevBlock.type === newBlock.type;
 
           // If nothing changed, reuse exact reference
-          // CRITICAL: Don't check position - it creates new refs for all blocks after insertion!
           if (contentSame && typeSame) {
             return prevBlock;  // ✅ PRESERVE REFERENCE
           }
 
-          // Content or type changed, create new object
+          // Content or type changed, use new object
           return newBlock;
         }
 

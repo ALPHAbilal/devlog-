@@ -268,6 +268,20 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
     paginatedBlockLoader.removeBlockFromCache(documentId, blockId);
   }, [documentId]);
 
+  // CRITICAL: Direct block setter that bypasses reference preservation logic
+  // Use this when you've already preserved references externally
+  const setBlocksDirectly = useCallback((newBlocks) => {
+    console.log('[SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly:', {
+      blockCount: newBlocks.length
+    });
+    
+    // Update in paginated cache
+    paginatedBlockLoader.updateCachedBlocks(documentId, newBlocks);
+    
+    // Set blocks directly without any transformation
+    setBlocks(newBlocks);
+  }, [documentId]);
+
   // Function to check if we need to load more (for infinite scroll)
   const checkLoadMore = useCallback((scrollElement) => {
     if (!enableInfiniteScroll || !hasMore || isLoadingMore) return;
@@ -302,6 +316,7 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
     updateBlocks,
     updateBlock,
     removeBlock,
+    setBlocksDirectly, // NEW: Direct setter
     checkLoadMore,
     progress: {
       loaded: blocks.length,

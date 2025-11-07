@@ -1081,6 +1081,14 @@ function ExpandedView({
       newBlockType: type,
       wrappedInTransition: true
     });
+    
+    console.log('[ADD-BLOCK-CRITICAL] About to call updateLoadedBlocks:', {
+      functionType: typeof updateLoadedBlocks,
+      functionName: updateLoadedBlocks?.name || 'anonymous',
+      blocksCount: updatedBlocks.length,
+      hasFunction: !!updateLoadedBlocks
+    });
+    
     startTransition(() => {
       updateLoadedBlocks(updatedBlocks);
       setShowBlockSelector(false);

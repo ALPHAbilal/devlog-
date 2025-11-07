@@ -26,7 +26,7 @@ import './VirtualizedGrid.css'; // For scrollbar styles
 // [VIRT-DEBUG] Verify Virtuoso import at module load time
 console.log('[VIRT-DEBUG-IMPORT] Virtuoso component imported:', typeof Virtuoso);
 
-export default function ExpandedView({
+function ExpandedView({
   entry,
   onClose,
   onUpdate,
@@ -54,9 +54,10 @@ export default function ExpandedView({
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
 
-  // [VIRT-DEBUG-0] Log loading strategy
-  console.log(`[VIRT-DEBUG-0] 📋 Document Loading Strategy`);
+  // [VIRT-DEBUG-0] Log loading strategy and track re-renders
+  console.log(`[VIRT-DEBUG-0] 📋 Component Render`);
   console.log(`[VIRT-DEBUG-0] Document ID: ${entry.id}`);
+  console.log(`[VIRT-DEBUG-0] entry reference changed:`, entry);
   console.log(`[VIRT-DEBUG-0] Block count: ${entry.blockCount || 'unknown'}`);
   console.log(`[VIRT-DEBUG-0] Using: ${shouldUsePagination ? 'PAGINATED loader (50+ blocks)' : 'OPTIMIZED loader (<50 blocks)'}`);
 
@@ -1899,3 +1900,24 @@ export default function ExpandedView({
     </>
   );
 }
+
+// Memoize ExpandedView to prevent unnecessary re-renders when entry reference changes
+// This prevents the AddBlockRow popup from closing when parent re-renders
+export default memo(ExpandedView, (prevProps, nextProps) => {
+  // Only re-render if entry.id changed (different document)
+  // Ignore entry reference changes if the document ID is the same
+  if (prevProps.entry.id !== nextProps.entry.id) return false;
+
+  // Re-render if other props changed
+  if (prevProps.onClose !== nextProps.onClose) return false;
+  if (prevProps.onUpdate !== nextProps.onUpdate) return false;
+  if (prevProps.isMobileView !== nextProps.isMobileView) return false;
+  if (prevProps.scrollContainerRef !== nextProps.scrollContainerRef) return false;
+  if (prevProps.onShowBlockSelector !== nextProps.onShowBlockSelector) return false;
+
+  // Compare allEntries length (not deep comparison for performance)
+  if (prevProps.allEntries.length !== nextProps.allEntries.length) return false;
+
+  // Props are equal, skip re-render
+  return true;
+});

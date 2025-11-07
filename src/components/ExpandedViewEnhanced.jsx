@@ -979,15 +979,31 @@ function ExpandedView({
     let updatedBlocks;
     if (afterBlockId) {
       const index = blocks.findIndex(b => b.id === afterBlockId);
-      updatedBlocks = [...blocks];
-      updatedBlocks.splice(index + 1, 0, newBlock);
-      // Update positions ONLY for blocks that actually need it (preserve references!)
-      // OPTIMIZATION: Only update position if it differs from array index
-      for (let i = index + 2; i < updatedBlocks.length; i++) {
-        if (updatedBlocks[i].position !== i) {
-          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+
+      // CRITICAL FIX: Preserve block references by building array manually
+      // instead of using spread operator which creates new element references
+      updatedBlocks = [];
+
+      // Add blocks before insertion point (preserve references)
+      for (let i = 0; i <= index; i++) {
+        updatedBlocks.push(blocks[i]);
+      }
+
+      // Add new block
+      updatedBlocks.push(newBlock);
+
+      // Add blocks after insertion point with position updates
+      for (let i = index + 1; i < blocks.length; i++) {
+        const block = blocks[i];
+        const newPosition = i + 1;
+
+        // Only create new object if position needs updating
+        if (block.position !== newPosition) {
+          updatedBlocks.push({ ...block, position: newPosition });
+        } else {
+          // Position already correct, reuse exact same reference
+          updatedBlocks.push(block);
         }
-        // else: position already correct, reuse same reference
       }
     } else {
       updatedBlocks = [...blocks, newBlock];

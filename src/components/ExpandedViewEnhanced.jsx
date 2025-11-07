@@ -695,6 +695,8 @@ export default function ExpandedView({
   const computeItemKey = useCallback((index, block) => block.id, []);
 
   // Memoize Virtuoso's itemContent to prevent re-creating all blocks on every render
+  // NOTE: showBlockSelector and selectorPosition are NOT in dependencies to prevent
+  // full list re-render when "+" button is clicked. BlockRenderer memo handles those changes.
   const renderBlockItem = useCallback((index, block) => {
     if (!block) return null;
 
@@ -720,7 +722,7 @@ export default function ExpandedView({
         dropPosition={dropPosition}
       />
     );
-  }, [blocks.length, isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
+  }, [blocks.length, isMobileView, focusedBlockId, draggedBlockId, dropTargetId, dropPosition]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {

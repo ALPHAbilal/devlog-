@@ -128,15 +128,49 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   };
 
   // Function to update blocks (for edits)
+  // OPTIMIZATION: Preserve block object references to prevent unnecessary re-renders
   const updateBlocks = (newBlocks) => {
-    // Ensure all blocks have positions
-    const blocksWithPositions = newBlocks.map((block, index) => ({
-      ...block,
-      position: block.position !== undefined ? block.position : index
-    }));
-    setBlocks(blocksWithPositions);
-    sessionCache.updateBlocks(documentId, blocksWithPositions);
-    optimizedBlockLoader.clearCache(documentId);
+    setBlocks(prevBlocks => {
+      // If previous blocks is empty or same length, create new array
+      if (!prevBlocks || prevBlocks.length === 0) {
+        return newBlocks.map((block, index) => ({
+          ...block,
+          position: block.position !== undefined ? block.position : index
+        }));
+      }
+
+      // Preserve references for unchanged blocks
+      const blocksWithPositions = newBlocks.map((newBlock, index) => {
+        const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
+
+        // If block exists and has same content, reuse the reference
+        if (prevBlock &&
+            prevBlock.content === newBlock.content &&
+            prevBlock.type === newBlock.type &&
+            prevBlock.metadata === newBlock.metadata) {
+          // Only update position if needed
+          if (prevBlock.position !== index) {
+            return { ...prevBlock, position: index };
+          }
+          return prevBlock; // Reuse exact same reference
+        }
+
+        // Block is new or changed, create new object
+        return {
+          ...newBlock,
+          position: newBlock.position !== undefined ? newBlock.position : index
+        };
+      });
+
+      return blocksWithPositions;
+    });
+
+    // Update caches with final blocks
+    setBlocks(finalBlocks => {
+      sessionCache.updateBlocks(documentId, finalBlocks);
+      optimizedBlockLoader.clearCache(documentId);
+      return finalBlocks;
+    });
   };
 
   // Function to update a single block

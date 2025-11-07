@@ -146,9 +146,34 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
   }, [documentId, currentPage, hasMore, isLoadingMore, pageSize, preloadNextPage]);
 
   // Function to update blocks (for edits)
+  // OPTIMIZATION: Preserve block object references to prevent unnecessary re-renders
   const updateBlocks = useCallback((newBlocks) => {
-    setBlocks(newBlocks);
-    
+    setBlocks(prevBlocks => {
+      // If previous blocks is empty, just use new blocks
+      if (!prevBlocks || prevBlocks.length === 0) {
+        return newBlocks;
+      }
+
+      // Preserve references for unchanged blocks
+      const updatedBlocks = newBlocks.map((newBlock, index) => {
+        const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
+
+        // If block exists and has same content, reuse the reference
+        if (prevBlock &&
+            prevBlock.content === newBlock.content &&
+            prevBlock.type === newBlock.type &&
+            prevBlock.metadata === newBlock.metadata &&
+            prevBlock.position === newBlock.position) {
+          return prevBlock; // Reuse exact same reference
+        }
+
+        // Block is new or changed, use new object
+        return newBlock;
+      });
+
+      return updatedBlocks;
+    });
+
     // Update cache - clear and let it rebuild on next load
     paginatedBlockLoader.clearCache(documentId);
     

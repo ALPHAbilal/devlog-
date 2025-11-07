@@ -819,7 +819,7 @@ function ExpandedView({
         dropPosition={dropPosition}
       />
     );
-  }, [isMobileView, focusedBlockId, draggedBlockId, dropTargetId, dropPosition]);
+  }, [isMobileView, focusedBlockId, draggedBlockId, dropTargetId, dropPosition, addBlock, setShowBlockSelector]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {

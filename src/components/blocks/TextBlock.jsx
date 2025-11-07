@@ -101,6 +101,43 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     }
   }, [block.content]);
 
+  // Memoize handleSave to prevent stale closures
+  const handleSaveRef = useRef(null);
+  useEffect(() => {
+    handleSaveRef.current = () => {
+      // Hide toolbar immediately
+      setShowToolbar(false);
+      setSelectedText('');
+      setToolbarPosition(null);
+      
+      // Only save if content actually changed
+      if (hasContentChanged) {
+        // Extract tags from content before saving
+        const extractedTags = extractTagsFromContent(content);
+        
+        // Track tag usage if tags were added
+        const previousTags = block.tags || [];
+        if (extractedTags.length > 0 && extractedTags.length !== previousTags.length) {
+          trackEvent('text_block_tagged', {
+            tag_count: extractedTags.length,
+            tags_added: extractedTags.length - previousTags.length
+          });
+        }
+        
+        // Remove isNew flag when saving
+        onUpdate(block.id, { 
+          content: content, 
+          tags: extractedTags, 
+          isNew: undefined,
+          metadata: { ...block.metadata, isCollapsed }
+        });
+        setHasContentChanged(false); // Reset the change flag
+      }
+      setIsEditing(false);
+      if (onFocus) onFocus(null); // Clear focus
+    };
+  }, [content, hasContentChanged, block.id, block.tags, block.metadata, isCollapsed, onUpdate, onFocus, trackEvent]);
+
   // Handle clicks outside to exit edit mode and hide toolbar
   useEffect(() => {
     if (!isEditing) return;
@@ -118,7 +155,9 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
         setShowToolbar(false);
         setSelectedText('');
         setToolbarPosition(null);
-        handleSave();
+        if (handleSaveRef.current) {
+          handleSaveRef.current();
+        }
       }
     };
 
@@ -128,7 +167,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isEditing, content]);
+  }, [isEditing]);
 
   // Handle text selection for toolbar
   useEffect(() => {
@@ -193,36 +232,9 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   }, [isEditing, content]);
 
   const handleSave = () => {
-    // Hide toolbar immediately
-    setShowToolbar(false);
-    setSelectedText('');
-    setToolbarPosition(null);
-    
-    // Only save if content actually changed
-    if (hasContentChanged) {
-      // Extract tags from content before saving
-      const extractedTags = extractTagsFromContent(content);
-      
-      // Track tag usage if tags were added
-      const previousTags = block.tags || [];
-      if (extractedTags.length > 0 && extractedTags.length !== previousTags.length) {
-        trackEvent('text_block_tagged', {
-          tag_count: extractedTags.length,
-          tags_added: extractedTags.length - previousTags.length
-        });
-      }
-      
-      // Remove isNew flag when saving
-      onUpdate(block.id, { 
-        content: content, 
-        tags: extractedTags, 
-        isNew: undefined,
-        metadata: { ...block.metadata, isCollapsed }
-      });
-      setHasContentChanged(false); // Reset the change flag
+    if (handleSaveRef.current) {
+      handleSaveRef.current();
     }
-    setIsEditing(false);
-    if (onFocus) onFocus(null); // Clear focus
   };
   
   // Update metadata when collapse state changes

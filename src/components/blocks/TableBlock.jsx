@@ -93,6 +93,7 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
   const tableRef = useRef(null);
   const saveTimeoutRef = useRef(null);
   const isInitializedRef = useRef(false);
+  const pendingEditRef = useRef(null); // Track pending edit after row addition
 
   // Monitor block.data changes (commented out for performance)
   // useEffect(() => {
@@ -125,10 +126,42 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
   // Focus input when editing
   useEffect(() => {
     if (editingCell && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        if (inputRef.current) {
+          inputRef.current.focus();
+          inputRef.current.select();
+        }
+      });
     }
   }, [editingCell]);
+  
+  // Handle pending edit after row addition
+  useEffect(() => {
+    if (pendingEditRef.current && tableData.rows.length > pendingEditRef.current.rowIndex) {
+      const { type, rowIndex, colIndex } = pendingEditRef.current;
+      pendingEditRef.current = null;
+      // Use a small delay to ensure the table has re-rendered
+      setTimeout(() => {
+        // Validate indices before starting edit
+        if (colIndex < tableData.headers.length) {
+          if (type === 'header' || (type === 'cell' && rowIndex < tableData.rows.length)) {
+            const key = `${type}-${rowIndex}-${colIndex}`;
+            setEditingCell(key);
+            
+            if (type === 'header') {
+              setCellValue(tableData.headers[colIndex] || '');
+            } else {
+              const row = tableData.rows[rowIndex] || [];
+              setCellValue(row[colIndex] || '');
+            }
+            
+            if (onFocus) onFocus(block.id);
+          }
+        }
+      }, 10);
+    }
+  }, [tableData.rows.length, tableData.headers.length, tableData, onFocus, block.id]);
 
   // Save table data with simple debouncing
   const saveTable = (newData) => {
@@ -192,8 +225,18 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
     if (onFocus) onFocus(block.id);
   };
 
-  const saveCell = () => {
+  const saveCell = (skipBlurCheck = false) => {
     if (!editingCell) return;
+    
+    // Don't save if we're clicking to edit another cell (unless explicitly requested)
+    if (!skipBlurCheck) {
+      // Check if the blur event is from clicking on another cell
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.closest('td') && activeElement !== inputRef.current) {
+        // User is clicking on another cell, don't save yet
+        return;
+      }
+    }
     
     const [type, rowIndex, colIndex] = editingCell.split('-');
     const newData = { ...tableData };
@@ -412,7 +455,7 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
       }
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      saveCell();
+      saveCell(true); // Force save on Enter
       
       // Move to cell below
       if (type === 'header' && tableData.rows.length > 0) {
@@ -423,7 +466,8 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
         } else {
           // Add new row and edit it
           addRow(rowIndex);
-          setTimeout(() => startEditingCell('cell', rowIndex + 1, colIndex), 0);
+          // Set pending edit to be handled by useEffect after re-render
+          pendingEditRef.current = { type: 'cell', rowIndex: rowIndex + 1, colIndex };
         }
       }
     } else if (e.key === 'Escape') {
@@ -547,7 +591,13 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
                           type="text"
                           value={cellValue}
                           onChange={(e) => setCellValue(e.target.value)}
-                          onBlur={saveCell}
+                          onBlur={(e) => {
+                            // Only save if the new focus target is not another cell
+                            const relatedTarget = e.relatedTarget;
+                            if (!relatedTarget || !relatedTarget.closest('td')) {
+                              saveCell(true);
+                            }
+                          }}
                           onKeyDown={handleKeyDown}
                           className="w-full bg-dark-primary/80 backdrop-blur-sm text-text-primary px-3 py-2 
                                      focus:outline-none focus:ring-1 focus:ring-accent-green/50 font-medium
@@ -603,7 +653,13 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
                             type="text"
                             value={cellValue}
                             onChange={(e) => setCellValue(e.target.value)}
-                            onBlur={saveCell}
+                            onBlur={(e) => {
+                              // Only save if the new focus target is not another cell
+                              const relatedTarget = e.relatedTarget;
+                              if (!relatedTarget || !relatedTarget.closest('td')) {
+                                saveCell(true);
+                              }
+                            }}
                             onKeyDown={handleKeyDown}
                             className="w-full bg-dark-primary/60 backdrop-blur-sm text-text-primary px-3 py-2 
                                        focus:outline-none focus:ring-1 focus:ring-accent-green/40
@@ -611,7 +667,13 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
                           />
                         ) : (
                           <div
-                            onClick={() => startEditingCell('cell', rowIndex, colIndex)}
+                            onClick={(e) => {
+                              // Save current cell if editing before starting new edit
+                              if (editingCell) {
+                                saveCell(true);
+                              }
+                              startEditingCell('cell', rowIndex, colIndex);
+                            }}
                             className="px-3 py-2 cursor-text bg-transparent hover:bg-dark-secondary/10
                                        text-text-primary/80 min-h-[40px] transition-colors
                                        flex items-center"

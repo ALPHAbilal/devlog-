@@ -1042,13 +1042,33 @@ function ExpandedView({
       });
     }
     
-    // Calculate position for the new block
+    // CRITICAL SAFEGUARD: Ensure blocks array is valid
+    if (!blocks || blocks.length === 0) {
+      console.error('[ADD-BLOCK] ERROR: blocks array is empty or invalid!', {
+        blocksType: typeof blocks,
+        blocksLength: blocks?.length,
+        blocksIsArray: Array.isArray(blocks)
+      });
+      return;
+    }
+    
+    // Calculate position and index for the new block
     let position;
+    let insertIndex = -1;
     if (afterBlockId) {
-      const index = blocks.findIndex(b => b.id === afterBlockId);
-      position = index + 1;
+      insertIndex = blocks.findIndex(b => b.id === afterBlockId);
+      if (insertIndex === -1) {
+        console.error('[ADD-BLOCK] ERROR: afterBlockId not found in blocks!', {
+          afterBlockId: afterBlockId?.substring(0, 8),
+          blocksLength: blocks.length,
+          blockIds: blocks.slice(0, 5).map(b => b.id.substring(0, 8))
+        });
+        return;
+      }
+      position = insertIndex + 1;
     } else {
       position = blocks.length;
+      insertIndex = blocks.length; // For appending at end
     }
 
     const newBlock = {
@@ -1081,10 +1101,10 @@ function ExpandedView({
     });
 
     // Insert the new block
-    const updatedBlocks = [...blocks];
+    // CRITICAL: Create a proper copy of the blocks array
+    const updatedBlocks = Array.from(blocks);
     if (afterBlockId) {
-      const index = blocks.findIndex(b => b.id === afterBlockId);
-      updatedBlocks.splice(index + 1, 0, newBlock);
+      updatedBlocks.splice(insertIndex + 1, 0, newBlock);
     } else {
       updatedBlocks.push(newBlock);
     }
@@ -1162,6 +1182,15 @@ function ExpandedView({
     console.log('[ADD-BLOCK-REF-PRESERVE] Reference preservation complete:', {
       totalBlocks: preservedBlocks.length,
       preservedCount: preservedBlocks.filter((b, i) => b === blocks.find(ob => ob.id === b.id)).length
+    });
+    
+    // CRITICAL DEBUG: Log what we're about to set
+    console.log('[ADD-BLOCK-DEBUG] About to set blocks:', {
+      preservedBlocksLength: preservedBlocks.length,
+      blocksLength: blocks.length,
+      updatedBlocksLength: updatedBlocks.length,
+      newBlockId: newBlock.id.substring(0, 8),
+      firstFewBlockIds: preservedBlocks.slice(0, 5).map(b => b.id.substring(0, 8))
     });
     
     startTransition(() => {

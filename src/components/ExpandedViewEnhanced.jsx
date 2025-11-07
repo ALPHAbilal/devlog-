@@ -35,31 +35,67 @@ function ExpandedView({
   scrollContainerRef: externalScrollRef,
   onShowBlockSelector
 }) {
+  // CRITICAL FIX: Stabilize entry object to prevent re-renders from parent reference changes
+  // Only create new entry reference when ID or title actually changes
+  const stableEntry = useMemo(() => ({
+    id: entry.id,
+    title: entry.title,
+    tags: entry.tags,
+    blocks: entry.blocks,
+    blockCount: entry.blockCount,
+    created_at: entry.created_at,
+    updated_at: entry.updated_at,
+    user_id: entry.user_id,
+    folder_id: entry.folder_id
+  }), [entry.id, entry.title, entry.tags, entry.blockCount, entry.created_at, entry.updated_at, entry.user_id, entry.folder_id]);
+  
   // Analytics hooks
   const { trackEvent } = useAnalytics();
   const { trackDocumentEvent } = useDocumentAnalytics();
   
   // Track document view on mount (not as page view)
   useEffect(() => {
-    if (entry?.id && entry?.title) {
+    if (stableEntry?.id && stableEntry?.title) {
       // Track as custom document_view event, not page_view
-      trackDocumentEvent('view', entry.id, {
-        document_title: entry.title,
-        block_count: entry.blockCount || 0,
-        has_blocks: !!entry.blocks
+      trackDocumentEvent('view', stableEntry.id, {
+        document_title: stableEntry.title,
+        block_count: stableEntry.blockCount || 0,
+        has_blocks: !!stableEntry.blocks
       });
     }
-  }, [entry?.id]); // Only track once per document ID
+  }, [stableEntry?.id]); // Only track once per document ID
   
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
-  const shouldUsePagination = !entry.blocks || entry.blockCount > 50;
+  const shouldUsePagination = !stableEntry.blocks || stableEntry.blockCount > 50;
 
-  // [VIRT-DEBUG-0] Log loading strategy and track re-renders
-  console.log(`[VIRT-DEBUG-0] 📋 Component Render`);
-  console.log(`[VIRT-DEBUG-0] Document ID: ${entry.id}`);
-  console.log(`[VIRT-DEBUG-0] entry reference changed:`, entry);
-  console.log(`[VIRT-DEBUG-0] Block count: ${entry.blockCount || 'unknown'}`);
-  console.log(`[VIRT-DEBUG-0] Using: ${shouldUsePagination ? 'PAGINATED loader (50+ blocks)' : 'OPTIMIZED loader (<50 blocks)'}`);
+  // [VIRT-DEBUG-0] Better logging with render tracking
+  const renderCount = useRef(0);
+  const entryRef = useRef(entry);
+  renderCount.current++;
+  
+  if (import.meta.env.DEV) {
+    const entryRefChanged = entryRef.current !== entry;
+    if (entryRefChanged) {
+      console.log(`[VIRT-DEBUG-0] ⚠️ entry reference ACTUALLY changed:`, {
+        renderNumber: renderCount.current,
+        oldId: entryRef.current?.id,
+        newId: entry?.id,
+        idChanged: entryRef.current?.id !== entry?.id,
+        titleChanged: entryRef.current?.title !== entry?.title,
+        tagsChanged: entryRef.current?.tags !== entry?.tags
+      });
+      entryRef.current = entry;
+    } else {
+      console.log(`[VIRT-DEBUG-0] ✅ entry reference STABLE (same object) - Render #${renderCount.current}`);
+    }
+    
+    console.log(`[VIRT-DEBUG-0] Render #${renderCount.current}`, {
+      documentId: entry.id,
+      blockCount: entry.blockCount || 'unknown',
+      loader: shouldUsePagination ? 'PAGINATED' : 'OPTIMIZED',
+      stableEntryWorks: stableEntry.id === entry.id
+    });
+  }
 
   // Always call both hooks to maintain hook order, but only use one
   const paginatedLoader = usePaginatedBlockLoader(entry.id, entry, {
@@ -95,12 +131,24 @@ function ExpandedView({
   // Memoize blocks array to prevent unnecessary re-renders
   const blocks = useMemo(() => {
     const result = loadedBlocks || [];
-    console.log(`[BLOCKS-MEMO] Blocks array updated: ${result.length} blocks`);
-    if (prevBlocksRef.current) {
-      const sameReferences = result.filter((block, i) => prevBlocksRef.current[i] === block).length;
-      console.log(`[BLOCKS-MEMO] Block reference stability: ${sameReferences}/${result.length} blocks same`);
+    if (import.meta.env.DEV) {
+      console.log(`[BLOCKS-MEMO] Blocks array updated: ${result.length} blocks`);
+      if (prevBlocksRef.current && prevBlocksRef.current.length > 0) {
+        const sameReferences = result.filter((block, i) => prevBlocksRef.current[i] === block).length;
+        const percentSame = result.length > 0 ? Math.round((sameReferences / result.length) * 100) : 0;
+        const status = percentSame >= 80 ? '✅ GOOD' : percentSame >= 50 ? '⚠️ MEDIUM' : '🔴 LOW';
+        console.log(`[BLOCKS-MEMO] Reference stability: ${sameReferences}/${result.length} (${percentSame}%) ${status}`);
+        
+        // Show which blocks got new references (only first 10 for brevity)
+        if (sameReferences < result.length) {
+          const changedIndices = result
+            .map((block, i) => prevBlocksRef.current[i] !== block ? i : null)
+            .filter(i => i !== null);
+          console.log(`[BLOCKS-MEMO] Blocks with new refs at indices: [${changedIndices.slice(0, 10).join(', ')}]${changedIndices.length > 10 ? ` +${changedIndices.length - 10} more` : ''}`);
+        }
+      }
+      prevBlocksRef.current = result;
     }
-    prevBlocksRef.current = result;
     return result;
   }, [loadedBlocks]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
@@ -135,6 +183,39 @@ function ExpandedView({
   // Smart Sync manager reference (does NOT use state to avoid re-renders)
   // SyncStatusIndicator component handles status polling independently
   const smartSyncManagerRef = useRef(null);
+
+  // Track render causes for debugging
+  const prevStateRef = useRef({});
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      const causes = [];
+      const prev = prevStateRef.current;
+      
+      if (showBlockSelector !== prev.showBlockSelector) {
+        causes.push(`showBlockSelector: ${prev.showBlockSelector} → ${showBlockSelector}`);
+      }
+      if (selectorPosition !== prev.selectorPosition) {
+        causes.push(`selectorPosition: ${prev.selectorPosition ? String(prev.selectorPosition).substring(0, 8) : 'null'} → ${selectorPosition ? String(selectorPosition).substring(0, 8) : 'null'}`);
+      }
+      if (focusedBlockId !== prev.focusedBlockId) {
+        causes.push(`focusedBlockId: ${prev.focusedBlockId ? prev.focusedBlockId.substring(0, 8) : 'null'} → ${focusedBlockId ? focusedBlockId.substring(0, 8) : 'null'}`);
+      }
+      if (blocks !== prev.blocks) {
+        causes.push(`blocks: ${prev.blocks?.length || 0} → ${blocks?.length || 0} items`);
+      }
+      if (viewMode !== prev.viewMode) {
+        causes.push(`viewMode: ${prev.viewMode} → ${viewMode}`);
+      }
+      
+      if (causes.length > 0) {
+        console.log(`[RENDER-CAUSE] State changes that triggered this render:`, causes);
+      } else if (renderCount.current > 1) {
+        console.log(`[RENDER-CAUSE] ⚠️ Re-render with no obvious state changes (could be parent re-render)`);
+      }
+      
+      prevStateRef.current = { showBlockSelector, selectorPosition, focusedBlockId, blocks, viewMode };
+    }
+  });
 
   // Create a memoized block renderer component to avoid closure issues
   const BlockRenderer = memo(({
@@ -938,6 +1019,14 @@ function ExpandedView({
   }, [blocks, updateLoadedBlocks]);
 
   const addBlock = useCallback((type, afterBlockId = null) => {
+    if (import.meta.env.DEV) {
+      console.log('[ADD-BLOCK] Creating new block:', {
+        type,
+        afterBlockId: afterBlockId ? afterBlockId.substring(0, 8) : 'null',
+        currentBlockCount: blocks.length
+      });
+    }
+    
     // Calculate position for the new block
     let position;
     if (afterBlockId) {
@@ -997,6 +1086,12 @@ function ExpandedView({
     });
     
     // Batch all state updates in a single transition
+    if (import.meta.env.DEV) {
+      console.log('[SELECTOR-HIDE] Hiding block selector after block creation:', {
+        newBlockType: type,
+        wrappedInTransition: true
+      });
+    }
     startTransition(() => {
       updateLoadedBlocks(normalizedBlocks);
       setShowBlockSelector(false);
@@ -1034,7 +1129,17 @@ function ExpandedView({
   }, [blocks, updateLoadedBlocks, focusedBlockId]);
 
   const handleAddBelowBlock = useCallback((blockIdOrData) => {
-    console.log('[ADD-BELOW-DEBUG] handleAddBelowBlock called with:', blockIdOrData, 'type:', typeof blockIdOrData);
+    if (import.meta.env.DEV) {
+      console.log('[ADD-BELOW-DEBUG] handleAddBelowBlock called:', {
+        type: typeof blockIdOrData,
+        isObject: typeof blockIdOrData === 'object',
+        hasType: blockIdOrData?.type,
+        blockType: blockIdOrData?.type,
+        willCreateBlock: typeof blockIdOrData === 'object' && blockIdOrData.type,
+        willShowSelector: !(typeof blockIdOrData === 'object' && blockIdOrData.type),
+        value: typeof blockIdOrData === 'string' ? blockIdOrData.substring(0, 8) : 'object'
+      });
+    }
 
     // If a block object is passed (from TextBlock paste), create it directly
     if (typeof blockIdOrData === 'object' && blockIdOrData.type) {
@@ -1095,19 +1200,42 @@ function ExpandedView({
       // }
     } else {
       // Normal behavior - show block selector
-      setSelectorPosition(blockIdOrData);
-      setShowBlockSelector(true);
+      if (import.meta.env.DEV) {
+        console.log('[SELECTOR-SHOW] Showing block selector:', {
+          position: typeof blockIdOrData === 'string' ? blockIdOrData.substring(0, 8) : blockIdOrData,
+          wrappedInTransition: true
+        });
+      }
+      // Wrap in startTransition to prevent flickering
+      startTransition(() => {
+        setSelectorPosition(blockIdOrData);
+        setShowBlockSelector(true);
+      });
     }
   }, [blocks, updateLoadedBlocks, focusedBlockId]);
 
   const handleAddAtEnd = useCallback(() => {
-    setSelectorPosition('end');
-    setShowBlockSelector(true);
+    // Wrap in startTransition to prevent flickering
+    startTransition(() => {
+      setSelectorPosition('end');
+      setShowBlockSelector(true);
+    });
   }, []);
 
   // Memoized callback for inline block addition from Block component
   const handleInlineBlockAdd = useCallback((blockIndex, data) => {
-    console.log('[INLINE-ADD-DEBUG] handleInlineBlockAdd called with index:', blockIndex, 'data:', data, 'type:', typeof data);
+    if (import.meta.env.DEV) {
+      console.log('[INLINE-ADD-DEBUG] handleInlineBlockAdd called:', {
+        blockIndex,
+        dataType: typeof data,
+        isObject: typeof data === 'object',
+        hasType: data?.type,
+        blockType: data?.type,
+        willCreateBlock: typeof data === 'object' && data.type,
+        willShowSelector: !(typeof data === 'object' && data.type),
+        value: typeof data === 'string' ? data.substring(0, 8) : 'object'
+      });
+    }
 
     if (typeof data === 'object' && data.type) {
       // Direct block creation from TextBlock

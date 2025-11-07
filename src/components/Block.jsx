@@ -192,8 +192,7 @@ function Block({
               block={block} 
               onUpdate={onUpdate}
               onConvert={handleConvert}
-              isFocused={isFocused}
-              onFocus={onFocus}
+              {...(block.type !== 'text' && block.type !== 'table' ? { isFocused, onFocus } : {})}
               onAddBelow={onAddBelow}
               allBlocks={allBlocks}
               onNavigateToBlock={onNavigateToBlock}
@@ -337,8 +336,7 @@ function Block({
               block={block} 
               onUpdate={onUpdate}
               onConvert={handleConvert}
-              isFocused={isFocused}
-              onFocus={onFocus}
+              {...(block.type !== 'text' && block.type !== 'table' ? { isFocused, onFocus } : {})}
               onAddBelow={onAddBelow}
               allBlocks={allBlocks}
               onNavigateToBlock={onNavigateToBlock}

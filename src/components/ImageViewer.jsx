@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ZoomIn, ZoomOut, RotateCw, Maximize2, Download } from 'lucide-react';
 
 export default function ImageViewer({ 
@@ -315,8 +316,28 @@ export default function ImageViewer({
 
   if (!image) return null;
 
-  return (
-    <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm">
+  // Prevent body scroll when lightbox is open
+  useEffect(() => {
+    if (image) {
+      const scrollY = window.scrollY;
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [image]);
+
+  // Render via portal to escape all parent containers and stacking contexts
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] bg-black/98 backdrop-blur-md">
       {/* Header Controls */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-10">
         {/* Zoom Controls */}
@@ -472,6 +493,7 @@ export default function ImageViewer({
           }
         </p>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

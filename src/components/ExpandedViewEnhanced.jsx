@@ -162,6 +162,9 @@ function ExpandedView({
   }, [loadedBlocks]);
   const [showBlockSelector, setShowBlockSelector] = useState(false);
   const [selectorPosition, setSelectorPosition] = useState(null);
+  // Refs to store selector state for renderBlockItem callback (prevents callback recreation)
+  const showBlockSelectorRef = useRef(false);
+  const selectorPositionRef = useRef(null);
   const [title, setTitle] = useState(entry.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [backlinks, setBacklinks] = useState([]);
@@ -224,6 +227,12 @@ function ExpandedView({
     
     prevStateRef.current = { showBlockSelector, selectorPosition, focusedBlockId, blocks, viewMode };
   });
+
+  // Sync refs with state so renderBlockItem can access current values without being a dependency
+  useEffect(() => {
+    showBlockSelectorRef.current = showBlockSelector;
+    selectorPositionRef.current = selectorPosition;
+  }, [showBlockSelector, selectorPosition]);
 
   // Create a memoized block renderer component to avoid closure issues
   // CRITICAL FIX: Use computed boolean props instead of raw state
@@ -792,7 +801,8 @@ function ExpandedView({
     }
 
     // Compute if THIS specific block is showing selector
-    const isShowingSelector = showBlockSelector && selectorPosition === block.id;
+    // Use refs instead of state to prevent callback recreation and mass re-renders
+    const isShowingSelector = showBlockSelectorRef.current && selectorPositionRef.current === block.id;
     // CRITICAL: When no block is focused (focusedBlockId === null), pass null not false
     const isBlockFocused = focusedBlockId === null ? null : focusedBlockId === block.id;
 
@@ -809,7 +819,7 @@ function ExpandedView({
         dropPosition={dropPosition}
       />
     );
-  }, [isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
+  }, [isMobileView, focusedBlockId, draggedBlockId, dropTargetId, dropPosition]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {

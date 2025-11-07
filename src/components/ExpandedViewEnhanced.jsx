@@ -117,6 +117,7 @@ function ExpandedView({
     hasMore = false,
     loadMore = () => {},
     updateBlocks: updateLoadedBlocks,
+    setBlocksDirectly, // NEW: Direct setter that bypasses reference preservation
     updateBlock: updateSingleBlock,
     removeBlock,
     checkLoadMore = () => {},
@@ -1135,7 +1136,7 @@ function ExpandedView({
     });
     
     startTransition(() => {
-      updateLoadedBlocks(preservedBlocks);
+      setBlocksDirectly(preservedBlocks);
       setShowBlockSelector(false);
       setSelectorPosition(null);
     });
@@ -1244,7 +1245,7 @@ function ExpandedView({
       
       // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(preservedBlocks);
+        setBlocksDirectly(preservedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for new block from paste
@@ -1361,7 +1362,7 @@ function ExpandedView({
       
       // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(preservedBlocks);
+        setBlocksDirectly(preservedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for inline new block

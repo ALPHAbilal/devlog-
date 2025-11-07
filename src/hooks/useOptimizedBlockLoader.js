@@ -276,6 +276,21 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
     setBlocks(prevBlocks => prevBlocks.filter(block => block.id !== blockId));
   };
 
+  // CRITICAL: Direct block setter that bypasses reference preservation logic
+  // Use this when you've already preserved references externally
+  const setBlocksDirectly = useCallback((newBlocks) => {
+    console.log('[SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly:', {
+      blockCount: newBlocks.length
+    });
+    
+    // Update caches
+    sessionCache.updateBlocks(documentId, newBlocks);
+    optimizedBlockLoader.clearCache(documentId);
+    
+    // Set blocks directly without any transformation
+    setBlocks(newBlocks);
+  }, [documentId]);
+
   return {
     blocks,
     isLoading,
@@ -283,6 +298,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
     updateBlocks,
     updateBlock,
     removeBlock,
+    setBlocksDirectly, // NEW: Direct setter
     preloadNearbyDocuments,
     // Provide empty implementations for pagination-specific features
     isLoadingMore: false,

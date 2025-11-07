@@ -165,6 +165,8 @@ function ExpandedView({
   // Refs to store selector state for renderBlockItem callback (prevents callback recreation)
   const showBlockSelectorRef = useRef(false);
   const selectorPositionRef = useRef(null);
+  // Ref to store addBlock function to avoid circular dependency
+  const addBlockRef = useRef(null);
   const [title, setTitle] = useState(entry.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [backlinks, setBacklinks] = useState([]);
@@ -290,7 +292,12 @@ function ExpandedView({
             </BlockErrorBoundary>
             <AddBlockRow
               show={isShowingSelector}
-              onSelect={(type) => addBlock(type, block.id)}
+              onSelect={(type) => {
+                // Access addBlock from closure - it will be defined by the time this is called
+                if (addBlockRef.current) {
+                  addBlockRef.current(type, block.id);
+                }
+              }}
               onClose={() => setShowBlockSelector(false)}
               isMobileView={isMobileView}
             />
@@ -819,7 +826,7 @@ function ExpandedView({
         dropPosition={dropPosition}
       />
     );
-  }, [isMobileView, focusedBlockId, draggedBlockId, dropTargetId, dropPosition, addBlock, setShowBlockSelector]);
+  }, [isMobileView, focusedBlockId, draggedBlockId, dropTargetId, dropPosition]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {
@@ -1228,6 +1235,11 @@ function ExpandedView({
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
   }, [blocks, updateLoadedBlocks, focusedBlockId]);
+  
+  // Store addBlock in ref so it can be accessed from renderBlockItem without circular dependency
+  useEffect(() => {
+    addBlockRef.current = addBlock;
+  }, [addBlock]);
 
   const handleAddBelowBlock = useCallback((blockIdOrData) => {
     // TEMPORARILY REMOVED DEV CHECK FOR PRODUCTION DEBUGGING

@@ -1105,6 +1105,17 @@ function ExpandedView({
         return block;
       }
       
+      // CRITICAL: Check if they're already the same reference (from spread operation)
+      if (oldBlock === block) {
+        console.log('[ADD-BLOCK-REF-PRESERVE] Preserving reference for block:', {
+          id: block.id,
+          oldIndex: blocks.indexOf(oldBlock),
+          newIndex: index,
+          sameRef: true
+        });
+        return oldBlock;
+      }
+      
       // Check if content, type, and metadata are the same
       const contentSame = oldBlock.content === block.content;
       const typeSame = oldBlock.type === block.type;
@@ -1112,7 +1123,7 @@ function ExpandedView({
       
       // If everything is the same, return the OLD reference
       if (contentSame && typeSame && metadataSame) {
-        console.log('[ADD-BLOCK-REF-PRESERVE] Preserving reference for block:', {
+        console.log('[ADD-BLOCK-REF-PRESERVE] Preserving reference for block (content check):', {
           id: block.id,
           oldIndex: blocks.indexOf(oldBlock),
           newIndex: index
@@ -1125,7 +1136,8 @@ function ExpandedView({
         id: block.id,
         contentSame,
         typeSame,
-        metadataSame
+        metadataSame,
+        refCheck: oldBlock === block
       });
       return block;
     });

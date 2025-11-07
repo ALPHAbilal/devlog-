@@ -283,9 +283,23 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       blockCount: newBlocks.length
     });
     
+    // CRITICAL: Store reference map BEFORE any operations
+    const blockRefMap = new Map(newBlocks.map(b => [b.id, b]));
+    
     // Update caches
     sessionCache.updateBlocks(documentId, newBlocks);
     optimizedBlockLoader.clearCache(documentId);
+    
+    // CRITICAL CHECK: Did cache operations mutate our blocks?
+    const mutatedBlocks = newBlocks.filter(b => blockRefMap.get(b.id) !== b);
+    if (mutatedBlocks.length > 0) {
+      console.error('[SET-BLOCKS-DIRECTLY] ❌ Cache operations MUTATED block references!', {
+        mutatedCount: mutatedBlocks.length,
+        firstMutated: mutatedBlocks[0].id
+      });
+    } else {
+      console.log('[SET-BLOCKS-DIRECTLY] ✅ Block references preserved through cache operations');
+    }
     
     // Set blocks directly without any transformation
     setBlocks(newBlocks);

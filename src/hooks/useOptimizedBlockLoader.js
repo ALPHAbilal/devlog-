@@ -44,26 +44,20 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
         // Check if blocks are already in entry AND have content
         if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
           // If blocks array exists with content, they were already loaded
-          // Ensure all blocks have positions
-          const blocksWithPositions = entry.blocks.map((block, index) => ({
-            ...block,
-            position: block.position !== undefined ? block.position : index
-          }));
-          setBlocks(blocksWithPositions);
+          // CRITICAL: Don't normalize positions - it breaks references!
+          // The blocks array index IS the position
+          setBlocks(entry.blocks);
           setIsLoading(false);
-          sessionCache.cacheBlocks(documentId, blocksWithPositions);
+          sessionCache.cacheBlocks(documentId, entry.blocks);
           return;
         }
 
         // Check session cache
         const cachedBlocks = sessionCache.getBlocks(documentId);
         if (cachedBlocks && cachedBlocks.length > 0) {
-          // Ensure cached blocks have positions
-          const blocksWithPositions = cachedBlocks.map((block, index) => ({
-            ...block,
-            position: block.position !== undefined ? block.position : index
-          }));
-          setBlocks(blocksWithPositions);
+          // CRITICAL: Don't normalize positions - it breaks references!
+          // The blocks array index IS the position
+          setBlocks(cachedBlocks);
           setIsLoading(false);
           return;
         }
@@ -131,59 +125,44 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   // OPTIMIZATION: Preserve block object references to prevent unnecessary re-renders
   const updateBlocks = (newBlocks) => {
     setBlocks(prevBlocks => {
-      // If previous blocks is empty, just add positions
+      // If previous blocks is empty, just return new blocks as-is
       if (!prevBlocks || prevBlocks.length === 0) {
-        const withPositions = newBlocks.map((block, index) => ({
-          ...block,
-          position: block.position !== undefined ? block.position : index
-        }));
         // Update caches
-        sessionCache.updateBlocks(documentId, withPositions);
+        sessionCache.updateBlocks(documentId, newBlocks);
         optimizedBlockLoader.clearCache(documentId);
-        return withPositions;
+        return newBlocks;
       }
 
-      // Preserve references for unchanged blocks
-      const blocksWithPositions = newBlocks.map((newBlock, index) => {
+      // CRITICAL FIX: Preserve references for unchanged blocks
+      // Don't normalize positions - array index IS the position!
+      const optimizedBlocks = newBlocks.map((newBlock, index) => {
         const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
 
         // If block exists and content unchanged, reuse reference
-        // For new blocks or blocks with new IDs, prevBlock will be undefined
         if (prevBlock) {
-          // Check if content actually changed (deep comparison not needed - string compare)
+          // Check if content actually changed
           const contentSame = prevBlock.content === newBlock.content;
           const typeSame = prevBlock.type === newBlock.type;
-          const positionSame = prevBlock.position === index;
 
           // If nothing changed, reuse exact reference
-          if (contentSame && typeSame && positionSame) {
-            return prevBlock;
-          }
-
-          // If only position changed, update just position
-          if (contentSame && typeSame && !positionSame) {
-            return { ...prevBlock, position: index };
+          // CRITICAL: Don't check position - it creates new refs for all blocks after insertion!
+          if (contentSame && typeSame) {
+            return prevBlock;  // ✅ PRESERVE REFERENCE
           }
 
           // Content or type changed, create new object
-          return {
-            ...newBlock,
-            position: index
-          };
+          return newBlock;
         }
 
-        // New block, assign position
-        return {
-          ...newBlock,
-          position: index
-        };
+        // New block, return as-is
+        return newBlock;
       });
 
       // Update caches
-      sessionCache.updateBlocks(documentId, blocksWithPositions);
+      sessionCache.updateBlocks(documentId, optimizedBlocks);
       optimizedBlockLoader.clearCache(documentId);
 
-      return blocksWithPositions;
+      return optimizedBlocks;
     });
   };
 

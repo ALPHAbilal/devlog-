@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContextOptimized';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useAnalytics } from '../../hooks/useAnalytics';
 
-function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow, allBlocks }) {
+function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
   const { user } = useAuth();
   const { trackEvent } = useAnalytics();
   
@@ -143,9 +143,8 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
         setHasContentChanged(false); // Reset the change flag
       }
       setIsEditing(false);
-      if (onFocus) onFocus(null); // Clear focus
     };
-  }, [content, hasContentChanged, block.id, block.tags, block.metadata, isCollapsed, onUpdate, onFocus, trackEvent]);
+  }, [content, hasContentChanged, block.id, block.tags, block.metadata, isCollapsed, onUpdate, trackEvent]);
 
   // Handle clicks outside to exit edit mode and hide toolbar
   useEffect(() => {
@@ -619,7 +618,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
       setIsEditing(false);
       setShowToolbar(false); // Ensure toolbar is hidden
       setSlashHint('');
-      if (onFocus) onFocus(null); // Clear focus when escaping
+        // Clear editing state when escaping
     } else if (e.key === 'Enter') {
       // Check for heading markdown at the start of the line
       const lines = content.split('\n');
@@ -642,7 +641,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
         e.preventDefault();
         setShowToolbar(false); // Ensure toolbar is hidden
         handleSave();
-        if (onFocus) onFocus(null); // Clear focus
+        // Clear editing state
       }
     }
   };
@@ -657,7 +656,6 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
           value={content}
           onChange={handleChange}
           onPaste={handlePaste}
-          onFocus={() => onFocus && onFocus(block.id)}
           onBlur={(e) => {
             // Don't blur if clicking on toolbar
             const relatedTarget = e.relatedTarget;
@@ -750,13 +748,11 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
             setSelectedText('');
             setToolbarPosition(null);
             setIsEditing(true);
-            if (onFocus) onFocus(block.id);
             // Focus will be handled by the useEffect when isEditing becomes true
           }
         }}
         className={`text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 
                    cursor-text transition-all duration-200 min-h-[50px]
-                   ${isFocused === false ? 'opacity-40' : 'opacity-100'}
         style={{ fontSize: 'var(--step-0)', lineHeight: 'var(--line-height-normal)' }}
                    ${isCollapsed ? 'border-l-4 border-accent-green/30 pl-3' : ''}`}
       >
@@ -804,7 +800,6 @@ export default memo(TextBlock, (prevProps, nextProps) => {
     prevProps.block.id === nextProps.block.id &&
     prevProps.block.content === nextProps.block.content &&
     prevProps.block.isNew === nextProps.block.isNew &&
-    prevProps.block.metadata?.isCollapsed === nextProps.block.metadata?.isCollapsed &&
-    prevProps.isFocused === nextProps.isFocused
+    prevProps.block.metadata?.isCollapsed === nextProps.block.metadata?.isCollapsed
   );
 });

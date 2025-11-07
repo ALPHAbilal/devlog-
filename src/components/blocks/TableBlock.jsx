@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, memo } from 'react';
 import { Plus, X, AlignLeft, AlignCenter, AlignRight, Download, Copy, Check, Table } from 'lucide-react';
 
-const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) {
+const TableBlock = function TableBlock({ block, onUpdate }) {
   // Custom CSS for smooth scrolling
   const customStyles = `
     .table-scroll::-webkit-scrollbar {
@@ -156,12 +156,11 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
               setCellValue(row[colIndex] || '');
             }
             
-            if (onFocus) onFocus(block.id);
           }
         }
       }, 10);
     }
-  }, [tableData.rows.length, tableData.headers.length, tableData, onFocus, block.id]);
+  }, [tableData.rows.length, tableData.headers.length, tableData]);
 
   // Save table data with simple debouncing
   const saveTable = (newData) => {
@@ -222,7 +221,6 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
       setCellValue(row[colIndex] || '');
     }
     
-    if (onFocus) onFocus(block.id);
   };
 
   const saveCell = (skipBlurCheck = false) => {
@@ -474,7 +472,6 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
       e.preventDefault();
       setEditingCell(null);
       setCellValue('');
-      if (onFocus) onFocus(null);
     }
   };
 
@@ -743,9 +740,7 @@ const TableBlock = function TableBlock({ block, onUpdate, isFocused, onFocus }) 
 
 export default memo(TableBlock, (prevProps, nextProps) => {
   // Standard checks first
-  if (prevProps.isFocused !== nextProps.isFocused) return false;
   if (prevProps.onUpdate !== nextProps.onUpdate) return false;
-  if (prevProps.onFocus !== nextProps.onFocus) return false;
   
   // Quick data reference check
   const prevData = prevProps.block.data;

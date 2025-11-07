@@ -226,19 +226,18 @@ function ExpandedView({
   });
 
   // Create a memoized block renderer component to avoid closure issues
+  // CRITICAL FIX: Use computed boolean props instead of raw state
+  // This prevents prop changes for blocks that aren't affected by selector/focus changes
   const BlockRenderer = memo(({
     block,
     index,
     isMobileView,
-    focusedBlockId,
-    showBlockSelector,
-    selectorPosition,
+    isBlockFocused,
+    isShowingSelector,
     draggedBlockId,
     dropTargetId,
     dropPosition
   }) => {
-    const isBlockFocused = focusedBlockId === null ? null : focusedBlockId === block.id;
-    const isShowingSelector = showBlockSelector && selectorPosition === block.id;
 
     return (
       <div className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
@@ -296,10 +295,8 @@ function ExpandedView({
       const reasons = [];
       if (prevProps.block !== nextProps.block) reasons.push('block');
       if (prevProps.index !== nextProps.index) reasons.push('index');
-
-      const prevFocused = prevProps.focusedBlockId === prevProps.block.id;
-      const nextFocused = nextProps.focusedBlockId === nextProps.block.id;
-      if (prevFocused !== nextFocused) reasons.push('focus');
+      if (prevProps.isBlockFocused !== nextProps.isBlockFocused) reasons.push('focus');
+      if (prevProps.isShowingSelector !== nextProps.isShowingSelector) reasons.push('selector');
 
       const prevDragged = prevProps.draggedBlockId === prevProps.block.id;
       const nextDragged = nextProps.draggedBlockId === nextProps.block.id;
@@ -313,10 +310,6 @@ function ExpandedView({
         reasons.push('dropPosition');
       }
 
-      const prevShowingSelector = prevProps.showBlockSelector && prevProps.selectorPosition === prevProps.block.id;
-      const nextShowingSelector = nextProps.showBlockSelector && nextProps.selectorPosition === nextProps.block.id;
-      if (prevShowingSelector !== nextShowingSelector) reasons.push('selector');
-
       if (prevProps.isMobileView !== nextProps.isMobileView) reasons.push('mobileView');
 
       if (reasons.length > 0) {
@@ -329,10 +322,9 @@ function ExpandedView({
     if (prevProps.block !== nextProps.block) return false;
     if (prevProps.index !== nextProps.index) return false;
 
-    // Check if THIS block is affected by focus changes
-    const prevFocused = prevProps.focusedBlockId === prevProps.block.id;
-    const nextFocused = nextProps.focusedBlockId === nextProps.block.id;
-    if (prevFocused !== nextFocused) return false;
+    // Check computed boolean props (these only change when THIS block is affected)
+    if (prevProps.isBlockFocused !== nextProps.isBlockFocused) return false;
+    if (prevProps.isShowingSelector !== nextProps.isShowingSelector) return false;
 
     // Check if THIS block is affected by drag operations
     const prevDragged = prevProps.draggedBlockId === prevProps.block.id;
@@ -347,11 +339,6 @@ function ExpandedView({
     if (prevDropTarget && nextDropTarget) {
       if (prevProps.dropPosition !== nextProps.dropPosition) return false;
     }
-
-    // Check if THIS block is showing the selector
-    const prevShowingSelector = prevProps.showBlockSelector && prevProps.selectorPosition === prevProps.block.id;
-    const nextShowingSelector = nextProps.showBlockSelector && nextProps.selectorPosition === nextProps.block.id;
-    if (prevShowingSelector !== nextShowingSelector) return false;
 
     // Rarely changes
     if (prevProps.isMobileView !== nextProps.isMobileView) return false;
@@ -790,6 +777,9 @@ function ExpandedView({
   // CRITICAL FIX: Remove blocks.length from dependencies!
   // When blocks.length changes, this callback gets a new reference, 
   // which causes Virtuoso to re-render ALL visible blocks!
+  // 
+  // CRITICAL FIX #2: Compute isShowingSelector here instead of passing raw props!
+  // This prevents ALL blocks from receiving prop changes when selector state changes
   const renderBlockItem = useCallback((index, block) => {
     if (!block) return null;
 
@@ -801,15 +791,18 @@ function ExpandedView({
       console.log(`[VIRT-DEBUG-1] Rendering block (ID: ${block.id?.substring(0, 8)}) - Render #${window.BLOCK_RENDER_COUNT[block.id]}`);
     }
 
+    // Compute if THIS specific block is showing selector
+    const isShowingSelector = showBlockSelector && selectorPosition === block.id;
+    const isBlockFocused = focusedBlockId === block.id;
+
     return (
       <BlockRenderer
         key={block.id}
         block={block}
         index={index}
         isMobileView={isMobileView}
-        focusedBlockId={focusedBlockId}
-        showBlockSelector={showBlockSelector}
-        selectorPosition={selectorPosition}
+        isBlockFocused={isBlockFocused}
+        isShowingSelector={isShowingSelector}
         draggedBlockId={draggedBlockId}
         dropTargetId={dropTargetId}
         dropPosition={dropPosition}

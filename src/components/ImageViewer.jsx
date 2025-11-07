@@ -316,7 +316,7 @@ export default function ImageViewer({
   if (!image) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-sm">
       {/* Header Controls */}
       <div className="absolute top-0 left-0 right-0 p-4 flex justify-between items-center z-10">
         {/* Zoom Controls */}

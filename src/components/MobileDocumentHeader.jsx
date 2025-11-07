@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function MobileDocumentHeader({ title, onBack, onMenuClick }) {
   return (
-    <header className="bg-dark-primary/95 backdrop-blur-xl border-b border-dark-secondary/30">
+    <header className="bg-dark-primary/95 backdrop-blur-xl border-b border-dark-secondary/30 relative z-40">
       <div className="flex items-center justify-between px-4 py-3 min-h-[48px]">
         {/* Back Button */}
         <button

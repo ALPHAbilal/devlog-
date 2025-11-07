@@ -234,10 +234,33 @@ function Block({
         }}
         onMouseLeave={(e) => {
           // Check if mouse is moving to child element
+          // Bulletproof check to prevent "Failed to execute 'contains' on 'Node'" error
           const relatedTarget = e.relatedTarget;
-          // Add null check to prevent TypeError
-          if (relatedTarget && e.currentTarget && e.currentTarget.contains(relatedTarget)) {
-            return; // Don't hide if moving to child element
+          if (relatedTarget && e.currentTarget) {
+            try {
+              // Five-point safety check before calling contains():
+              // 1. relatedTarget exists (already checked)
+              // 2. relatedTarget is an object
+              // 3. relatedTarget has nodeType property
+              // 4. nodeType === 1 (ELEMENT_NODE - the only safe type for contains())
+              // 5. currentTarget has contains method
+              if (
+                typeof relatedTarget === 'object' &&
+                'nodeType' in relatedTarget &&
+                relatedTarget.nodeType === 1 && // ELEMENT_NODE = 1
+                typeof e.currentTarget.contains === 'function'
+              ) {
+                // Now safe to call contains()
+                if (e.currentTarget.contains(relatedTarget)) {
+                  return; // Don't hide if moving to child element
+                }
+              }
+            } catch (err) {
+              // Silently handle edge cases - only log in development
+              if (process.env.NODE_ENV === 'development') {
+                console.debug('Block onMouseLeave: Safe handling of edge case', err);
+              }
+            }
           }
           
           // Don't hide if menu is open

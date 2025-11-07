@@ -264,12 +264,24 @@ export function deserializeBlock(block) {
       case 'image':
         // Restore images array
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          deserialized.images = parsed.images || [];
-          deserialized.layout = parsed.layout || 'grid';
-          deserialized.columns = parsed.columns || 3;
+          try {
+            const parsed = typeof block.content === 'string' 
+              ? JSON.parse(block.content) 
+              : block.content;
+            deserialized.images = parsed.images || [];
+            deserialized.layout = parsed.layout || 'grid';
+            deserialized.columns = parsed.columns || 3;
+          } catch (e) {
+            // If content is not JSON (plain text), use empty images array
+            console.warn('BlockSerializer: Image block content is not valid JSON, using empty images array', {
+              blockId: block.id,
+              contentType: typeof block.content,
+              contentPreview: typeof block.content === 'string' ? block.content.substring(0, 50) : 'not string'
+            });
+            deserialized.images = [];
+            deserialized.layout = 'grid';
+            deserialized.columns = 3;
+          }
         } else {
           deserialized.images = [];
         }
@@ -325,10 +337,20 @@ export function deserializeBlock(block) {
       case 'todo':
         // Restore todo items
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          deserialized.data = parsed.data || { todos: [] };
+          try {
+            const parsed = typeof block.content === 'string' 
+              ? JSON.parse(block.content) 
+              : block.content;
+            deserialized.data = parsed.data || { todos: [] };
+          } catch (e) {
+            // If content is not JSON (plain text), use empty todos
+            console.warn('BlockSerializer: Todo block content is not valid JSON, using empty todos', {
+              blockId: block.id,
+              contentType: typeof block.content,
+              contentPreview: typeof block.content === 'string' ? block.content.substring(0, 50) : 'not string'
+            });
+            deserialized.data = { todos: [] };
+          }
         } else {
           deserialized.data = { todos: [] };
         }
@@ -378,24 +400,35 @@ export function deserializeBlock(block) {
       case 'filetree':
         // Restore tree data from content
         if (block.content) {
-          const parsed = typeof block.content === 'string'
-            ? JSON.parse(block.content)
-            : block.content;
+          try {
+            const parsed = typeof block.content === 'string'
+              ? JSON.parse(block.content)
+              : block.content;
 
-          // Handle multiple formats:
-          // 1. Proper format: {treeData: [...], expanded: {...}}
-          // 2. Direct tree format: {name: "root", type: "folder", children: [...]}
+            // Handle multiple formats:
+            // 1. Proper format: {treeData: [...], expanded: {...}}
+            // 2. Direct tree format: {name: "root", type: "folder", children: [...]}
 
-          if (parsed.treeData !== undefined) {
-            deserialized.treeData = parsed.treeData || [];
-            deserialized.expanded = parsed.expanded || {};
-          } else if (parsed.name && parsed.type) {
-            // Direct tree object - wrap in array
-            console.log('🌲 FileTree: Converting direct tree object to array format');
-            deserialized.treeData = [parsed];
-            deserialized.expanded = {};
-          } else {
-            console.warn('🌲 FileTree: Unknown content format, defaulting to empty');
+            if (parsed.treeData !== undefined) {
+              deserialized.treeData = parsed.treeData || [];
+              deserialized.expanded = parsed.expanded || {};
+            } else if (parsed.name && parsed.type) {
+              // Direct tree object - wrap in array
+              console.log('🌲 FileTree: Converting direct tree object to array format');
+              deserialized.treeData = [parsed];
+              deserialized.expanded = {};
+            } else {
+              console.warn('🌲 FileTree: Unknown content format, defaulting to empty');
+              deserialized.treeData = [];
+              deserialized.expanded = {};
+            }
+          } catch (e) {
+            // If content is not JSON (plain text), use empty tree
+            console.warn('BlockSerializer: FileTree block content is not valid JSON, using empty tree', {
+              blockId: block.id,
+              contentType: typeof block.content,
+              contentPreview: typeof block.content === 'string' ? block.content.substring(0, 50) : 'not string'
+            });
             deserialized.treeData = [];
             deserialized.expanded = {};
           }
@@ -442,12 +475,24 @@ export function deserializeBlock(block) {
       case 'inlineImage':
         // Restore inline image data
         if (block.content) {
-          const parsed = typeof block.content === 'string' 
-            ? JSON.parse(block.content) 
-            : block.content;
-          deserialized.url = parsed.url || '';
-          deserialized.alt = parsed.alt || '';
-          deserialized.caption = parsed.caption || '';
+          try {
+            const parsed = typeof block.content === 'string' 
+              ? JSON.parse(block.content) 
+              : block.content;
+            deserialized.url = parsed.url || '';
+            deserialized.alt = parsed.alt || '';
+            deserialized.caption = parsed.caption || '';
+          } catch (e) {
+            // If content is not JSON (plain text), use empty values
+            console.warn('BlockSerializer: InlineImage block content is not valid JSON, using empty values', {
+              blockId: block.id,
+              contentType: typeof block.content,
+              contentPreview: typeof block.content === 'string' ? block.content.substring(0, 50) : 'not string'
+            });
+            deserialized.url = '';
+            deserialized.alt = '';
+            deserialized.caption = '';
+          }
         } else {
           deserialized.url = '';
           deserialized.alt = '';

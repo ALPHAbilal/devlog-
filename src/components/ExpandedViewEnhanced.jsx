@@ -787,6 +787,9 @@ function ExpandedView({
   // Memoize Virtuoso's itemContent to prevent re-creating all blocks on every render
   // CRITICAL FIX: Include ALL values used in the closure to prevent stale closures
   // BlockRenderer's memo will prevent unnecessary re-renders of unchanged blocks
+  // CRITICAL FIX: Remove blocks.length from dependencies!
+  // When blocks.length changes, this callback gets a new reference, 
+  // which causes Virtuoso to re-render ALL visible blocks!
   const renderBlockItem = useCallback((index, block) => {
     if (!block) return null;
 
@@ -795,7 +798,7 @@ function ExpandedView({
       if (!window.BLOCK_RENDER_COUNT) window.BLOCK_RENDER_COUNT = {};
       window.BLOCK_RENDER_COUNT[block.id] = (window.BLOCK_RENDER_COUNT[block.id] || 0) + 1;
 
-      console.log(`[VIRT-DEBUG-1] Rendering block ${index + 1}/${blocks.length} (ID: ${block.id?.substring(0, 8)}) - Render #${window.BLOCK_RENDER_COUNT[block.id]}`);
+      console.log(`[VIRT-DEBUG-1] Rendering block (ID: ${block.id?.substring(0, 8)}) - Render #${window.BLOCK_RENDER_COUNT[block.id]}`);
     }
 
     return (
@@ -812,7 +815,7 @@ function ExpandedView({
         dropPosition={dropPosition}
       />
     );
-  }, [blocks.length, isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
+  }, [isMobileView, focusedBlockId, showBlockSelector, selectorPosition, draggedBlockId, dropTargetId, dropPosition]);
 
   // Auto-scroll during drag
   const startAutoScroll = (direction) => {

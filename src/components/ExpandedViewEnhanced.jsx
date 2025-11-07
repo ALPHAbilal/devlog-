@@ -2064,5 +2064,3 @@ export default memo(ExpandedView, (prevProps, nextProps) => {
   // Props are equal, skip re-render
   return true;
 });
-
-

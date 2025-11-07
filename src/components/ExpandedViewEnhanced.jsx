@@ -793,7 +793,8 @@ function ExpandedView({
 
     // Compute if THIS specific block is showing selector
     const isShowingSelector = showBlockSelector && selectorPosition === block.id;
-    const isBlockFocused = focusedBlockId === block.id;
+    // CRITICAL: When no block is focused (focusedBlockId === null), pass null not false
+    const isBlockFocused = focusedBlockId === null ? null : focusedBlockId === block.id;
 
     return (
       <BlockRenderer

@@ -980,9 +980,13 @@ export default function ExpandedView({
       const index = blocks.findIndex(b => b.id === afterBlockId);
       updatedBlocks = [...blocks];
       updatedBlocks.splice(index + 1, 0, newBlock);
-      // Update positions for all blocks after the insertion point
+      // Update positions ONLY for blocks that actually need it (preserve references!)
+      // OPTIMIZATION: Only update position if it differs from array index
       for (let i = index + 2; i < updatedBlocks.length; i++) {
-        updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+        if (updatedBlocks[i].position !== i) {
+          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+        }
+        // else: position already correct, reuse same reference
       }
     } else {
       updatedBlocks = [...blocks, newBlock];
@@ -1101,10 +1105,14 @@ export default function ExpandedView({
       
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(blockIndex + 1, 0, newBlock);
-      
-      // Update positions for all blocks after the insertion point
+
+      // Update positions ONLY for blocks that actually need it (preserve references!)
+      // OPTIMIZATION: Only update position if it differs from array index
       for (let i = blockIndex + 2; i < updatedBlocks.length; i++) {
-        updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+        if (updatedBlocks[i].position !== i) {
+          updatedBlocks[i] = { ...updatedBlocks[i], position: i };
+        }
+        // else: position already correct, reuse same reference
       }
       
       startTransition(() => {

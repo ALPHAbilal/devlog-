@@ -1071,16 +1071,9 @@ function ExpandedView({
       updatedBlocks.push(newBlock);
     }
     
-    // CRITICAL FIX: Normalize positions to match array indices
-    // Handle undefined/null positions by treating them as needing update
-    const normalizedBlocks = updatedBlocks.map((block, idx) => {
-      // If position is undefined/null or differs from index, update it
-      if (block.position == null || block.position !== idx) {
-        return { ...block, position: idx };
-      }
-      // Position already correct - keep same reference
-      return block;
-    });
+    // CRITICAL FIX: Don't normalize all positions - it breaks references!
+    // Position will be set by SmartSync based on array index when saving
+    // Only the new block has a position set above
     
     // Batch all state updates in a single transition
     // TEMPORARILY REMOVED DEV CHECK FOR PRODUCTION DEBUGGING
@@ -1089,7 +1082,7 @@ function ExpandedView({
       wrappedInTransition: true
     });
     startTransition(() => {
-      updateLoadedBlocks(normalizedBlocks);
+      updateLoadedBlocks(updatedBlocks);
       setShowBlockSelector(false);
       setSelectorPosition(null);
     });
@@ -1156,20 +1149,12 @@ function ExpandedView({
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(index + 1, 0, newBlock);
       
-      // CRITICAL FIX: Normalize positions to match array indices
-      // Handle undefined/null positions by treating them as needing update
-      const normalizedBlocks = updatedBlocks.map((block, idx) => {
-        // If position is undefined/null or differs from index, update it
-        if (block.position == null || block.position !== idx) {
-          return { ...block, position: idx };
-        }
-        // Position already correct - keep same reference
-        return block;
-      });
+      // CRITICAL FIX: Don't normalize all positions - it breaks references!
+      // Position will be set by SmartSync based on array index when saving
       
       // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(normalizedBlocks);
+        updateLoadedBlocks(updatedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for new block from paste
@@ -1244,20 +1229,12 @@ function ExpandedView({
       const updatedBlocks = [...blocks];
       updatedBlocks.splice(blockIndex + 1, 0, newBlock);
       
-      // CRITICAL FIX: Normalize positions to match array indices
-      // Handle undefined/null positions by treating them as needing update  
-      const normalizedBlocks = updatedBlocks.map((block, idx) => {
-        // If position is undefined/null or differs from index, update it
-        if (block.position == null || block.position !== idx) {
-          return { ...block, position: idx };
-        }
-        // Position already correct - keep same reference
-        return block;
-      });
+      // CRITICAL FIX: Don't normalize all positions - it breaks references!
+      // Position will be set by SmartSync based on array index when saving
       
       // Wrap state update in startTransition to mark as non-urgent
       startTransition(() => {
-        updateLoadedBlocks(normalizedBlocks);
+        updateLoadedBlocks(updatedBlocks);
       });
       
       // CRITICAL FIX: Call Smart Sync for inline new block

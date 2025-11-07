@@ -243,203 +243,1076 @@ Where N increases each time (40/41, 41/42, 42/43).
 ## 📝 PASTE YOUR TEST RESULTS BELOW
 
 ### Test 1 Result (Click "+" Button):
-index-3frpBIxs.js:26 Using optimized Supabase client
-index-3frpBIxs.js:26 [VIRT-DEBUG-IMPORT] Virtuoso component imported: object
-index-3frpBIxs.js:26 IndexedDB initialized successfully
-index-3frpBIxs.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-3frpBIxs.js:26 [Supabase] Activity monitoring disabled - sessions use automatic token refresh
-index-3frpBIxs.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-3frpBIxs.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
-index-3frpBIxs.js:26 Using Supabase for storage
-index-3frpBIxs.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Blocks array updated: 0 blocks
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ⏳ Waiting for SmartSync manager...
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ⚠️ Not ready to start polling: {hasDocumentId: true, managerReady: false, hasManagerRef: false}
-index-3frpBIxs.js:26 SessionCache: Cached 5 blocks for document 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Blocks array updated: 5 blocks
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Block reference stability: 0/5 blocks same
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ✅ SmartSync manager ready
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ✅ Starting status polling for document: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 SmartSync: IndexedDB initialized
-index-3frpBIxs.js:26 💻 CodeBlock f2f51dbd-8d59-49bf-a1ae-cc81688b0cc9 rendered at 2025-11-07T10:36:59.600Z
-index-3frpBIxs.js:26 📌 HeadingBlock f21e9822-a556-4a33-97fd-8f67cd67732c rendered at 2025-11-07T10:36:59.601Z
-index-3frpBIxs.js:26 📌 HeadingBlock c2b04e51-94bf-4642-85f6-f563bc8b3e52 rendered at 2025-11-07T10:36:59.603Z
-index-3frpBIxs.js:26 📁 FileTreeBlock 0f399d33-7bd9-4410-99bc-8256cf56b055 rendered at 2025-11-07T10:36:59.678Z
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 🎯 IssueTrackerBlock initialization: {blockId: 'e6050e22-f989-4a99-b8e4-08a869bcb376', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
-index-3frpBIxs.js:26 ExpandedView: Initial load period complete, enabling saves
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 ExpandedView: Calling Smart Sync for new block: {id: '8056d59a-eb0b-4955-a84b-05ca945788e5', type: 'image', position: 5, created_at: 1762511827534}
-index-3frpBIxs.js:26 🔍 BlockSerializer.serialize INPUT: {id: '8056d59a-eb0b-4955-a84b-05ca945788e5', type: 'image', hasContent: true, hasMessages: false, hasImages: false, …}
-index-3frpBIxs.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '8056d59a-eb0b-4955-a84b-05ca945788e5', type: 'image', position: 5, contentLength: 41, contentPreview: '{"images":[],"layout":"grid","columns":3}'}
-index-3frpBIxs.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '8056d59a-eb0b-4955-a84b-05ca945788e5', action: 'CREATE', blockType: 'image', position: 5, contentLength: 41, …}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Blocks array updated: 6 blocks
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Block reference stability: 5/6 blocks same
-index-3frpBIxs.js:26 💻 CodeBlock f2f51dbd-8d59-49bf-a1ae-cc81688b0cc9 rendered at 2025-11-07T10:37:07.564Z
-index-3frpBIxs.js:26 📌 HeadingBlock f21e9822-a556-4a33-97fd-8f67cd67732c rendered at 2025-11-07T10:37:07.566Z
-index-3frpBIxs.js:26 📌 HeadingBlock c2b04e51-94bf-4642-85f6-f563bc8b3e52 rendered at 2025-11-07T10:37:07.569Z
-index-3frpBIxs.js:26 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:37:07.571Z
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
-index-3frpBIxs.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
-index-3frpBIxs.js:26 📁 FileTreeBlock 0f399d33-7bd9-4410-99bc-8256cf56b055 rendered at 2025-11-07T10:37:07.657Z
-index-3frpBIxs.js:26 🎯 IssueTrackerBlock initialization: {blockId: 'e6050e22-f989-4a99-b8e4-08a869bcb376', hasData: false, milestone: undefined, issuesCount: 0, rawBlock: {…}}
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
-index-3frpBIxs.js:26 FileTreeBlock memo: PREVENTED
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 1, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 1, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 ExpandedView: Calling Smart Sync for new block: {id: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', type: 'issue-tracker', position: 6, created_at: 1762511830979}
-index-3frpBIxs.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', type: 'issue-tracker', hasContent: true, hasMessages: false, hasImages: false, …}
-index-3frpBIxs.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', type: 'issue-tracker', position: 6, contentLength: 28, contentPreview: '{"milestone":"","issues":[]}'}
-index-3frpBIxs.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', action: 'CREATE', blockType: 'issue-tracker', position: 6, contentLength: 28, …}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Blocks array updated: 7 blocks
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Block reference stability: 6/7 blocks same
-index-3frpBIxs.js:26 📌 HeadingBlock c2b04e51-94bf-4642-85f6-f563bc8b3e52 rendered at 2025-11-07T10:37:11.000Z
-index-3frpBIxs.js:26 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:37:11.002Z
-index-3frpBIxs.js:26 [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 2
-index-3frpBIxs.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
-index-3frpBIxs.js:26 🎯 IssueTrackerBlock initialization: {blockId: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 ExpandedView: Calling Smart Sync for new block: {id: '3913b055-3a24-4b89-9e37-fd5fd26d003c', type: 'heading', position: 7, created_at: 1762511835583}
-index-3frpBIxs.js:26 🔍 BlockSerializer.serialize INPUT: {id: '3913b055-3a24-4b89-9e37-fd5fd26d003c', type: 'heading', hasContent: true, hasMessages: false, hasImages: false, …}
-index-3frpBIxs.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '3913b055-3a24-4b89-9e37-fd5fd26d003c', type: 'heading', position: 7, contentLength: 0, contentPreview: ''}
-index-3frpBIxs.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '3913b055-3a24-4b89-9e37-fd5fd26d003c', action: 'CREATE', blockType: 'heading', position: 7, contentLength: 0, …}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 2, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Block count: unknown
-index-3frpBIxs.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Blocks array updated: 8 blocks
-index-3frpBIxs.js:26 [BLOCKS-MEMO] Block reference stability: 7/8 blocks same
-index-3frpBIxs.js:26 📌 HeadingBlock c2b04e51-94bf-4642-85f6-f563bc8b3e52 rendered at 2025-11-07T10:37:15.603Z
-index-3frpBIxs.js:26 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:37:15.605Z
-index-3frpBIxs.js:26 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:37:15.607Z
-index-3frpBIxs.js:26 [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 3
-index-3frpBIxs.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
-index-3frpBIxs.js:26 🎯 IssueTrackerBlock initialization: {blockId: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 3, syncing: false, lastSync: 1762511819556, online: true}
-index-3frpBIxs.js:26 SmartSync: Syncing 3 changes
-index-3frpBIxs.js:26 SmartSync: Changes being sent: (3) [{…}, {…}, {…}]
-index-3frpBIxs.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
-index-3frpBIxs.js:26 SmartSync: RPC response: {total: 3, errors: Array(0), success: true, processed: 3, timestamp: 1762511841627.374}
-index-3frpBIxs.js:26 [SYNC-DEBUG] Full RPC Response: {
-  "total": 3,
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 11 blocks
+ [BLOCKS-MEMO] Block reference stability: 10/11 blocks same
+ 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:43:30.717Z
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:43:30.719Z
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:43:30.721Z
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 3
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ 🎯 IssueTrackerBlock initialization: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 625a6b17
+ [BLOCK-UPDATE] Changes detected, updating block: 625a6b17
+ [BLOCK-REF-STABILITY] 10/11 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 11 blocks
+ [BLOCKS-MEMO] Block reference stability: 10/11 blocks same
+ [BLOCK-MEMO] headingBlock 625a6b17 - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 4
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ ExpandedView: Calling Smart Sync for new block: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 12 blocks
+ [BLOCKS-MEMO] Block reference stability: 11/12 blocks same
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:43:35.165Z
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:43:35.167Z
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 5
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:43:35.257Z
+ 🎯 IssueTrackerBlock initialization: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ SmartSync: Syncing 5 changes
+ SmartSync: Changes being sent: Array(5)
+ SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ SmartSync: RPC response: Object
+ [SYNC-DEBUG] Full RPC Response: {
+  "total": 5,
   "errors": [],
   "success": true,
-  "processed": 3,
-  "timestamp": 1762511841627.374
+  "processed": 5,
+  "timestamp": 1762512221191.536
 }
-index-3frpBIxs.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
-index-3frpBIxs.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
-index-3frpBIxs.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
-index-3frpBIxs.js:26 [SYNC-DEBUG] Change 1: {action: 'CREATE', block_id: '8056d59a-eb0b-4955-a84b-05ca945788e5', block_type: 'image', position: 5, has_type: true, …}
-index-3frpBIxs.js:26 [SYNC-DEBUG] Change 2: {action: 'CREATE', block_id: 'b3ad1337-a73a-42e3-a744-41fc2871ca1a', block_type: 'issue-tracker', position: 6, has_type: true, …}
-index-3frpBIxs.js:26 [SYNC-DEBUG] Change 3: {action: 'CREATE', block_id: '3913b055-3a24-4b89-9e37-fd5fd26d003c', block_type: 'heading', position: 7, has_type: true, …}
-index-3frpBIxs.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
-index-3frpBIxs.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
-index-3frpBIxs.js:26 [SYNC-DEBUG] Changes that were sent: (3) [{…}, {…}, {…}]
-index-3frpBIxs.js:26 SmartSync: Successfully synced 3 changes
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511840910, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511840910, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511840910, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762511840910, online: true}
-index-3frpBIxs.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762511840910, online: true}
+ [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
+ [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+ [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+ [SYNC-DEBUG] Change 1: Object
+ [SYNC-DEBUG] Change 2: Object
+ [SYNC-DEBUG] Change 3: Object
+ [SYNC-DEBUG] Change 4: Object
+ [SYNC-DEBUG] Change 5: Object
+ [SYNC-DEBUG] === END CRITICAL FIELDS ===
+ [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+ [SYNC-DEBUG] Changes that were sent: Array(5)
+ SmartSync: Successfully synced 5 changes
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ ExpandedView: Calling Smart Sync for new block: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:43:40.861Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:43:40.863Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:43:40.886Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:43:40.889Z
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:43:40.982Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ SmartSync: Syncing 1 changes
+ SmartSync: Changes being sent: Array(1)
+ SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ SmartSync: RPC response: Object
+ [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
+  "errors": [],
+  "success": true,
+  "processed": 1,
+  "timestamp": 1762512226922.853
+}
+ [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
+ [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+ [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+ [SYNC-DEBUG] Change 1: Object
+ [SYNC-DEBUG] === END CRITICAL FIELDS ===
+ [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+ [SYNC-DEBUG] Changes that were sent: Array(1)
+ SmartSync: Successfully synced 1 changes
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:43:48.489Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:43:48.492Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:43:48.586Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:43:59.483Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:43:59.484Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:43:59.576Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:00.671Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:00.671Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:00.687Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:00.687Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:00.703Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:00.703Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:00.719Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:00.719Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:00.781Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:00.781Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:00.793Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:00.793Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:00.878Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:01.629Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:01.629Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:01.644Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:01.644Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:01.657Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:01.658Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:01.673Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:01.674Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:01.746Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:01.746Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:01.758Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:01.759Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:01.842Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:02.438Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:02.438Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:02.453Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:02.454Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:02.469Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:02.469Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:02.485Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:02.485Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:02.548Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:02.549Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:02.562Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:02.563Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:02.641Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:03.350Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:03.350Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:03.370Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:03.370Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:03.387Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:03.387Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:03.406Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:03.407Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:03.458Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:03.458Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:03.470Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:03.470Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:03.559Z
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:44:04.240Z
+ 🎯 IssueTrackerBlock initialization: Object
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:44:04.314Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:44:04.713Z
+ 📌 HeadingBlock c2b04e51-94bf-4642-85f6-f563bc8b3e52 rendered at 2025-11-07T10:44:04.974Z
+ 🎯 IssueTrackerBlock initialization: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 💻 CodeBlock f2f51dbd-8d59-49bf-a1ae-cc81688b0cc9 rendered at 2025-11-07T10:44:05.781Z
+ 📌 HeadingBlock f21e9822-a556-4a33-97fd-8f67cd67732c rendered at 2025-11-07T10:44:05.781Z
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:05.802Z
+ 🎯 IssueTrackerBlock initialization: Object
+ 📁 FileTreeBlock 0f399d33-7bd9-4410-99bc-8256cf56b055 rendered at 2025-11-07T10:44:05.859Z
+ FileTreeBlock memo: PREVENTED
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ FileTreeBlock memo: PREVENTED
+ FileTreeBlock memo: PREVENTED
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:06.682Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:06.966Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:07.049Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:08.560Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:08.560Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:08.576Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:08.576Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:08.589Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:08.589Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:08.604Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:08.604Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:08.680Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:08.694Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:08.695Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:08.705Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:08.706Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:08.774Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:09.395Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:09.395Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:09.412Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:09.413Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:09.431Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:09.431Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:09.449Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:09.449Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:09.525Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:10.034Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:10.035Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:10.049Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:10.050Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:10.063Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:10.064Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:10.078Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:10.078Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:10.142Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:10.143Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:10.156Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:10.157Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:10.241Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(4) for block: c7e37789
+ [BLOCK-UPDATE] Changes detected, updating block: c7e37789
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:11.710Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:11.711Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:11.726Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:11.726Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:11.741Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:11.741Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:11.756Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:11.756Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] textBlock c7e37789 - Props changed: content
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:11.825Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:11.825Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:11.908Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:13.471Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:13.471Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:13.541Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ SmartSync: Syncing 1 changes
+ SmartSync: Changes being sent: Array(1)
+ SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: c7e37789
+ [BLOCK-UPDATE] Changes detected, updating block: c7e37789
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:16.962Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:16.963Z
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] textBlock c7e37789 - Props changed: content
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
+ [SYNC-SCHEDULE] ⏰ Max interval reached (30s), calling throttledSync
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ SmartSync: RPC response: Object
+ [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
+  "errors": [],
+  "success": true,
+  "processed": 1,
+  "timestamp": 1762512257802.241
+}
+ [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
+ [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+ [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+ [SYNC-DEBUG] Change 1: Object
+ [SYNC-DEBUG] === END CRITICAL FIELDS ===
+ [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+ [SYNC-DEBUG] Changes that were sent: Array(1)
+ SmartSync: Successfully synced 1 changes
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:17.041Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:18.903Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:18.903Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:18.974Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:19.802Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:19.802Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:19.874Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:20.640Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:20.640Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:20.708Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ SmartSync: Syncing 1 changes
+ SmartSync: Changes being sent: Array(1)
+ SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ SmartSync: RPC response: Object
+ [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
+  "errors": [],
+  "success": true,
+  "processed": 1,
+  "timestamp": 1762512263029.575
+}
+ [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
+ [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+ [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+ [SYNC-DEBUG] Change 1: Object
+ [SYNC-DEBUG] === END CRITICAL FIELDS ===
+ [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+ [SYNC-DEBUG] Changes that were sent: Array(1)
+ SmartSync: Successfully synced 1 changes
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:22.290Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:22.290Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:22.363Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:23.455Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:23.456Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:23.524Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🎯 IssueTrackerBlock initialization: Object
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:44:25.231Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 📌 HeadingBlock 625a6b17-29d0-4344-88c1-4a3d31bcf39f rendered at 2025-11-07T10:44:26.643Z
+ 📝 TextBlock c7e37789-94e2-44b5-8322-d38a384c0f3a rendered at 2025-11-07T10:44:26.643Z
+ 🤖 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 rendered at 2025-11-07T10:44:26.725Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:44:28.976Z
+ 🎯 IssueTrackerBlock initialization: Object
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:44:29.043Z
+ 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:44:29.114Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🟢 AI Block: Adding message Object
+ 🟣 AI Block Update: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 88942c3d
+ [BLOCK-UPDATE] Changes detected, updating block: 88942c3d
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] aiBlock 88942c3d - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🟢 AI Block: Adding message Object
+ 🟣 AI Block Update: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 88942c3d
+ [BLOCK-UPDATE] Changes detected, updating block: 88942c3d
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] aiBlock 88942c3d - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 2
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🟢 AI Block: Adding message Object
+ 🟣 AI Block Update: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 88942c3d
+ [BLOCK-UPDATE] Changes detected, updating block: 88942c3d
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] aiBlock 88942c3d - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 3
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🟢 AI Block: Adding message Object
+ 🟣 AI Block Update: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 88942c3d
+ [BLOCK-UPDATE] Changes detected, updating block: 88942c3d
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] aiBlock 88942c3d - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 4
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ 📌 HeadingBlock 3913b055-3a24-4b89-9e37-fd5fd26d003c rendered at 2025-11-07T10:44:46.864Z
+ 🌆 ImageBlock 8056d59a-eb0b-4955-a84b-05ca945788e5 rendered at 2025-11-07T10:44:47.263Z
+ 📌 HeadingBlock c2b04e51-94bf-4642-85f6-f563bc8b3e52 rendered at 2025-11-07T10:44:47.330Z
+ 🎯 IssueTrackerBlock initialization: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ 🎯 IssueTrackerBlock initialization: Object
+ 🔚 AIBlock 88942c3d-61a9-4b28-8019-6288f1ac8127 unmounted
+ 💻 CodeBlock f2f51dbd-8d59-49bf-a1ae-cc81688b0cc9 rendered at 2025-11-07T10:44:48.434Z
+ 📌 HeadingBlock f21e9822-a556-4a33-97fd-8f67cd67732c rendered at 2025-11-07T10:44:48.435Z
+ 📁 FileTreeBlock 0f399d33-7bd9-4410-99bc-8256cf56b055 rendered at 2025-11-07T10:44:48.483Z
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ FileTreeBlock memo: PREVENTED
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(5) for block: 0f399d33
+ [BLOCK-UPDATE] Changes detected, updating block: 0f399d33
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ [DEBUG-SERIALIZE] FileTree block.snapshots: Array(0)
+ [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+ [DEBUG-SERIALIZE] FileTree block.metadata: Object
+ [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: Array(0)
+ [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] filetreeBlock 0f399d33 - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 5
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 0f399d33
+ [BLOCK-UPDATE] Changes detected, updating block: 0f399d33
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ [DEBUG-SERIALIZE] FileTree block.snapshots: Array(0)
+ [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+ [DEBUG-SERIALIZE] FileTree block.metadata: Object
+ [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: Array(0)
+ [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] filetreeBlock 0f399d33 - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 6
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [BLOCK-UPDATE-DEBUG] Changed keys: Array(1) for block: 0f399d33
+ [BLOCK-UPDATE] Changes detected, updating block: 0f399d33
+ [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+ [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+ 🔍 BlockSerializer.serialize INPUT: Object
+ [DEBUG-SERIALIZE] FileTree block.snapshots: Array(0)
+ [DEBUG-SERIALIZE] FileTree block.currentSnapshotId: initial
+ [DEBUG-SERIALIZE] FileTree block.metadata: Object
+ [DEBUG-SERIALIZE] FileTree serialized.metadata.snapshots: Array(0)
+ [DEBUG-SERIALIZE] FileTree serialized.metadata.currentSnapshotId: initial
+ 🔍 BlockSerializer.serialize OUTPUT: Object
+ [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+ 🚀 SmartSync.handleChange INPUT: Object
+ [VIRT-DEBUG-0] 📋 Document Loading Strategy
+ [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+ [VIRT-DEBUG-0] Block count: unknown
+ [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+ [BLOCKS-MEMO] Blocks array updated: 13 blocks
+ [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+ [BLOCK-MEMO] filetreeBlock 0f399d33 - PREVENTED
+ [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 7
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+ [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+ [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 FileTreeBlock memo: PREVENTED
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 SmartSync: Syncing 7 changes
+index-CSSoVVPE.js:26 SmartSync: Changes being sent: Array(7)
+index-CSSoVVPE.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+index-CSSoVVPE.js:26 SmartSync: RPC response: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 7,
+  "errors": [],
+  "success": true,
+  "processed": 7,
+  "timestamp": 1762512297794.865
+}
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
+index-CSSoVVPE.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-CSSoVVPE.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 1: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 2: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 3: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 4: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 5: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 6: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 7: Object
+index-CSSoVVPE.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-CSSoVVPE.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Changes that were sent: Array(7)
+index-CSSoVVPE.js:26 SmartSync: Successfully synced 7 changes
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 FileTreeBlock memo: PREVENTED
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 FileTreeBlock memo: PREVENTED
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [BLOCK-UPDATE-DEBUG] Changed keys: Array(3) for block: f2f51dbd
+index-CSSoVVPE.js:26 [BLOCK-UPDATE] Changes detected, updating block: f2f51dbd
+index-CSSoVVPE.js:26 [BLOCK-REF-STABILITY] 12/13 blocks kept same reference
+index-CSSoVVPE.js:26 [SYNC-CHANGE-RECEIVED] 📥 Block update received: Object
+index-CSSoVVPE.js:26 🔍 BlockSerializer.serialize INPUT: Object
+index-CSSoVVPE.js:26 🔍 BlockSerializer.serialize OUTPUT: Object
+index-CSSoVVPE.js:26 [SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with: Object
+index-CSSoVVPE.js:26 🚀 SmartSync.handleChange INPUT: Object
+index-CSSoVVPE.js:26 [VIRT-DEBUG-0] 📋 Document Loading Strategy
+index-CSSoVVPE.js:26 [VIRT-DEBUG-0] Document ID: 91183c04-4294-4967-a85c-45618b98e044
+index-CSSoVVPE.js:26 [VIRT-DEBUG-0] Block count: unknown
+index-CSSoVVPE.js:26 [VIRT-DEBUG-0] Using: OPTIMIZED loader (<50 blocks)
+index-CSSoVVPE.js:26 [BLOCKS-MEMO] Blocks array updated: 13 blocks
+index-CSSoVVPE.js:26 [BLOCKS-MEMO] Block reference stability: 12/13 blocks same
+index-CSSoVVPE.js:26 [BLOCK-MEMO] codeBlock f2f51dbd - Props changed: content
+index-CSSoVVPE.js:26 [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
+index-CSSoVVPE.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-CSSoVVPE.js:26 [SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: Object
+index-CSSoVVPE.js:26 FileTreeBlock memo: PREVENTED
+index-CSSoVVPE.js:26 FileTreeBlock memo: PREVENTED
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: Object
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: Object
+index-CSSoVVPE.js:993 Uncaught TypeError: Failed to execute 'contains' on 'Node': parameter 1 is not of type 'Node'.
+    at onMouseLeave (index-CSSoVVPE.js:993:2527)
+    at mC (index-CSSoVVPE.js:106:118385)
+    at index-CSSoVVPE.js:106:123691
+    at Ho (index-CSSoVVPE.js:106:9041)
+    at eb (index-CSSoVVPE.js:106:119630)
+    at hb (index-CSSoVVPE.js:107:26867)
+    at NB (index-CSSoVVPE.js:107:26782)
+    at HTMLDivElement.r (index-CSSoVVPE.js:26:9336)
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1762512297129, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 1, syncing: false, lastSync: 1762512297129, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1762512297129, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 1, syncing: false, lastSync: 1762512297129, online: true}
+index-CSSoVVPE.js:26 SmartSync: Syncing 1 changes
+index-CSSoVVPE.js:26 SmartSync: Changes being sent: [{…}]
+index-CSSoVVPE.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-CSSoVVPE.js:26 SmartSync: RPC response: {total: 1, errors: Array(0), success: true, processed: 1, timestamp: 1762512310107.5}
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 1,
+  "errors": [],
+  "success": true,
+  "processed": 1,
+  "timestamp": 1762512310107.5
+}
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 91183c04-4294-4967-a85c-45618b98e044
+index-CSSoVVPE.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-CSSoVVPE.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Change 1: {action: 'UPDATE', block_id: 'f2f51dbd-8d59-49bf-a1ae-cc81688b0cc9', block_type: 'code', position: 0, has_type: true, …}
+index-CSSoVVPE.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-CSSoVVPE.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-CSSoVVPE.js:26 [SYNC-DEBUG] Changes that were sent: [{…}]
+index-CSSoVVPE.js:26 SmartSync: Successfully synced 1 changes
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+index-CSSoVVPE.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1762512309315, online: true}
+
 
 ```
 

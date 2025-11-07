@@ -235,10 +235,19 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
       console.log('[BLOCK-UPDATE] Changes detected, updating block:', blockId.substring(0, 8));
 
-      // Only create new array if something actually changed
-      const newBlocks = prevBlocks.map(block =>
-        block.id === blockId ? { ...block, ...updates } : block
-      );
+      // Create updated block
+      const updatedBlock = { ...existingBlock, ...updates };
+
+      // Check if the new block is actually different from the old one
+      if (updatedBlock === existingBlock) {
+        console.log('[BLOCK-UPDATE] Block reference unchanged after spread');
+        return prevBlocks;
+      }
+
+      // Create new array with only the updated block replaced
+      // CRITICAL: Only create new array, preserve all other block references
+      const newBlocks = [...prevBlocks];
+      newBlocks[blockIndex] = updatedBlock;
 
       // Verify reference stability for unchanged blocks
       const unchangedCount = newBlocks.filter((block, i) => block === prevBlocks[i]).length;

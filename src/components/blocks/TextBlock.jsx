@@ -39,6 +39,7 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
   const textareaRef = useRef(null);
   const selectionTimeoutRef = useRef(null);
   const isMountedRef = useRef(false); // Track if component has mounted
+  const justEnteredEditModeRef = useRef(false); // Track if we just entered edit mode to prevent immediate blur
   
   // Constants for collapse behavior
   const MAX_LINES_BEFORE_COLLAPSE = 15;
@@ -82,10 +83,18 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
-      textareaRef.current.focus();
-      // Auto-resize textarea
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+      // Use requestAnimationFrame to ensure DOM is ready and focus happens after render
+      requestAnimationFrame(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          // Position cursor at end of content
+          const length = textareaRef.current.value.length;
+          textareaRef.current.setSelectionRange(length, length);
+          // Auto-resize textarea
+          textareaRef.current.style.height = 'auto';
+          textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+        }
+      });
     } else if (!isEditing) {
       // Clean up when exiting edit mode
       setShowToolbar(false);
@@ -140,9 +149,23 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
 
   // Handle clicks outside to exit edit mode and hide toolbar
   useEffect(() => {
-    if (!isEditing) return;
+    if (!isEditing) {
+      justEnteredEditModeRef.current = false;
+      return;
+    }
+
+    // Set flag when entering edit mode to prevent immediate blur
+    justEnteredEditModeRef.current = true;
+    const timeout = setTimeout(() => {
+      justEnteredEditModeRef.current = false;
+    }, 100); // Small delay to allow focus to settle
 
     const handleClickOutside = (e) => {
+      // Don't handle clicks if we just entered edit mode (prevents immediate blur)
+      if (justEnteredEditModeRef.current) {
+        return;
+      }
+      
       // Check if click is outside the textarea and toolbar
       if (textareaRef.current && !textareaRef.current.contains(e.target)) {
         // Check if click is on the toolbar
@@ -161,10 +184,14 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
       }
     };
 
-    // Add click listener
-    document.addEventListener('mousedown', handleClickOutside);
+    // Add click listener with a small delay to avoid catching the initial click
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 50);
     
     return () => {
+      clearTimeout(timeout);
+      clearTimeout(timeoutId);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isEditing]);
@@ -713,15 +740,18 @@ function TextBlock({ block, onUpdate, onConvert, isFocused, onFocus, onAddBelow,
       )}
       
       <div 
-        onClick={() => {
+        onClick={(e) => {
           // Don't enter edit mode if clicking on collapsed content
           if (!isCollapsed) {
+            // Prevent event from bubbling to avoid triggering click outside handlers
+            e.stopPropagation();
             // Ensure toolbar is hidden before entering edit mode
             setShowToolbar(false);
             setSelectedText('');
             setToolbarPosition(null);
             setIsEditing(true);
             if (onFocus) onFocus(block.id);
+            // Focus will be handled by the useEffect when isEditing becomes true
           }
         }}
         className={`text-text-primary p-4 rounded-lg hover:bg-dark-secondary/30 

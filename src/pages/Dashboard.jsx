@@ -60,6 +60,9 @@ export default function Dashboard() {
   const [entries, setEntries] = useState([]);
   const [allDocuments, setAllDocuments] = useState([]); // All documents for sidebar (includes docs in folders)
   const [expandedEntry, setExpandedEntry] = useState(null);
+
+  // [DASHBOARD-DEBUG] Log re-renders to find the loop
+  console.log('[DASHBOARD-DEBUG] Dashboard render, expandedEntry:', expandedEntry?.id);
   const [searchTerm, setSearchTerm] = useState('');
   // Server-side search state
   const [searchResults, setSearchResults] = useState([]);

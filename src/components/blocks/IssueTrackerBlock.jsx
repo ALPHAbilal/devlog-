@@ -425,6 +425,42 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
   const [issues, setIssues] = useState(blockData.issues || []);
   const [isEditingMilestone, setIsEditingMilestone] = useState(false);
 
+  // CRITICAL FIX: Sync internal state when block.data changes from parent
+  // This prevents the infinite re-render loop that causes flickering
+  useEffect(() => {
+    const newMilestone = blockData.milestone || '';
+    const newIssues = blockData.issues || [];
+    
+    // Only update state if the incoming data has actually changed
+    // This prevents unnecessary re-renders while keeping component in sync
+    setMilestone(prevMilestone => {
+      if (newMilestone !== prevMilestone) {
+        console.log('[ISSUE-TRACKER-SYNC] Milestone updated:', { old: prevMilestone, new: newMilestone });
+        return newMilestone;
+      }
+      return prevMilestone;
+    });
+    
+    setIssues(prevIssues => {
+      // Compare by reference first (fastest)
+      if (newIssues === prevIssues) return prevIssues;
+      
+      // Then compare by length (quick check)
+      if (newIssues.length !== prevIssues.length) {
+        console.log('[ISSUE-TRACKER-SYNC] Issues count changed:', { old: prevIssues.length, new: newIssues.length });
+        return newIssues;
+      }
+      
+      // If lengths are same, check if it's the same data (by reference of first item)
+      if (newIssues.length > 0 && newIssues[0] !== prevIssues[0]) {
+        console.log('[ISSUE-TRACKER-SYNC] Issues array changed (different references)');
+        return newIssues;
+      }
+      
+      return prevIssues;
+    });
+  }, [block.data, block.id, blockData.milestone, blockData.issues]); // Re-sync when block data changes
+
   const handleAddIssue = () => {
     const newIssue = {
       id: `issue-${Date.now()}`,

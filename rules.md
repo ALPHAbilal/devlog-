@@ -2,7 +2,7 @@
 
 *Universal practices that guarantee avoiding critical errors. If AI assistants follow these, problems are prevented, not just solved.*
 
-**🆕 NEW PERFORMANCE RULES (Rules 7-16)**: Hard-learned lessons from actual AI debugging sessions that wasted hours on wrong solutions. These rules would have prevented the "virtualization disaster" and found the real canvas animation issue in minutes instead of hours. Rule 16 especially acknowledges that debugging is a collaborative loop with the user, not a solo mission.
+**🆕 NEW PERFORMANCE RULES (Rules 7-16, 34)**: Hard-learned lessons from actual AI debugging sessions that wasted hours on wrong solutions. These rules would have prevented the "virtualization disaster" and found the real canvas animation issue in minutes instead of hours. Rule 16 especially acknowledges that debugging is a collaborative loop with the user, not a solo mission. **Rule 34 captures the 2-hour "block flickering" debug session - inline arrow functions destroying ALL memoization.**
 
 ---
 
@@ -89,7 +89,13 @@
    - [ ] Am I stuck defending my initial hypothesis? (Rule 17)
    - [ ] Would admitting uncertainty lead to better discovery?
 
-□ 12. SOLUTION VALIDATION
+□ 12. INLINE FUNCTION CHECK (Rule 34)
+   - [ ] Are there inline arrow functions in JSX props?
+   - [ ] Are callbacks in virtualized lists memoized?
+   - [ ] Is itemContent/computeItemKey using useCallback?
+   - [ ] Could new function references be breaking memo?
+
+□ 13. SOLUTION VALIDATION
    - [ ] Will my fix address the ROOT cause (not the symptom)?
    - [ ] Have I considered side effects?
    - [ ] Is there a simpler solution?
@@ -1236,6 +1242,113 @@ Universal Questions for ANY Codebase:
 ```
 
 *This prevents: Scattered knowledge, repeated debugging, lost context, redundant work*
+
+### RULE 34: The "Inline Arrow Function = Performance Killer" Protocol 🎯
+**NEVER use inline arrow functions in JSX props, especially for virtualized lists - they destroy ALL memoization.**
+
+**The Problem**: Spent 2+ hours debugging block flickering. The issue wasn't the blocks themselves - it was inline arrow functions creating new references on every render, causing Virtuoso to remount everything.
+
+**The Discovery Chain**:
+1. ✅ Fixed React.memo in child components (didn't help)
+2. ✅ Added deep equality checks in updateBlock (didn't help)
+3. ✅ Memoized onMoveUp/onMoveDown handlers (didn't help)
+4. ✅ **FOUND IT**: Virtuoso had inline `itemContent={(index, block) => ...}` - creating NEW function every render!
+
+**The Universal Rule**: Every inline arrow function creates a new reference that breaks:
+- React.memo comparisons
+- useCallback dependencies
+- Virtuoso's component recycling
+- Any performance optimization relying on referential equality
+
+```markdown
+□ THE INLINE FUNCTION PROTOCOL:
+
+1. NEVER DO THIS:
+   ❌ <Virtuoso itemContent={(i, item) => <Component />} />
+   ❌ <Button onClick={() => handleClick(id)} />
+   ❌ onMoveUp={(id) => moveBlock(id, 'up')}
+
+2. ALWAYS DO THIS:
+   ✅ const renderItem = useCallback((i, item) => <Component />, [deps]);
+   ✅ <Virtuoso itemContent={renderItem} />
+
+   ✅ const handleClick = useCallback(() => handleClick(id), [id]);
+   ✅ <Button onClick={handleClick} />
+
+   ✅ const handleMoveUp = useCallback((id) => moveBlock(id, 'up'), [moveBlock]);
+   ✅ onMoveUp={handleMoveUp}
+
+3. CRITICAL FOR VIRTUALIZED LISTS:
+   - [ ] computeItemKey - MUST be memoized
+   - [ ] itemContent - MUST be memoized
+   - [ ] Any callback prop - MUST be memoized
+   - [ ] Even "simple" arrow functions break recycling
+
+4. DEEP EQUALITY ALSO MATTERS:
+   - [ ] Objects with same content but different refs fail ===
+   - [ ] Use JSON.stringify for deep comparison when needed
+   - [ ] Return SAME array reference if nothing changed
+   - [ ] Track which blocks kept same reference
+
+5. THE DEBUGGING SEQUENCE:
+   When blocks re-render unexpectedly:
+   - [ ] Add [BLOCK-REF-STABILITY] logging to see reference changes
+   - [ ] Add [BLOCKS-MEMO] logging to track array updates
+   - [ ] Add [BLOCK-MEMO] logging in memo functions
+   - [ ] Check parent component for inline functions FIRST
+```
+
+**Real Example From 2-Hour Debug Session**:
+```javascript
+// ❌ BEFORE (caused ALL blocks to re-render on any edit):
+<Virtuoso
+  data={blocks}
+  computeItemKey={(index, block) => block.id}  // NEW function every render
+  itemContent={(index, block) => {             // NEW function every render
+    return <BlockRenderer block={block} />
+  }}
+/>
+
+// ✅ AFTER (only edited block re-renders):
+const computeItemKey = useCallback((index, block) => block.id, []);
+const renderBlockItem = useCallback((index, block) => {
+  return <BlockRenderer block={block} />
+}, [deps]);
+
+<Virtuoso
+  data={blocks}
+  computeItemKey={computeItemKey}
+  itemContent={renderBlockItem}
+/>
+```
+
+**The Logs That Revealed The Truth**:
+```
+[BLOCKS-MEMO] Block reference stability: 38/39 blocks same  ✅ Deep equality working
+[BLOCK-MEMO] filetreeBlock - PREVENTED                      ✅ Memo working
+FileTreeBlock memo: PREVENTED                               ✅ Component memo working
+→ But ALL blocks still rendered!                            ❌ Virtuoso got new itemContent
+```
+
+**Key Lessons Learned**:
+1. **Container-First Rule** - Should have checked ExpandedViewEnhanced FIRST, not individual blocks
+2. **Function Reference Stability** - Is EVERYTHING in React performance
+3. **Problems Stack** - There were 3 separate issues breaking memo (shallow equality, inline props, inline Virtuoso functions)
+4. **Logging Saved Us** - Strategic logs revealed exact problem when intuition failed
+5. **Measurement Over Assumptions** - Only logs showed that 38/39 blocks kept same reference but still re-rendered
+
+**Performance Impact**:
+- Before: Edit 1 block → ALL 39 blocks re-render (flicker visible)
+- After: Edit 1 block → ONLY that 1 block re-renders (smooth)
+- Time Saved: 2+ hours of future debugging for anyone hitting this
+
+**When This Applies**:
+- ✅ Virtualized lists (react-window, react-virtuoso, tanstack-virtual)
+- ✅ Large lists with React.memo optimization
+- ✅ Any component with heavy memoization
+- ✅ Performance-critical rendering paths
+
+*This prevents: Mysterious re-renders, virtualization failing to recycle, memo optimizations being useless, 2+ hour debugging sessions, block flickering, cascading re-renders*
 
 ---
 

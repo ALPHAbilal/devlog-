@@ -1767,6 +1767,13 @@ function ExpandedView({
               skipAnimationFrameInResizeObserver={true}
               computeItemKey={computeItemKey}
               itemContent={renderBlockItem}
+              rangeChanged={(range) => {
+                console.log('[VIRTUOSO-RANGE] Visible range changed:', {
+                  startIndex: range.startIndex,
+                  endIndex: range.endIndex,
+                  visibleCount: range.endIndex - range.startIndex + 1
+                });
+              }}
             />
           )}
 

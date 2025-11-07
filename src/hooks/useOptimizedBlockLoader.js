@@ -135,6 +135,12 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
       // CRITICAL FIX: Preserve references for unchanged blocks
       // Don't normalize positions - array index IS the position!
+      
+      let sameRefCount = 0;
+      let contentSameCount = 0;
+      let newBlockCount = 0;
+      let changedCount = 0;
+      
       const optimizedBlocks = newBlocks.map((newBlock, index) => {
         const prevBlock = prevBlocks.find(b => b.id === newBlock.id);
 
@@ -143,6 +149,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
           // SUPER CRITICAL: If it's the exact same object reference, just return it!
           // This happens when we splice() the array in addBlock/moveBlock
           if (prevBlock === newBlock) {
+            sameRefCount++;
             return prevBlock;  // ✅ SAME OBJECT - KEEP IT!
           }
 
@@ -152,16 +159,30 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
           // If nothing changed, reuse exact reference
           if (contentSame && typeSame) {
+            contentSameCount++;
             return prevBlock;  // ✅ PRESERVE REFERENCE
           }
 
           // Content or type changed, use new object
+          changedCount++;
           return newBlock;
         }
 
         // New block, return as-is
+        newBlockCount++;
         return newBlock;
       });
+      
+      if (import.meta.env.DEV) {
+        console.log('[UPDATE-BLOCKS-DEBUG] Reference preservation analysis:', {
+          total: newBlocks.length,
+          sameRef: sameRefCount,
+          contentSame: contentSameCount,
+          changed: changedCount,
+          new: newBlockCount,
+          preserved: sameRefCount + contentSameCount
+        });
+      }
 
       // Update caches
       sessionCache.updateBlocks(documentId, optimizedBlocks);

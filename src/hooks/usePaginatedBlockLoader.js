@@ -242,10 +242,11 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
         return prevBlocks;
       }
 
-      // Create new array with only the updated block replaced
-      // CRITICAL: Only create new array, preserve all other block references
-      const newBlocks = [...prevBlocks];
-      newBlocks[blockIndex] = updatedBlock;
+      // CRITICAL FIX: Use .map() with reference preservation
+      // This ensures unchanged blocks keep EXACT same reference
+      const newBlocks = prevBlocks.map((block, i) =>
+        i === blockIndex ? updatedBlock : block
+      );
 
       // Verify reference stability for unchanged blocks
       const unchangedCount = newBlocks.filter((block, i) => block === prevBlocks[i]).length;

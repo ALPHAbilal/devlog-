@@ -19,9 +19,26 @@ export default function SyncStatusIndicator({ documentId, syncManagerRef }) {
 
   const intervalRef = useRef(null);
 
+  // Track if manager is ready - this state change will trigger effect re-run
+  const [managerReady, setManagerReady] = useState(false);
+
+  // Check if manager is ready
   useEffect(() => {
-    if (!documentId || !syncManagerRef?.current) {
-      console.log('[SYNC-STATUS-POLL] ⚠️ Missing documentId or syncManagerRef, polling disabled');
+    if (syncManagerRef?.current) {
+      console.log('[SYNC-STATUS-POLL] ✅ SmartSync manager ready');
+      setManagerReady(true);
+    } else {
+      console.log('[SYNC-STATUS-POLL] ⏳ Waiting for SmartSync manager...');
+    }
+  }, [syncManagerRef?.current]); // Watch the actual ref value
+
+  useEffect(() => {
+    if (!documentId || !managerReady || !syncManagerRef?.current) {
+      console.log('[SYNC-STATUS-POLL] ⚠️ Not ready to start polling:', {
+        hasDocumentId: !!documentId,
+        managerReady,
+        hasManagerRef: !!syncManagerRef?.current
+      });
       return;
     }
 
@@ -55,7 +72,7 @@ export default function SyncStatusIndicator({ documentId, syncManagerRef }) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [documentId, syncManagerRef]);
+  }, [documentId, managerReady]); // Depend on managerReady state instead of ref
 
   return (
     <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-dark-secondary/30

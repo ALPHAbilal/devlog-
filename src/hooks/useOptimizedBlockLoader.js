@@ -124,7 +124,15 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
   // Function to update blocks (for edits)
   // OPTIMIZATION: Preserve block object references to prevent unnecessary re-renders
   const updateBlocks = (newBlocks) => {
+    if (import.meta.env.DEV) {
+      console.log('[UPDATE-BLOCKS-CALLED] updateBlocks invoked with', newBlocks.length, 'blocks');
+    }
+    
     setBlocks(prevBlocks => {
+      if (import.meta.env.DEV) {
+        console.log('[UPDATE-BLOCKS-SETTER] Inside setBlocks callback, prev:', prevBlocks?.length, 'new:', newBlocks.length);
+      }
+      
       // If previous blocks is empty, just return new blocks as-is
       if (!prevBlocks || prevBlocks.length === 0) {
         // Update caches

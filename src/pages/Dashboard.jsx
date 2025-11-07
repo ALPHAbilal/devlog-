@@ -785,22 +785,23 @@ export default function Dashboard() {
                             'Click to start writing...';
     }
     
-    // Update local state
-    const updatedEntries = entries.map(entry => 
+    // MILESTONE 1: Skip block updates entirely - ExpandedView manages its own blocks
+    if (updates.blocks) {
+      console.log('Dashboard: Skipping block update - ExpandedView manages blocks internally');
+      // Don't update entries or expandedEntry for block changes
+      // ExpandedView has its own block state that's already updated
+      return;
+    }
+
+    // Update local state (only for non-block updates like title, tags)
+    const updatedEntries = entries.map(entry =>
       entry.id === entryId ? updatedEntry : entry
     );
     setEntries(updatedEntries);
-    
-    // Update expandedEntry if it's the one being edited
+
+    // Update expandedEntry if it's the one being edited (only for non-block updates)
     if (expandedEntry && expandedEntry.id === entryId) {
       setExpandedEntry(updatedEntry);
-    }
-    
-    // MILESTONE 1: Skip block saves - let Smart Sync handle them
-    if (updates.blocks) {
-      console.log('Dashboard: Skipping block save - Smart Sync will handle it');
-      // Don't save blocks through storageWrapper, Smart Sync is already handling this
-      return;
     }
     
     // Save only this document to storage - use requestIdleCallback for non-blocking save

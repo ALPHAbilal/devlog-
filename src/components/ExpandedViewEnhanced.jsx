@@ -1209,14 +1209,22 @@ function ExpandedView({
       });
     }
     
-    // CRITICAL SAFEGUARD: Ensure blocks array is valid
-    if (!blocks || blocks.length === 0) {
-      console.error('[ADD-BLOCK] ERROR: blocks array is empty or invalid!', {
+    // CRITICAL SAFEGUARD: Ensure blocks array is valid (but allow empty array for new documents)
+    if (!blocks || !Array.isArray(blocks)) {
+      console.error('[ADD-BLOCK] ERROR: blocks array is invalid!', {
         blocksType: typeof blocks,
         blocksLength: blocks?.length,
         blocksIsArray: Array.isArray(blocks)
       });
       return;
+    }
+    
+    // Log when creating first block in empty document
+    if (blocks.length === 0) {
+      console.log('[ADD-BLOCK] Creating first block in empty document:', {
+        type,
+        documentId: entry.id?.substring(0, 8) + '...'
+      });
     }
     
     // Calculate position and index for the new block
@@ -1250,6 +1258,15 @@ function ExpandedView({
     // Initialize block based on type
     if (type === 'heading') {
       newBlock.level = 2;
+    } else if (type === 'code') {
+      // Initialize code block with default language
+      newBlock.language = 'javascript'; // Default language
+      newBlock.content = ''; // Empty content initially
+      console.log('[CODE-BLOCK] 🆕 Creating new code block:', {
+        blockId: newBlock.id.substring(0, 8) + '...',
+        language: newBlock.language,
+        position: newBlock.position
+      });
     } else if (type === 'issue-tracker') {
       // Initialize issue-tracker with proper data structure
       newBlock.data = {

@@ -51,12 +51,26 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
           // [CACHE-TRACK] Log entry blocks found
           console.log(`[CACHE-TRACK] ✅ SOURCE: entry.blocks - Found ${entry.blocks.length} blocks in entry prop (no cache check needed)`);
           
+          // CRITICAL FIX: Deserialize blocks from entry.blocks
+          // entry.blocks contains raw database format (with content JSON string)
+          // We need to deserialize them to restore block-specific fields like images
+          const { deserializeBlock } = await import('../utils/blockSerializer');
+          const deserializedBlocks = entry.blocks.map(block => {
+            // Check if block is already deserialized (has images field for image blocks)
+            if (block.type === 'image' && block.images !== undefined) {
+              // Already deserialized, use as-is
+              return block;
+            }
+            // Deserialize the block to restore block-specific fields
+            return deserializeBlock(block);
+          });
+          
           // If blocks array exists with content, they were already loaded
           // CRITICAL: Don't normalize positions - it breaks references!
           // The blocks array index IS the position
-          setBlocks(entry.blocks);
+          setBlocks(deserializedBlocks);
           setIsLoading(false);
-          sessionCache.cacheBlocks(documentId, entry.blocks);
+          sessionCache.cacheBlocks(documentId, deserializedBlocks);
           
           const loadTime = performance.now() - loadStartTime;
           console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry in ${loadTime.toFixed(2)}ms`);

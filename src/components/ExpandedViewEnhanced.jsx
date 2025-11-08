@@ -37,17 +37,35 @@ function ExpandedView({
 }) {
   // CRITICAL FIX: Stabilize entry object to prevent re-renders from parent reference changes
   // Only create new entry reference when ID or title actually changes
-  const stableEntry = useMemo(() => ({
-    id: entry.id,
-    title: entry.title,
-    tags: entry.tags,
-    blocks: entry.blocks,
-    blockCount: entry.blockCount,
-    created_at: entry.created_at,
-    updated_at: entry.updated_at,
-    user_id: entry.user_id,
-    folder_id: entry.folder_id
-  }), [entry.id, entry.title, entry.tags, entry.blockCount, entry.created_at, entry.updated_at, entry.user_id, entry.folder_id]);
+  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+  const stableEntry = useMemo(() => {
+    if (!entry || !entry.id) {
+      // Return a safe default object if entry is invalid
+      console.warn('[ExpandedViewEnhanced] entry or entry.id is undefined:', { entry: !!entry, hasId: !!entry?.id });
+      return {
+        id: null,
+        title: '',
+        tags: [],
+        blocks: [],
+        blockCount: 0,
+        created_at: null,
+        updated_at: null,
+        user_id: null,
+        folder_id: null
+      };
+    }
+    return {
+      id: entry.id,
+      title: entry.title,
+      tags: entry.tags,
+      blocks: entry.blocks,
+      blockCount: entry.blockCount,
+      created_at: entry.created_at,
+      updated_at: entry.updated_at,
+      user_id: entry.user_id,
+      folder_id: entry.folder_id
+    };
+  }, [entry?.id, entry?.title, entry?.tags, entry?.blockCount, entry?.created_at, entry?.updated_at, entry?.user_id, entry?.folder_id]);
   
   // Analytics hooks
   const { trackEvent } = useAnalytics();
@@ -73,7 +91,7 @@ function ExpandedView({
     const hasBlocks = !!stableEntry.blocks && stableEntry.blocks.length > 0;
     const sourceType = hasBlocks ? 'entry.blocks (prop)' : 'cache/database';
     
-    console.log(`[CACHE-TRACK] 📄 ExpandedViewEnhanced: Document ${stableEntry.id.substring(0, 8)}`, {
+    console.log(`[CACHE-TRACK] 📄 ExpandedViewEnhanced: Document ${stableEntry.id ? stableEntry.id.substring(0, 8) : 'unknown'}`, {
       blockCount: stableEntry.blockCount || 'unknown',
       hasBlocksInEntry: hasBlocks,
       blocksInEntry: hasBlocks ? stableEntry.blocks.length : 0,
@@ -116,21 +134,24 @@ function ExpandedView({
   }
   
   console.log(`[VIRT-DEBUG-0] Render #${renderCount.current}`, {
-    documentId: entry.id,
-    blockCount: entry.blockCount || 'unknown',
+    documentId: entry?.id || 'undefined',
+    blockCount: entry?.blockCount || 'unknown',
     loader: shouldUsePagination ? 'PAGINATED' : 'OPTIMIZED',
-    stableEntryWorks: stableEntry.id === entry.id
+    stableEntryWorks: stableEntry.id === entry?.id,
+    hasEntry: !!entry,
+    hasEntryId: !!entry?.id
   });
 
   // Always call both hooks to maintain hook order, but only use one
-  const paginatedLoader = usePaginatedBlockLoader(entry.id, entry, {
+  // ROOT CAUSE FIX: Guard against undefined entry.id
+  const paginatedLoader = usePaginatedBlockLoader(entry?.id || null, entry, {
     pageSize: 50,
     enableInfiniteScroll: true,
-    skip: !shouldUsePagination
+    skip: !shouldUsePagination || !entry?.id
   });
 
-  const optimizedLoader = useOptimizedBlockLoader(entry.id, entry, {
-    skip: shouldUsePagination
+  const optimizedLoader = useOptimizedBlockLoader(entry?.id || null, entry, {
+    skip: shouldUsePagination || !entry?.id
   });
 
   // Select which loader to use
@@ -398,10 +419,12 @@ function ExpandedView({
 
   // Update title and tags when entry changes (e.g., when navigating via document links)
   // Also sync when title changes from parent (after save confirmation)
+  // ROOT CAUSE FIX: Guard against undefined entry
   useEffect(() => {
-    setTitle(entry.title);
+    if (!entry) return;
+    setTitle(entry.title || '');
     setTags(entry.tags || []);
-  }, [entry.id, entry.title, entry.tags]);
+  }, [entry?.id, entry?.title, entry?.tags]);
   
   // REMOVED: saveStatusTimeoutRef cleanup - no longer needed
   // SyncStatusIndicator now handles all save status display
@@ -411,7 +434,11 @@ function ExpandedView({
   // This prevents parent re-renders that caused block flickering
   // See: src/components/SyncStatusIndicator.jsx
   useEffect(() => {
-    if (!entry.id) return;
+    // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+    if (!entry || !entry.id) {
+      console.warn('[ExpandedViewEnhanced] Cannot initialize SmartSync: entry or entry.id is undefined');
+      return;
+    }
 
     // Get or create Smart Sync manager for this document
     const syncManager = getSmartSyncManager(entry.id);
@@ -427,10 +454,13 @@ function ExpandedView({
     }
 
     // No interval needed - SyncStatusIndicator handles that
-  }, [entry.id]);
+  }, [entry?.id]);
 
   // Check for unsaved changes on mount
+  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
   useEffect(() => {
+    if (!entry || !entry.id) return;
+    
     const checkForBackup = async () => {
       const backup = await autoSaveManager.recoverFromBackup(entry.id);
       if (backup && backup.data && backup.data.blocks) {
@@ -451,7 +481,7 @@ function ExpandedView({
     }, delay);
     
     return () => clearTimeout(timer);
-  }, [entry.id, entry.metadata]);
+  }, [entry?.id, entry?.metadata]);
 
   // Handle internal updates
   useEffect(() => {
@@ -461,7 +491,10 @@ function ExpandedView({
   }, [isInternalUpdate]);
 
   // Preload nearby documents when this one is opened
+  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
   useEffect(() => {
+    if (!entry || !entry.id) return;
+    
     // Get nearby document IDs (e.g., next/prev in the list)
     const currentIndex = allEntries.findIndex(e => e.id === entry.id);
     const nearbyIds = [];
@@ -472,7 +505,7 @@ function ExpandedView({
     if (nearbyIds.length > 0) {
       preloadNearbyDocuments(nearbyIds);
     }
-  }, [entry.id, allEntries, preloadNearbyDocuments]);
+  }, [entry?.id, allEntries, preloadNearbyDocuments]);
 
 
   // Calculate backlinks
@@ -786,12 +819,13 @@ function ExpandedView({
         });
         
         // Clear from session cache to prevent reappearance
-        if (window.sessionCache) {
+        // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+        if (window.sessionCache && entry?.id) {
           window.sessionCache.clearBlock(entry.id, blockId);
         }
         
         // Clear from paginated block loader cache
-        if (window.paginatedBlockLoader) {
+        if (window.paginatedBlockLoader && entry?.id) {
           window.paginatedBlockLoader.clearCache(entry.id);
         }
       }).catch(error => {
@@ -1635,7 +1669,12 @@ function ExpandedView({
   }, [blocks, updateLoadedBlocks, handleAddBelowBlock]);
 
   // Helper function for saving (status now handled by SyncStatusIndicator)
+  // ROOT CAUSE FIX: Guard against undefined entry.id
   const saveWithStatus = async (updates, description = 'changes') => {
+    if (!entry || !entry.id) {
+      console.error(`[ExpandedViewEnhanced] Cannot save ${description}: entry or entry.id is undefined`);
+      throw new Error(`Cannot save ${description}: entry or entry.id is undefined`);
+    }
     try {
       const result = await onUpdate(entry.id, updates);
       // SyncStatusIndicator automatically shows save status
@@ -1648,6 +1687,12 @@ function ExpandedView({
   };
 
   const handleTitleSave = async () => {
+    // ROOT CAUSE FIX: Guard against undefined entry
+    if (!entry || !entry.id) {
+      console.error('[ExpandedViewEnhanced] Cannot save title: entry or entry.id is undefined');
+      setIsEditingTitle(false);
+      return;
+    }
     if (onUpdate && title !== entry.title) {
       await saveWithStatus({ title }, 'title');
     }
@@ -1809,7 +1854,7 @@ function ExpandedView({
               
               {/* Sync Status Indicator - Isolated Component */}
               <SyncStatusIndicator
-                documentId={entry.id}
+                documentId={entry?.id || null}
                 syncManagerRef={smartSyncManagerRef}
               />
 
@@ -2376,7 +2421,7 @@ function ExpandedView({
       {showShareDialog && (
         <ShareDialogSimple 
           document={{
-            id: entry.id,
+            id: entry?.id || null,
             title: title,
             blocks: blocks,
             tags: tags,
@@ -2401,6 +2446,8 @@ function ExpandedView({
 export default memo(ExpandedView, (prevProps, nextProps) => {
   // Only re-render if entry.id changed (different document)
   // Ignore entry reference changes if the document ID is the same
+  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+  if (!prevProps.entry || !nextProps.entry) return false;
   if (prevProps.entry.id !== nextProps.entry.id) return false;
 
   // Re-render if other props changed

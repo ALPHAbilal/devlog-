@@ -733,6 +733,14 @@ export default function Dashboard() {
 
   // Update entry
   const updateEntry = useCallback(async (entryId, updates) => {
+    console.log('[Dashboard] updateEntry called:', {
+      entryId,
+      updatesKeys: updates ? Object.keys(updates) : 'null',
+      updatesHasId: updates && 'id' in updates,
+      updatesIdValue: updates?.id,
+      expandedEntryId: expandedEntry?.id
+    });
+    
     // Handle deletion when updates is null
     if (updates === null) {
       try {
@@ -771,9 +779,19 @@ export default function Dashboard() {
     // Find the entry being updated
     const entryToUpdate = entries.find(entry => entry.id === entryId);
     if (!entryToUpdate) {
-      console.warn('[Dashboard] Entry not found for update:', entryId);
+      console.warn('[Dashboard] Entry not found for update:', {
+        entryId,
+        entriesCount: entries.length,
+        entryIds: entries.slice(0, 5).map(e => e.id)
+      });
       return;
     }
+    
+    console.log('[Dashboard] Found entryToUpdate:', {
+      id: entryToUpdate.id,
+      title: entryToUpdate.title,
+      hasId: !!entryToUpdate.id
+    });
     
     // Create updated entry
     const updatedEntry = {

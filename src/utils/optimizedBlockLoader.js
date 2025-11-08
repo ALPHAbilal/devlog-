@@ -195,8 +195,40 @@ export class OptimizedBlockLoader {
    * Transform block from database format
    */
   transformBlockFromDB(block) {
+    // Log image blocks from database
+    if (block.type === 'image') {
+      console.log('[IMAGE-BLOCK] 📥 Loading from database:', {
+        blockId: block.id?.substring(0, 8) + '...',
+        hasContent: !!block.content,
+        contentType: typeof block.content,
+        contentLength: typeof block.content === 'string' ? block.content.length : 0,
+        contentPreview: typeof block.content === 'string' ? block.content.substring(0, 200) : 'not-string',
+        position: block.position,
+        metadata: block.metadata
+      });
+    }
+    
     // Use the deserializer to properly restore block structure
     const deserializedBlock = deserializeBlock(block);
+    
+    // Log image blocks after deserialization
+    if (block.type === 'image') {
+      console.log('[IMAGE-BLOCK] ✅ Transformed from database:', {
+        blockId: block.id?.substring(0, 8) + '...',
+        hasImages: !!deserializedBlock.images,
+        imagesIsArray: Array.isArray(deserializedBlock.images),
+        imagesCount: Array.isArray(deserializedBlock.images) ? deserializedBlock.images.length : 'not-array',
+        images: Array.isArray(deserializedBlock.images)
+          ? deserializedBlock.images.map(img => ({
+              id: img.id?.substring(0, 8) + '...',
+              url: img.url?.substring(0, 50) + '...',
+              hasStoragePath: !!img.storagePath
+            }))
+          : deserializedBlock.images,
+        layout: deserializedBlock.layout,
+        columns: deserializedBlock.columns
+      });
+    }
     
     // Add any additional fields that might be stored separately in the database
     if (block.type === 'code') {

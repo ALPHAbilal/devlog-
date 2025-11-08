@@ -533,9 +533,25 @@ function ExpandedView({
         blockId: blockId.substring(0, 8) + '...',
         blockType: currentBlock?.type || 'unknown',
         updatesImagesCount: Array.isArray(updates.images) ? updates.images.length : 'not-array',
+        updatesImages: Array.isArray(updates.images) 
+          ? updates.images.map(img => ({
+              id: img.id?.substring(0, 8) + '...',
+              url: img.url?.substring(0, 50) + '...',
+              hasStoragePath: !!img.storagePath
+            }))
+          : updates.images,
+        currentBlockFound: !!currentBlock,
         currentImagesCount: Array.isArray(currentBlock?.images) ? currentBlock.images.length : 'not-array',
+        currentImages: Array.isArray(currentBlock?.images)
+          ? currentBlock.images.map(img => ({
+              id: img.id?.substring(0, 8) + '...',
+              url: img.url?.substring(0, 50) + '...'
+            }))
+          : currentBlock?.images,
         needsSave,
-        isInitialLoad: isInitialLoadRef.current
+        isInitialLoad: isInitialLoadRef.current,
+        blocksArrayLength: blocks.length,
+        blockInArray: blocks.some(b => b.id === blockId)
       });
     }
 

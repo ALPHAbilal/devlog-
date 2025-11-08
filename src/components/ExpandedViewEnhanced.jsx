@@ -601,11 +601,29 @@ function ExpandedView({
         if (currentBlock) {
           // Remove isNew flag when updating a block (user has interacted with it)
           const { isNew, ...blockWithoutNew } = currentBlock;
+          // CRITICAL FIX: Preserve position - never lose it!
+          // Priority: 1) updates.position, 2) currentBlock.position, 3) entry.blocks position, 4) array index
+          let blockPosition = updates.position;
+          if (blockPosition === undefined || blockPosition === null) {
+            if (currentBlock.position !== undefined && currentBlock.position !== null) {
+              blockPosition = currentBlock.position;
+            } else {
+              // Try stableEntry.blocks as source of truth
+              const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
+              if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
+                blockPosition = entryBlock.position;
+              } else {
+                // Last resort: use array index
+                blockPosition = blocks.indexOf(currentBlock);
+              }
+            }
+          }
+          
           const updatedBlock = {
             ...blockWithoutNew,
             ...updates,
-            // Use stored position if available, otherwise use array index
-            position: currentBlock.position !== undefined ? currentBlock.position : blocks.indexOf(currentBlock)
+            // CRITICAL: Always preserve position - never default to 0 unless it's actually position 0
+            position: blockPosition
           };
 
           // [TABLE-SAVE] Log before serialization for table blocks
@@ -679,11 +697,31 @@ function ExpandedView({
                               (updates.language !== undefined || updates.filePath !== undefined ? 'code' : null) ||
                               'text'; // fallback
           
+          // CRITICAL FIX: Try to get position from stableEntry.blocks (source of truth) or blocks array
+          let blockPosition = updates.position;
+          if (blockPosition === undefined) {
+            // Try to find in stableEntry.blocks first (most reliable)
+            const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
+            if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
+              blockPosition = entryBlock.position;
+            } else {
+              // Fallback: try to find in current blocks array
+              const blockInArray = blocks.find(b => b.id === blockId);
+              if (blockInArray && blockInArray.position !== undefined && blockInArray.position !== null) {
+                blockPosition = blockInArray.position;
+              } else {
+                // Last resort: use array index (but this is unreliable)
+                const blockIndex = blocks.findIndex(b => b.id === blockId);
+                blockPosition = blockIndex >= 0 ? blockIndex : blocks.length;
+              }
+            }
+          }
+          
           // Construct block from updates
           const constructedBlock = {
             id: blockId,
             type: inferredType,
-            position: updates.position !== undefined ? updates.position : 0,
+            position: blockPosition,
             metadata: updates.metadata || {},
             ...updates
           };
@@ -749,7 +787,7 @@ function ExpandedView({
         }
       }
     }
-  }, [blocks, updateSingleBlock]);
+  }, [blocks, updateSingleBlock, stableEntry]);
 
   const deleteBlock = useCallback((blockId) => {
     // Defensive check

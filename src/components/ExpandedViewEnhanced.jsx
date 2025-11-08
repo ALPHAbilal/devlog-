@@ -629,7 +629,88 @@ function ExpandedView({
             // SyncStatusIndicator will show the error state automatically
           });
         } else {
-          console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ Block not found in blocks array:', blockId);
+          // CRITICAL FIX: Block not found in array yet (startTransition timing issue)
+          // Construct block from updates to ensure save happens
+          console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ Block not found in blocks array yet (startTransition), constructing from updates:', blockId);
+          
+          // Infer block type from updates
+          const inferredType = updates.type || 
+                              (updates.images !== undefined ? 'image' : null) ||
+                              (updates.messages !== undefined ? 'ai' : null) ||
+                              (updates.treeData !== undefined ? 'filetree' : null) ||
+                              (updates.data !== undefined ? 'table' : null) ||
+                              (updates.url !== undefined ? 'inline-image' : null) ||
+                              'text'; // fallback
+          
+          // Construct block from updates
+          const constructedBlock = {
+            id: blockId,
+            type: inferredType,
+            position: updates.position !== undefined ? updates.position : 0,
+            metadata: updates.metadata || {},
+            ...updates
+          };
+          
+          // Log image block construction for tracking
+          if (updates.images !== undefined) {
+            console.log('[IMAGE-BLOCK] 🔨 Constructing block from updates:', {
+              blockId: blockId.substring(0, 8) + '...',
+              inferredType,
+              imagesCount: Array.isArray(constructedBlock.images) ? constructedBlock.images.length : 'not-array',
+              images: Array.isArray(constructedBlock.images) 
+                ? constructedBlock.images.map(img => ({
+                    id: img.id?.substring(0, 8) + '...',
+                    url: img.url?.substring(0, 50) + '...',
+                    hasStoragePath: !!img.storagePath
+                  }))
+                : constructedBlock.images
+            });
+          }
+          
+          // Serialize the constructed block
+          const serializedBlock = serializeBlock(constructedBlock);
+          
+          // Log serialized result for image blocks
+          if (updates.images !== undefined) {
+            let parsedContent = null;
+            try {
+              parsedContent = JSON.parse(serializedBlock.content);
+            } catch (e) {
+              parsedContent = { error: 'Failed to parse content' };
+            }
+            console.log('[IMAGE-BLOCK] 📦 Serialized constructed block:', {
+              blockId: blockId.substring(0, 8) + '...',
+              contentLength: serializedBlock.content?.length,
+              contentPreview: serializedBlock.content?.substring(0, 200),
+              parsedImagesCount: parsedContent?.images?.length || 0,
+              parsedImages: parsedContent?.images?.map(img => ({
+                id: img.id?.substring(0, 8) + '...',
+                url: img.url?.substring(0, 50) + '...'
+              })) || []
+            });
+          }
+          
+          console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with constructed block:', {
+            blockId: blockId.substring(0, 8) + '...',
+            action: 'UPDATE',
+            blockType: constructedBlock.type,
+            position: constructedBlock.position,
+            contentLength: serializedBlock.content?.length
+          });
+          
+          // Save the constructed block
+          smartSyncManagerRef.current.handleChange(
+            blockId,
+            serializedBlock.content,
+            'UPDATE',
+            constructedBlock.type,
+            constructedBlock.position,
+            serializedBlock.metadata
+          ).then(() => {
+            console.log('[SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully (constructed block)');
+          }).catch(error => {
+            console.error('[SYNC-CHANGE-RECEIVED] ❌ Smart Sync error (constructed block):', error);
+          });
         }
       } else {
         console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ smartSyncManagerRef.current is null/undefined');

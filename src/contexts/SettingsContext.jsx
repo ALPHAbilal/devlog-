@@ -12,7 +12,7 @@ export function SettingsProvider({ children }) {
     autoSaveInterval: 30, // Changed from 1 to 30 seconds for production stability
     showLineNumbers: true,
     enableTextCollapse: true,
-    sessionTimeout: 30 // Default 30 minutes
+    sessionTimeout: 4320 // Default 3 days (72 hours = 4320 minutes)
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -23,6 +23,11 @@ export function SettingsProvider({ children }) {
       try {
         const parsed = JSON.parse(localSettings);
         setSettings(prev => ({ ...prev, ...parsed }));
+        
+        // Apply session timeout if set in localStorage
+        if (parsed.sessionTimeout !== undefined) {
+          setInactivityTimeout(parsed.sessionTimeout);
+        }
       } catch (err) {
         console.error('Error parsing local settings:', err);
       }

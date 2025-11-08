@@ -14,13 +14,12 @@ const STORAGE_KEY = 'sb-zqcjipwiznesnbgbocnu-auth-token';
  * - Smart refresh handling
  * - Connection pooling
  * - Request deduplication
- * - Automatic token refresh (no inactivity timeout)
+ * - Automatic token refresh with 3-day inactivity timeout
  *
  * Session Management:
- * Sessions persist indefinitely through automatic token refresh.
- * No forced logout due to inactivity - users stay signed in as long as
- * their tokens can be refreshed. This is ideal for developer tools where
- * users frequently switch between applications.
+ * Sessions persist through automatic token refresh.
+ * Users are automatically signed out after 3 days (72 hours) of inactivity.
+ * Activity monitoring resets the timer on user interaction (mouse, keyboard, scroll, touch).
  */
 class OptimizedSupabaseClient {
   constructor() {
@@ -34,9 +33,9 @@ class OptimizedSupabaseClient {
     this.refreshPromise = null; // Track ongoing refresh
     this.lastRefreshTime = 0;
     this.sessionTimeout = null;
-    // Inactivity timeout disabled - rely on Supabase's automatic token refresh
-    // Sessions will remain active as long as tokens can be refreshed
-    this.inactivityTimeout = 0; // 0 = disabled (previously 30 minutes)
+    // Inactivity timeout set to 3 days (72 hours)
+    // Sessions will remain active for 3 days of inactivity before automatic signout
+    this.inactivityTimeout = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds (259200000 ms)
   }
 
   /**
@@ -247,8 +246,8 @@ class OptimizedSupabaseClient {
 
   /**
    * Set up activity monitoring for session timeout
-   * Note: Activity monitoring is currently disabled (inactivityTimeout = 0)
-   * This method is kept for potential future use if timeout needs to be re-enabled
+   * Monitors user activity (mouse, keyboard, scroll, touch) to reset the inactivity timer
+   * Default timeout is 3 days of inactivity before automatic signout
    */
   setupActivityMonitoring() {
     // Skip setup if inactivity timeout is disabled

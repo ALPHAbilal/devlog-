@@ -775,25 +775,24 @@ export default function Dashboard() {
       return;
     }
     
-    // ROOT CAUSE FIX: Ensure id is always preserved - updates should never override id
-    // Create updated entry, explicitly preserving id from entryToUpdate
+    // Create updated entry
     const updatedEntry = {
       ...entryToUpdate,
       ...updates,
-      id: entryToUpdate.id, // CRITICAL: Always preserve the original id
+      id: entryToUpdate.id, // CRITICAL: Always preserve id - updates should never override it
       updatedAt: new Date().toISOString()
     };
     
-    // Validate that id is present
+    // Debug logging to track id loss
     if (!updatedEntry.id) {
-      console.error('[Dashboard] CRITICAL: updatedEntry missing id!', {
+      console.error('[Dashboard] CRITICAL: updatedEntry missing id after creation!', {
         entryToUpdateId: entryToUpdate.id,
         entryId,
         updatesKeys: Object.keys(updates),
-        hasIdInUpdates: 'id' in updates
+        updatesHasId: 'id' in updates,
+        updatesIdValue: updates.id,
+        updatedEntryKeys: Object.keys(updatedEntry)
       });
-      // Don't proceed if id is missing
-      return;
     }
     
     // Update preview based on blocks
@@ -821,6 +820,16 @@ export default function Dashboard() {
 
     // Update expandedEntry if it's the one being edited (only for non-block updates)
     if (expandedEntry && expandedEntry.id === entryId) {
+      // Debug logging before setting expandedEntry
+      if (!updatedEntry.id) {
+        console.error('[Dashboard] CRITICAL: Cannot set expandedEntry - missing id!', {
+          entryId,
+          updatedEntryKeys: Object.keys(updatedEntry),
+          updatedEntryId: updatedEntry.id
+        });
+        return; // Don't update if id is missing
+      }
+      console.log('[Dashboard] Setting expandedEntry with id:', updatedEntry.id);
       setExpandedEntry(updatedEntry);
     }
     

@@ -733,14 +733,6 @@ export default function Dashboard() {
 
   // Update entry
   const updateEntry = useCallback(async (entryId, updates) => {
-    console.log('[Dashboard] updateEntry called:', {
-      entryId,
-      updatesKeys: updates ? Object.keys(updates) : 'null',
-      updatesHasId: updates && 'id' in updates,
-      updatesIdValue: updates?.id,
-      expandedEntryId: expandedEntry?.id
-    });
-    
     // Handle deletion when updates is null
     if (updates === null) {
       try {
@@ -779,19 +771,8 @@ export default function Dashboard() {
     // Find the entry being updated
     const entryToUpdate = entries.find(entry => entry.id === entryId);
     if (!entryToUpdate) {
-      console.warn('[Dashboard] Entry not found for update:', {
-        entryId,
-        entriesCount: entries.length,
-        entryIds: entries.slice(0, 5).map(e => e.id)
-      });
       return;
     }
-    
-    console.log('[Dashboard] Found entryToUpdate:', {
-      id: entryToUpdate.id,
-      title: entryToUpdate.title,
-      hasId: !!entryToUpdate.id
-    });
     
     // Create updated entry
     const updatedEntry = {
@@ -800,18 +781,6 @@ export default function Dashboard() {
       id: entryToUpdate.id, // CRITICAL: Always preserve id - updates should never override it
       updatedAt: new Date().toISOString()
     };
-    
-    // Debug logging to track id loss
-    if (!updatedEntry.id) {
-      console.error('[Dashboard] CRITICAL: updatedEntry missing id after creation!', {
-        entryToUpdateId: entryToUpdate.id,
-        entryId,
-        updatesKeys: Object.keys(updates),
-        updatesHasId: 'id' in updates,
-        updatesIdValue: updates.id,
-        updatedEntryKeys: Object.keys(updatedEntry)
-      });
-    }
     
     // Update preview based on blocks
     if (updates.blocks) {
@@ -838,16 +807,9 @@ export default function Dashboard() {
 
     // Update expandedEntry if it's the one being edited (only for non-block updates)
     if (expandedEntry && expandedEntry.id === entryId) {
-      // Debug logging before setting expandedEntry
       if (!updatedEntry.id) {
-        console.error('[Dashboard] CRITICAL: Cannot set expandedEntry - missing id!', {
-          entryId,
-          updatedEntryKeys: Object.keys(updatedEntry),
-          updatedEntryId: updatedEntry.id
-        });
         return; // Don't update if id is missing
       }
-      console.log('[Dashboard] Setting expandedEntry with id:', updatedEntry.id);
       setExpandedEntry(updatedEntry);
     }
     

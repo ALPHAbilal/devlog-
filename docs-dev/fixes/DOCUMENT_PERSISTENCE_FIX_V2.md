@@ -1,6 +1,61 @@
 # Document Persistence Fix V2 - Root Cause Analysis
 
-## Root Causes Identified from Logs
+## Critical Fix: Document Title Editing Causing Entry ID Loss
+
+### Problem
+When editing a document title in `DocumentPage`, the document would lose its `id` property, causing:
+- `TypeError: Cannot read properties of undefined (reading 'substring')`
+- `[ExpandedViewEnhanced] Cannot save title: entry or entry.id is undefined`
+- Document becoming unusable after title edit
+
+### Root Cause
+**File**: `src/pages/DocumentPage.jsx`
+
+The `handleUpdate` function had an incorrect signature:
+- **Expected**: `handleUpdate(updatedDocument)` - single parameter
+- **Actual**: `onUpdate(entryId, updates)` - two parameters (as called by `ExpandedViewEnhanced`)
+
+When `ExpandedViewEnhanced` called `onUpdate(entry.id, { title: 'new title' })`:
+1. `handleUpdate` received `entry.id` (a string) as the first parameter
+2. `setDocument(entry.id)` set `document` to a string instead of an object
+3. `document.id` became `undefined` because strings don't have an `id` property
+
+### Fix Applied
+Updated `DocumentPage.jsx` `handleUpdate` to:
+1. Accept correct signature: `(entryId, updates)` instead of `(updatedDocument)`
+2. Merge updates into current document: `{ ...document, ...updates, id: document.id }`
+3. Always preserve `id` field explicitly
+4. Save to storage after updating
+
+**Code Change**:
+```javascript
+// BEFORE (WRONG):
+const handleUpdate = useCallback((updatedDocument) => {
+  setDocument(updatedDocument);
+}, []);
+
+// AFTER (CORRECT):
+const handleUpdate = useCallback(async (entryId, updates) => {
+  if (!document || !document.id) return;
+  const updatedDocument = {
+    ...document,
+    ...updates,
+    id: document.id, // CRITICAL: Always preserve id
+    updated_at: new Date().toISOString()
+  };
+  setDocument(updatedDocument);
+  await storageWrapper.saveDocument({ ...updatedDocument, blocks: undefined });
+}, [document, navigate]);
+```
+
+### Additional Safeguards Added
+- **ExpandedViewEnhanced.jsx**: Added guards against `undefined` entry or `entry.id` throughout
+- **Dashboard.jsx**: Added `id` preservation when creating `updatedEntry`
+- All components now validate `entry.id` exists before using it
+
+---
+
+## Previous Root Causes Identified
 
 1. **Blocks table doesn't have deleted_at column**
    - Error: "column dl.deleted_at does not exist" 
@@ -33,10 +88,12 @@ export const storageWrapper = {
 - **File**: `src/services/shareService.js` (line 221)
 - Removed `.eq('deleted_at', null)` from blocks table queries
 
-### 3. Added Comprehensive Logging
-- Added logging when saving documents to Supabase
-- Added logging for successful saves with document ID and timestamp
-- This helps track if documents are actually being saved
+### 3. Document Title Editing Fix (Latest)
+- **File**: `src/pages/DocumentPage.jsx`
+- Fixed `handleUpdate` function signature mismatch
+- Now correctly handles `(entryId, updates)` signature from `ExpandedViewEnhanced`
+- Always preserves document `id` when merging updates
+- See "Critical Fix: Document Title Editing Causing Entry ID Loss" section above for details
 
 ### 4. Existing Fixes Still Apply
 - RPC function parameters fixed (removed p_user_id)

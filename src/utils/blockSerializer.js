@@ -60,22 +60,12 @@ export function serializeBlock(block) {
 
   // Serialize based on block type
   switch (block.type) {
-    case 'text':
-    case 'heading':
-    case 'code':
-      // These blocks already use 'content' field
-      serialized.content = block.content || '';
-      // Log code block serialization
-      console.log('[CODE-BLOCK] 🔄 Serializing code block:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        hasContent: !!block.content,
-        contentLength: block.content?.length || 0,
-        hasLanguage: block.language !== undefined,
-        hasFilePath: block.filePath !== undefined,
-        language: block.language,
-        filePath: block.filePath
-      });
-      break;
+      case 'text':
+      case 'heading':
+      case 'code':
+        // These blocks already use 'content' field
+        serialized.content = block.content || '';
+        break;
 
     case 'ai':
       // AI blocks store messages array
@@ -237,16 +227,6 @@ export function deserializeBlock(block) {
       case 'code':
         // These blocks use content directly
         deserialized.content = block.content || '';
-        // Log code block deserialization
-        console.log('[CODE-BLOCK] 🔄 Deserializing code block:', {
-          blockId: block.id?.substring(0, 8) + '...',
-          hasContent: !!block.content,
-          contentLength: block.content?.length || 0,
-          hasLanguage: block.language !== undefined,
-          hasFilePath: block.file_path !== undefined,
-          language: block.language,
-          filePath: block.file_path
-        });
         break;
 
       case 'ai':

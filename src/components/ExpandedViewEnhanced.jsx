@@ -37,11 +37,10 @@ function ExpandedView({
 }) {
   // CRITICAL FIX: Stabilize entry object to prevent re-renders from parent reference changes
   // Only create new entry reference when ID or title actually changes
-  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+  // Guard against undefined entry or entry.id
   const stableEntry = useMemo(() => {
     if (!entry || !entry.id) {
       // Return a safe default object if entry is invalid
-      console.warn('[ExpandedViewEnhanced] entry or entry.id is undefined:', { entry: !!entry, hasId: !!entry?.id });
       return {
         id: null,
         title: '',
@@ -434,9 +433,8 @@ function ExpandedView({
   // This prevents parent re-renders that caused block flickering
   // See: src/components/SyncStatusIndicator.jsx
   useEffect(() => {
-    // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+    // Guard against undefined entry or entry.id
     if (!entry || !entry.id) {
-      console.warn('[ExpandedViewEnhanced] Cannot initialize SmartSync: entry or entry.id is undefined');
       return;
     }
 
@@ -457,7 +455,7 @@ function ExpandedView({
   }, [entry?.id]);
 
   // Check for unsaved changes on mount
-  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+  // Guard against undefined entry or entry.id
   useEffect(() => {
     if (!entry || !entry.id) return;
     
@@ -491,7 +489,7 @@ function ExpandedView({
   }, [isInternalUpdate]);
 
   // Preload nearby documents when this one is opened
-  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+  // Guard against undefined entry or entry.id
   useEffect(() => {
     if (!entry || !entry.id) return;
     
@@ -559,25 +557,6 @@ function ExpandedView({
                      updates.filePath !== undefined ||     // Code blocks
                      updates.level !== undefined;          // Heading blocks
 
-    // Log code block updates specifically
-    if (updates.language !== undefined || updates.filePath !== undefined) {
-      const currentBlock = blocks.find(b => b.id === blockId);
-      console.log('[CODE-BLOCK] 📥 ExpandedView received code block update:', {
-        blockId: blockId.substring(0, 8) + '...',
-        blockType: currentBlock?.type || 'unknown',
-        hasLanguage: updates.language !== undefined,
-        hasFilePath: updates.filePath !== undefined,
-        hasContent: updates.content !== undefined,
-        language: updates.language,
-        filePath: updates.filePath,
-        contentLength: updates.content?.length || 0,
-        currentBlockFound: !!currentBlock,
-        currentBlockType: currentBlock?.type,
-        needsSave,
-        isInitialLoad: isInitialLoadRef.current
-      });
-    }
-
     // Use the loader's updateBlock method
     startTransition(() => {
       updateSingleBlock(blockId, updates);
@@ -585,13 +564,6 @@ function ExpandedView({
 
     // Skip saves during initial load
     if (needsSave && !isInitialLoadRef.current) {
-      console.log('[SYNC-CHANGE-RECEIVED] 📥 Block update received:', {
-        blockId: blockId.substring(0, 8) + '...',
-        updates: Object.keys(updates),
-        needsSave,
-        smartSyncExists: !!smartSyncManagerRef.current
-      });
-
       // Use Smart Sync for saving - get current block and apply updates
       if (smartSyncManagerRef.current) {
         const currentBlock = blocks.find(b => b.id === blockId);
@@ -605,41 +577,8 @@ function ExpandedView({
             position: currentBlock.position !== undefined ? currentBlock.position : blocks.indexOf(currentBlock)
           };
 
-          // Log code block merge before serialization
-          if (updates.language !== undefined || updates.filePath !== undefined) {
-            console.log('[CODE-BLOCK] 🔀 Block merge before serialization:', {
-              blockId: blockId.substring(0, 8) + '...',
-              updatedBlockType: updatedBlock.type,
-              hasLanguage: updatedBlock.language !== undefined,
-              hasFilePath: updatedBlock.filePath !== undefined,
-              hasContent: updatedBlock.content !== undefined,
-              language: updatedBlock.language,
-              filePath: updatedBlock.filePath,
-              contentLength: updatedBlock.content?.length || 0
-            });
-          }
-
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
-          
-          // Log code block serialization result
-          if (updates.language !== undefined || updates.filePath !== undefined) {
-            console.log('[CODE-BLOCK] 📦 Serialized code block:', {
-              blockId: blockId.substring(0, 8) + '...',
-              blockType: serializedBlock.type || updatedBlock.type,
-              contentLength: serializedBlock.content?.length || 0,
-              hasLanguage: updatedBlock.language !== undefined,
-              hasFilePath: updatedBlock.filePath !== undefined
-            });
-          }
-
-          console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with:', {
-            blockId: blockId.substring(0, 8) + '...',
-            action: 'UPDATE',
-            blockType: updatedBlock.type,
-            position: updatedBlock.position,
-            contentLength: serializedBlock.content?.length
-          });
 
           // Smart Sync handles everything - pass the normalized content WITH type, position, and metadata
           smartSyncManagerRef.current.handleChange(
@@ -649,18 +588,13 @@ function ExpandedView({
             updatedBlock.type,       // CRITICAL: Send block type
             updatedBlock.position,   // CRITICAL: Use the block's actual position, not array index
             serializedBlock.metadata // CRITICAL: Send metadata for snapshots and other JSONB data
-          ).then(() => {
-            console.log('[SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully');
-            // Update sync status will happen automatically via the interval
-          }).catch(error => {
+          ).catch(error => {
             console.error('[SYNC-CHANGE-RECEIVED] ❌ Smart Sync error:', error);
-            // REMOVED: setSaveStatus - was causing unnecessary re-renders
             // SyncStatusIndicator will show the error state automatically
           });
         } else {
           // CRITICAL FIX: Block not found in array yet (startTransition timing issue)
           // Construct block from updates to ensure save happens
-          console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ Block not found in blocks array yet (startTransition), constructing from updates:', blockId);
           
           // Infer block type from updates
           const inferredType = updates.type || 
@@ -672,19 +606,6 @@ function ExpandedView({
                               (updates.language !== undefined || updates.filePath !== undefined ? 'code' : null) ||
                               'text'; // fallback
           
-          // Log code block type inference
-          if (updates.language !== undefined || updates.filePath !== undefined) {
-            console.log('[CODE-BLOCK] 🔍 Type inference for code block:', {
-              blockId: blockId.substring(0, 8) + '...',
-              hasType: !!updates.type,
-              updatesType: updates.type,
-              hasLanguage: updates.language !== undefined,
-              hasFilePath: updates.filePath !== undefined,
-              inferredType,
-              willBeCode: inferredType === 'code'
-            });
-          }
-          
           // Construct block from updates
           const constructedBlock = {
             id: blockId,
@@ -694,67 +615,22 @@ function ExpandedView({
             ...updates
           };
           
-          // Log code block construction
-          if (inferredType === 'code' || updates.language !== undefined || updates.filePath !== undefined) {
-            console.log('[CODE-BLOCK] 🔨 Constructing code block from updates:', {
-              blockId: blockId.substring(0, 8) + '...',
-              inferredType,
-              hasLanguage: constructedBlock.language !== undefined,
-              hasFilePath: constructedBlock.filePath !== undefined,
-              hasContent: constructedBlock.content !== undefined,
-              contentLength: constructedBlock.content?.length || 0,
-              language: constructedBlock.language,
-              filePath: constructedBlock.filePath
-            });
-          }
-          
           // Serialize the constructed block
           const serializedBlock = serializeBlock(constructedBlock);
           
-          // Log code block serialization result
-          if (inferredType === 'code' || updates.language !== undefined || updates.filePath !== undefined) {
-            console.log('[CODE-BLOCK] 📦 Serialized code block:', {
-              blockId: blockId.substring(0, 8) + '...',
-              blockType: serializedBlock.type || constructedBlock.type,
-              contentLength: serializedBlock.content?.length || 0,
-              hasLanguage: constructedBlock.language !== undefined,
-              hasFilePath: constructedBlock.filePath !== undefined
-            });
-          }
-          
-          console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with constructed block:', {
-            blockId: blockId.substring(0, 8) + '...',
-            action: 'UPDATE',
-            blockType: constructedBlock.type,
-            position: constructedBlock.position,
-            contentLength: serializedBlock.content?.length
-          });
-          
-          // Save the constructed block
+          // Smart Sync handles everything - pass the normalized content WITH type, position, and metadata
           smartSyncManagerRef.current.handleChange(
-            blockId,
+            constructedBlock.id,
             serializedBlock.content,
             'UPDATE',
-            constructedBlock.type,
-            constructedBlock.position,
-            serializedBlock.metadata
-          ).then(() => {
-            console.log('[SYNC-CHANGE-RECEIVED] ✅ handleChange completed successfully (constructed block)');
-          }).catch(error => {
-            console.error('[SYNC-CHANGE-RECEIVED] ❌ Smart Sync error (constructed block):', error);
+            constructedBlock.type,       // CRITICAL: Send block type
+            constructedBlock.position,   // CRITICAL: Send position
+            serializedBlock.metadata     // CRITICAL: Send metadata for snapshots and other JSONB data
+          ).catch(error => {
+            console.error('[SYNC-CHANGE-RECEIVED] ❌ Smart Sync error:', error);
+            // SyncStatusIndicator will show the error state automatically
           });
         }
-      } else {
-        console.warn('[SYNC-CHANGE-RECEIVED] ⚠️ smartSyncManagerRef.current is null/undefined');
-      }
-    } else {
-      if (!needsSave) {
-        console.log('[SYNC-CHANGE-RECEIVED] ℹ️ Update skipped (needsSave=false):', {
-          blockId: blockId.substring(0, 8) + '...',
-          updates: Object.keys(updates)
-        });
-      } else if (isInitialLoadRef.current) {
-        console.log('[SYNC-CHANGE-RECEIVED] ⏳ Update skipped (initial load protection active)');
       }
     }
   }, [blocks, updateSingleBlock]);
@@ -819,7 +695,6 @@ function ExpandedView({
         });
         
         // Clear from session cache to prevent reappearance
-        // ROOT CAUSE FIX: Guard against undefined entry or entry.id
         if (window.sessionCache && entry?.id) {
           window.sessionCache.clearBlock(entry.id, blockId);
         }
@@ -1669,10 +1544,9 @@ function ExpandedView({
   }, [blocks, updateLoadedBlocks, handleAddBelowBlock]);
 
   // Helper function for saving (status now handled by SyncStatusIndicator)
-  // ROOT CAUSE FIX: Guard against undefined entry.id
+  // Guard against undefined entry.id
   const saveWithStatus = async (updates, description = 'changes') => {
     if (!entry || !entry.id) {
-      console.error(`[ExpandedViewEnhanced] Cannot save ${description}: entry or entry.id is undefined`);
       throw new Error(`Cannot save ${description}: entry or entry.id is undefined`);
     }
     try {
@@ -1687,9 +1561,8 @@ function ExpandedView({
   };
 
   const handleTitleSave = async () => {
-    // ROOT CAUSE FIX: Guard against undefined entry
+    // Guard against undefined entry
     if (!entry || !entry.id) {
-      console.error('[ExpandedViewEnhanced] Cannot save title: entry or entry.id is undefined');
       setIsEditingTitle(false);
       return;
     }
@@ -2446,7 +2319,7 @@ function ExpandedView({
 export default memo(ExpandedView, (prevProps, nextProps) => {
   // Only re-render if entry.id changed (different document)
   // Ignore entry reference changes if the document ID is the same
-  // ROOT CAUSE FIX: Guard against undefined entry or entry.id
+  // Guard against undefined entry or entry.id
   if (!prevProps.entry || !nextProps.entry) return false;
   if (prevProps.entry.id !== nextProps.entry.id) return false;
 

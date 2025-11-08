@@ -195,19 +195,6 @@ export class OptimizedBlockLoader {
    * Transform block from database format
    */
   transformBlockFromDB(block) {
-    // Log code blocks from database
-    if (block.type === 'code') {
-      console.log('[CODE-BLOCK] 📥 Loading code block from database:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        hasContent: !!block.content,
-        contentLength: block.content?.length || 0,
-        hasLanguage: block.language !== undefined,
-        hasFilePath: block.file_path !== undefined,
-        language: block.language,
-        filePath: block.file_path
-      });
-    }
-    
     // Use the deserializer to properly restore block structure
     const deserializedBlock = deserializeBlock(block);
     
@@ -216,18 +203,6 @@ export class OptimizedBlockLoader {
       deserializedBlock.language = block.language || deserializedBlock.language;
       deserializedBlock.filePath = block.file_path || deserializedBlock.filePath;
       deserializedBlock.versionOf = block.version_of || deserializedBlock.versionOf;
-      
-      // Log code block after transformation
-      console.log('[CODE-BLOCK] ✅ Transformed code block from database:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        blockType: deserializedBlock.type,
-        hasLanguage: deserializedBlock.language !== undefined,
-        hasFilePath: deserializedBlock.filePath !== undefined,
-        hasContent: deserializedBlock.content !== undefined,
-        language: deserializedBlock.language,
-        filePath: deserializedBlock.filePath,
-        contentLength: deserializedBlock.content?.length || 0
-      });
     }
     
     // Ensure position is set

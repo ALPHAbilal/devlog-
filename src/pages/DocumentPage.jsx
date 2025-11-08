@@ -120,12 +120,6 @@ export default function DocumentPage() {
    * We need to merge the updates into the current document and save it
    */
   const handleUpdate = useCallback(async (entryId, updates) => {
-    console.log('[DocumentPage] handleUpdate called:', {
-      entryId,
-      updatesKeys: updates ? Object.keys(updates) : 'null',
-      currentDocumentId: document?.id
-    });
-    
     // Handle deletion
     if (updates === null) {
       // Document was deleted, navigate away
@@ -133,17 +127,12 @@ export default function DocumentPage() {
       return;
     }
     
-    // ROOT CAUSE FIX: Merge updates into current document, preserving id
+    // Merge updates into current document, preserving id
     if (!document || !document.id) {
-      console.error('[DocumentPage] Cannot update: document or document.id is undefined');
       return;
     }
     
     if (document.id !== entryId) {
-      console.warn('[DocumentPage] Entry ID mismatch:', {
-        documentId: document.id,
-        entryId
-      });
       return;
     }
     
@@ -157,16 +146,9 @@ export default function DocumentPage() {
     
     // Validate id is present
     if (!updatedDocument.id) {
-      console.error('[DocumentPage] CRITICAL: updatedDocument missing id!', {
-        documentId: document.id,
-        entryId,
-        updatesKeys: Object.keys(updates),
-        hasIdInUpdates: 'id' in updates
-      });
       return;
     }
     
-    console.log('[DocumentPage] Setting updated document with id:', updatedDocument.id);
     setDocument(updatedDocument);
     
     // Save to storage
@@ -174,7 +156,6 @@ export default function DocumentPage() {
       // Remove blocks from save (blocks are handled by SmartSync)
       const { blocks, ...documentToSave } = updatedDocument;
       await storageWrapper.saveDocument(documentToSave);
-      console.log('[DocumentPage] Document saved successfully');
     } catch (error) {
       console.error('[DocumentPage] Error saving document:', error);
       // Don't throw - UI already updated optimistically

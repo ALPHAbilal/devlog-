@@ -56,41 +56,14 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
           // We need to deserialize them to restore block-specific fields like images
           const { deserializeBlock } = await import('../utils/blockSerializer');
           const deserializedBlocks = entry.blocks.map(block => {
-            // Log code blocks from entry.blocks
-            if (block.type === 'code') {
-              console.log('[CODE-BLOCK] 📥 Code block from entry.blocks:', {
-                blockId: block.id?.substring(0, 8) + '...',
-                hasContent: !!block.content,
-                contentLength: block.content?.length || 0,
-                hasLanguage: block.language !== undefined,
-                hasFilePath: block.filePath !== undefined,
-                language: block.language,
-                filePath: block.filePath
-              });
-            }
-            
-            // Check if block is already deserialized (has images field for image blocks)
-            if (block.type === 'image' && block.images !== undefined) {
+            // Check if block is already deserialized (has images field for image blocks, or language/filePath for code blocks)
+            if ((block.type === 'image' && block.images !== undefined) ||
+                (block.type === 'code' && (block.language !== undefined || block.filePath !== undefined))) {
               // Already deserialized, use as-is
               return block;
             }
             // Deserialize the block to restore block-specific fields
-            const deserialized = deserializeBlock(block);
-            
-            // Log code block after deserialization
-            if (block.type === 'code') {
-              console.log('[CODE-BLOCK] ✅ Code block deserialized from entry.blocks:', {
-                blockId: block.id?.substring(0, 8) + '...',
-                blockType: deserialized.type,
-                hasLanguage: deserialized.language !== undefined,
-                hasFilePath: deserialized.filePath !== undefined,
-                hasContent: deserialized.content !== undefined,
-                language: deserialized.language,
-                filePath: deserialized.filePath
-              });
-            }
-            
-            return deserialized;
+            return deserializeBlock(block);
           });
           
           // If blocks array exists with content, they were already loaded

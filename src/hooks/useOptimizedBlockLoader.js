@@ -60,16 +60,28 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
           
           const loadTime = performance.now() - loadStartTime;
           console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry in ${loadTime.toFixed(2)}ms`);
+          console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: entry.blocks (bypasses cache check)`);
+          
+          // Track entry.blocks usage via sessionCache stats tracker
+          // We'll expose a method to record this
+          if (sessionCache.statsTracker) {
+            sessionCache.statsTracker.recordEntryBlocks(loadTime);
+          }
           return;
         }
 
         // Check session cache
         console.log(`[CACHE-TRACK] 🔍 CHECKING: sessionCache.getBlocks(${documentId.substring(0, 8)})`);
+        const cacheCheckStart = performance.now();
         const cachedBlocks = sessionCache.getBlocks(documentId);
+        const cacheCheckTime = performance.now() - cacheCheckStart;
+        
         if (cachedBlocks && cachedBlocks.length > 0) {
           // [CACHE-TRACK] Log cache hit
           const loadTime = performance.now() - loadStartTime;
           console.log(`[CACHE-TRACK] ✅ CACHE HIT: Found ${cachedBlocks.length} blocks in sessionCache - Load time: ${loadTime.toFixed(2)}ms`);
+          console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: sessionCache (cache hit)`);
+          console.log(`[CACHE-TRACK] ⚡ PERFORMANCE: Cache lookup ${cacheCheckTime.toFixed(2)}ms, Total ${loadTime.toFixed(2)}ms`);
           
           // CRITICAL: Don't normalize positions - it breaks references!
           // The blocks array index IS the position
@@ -82,6 +94,7 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
         // [CACHE-TRACK] Log cache miss - loading from database
         console.log(`[CACHE-TRACK] ❌ CACHE MISS: No blocks in cache, loading from database...`);
+        console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: database (cache miss)`);
 
         // Only show skeletons when we're actually loading from database
         // This happens when entry.blocks is undefined (not loaded yet)
@@ -94,6 +107,12 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
         const dbLoadTime = performance.now() - dbLoadStart;
         
         console.log(`[CACHE-TRACK] 📊 DATABASE: Loaded from DB in ${dbLoadTime.toFixed(2)}ms (fromCache: ${result?.fromCache || false})`);
+        console.log(`[CACHE-TRACK] ⚡ PERFORMANCE: Database load ${dbLoadTime.toFixed(2)}ms`);
+        
+        // Track database load
+        if (sessionCache.statsTracker && !result?.fromCache) {
+          sessionCache.statsTracker.recordDatabaseLoad(dbLoadTime);
+        }
         
         if (!mountedRef.current) return;
 

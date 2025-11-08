@@ -70,14 +70,28 @@ function ExpandedView({
 
   // [CACHE-TRACK] Log loader selection
   useEffect(() => {
+    const hasBlocks = !!stableEntry.blocks && stableEntry.blocks.length > 0;
+    const sourceType = hasBlocks ? 'entry.blocks (prop)' : 'cache/database';
+    
     console.log(`[CACHE-TRACK] 📄 ExpandedViewEnhanced: Document ${stableEntry.id.substring(0, 8)}`, {
       blockCount: stableEntry.blockCount || 'unknown',
-      hasBlocksInEntry: !!stableEntry.blocks && stableEntry.blocks.length > 0,
+      hasBlocksInEntry: hasBlocks,
+      blocksInEntry: hasBlocks ? stableEntry.blocks.length : 0,
       loader: shouldUsePagination ? 'PAGINATED' : 'OPTIMIZED',
+      expectedSource: sourceType,
       reason: shouldUsePagination 
         ? `blockCount > 50 or no blocks in entry` 
         : `blockCount <= 50 and blocks available`
     });
+    
+    // Log cache stats summary when document loads (every 5 document loads)
+    if (window.__cacheStatsLogCount === undefined) {
+      window.__cacheStatsLogCount = 0;
+    }
+    window.__cacheStatsLogCount++;
+    if (window.__cacheStatsLogCount % 5 === 0) {
+      sessionCache.logPerformanceSummary();
+    }
   }, [stableEntry.id, stableEntry.blockCount, shouldUsePagination]);
 
   // [VIRT-DEBUG-0] Better logging with render tracking

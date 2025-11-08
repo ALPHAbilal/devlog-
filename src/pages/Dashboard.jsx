@@ -770,14 +770,31 @@ export default function Dashboard() {
     
     // Find the entry being updated
     const entryToUpdate = entries.find(entry => entry.id === entryId);
-    if (!entryToUpdate) return;
+    if (!entryToUpdate) {
+      console.warn('[Dashboard] Entry not found for update:', entryId);
+      return;
+    }
     
-    // Create updated entry
+    // ROOT CAUSE FIX: Ensure id is always preserved - updates should never override id
+    // Create updated entry, explicitly preserving id from entryToUpdate
     const updatedEntry = {
       ...entryToUpdate,
       ...updates,
+      id: entryToUpdate.id, // CRITICAL: Always preserve the original id
       updatedAt: new Date().toISOString()
     };
+    
+    // Validate that id is present
+    if (!updatedEntry.id) {
+      console.error('[Dashboard] CRITICAL: updatedEntry missing id!', {
+        entryToUpdateId: entryToUpdate.id,
+        entryId,
+        updatesKeys: Object.keys(updates),
+        hasIdInUpdates: 'id' in updates
+      });
+      // Don't proceed if id is missing
+      return;
+    }
     
     // Update preview based on blocks
     if (updates.blocks) {

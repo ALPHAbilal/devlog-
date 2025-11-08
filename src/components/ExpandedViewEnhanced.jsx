@@ -526,6 +526,24 @@ function ExpandedView({
                      updates.filePath !== undefined ||     // Code blocks
                      updates.level !== undefined;          // Heading blocks
 
+    // Log code block updates specifically
+    if (updates.language !== undefined || updates.filePath !== undefined) {
+      const currentBlock = blocks.find(b => b.id === blockId);
+      console.log('[CODE-BLOCK] 📥 ExpandedView received code block update:', {
+        blockId: blockId.substring(0, 8) + '...',
+        blockType: currentBlock?.type || 'unknown',
+        hasLanguage: updates.language !== undefined,
+        hasFilePath: updates.filePath !== undefined,
+        hasContent: updates.content !== undefined,
+        language: updates.language,
+        filePath: updates.filePath,
+        contentLength: updates.content?.length || 0,
+        currentBlockFound: !!currentBlock,
+        currentBlockType: currentBlock?.type,
+        needsSave,
+        isInitialLoad: isInitialLoadRef.current
+      });
+    }
 
     // Use the loader's updateBlock method
     startTransition(() => {
@@ -554,8 +572,33 @@ function ExpandedView({
             position: currentBlock.position !== undefined ? currentBlock.position : blocks.indexOf(currentBlock)
           };
 
+          // Log code block merge before serialization
+          if (updates.language !== undefined || updates.filePath !== undefined) {
+            console.log('[CODE-BLOCK] 🔀 Block merge before serialization:', {
+              blockId: blockId.substring(0, 8) + '...',
+              updatedBlockType: updatedBlock.type,
+              hasLanguage: updatedBlock.language !== undefined,
+              hasFilePath: updatedBlock.filePath !== undefined,
+              hasContent: updatedBlock.content !== undefined,
+              language: updatedBlock.language,
+              filePath: updatedBlock.filePath,
+              contentLength: updatedBlock.content?.length || 0
+            });
+          }
+
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
+          
+          // Log code block serialization result
+          if (updates.language !== undefined || updates.filePath !== undefined) {
+            console.log('[CODE-BLOCK] 📦 Serialized code block:', {
+              blockId: blockId.substring(0, 8) + '...',
+              blockType: serializedBlock.type || updatedBlock.type,
+              contentLength: serializedBlock.content?.length || 0,
+              hasLanguage: updatedBlock.language !== undefined,
+              hasFilePath: updatedBlock.filePath !== undefined
+            });
+          }
 
           console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with:', {
             blockId: blockId.substring(0, 8) + '...',
@@ -593,7 +636,21 @@ function ExpandedView({
                               (updates.treeData !== undefined ? 'filetree' : null) ||
                               (updates.data !== undefined ? 'table' : null) ||
                               (updates.url !== undefined ? 'inline-image' : null) ||
+                              (updates.language !== undefined || updates.filePath !== undefined ? 'code' : null) ||
                               'text'; // fallback
+          
+          // Log code block type inference
+          if (updates.language !== undefined || updates.filePath !== undefined) {
+            console.log('[CODE-BLOCK] 🔍 Type inference for code block:', {
+              blockId: blockId.substring(0, 8) + '...',
+              hasType: !!updates.type,
+              updatesType: updates.type,
+              hasLanguage: updates.language !== undefined,
+              hasFilePath: updates.filePath !== undefined,
+              inferredType,
+              willBeCode: inferredType === 'code'
+            });
+          }
           
           // Construct block from updates
           const constructedBlock = {
@@ -604,8 +661,33 @@ function ExpandedView({
             ...updates
           };
           
+          // Log code block construction
+          if (inferredType === 'code' || updates.language !== undefined || updates.filePath !== undefined) {
+            console.log('[CODE-BLOCK] 🔨 Constructing code block from updates:', {
+              blockId: blockId.substring(0, 8) + '...',
+              inferredType,
+              hasLanguage: constructedBlock.language !== undefined,
+              hasFilePath: constructedBlock.filePath !== undefined,
+              hasContent: constructedBlock.content !== undefined,
+              contentLength: constructedBlock.content?.length || 0,
+              language: constructedBlock.language,
+              filePath: constructedBlock.filePath
+            });
+          }
+          
           // Serialize the constructed block
           const serializedBlock = serializeBlock(constructedBlock);
+          
+          // Log code block serialization result
+          if (inferredType === 'code' || updates.language !== undefined || updates.filePath !== undefined) {
+            console.log('[CODE-BLOCK] 📦 Serialized code block:', {
+              blockId: blockId.substring(0, 8) + '...',
+              blockType: serializedBlock.type || constructedBlock.type,
+              contentLength: serializedBlock.content?.length || 0,
+              hasLanguage: constructedBlock.language !== undefined,
+              hasFilePath: constructedBlock.filePath !== undefined
+            });
+          }
           
           console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with constructed block:', {
             blockId: blockId.substring(0, 8) + '...',

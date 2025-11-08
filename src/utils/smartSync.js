@@ -225,6 +225,18 @@ class SmartSyncManager {
       hasRequiredFields: !!(blockType && (position !== null && position !== undefined))
     });
 
+    // Log code block changes
+    if (blockType === 'code' && content) {
+      console.log('[CODE-BLOCK] 📨 SmartSync.handleChange received code block:', {
+        blockId: blockId.substring(0, 8) + '...',
+        contentLength: content.length,
+        hasLanguage: metadata?.language !== undefined,
+        hasFilePath: metadata?.filePath !== undefined,
+        language: metadata?.language,
+        filePath: metadata?.filePath
+      });
+    }
+
     const change = {
       blockId,
       content,

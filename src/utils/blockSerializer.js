@@ -65,6 +65,16 @@ export function serializeBlock(block) {
     case 'code':
       // These blocks already use 'content' field
       serialized.content = block.content || '';
+      // Log code block serialization
+      console.log('[CODE-BLOCK] 🔄 Serializing code block:', {
+        blockId: block.id?.substring(0, 8) + '...',
+        hasContent: !!block.content,
+        contentLength: block.content?.length || 0,
+        hasLanguage: block.language !== undefined,
+        hasFilePath: block.filePath !== undefined,
+        language: block.language,
+        filePath: block.filePath
+      });
       break;
 
     case 'ai':
@@ -227,10 +237,16 @@ export function deserializeBlock(block) {
       case 'code':
         // These blocks use content directly
         deserialized.content = block.content || '';
-        // For heading blocks, extract level from metadata if not present
-        if (block.type === 'heading' && block.metadata?.level) {
-          deserialized.level = block.metadata.level;
-        }
+        // Log code block deserialization
+        console.log('[CODE-BLOCK] 🔄 Deserializing code block:', {
+          blockId: block.id?.substring(0, 8) + '...',
+          hasContent: !!block.content,
+          contentLength: block.content?.length || 0,
+          hasLanguage: block.language !== undefined,
+          hasFilePath: block.file_path !== undefined,
+          language: block.language,
+          filePath: block.file_path
+        });
         break;
 
       case 'ai':

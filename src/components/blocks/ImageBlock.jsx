@@ -11,13 +11,8 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   
   // Performance monitoring
   useEffect(() => {
-    console.log(`🌆 ImageBlock ${block.id} rendered at ${new Date().toISOString()}`, {
-      blockId: block.id?.substring(0, 8) + '...',
-      hasImages: !!block.images,
-      imagesCount: Array.isArray(block.images) ? block.images.length : 'not-array',
-      localImagesCount: images.length
-    });
-  }, [block.id, block.images, images.length]);
+    console.log(`🌆 ImageBlock ${block.id} rendered at ${new Date().toISOString()}`);
+  }, [block.id]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
@@ -30,38 +25,10 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   
   // Initialize images array from block data
   useEffect(() => {
-    console.log('[IMAGE-BLOCK] 🔄 Initializing from block data:', {
-      blockId: block.id?.substring(0, 8) + '...',
-      blockType: block.type,
-      hasImages: !!block.images,
-      imagesIsArray: Array.isArray(block.images),
-      imagesCount: Array.isArray(block.images) ? block.images.length : 'not-array',
-      imagesValue: block.images,
-      hasUrl: !!block.url,
-      hasContent: !!block.content,
-      contentType: typeof block.content,
-      contentLength: typeof block.content === 'string' ? block.content.length : 0,
-      blockKeys: Object.keys(block),
-      fullBlock: block
-    });
-    
     if (block.images && Array.isArray(block.images)) {
-      console.log('[IMAGE-BLOCK] ✅ Setting images from block.images array:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        imagesCount: block.images.length,
-        images: block.images.map(img => ({
-          id: img.id?.substring(0, 8) + '...',
-          url: img.url?.substring(0, 50) + '...',
-          hasStoragePath: !!img.storagePath
-        }))
-      });
       setImages(block.images);
     } else if (block.url) {
       // Convert legacy single image to array format
-      console.log('[IMAGE-BLOCK] 🔄 Converting legacy single image format:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        url: block.url?.substring(0, 50) + '...'
-      });
       setImages([{
         id: crypto.randomUUID(),
         url: block.url,
@@ -71,33 +38,9 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
         dimensions: block.dimensions
       }]);
     } else {
-      console.warn('[IMAGE-BLOCK] ⚠️ No images found in block - setting empty array:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        hasImages: !!block.images,
-        imagesType: typeof block.images,
-        hasUrl: !!block.url,
-        hasContent: !!block.content,
-        contentPreview: typeof block.content === 'string' ? block.content.substring(0, 100) : 'not-string'
-      });
       setImages([]);
     }
-    
-    // Note: images state will be updated by setImages calls above
-    // We'll log the state in a separate effect to avoid dependency issues
   }, [block]);
-  
-  // Log images state changes separately
-  useEffect(() => {
-    console.log('[IMAGE-BLOCK] 📊 Images state updated:', {
-      blockId: block.id?.substring(0, 8) + '...',
-      localImagesCount: images.length,
-      blockImagesCount: Array.isArray(block.images) ? block.images.length : 'not-array',
-      localImages: images.map(img => ({
-        id: img.id?.substring(0, 8) + '...',
-        url: img.url?.substring(0, 50) + '...'
-      }))
-    });
-  }, [images, block.id, block.images]);
 
   // Handle file selection (supports multiple files)
   const handleFileSelect = async (e) => {
@@ -156,21 +99,6 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
       // Update block with all images
       const updatedImages = [...images, ...newImages];
       setImages(updatedImages);
-      
-      // Log image update for tracking
-      console.log('[IMAGE-BLOCK] 📤 Upload complete - calling onUpdate:', {
-        blockId: block.id.substring(0, 8) + '...',
-        action: 'UPLOAD',
-        imagesCount: updatedImages.length,
-        newImagesCount: newImages.length,
-        images: updatedImages.map(img => ({
-          id: img.id?.substring(0, 8) + '...',
-          url: img.url?.substring(0, 50) + '...',
-          alt: img.alt,
-          hasStoragePath: !!img.storagePath
-        }))
-      });
-      
       onUpdate(block.id, { images: updatedImages });
       
       setUploadProgress(100);
@@ -263,19 +191,6 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   const handleDeleteImage = (imageId) => {
     const updatedImages = images.filter(img => img.id !== imageId);
     setImages(updatedImages);
-    
-    // Log image deletion for tracking
-    console.log('[IMAGE-BLOCK] 🗑️ Delete image - calling onUpdate:', {
-      blockId: block.id.substring(0, 8) + '...',
-      action: 'DELETE',
-      deletedImageId: imageId.substring(0, 8) + '...',
-      remainingImagesCount: updatedImages.length,
-      images: updatedImages.map(img => ({
-        id: img.id?.substring(0, 8) + '...',
-        url: img.url?.substring(0, 50) + '...'
-      }))
-    });
-    
     onUpdate(block.id, { images: updatedImages });
     
     // If no images left, delete the entire block
@@ -290,16 +205,6 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
       img.id === imageId ? { ...img, alt: newAlt } : img
     );
     setImages(updatedImages);
-    
-    // Log alt text update for tracking
-    console.log('[IMAGE-BLOCK] ✏️ Alt text update - calling onUpdate:', {
-      blockId: block.id.substring(0, 8) + '...',
-      action: 'UPDATE_ALT',
-      imageId: imageId.substring(0, 8) + '...',
-      newAlt: newAlt,
-      imagesCount: updatedImages.length
-    });
-    
     onUpdate(block.id, { images: updatedImages });
     setEditingImageId(null);
   };
@@ -324,16 +229,6 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
     newImages.splice(targetIndex, 0, draggedImage);
     
     setImages(newImages);
-    
-    // Log reorder for tracking
-    console.log('[IMAGE-BLOCK] 🔄 Reorder images - calling onUpdate:', {
-      blockId: block.id.substring(0, 8) + '...',
-      action: 'REORDER',
-      fromIndex: draggedIndex,
-      toIndex: targetIndex,
-      imagesCount: newImages.length
-    });
-    
     onUpdate(block.id, { images: newImages });
     setDraggedImageId(null);
   };

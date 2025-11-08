@@ -82,22 +82,6 @@ export function serializeBlock(block) {
         layout: block.layout || 'grid',
         columns: block.columns || 3
       };
-      
-      // Log image block serialization
-      console.log('[IMAGE-BLOCK] 🔄 Serializing image block:', {
-        blockId: block.id?.substring(0, 8) + '...',
-        inputImagesCount: Array.isArray(block.images) ? block.images.length : 'not-array',
-        inputImages: Array.isArray(block.images) 
-          ? block.images.map(img => ({
-              id: img.id?.substring(0, 8) + '...',
-              url: img.url?.substring(0, 50) + '...',
-              hasStoragePath: !!img.storagePath
-            }))
-          : block.images,
-        outputImagesCount: imageData.images.length,
-        serializedContentLength: JSON.stringify(imageData).length
-      });
-      
       serialized.content = JSON.stringify(imageData);
       break;
 
@@ -280,64 +264,26 @@ export function deserializeBlock(block) {
 
       case 'image':
         // Restore images array
-        console.log('[IMAGE-BLOCK] 🔄 Deserializing image block:', {
-          blockId: block.id?.substring(0, 8) + '...',
-          hasContent: !!block.content,
-          contentType: typeof block.content,
-          contentLength: typeof block.content === 'string' ? block.content.length : 0,
-          contentPreview: typeof block.content === 'string' ? block.content.substring(0, 200) : 'not-string'
-        });
-        
         if (block.content) {
           try {
             const parsed = typeof block.content === 'string' 
               ? JSON.parse(block.content) 
               : block.content;
-            
-            console.log('[IMAGE-BLOCK] ✅ Parsed content successfully:', {
-              blockId: block.id?.substring(0, 8) + '...',
-              parsedKeys: Object.keys(parsed),
-              hasImages: !!parsed.images,
-              imagesIsArray: Array.isArray(parsed.images),
-              imagesCount: Array.isArray(parsed.images) ? parsed.images.length : 'not-array',
-              images: Array.isArray(parsed.images) 
-                ? parsed.images.map(img => ({
-                    id: img.id?.substring(0, 8) + '...',
-                    url: img.url?.substring(0, 50) + '...',
-                    hasStoragePath: !!img.storagePath
-                  }))
-                : parsed.images,
-              layout: parsed.layout,
-              columns: parsed.columns
-            });
-            
             deserialized.images = parsed.images || [];
             deserialized.layout = parsed.layout || 'grid';
             deserialized.columns = parsed.columns || 3;
-            
-            console.log('[IMAGE-BLOCK] ✅ Deserialized result:', {
-              blockId: block.id?.substring(0, 8) + '...',
-              imagesCount: deserialized.images.length,
-              layout: deserialized.layout,
-              columns: deserialized.columns
-            });
           } catch (e) {
             // If content is not JSON (plain text), use empty images array
-            console.error('[IMAGE-BLOCK] ❌ Failed to parse content:', {
-              blockId: block.id?.substring(0, 8) + '...',
-              error: e.message,
+            console.warn('BlockSerializer: Image block content is not valid JSON, using empty images array', {
+              blockId: block.id,
               contentType: typeof block.content,
-              contentPreview: typeof block.content === 'string' ? block.content.substring(0, 100) : 'not string'
+              contentPreview: typeof block.content === 'string' ? block.content.substring(0, 50) : 'not string'
             });
             deserialized.images = [];
             deserialized.layout = 'grid';
             deserialized.columns = 3;
           }
         } else {
-          console.warn('[IMAGE-BLOCK] ⚠️ No content field in block:', {
-            blockId: block.id?.substring(0, 8) + '...',
-            blockKeys: Object.keys(block)
-          });
           deserialized.images = [];
         }
         break;

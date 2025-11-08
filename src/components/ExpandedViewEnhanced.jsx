@@ -526,34 +526,6 @@ function ExpandedView({
                      updates.filePath !== undefined ||     // Code blocks
                      updates.level !== undefined;          // Heading blocks
 
-    // Log image block updates specifically
-    if (updates.images !== undefined) {
-      const currentBlock = blocks.find(b => b.id === blockId);
-      console.log('[IMAGE-BLOCK] 📥 ExpandedView received update:', {
-        blockId: blockId.substring(0, 8) + '...',
-        blockType: currentBlock?.type || 'unknown',
-        updatesImagesCount: Array.isArray(updates.images) ? updates.images.length : 'not-array',
-        updatesImages: Array.isArray(updates.images) 
-          ? updates.images.map(img => ({
-              id: img.id?.substring(0, 8) + '...',
-              url: img.url?.substring(0, 50) + '...',
-              hasStoragePath: !!img.storagePath
-            }))
-          : updates.images,
-        currentBlockFound: !!currentBlock,
-        currentImagesCount: Array.isArray(currentBlock?.images) ? currentBlock.images.length : 'not-array',
-        currentImages: Array.isArray(currentBlock?.images)
-          ? currentBlock.images.map(img => ({
-              id: img.id?.substring(0, 8) + '...',
-              url: img.url?.substring(0, 50) + '...'
-            }))
-          : currentBlock?.images,
-        needsSave,
-        isInitialLoad: isInitialLoadRef.current,
-        blocksArrayLength: blocks.length,
-        blockInArray: blocks.some(b => b.id === blockId)
-      });
-    }
 
     // Use the loader's updateBlock method
     startTransition(() => {
@@ -582,43 +554,8 @@ function ExpandedView({
             position: currentBlock.position !== undefined ? currentBlock.position : blocks.indexOf(currentBlock)
           };
 
-          // Log image block merge for tracking
-          if (updates.images !== undefined) {
-            console.log('[IMAGE-BLOCK] 🔀 Block merge before serialization:', {
-              blockId: blockId.substring(0, 8) + '...',
-              updatedBlockImagesCount: Array.isArray(updatedBlock.images) ? updatedBlock.images.length : 'not-array',
-              updatedBlockImages: Array.isArray(updatedBlock.images) 
-                ? updatedBlock.images.map(img => ({
-                    id: img.id?.substring(0, 8) + '...',
-                    url: img.url?.substring(0, 50) + '...',
-                    hasStoragePath: !!img.storagePath
-                  }))
-                : updatedBlock.images
-            });
-          }
-
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
-
-          // Log serialized result for image blocks
-          if (updates.images !== undefined) {
-            let parsedContent = null;
-            try {
-              parsedContent = JSON.parse(serializedBlock.content);
-            } catch (e) {
-              parsedContent = { error: 'Failed to parse content' };
-            }
-            console.log('[IMAGE-BLOCK] 📦 Serialized block:', {
-              blockId: blockId.substring(0, 8) + '...',
-              contentLength: serializedBlock.content?.length,
-              contentPreview: serializedBlock.content?.substring(0, 200),
-              parsedImagesCount: parsedContent?.images?.length || 0,
-              parsedImages: parsedContent?.images?.map(img => ({
-                id: img.id?.substring(0, 8) + '...',
-                url: img.url?.substring(0, 50) + '...'
-              })) || []
-            });
-          }
 
           console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with:', {
             blockId: blockId.substring(0, 8) + '...',
@@ -667,44 +604,8 @@ function ExpandedView({
             ...updates
           };
           
-          // Log image block construction for tracking
-          if (updates.images !== undefined) {
-            console.log('[IMAGE-BLOCK] 🔨 Constructing block from updates:', {
-              blockId: blockId.substring(0, 8) + '...',
-              inferredType,
-              imagesCount: Array.isArray(constructedBlock.images) ? constructedBlock.images.length : 'not-array',
-              images: Array.isArray(constructedBlock.images) 
-                ? constructedBlock.images.map(img => ({
-                    id: img.id?.substring(0, 8) + '...',
-                    url: img.url?.substring(0, 50) + '...',
-                    hasStoragePath: !!img.storagePath
-                  }))
-                : constructedBlock.images
-            });
-          }
-          
           // Serialize the constructed block
           const serializedBlock = serializeBlock(constructedBlock);
-          
-          // Log serialized result for image blocks
-          if (updates.images !== undefined) {
-            let parsedContent = null;
-            try {
-              parsedContent = JSON.parse(serializedBlock.content);
-            } catch (e) {
-              parsedContent = { error: 'Failed to parse content' };
-            }
-            console.log('[IMAGE-BLOCK] 📦 Serialized constructed block:', {
-              blockId: blockId.substring(0, 8) + '...',
-              contentLength: serializedBlock.content?.length,
-              contentPreview: serializedBlock.content?.substring(0, 200),
-              parsedImagesCount: parsedContent?.images?.length || 0,
-              parsedImages: parsedContent?.images?.map(img => ({
-                id: img.id?.substring(0, 8) + '...',
-                url: img.url?.substring(0, 50) + '...'
-              })) || []
-            });
-          }
           
           console.log('[SYNC-CHANGE-RECEIVED] 🚀 Calling SmartSync.handleChange with constructed block:', {
             blockId: blockId.substring(0, 8) + '...',

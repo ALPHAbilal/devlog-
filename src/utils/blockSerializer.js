@@ -86,12 +86,91 @@ export function serializeBlock(block) {
       break;
 
     case 'table':
+      // [TABLE-SAVE] Log table block before serialization
+      console.log('[TABLE-SAVE] Step: blockSerializer.serializeBlock Entry (table)', {
+        blockId: block.id,
+        blockType: block.type,
+        inputBlock: {
+          hasData: 'data' in block,
+          dataStructure: block.data ? {
+            hasHeaders: Array.isArray(block.data.headers),
+            headersCount: block.data.headers?.length || 0,
+            hasRows: Array.isArray(block.data.rows),
+            rowsCount: block.data.rows?.length || 0,
+            hasColumnAlignments: Array.isArray(block.data.columnAlignments),
+            columnAlignmentsCount: block.data.columnAlignments?.length || 0,
+            hasHeaderRow: typeof block.data.hasHeaderRow === 'boolean' ? block.data.hasHeaderRow : undefined,
+            dataSize: JSON.stringify(block.data).length,
+            fullData: block.data,
+            dataPreview: {
+              headers: block.data.headers?.slice(0, 5),
+              firstRow: block.data.rows?.[0]?.slice(0, 5),
+              lastRow: block.data.rows?.[block.data.rows?.length - 1]?.slice(0, 5),
+              columnAlignments: block.data.columnAlignments?.slice(0, 5)
+            }
+          } : null,
+          willUseDefault: !block.data
+        }
+      });
+      
       // Table blocks store structured data
-      serialized.content = JSON.stringify({
-        data: block.data || {
-          headers: ['Column 1', 'Column 2'],
-          rows: [['', '']],
-          columnAlignments: ['left', 'left']
+      const tableDataToSerialize = block.data || {
+        headers: ['Column 1', 'Column 2'],
+        rows: [['', '']],
+        columnAlignments: ['left', 'left']
+      };
+      
+      // Validate required fields before serialization
+      const validationErrors = [];
+      if (!Array.isArray(tableDataToSerialize.headers)) {
+        validationErrors.push('headers is not an array');
+      }
+      if (!Array.isArray(tableDataToSerialize.rows)) {
+        validationErrors.push('rows is not an array');
+      }
+      if (!Array.isArray(tableDataToSerialize.columnAlignments)) {
+        validationErrors.push('columnAlignments is not an array');
+      }
+      
+      if (validationErrors.length > 0) {
+        console.error('[TABLE-SAVE] Step: blockSerializer Validation Errors', {
+          blockId: block.id,
+          errors: validationErrors,
+          receivedData: tableDataToSerialize
+        });
+      }
+      
+      const serializedTableData = {
+        data: tableDataToSerialize
+      };
+      
+      serialized.content = JSON.stringify(serializedTableData);
+      
+      // [TABLE-SAVE] Log after serialization
+      console.log('[TABLE-SAVE] Step: blockSerializer.serializeBlock Complete (table)', {
+        blockId: block.id,
+        serialized: {
+          contentLength: serialized.content.length,
+          contentPreview: serialized.content.substring(0, 300),
+          fullContent: serialized.content,
+          parsedContent: (() => {
+            try {
+              const parsed = JSON.parse(serialized.content);
+              return {
+                hasData: !!parsed.data,
+                dataStructure: parsed.data ? {
+                  headersCount: parsed.data.headers?.length || 0,
+                  rowsCount: parsed.data.rows?.length || 0,
+                  columnAlignmentsCount: parsed.data.columnAlignments?.length || 0,
+                  hasHeaderRow: parsed.data.hasHeaderRow,
+                  fullData: parsed.data
+                } : null
+              };
+            } catch (e) {
+              return { error: 'Failed to parse serialized content', message: e.message };
+            }
+          })(),
+          validationErrors: validationErrors.length > 0 ? validationErrors : null
         }
       });
       break;

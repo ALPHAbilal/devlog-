@@ -533,6 +533,37 @@ function ExpandedView({
       });
     }
     
+    // [TABLE-SAVE] Log table block updates
+    if (block && block.type === 'table') {
+      console.log('[TABLE-SAVE] Step: ExpandedViewEnhanced.updateBlock Entry', {
+        blockId,
+        blockType: block.type,
+        updates: {
+          hasData: 'data' in updates,
+          dataStructure: updates.data ? {
+            hasHeaders: Array.isArray(updates.data.headers),
+            headersCount: updates.data.headers?.length || 0,
+            hasRows: Array.isArray(updates.data.rows),
+            rowsCount: updates.data.rows?.length || 0,
+            hasColumnAlignments: Array.isArray(updates.data.columnAlignments),
+            columnAlignmentsCount: updates.data.columnAlignments?.length || 0,
+            hasHeaderRow: typeof updates.data.hasHeaderRow === 'boolean' ? updates.data.hasHeaderRow : undefined,
+            dataSize: JSON.stringify(updates.data).length,
+            fullData: updates.data
+          } : null,
+          allUpdateKeys: Object.keys(updates)
+        },
+        currentBlock: {
+          hasData: !!block.data,
+          dataStructure: block.data ? {
+            headersCount: block.data.headers?.length || 0,
+            rowsCount: block.data.rows?.length || 0,
+            columnAlignmentsCount: block.data.columnAlignments?.length || 0
+          } : null
+        }
+      });
+    }
+    
     // console.log('🟩 ExpandedViewEnhanced: updateBlock called:', {
     //   blockId: blockId,
     //   updates: updates,
@@ -577,8 +608,50 @@ function ExpandedView({
             position: currentBlock.position !== undefined ? currentBlock.position : blocks.indexOf(currentBlock)
           };
 
+          // [TABLE-SAVE] Log before serialization for table blocks
+          if (currentBlock.type === 'table') {
+            console.log('[TABLE-SAVE] Step: ExpandedViewEnhanced Before Serialization', {
+              blockId,
+              updatedBlock: {
+                type: updatedBlock.type,
+                position: updatedBlock.position,
+                hasData: !!updatedBlock.data,
+                dataStructure: updatedBlock.data ? {
+                  headersCount: updatedBlock.data.headers?.length || 0,
+                  rowsCount: updatedBlock.data.rows?.length || 0,
+                  columnAlignmentsCount: updatedBlock.data.columnAlignments?.length || 0,
+                  hasHeaderRow: updatedBlock.data.hasHeaderRow,
+                  dataSize: JSON.stringify(updatedBlock.data).length,
+                  fullData: updatedBlock.data
+                } : null
+              }
+            });
+          }
+
           // Serialize the block to normalize data structure
           const serializedBlock = serializeBlock(updatedBlock);
+
+          // [TABLE-SAVE] Log after serialization for table blocks
+          if (currentBlock.type === 'table') {
+            console.log('[TABLE-SAVE] Step: ExpandedViewEnhanced After Serialization', {
+              blockId,
+              serializedBlock: {
+                type: serializedBlock.type,
+                position: serializedBlock.position,
+                contentLength: serializedBlock.content?.length || 0,
+                contentPreview: serializedBlock.content?.substring(0, 200),
+                fullContent: serializedBlock.content,
+                metadata: serializedBlock.metadata
+              },
+              parsedContent: (() => {
+                try {
+                  return JSON.parse(serializedBlock.content);
+                } catch (e) {
+                  return { error: 'Failed to parse', message: e.message };
+                }
+              })()
+            });
+          }
 
           // Smart Sync handles everything - pass the normalized content WITH type, position, and metadata
           smartSyncManagerRef.current.handleChange(
@@ -615,8 +688,51 @@ function ExpandedView({
             ...updates
           };
           
+          // [TABLE-SAVE] Log constructed block for table blocks
+          if (inferredType === 'table') {
+            console.log('[TABLE-SAVE] Step: ExpandedViewEnhanced Constructed Block (Block Not Found)', {
+              blockId,
+              inferredType,
+              constructedBlock: {
+                type: constructedBlock.type,
+                position: constructedBlock.position,
+                hasData: !!constructedBlock.data,
+                dataStructure: constructedBlock.data ? {
+                  headersCount: constructedBlock.data.headers?.length || 0,
+                  rowsCount: constructedBlock.data.rows?.length || 0,
+                  columnAlignmentsCount: constructedBlock.data.columnAlignments?.length || 0,
+                  hasHeaderRow: constructedBlock.data.hasHeaderRow,
+                  dataSize: JSON.stringify(constructedBlock.data).length,
+                  fullData: constructedBlock.data
+                } : null
+              }
+            });
+          }
+          
           // Serialize the constructed block
           const serializedBlock = serializeBlock(constructedBlock);
+          
+          // [TABLE-SAVE] Log after serialization for constructed table blocks
+          if (inferredType === 'table') {
+            console.log('[TABLE-SAVE] Step: ExpandedViewEnhanced Constructed Block After Serialization', {
+              blockId,
+              serializedBlock: {
+                type: serializedBlock.type,
+                position: serializedBlock.position,
+                contentLength: serializedBlock.content?.length || 0,
+                contentPreview: serializedBlock.content?.substring(0, 200),
+                fullContent: serializedBlock.content,
+                metadata: serializedBlock.metadata
+              },
+              parsedContent: (() => {
+                try {
+                  return JSON.parse(serializedBlock.content);
+                } catch (e) {
+                  return { error: 'Failed to parse', message: e.message };
+                }
+              })()
+            });
+          }
           
           // Smart Sync handles everything - pass the normalized content WITH type, position, and metadata
           smartSyncManagerRef.current.handleChange(

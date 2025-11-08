@@ -224,6 +224,45 @@ class SmartSyncManager {
       // Add validation check
       hasRequiredFields: !!(blockType && (position !== null && position !== undefined))
     });
+    
+    // [TABLE-SAVE] Log table block specific data
+    if (blockType === 'table') {
+      console.log('[TABLE-SAVE] Step: SmartSync.handleChange Entry (table)', {
+        blockId,
+        action,
+        blockType,
+        position,
+        content: {
+          length: content?.length || 0,
+          preview: content?.substring(0, 300),
+          fullContent: content,
+          parsedContent: (() => {
+            try {
+              const parsed = JSON.parse(content);
+              return {
+                hasData: !!parsed.data,
+                dataStructure: parsed.data ? {
+                  headersCount: parsed.data.headers?.length || 0,
+                  rowsCount: parsed.data.rows?.length || 0,
+                  columnAlignmentsCount: parsed.data.columnAlignments?.length || 0,
+                  hasHeaderRow: parsed.data.hasHeaderRow,
+                  fullData: parsed.data,
+                  dataPreview: {
+                    headers: parsed.data.headers?.slice(0, 5),
+                    firstRow: parsed.data.rows?.[0]?.slice(0, 5),
+                    lastRow: parsed.data.rows?.[parsed.data.rows?.length - 1]?.slice(0, 5)
+                  }
+                } : null
+              };
+            } catch (e) {
+              return { error: 'Failed to parse content', message: e.message, rawContent: content };
+            }
+          })()
+        },
+        metadata,
+        hasRequiredFields: !!(blockType && (position !== null && position !== undefined))
+      });
+    }
 
     const change = {
       blockId,
@@ -244,6 +283,21 @@ class SmartSyncManager {
 
       // Also update the blocks table for quick state recovery
       if (action === 'UPDATE' || action === 'CREATE') {
+        // [TABLE-SAVE] Log IndexedDB write for table blocks
+        if (blockType === 'table') {
+          console.log('[TABLE-SAVE] Step: SmartSync.handleChange Writing to IndexedDB', {
+            blockId,
+            contentLength: content?.length || 0,
+            contentPreview: content?.substring(0, 200),
+            willStore: {
+              id: blockId,
+              documentId: this.documentId,
+              contentLength: content?.length || 0,
+              synced: false
+            }
+          });
+        }
+        
         await this.db.blocks.put({
           id: blockId,
           documentId: this.documentId,
@@ -251,6 +305,13 @@ class SmartSyncManager {
           updated_at: Date.now(),
           synced: false
         });
+        
+        // [TABLE-SAVE] Log IndexedDB write complete for table blocks
+        if (blockType === 'table') {
+          console.log('[TABLE-SAVE] Step: SmartSync.handleChange IndexedDB Write Complete', {
+            blockId
+          });
+        }
       } else if (action === 'DELETE') {
         await this.db.blocks.delete(blockId);
       }
@@ -320,6 +381,44 @@ class SmartSyncManager {
     
     console.log(`SmartSync: Syncing ${batch.length} changes`);
     
+    // [TABLE-SAVE] Filter and log table block changes in batch
+    const tableBlockChanges = batch.filter(change => change.blockType === 'table');
+    if (tableBlockChanges.length > 0) {
+      console.log('[TABLE-SAVE] Step: SmartSync.executeBatchSync Table Blocks in Batch', {
+        tableBlockCount: tableBlockChanges.length,
+        totalBatchSize: batch.length,
+        tableBlocks: tableBlockChanges.map(change => ({
+          blockId: change.blockId,
+          action: change.action,
+          contentLength: change.content?.length || 0,
+          contentPreview: change.content?.substring(0, 200),
+          fullContent: change.content,
+          parsedContent: (() => {
+            try {
+              const parsed = JSON.parse(change.content);
+              return {
+                hasData: !!parsed.data,
+                dataStructure: parsed.data ? {
+                  headersCount: parsed.data.headers?.length || 0,
+                  rowsCount: parsed.data.rows?.length || 0,
+                  columnAlignmentsCount: parsed.data.columnAlignments?.length || 0,
+                  hasHeaderRow: parsed.data.hasHeaderRow,
+                  dataPreview: {
+                    headers: parsed.data.headers?.slice(0, 3),
+                    firstRow: parsed.data.rows?.[0]?.slice(0, 3)
+                  }
+                } : null
+              };
+            } catch (e) {
+              return { error: 'Failed to parse', message: e.message };
+            }
+          })(),
+          position: change.position,
+          timestamp: change.timestamp
+        }))
+      });
+    }
+    
     // Log the actual changes being sent
     console.log('SmartSync: Changes being sent:', batch.map(change => ({
       block_id: change.blockId,
@@ -339,28 +438,100 @@ class SmartSyncManager {
       console.log('SmartSync: Current user ID:', session.user.id);
       
 
+      // Prepare batch payload
+      const batchPayload = batch.map(change => ({
+        block_id: change.blockId,
+        content: change.content,
+        action: change.action,
+        block_type: change.blockType, // CRITICAL: Send block type
+        position: change.position,     // CRITICAL: Send position
+        metadata: change.metadata,     // CRITICAL: Send metadata for snapshots
+        timestamp: change.timestamp
+      }));
+      
+      // [TABLE-SAVE] Log exact payload for table blocks
+      const tablePayloads = batchPayload.filter((payload, idx) => batch[idx].blockType === 'table');
+      if (tablePayloads.length > 0) {
+        console.log('[TABLE-SAVE] Step: SmartSync.executeBatchSync Table Block Payloads', {
+          tableBlockCount: tablePayloads.length,
+          payloads: tablePayloads.map((payload, idx) => {
+            const originalChange = batch.find(c => c.blockId === payload.block_id);
+            return {
+              block_id: payload.block_id,
+              action: payload.action,
+              block_type: payload.block_type,
+              position: payload.position,
+              contentLength: payload.content?.length || 0,
+              contentPreview: payload.content?.substring(0, 200),
+              fullContent: payload.content,
+              metadata: payload.metadata,
+              timestamp: payload.timestamp,
+              parsedContent: (() => {
+                try {
+                  const parsed = JSON.parse(payload.content);
+                  return {
+                    hasData: !!parsed.data,
+                    dataStructure: parsed.data ? {
+                      headersCount: parsed.data.headers?.length || 0,
+                      rowsCount: parsed.data.rows?.length || 0,
+                      columnAlignmentsCount: parsed.data.columnAlignments?.length || 0,
+                      hasHeaderRow: parsed.data.hasHeaderRow
+                    } : null
+                  };
+                } catch (e) {
+                  return { error: 'Failed to parse', message: e.message };
+                }
+              })()
+            };
+          })
+        });
+      }
+
       // ONE API call for entire batch
       const { data, error } = await this.supabase
         .rpc('batch_sync_changes', {
           p_document_id: this.documentId,
-          p_changes: batch.map(change => ({
-            block_id: change.blockId,
-            content: change.content,
-            action: change.action,
-            block_type: change.blockType, // CRITICAL: Send block type
-            position: change.position,     // CRITICAL: Send position
-            metadata: change.metadata,     // CRITICAL: Send metadata for snapshots
-            timestamp: change.timestamp
-          }))
+          p_changes: batchPayload
         });
 
       if (error) {
         console.error('SmartSync: RPC error:', error);
+        // [TABLE-SAVE] Log RPC error for table blocks
+        if (tableBlockChanges.length > 0) {
+          console.error('[TABLE-SAVE] Step: SmartSync.executeBatchSync RPC Error (table blocks affected)', {
+            error,
+            tableBlockCount: tableBlockChanges.length,
+            affectedBlockIds: tableBlockChanges.map(c => c.blockId)
+          });
+        }
         throw error;
       }
       
       // Log the response from the database
       console.log('SmartSync: RPC response:', data);
+      
+      // [TABLE-SAVE] Log RPC response for table blocks
+      if (tableBlockChanges.length > 0) {
+        console.log('[TABLE-SAVE] Step: SmartSync.executeBatchSync RPC Response (table blocks)', {
+          response: data,
+          tableBlockCount: tableBlockChanges.length,
+          processed: data?.processed || 0,
+          total: data?.total || 0,
+          errors: data?.errors || [],
+          success: data?.success !== false,
+          tableBlockIds: tableBlockChanges.map(c => c.blockId)
+        });
+        
+        // Verify table blocks were processed
+        if (data?.processed !== undefined && data?.processed < tableBlockChanges.length) {
+          console.warn('[TABLE-SAVE] Warning: Not all table blocks were processed', {
+            expected: tableBlockChanges.length,
+            processed: data.processed,
+            total: data.total,
+            errors: data.errors
+          });
+        }
+      }
       
       // CRITICAL DEBUG: Check what the RPC actually did
       console.log('[SYNC-DEBUG] Full RPC Response:', JSON.stringify(data, null, 2));

@@ -44,6 +44,29 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
   const [tableData, setTableData] = useState(() => {
     // Validate and ensure table data structure
     const data = block.data || defaultData;
+    
+    // [TABLE-SAVE] Log initialization data
+    console.log('[TABLE-SAVE] Step: Initialization', {
+      blockId: block.id,
+      blockType: block.type,
+      hasBlockData: !!block.data,
+      receivedData: block.data ? {
+        hasHeaders: Array.isArray(block.data.headers),
+        headersCount: block.data.headers?.length || 0,
+        hasRows: Array.isArray(block.data.rows),
+        rowsCount: block.data.rows?.length || 0,
+        hasColumnAlignments: Array.isArray(block.data.columnAlignments),
+        columnAlignmentsCount: block.data.columnAlignments?.length || 0,
+        hasHeaderRow: typeof block.data.hasHeaderRow === 'boolean' ? block.data.hasHeaderRow : undefined
+      } : null,
+      willUseDefault: !block.data,
+      dataPreview: block.data ? {
+        headers: block.data.headers?.slice(0, 3),
+        firstRow: block.data.rows?.[0]?.slice(0, 3),
+        columnAlignments: block.data.columnAlignments?.slice(0, 3)
+      } : null
+    });
+    
     if (data && typeof data === 'object') {
       // Ensure all required fields exist
       if (!Array.isArray(data.headers)) {
@@ -84,7 +107,26 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
         }
       }
     }
-    return data;
+    
+    // [TABLE-SAVE] Log initialized state
+    const initializedData = data || defaultData;
+    console.log('[TABLE-SAVE] Step: Initialization Complete', {
+      blockId: block.id,
+      initializedData: {
+        headersCount: initializedData.headers?.length || 0,
+        rowsCount: initializedData.rows?.length || 0,
+        columnAlignmentsCount: initializedData.columnAlignments?.length || 0,
+        hasHeaderRow: initializedData.hasHeaderRow,
+        dataSize: JSON.stringify(initializedData).length,
+        dataPreview: {
+          headers: initializedData.headers?.slice(0, 3),
+          firstRow: initializedData.rows?.[0]?.slice(0, 3),
+          lastRow: initializedData.rows?.[initializedData.rows?.length - 1]?.slice(0, 3)
+        }
+      }
+    });
+    
+    return initializedData;
   });
   const [editingCell, setEditingCell] = useState(null);
   const [cellValue, setCellValue] = useState('');
@@ -164,6 +206,19 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
 
   // Save table data with simple debouncing
   const saveTable = (newData) => {
+    // [TABLE-SAVE] Log saveTable entry
+    console.log('[TABLE-SAVE] Step: saveTable Entry', {
+      blockId: block.id,
+      isInitialized: isInitializedRef.current,
+      newDataBeforeFix: {
+        headersCount: newData.headers?.length || 0,
+        rowsCount: newData.rows?.length || 0,
+        columnAlignmentsCount: newData.columnAlignments?.length || 0,
+        hasHeaderRow: newData.hasHeaderRow,
+        dataSize: JSON.stringify(newData).length
+      }
+    });
+    
     // Ensure data consistency before saving
     const columnCount = newData.headers.length;
     
@@ -188,18 +243,80 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
       }
     }
     
+    // [TABLE-SAVE] Log data after fixes
+    console.log('[TABLE-SAVE] Step: saveTable After Fixes', {
+      blockId: block.id,
+      fixedData: {
+        headersCount: newData.headers.length,
+        rowsCount: newData.rows.length,
+        columnAlignmentsCount: newData.columnAlignments.length,
+        hasHeaderRow: newData.hasHeaderRow,
+        dataSize: JSON.stringify(newData).length,
+        dataPreview: {
+          headers: newData.headers.slice(0, 5),
+          firstRow: newData.rows[0]?.slice(0, 5),
+          lastRow: newData.rows[newData.rows.length - 1]?.slice(0, 5),
+          columnAlignments: newData.columnAlignments.slice(0, 5)
+        },
+        fullDataStructure: {
+          headers: newData.headers,
+          rows: newData.rows,
+          columnAlignments: newData.columnAlignments,
+          hasHeaderRow: newData.hasHeaderRow
+        }
+      }
+    });
+    
     setTableData(newData);
     
     // Don't save during initialization
-    if (!isInitializedRef.current) return;
+    if (!isInitializedRef.current) {
+      console.log('[TABLE-SAVE] Step: saveTable Skipped (Not Initialized)', {
+        blockId: block.id,
+        isInitialized: isInitializedRef.current
+      });
+      return;
+    }
     
     // Clear any existing timeout
     if (saveTimeoutRef.current) {
+      console.log('[TABLE-SAVE] Step: saveTable Clearing Previous Timeout', {
+        blockId: block.id
+      });
       clearTimeout(saveTimeoutRef.current);
     }
     
+    // [TABLE-SAVE] Log before setting timeout
+    console.log('[TABLE-SAVE] Step: saveTable Setting Debounce Timeout', {
+      blockId: block.id,
+      willCallOnUpdate: true,
+      dataToSave: {
+        headersCount: newData.headers.length,
+        rowsCount: newData.rows.length,
+        columnAlignmentsCount: newData.columnAlignments.length,
+        hasHeaderRow: newData.hasHeaderRow,
+        dataSize: JSON.stringify(newData).length,
+        fullData: newData
+      }
+    });
+    
     // Debounce the parent update with longer delay
     saveTimeoutRef.current = setTimeout(() => {
+      // [TABLE-SAVE] Log when onUpdate is actually called
+      console.log('[TABLE-SAVE] Step: saveTable Calling onUpdate', {
+        blockId: block.id,
+        timestamp: Date.now(),
+        dataBeingSent: {
+          headersCount: newData.headers.length,
+          rowsCount: newData.rows.length,
+          columnAlignmentsCount: newData.columnAlignments.length,
+          hasHeaderRow: newData.hasHeaderRow,
+          dataSize: JSON.stringify(newData).length,
+          fullData: newData,
+          dataStringified: JSON.stringify(newData)
+        }
+      });
+      
       onUpdate(block.id, { data: newData });
     }, 2000); // 2 second debounce to prevent rapid saves
   };

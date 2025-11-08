@@ -77,11 +77,28 @@ export function serializeBlock(block) {
 
     case 'image':
       // Image blocks store images array
-      serialized.content = JSON.stringify({
+      const imageData = {
         images: block.images || [],
         layout: block.layout || 'grid',
         columns: block.columns || 3
+      };
+      
+      // Log image block serialization
+      console.log('[IMAGE-BLOCK] 🔄 Serializing image block:', {
+        blockId: block.id?.substring(0, 8) + '...',
+        inputImagesCount: Array.isArray(block.images) ? block.images.length : 'not-array',
+        inputImages: Array.isArray(block.images) 
+          ? block.images.map(img => ({
+              id: img.id?.substring(0, 8) + '...',
+              url: img.url?.substring(0, 50) + '...',
+              hasStoragePath: !!img.storagePath
+            }))
+          : block.images,
+        outputImagesCount: imageData.images.length,
+        serializedContentLength: JSON.stringify(imageData).length
       });
+      
+      serialized.content = JSON.stringify(imageData);
       break;
 
     case 'table':

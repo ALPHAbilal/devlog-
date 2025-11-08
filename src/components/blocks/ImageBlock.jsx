@@ -97,6 +97,21 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
       // Update block with all images
       const updatedImages = [...images, ...newImages];
       setImages(updatedImages);
+      
+      // Log image update for tracking
+      console.log('[IMAGE-BLOCK] 📤 Upload complete - calling onUpdate:', {
+        blockId: block.id.substring(0, 8) + '...',
+        action: 'UPLOAD',
+        imagesCount: updatedImages.length,
+        newImagesCount: newImages.length,
+        images: updatedImages.map(img => ({
+          id: img.id?.substring(0, 8) + '...',
+          url: img.url?.substring(0, 50) + '...',
+          alt: img.alt,
+          hasStoragePath: !!img.storagePath
+        }))
+      });
+      
       onUpdate(block.id, { images: updatedImages });
       
       setUploadProgress(100);
@@ -189,6 +204,19 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   const handleDeleteImage = (imageId) => {
     const updatedImages = images.filter(img => img.id !== imageId);
     setImages(updatedImages);
+    
+    // Log image deletion for tracking
+    console.log('[IMAGE-BLOCK] 🗑️ Delete image - calling onUpdate:', {
+      blockId: block.id.substring(0, 8) + '...',
+      action: 'DELETE',
+      deletedImageId: imageId.substring(0, 8) + '...',
+      remainingImagesCount: updatedImages.length,
+      images: updatedImages.map(img => ({
+        id: img.id?.substring(0, 8) + '...',
+        url: img.url?.substring(0, 50) + '...'
+      }))
+    });
+    
     onUpdate(block.id, { images: updatedImages });
     
     // If no images left, delete the entire block
@@ -203,6 +231,16 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
       img.id === imageId ? { ...img, alt: newAlt } : img
     );
     setImages(updatedImages);
+    
+    // Log alt text update for tracking
+    console.log('[IMAGE-BLOCK] ✏️ Alt text update - calling onUpdate:', {
+      blockId: block.id.substring(0, 8) + '...',
+      action: 'UPDATE_ALT',
+      imageId: imageId.substring(0, 8) + '...',
+      newAlt: newAlt,
+      imagesCount: updatedImages.length
+    });
+    
     onUpdate(block.id, { images: updatedImages });
     setEditingImageId(null);
   };
@@ -227,6 +265,16 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
     newImages.splice(targetIndex, 0, draggedImage);
     
     setImages(newImages);
+    
+    // Log reorder for tracking
+    console.log('[IMAGE-BLOCK] 🔄 Reorder images - calling onUpdate:', {
+      blockId: block.id.substring(0, 8) + '...',
+      action: 'REORDER',
+      fromIndex: draggedIndex,
+      toIndex: targetIndex,
+      imagesCount: newImages.length
+    });
+    
     onUpdate(block.id, { images: newImages });
     setDraggedImageId(null);
   };

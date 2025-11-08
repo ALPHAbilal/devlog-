@@ -225,6 +225,27 @@ class SmartSyncManager {
       hasRequiredFields: !!(blockType && (position !== null && position !== undefined))
     });
 
+    // Special logging for image blocks
+    if (blockType === 'image' && content) {
+      let parsedContent = null;
+      try {
+        parsedContent = JSON.parse(content);
+      } catch (e) {
+        parsedContent = { error: 'Failed to parse' };
+      }
+      console.log('[IMAGE-BLOCK] 📨 SmartSync.handleChange received:', {
+        blockId: blockId.substring(0, 8) + '...',
+        contentLength: content.length,
+        parsedImagesCount: parsedContent?.images?.length || 0,
+        parsedImages: parsedContent?.images?.map(img => ({
+          id: img.id?.substring(0, 8) + '...',
+          url: img.url?.substring(0, 50) + '...'
+        })) || [],
+        layout: parsedContent?.layout,
+        columns: parsedContent?.columns
+      });
+    }
+
     const change = {
       blockId,
       content,
@@ -338,6 +359,32 @@ class SmartSyncManager {
       
       console.log('SmartSync: Current user ID:', session.user.id);
       
+      // Log image blocks in batch before sending
+      const imageBlocksInBatch = batch.filter(c => c.blockType === 'image');
+      if (imageBlocksInBatch.length > 0) {
+        console.log('[IMAGE-BLOCK] 📤 SmartSync sending to database:', {
+          documentId: this.documentId.substring(0, 8) + '...',
+          imageBlocksCount: imageBlocksInBatch.length,
+          imageBlocks: imageBlocksInBatch.map(change => {
+            let parsedContent = null;
+            try {
+              parsedContent = JSON.parse(change.content);
+            } catch (e) {
+              parsedContent = { error: 'Failed to parse' };
+            }
+            return {
+              blockId: change.blockId.substring(0, 8) + '...',
+              contentLength: change.content?.length,
+              imagesCount: parsedContent?.images?.length || 0,
+              images: parsedContent?.images?.map(img => ({
+                id: img.id?.substring(0, 8) + '...',
+                url: img.url?.substring(0, 50) + '...'
+              })) || []
+            };
+          })
+        });
+      }
+
       // ONE API call for entire batch
       const { data, error } = await this.supabase
         .rpc('batch_sync_changes', {
@@ -360,6 +407,17 @@ class SmartSyncManager {
       
       // Log the response from the database
       console.log('SmartSync: RPC response:', data);
+
+      // Log image blocks after database sync
+      if (imageBlocksInBatch.length > 0) {
+        console.log('[IMAGE-BLOCK] ✅ SmartSync database response:', {
+          documentId: this.documentId.substring(0, 8) + '...',
+          rpcSuccess: data?.success !== false,
+          processed: data?.processed,
+          errors: data?.errors,
+          imageBlocksSent: imageBlocksInBatch.length
+        });
+      }
       
       // CRITICAL DEBUG: Check what the RPC actually did
       console.log('[SYNC-DEBUG] Full RPC Response:', JSON.stringify(data, null, 2));

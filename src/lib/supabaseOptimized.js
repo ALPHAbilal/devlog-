@@ -182,6 +182,8 @@ class OptimizedSupabaseClient {
       const { data: { session }, error } = await this.client.auth.getSession();
       if (session) {
         console.log('[Supabase] Restored existing session:', session.user.id);
+        // Start timer for restored session (fixes issue where timer never starts on page refresh)
+        this.startInactivityTimer();
       } else if (error) {
         console.error('[Supabase] Error restoring session:', error);
       }
@@ -318,9 +320,11 @@ class OptimizedSupabaseClient {
    * Only enable this if your application has specific security requirements.
    */
   setInactivityTimeout(minutes) {
-    // 0 means never timeout
     this.inactivityTimeout = minutes === 0 ? 0 : minutes * 60 * 1000;
-    this.resetInactivityTimer();
+    // Reset timer with new timeout (will start if session exists)
+    if (this.client) {
+      this.resetInactivityTimer();
+    }
   }
 
   /**

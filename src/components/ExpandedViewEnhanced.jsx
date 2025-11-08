@@ -68,6 +68,18 @@ function ExpandedView({
   // Check if document might have many blocks (use pagination for documents with 50+ blocks)
   const shouldUsePagination = !stableEntry.blocks || stableEntry.blockCount > 50;
 
+  // [CACHE-TRACK] Log loader selection
+  useEffect(() => {
+    console.log(`[CACHE-TRACK] 📄 ExpandedViewEnhanced: Document ${stableEntry.id.substring(0, 8)}`, {
+      blockCount: stableEntry.blockCount || 'unknown',
+      hasBlocksInEntry: !!stableEntry.blocks && stableEntry.blocks.length > 0,
+      loader: shouldUsePagination ? 'PAGINATED' : 'OPTIMIZED',
+      reason: shouldUsePagination 
+        ? `blockCount > 50 or no blocks in entry` 
+        : `blockCount <= 50 and blocks available`
+    });
+  }, [stableEntry.id, stableEntry.blockCount, shouldUsePagination]);
+
   // [VIRT-DEBUG-0] Better logging with render tracking
   const renderCount = useRef(0);
   const entryRef = useRef(entry);
@@ -131,6 +143,12 @@ function ExpandedView({
   // Memoize blocks array to prevent unnecessary re-renders
   const blocks = useMemo(() => {
     const result = loadedBlocks || [];
+    
+    // [CACHE-TRACK] Log blocks ready for rendering
+    if (result.length > 0 && (!prevBlocksRef.current || prevBlocksRef.current.length === 0)) {
+      console.log(`[CACHE-TRACK] ✅ READY: ${result.length} blocks ready for rendering in ExpandedViewEnhanced`);
+    }
+    
     // TEMPORARILY REMOVED DEV CHECK FOR PRODUCTION DEBUGGING
     console.log(`[BLOCKS-MEMO] Blocks array updated: ${result.length} blocks`);
     if (prevBlocksRef.current && prevBlocksRef.current.length > 0) {

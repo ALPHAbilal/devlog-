@@ -50,32 +50,77 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
       setError(null);
 
       try {
+        const loadStartTime = performance.now();
+        
+        // [CACHE-TRACK] Log loader start
+        console.log(`[CACHE-TRACK] 🚀 usePaginatedBlockLoader: Starting load for document ${documentId.substring(0, 8)}`);
+        
         // Check if blocks are already in entry with content
         if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
+          // [CACHE-TRACK] Log entry blocks found
+          console.log(`[CACHE-TRACK] ✅ SOURCE: entry.blocks - Found ${entry.blocks.length} blocks in entry prop (no cache check needed)`);
+          
           setBlocks(entry.blocks);
           setTotalCount(entry.blocks.length);
           setHasMore(false);
           setIsLoading(false);
           sessionCache.cacheBlocks(documentId, entry.blocks);
+          
+          const loadTime = performance.now() - loadStartTime;
+          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry in ${loadTime.toFixed(2)}ms`);
           return;
         }
 
-        // Check session cache for the first page
+        // Check paginatedBlockLoader cache first
+        console.log(`[CACHE-TRACK] 🔍 CHECKING: paginatedBlockLoader.getCachedBlocks(${documentId.substring(0, 8)})`);
         const cachedData = paginatedBlockLoader.getCachedBlocks(documentId);
         if (cachedData && cachedData.blocks.length > 0) {
+          // [CACHE-TRACK] Log cache hit from paginated loader
+          const loadTime = performance.now() - loadStartTime;
+          console.log(`[CACHE-TRACK] ✅ CACHE HIT (paginated): Found ${cachedData.blocks.length} blocks in paginatedBlockLoader cache - Load time: ${loadTime.toFixed(2)}ms`);
+          
           setBlocks(cachedData.blocks);
           setTotalCount(cachedData.totalCount);
           setHasMore(cachedData.hasMore);
           setIsLoading(false);
+          
+          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from paginated cache in ${loadTime.toFixed(2)}ms`);
           return;
         }
 
+        // Check sessionCache as fallback
+        console.log(`[CACHE-TRACK] 🔍 CHECKING: sessionCache.getBlocks(${documentId.substring(0, 8)}) as fallback`);
+        const sessionCachedBlocks = sessionCache.getBlocks(documentId);
+        if (sessionCachedBlocks && sessionCachedBlocks.length > 0) {
+          // [CACHE-TRACK] Log cache hit from sessionCache
+          const loadTime = performance.now() - loadStartTime;
+          console.log(`[CACHE-TRACK] ✅ CACHE HIT (sessionCache): Found ${sessionCachedBlocks.length} blocks in sessionCache - Load time: ${loadTime.toFixed(2)}ms`);
+          
+          setBlocks(sessionCachedBlocks);
+          setTotalCount(sessionCachedBlocks.length);
+          setHasMore(false); // Assume all blocks loaded if from sessionCache
+          setIsLoading(false);
+          
+          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from sessionCache in ${loadTime.toFixed(2)}ms`);
+          return;
+        }
+
+        // [CACHE-TRACK] Log cache miss - loading from database
+        console.log(`[CACHE-TRACK] ❌ CACHE MISS: No blocks in any cache, loading from database...`);
+
         // Load first page from database
+        const dbLoadStart = performance.now();
         const result = await paginatedBlockLoader.loadDocumentFirstPage(documentId, pageSize);
+        const dbLoadTime = performance.now() - dbLoadStart;
+        
+        console.log(`[CACHE-TRACK] 📊 DATABASE: Loaded from DB in ${dbLoadTime.toFixed(2)}ms (fromCache: ${result?.fromCache || false})`);
         
         if (!mountedRef.current) return;
 
         if (result && result.blocks) {
+          // [CACHE-TRACK] Log blocks received
+          console.log(`[CACHE-TRACK] 📦 RECEIVED: ${result.blocks.length} blocks from loader (totalCount: ${result.totalCount}, hasMore: ${result.hasMore}, fromCache: ${result.fromCache || false})`);
+          
           startTransition(() => {
             setBlocks(result.blocks);
             setTotalCount(result.totalCount);
@@ -83,11 +128,20 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
             setCurrentPage(0);
           });
 
+          // [CACHE-TRACK] Log caching
+          console.log(`[CACHE-TRACK] 💾 CACHING: Storing ${result.blocks.length} blocks in sessionCache`);
+          sessionCache.cacheBlocks(documentId, result.blocks);
+
           // Preload next page if enabled
           if (preloadNextPage && result.hasMore) {
+            console.log(`[CACHE-TRACK] 🔮 PRELOAD: Preloading next page...`);
             paginatedBlockLoader.preloadNextPage(documentId, 0, pageSize);
           }
+          
+          const totalLoadTime = performance.now() - loadStartTime;
+          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Total load time: ${totalLoadTime.toFixed(2)}ms (DB: ${dbLoadTime.toFixed(2)}ms)`);
         } else {
+          console.log(`[CACHE-TRACK] ⚠️ EMPTY: No blocks returned from loader`);
           startTransition(() => {
             setBlocks([]);
             setTotalCount(0);

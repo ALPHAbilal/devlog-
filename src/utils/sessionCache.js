@@ -72,7 +72,13 @@ class SessionCache {
    * Cache blocks for a document
    */
   cacheBlocks(documentId, blocks) {
-    this.cache.set(this.getBlocksKey(documentId), blocks);
+    const blockCount = Array.isArray(blocks) ? blocks.length : 0;
+    const cacheKey = this.getBlocksKey(documentId);
+    
+    // [CACHE-TRACK] Log cache write
+    console.log(`[CACHE-TRACK] 💾 SET: cacheBlocks(${documentId.substring(0, 8)}) - Caching ${blockCount} blocks`);
+    
+    this.cache.set(cacheKey, blocks);
     
     // Update metadata
     const metaKey = this.getMetadataKey(documentId);
@@ -107,8 +113,14 @@ class SessionCache {
    * Get cached blocks
    */
   getBlocks(documentId) {
-    const blocks = this.cache.get(this.getBlocksKey(documentId));
+    const cacheKey = this.getBlocksKey(documentId);
+    const blocks = this.cache.get(cacheKey);
+    
+    // [CACHE-TRACK] Log cache lookup
     if (blocks) {
+      const blockCount = Array.isArray(blocks) ? blocks.length : 0;
+      console.log(`[CACHE-TRACK] ✅ HIT: getBlocks(${documentId.substring(0, 8)}) - Found ${blockCount} blocks in cache`);
+      
       // Update last accessed in metadata
       const metaKey = this.getMetadataKey(documentId);
       const meta = this.cache.get(metaKey) || {};
@@ -116,7 +128,10 @@ class SessionCache {
         ...meta,
         lastAccessed: Date.now()
       });
+    } else {
+      console.log(`[CACHE-TRACK] ❌ MISS: getBlocks(${documentId.substring(0, 8)}) - No blocks in cache`);
     }
+    
     return blocks;
   }
 
@@ -173,7 +188,13 @@ class SessionCache {
    * Update cached blocks
    */
   updateBlocks(documentId, blocks) {
-    this.cache.set(this.getBlocksKey(documentId), blocks);
+    const blockCount = Array.isArray(blocks) ? blocks.length : 0;
+    const cacheKey = this.getBlocksKey(documentId);
+    
+    // [CACHE-TRACK] Log cache update
+    console.log(`[CACHE-TRACK] 🔄 UPDATE: updateBlocks(${documentId.substring(0, 8)}) - Updating cache with ${blockCount} blocks`);
+    
+    this.cache.set(cacheKey, blocks);
     
     // Update metadata
     const metaKey = this.getMetadataKey(documentId);

@@ -40,9 +40,7 @@ const IssueTrackerPlaceholder = memo(({ block, onUpdate }) => {
   }
   
   // Calculate issue statistics
-  // CRITICAL FIX: Read from block.data.issues (wrapped structure)
-  const blockData = block.data || {};
-  const issues = blockData.issues || block.issues || [];
+  const issues = block.issues || [];
   const openCount = issues.filter(i => i.status === 'open').length;
   const inProgressCount = issues.filter(i => i.status === 'in-progress').length;
   const closedCount = issues.filter(i => i.status === 'closed').length;
@@ -114,7 +112,7 @@ const OptimizedIssueTrackerBlock = memo(({ block, onUpdate }) => {
             });
           } else if (!entry.isIntersecting && renderMode === 'visible') {
             // Component is no longer visible, switch to lightweight mode for heavy blocks
-            const issueCount = (block.data?.issues || block.issues)?.length || 0;
+            const issueCount = block.issues?.length || 0;
             if (issueCount > 10) {
               startTransition(() => {
                 setRenderMode('placeholder');
@@ -163,9 +161,8 @@ const OptimizedIssueTrackerBlock = memo(({ block, onUpdate }) => {
   if (prevProps.block.title !== nextProps.block.title) return false;
   
   // Deep compare issues array (check length and IDs)
-  // CRITICAL FIX: Read from block.data.issues (wrapped structure)
-  const prevIssues = prevProps.block.data?.issues || prevProps.block.issues || [];
-  const nextIssues = nextProps.block.data?.issues || nextProps.block.issues || [];
+  const prevIssues = prevProps.block.issues || [];
+  const nextIssues = nextProps.block.issues || [];
   
   if (prevIssues.length !== nextIssues.length) return false;
   

@@ -467,7 +467,7 @@ const IssueTrackerBlock = ({ block, onUpdate }) => {
       title: '',
       description: '',
       code: '',
-      status: 'active',
+      status: 'open',  // CRITICAL FIX: Changed from 'active' to 'open' to match Zod schema
       attempts: []
     };
     const newIssues = [...issues, newIssue];

@@ -588,6 +588,24 @@ function ExpandedView({
                      updates.filePath !== undefined ||     // Code blocks
                      updates.level !== undefined;          // Heading blocks
 
+    // CRITICAL FIX: Get position BEFORE startTransition (while blocks is fresh)
+    // Priority: 1) updates.position, 2) block.position, 3) stableEntry.blocks position, 4) array index
+    let blockPosition = updates.position;
+    if (blockPosition === undefined || blockPosition === null) {
+      if (block && block.position !== undefined && block.position !== null) {
+        blockPosition = block.position;
+      } else {
+        // Try stableEntry.blocks as source of truth
+        const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
+        if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
+          blockPosition = entryBlock.position;
+        } else {
+          // Last resort: use array index
+          blockPosition = block ? blocks.indexOf(block) : blocks.length;
+        }
+      }
+    }
+
     // Use the loader's updateBlock method
     startTransition(() => {
       updateSingleBlock(blockId, updates);
@@ -597,32 +615,18 @@ function ExpandedView({
     if (needsSave && !isInitialLoadRef.current) {
       // Use Smart Sync for saving - get current block and apply updates
       if (smartSyncManagerRef.current) {
-        const currentBlock = blocks.find(b => b.id === blockId);
+        // CRITICAL FIX: Reuse the 'block' variable from line 524 (found BEFORE startTransition)
+        // This avoids stale closure issues - 'block' is guaranteed to be fresh
+        const currentBlock = block;
         if (currentBlock) {
           // Remove isNew flag when updating a block (user has interacted with it)
           const { isNew, ...blockWithoutNew } = currentBlock;
-          // CRITICAL FIX: Preserve position - never lose it!
-          // Priority: 1) updates.position, 2) currentBlock.position, 3) entry.blocks position, 4) array index
-          let blockPosition = updates.position;
-          if (blockPosition === undefined || blockPosition === null) {
-            if (currentBlock.position !== undefined && currentBlock.position !== null) {
-              blockPosition = currentBlock.position;
-            } else {
-              // Try stableEntry.blocks as source of truth
-              const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
-              if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
-                blockPosition = entryBlock.position;
-              } else {
-                // Last resort: use array index
-                blockPosition = blocks.indexOf(currentBlock);
-              }
-            }
-          }
           
+          // Use the blockPosition we calculated BEFORE startTransition (already has correct priority)
           const updatedBlock = {
             ...blockWithoutNew,
             ...updates,
-            // CRITICAL: Always preserve position - never default to 0 unless it's actually position 0
+            // CRITICAL: Always preserve position - use the one we got BEFORE startTransition
             position: blockPosition
           };
 
@@ -697,31 +701,12 @@ function ExpandedView({
                               (updates.language !== undefined || updates.filePath !== undefined ? 'code' : null) ||
                               'text'; // fallback
           
-          // CRITICAL FIX: Try to get position from stableEntry.blocks (source of truth) or blocks array
-          let blockPosition = updates.position;
-          if (blockPosition === undefined) {
-            // Try to find in stableEntry.blocks first (most reliable)
-            const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
-            if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
-              blockPosition = entryBlock.position;
-            } else {
-              // Fallback: try to find in current blocks array
-              const blockInArray = blocks.find(b => b.id === blockId);
-              if (blockInArray && blockInArray.position !== undefined && blockInArray.position !== null) {
-                blockPosition = blockInArray.position;
-              } else {
-                // Last resort: use array index (but this is unreliable)
-                const blockIndex = blocks.findIndex(b => b.id === blockId);
-                blockPosition = blockIndex >= 0 ? blockIndex : blocks.length;
-              }
-            }
-          }
-          
-          // Construct block from updates
+          // Use the blockPosition we calculated BEFORE startTransition
+          // This ensures we have the correct position even if block wasn't found
           const constructedBlock = {
             id: blockId,
             type: inferredType,
-            position: blockPosition,
+            position: blockPosition >= 0 ? blockPosition : blocks.length, // Fallback to length if position is invalid
             metadata: updates.metadata || {},
             ...updates
           };

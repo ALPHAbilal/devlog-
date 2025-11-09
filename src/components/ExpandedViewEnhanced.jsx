@@ -219,6 +219,10 @@ function ExpandedView({
   const selectorPositionRef = useRef(null);
   // Ref to store addBlock function to avoid circular dependency
   const addBlockRef = useRef(null);
+  // Refs to prevent callback recreation (Priority 4 fix - prevent flickering)
+  const blocksRef = useRef(blocks);
+  const loadedBlocksRef = useRef(loadedBlocks);
+  const stableEntryRef = useRef(stableEntry);
   const [title, setTitle] = useState(entry.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [backlinks, setBacklinks] = useState([]);
@@ -287,6 +291,13 @@ function ExpandedView({
     showBlockSelectorRef.current = showBlockSelector;
     selectorPositionRef.current = selectorPosition;
   }, [showBlockSelector, selectorPosition]);
+
+  // Sync blocks/loadedBlocks/stableEntry refs to prevent updateBlock callback recreation (Priority 4 fix)
+  useEffect(() => {
+    blocksRef.current = blocks;
+    loadedBlocksRef.current = loadedBlocks;
+    stableEntryRef.current = stableEntry;
+  }, [blocks, loadedBlocks, stableEntry]);
 
   // Create a memoized block renderer component to avoid closure issues
   // CRITICAL FIX: Use computed boolean props instead of raw state
@@ -594,26 +605,32 @@ function ExpandedView({
                      updates.level !== undefined;          // Heading blocks
 
     // CRITICAL FIX: Get position BEFORE startTransition (while blocks/loadedBlocks is fresh)
-    // Priority: 1) updates.position, 2) actualBlock.position, 3) loadedBlocks index, 4) stableEntry.blocks position, 5) array index
-    let blockPosition = updates.position;
+    // Priority: 1) updates.position, 2) actualBlock.position, 3) array index (simple fallback)
+    // Use refs to prevent callback recreation (Priority 4 fix)
+    let blockPosition = updates.position ?? actualBlock?.position;
+
+    // If still undefined/null, use array index as fallback
     if (blockPosition === undefined || blockPosition === null) {
-      if (actualBlock && actualBlock.position !== undefined && actualBlock.position !== null) {
-        blockPosition = actualBlock.position;
+      if (block) {
+        const idx = blocksRef.current.indexOf(block);
+        blockPosition = idx >= 0 ? idx : blocksRef.current.length;
+      } else if (loaderBlock && loadedBlocksRef.current) {
+        const idx = loadedBlocksRef.current.indexOf(loaderBlock);
+        blockPosition = idx >= 0 ? idx : (loadedBlocksRef.current.length || blocksRef.current.length);
       } else {
-        // Try loadedBlocks index (more reliable than memoized blocks)
-        if (loaderBlock) {
-          blockPosition = loadedBlocks.indexOf(loaderBlock);
-        } else {
-          // Try stableEntry.blocks as source of truth
-          const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
-          if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
-            blockPosition = entryBlock.position;
-          } else {
-            // Last resort: use array index from blocks
-            blockPosition = block ? blocks.indexOf(block) : blocks.length;
-          }
-        }
+        // Absolute last resort
+        blockPosition = blocksRef.current.length;
       }
+    }
+
+    // VALIDATION: Ensure position is always valid (never negative)
+    if (blockPosition < 0) {
+      console.warn('[POSITION-FIX] ⚠️ Invalid position detected, using fallback:', {
+        blockId,
+        invalidPosition: blockPosition,
+        fallback: blocksRef.current.length
+      });
+      blockPosition = blocksRef.current.length;
     }
 
     // Use the loader's updateBlock method
@@ -716,7 +733,7 @@ function ExpandedView({
           const constructedBlock = {
             id: blockId,
             type: inferredType,
-            position: blockPosition >= 0 ? blockPosition : blocks.length, // Fallback to length if position is invalid
+            position: blockPosition >= 0 ? blockPosition : blocksRef.current.length, // Fallback to length if position is invalid
             metadata: updates.metadata || {},
             ...updates
           };
@@ -782,7 +799,7 @@ function ExpandedView({
         }
       }
     }
-  }, [blocks, loadedBlocks, updateSingleBlock, stableEntry]);
+  }, [updateSingleBlock]); // Priority 4 fix: Only stable function in deps, blocks/loadedBlocks/stableEntry accessed via refs
 
   const deleteBlock = useCallback((blockId) => {
     // Defensive check

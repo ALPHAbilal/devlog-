@@ -266,34 +266,27 @@ export function deserializeBlock(block) {
   // Parse content
   if (block.content) {
     try {
-      let parsed;
-      
-      // Handle legacy plain text content for text/heading/code blocks
-      if ((block.type === 'text' || block.type === 'heading' || block.type === 'code') && 
-          typeof block.content === 'string' && 
-          !block.content.trim().startsWith('{') && 
-          !block.content.trim().startsWith('[')) {
-        // Legacy plain text format - wrap in JSON structure
-        parsed = { content: block.content };
-      } else {
-        // JSON format (new) or other types
-        parsed = typeof block.content === 'string'
-          ? JSON.parse(block.content)
-          : block.content;
-      }
+      // Parse content - Zod schemas now handle both legacy (plain string) and new (JSON) formats
+      const parsed = typeof block.content === 'string'
+        ? (function() {
+            try {
+              return JSON.parse(block.content);
+            } catch {
+              // Not JSON - return as-is for Zod to handle (legacy plain text)
+              return block.content;
+            }
+          })()
+        : block.content;
 
-      // Zod validates and filters invalid fields automatically
+      // Zod validates and automatically handles both formats:
+      // - Legacy: "plain text" → transforms to {content: "plain text"}
+      // - New: {content: "text"} → validates and passes through
       const validated = schema.parse(parsed);
 
       // Map validated data back to block structure
       if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
-        // Handle both JSON format (new) and plain text (legacy)
-        if (typeof validated.content === 'string') {
-          deserialized.content = validated.content;
-        } else {
-          // Legacy: content was stored as plain text, not JSON
-          deserialized.content = block.content || '';
-        }
+        // Zod transform already normalized both formats to {content: string}
+        deserialized.content = validated.content || '';
       } else if (block.type === 'ai') {
         deserialized.messages = validated.messages || [];
         if (validated.metadata) {

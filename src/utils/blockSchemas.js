@@ -14,17 +14,44 @@ const TableAlignmentSchema = z.enum(['left', 'center', 'right']);
 
 // Block content schemas (what goes into the 'content' field)
 export const BlockContentSchemas = {
-  // Simple text-based blocks
-  text: z.object({
-    content: z.string().default('')
+  // Simple text-based blocks - Accept BOTH plain string (legacy) and object format (new)
+  text: z.union([
+    z.string(),  // Legacy format: "plain text"
+    z.object({    // New format: {content: "text"}
+      content: z.string().default('')
+    })
+  ]).transform(val => {
+    // Normalize to object format for consistency
+    if (typeof val === 'string') {
+      return { content: val };
+    }
+    return val;
   }),
 
-  heading: z.object({
-    content: z.string().default('')
+  heading: z.union([
+    z.string(),  // Legacy format: "plain text"
+    z.object({    // New format: {content: "text"}
+      content: z.string().default('')
+    })
+  ]).transform(val => {
+    // Normalize to object format for consistency
+    if (typeof val === 'string') {
+      return { content: val };
+    }
+    return val;
   }),
 
-  code: z.object({
-    content: z.string().default('')
+  code: z.union([
+    z.string(),  // Legacy format: "plain text"
+    z.object({    // New format: {content: "text"}
+      content: z.string().default('')
+    })
+  ]).transform(val => {
+    // Normalize to object format for consistency
+    if (typeof val === 'string') {
+      return { content: val };
+    }
+    return val;
   }),
 
   // AI conversation blocks

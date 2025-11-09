@@ -125,7 +125,7 @@ export const BlockContentSchemas = {
         title: z.string().default(''),
         description: z.string().default(''),
         code: z.string().default(''),
-        status: z.enum(['open', 'in-progress', 'closed']).default('open'), // Fixed: Match OptimizedIssueTrackerBlock.jsx
+        status: z.enum(['open', 'in-progress', 'closed', 'solved']).default('open'), // Fixed: Added 'solved' status
         attempts: z.array(z.any()).default([])
       })).default([])
       // Zod will automatically reject: headers, rows, columnAlignments, or any other fields
@@ -141,7 +141,7 @@ export const BlockContentSchemas = {
         title: z.string().default(''),
         description: z.string().default(''),
         code: z.string().default(''),
-        status: z.enum(['open', 'in-progress', 'closed']).default('open'), // Fixed: Match OptimizedIssueTrackerBlock.jsx
+        status: z.enum(['open', 'in-progress', 'closed', 'solved']).default('open'), // Fixed: Added 'solved' status
         attempts: z.array(z.any()).default([])
       })).default([])
     })

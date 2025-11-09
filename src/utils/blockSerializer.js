@@ -68,9 +68,11 @@ export function serializeBlock(block) {
     return serialized;
   }
 
+  // CRITICAL FIX: Declare dataToValidate BEFORE try block so catch block can access it
+  let dataToValidate = {};
+
   try {
     // Extract data based on block type
-    let dataToValidate = {};
 
     if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
       dataToValidate = { content: block.content || '' };

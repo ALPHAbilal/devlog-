@@ -719,10 +719,14 @@ function ExpandedView({
           // Construct block from updates to ensure save happens
           
           // Infer block type from updates
-          const inferredType = updates.type || 
+          // CRITICAL FIX: Distinguish between table and issue-tracker (both have .data!)
+          const inferredType = updates.type ||
                               (updates.images !== undefined ? 'image' : null) ||
                               (updates.messages !== undefined ? 'ai' : null) ||
                               (updates.treeData !== undefined ? 'filetree' : null) ||
+                              // ✅ Check for issue tracker FIRST (more specific - has milestone or issues)
+                              (updates.data?.milestone !== undefined || updates.data?.issues !== undefined ? 'issue-tracker' : null) ||
+                              // ✅ Then check for table (less specific - just has data)
                               (updates.data !== undefined ? 'table' : null) ||
                               (updates.url !== undefined ? 'inline-image' : null) ||
                               (updates.language !== undefined || updates.filePath !== undefined ? 'code' : null) ||

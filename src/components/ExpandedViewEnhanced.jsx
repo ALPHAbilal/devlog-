@@ -533,18 +533,19 @@ function ExpandedView({
     
     // CRITICAL FIX: Check BOTH blocks (memoized) and loadedBlocks (source of truth)
     // loadedBlocks is updated immediately by the loader, but blocks is memoized with a delay
-    const block = blocks.find(b => b.id === blockId);
-    const loaderBlock = loadedBlocks?.find(b => b.id === blockId);
+    // CRITICAL: Use refs to avoid stale closure bug (comment said "accessed via refs" but code didn't!)
+    const block = blocksRef.current.find(b => b.id === blockId);
+    const loaderBlock = loadedBlocksRef.current?.find(b => b.id === blockId);
     const actualBlock = block || loaderBlock; // Use whichever is found
 
     // [DEBUG-1] Log block lookup failure
     if (!actualBlock) {
       console.error('[DEBUG-1] ❌ CRITICAL: actualBlock is undefined!', {
         blockId: blockId.substring(0, 8),
-        blocksArrayLength: blocks.length,
-        loadedBlocksArrayLength: loadedBlocks?.length || 0,
-        blocksIds: blocks.map(b => b.id.substring(0, 8)),
-        loadedBlocksIds: loadedBlocks?.map(b => b.id.substring(0, 8)) || [],
+        blocksArrayLength: blocksRef.current.length,
+        loadedBlocksArrayLength: loadedBlocksRef.current?.length || 0,
+        blocksIds: blocksRef.current.map(b => b.id.substring(0, 8)),
+        loadedBlocksIds: loadedBlocksRef.current?.map(b => b.id.substring(0, 8)) || [],
         blocksRefLength: blocksRef.current.length,
         blocksRefIds: blocksRef.current.map(b => b.id.substring(0, 8))
       });

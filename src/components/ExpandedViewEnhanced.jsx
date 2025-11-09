@@ -520,24 +520,29 @@ function ExpandedView({
       return;
     }
     
-    // Debug AI blocks specifically
+    // CRITICAL FIX: Check BOTH blocks (memoized) and loadedBlocks (source of truth)
+    // loadedBlocks is updated immediately by the loader, but blocks is memoized with a delay
     const block = blocks.find(b => b.id === blockId);
-    if (block && block.type === 'ai') {
+    const loaderBlock = loadedBlocks?.find(b => b.id === blockId);
+    const actualBlock = block || loaderBlock; // Use whichever is found
+    
+    // Debug AI blocks specifically
+    if (actualBlock && actualBlock.type === 'ai') {
       console.log('🟣 AI Block Update:', {
         blockId,
-        blockType: block.type,
+        blockType: actualBlock.type,
         updates,
         hasMessages: 'messages' in updates,
         messageCount: updates.messages?.length || 0,
-        currentMessageCount: block?.messages?.length || 0
+        currentMessageCount: actualBlock?.messages?.length || 0
       });
     }
     
     // [TABLE-SAVE] Log table block updates
-    if (block && block.type === 'table') {
+    if (actualBlock && actualBlock.type === 'table') {
       console.log('[TABLE-SAVE] Step: ExpandedViewEnhanced.updateBlock Entry', {
         blockId,
-        blockType: block.type,
+        blockType: actualBlock.type,
         updates: {
           hasData: 'data' in updates,
           dataStructure: updates.data ? {
@@ -554,11 +559,11 @@ function ExpandedView({
           allUpdateKeys: Object.keys(updates)
         },
         currentBlock: {
-          hasData: !!block.data,
-          dataStructure: block.data ? {
-            headersCount: block.data.headers?.length || 0,
-            rowsCount: block.data.rows?.length || 0,
-            columnAlignmentsCount: block.data.columnAlignments?.length || 0
+          hasData: !!actualBlock.data,
+          dataStructure: actualBlock.data ? {
+            headersCount: actualBlock.data.headers?.length || 0,
+            rowsCount: actualBlock.data.rows?.length || 0,
+            columnAlignmentsCount: actualBlock.data.columnAlignments?.length || 0
           } : null
         }
       });
@@ -588,20 +593,25 @@ function ExpandedView({
                      updates.filePath !== undefined ||     // Code blocks
                      updates.level !== undefined;          // Heading blocks
 
-    // CRITICAL FIX: Get position BEFORE startTransition (while blocks is fresh)
-    // Priority: 1) updates.position, 2) block.position, 3) stableEntry.blocks position, 4) array index
+    // CRITICAL FIX: Get position BEFORE startTransition (while blocks/loadedBlocks is fresh)
+    // Priority: 1) updates.position, 2) actualBlock.position, 3) loadedBlocks index, 4) stableEntry.blocks position, 5) array index
     let blockPosition = updates.position;
     if (blockPosition === undefined || blockPosition === null) {
-      if (block && block.position !== undefined && block.position !== null) {
-        blockPosition = block.position;
+      if (actualBlock && actualBlock.position !== undefined && actualBlock.position !== null) {
+        blockPosition = actualBlock.position;
       } else {
-        // Try stableEntry.blocks as source of truth
-        const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
-        if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
-          blockPosition = entryBlock.position;
+        // Try loadedBlocks index (more reliable than memoized blocks)
+        if (loaderBlock) {
+          blockPosition = loadedBlocks.indexOf(loaderBlock);
         } else {
-          // Last resort: use array index
-          blockPosition = block ? blocks.indexOf(block) : blocks.length;
+          // Try stableEntry.blocks as source of truth
+          const entryBlock = stableEntry?.blocks?.find(b => b.id === blockId);
+          if (entryBlock && entryBlock.position !== undefined && entryBlock.position !== null) {
+            blockPosition = entryBlock.position;
+          } else {
+            // Last resort: use array index from blocks
+            blockPosition = block ? blocks.indexOf(block) : blocks.length;
+          }
         }
       }
     }
@@ -615,9 +625,9 @@ function ExpandedView({
     if (needsSave && !isInitialLoadRef.current) {
       // Use Smart Sync for saving - get current block and apply updates
       if (smartSyncManagerRef.current) {
-        // CRITICAL FIX: Reuse the 'block' variable from line 524 (found BEFORE startTransition)
-        // This avoids stale closure issues - 'block' is guaranteed to be fresh
-        const currentBlock = block;
+        // CRITICAL FIX: Use actualBlock (from either blocks or loadedBlocks)
+        // This avoids stale closure issues - actualBlock is guaranteed to be fresh
+        const currentBlock = actualBlock;
         if (currentBlock) {
           // Remove isNew flag when updating a block (user has interacted with it)
           const { isNew, ...blockWithoutNew } = currentBlock;
@@ -772,7 +782,7 @@ function ExpandedView({
         }
       }
     }
-  }, [blocks, updateSingleBlock, stableEntry]);
+  }, [blocks, loadedBlocks, updateSingleBlock, stableEntry]);
 
   const deleteBlock = useCallback((blockId) => {
     // Defensive check

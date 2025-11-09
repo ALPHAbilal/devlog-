@@ -536,6 +536,19 @@ function ExpandedView({
     const block = blocks.find(b => b.id === blockId);
     const loaderBlock = loadedBlocks?.find(b => b.id === blockId);
     const actualBlock = block || loaderBlock; // Use whichever is found
+
+    // [DEBUG-1] Log block lookup failure
+    if (!actualBlock) {
+      console.error('[DEBUG-1] ❌ CRITICAL: actualBlock is undefined!', {
+        blockId: blockId.substring(0, 8),
+        blocksArrayLength: blocks.length,
+        loadedBlocksArrayLength: loadedBlocks?.length || 0,
+        blocksIds: blocks.map(b => b.id.substring(0, 8)),
+        loadedBlocksIds: loadedBlocks?.map(b => b.id.substring(0, 8)) || [],
+        blocksRefLength: blocksRef.current.length,
+        blocksRefIds: blocksRef.current.map(b => b.id.substring(0, 8))
+      });
+    }
     
     // Debug AI blocks specifically
     if (actualBlock && actualBlock.type === 'ai') {
@@ -642,7 +655,11 @@ function ExpandedView({
               actualBlock?.position !== undefined ? 'actualBlock.position' :
               'array index fallback',
       blocksArrayLength: blocksRef.current.length,
-      blockIndexInArray: block ? blocksRef.current.indexOf(block) : -1
+      blockIndexInArray: block ? blocksRef.current.indexOf(block) : -1,
+      actualBlockPosition: actualBlock?.position,
+      updatesPosition: updates.position,
+      hasActualBlock: !!actualBlock,
+      fallbackUsed: !actualBlock && !updates.position
     });
 
     // Use the loader's updateBlock method

@@ -490,29 +490,6 @@ function FileTreeBlock({ block, onUpdate }) {
     return new Date(timestamp).toLocaleDateString();
   };
 
-  // CRITICAL FIX: Debounce onUpdate calls to prevent data loss on quick reloads
-  // FileTreeBlock has 8 immediate onUpdate calls when adding/removing files rapidly.
-  // Without debouncing, changes queue up in SmartSync's 5-second debounce window,
-  // causing data loss if user reloads before the 5 seconds elapse.
-  const debounceRef = useRef(null);
-  const debouncedOnUpdate = (blockId, updates) => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-    debounceRef.current = setTimeout(() => {
-      onUpdate(blockId, updates);
-    }, 100); // 100ms debounce - batches rapid file operations
-  };
-
-  // Cleanup debounce timer on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
   // Performance monitoring
   useEffect(() => {
     console.log(`📁 FileTreeBlock ${block.id} rendered at ${new Date().toISOString()}`);
@@ -570,7 +547,7 @@ function FileTreeBlock({ block, onUpdate }) {
     if (block._needsInitialSnapshotSave && snapshots.length > 0) {
       // Save initial snapshot to database (one-time operation)
       // CRITICAL: Pass snapshots as top-level fields for serialization
-      debouncedOnUpdate(block.id, {
+      onUpdate(block.id, {
         treeData: treeData,
         metadata: {
           ...(block.metadata || {}),
@@ -646,7 +623,7 @@ function FileTreeBlock({ block, onUpdate }) {
 
     // Persist to database via onUpdate
     // CRITICAL: Pass snapshots as top-level fields for serialization
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: treeData,
       metadata: metadataToSave,
       snapshots: updatedSnapshots,
@@ -674,7 +651,7 @@ function FileTreeBlock({ block, onUpdate }) {
 
     // CRITICAL FIX #2: Preserve existing metadata fields
     // CRITICAL: Pass snapshots as top-level fields for serialization
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: restoredTree,
       metadata: {
         ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
@@ -705,7 +682,7 @@ function FileTreeBlock({ block, onUpdate }) {
 
     // CRITICAL FIX #2: Preserve existing metadata fields
     // CRITICAL: Pass snapshots as top-level fields for serialization
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: treeData,
       metadata: {
         ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
@@ -737,7 +714,7 @@ function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = updateTree(treeData);
     setTreeData(newTree);
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: newTree,
       metadata: {
         ...(block.metadata || {}),
@@ -842,7 +819,7 @@ function FileTreeBlock({ block, onUpdate }) {
     }
 
     setTreeData(newTree);
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: newTree,
       metadata: {
         ...(block.metadata || {}),
@@ -888,7 +865,7 @@ function FileTreeBlock({ block, onUpdate }) {
   const removeNode = (nodeId) => {
     const newTree = removeNodeFromTree(treeData, nodeId);
     setTreeData(newTree);
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: newTree,
       metadata: {
         ...(block.metadata || {}),
@@ -934,7 +911,7 @@ function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = [...treeData, newNode];
     setTreeData(newTree);
-    debouncedOnUpdate(block.id, {
+    onUpdate(block.id, {
       treeData: newTree,
       metadata: {
         ...(block.metadata || {}),

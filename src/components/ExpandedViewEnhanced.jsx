@@ -633,6 +633,18 @@ function ExpandedView({
       blockPosition = blocksRef.current.length;
     }
 
+    // [DEBUG-POSITION] Log position calculation for all blocks
+    console.log('[DEBUG-POSITION] Position calculated for block:', {
+      blockId: blockId.substring(0, 8),
+      blockType: actualBlock?.type,
+      calculatedPosition: blockPosition,
+      source: updates.position !== undefined ? 'updates.position' :
+              actualBlock?.position !== undefined ? 'actualBlock.position' :
+              'array index fallback',
+      blocksArrayLength: blocksRef.current.length,
+      blockIndexInArray: block ? blocksRef.current.indexOf(block) : -1
+    });
+
     // Use the loader's updateBlock method
     startTransition(() => {
       updateSingleBlock(blockId, updates);

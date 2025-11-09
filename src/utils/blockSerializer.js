@@ -146,9 +146,13 @@ export function serializeBlock(block) {
         }
       };
     } else if (block.type === 'filetree') {
+      // CRITICAL FIX: Include snapshots and snapshot state in content
       dataToValidate = {
         treeData: block.treeData || [],
-        expanded: block.expanded || []
+        expanded: block.expanded || [],
+        snapshots: block.snapshots || [],
+        currentSnapshotId: block.currentSnapshotId || null,
+        snapshotLimit: block.snapshotLimit || 50
       };
     }
 
@@ -334,16 +338,15 @@ export function deserializeBlock(block) {
         deserialized.treeData = validated.treeData || [];
         deserialized.expanded = validated.expanded || []; // Fixed: Use array to match Zod schema
 
-        // Restore snapshots from metadata
-        const meta = block.metadata || {};
-        console.log('[DEBUG-DESERIALIZE] FileTree block.id:', block.id);
-        console.log('[DEBUG-DESERIALIZE] FileTree block.metadata:', block.metadata);
-        console.log('[DEBUG-DESERIALIZE] FileTree meta.snapshots:', meta.snapshots);
-        console.log('[DEBUG-DESERIALIZE] FileTree meta.currentSnapshotId:', meta.currentSnapshotId);
+        // CRITICAL FIX: Read snapshots from content (not metadata)
+        deserialized.snapshots = validated.snapshots || [];
+        deserialized.currentSnapshotId = validated.currentSnapshotId || null;
+        deserialized.snapshotLimit = validated.snapshotLimit || 50;
 
-        deserialized.snapshots = meta.snapshots || [];
-        deserialized.currentSnapshotId = meta.currentSnapshotId || null;
-        deserialized.snapshotLimit = meta.snapshotLimit || 50;
+        // Debug logging
+        console.log('[DEBUG-DESERIALIZE] FileTree block.id:', block.id);
+        console.log('[DEBUG-DESERIALIZE] FileTree validated.snapshots:', validated.snapshots);
+        console.log('[DEBUG-DESERIALIZE] FileTree validated.currentSnapshotId:', validated.currentSnapshotId);
 
         console.log('[DEBUG-DESERIALIZE] FileTree deserialized.snapshots:', deserialized.snapshots);
         console.log('[DEBUG-DESERIALIZE] FileTree deserialized.currentSnapshotId:', deserialized.currentSnapshotId);

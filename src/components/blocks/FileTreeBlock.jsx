@@ -504,8 +504,8 @@ function FileTreeBlock({ block, onUpdate }) {
 
   // Snapshot management
   const [snapshots, setSnapshots] = useState(() => {
-    // Initialize from block metadata or create initial snapshot
-    const existingSnapshots = block.metadata?.snapshots || [];
+    // CRITICAL FIX: Read from content (block.snapshots) with fallback to metadata
+    const existingSnapshots = block.snapshots || block.metadata?.snapshots || [];
     if (existingSnapshots.length === 0) {
       return [{
         id: 'initial',
@@ -518,7 +518,8 @@ function FileTreeBlock({ block, onUpdate }) {
   });
 
   const [currentSnapshotId, setCurrentSnapshotId] = useState(
-    block.metadata?.currentSnapshotId || 'initial'
+    // CRITICAL FIX: Read from content (block.currentSnapshotId) with fallback to metadata
+    block.currentSnapshotId || block.metadata?.currentSnapshotId || 'initial'
   );
 
   const [snapshotPopoverOpen, setSnapshotPopoverOpen] = useState(false);

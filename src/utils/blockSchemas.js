@@ -150,7 +150,11 @@ export const BlockContentSchemas = {
   // File tree blocks
   filetree: z.object({
     treeData: z.array(z.any()).default([]), // Complex recursive structure - using z.any() for now
-    expanded: z.array(z.string()).default([])
+    expanded: z.array(z.string()).default([]),
+    // CRITICAL FIX: Add snapshot fields so they persist
+    snapshots: z.array(z.any()).default([]), // Array of snapshot objects
+    currentSnapshotId: z.string().nullable().default(null),
+    snapshotLimit: z.number().default(50)
   })
 };
 

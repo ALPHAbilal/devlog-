@@ -141,6 +141,254 @@ Sentry.captureException(error, {
 
 ---
 
+### Type Inference Bug: Issue Tracker Blocks Saved as Table Type
+**Date**: 2025-11-09
+**Severity**: 🔴 CRITICAL - Data corruption in production
+**Symptoms**:
+- Issue tracker blocks saved with `type: 'table'` in database
+- Data loss: `milestone` and `issues` fields get corrupted
+- After reload, issue tracker blocks appear as empty tables
+- Console shows: `[TABLE-SAVE] Step: ExpandedViewEnhanced Constructed Block` for issue tracker blocks
+- Production logs show: `blockType: 'table'` when it should be `'issue-tracker'`
+
+**Root Cause**:
+Type inference fallback in `ExpandedViewEnhanced.jsx` checks for `.data` field existence and assumes ALL blocks with `data` are tables. But both `table` AND `issue-tracker` blocks have a `data` field with different structures:
+
+```javascript
+// Table block structure
+{data: {headers: [], rows: [], columnAlignments: [], hasHeaderRow: true}}
+
+// Issue tracker block structure
+{data: {milestone: '', issues: []}}
+```
+
+**Buggy Code** (line ~722):
+```javascript
+// ❌ WRONG: Checks generic .data field first
+const inferredType = updates.type ||
+  (updates.images !== undefined ? 'image' : null) ||
+  (updates.messages !== undefined ? 'ai' : null) ||
+  (updates.treeData !== undefined ? 'filetree' : null) ||
+  (updates.data !== undefined ? 'table' : null) ||  // ❌ Catches BOTH table and issue-tracker!
+  (updates.url !== undefined ? 'inline-image' : null) ||
+  'text';
+```
+
+**Why It Fails**:
+1. User creates/updates issue tracker block with `{data: {milestone: 'v1.0', issues: [...]}}`
+2. Block not found in array yet (timing issue with `startTransition`)
+3. Type inference runs and sees `updates.data !== undefined`
+4. Assumes it's a `'table'` type
+5. Block gets serialized with Table Zod schema
+6. Issue tracker fields (`milestone`, `issues`) get lost or transformed to table fields
+7. Database saves wrong data structure
+8. On reload, block loads as table with corrupted data
+
+**Complete Solution**:
+Check for more specific fields BEFORE generic field. Order matters!
+
+```javascript
+// ✅ CORRECT: Check specific fields first (issue tracker), then generic (table)
+const inferredType = updates.type ||
+  (updates.images !== undefined ? 'image' : null) ||
+  (updates.messages !== undefined ? 'ai' : null) ||
+  (updates.treeData !== undefined ? 'filetree' : null) ||
+  // ✅ Check for issue tracker FIRST (more specific - has milestone or issues)
+  (updates.data?.milestone !== undefined || updates.data?.issues !== undefined ? 'issue-tracker' : null) ||
+  // ✅ Then check for table (less specific - just has data)
+  (updates.data !== undefined ? 'table' : null) ||
+  (updates.url !== undefined ? 'inline-image' : null) ||
+  (updates.language !== undefined || updates.filePath !== undefined ? 'code' : null) ||
+  'text';
+```
+
+**Why This Works**:
+- **Specificity First**: Check for `data.milestone` or `data.issues` → must be issue tracker
+- **Generic Fallback**: If `data` exists but no milestone/issues → it's a table
+- **Order Matters**: More specific checks MUST come before less specific checks
+- **Optional Chaining**: `updates.data?.milestone` safely handles missing `data` object
+
+**Files Fixed**:
+- `src/components/ExpandedViewEnhanced.jsx:722-733` - Fixed type inference order
+
+**Detection in Logs**:
+Look for these patterns that indicate the bug is happening:
+```javascript
+// Bad: Issue tracker initialized but saved as table
+🎯 IssueTrackerBlock initialization: {milestone: 'v1.0', issuesCount: 3}
+🚀 SmartSync.handleChange INPUT: {blockType: 'table', ...}  // ❌ WRONG!
+
+// Good: Correct type matching
+🎯 IssueTrackerBlock initialization: {milestone: 'v1.0', issuesCount: 3}
+🚀 SmartSync.handleChange INPUT: {blockType: 'issue-tracker', ...}  // ✅ CORRECT!
+```
+
+**Impact**:
+- **Before**: Issue tracker blocks lose data when saved, become tables
+- **After**: Each block type correctly identified and saved with proper schema
+- **User Experience**: No more data corruption, blocks work as expected
+
+**Pattern: When Adding New Block Types with .data Field**:
+1. Always check for type-specific fields FIRST (e.g., `updates.data?.todos` for todo blocks)
+2. Put the generic `updates.data !== undefined` check LAST
+3. Use optional chaining to safely check nested fields
+4. Document which fields distinguish each type
+
+**Testing Checklist**:
+- ✅ Create issue tracker block → verify saved as `type: 'issue-tracker'`
+- ✅ Create table block → verify saved as `type: 'table'`
+- ✅ Update issue tracker → verify milestone/issues preserved
+- ✅ Update table → verify headers/rows preserved
+- ✅ Reload page → verify both block types render correctly
+- ✅ Check database → verify correct `type` and `content` structure
+
+**Related Blocks with .data Field**:
+- `table`: `{data: {headers, rows, columnAlignments, hasHeaderRow}}`
+- `issue-tracker`: `{data: {milestone, issues}}`
+- `todo`: `{data: {todos}}`
+- Add new types HERE with their distinguishing fields
+
+**Time Saved**: 2+ hours debugging data corruption issues
+**Severity Reduction**: Data corruption → Clean data persistence
+
+---
+
+### Zod Schema Validation Failures Wiping User Data
+**Date**: 2025-11-09
+**Severity**: 🔴 CRITICAL - Data loss on save/load
+**Symptoms**:
+- Issue tracker blocks save but have no data after reload (empty milestone, no issues)
+- FileTree blocks lose tree structure after reload
+- Console shows: `BlockSerializer: Validation failed for [block-type]: ZodError`
+- Validation errors result in empty blocks instead of preserving user data
+
+**Root Causes**:
+
+1. **Schema Mismatch - Issue Tracker Status Enum**:
+   - **Component uses**: `['open', 'in-progress', 'closed']` (OptimizedIssueTrackerBlock.jsx:44-46)
+   - **Zod schema had**: `['active', 'resolved', 'closed']` (blockSchemas.js:128)
+   - Result: Validation failed when status was `'open'` or `'in-progress'`
+
+2. **Schema Mismatch - FileTree Expanded Field Type**:
+   - **Zod schema defines**: `expanded: z.array(z.string()).default([])`
+   - **Deserializer used**: `expanded || {}` (expected object)
+   - Result: Type inconsistency could cause validation errors
+
+3. **Destructive Error Handling**:
+   - When Zod validation failed, code used **empty defaults** instead of preserving data
+   - Old error handler: `const safeDefault = schema.safeParse({}); serialized.content = JSON.stringify(safeDefault.data);`
+   - Result: User's data completely wiped when ANY field failed validation
+
+**Complete Solution**:
+
+**Fix #1: Update Issue Tracker Schema** (blockSchemas.js:128, 144)
+```javascript
+// ❌ BEFORE: Wrong enum values
+status: z.enum(['active', 'resolved', 'closed']).default('active')
+
+// ✅ AFTER: Match component's actual values
+status: z.enum(['open', 'in-progress', 'closed']).default('open')
+```
+
+**Fix #2: FileTree Type Consistency** (blockSerializer.js:322, 366)
+```javascript
+// ❌ BEFORE: Inconsistent types
+deserialized.expanded = validated.expanded || {}; // Object
+
+// ✅ AFTER: Match schema (array)
+deserialized.expanded = validated.expanded || []; // Array
+```
+
+**Fix #3: Preserve Data on Validation Failure** (blockSerializer.js:188-210)
+```javascript
+// ❌ BEFORE: Wipe data on validation error
+} catch (error) {
+  console.error(`Validation failed for ${block.type}:`, error);
+  const safeDefault = schema.safeParse({});
+  serialized.content = JSON.stringify(safeDefault.data); // LOSES ALL DATA!
+}
+
+// ✅ AFTER: Preserve original data
+} catch (error) {
+  console.error(`Validation failed for ${block.type}:`, error);
+  console.error(`Failed data:`, dataToValidate);
+
+  // Try to preserve original data
+  if (block.content && typeof block.content === 'string') {
+    serialized.content = block.content; // Keep existing
+  } else if (block.content && typeof block.content === 'object') {
+    serialized.content = JSON.stringify(block.content); // Stringify invalid data
+  } else {
+    serialized.content = JSON.stringify(dataToValidate); // Save what we tried
+  }
+}
+```
+
+**Fix #4: Preserve Data on Deserialization Failure** (blockSerializer.js:365-409)
+```javascript
+// ✅ NEW: Use parsed (but invalid) content instead of empty defaults
+} catch (error) {
+  console.warn(`Failed to parse/validate content for ${block.type}:`, error);
+
+  if (parsed && typeof parsed === 'object') {
+    console.warn(`Using parsed (but invalid) content to preserve user data`);
+
+    if (block.type === 'ai') {
+      deserialized.messages = parsed.messages || [];
+    } else if (block.type === 'filetree') {
+      deserialized.treeData = parsed.treeData || [];
+      deserialized.expanded = parsed.expanded || [];
+    }
+    // ... handle other types
+  }
+  // Only use empty defaults if no data exists at all
+}
+```
+
+**Detection in Logs**:
+```javascript
+// Bad: Validation failure with data loss
+BlockSerializer: Validation failed for issue-tracker: ZodError
+  "received": "in-progress"  // Not in enum!
+  "options": ["active", "resolved", "closed"]
+
+// Good: Validation success or graceful fallback
+BlockSerializer: Using parsed (but invalid) content to preserve user data
+```
+
+**Files Fixed**:
+- `src/utils/blockSchemas.js:128, 144` - Updated issue tracker status enum
+- `src/utils/blockSerializer.js:322, 366` - Fixed FileTree type consistency
+- `src/utils/blockSerializer.js:188-210` - Improved serialization error handling
+- `src/utils/blockSerializer.js:365-409` - Improved deserialization error handling
+
+**Impact**:
+- **Before**: Validation errors wiped all user data with empty defaults
+- **After**: Validation errors preserve user data, only use defaults as last resort
+- **User Experience**: No more complete data loss from schema mismatches
+
+**Pattern: When Adding New Block Types**:
+1. **Component First**: Check what values the component ACTUALLY uses
+2. **Schema Second**: Make Zod schema match component reality, not assumptions
+3. **Test Enums**: If using enums, verify all possible values are included
+4. **Type Consistency**: Use same type (array/object/string) everywhere for each field
+5. **Error Handling**: Always preserve user data on validation failure
+
+**Testing Checklist**:
+- ✅ Create issue tracker with "in-progress" status → verify it saves and loads
+- ✅ Create FileTree with nodes → verify tree structure persists after reload
+- ✅ Intentionally cause validation error → verify data is preserved, not wiped
+- ✅ Check console for "Validation failed" warnings → verify graceful fallback
+- ✅ Reload page after validation error → verify data still exists
+
+**Known Limitation**:
+AI blocks and FileTree blocks may still experience **partial data loss on rapid updates** due to batch sync timing issues at the database layer. This requires investigation of the `batch_sync_changes` RPC function to ensure proper ordering of updates to the same block_id within a batch.
+
+**Time Saved**: 3+ hours debugging "data disappeared" issues
+**Severity Reduction**: Complete data loss → Data preserved even with validation errors
+
+---
+
 ## Pattern: Block Flickering Prevention
 
 **Problem**: Blocks flicker when parent state updates frequently (e.g., sync status every 1 second)

@@ -187,12 +187,25 @@ export function serializeBlock(block) {
 
   } catch (error) {
     console.error(`BlockSerializer: Validation failed for ${block.type}:`, error);
-    // Use safe defaults
-    const safeDefault = schema.safeParse({});
-    if (safeDefault.success) {
-      serialized.content = JSON.stringify(safeDefault.data);
+    console.error(`BlockSerializer: Failed data:`, dataToValidate);
+
+    // CRITICAL: Preserve original data instead of wiping with empty defaults
+    // Try to use original content if it exists, otherwise use minimal valid structure
+    if (block.content && typeof block.content === 'string') {
+      // Already has serialized content, preserve it
+      serialized.content = block.content;
+    } else if (block.content && typeof block.content === 'object') {
+      // Has object content, stringify it even if invalid
+      serialized.content = JSON.stringify(block.content);
     } else {
-      serialized.content = block.content || '';
+      // Last resort: try safe defaults
+      const safeDefault = schema.safeParse({});
+      if (safeDefault.success) {
+        serialized.content = JSON.stringify(safeDefault.data);
+      } else {
+        // Absolute last resort: empty string
+        serialized.content = JSON.stringify(dataToValidate); // Save what we tried to validate
+      }
     }
   }
 
@@ -319,7 +332,7 @@ export function deserializeBlock(block) {
         };
       } else if (block.type === 'filetree') {
         deserialized.treeData = validated.treeData || [];
-        deserialized.expanded = validated.expanded || {};
+        deserialized.expanded = validated.expanded || []; // Fixed: Use array to match Zod schema
 
         // Restore snapshots from metadata
         const meta = block.metadata || {};
@@ -351,19 +364,46 @@ export function deserializeBlock(block) {
 
     } catch (error) {
       console.warn(`BlockSerializer: Failed to parse/validate content for ${block.type}:`, error);
-      // Use safe defaults
-      const safeDefault = schema.safeParse({});
-      if (safeDefault.success) {
-        const defaults = safeDefault.data;
-        if (block.type === 'table') {
-          deserialized.data = defaults.data;
+      console.warn(`BlockSerializer: Failed to parse content:`, block.content);
+
+      // CRITICAL: Try to preserve original data instead of using empty defaults
+      // Attempt to use the parsed content even if validation failed
+      if (parsed && typeof parsed === 'object') {
+        console.warn(`BlockSerializer: Using parsed (but invalid) content to preserve user data`);
+
+        if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
+          deserialized.content = parsed.content || parsed || '';
+        } else if (block.type === 'ai') {
+          deserialized.messages = parsed.messages || [];
+        } else if (block.type === 'image') {
+          deserialized.images = parsed.images || [];
+          deserialized.layout = parsed.layout || 'grid';
+          deserialized.columns = parsed.columns || 3;
+        } else if (block.type === 'table') {
+          deserialized.data = parsed.data || {headers: [], rows: [], columnAlignments: [], hasHeaderRow: true};
         } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-          deserialized.data = defaults.data;
+          deserialized.data = parsed.data || {milestone: '', issues: []};
         } else if (block.type === 'todo') {
-          deserialized.data = defaults.data;
+          deserialized.data = parsed.data || {todos: []};
         } else if (block.type === 'filetree') {
-          deserialized.treeData = defaults.treeData || [];
-          deserialized.expanded = defaults.expanded || {};
+          deserialized.treeData = parsed.treeData || [];
+          deserialized.expanded = parsed.expanded || [];
+        }
+      } else {
+        // Only use empty defaults if we have no data at all
+        const safeDefault = schema.safeParse({});
+        if (safeDefault.success) {
+          const defaults = safeDefault.data;
+          if (block.type === 'table') {
+            deserialized.data = defaults.data;
+          } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
+            deserialized.data = defaults.data;
+          } else if (block.type === 'todo') {
+            deserialized.data = defaults.data;
+          } else if (block.type === 'filetree') {
+            deserialized.treeData = defaults.treeData || [];
+            deserialized.expanded = defaults.expanded || [];
+          }
         }
       }
     }

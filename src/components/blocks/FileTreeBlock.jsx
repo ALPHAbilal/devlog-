@@ -495,7 +495,9 @@ function FileTreeBlock({ block, onUpdate }) {
     console.log(`📁 FileTreeBlock ${block.id} rendered at ${new Date().toISOString()}`);
   }, [block.id]);
 
-  const [treeData, setTreeData] = useState(block.treeData || [
+  // CRITICAL FIX: Read from block.data.treeData (wrapped structure)
+  const blockData = block.data || {};
+  const [treeData, setTreeData] = useState(blockData.treeData || block.treeData || [
     { id: '1', name: 'src', isFolder: true, children: [] }
   ]);
   const [editingFile, setEditingFile] = useState(null);
@@ -505,20 +507,20 @@ function FileTreeBlock({ block, onUpdate }) {
   // Snapshot management
   const [snapshots, setSnapshots] = useState(() => {
     // Initialize from block metadata or create initial snapshot
-    const existingSnapshots = block.metadata?.snapshots || [];
+    const existingSnapshots = block.metadata?.snapshots || blockData.snapshots || [];
     if (existingSnapshots.length === 0) {
       return [{
         id: 'initial',
         timestamp: Date.now(),
         label: 'Initial state',
-        tree: sanitizeTreeForSnapshot(block.treeData || [])
+        tree: sanitizeTreeForSnapshot(blockData.treeData || block.treeData || [])
       }];
     }
     return existingSnapshots;
   });
 
   const [currentSnapshotId, setCurrentSnapshotId] = useState(
-    block.metadata?.currentSnapshotId || 'initial'
+    block.metadata?.currentSnapshotId || blockData.currentSnapshotId || 'initial'
   );
 
   const [snapshotPopoverOpen, setSnapshotPopoverOpen] = useState(false);
@@ -545,17 +547,19 @@ function FileTreeBlock({ block, onUpdate }) {
   useEffect(() => {
     if (block._needsInitialSnapshotSave && snapshots.length > 0) {
       // Save initial snapshot to database (one-time operation)
-      // CRITICAL: Pass snapshots as top-level fields for serialization
+      // CRITICAL FIX: Wrap in "data" object for proper type inference
       onUpdate(block.id, {
-        treeData: treeData,
+        data: {
+          treeData: treeData,
+          snapshots: snapshots,
+          currentSnapshotId: currentSnapshotId,
+          snapshotLimit: block.metadata?.snapshotLimit || 50
+        },
         metadata: {
           ...(block.metadata || {}),
           snapshots: snapshots,
           currentSnapshotId: currentSnapshotId
-        },
-        snapshots: snapshots,
-        currentSnapshotId: currentSnapshotId,
-        snapshotLimit: block.metadata?.snapshotLimit || 50
+        }
       });
 
       // Clear flag to prevent repeated saves (modify block object directly)
@@ -621,13 +625,15 @@ function FileTreeBlock({ block, onUpdate }) {
     }
 
     // Persist to database via onUpdate
-    // CRITICAL: Pass snapshots as top-level fields for serialization
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: treeData,
-      metadata: metadataToSave,
-      snapshots: updatedSnapshots,
-      currentSnapshotId: newSnapshot.id,
-      snapshotLimit: maxSnapshots
+      data: {
+        treeData: treeData,
+        snapshots: updatedSnapshots,
+        currentSnapshotId: newSnapshot.id,
+        snapshotLimit: maxSnapshots
+      },
+      metadata: metadataToSave
     });
   };
 
@@ -648,18 +654,19 @@ function FileTreeBlock({ block, onUpdate }) {
     setTreeData(restoredTree);
     setCurrentSnapshotId(snapshotId);
 
-    // CRITICAL FIX #2: Preserve existing metadata fields
-    // CRITICAL: Pass snapshots as top-level fields for serialization
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: restoredTree,
+      data: {
+        treeData: restoredTree,
+        snapshots: snapshots,
+        currentSnapshotId: snapshotId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
+      },
       metadata: {
         ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
         snapshots: snapshots,
         currentSnapshotId: snapshotId
-      },
-      snapshots: snapshots,
-      currentSnapshotId: snapshotId,
-      snapshotLimit: block.metadata?.snapshotLimit || 50
+      }
     });
   };
 
@@ -679,18 +686,19 @@ function FileTreeBlock({ block, onUpdate }) {
       setCurrentSnapshotId(newCurrentId);
     }
 
-    // CRITICAL FIX #2: Preserve existing metadata fields
-    // CRITICAL: Pass snapshots as top-level fields for serialization
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: treeData,
+      data: {
+        treeData: treeData,
+        snapshots: updatedSnapshots,
+        currentSnapshotId: newCurrentId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
+      },
       metadata: {
         ...(block.metadata || {}),  // Preserve last_sync, sync_timestamp, etc.
         snapshots: updatedSnapshots,
         currentSnapshotId: newCurrentId
-      },
-      snapshots: updatedSnapshots,
-      currentSnapshotId: newCurrentId,
-      snapshotLimit: block.metadata?.snapshotLimit || 50
+      }
     });
   };
 
@@ -713,16 +721,19 @@ function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = updateTree(treeData);
     setTreeData(newTree);
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: newTree,
+      data: {
+        treeData: newTree,
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
+      },
       metadata: {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      },
-      snapshots: snapshots,
-      currentSnapshotId: currentSnapshotId,
-      snapshotLimit: block.metadata?.snapshotLimit || 50
+      }
     });
   };
 
@@ -818,16 +829,19 @@ function FileTreeBlock({ block, onUpdate }) {
     }
 
     setTreeData(newTree);
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: newTree,
+      data: {
+        treeData: newTree,
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
+      },
       metadata: {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      },
-      snapshots: snapshots,
-      currentSnapshotId: currentSnapshotId,
-      snapshotLimit: block.metadata?.snapshotLimit || 50
+      }
     });
   };
 
@@ -864,16 +878,19 @@ function FileTreeBlock({ block, onUpdate }) {
   const removeNode = (nodeId) => {
     const newTree = removeNodeFromTree(treeData, nodeId);
     setTreeData(newTree);
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: newTree,
+      data: {
+        treeData: newTree,
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
+      },
       metadata: {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      },
-      snapshots: snapshots,
-      currentSnapshotId: currentSnapshotId,
-      snapshotLimit: block.metadata?.snapshotLimit || 50
+      }
     });
   };
 
@@ -910,16 +927,19 @@ function FileTreeBlock({ block, onUpdate }) {
 
     const newTree = [...treeData, newNode];
     setTreeData(newTree);
+    // CRITICAL FIX: Wrap in "data" object for proper type inference
     onUpdate(block.id, {
-      treeData: newTree,
+      data: {
+        treeData: newTree,
+        snapshots: snapshots,
+        currentSnapshotId: currentSnapshotId,
+        snapshotLimit: block.metadata?.snapshotLimit || 50
+      },
       metadata: {
         ...(block.metadata || {}),
         snapshots: snapshots,
         currentSnapshotId: currentSnapshotId
-      },
-      snapshots: snapshots,
-      currentSnapshotId: currentSnapshotId,
-      snapshotLimit: block.metadata?.snapshotLimit || 50
+      }
     });
   };
 

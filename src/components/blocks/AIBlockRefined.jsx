@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Bot, User, Plus, Copy, Check, ChevronDown, ChevronUp, Sparkles, FileText, AlertCircle, X } from 'lucide-react';
+import { Bot, User, Plus, Copy, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { parseMarkdown } from '../../utils/parseMarkdown.jsx';
 import '../AIBlockScroll.css';
 
@@ -10,8 +10,6 @@ function AIBlock({ block, onUpdate }) {
   const [copiedIndex, setCopiedIndex] = useState(null);
   const [collapsedMessages, setCollapsedMessages] = useState(new Set(block.metadata?.collapsedMessages || []));
   const [isBlockCollapsed, setIsBlockCollapsed] = useState(block.metadata?.isBlockCollapsed || false);
-  const [showImportPreview, setShowImportPreview] = useState(false);
-  const [parsedMessages, setParsedMessages] = useState([]);
   const [selectedRole, setSelectedRole] = useState('user');
   const textareaRef = useRef(null);
 
@@ -30,94 +28,6 @@ function AIBlock({ block, onUpdate }) {
     textarea.style.height = textarea.scrollHeight + 'px';
   }, []);
 
-  // Check if text looks like a conversation
-  const looksLikeConversation = useCallback((text) => {
-    const conversationPatterns = [
-      /^(User|You|Human|Me):\s*/mi,
-      /^(Assistant|AI|ChatGPT|Claude|Bot):\s*/mi,
-      /^(Question|Q):\s*/mi,
-      /^(Answer|A):\s*/mi,
-    ];
-    
-    // Check if text contains multiple role indicators
-    let matchCount = 0;
-    for (const pattern of conversationPatterns) {
-      if (pattern.test(text)) {
-        matchCount++;
-        if (matchCount >= 2) return true;
-      }
-    }
-    
-    // Also check for alternating pattern without explicit labels
-    const lines = text.split('\n').filter(line => line.trim());
-    return lines.length >= 4 && lines.some((_, i) => i % 2 === 0);
-  }, []);
-
-  // Parse conversation text into messages
-  const parseConversation = useCallback((text) => {
-    const messages = [];
-    const lines = text.split('\n');
-    
-    // Patterns for role detection
-    const userPatterns = /^(User|You|Human|Me|Question|Q):\s*/i;
-    const aiPatterns = /^(Assistant|AI|ChatGPT|Claude|Bot|Answer|A):\s*/i;
-    
-    let currentMessage = null;
-    let lastRole = 'ai'; // Start with AI so first message defaults to user
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      // Check if line starts with a role indicator
-      if (userPatterns.test(trimmedLine)) {
-        // Save previous message if exists
-        if (currentMessage) {
-          messages.push(currentMessage);
-        }
-        // Start new user message
-        currentMessage = {
-          role: 'user',
-          content: trimmedLine.replace(userPatterns, '').trim()
-        };
-        lastRole = 'user';
-      } else if (aiPatterns.test(trimmedLine)) {
-        // Save previous message if exists
-        if (currentMessage) {
-          messages.push(currentMessage);
-        }
-        // Start new AI message
-        currentMessage = {
-          role: 'ai',
-          content: trimmedLine.replace(aiPatterns, '').trim()
-        };
-        lastRole = 'ai';
-      } else if (trimmedLine) {
-        // Continue current message or start new one with alternating role
-        if (currentMessage) {
-          currentMessage.content += '\n' + trimmedLine;
-        } else {
-          // No role indicator found, alternate roles
-          currentMessage = {
-            role: lastRole === 'user' ? 'ai' : 'user',
-            content: trimmedLine
-          };
-          lastRole = currentMessage.role;
-        }
-      } else if (currentMessage && trimmedLine === '') {
-        // Empty line might indicate message boundary
-        messages.push(currentMessage);
-        currentMessage = null;
-      }
-    }
-    
-    // Don't forget the last message
-    if (currentMessage) {
-      messages.push(currentMessage);
-    }
-    
-    return messages.filter(m => m.content.trim());
-  }, []);
-
   // Initialize new message textarea
   useEffect(() => {
     if (isAddingMessage && textareaRef.current) {
@@ -125,19 +35,6 @@ function AIBlock({ block, onUpdate }) {
       textareaRef.current.focus();
     }
   }, [isAddingMessage, autoResize]);
-
-  // Handle paste event
-  const handlePaste = useCallback((e) => {
-    const pastedText = e.clipboardData.getData('text');
-    
-    // Check if it looks like a conversation
-    if (pastedText.includes('\n') && looksLikeConversation(pastedText)) {
-      e.preventDefault();
-      const parsed = parseConversation(pastedText);
-      setParsedMessages(parsed);
-      setShowImportPreview(true);
-    }
-  }, [looksLikeConversation, parseConversation]);
 
   // Message management functions
   const addMessage = useCallback((role, content) => {
@@ -162,25 +59,6 @@ function AIBlock({ block, onUpdate }) {
       setCollapsedMessages(prev => new Set([...prev, messages.length]));
     }
   }, [messages, onUpdate, block.id]);
-
-  // Import multiple messages at once
-  const importMessages = useCallback(() => {
-    if (parsedMessages.length === 0) return;
-    
-    const updatedMessages = [...messages, ...parsedMessages];
-    setMessages(updatedMessages);
-    onUpdate(block.id, { messages: updatedMessages });
-    setShowImportPreview(false);
-    setParsedMessages([]);
-    
-    // Auto-collapse long messages
-    parsedMessages.forEach((msg, idx) => {
-      const lines = msg.content.split('\n');
-      if (lines.length > 15) {
-        setCollapsedMessages(prev => new Set([...prev, messages.length + idx]));
-      }
-    });
-  }, [messages, parsedMessages, onUpdate, block.id]);
 
   const updateMessage = useCallback((index, content) => {
     const updatedMessages = [...messages];
@@ -433,99 +311,6 @@ function AIBlock({ block, onUpdate }) {
     setIsBlockCollapsed(prev => !prev);
   }, []);
 
-  // Import Preview Modal Component
-  const ImportPreviewModal = () => {
-    if (!showImportPreview || parsedMessages.length === 0) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowImportPreview(false)}>
-        <div 
-          className="bg-dark-primary border border-dark-secondary/50 rounded-lg p-6 max-w-3xl max-h-[80vh] overflow-hidden flex flex-col"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <FileText size={20} className="text-accent-green" />
-              <h3 className="text-lg font-semibold text-text-primary">Import Conversation</h3>
-              <span className="text-sm text-text-secondary">({parsedMessages.length} messages detected)</span>
-            </div>
-            <button
-              onClick={() => setShowImportPreview(false)}
-              className="text-text-secondary hover:text-text-primary"
-            >
-              <X size={20} />
-            </button>
-          </div>
-
-          <div className="flex-1 overflow-y-auto mb-4 space-y-3 max-h-[50vh]">
-            {parsedMessages.map((msg, idx) => (
-              <div key={idx} className="flex gap-3 p-3 rounded-lg bg-dark-secondary/20">
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={() => {
-                      const updated = [...parsedMessages];
-                      updated[idx].role = updated[idx].role === 'user' ? 'ai' : 'user';
-                      setParsedMessages(updated);
-                    }}
-                    className={`
-                      w-10 h-10 rounded-full flex items-center justify-center transition-all
-                      ${msg.role === 'user' 
-                        ? 'bg-blue-500/20 hover:bg-blue-500/30 border-2 border-blue-500/30' 
-                        : 'bg-gradient-to-br from-accent-green/20 to-accent-green/10 hover:from-accent-green/30 hover:to-accent-green/20 border-2 border-accent-green/30'
-                      }
-                    `}
-                    title="Click to toggle role"
-                  >
-                    {msg.role === 'user' ? (
-                      <User size={18} className="text-blue-400" />
-                    ) : (
-                      <Sparkles size={18} className="text-accent-green" />
-                    )}
-                  </button>
-                </div>
-                <div className="flex-1">
-                  <div className="text-xs font-medium mb-1">
-                    <span className={msg.role === 'user' ? 'text-blue-400' : 'text-accent-green'}>
-                      {msg.role === 'user' ? 'User' : 'AI'}
-                    </span>
-                    <span className="text-text-secondary/50 ml-2">(click icon to switch)</span>
-                  </div>
-                  <div className="text-sm text-text-primary whitespace-pre-wrap">
-                    {msg.content.length > 200 
-                      ? msg.content.substring(0, 200) + '...' 
-                      : msg.content
-                    }
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-dark-secondary/30">
-            <div className="flex items-center gap-2 text-sm text-text-secondary">
-              <AlertCircle size={16} />
-              <span>Click role icons to fix any incorrectly detected roles</span>
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowImportPreview(false)}
-                className="px-4 py-2 text-text-secondary hover:text-text-primary transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={importMessages}
-                className="px-4 py-2 bg-accent-green text-dark-primary rounded-lg hover:bg-accent-green/90 transition-colors font-medium"
-              >
-                Import All
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="ai-block-container space-y-6">
       {/* Header */}
@@ -644,12 +429,10 @@ function AIBlock({ block, onUpdate }) {
               </button>
             </div>
           </div>
-          
-          {/* Textarea with paste handler */}
+
           <textarea
             ref={textareaRef}
             onChange={(e) => autoResize(e.target)}
-            onPaste={handlePaste}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
                 setIsAddingMessage(false);
@@ -734,9 +517,6 @@ function AIBlock({ block, onUpdate }) {
           <span className="text-sm">Add message</span>
         </button>
       )}
-      
-      {/* Import Preview Modal */}
-      <ImportPreviewModal />
     </div>
   );
 }

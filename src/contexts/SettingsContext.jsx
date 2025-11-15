@@ -23,14 +23,26 @@ export function SettingsProvider({ children }) {
       try {
         const parsed = JSON.parse(localSettings);
         setSettings(prev => ({ ...prev, ...parsed }));
-        
+
         // Apply session timeout if set in localStorage
         if (parsed.sessionTimeout !== undefined) {
+          // [DEBUG-TIMEOUT] Log localStorage override
+          console.log('[DEBUG-TIMEOUT-14] ⚙️ Settings from LOCALSTORAGE:', {
+            source: 'localStorage.devlogSettings',
+            sessionTimeout_minutes: parsed.sessionTimeout,
+            sessionTimeout_hours: parsed.sessionTimeout / 60,
+            allSettings: parsed,
+            timestamp: new Date().toISOString()
+          });
+
           setInactivityTimeout(parsed.sessionTimeout);
         }
       } catch (err) {
         console.error('Error parsing local settings:', err);
       }
+    } else {
+      // [DEBUG-TIMEOUT] Log no localStorage settings
+      console.log('[DEBUG-TIMEOUT-15] ℹ️ No localStorage settings found, using defaults');
     }
   }, []);
 
@@ -55,14 +67,28 @@ export function SettingsProvider({ children }) {
         } else if (profile?.settings) {
           const profileSettings = profile.settings;
           setSettings(prev => ({ ...prev, ...profileSettings }));
-          
+
           // Update local cache
           localStorage.setItem('devlogSettings', JSON.stringify(profileSettings));
-          
+
           // Apply session timeout if set
           if (profileSettings.sessionTimeout !== undefined) {
+            // [DEBUG-TIMEOUT] Log database override
+            console.log('[DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table):', {
+              source: 'profiles.settings',
+              userId: user.id,
+              sessionTimeout_minutes: profileSettings.sessionTimeout,
+              sessionTimeout_hours: profileSettings.sessionTimeout / 60,
+              allSettings: profileSettings,
+              timestamp: new Date().toISOString()
+            });
+
             setInactivityTimeout(profileSettings.sessionTimeout);
+          } else {
+            console.log('[DEBUG-TIMEOUT-17] ℹ️ Database settings loaded but no sessionTimeout specified');
           }
+        } else {
+          console.log('[DEBUG-TIMEOUT-18] ℹ️ No database settings found for user');
         }
       } catch (err) {
         console.error('Error loading settings from profiles:', err);

@@ -36,6 +36,14 @@ class OptimizedSupabaseClient {
     // Inactivity timeout set to 3 days (72 hours)
     // Sessions will remain active for 3 days of inactivity before automatic signout
     this.inactivityTimeout = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds (259200000 ms)
+
+    // [DEBUG-TIMEOUT] Log initial timeout configuration
+    console.log('[DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized:', {
+      defaultTimeout_ms: this.inactivityTimeout,
+      defaultTimeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      defaultTimeout_days: this.inactivityTimeout / (24 * 60 * 60 * 1000),
+      timestamp: new Date().toISOString()
+    });
   }
 
   /**
@@ -258,9 +266,32 @@ class OptimizedSupabaseClient {
       return;
     }
 
+    // [DEBUG-TIMEOUT] Log activity monitoring setup
+    console.log('[DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED:', {
+      events: ['mousedown', 'keydown', 'scroll', 'touchstart'],
+      timeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      timestamp: new Date().toISOString()
+    });
+
     const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    let activityCount = 0;
+    let lastActivityLog = 0;
 
     const handleActivity = () => {
+      activityCount++;
+      const now = Date.now();
+
+      // [DEBUG-TIMEOUT] Log activity every 60 seconds max (prevent spam)
+      if (now - lastActivityLog > 60000) {
+        console.log('[DEBUG-TIMEOUT-7] 🖱️ User activity detected:', {
+          activityCount,
+          lastEvent: event.type,
+          timerWillReset: true,
+          timestamp: new Date().toISOString()
+        });
+        lastActivityLog = now;
+      }
+
       this.resetInactivityTimer();
     };
 
@@ -298,13 +329,30 @@ class OptimizedSupabaseClient {
    */
   resetInactivityTimer() {
     this.stopInactivityTimer();
-    
+
     // Don't set timeout if it's disabled (0 means never timeout)
     if (this.inactivityTimeout === 0) {
+      // [DEBUG-TIMEOUT] Log disabled timeout
+      console.log('[DEBUG-TIMEOUT-3] ℹ️ Inactivity timer NOT started (timeout disabled)');
       return;
     }
-    
+
+    // [DEBUG-TIMEOUT] Log timer reset
+    console.log('[DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET:', {
+      timeout_ms: this.inactivityTimeout,
+      timeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      willExpireAt: new Date(Date.now() + this.inactivityTimeout).toISOString(),
+      timestamp: new Date().toISOString()
+    });
+
     this.sessionTimeout = setTimeout(async () => {
+      // [DEBUG-TIMEOUT] Log timeout trigger
+      console.error('[DEBUG-TIMEOUT-5] 🚨 TIMEOUT TRIGGERED - Signing out user:', {
+        timeout_ms: this.inactivityTimeout,
+        timeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+        triggeredAt: new Date().toISOString(),
+        reason: 'inactivity'
+      });
       console.log('[Supabase] Session timeout due to inactivity');
       sessionMonitor.logActivity('session_timeout', { reason: 'inactivity' });
       await this.client.auth.signOut();
@@ -320,7 +368,21 @@ class OptimizedSupabaseClient {
    * Only enable this if your application has specific security requirements.
    */
   setInactivityTimeout(minutes) {
+    const oldTimeout = this.inactivityTimeout;
     this.inactivityTimeout = minutes === 0 ? 0 : minutes * 60 * 1000;
+
+    // [DEBUG-TIMEOUT] Log timeout override
+    console.log('[DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout():', {
+      oldTimeout_ms: oldTimeout,
+      oldTimeout_hours: oldTimeout / (60 * 60 * 1000),
+      newTimeout_minutes: minutes,
+      newTimeout_ms: this.inactivityTimeout,
+      newTimeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      source: 'setInactivityTimeout() call',
+      stackTrace: new Error().stack.split('\n').slice(2, 5).join('\n'), // Show caller
+      timestamp: new Date().toISOString()
+    });
+
     // Reset timer with new timeout (will start if session exists)
     if (this.client) {
       this.resetInactivityTimer();
@@ -350,9 +412,20 @@ class OptimizedSupabaseClient {
           const expiresAt = result.data.session.expires_at;
           const nowInSeconds = Math.floor(Date.now() / 1000);
           const timeUntilExpiry = expiresAt - nowInSeconds;
-          
+
+          // [DEBUG-TIMEOUT] Log token expiry status
+          console.log('[DEBUG-TIMEOUT-8] 🔑 JWT Token status:', {
+            expiresAt: new Date(expiresAt * 1000).toISOString(),
+            timeUntilExpiry_seconds: timeUntilExpiry,
+            timeUntilExpiry_minutes: Math.floor(timeUntilExpiry / 60),
+            refreshThreshold_seconds: 300,
+            willRefreshSoon: timeUntilExpiry < 300,
+            timestamp: new Date().toISOString()
+          });
+
           // Refresh if less than 5 minutes until expiry
           if (timeUntilExpiry < 300 && !this.refreshPromise) {
+            console.log('[DEBUG-TIMEOUT-9] 🔄 Proactive token refresh TRIGGERED');
             console.log('[Supabase] Proactively refreshing token');
             this.refreshPromise = this.refreshSession();
             const refreshResult = await this.refreshPromise;
@@ -375,25 +448,51 @@ class OptimizedSupabaseClient {
    */
   async refreshSession() {
     try {
+      // [DEBUG-TIMEOUT] Log refresh attempt
+      console.log('[DEBUG-TIMEOUT-10] 🔄 Token refresh STARTED:', {
+        attemptTimestamp: new Date().toISOString(),
+        failedRefreshCount: sessionMonitor.suspiciousPatterns.failedRefreshes
+      });
+
       sessionMonitor.logActivity('refresh_attempt', { timestamp: Date.now() });
-      
+
       const { data, error } = await this.getClient().auth.refreshSession();
-      
+
       if (error) {
+        // [DEBUG-TIMEOUT] Log refresh failure
+        console.error('[DEBUG-TIMEOUT-11] ❌ Token refresh FAILED:', {
+          error: error.message,
+          errorCode: error.code,
+          failedRefreshCount: sessionMonitor.suspiciousPatterns.failedRefreshes + 1,
+          willForceSignOut: sessionMonitor.suspiciousPatterns.failedRefreshes >= 3,
+          timestamp: new Date().toISOString()
+        });
+
         sessionMonitor.logActivity('refresh_failed', { error: error.message });
         throw error;
       }
-      
+
+      // [DEBUG-TIMEOUT] Log refresh success
+      console.log('[DEBUG-TIMEOUT-12] ✅ Token refresh SUCCESS:', {
+        newExpiresAt: new Date(data.session.expires_at * 1000).toISOString(),
+        timestamp: new Date().toISOString()
+      });
+
       sessionMonitor.logActivity('refresh_success', { timestamp: Date.now() });
       return { data, error: null };
     } catch (error) {
       console.error('[Supabase] Refresh session error:', error);
-      
+
       // If refresh fails too many times, force re-authentication
       if (sessionMonitor.suspiciousPatterns.failedRefreshes > 3) {
+        // [DEBUG-TIMEOUT] Log forced sign-out
+        console.error('[DEBUG-TIMEOUT-13] 🚨 FORCED SIGN-OUT after multiple refresh failures:', {
+          failedRefreshCount: sessionMonitor.suspiciousPatterns.failedRefreshes,
+          timestamp: new Date().toISOString()
+        });
         await this.client.auth.signOut();
       }
-      
+
       return { data: { session: null }, error };
     }
   }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, startTransition, useMemo, useDeferredValue, memo } from 'react';
 import { flushSync } from 'react-dom';
-import { ArrowLeft, Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
+import { Plus, Link2, LayoutList, LayoutGrid, Trash2, Share2 } from 'lucide-react';
 import { Virtuoso } from 'react-virtuoso';
 import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
@@ -1886,26 +1886,8 @@ function ExpandedView({
         <div className={`mx-auto fade-in ${isMobileView ? 'px-4 py-3' : 'max-w-4xl px-8 py-8'}`}>
       {/* Header - Hidden on mobile as it's handled by MobileDocumentHeader */}
       {!isMobileView && (
-      <div className="flex items-start gap-4 mb-6">
-        <button 
-          onClick={async () => {
-            // Save any pending changes before closing
-            if (smartSyncManagerRef.current) {
-              const status = smartSyncManagerRef.current.getSyncStatus();
-              if (status.pending > 0) {
-                await smartSyncManagerRef.current.forceSync();
-              }
-            }
-            onClose();
-          }}
-          className="mt-1 p-2 text-text-secondary hover:text-text-primary 
-                     hover:bg-dark-secondary/50 rounded-lg transition-all
-                     group flex items-center gap-2"
-          title="Back to dashboard"
-        >
-          <ArrowLeft size={20} className="group-hover:-translate-x-0.5 transition-transform" />
-        </button>
-        <div className="flex-1">
+      <div className="mb-6">
+        <div>
           <div className="flex items-center justify-between">
             <div className="text-text-secondary text-sm mb-2">
               Document

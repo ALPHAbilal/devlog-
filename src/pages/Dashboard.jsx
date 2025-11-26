@@ -195,11 +195,9 @@ export default function Dashboard() {
   // Handle document expansion with tab system
   const handleDocumentExpand = useCallback((document) => {
     // Open document in tab (or switch to existing tab)
+    // No navigation - tabs stay on dashboard
     openTab(document);
-
-    // Update URL to reflect the opened document
-    navigate(`/document/${document.id}`, { replace: true });
-  }, [navigate, openTab]);
+  }, [openTab]);
 
   // Update storage info
   const updateStorageInfo = useCallback(async () => {
@@ -273,7 +271,10 @@ export default function Dashboard() {
     // ✅ OPTIMISTIC UPDATE: Update UI immediately (instant response!)
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
-    setExpandedEntry(newEntry);
+    setAllDocuments(prev => [newEntry, ...prev]);
+
+    // Open in tab instead of old expandedEntry
+    openTab(newEntry);
 
     // Save to IndexedDB for local backup (fast - ~22ms)
     try {
@@ -316,7 +317,7 @@ export default function Dashboard() {
         // TODO: Implement retry logic
         // Could add to a sync queue for automatic retry
       });
-  }, [entries, trackDocumentEvent]);
+  }, [entries, openTab, trackDocumentEvent]);
 
   // Handle new tab creation (creates document and opens in tab)
   const handleCreateNewTab = useCallback(async () => {
@@ -361,9 +362,10 @@ export default function Dashboard() {
       }
     };
 
-    // Update UI immediately
+    // Update UI immediately - update both entries and allDocuments
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
+    setAllDocuments(prev => [newEntry, ...prev]);
 
     // Open in tab
     openTab(newEntry);

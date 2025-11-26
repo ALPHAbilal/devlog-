@@ -1352,6 +1352,7 @@ export default function Dashboard() {
               isCollapsed={isSidebarCollapsed}
               onToggleCollapse={toggleSidebarCollapse}
               className="h-full"
+              onCreateDocument={handleCreateNewTab}
               onDocumentSelect={(data) => {
                 if (data?.action === 'create') {
                   handleCreateNewTab();
@@ -1506,6 +1507,7 @@ export default function Dashboard() {
             isCollapsed={false}
             onToggleCollapse={() => {}}
             className="h-full"
+            onCreateDocument={handleCreateNewTab}
             onDocumentSelect={(data) => {
               if (data?.action === 'create') {
                 handleCreateNewTab();

@@ -11,7 +11,8 @@ export default function SidebarTreeItem({
   isFavorite = false,
   isLast = false,
   onItemClick,
-  onContextMenu
+  onContextMenu,
+  isSelected = false
 }) {
   const hasChildren = item.children && item.children.length > 0;
   const isFile = item.type === 'file' || item.type === 'document';
@@ -59,9 +60,13 @@ export default function SidebarTreeItem({
 
       <div
         className={`
-          flex items-center gap-2 py-1.5 px-2 text-sm transition-all duration-200 group relative
-          ${isFile ? 'text-white/60 hover:text-white/90' : 'text-white/70 hover:text-white/95'}
-          ${!isFile ? 'cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent rounded-lg' : 'cursor-pointer hover:bg-white/[0.03] rounded-lg'}
+          flex items-center gap-2 py-1.5 px-2 text-sm transition-all duration-200 group relative rounded-lg
+          ${isSelected
+            ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
+            : isFile
+              ? 'text-white/60 hover:text-white/90 cursor-pointer hover:bg-white/[0.03]'
+              : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
+          }
         `}
         style={{ paddingLeft: `${depth * 16 + 12}px` }}
         onClick={handleClick}
@@ -84,7 +89,7 @@ export default function SidebarTreeItem({
 
         {/* Icon */}
         {isFile ? (
-          <FileText className="w-3.5 h-3.5 text-white/30 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0" />
+          <FileText className={`w-3.5 h-3.5 transition-all duration-200 flex-shrink-0 ${isSelected ? 'text-emerald-400' : 'text-white/30 group-hover:text-emerald-400/90'}`} />
         ) : isExpanded ? (
           <FolderOpen className="w-4 h-4 text-emerald-400 group-hover:text-emerald-300 transition-all duration-200 flex-shrink-0 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]" />
         ) : (

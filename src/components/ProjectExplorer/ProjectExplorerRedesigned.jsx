@@ -1,11 +1,12 @@
 import { useState, useMemo } from 'react';
-import { Star, FolderPlus, PanelLeft, FilePlus, Trash2 } from 'lucide-react';
+import { Star, FolderPlus, PanelLeft, FilePlus, Trash2, Inbox, User, Settings } from 'lucide-react';
 import { useFolders } from '../../hooks/useFolders';
 import SidebarSectionHeader from './SidebarSectionHeader';
 import SidebarTreeItem from './SidebarTreeItem';
 import SidebarCollapseButton from './SidebarCollapseButton';
 import InputModal from '../InputModal';
 import ConfirmDialog from '../ConfirmDialog';
+import { useNavigate } from 'react-router-dom';
 
 export default function ProjectExplorerRedesigned({
   onDocumentSelect,
@@ -15,12 +16,16 @@ export default function ProjectExplorerRedesigned({
   isCollapsed = false,
   onToggleCollapse,
   className = '',
-  height = 'h-full'
+  height = 'h-full',
+  onCreateDocument
 }) {
+  const navigate = useNavigate();
+
   // State management
   const [expandedFolders, setExpandedFolders] = useState(new Set(['1']));
   const [explorerExpanded, setExplorerExpanded] = useState(true);
   const [favoritesExpanded, setFavoritesExpanded] = useState(true);
+  const [inboxExpanded, setInboxExpanded] = useState(true);
 
   // Modal state
   const [showInputModal, setShowInputModal] = useState(false);
@@ -90,10 +95,37 @@ export default function ProjectExplorerRedesigned({
     return combined;
   }, [folders, documents]);
 
-  // Get favorite folders
+  // Get Inbox documents (documents without folder_id)
+  const inboxDocuments = useMemo(() => {
+    return documents
+      .filter(doc => doc.type !== 'folder' && !doc.folder_id && !doc.deleted_at)
+      .map(doc => ({
+        ...doc,
+        type: 'document',
+        name: doc.title
+      }));
+  }, [documents]);
+
+  // Get favorite documents (documents with is_favorite = true)
+  const favoriteDocuments = useMemo(() => {
+    return documents
+      .filter(doc => doc.type !== 'folder' && doc.is_favorite && !doc.deleted_at)
+      .map(doc => ({
+        ...doc,
+        type: 'document',
+        name: doc.title
+      }));
+  }, [documents]);
+
+  // Get favorite folders (keep existing behavior)
   const favoriteFolders = useMemo(() => {
     return folderTree.filter(f => f.isFavorite || f.favorite);
   }, [folderTree]);
+
+  // Combined favorites (folders + documents)
+  const allFavorites = useMemo(() => {
+    return [...favoriteFolders, ...favoriteDocuments];
+  }, [favoriteFolders, favoriteDocuments]);
 
   // Handle item click (document or folder)
   const handleItemClick = (item) => {
@@ -205,12 +237,29 @@ export default function ProjectExplorerRedesigned({
         {/* Separator */}
         <div className="bg-white/10 mx-4 mb-2 h-px" />
 
+        {/* Inbox Icon */}
+        <div className="px-2 py-1">
+          <div
+            className="flex items-center justify-center p-3 text-blue-400/70 hover:text-blue-300 hover:bg-blue-400/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
+            title={`Inbox (${inboxDocuments.length})`}
+          >
+            <Inbox className="w-5 h-5" />
+            {inboxDocuments.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 text-white text-xs font-medium rounded-full flex items-center justify-center">
+                {inboxDocuments.length > 9 ? '9+' : inboxDocuments.length}
+              </span>
+            )}
+            {/* Active indicator */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-blue-400 rounded-full group-hover:h-8 transition-all duration-200" />
+          </div>
+        </div>
+
         {/* Favorites Icon */}
-        {favoriteFolders.length > 0 && (
+        {allFavorites.length > 0 && (
           <div className="px-2 py-1">
             <div
               className="flex items-center justify-center p-3 text-amber-400/70 hover:text-amber-300 hover:bg-amber-400/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
-              title={`Favorites (${favoriteFolders.length})`}
+              title={`Favorites (${allFavorites.length})`}
             >
               <Star className="w-5 h-5 fill-current" />
               {/* Active indicator */}
@@ -219,8 +268,21 @@ export default function ProjectExplorerRedesigned({
           </div>
         )}
 
-        {/* Bottom spacer */}
-        <div className="h-3 flex-shrink-0" />
+        {/* Spacer to push profile to bottom */}
+        <div className="flex-1" />
+
+        {/* Profile Icon at bottom */}
+        <div className="px-2 py-3 flex-shrink-0 border-t border-white/5">
+          <button
+            onClick={() => navigate('/settings')}
+            className="w-full flex items-center justify-center p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
+            title="Settings"
+          >
+            <Settings className="w-5 h-5" />
+            {/* Active indicator */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-white rounded-full group-hover:h-8 transition-all duration-200" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -234,31 +296,87 @@ export default function ProjectExplorerRedesigned({
       {/* Separator */}
       <div className="bg-white/10 mx-4 mb-3 h-px" />
 
+      {/* Inbox Section - Quick Capture Area */}
+      <div className="px-4 flex-shrink-0">
+        <div className="pb-3">
+          <SidebarSectionHeader
+            title="Inbox"
+            isExpanded={inboxExpanded}
+            onToggle={() => setInboxExpanded(!inboxExpanded)}
+            icon={Inbox}
+            count={inboxDocuments.length}
+            actionButton={
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCreateDocument?.();
+                }}
+                className="opacity-0 group-hover:opacity-100 hover:bg-blue-500/20 rounded p-1 transition-all duration-200 hover:scale-110"
+                title="New Document"
+              >
+                <FilePlus className="w-3.5 h-3.5 text-blue-400 hover:text-blue-300" />
+              </button>
+            }
+          />
+
+          {inboxExpanded && inboxDocuments.length > 0 && (
+            <div className="mt-2 space-y-0.5 max-h-32 overflow-y-auto sidebar-scroll pr-1">
+              {inboxDocuments.map((doc, index) => (
+                <SidebarTreeItem
+                  key={doc.id}
+                  item={doc}
+                  isExpanded={false}
+                  onToggle={() => {}}
+                  expandedFolders={expandedFolders}
+                  depth={0}
+                  isFavorite={false}
+                  isLast={index === inboxDocuments.length - 1}
+                  onItemClick={handleItemClick}
+                  onContextMenu={handleContextMenu}
+                  isSelected={selectedDocumentId === doc.id}
+                />
+              ))}
+            </div>
+          )}
+
+          {inboxExpanded && inboxDocuments.length === 0 && (
+            <div className="mt-2 text-xs text-white/30 text-center py-2">
+              No documents in inbox
+            </div>
+          )}
+        </div>
+
+        {/* Separator */}
+        <div className="bg-white/5 mb-3 h-px" />
+      </div>
+
       {/* Favorites Section - No Scroll */}
       <div className="px-4 flex-shrink-0">
-        {favoriteFolders.length > 0 && (
-          <div className="pb-4">
+        {allFavorites.length > 0 && (
+          <div className="pb-3">
             <SidebarSectionHeader
               title="Favorites"
               isExpanded={favoritesExpanded}
               onToggle={() => setFavoritesExpanded(!favoritesExpanded)}
               icon={Star}
+              count={allFavorites.length}
             />
 
             {favoritesExpanded && (
-              <div className="mt-2 space-y-0.5">
-                {favoriteFolders.map((folder, index) => (
+              <div className="mt-2 space-y-0.5 max-h-32 overflow-y-auto sidebar-scroll pr-1">
+                {allFavorites.map((item, index) => (
                   <SidebarTreeItem
-                    key={folder.id}
-                    item={folder}
-                    isExpanded={expandedFolders.has(folder.id)}
+                    key={item.id}
+                    item={item}
+                    isExpanded={expandedFolders.has(item.id)}
                     onToggle={toggleFolder}
                     expandedFolders={expandedFolders}
                     depth={0}
                     isFavorite={true}
-                    isLast={index === favoriteFolders.length - 1}
+                    isLast={index === allFavorites.length - 1}
                     onItemClick={handleItemClick}
                     onContextMenu={handleContextMenu}
+                    isSelected={selectedDocumentId === item.id}
                   />
                 ))}
               </div>
@@ -267,11 +385,11 @@ export default function ProjectExplorerRedesigned({
         )}
 
         {/* Separator */}
-        {favoriteFolders.length > 0 && <div className="bg-white/5 my-4 h-px" />}
+        {allFavorites.length > 0 && <div className="bg-white/5 mb-3 h-px" />}
       </div>
 
       {/* Explorer Section - With Scroll */}
-      <div className="flex-1 px-4 min-h-0 flex flex-col pb-4">
+      <div className="flex-1 px-4 min-h-0 flex flex-col">
         <SidebarSectionHeader
           title="All Folders"
           isExpanded={explorerExpanded}
@@ -294,7 +412,7 @@ export default function ProjectExplorerRedesigned({
         {/* Folder List with Custom Scrollbar */}
         {explorerExpanded && (
           <div className="sidebar-scroll flex-1 h-0 mt-2 overflow-y-auto pr-2">
-            <div className="space-y-0.5 pb-4">
+            <div className="space-y-0.5 pb-2">
               {folderTree.map((folder, index) => (
                 <SidebarTreeItem
                   key={folder.id}
@@ -307,6 +425,7 @@ export default function ProjectExplorerRedesigned({
                   isLast={index === folderTree.length - 1}
                   onItemClick={handleItemClick}
                   onContextMenu={handleContextMenu}
+                  isSelected={selectedDocumentId === folder.id}
                 />
               ))}
             </div>
@@ -314,8 +433,16 @@ export default function ProjectExplorerRedesigned({
         )}
       </div>
 
-      {/* Bottom spacer */}
-      <div className="h-4 flex-shrink-0" />
+      {/* Profile/Settings Section at bottom */}
+      <div className="flex-shrink-0 px-4 py-3 border-t border-white/5">
+        <button
+          onClick={() => navigate('/settings')}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200 group"
+        >
+          <Settings className="w-4 h-4" />
+          <span className="text-sm font-medium">Settings</span>
+        </button>
+      </div>
 
       {/* Modals */}
       <InputModal

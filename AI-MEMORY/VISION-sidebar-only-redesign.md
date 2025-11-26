@@ -17,21 +17,85 @@ The current UI has two navigation systems (sidebar + dashboard cards) creating:
 **Sidebar + Browser-Style Tabs**
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│  [Doc 1 ✕] [Doc 2 ✕] [Untitled ✕]  [+]              TAB BAR     │
-├─────────────┬────────────────────────────────────────────────────┤
-│             │                                                    │
-│   SIDEBAR   │              DOCUMENT CONTENT                      │
-│             │              (Active Tab)                          │
-│  - Search   │                                                    │
-│  - Favorites│                                                    │
-│  - Inbox    │                                                    │
-│  - Folders  │                                                    │
-│             │                                                    │
-└─────────────┴────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│ [Green accent line - 2px]                                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TAB BAR (h-11, 44px) - Clean, minimal                         │
+│  [📄 Doc 1 ✕] [📄 Doc 2 ✕] [📄 Untitled ✕]  [+]                │
+│                                                                 │
+├─────────────┬───────────────────────────────────────────────────┤
+│             │                                                   │
+│  SIDEBAR    │                                                   │
+│  (w-72)     │                                                   │
+│             │                                                   │
+│  ┌────────┐ │                                                   │
+│  │🔍Search│ │        DOCUMENT CONTENT                           │
+│  └────────┘ │        (ExpandedViewEnhanced)                     │
+│             │                                                   │
+│  ⭐ Favorites│        - Instant tab switching (< 50ms)          │
+│    └─ Doc A │        - No loading spinners                      │
+│             │        - Documents pre-cached                     │
+│  📥 Inbox(3)│                                                   │
+│    ├─ Note  │                                                   │
+│    └─ New   │                                                   │
+│             │                                                   │
+│  📁 Folders │                                                   │
+│    ├─ Proj A│                                                   │
+│    └─ Proj B│                                                   │
+│             │                                                   │
+│  ───────────│                                                   │
+│  [⚙️] [👤]  │  ← Settings + Profile at bottom                   │
+│             │                                                   │
+└─────────────┴───────────────────────────────────────────────────┘
 ```
 
 **Core Insight:** Browser tabs are universal UX. Everyone knows how they work. Zero learning curve.
+
+### UI Decisions (FINAL)
+
+| Element | Location | Notes |
+|---------|----------|-------|
+| **Tab Bar** | Top, full width | Clean minimal design. Only tabs + [+] button |
+| **Search** | Sidebar top | Same backend. Results shown in sidebar |
+| **Favorites** | Sidebar section | Starred docs/folders |
+| **Inbox** | Sidebar section | Unsorted documents with count badge |
+| **Folders** | Sidebar section | Folder tree structure |
+| **Settings** | Sidebar bottom | Gear icon → /settings |
+| **Profile** | Sidebar bottom | Avatar + dropdown menu |
+| **DashboardHeader** | **REMOVED** | No longer needed |
+| **Card Grid** | **REMOVED** | Replaced by tabs |
+
+### Layout Behavior (CRITICAL)
+
+**The layout is a fixed viewport shell with internal scrolling:**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ h-screen overflow-hidden (no page scroll)                       │
+├─────────────────────────────────────────────────────────────────┤
+│  TAB BAR (h-11, 44px)                              ← FIXED      │
+├───────────┬─────────────────────────────────────────────────────┤
+│           │                                                     │
+│  SIDEBAR  │   DOCUMENT CONTENT                                  │
+│  FIXED    │   overflow-y-auto                      ← SCROLLS    │
+│           │                                         INTERNALLY  │
+│  w-72     │   ┌─────────────────────────────────┐              │
+│  ↔        │   │ Block 1                         │  ↕           │
+│  w-20     │   │ Block 2                         │  ↕           │
+│  (toggle) │   │ Block 3                         │  ↕           │
+│           │   │ ...                             │  ↕           │
+│  ─────────│   └─────────────────────────────────┘              │
+│  [⚙️] [👤] │                                                     │
+└───────────┴─────────────────────────────────────────────────────┘
+```
+
+**Rules:**
+1. Outer container: `h-screen overflow-hidden` - fills viewport, NO page scroll
+2. Tab bar: Fixed `h-11` (44px), always visible at top
+3. Sidebar: Collapsible (80px ↔ 280px), fixed on left, full height
+4. Document area: `flex-1 overflow-y-auto` - scrolls internally
+5. Sidebar collapse/expand: Same behavior as current (Cmd+B toggle)
 
 ---
 

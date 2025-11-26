@@ -679,3 +679,12 @@ select option {
   scrollbar-color: rgba(16, 185, 129, 0.2) rgba(255, 255, 255, 0.02);
 }
 
+/* Hide scrollbar for tab bar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+

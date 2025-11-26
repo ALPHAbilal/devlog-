@@ -1,18 +1,13 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import EntryCard from '../components/EntryCard';
 import ExpandedView from '../components/ExpandedViewEnhanced';
 import MobileDocumentViewer from '../components/MobileDocumentViewer';
 import { useResponsive } from '../hooks/useResponsive';
-import SearchBar from '../components/SearchBar';
 import DocumentLinkModal from '../components/DocumentLinkModal';
-import VirtualizedGrid from '../components/VirtualizedGrid';
-import DocumentGridRedesigned from '../components/DocumentGridRedesigned';
-import DocumentCardSkeleton from '../components/DocumentCardSkeleton';
-import FolderCardSkeleton from '../components/FolderCardSkeleton';
 import SidebarSkeleton from '../components/SidebarSkeleton';
-import LogoMinimal, { LogoIcon } from '../components/LogoMinimal';
-import DashboardHeader from '../components/Dashboard/DashboardHeader';
+import TabBar from '../components/TabBar';
+import EmptyState from '../components/EmptyState';
+import { useTabContext } from '../contexts/TabContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ProjectCard from '../components/ProjectCard';
 // import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
@@ -119,6 +114,23 @@ export default function Dashboard() {
   const [showProjectModal, setShowProjectModal] = useState(false);
   const [editingProject, setEditingProject] = useState(null);
   const { isCollapsed: isSidebarCollapsed, toggleCollapsed: toggleSidebarCollapse, showMobileSidebar: showSidebar, toggleMobileSidebar, closeMobileSidebar } = useSidebar();
+
+  // Tab management
+  const {
+    tabs,
+    activeTabId,
+    openTab,
+    closeTab,
+    updateTabTitle,
+    isInitialized: tabsInitialized
+  } = useTabContext();
+
+  // Find the active document based on activeTabId
+  const activeDocument = useMemo(() => {
+    if (!activeTabId) return null;
+    return allDocuments.find(doc => doc.id === activeTabId);
+  }, [activeTabId, allDocuments]);
+
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showMobileSidebarSheet, setShowMobileSidebarSheet] = useState(false);
   const [showMobileContextMenu, setShowMobileContextMenu] = useState(false);
@@ -180,19 +192,14 @@ export default function Dashboard() {
     isMobile ? 80 : 0 // Only enable on mobile
   );
   
-  // Handle document expansion with lazy block loading
+  // Handle document expansion with tab system
   const handleDocumentExpand = useCallback((document) => {
-    // Open document immediately - ExpandedViewEnhanced will handle progressive loading
-    // Clear blocks array to force full reload from database
-    const documentForEdit = {
-      ...document,
-      blocks: undefined // Force block loader to fetch all blocks
-    };
-    setExpandedEntry(documentForEdit);
+    // Open document in tab (or switch to existing tab)
+    openTab(document);
 
     // Update URL to reflect the opened document
     navigate(`/document/${document.id}`, { replace: true });
-  }, [navigate]);
+  }, [navigate, openTab]);
 
   // Update storage info
   const updateStorageInfo = useCallback(async () => {
@@ -310,6 +317,88 @@ export default function Dashboard() {
         // Could add to a sync queue for automatic retry
       });
   }, [entries, trackDocumentEvent]);
+
+  // Handle new tab creation (creates document and opens in tab)
+  const handleCreateNewTab = useCallback(async () => {
+    // Create a default text block for new documents
+    const defaultBlock = {
+      id: crypto.randomUUID(),
+      type: 'text',
+      content: '',
+      position: 0
+    };
+
+    // Check for duplicate names and generate unique title
+    let baseTitle = 'Untitled Document';
+    let title = baseTitle;
+    let counter = 2;
+
+    // Get all documents without folder (Inbox behavior)
+    const documentsInInbox = entries.filter(doc =>
+      !doc.folder_id &&
+      !doc.deleted_at
+    );
+
+    // Keep checking until we find a unique name
+    while (documentsInInbox.some(doc => doc.title === title)) {
+      title = `${baseTitle} (${counter})`;
+      counter++;
+    }
+
+    const newEntry = {
+      id: crypto.randomUUID(),
+      user_id: user.id,
+      title: title,
+      blocks: [defaultBlock],
+      tags: [],
+      folder_id: null, // New docs go to Inbox (no folder)
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      metadata: {
+        syncStatus: 'syncing',
+        createdLocally: true,
+        isNewDocument: true
+      }
+    };
+
+    // Update UI immediately
+    const updatedEntries = [newEntry, ...entries];
+    setEntries(updatedEntries);
+
+    // Open in tab
+    openTab(newEntry);
+
+    // Save to IndexedDB for local backup
+    try {
+      await IndexedDBAdapter.saveDocument(newEntry);
+    } catch (error) {
+      console.error('Failed to save to IndexedDB:', error);
+    }
+
+    // Background sync to Supabase
+    storageWrapper.saveDocument(newEntry)
+      .then(() => {
+        newEntry.metadata.syncStatus = 'synced';
+        toast.success('Document synced to cloud');
+      })
+      .catch((error) => {
+        console.error('Background sync failed:', error);
+        newEntry.metadata.syncStatus = 'failed';
+        toast.error('Failed to sync document. Changes saved locally.');
+      });
+
+    return newEntry;
+  }, [entries, user?.id, openTab, toast]);
+
+  // Listen for keyboard shortcut to create new tab (from TabContext)
+  useEffect(() => {
+    const handleNewTab = () => {
+      handleCreateNewTab();
+    };
+
+    window.addEventListener('devlog:newTab', handleNewTab);
+    return () => window.removeEventListener('devlog:newTab', handleNewTab);
+  }, [handleCreateNewTab]);
 
   // NOTE: Click-outside handler removed - now handled by DashboardHeader component
   // The old handler was using mousedown and looking for .profile-menu-container class
@@ -1209,167 +1298,13 @@ export default function Dashboard() {
     return 'text-gray-400';
   };
 
-  // Check for expanded document FIRST - it has its own loading skeleton
-  if (expandedEntry) {
-    console.log('Dashboard: Showing ExpandedView instead of grid');
+  // Show simple loading state during initial load
+  if (isLoadingDocuments && paginatedDocuments.length === 0 && !tabsInitialized) {
     return (
-      <div 
-        className="h-screen overflow-hidden grid grid-cols-1 lg:grid-cols-[auto,1fr]"
-        style={{
-          '--sidebar-width': isSidebarCollapsed ? '80px' : '280px',
-          transition: 'grid-template-columns 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-          willChange: 'grid-template-columns',
-          contain: 'layout style'
-        }}
-      >
-        {/* Mobile overlay */}
-        {showSidebar && (
-          <div
-            className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-            onClick={() => closeMobileSidebar()}
-          />
-        )}
-        
-        {/* Project Sidebar */}
-        <div 
-          className={`
-            fixed lg:relative inset-y-0 left-0 z-40 w-[280px] lg:w-auto
-            bg-dark-primary lg:bg-transparent
-            flex flex-col
-            transition-all duration-200 ease-out
-            h-full overflow-hidden
-            ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            lg:col-start-1
-          `}
-        >
-          {/* Sidebar Content wrapper for spacing */}
-          <div className="flex-1 min-h-0 pt-20 pb-7 flex flex-col">
-            <ProjectExplorerV2
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={toggleSidebarCollapse}
-              className="flex-1 min-h-0"
-              onDocumentSelect={(data) => {
-                if (data?.action === 'create') {
-                  createNewEntry(data.folderId);
-                } else if (data?.id) {
-                  const doc = allDocuments.find(e => e.id === data.id);
-                  if (doc) {
-                    handleDocumentExpand(doc);
-                  }
-                } else if (data) {
-                  // Direct document object passed
-                  handleDocumentExpand(data);
-                }
-              }}
-              selectedDocumentId={expandedEntry?.id}
-              documents={allDocuments}
-              onDocumentMove={async (docId, folderId) => {
-                // Update the document's folder_id
-                await updateEntry(docId, { folder_id: folderId });
-              }}
-              onDocumentDelete={(document) => {
-                const docId = document.id || document;
-                setConfirmDialogConfig({
-                  title: 'Delete Document',
-                  message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
-                  onConfirm: async () => {
-                    await deleteEntry(docId);
-                    // Refresh the entries list
-                    await loadEntries();
-                    toast.success('Document deleted successfully');
-                    setShowConfirmDialog(false);
-                  }
-                });
-                setShowConfirmDialog(true);
-              }}
-            />
-          </div>
-        </div>
-        
-        {/* Expanded View Content */}
-        <main className="flex flex-col min-w-0 overflow-hidden lg:col-start-2">
-          <MobileDocumentViewer 
-            entry={expandedEntry} 
-            onClose={() => {
-              setExpandedEntry(null);
-              navigate('/dashboard', { replace: true });
-            }}
-            onUpdate={updateEntry}
-            allEntries={entries}
-            onNavigateToDocument={(newEntry) => {
-              setExpandedEntry(newEntry);
-              navigate(`/document/${newEntry.id}`, { replace: true });
-            }}
-          />
-        </main>
-      </div>
-    );
-  }
-
-  // Show skeleton UI while loading for better perceived performance
-  // Show loading skeleton only during initial load (when no documents yet)
-  if (isLoadingDocuments && paginatedDocuments.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32] p-6">
-        <div className="flex gap-6 h-[calc(100vh-3rem)] max-w-[1800px] mx-auto">
-          {/* Sidebar Skeleton */}
-          <SidebarSkeleton />
-
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col gap-6 min-w-0">
-            {/* Header Skeleton */}
-            <div className="bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50" />
-                  <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-20 bg-white/10 rounded-lg animate-pulse" />
-                  <div className="h-9 w-9 bg-white/10 rounded-lg animate-pulse" />
-                </div>
-              </div>
-            </div>
-
-            {/* Documents Grid Skeleton */}
-            <div className="flex-1 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
-              <div className="p-6 h-full overflow-auto">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-3 items-start auto-rows-max">
-                  {/* Mix of folders and documents like in real dashboard */}
-                  <FolderCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <FolderCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <FolderCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <FolderCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <FolderCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <FolderCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                  <DocumentCardSkeleton />
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-db-dark-base via-db-dark-primary to-db-dark-secondary">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
+          <span className="text-white/50 text-sm">Loading...</span>
         </div>
       </div>
     );
@@ -1384,203 +1319,94 @@ export default function Dashboard() {
       onDragCancel={handleDragCancel}
       modifiers={[restrictToWindowEdges]}
     >
-      {/* Figma Layout: Outer container with padding */}
-      <div className="min-h-screen dashboard-container flex flex-col
-                      bg-gradient-to-br from-[#050b14] via-[#0a1628] to-[#0f1d32]">
-        {/* Trial Banner - Above everything */}
-        <TrialBanner trialStatus={trialStatus} />
+      {/* Tab-based Layout: Outer container fills viewport, no page scroll */}
+      <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-db-dark-base via-db-dark-primary to-db-dark-secondary">
+        {/* Green accent line at very top */}
+        <div className="h-0.5 bg-emerald-500 flex-shrink-0" />
 
-        {/* Figma Layout: Main content area with padding and max-width */}
-        <div className="flex-1 p-6">
-          <div className="flex gap-6 h-[calc(100vh-3rem)] max-w-[1800px] mx-auto">
-            {/* Mobile Sidebar Overlay */}
-            {showSidebar && !isMobile && (
-              <div
-                className="fixed inset-0 bg-black/50 z-20 lg:hidden"
-                onClick={() => setShowSidebar(false)}
-              />
-            )}
+        {/* Tab Bar - fixed height, stays at top */}
+        <TabBar onNewTab={handleCreateNewTab} />
 
-            {/* Sidebar Bento Box - Desktop always visible, mobile overlay */}
-            <div className={`
-              ${isMobile ? 'fixed inset-y-0 left-0 z-40 transition-transform duration-300' : ''}
+        {/* Main area - fills remaining height */}
+        <div className="flex-1 min-h-0 flex overflow-hidden">
+          {/* Mobile Sidebar Overlay */}
+          {showSidebar && isMobile && (
+            <div
+              className="fixed inset-0 bg-black/50 z-20"
+              onClick={() => closeMobileSidebar()}
+            />
+          )}
+
+          {/* Sidebar - fixed width, collapsible */}
+          <div
+            className={`
+              flex-shrink-0 h-full transition-all duration-300 ease-in-out
+              ${isMobile ? 'fixed inset-y-0 left-0 z-40' : ''}
               ${isMobile && !showSidebar ? '-translate-x-full' : 'translate-x-0'}
-              ${!isMobile ? 'flex-shrink-0' : ''}
-            `}>
-              <ProjectExplorerV2
-                isCollapsed={isSidebarCollapsed}
-                onToggleCollapse={toggleSidebarCollapse}
-                className="h-full"
-                onDocumentSelect={(data) => {
-                  if (data?.action === 'create') {
-                    createNewEntry(data.folderId);
-                  } else if (data?.id) {
-                    const doc = allDocuments.find(e => e.id === data.id);
-                    if (doc) {
-                      handleDocumentExpand(doc);
-                    }
-                  } else if (data) {
-                    handleDocumentExpand(data);
+            `}
+            style={{ width: isMobile ? '280px' : (isSidebarCollapsed ? '80px' : '280px') }}
+          >
+            <ProjectExplorerV2
+              isCollapsed={isSidebarCollapsed}
+              onToggleCollapse={toggleSidebarCollapse}
+              className="h-full"
+              onDocumentSelect={(data) => {
+                if (data?.action === 'create') {
+                  handleCreateNewTab();
+                } else if (data?.id) {
+                  const doc = allDocuments.find(e => e.id === data.id);
+                  if (doc) {
+                    handleDocumentExpand(doc);
                   }
-                  // Close mobile sidebar after selection
-                  if (isMobile) setShowSidebar(false);
-                }}
-                selectedDocumentId={expandedEntry?.id}
-                height="h-full"
-                documents={allDocuments}
-                onDocumentMove={async (docId, folderId) => {
-                  await updateEntry(docId, { folder_id: folderId });
-                }}
-                onDocumentDelete={(document) => {
-                  const docId = document.id || document;
-                  setConfirmDialogConfig({
-                    title: 'Delete Document',
-                    message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
-                    onConfirm: async () => {
-                      await deleteEntry(docId);
-                      await loadEntries();
-                      toast.success('Document deleted successfully');
-                      setShowConfirmDialog(false);
+                } else if (data) {
+                  handleDocumentExpand(data);
+                }
+                // Close mobile sidebar after selection
+                if (isMobile) closeMobileSidebar();
+              }}
+              selectedDocumentId={activeTabId}
+              documents={allDocuments}
+              onDocumentMove={async (docId, folderId) => {
+                await updateEntry(docId, { folder_id: folderId });
+              }}
+              onDocumentDelete={(document) => {
+                const docId = document.id || document;
+                setConfirmDialogConfig({
+                  title: 'Delete Document',
+                  message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
+                  onConfirm: async () => {
+                    await deleteEntry(docId);
+                    // Close tab if open
+                    if (tabs.find(t => t.id === docId)) {
+                      closeTab(docId);
                     }
-                  });
-                  setShowConfirmDialog(true);
-                }}
-              />
-            </div>
-
-            {/* Main Content Column */}
-            <div className="flex-1 flex flex-col gap-6 min-w-0">
-              {/* Header Component with Portal-based Profile Menu */}
-              <DashboardHeader
-                entries={entries}
-                searchTerm={searchTerm}
-                onSearchChange={(e) => setSearchTerm(e.target.value)}
-                searchBarRef={searchBarRef}
-                user={user}
-                showProfileMenu={showProfileMenu}
-                setShowProfileMenu={setShowProfileMenu}
-                onSignOut={signOut}
-                onCreateNew={() => createNewEntry()}
-                onToggleMobileSidebar={() => {
-                  if (isMobile) {
-                    setShowMobileSidebarSheet(true);
-                  } else {
-                    setShowSidebar(!showSidebar);
+                    await loadEntries();
+                    toast.success('Document deleted successfully');
+                    setShowConfirmDialog(false);
                   }
-                }}
-                isMobile={isMobile}
+                });
+                setShowConfirmDialog(true);
+              }}
+            />
+          </div>
+
+          {/* Document area - takes remaining width, scrolls internally */}
+          <div className="flex-1 min-w-0 h-full overflow-hidden">
+            {activeTabId && activeDocument ? (
+              <ExpandedView
+                key={activeTabId}
+                entry={activeDocument}
+                onClose={() => closeTab(activeTabId)}
+                onUpdate={updateEntry}
+                allEntries={allDocuments}
+                onNavigateToDocument={(doc) => openTab(doc)}
               />
-
-              {/* Documents Grid Bento Box */}
-              <div className="flex-1 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden">
-                <div
-                  ref={pullToRefreshRef}
-                  className="dashboard-scroll-container h-full overflow-y-auto overflow-x-hidden custom-scrollbar relative"
-                  style={{
-                    scrollbarWidth: 'thin',
-                    scrollbarColor: 'rgba(16, 185, 129, 0.3) rgba(255, 255, 255, 0.05)',
-                    paddingBottom: isMobile ? '80px' : '1rem'
-                  }}
-                >
-                  {/* Pull to refresh indicator */}
-                  {isPulling && (
-                    <div
-                      className="absolute top-0 left-0 right-0 flex items-center justify-center transition-all"
-                      style={{
-                        height: `${pullDistance}px`,
-                        opacity: pullProgress
-                      }}
-                    >
-                      <div className="text-white/60 text-sm">
-                        {pullProgress >= 1 ? 'Release to refresh' : 'Pull to refresh'}
-                      </div>
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <DocumentGridRedesigned
-                      entries={filteredEntries}
-                      onExpand={handleDocumentExpand}
-                      searchTerm={searchTerm}
-                      selectedDocuments={selectedDocuments}
-                      onSelectDocument={handleDocumentSelect}
-                      selectionMode={selectedDocuments.size > 0}
-                      onContextMenu={isMobile ? (entry) => {
-                        setContextMenuTarget(entry);
-                        setShowMobileContextMenu(true);
-                      } : undefined}
-                    />
-
-                    {/* Infinite Scroll Loading State */}
-                    {isLoadingMore && (
-                      <div className="py-6 flex justify-center">
-                        <div className="flex items-center gap-3 text-sm text-gray-400">
-                          <div className="w-4 h-4 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
-                          <span>Loading more documents...</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            ) : (
+              <EmptyState onCreateNew={handleCreateNewTab} />
+            )}
           </div>
         </div>
       </div>
-
-      {/* Empty State */}
-      {displayEntries.length === 0 && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center max-w-md">
-            {isSearching ? (
-              <div className="flex flex-col items-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-                <p className="text-text-secondary">Searching...</p>
-              </div>
-            ) : searchTerm && searchTerm.trim() !== '' ? (
-              <div className="flex flex-col items-center gap-4">
-                <Search className="w-16 h-16 text-gray-400" />
-                <h3 className="text-lg font-medium text-text-primary">No documents found</h3>
-                <p className="text-text-secondary">
-                  No documents match your search for "<strong>{searchTerm}</strong>"
-                </p>
-                <p className="text-sm text-text-secondary/70">
-                  Try different keywords or clear your search to see all documents.
-                </p>
-                {searchError && (
-                  <p className="text-sm text-red-500 mt-2">Error: {searchError}</p>
-                )}
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="text-accent-green hover:text-accent-green/80 text-sm mt-2"
-                >
-                  Clear search
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4">
-                <FileText className="w-16 h-16 text-gray-400" />
-                <h2 className="text-2xl font-light text-text-primary mb-4">
-                  Welcome to Journey Logger
-                </h2>
-                <p className="text-text-secondary mb-8 max-w-md">
-                  Start documenting your developer journey with powerful blocks, 
-                  markdown support, and interconnected knowledge.
-                </p>
-                <button
-                  onClick={() => createNewEntry()}
-                  className="inline-flex items-center gap-2 px-6 py-3 
-                             bg-accent-green text-dark-primary rounded-lg
-                             hover:bg-accent-green/80 transition-colors"
-                >
-                  <Plus size={20} />
-                  Create Your First Document
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
 
       {/* Document Link Modal */}
       <DocumentLinkModal
@@ -1651,9 +1477,9 @@ export default function Dashboard() {
       />
       
       {/* Mobile FAB */}
-      {isMobile && !expandedEntry && (
+      {isMobile && !activeTabId && (
         <MobileFAB
-          onCreateDocument={() => createNewEntry()}
+          onCreateDocument={() => handleCreateNewTab()}
           onCreateFolder={() => {
             // TODO: Implement folder creation
             toast.info('Folder creation coming soon!');
@@ -1680,7 +1506,7 @@ export default function Dashboard() {
             className="h-full"
             onDocumentSelect={(data) => {
               if (data?.action === 'create') {
-                createNewEntry(data.folderId);
+                handleCreateNewTab();
               } else if (data?.id) {
                 const doc = allDocuments.find(e => e.id === data.id);
                 if (doc) {
@@ -1691,7 +1517,7 @@ export default function Dashboard() {
               }
               setShowMobileSidebarSheet(false);
             }}
-            selectedDocumentId={expandedEntry?.id}
+            selectedDocumentId={activeTabId}
             documents={allDocuments}
             onDocumentMove={async (docId, folderId) => {
               await updateEntry(docId, { folder_id: folderId });

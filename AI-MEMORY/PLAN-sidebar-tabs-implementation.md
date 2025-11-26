@@ -3,10 +3,107 @@
 > Detailed implementation plan for the Sidebar + Browser-Style Tabs redesign
 > Reference: `AI-MEMORY/VISION-sidebar-only-redesign.md`
 > Created: 2025-11-26
+> Updated: 2025-11-26 - Finalized UI layout
 
 ## Overview
 
 Transform Devlog from a dashboard card grid + sidebar model to a **Sidebar + Browser-Style Tabs** model. This removes the dashboard cards entirely and introduces a tab bar for multi-document workflows with session persistence.
+
+---
+
+## FINAL UI LAYOUT
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ [Green accent line - 2px]                                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  TAB BAR (h-11, 44px) - Clean, minimal                         │
+│  [Doc 1 ✕] [Doc 2 ✕] [Untitled ✕]  [+]                         │
+│                                                                 │
+├─────────────┬───────────────────────────────────────────────────┤
+│             │                                                   │
+│  SIDEBAR    │                                                   │
+│  (w-72)     │                                                   │
+│             │                                                   │
+│  ┌────────┐ │                                                   │
+│  │🔍Search│ │        DOCUMENT CONTENT                           │
+│  └────────┘ │        (ExpandedViewEnhanced)                     │
+│             │                                                   │
+│  ⭐ Favorites│        - Instant tab switching                   │
+│    └─ Doc A │        - No loading states                        │
+│             │        - Pre-cached documents                     │
+│  📥 Inbox(3)│                                                   │
+│    ├─ Note  │                                                   │
+│    └─ New   │                                                   │
+│             │                                                   │
+│  📁 Folders │                                                   │
+│    ├─ Proj A│                                                   │
+│    └─ Proj B│                                                   │
+│             │                                                   │
+│  ───────────│                                                   │
+│  [⚙️] [👤]  │  ← Settings + Profile at bottom                   │
+│             │                                                   │
+└─────────────┴───────────────────────────────────────────────────┘
+```
+
+### UI Decisions (FINAL)
+
+| Element | Location | Notes |
+|---------|----------|-------|
+| **Tab Bar** | Top, full width | Clean minimal design. Only tabs + [+] button |
+| **Search** | Sidebar top | Uses existing backend. Results shown in sidebar |
+| **Favorites** | Sidebar section | Starred docs/folders |
+| **Inbox** | Sidebar section | Unsorted documents with count badge |
+| **Folders** | Sidebar section | Folder tree structure |
+| **Settings** | Sidebar bottom | Gear icon → navigates to /settings |
+| **Profile** | Sidebar bottom | Avatar + dropdown menu |
+| **DashboardHeader** | **REMOVED** | No longer needed |
+| **Card Grid** | **REMOVED** | Replaced by tabs |
+
+### Performance Requirements
+
+| Action | Target | Implementation |
+|--------|--------|----------------|
+| Tab switch | **< 50ms** | Documents pre-cached in memory |
+| New tab creation | **< 100ms** | Optimistic UI update |
+| Search results | **< 200ms** | Existing backend, sidebar display |
+| Session restore | **< 500ms** | localStorage read on mount |
+
+### Layout Behavior (CRITICAL)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ VIEWPORT (h-screen, overflow-hidden)                            │
+├─────────────────────────────────────────────────────────────────┤
+│  TAB BAR (h-11)                                    ← FIXED      │
+├───────────┬─────────────────────────────────────────────────────┤
+│           │                                                     │
+│  SIDEBAR  │   DOCUMENT CONTENT AREA                             │
+│  (FIXED)  │   ┌─────────────────────────────────────────────┐  │
+│           │   │                                             │  │
+│  w-72     │   │  overflow-y-auto                            │  │
+│  or       │   │  (scrolls internally)                       │  │
+│  w-20     │   │                                             │  │
+│  when     │   │  Block 1                        ↕           │  │
+│  collapsed│   │  Block 2                        ↕ SCROLL    │  │
+│           │   │  Block 3                        ↕           │  │
+│  ↔        │   │  ...                            ↕           │  │
+│  toggle   │   │                                             │  │
+│           │   └─────────────────────────────────────────────┘  │
+│  ─────────│                                                     │
+│  [⚙️] [👤] │                                                     │
+└───────────┴─────────────────────────────────────────────────────┘
+```
+
+**Key Layout Rules:**
+1. **Outer container**: `h-screen overflow-hidden` (fills viewport, no page scroll)
+2. **Tab bar**: Fixed height `h-11` (44px), stays at top
+3. **Sidebar**: Fixed width, collapsible (80px ↔ 280px), full height minus tab bar
+4. **Document area**: `flex-1 overflow-y-auto` (takes remaining space, scrolls internally)
+5. **No page-level scrolling**: Everything contained within viewport
+
+---
 
 ## Current State Analysis
 
@@ -17,62 +114,53 @@ Layout.jsx
         ├── ProjectExplorerRedesigned (Sidebar)
         │     ├── Favorites section
         │     └── Folder tree
-        ├── DashboardHeader
-        ├── DocumentGridRedesigned (CARDS - TO BE REMOVED)
-        │     └── EntryCardRedesigned
+        ├── DashboardHeader ← REMOVE
+        ├── DocumentGridRedesigned (CARDS) ← REMOVE
+        │     └── EntryCardRedesigned ← REMOVE
         └── ExpandedViewEnhanced (when doc selected)
 ```
 
 ### Key Files to Modify
 | File | Change Type | Purpose |
 |------|-------------|---------|
-| `src/pages/Dashboard.jsx` | **MAJOR** | Remove card grid, add tab management |
-| `src/components/Layout.jsx` | **MINOR** | Add TabBar component |
-| `src/contexts/SidebarContext.jsx` | **EXTEND** | Add tab state management |
-| `src/components/ProjectExplorer/ProjectExplorerRedesigned.jsx` | **MODIFY** | Add Inbox section, search, selection highlight |
+| `src/pages/Dashboard.jsx` | **MAJOR** | Remove cards, remove header, add tabs |
+| `src/components/Layout.jsx` | **MINOR** | Adjust structure for tab bar |
+| `src/components/ProjectExplorer/ProjectExplorerRedesigned.jsx` | **MAJOR** | Add search, Inbox, profile/settings |
 
 ### New Files to Create
 | File | Purpose |
 |------|---------|
-| `src/components/TabBar.jsx` | Tab bar component |
-| `src/components/Tab.jsx` | Individual tab component |
-| `src/contexts/TabContext.jsx` | Tab state management + persistence |
-| `src/hooks/useTabPersistence.js` | localStorage/IndexedDB tab persistence |
+| `src/components/TabBar.jsx` | Clean tab bar component |
+| `src/contexts/TabContext.jsx` | Tab state + persistence |
+| `src/components/EmptyState.jsx` | When no tabs open |
+| `src/components/SidebarFooter.jsx` | Settings + Profile section |
 
-### Files to Remove/Deprecate
+### Files to Remove
 | File | Reason |
 |------|--------|
+| `src/components/Dashboard/DashboardHeader.jsx` | Replaced by tab bar |
 | `src/components/DocumentGridRedesigned.jsx` | Replaced by tabs |
 | `src/components/EntryCardRedesigned.jsx` | No longer needed |
 | `src/components/EntryCard.jsx` | No longer needed |
-| `src/components/FolderCard.jsx` | Folders only in sidebar now |
+| `src/components/FolderCard.jsx` | Folders only in sidebar |
+| `src/components/DocumentCardSkeleton.jsx` | No card loading states |
+| `src/components/FolderCardSkeleton.jsx` | No card loading states |
 
 ---
 
 ## Desired End State
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│  [Doc 1 ✕] [Doc 2 ✕] [Untitled ✕]  [+]              TAB BAR     │
-├─────────────┬────────────────────────────────────────────────────┤
-│ 🔍 Search   │                                                    │
-├─────────────┤              DOCUMENT CONTENT                      │
-│ ⭐ Favorites │              (Active Tab)                         │
-├─────────────┤                                                    │
-│ 📥 Inbox (3) │              Full ExpandedViewEnhanced            │
-├─────────────┤                                                    │
-│ 📁 Folders  │                                                    │
-└─────────────┴────────────────────────────────────────────────────┘
-```
-
 ### Verification Criteria
 1. App opens with previously open tabs restored
 2. [+] creates new doc in Inbox and opens in new tab
 3. Clicking sidebar doc opens in tab (or switches if already open)
-4. Tabs can be closed, reordered (future)
-5. Keyboard shortcuts work (Cmd+T, Cmd+W, Cmd+1-9)
+4. **Tab switching is instant** (< 50ms, no spinners)
+5. Keyboard shortcuts work (Cmd+T, Cmd+W, Cmd+Tab, Cmd+1-9)
 6. No dashboard cards visible anywhere
-7. Search in sidebar filters and persists when clicking results
+7. No DashboardHeader visible anywhere
+8. Search in sidebar filters and persists when clicking results
+9. Profile menu accessible from sidebar bottom
+10. Settings accessible from sidebar bottom
 
 ---
 
@@ -312,91 +400,105 @@ Create the visual tab bar component that displays open tabs.
 
 **File**: `src/components/TabBar.jsx` (NEW)
 
+**Design Goals:**
+- Clean, minimal appearance
+- Smooth hover/active states
+- Instant visual feedback
+- Matches existing dark theme
+
 ```jsx
 import { useTabContext } from '../contexts/TabContext';
-import { X, Plus } from 'lucide-react';
-import { useRef, useState, useEffect } from 'react';
+import { X, Plus, FileText } from 'lucide-react';
+import { useRef } from 'react';
 
-export default function TabBar({ onNewTab, onTabClick }) {
+export default function TabBar({ onNewTab }) {
   const { tabs, activeTabId, closeTab, setActiveTabId } = useTabContext();
-  const tabsContainerRef = useRef(null);
-  const [showOverflow, setShowOverflow] = useState(false);
-
-  // Check for overflow
-  useEffect(() => {
-    const container = tabsContainerRef.current;
-    if (container) {
-      setShowOverflow(container.scrollWidth > container.clientWidth);
-    }
-  }, [tabs]);
-
-  const handleTabClick = (tabId) => {
-    setActiveTabId(tabId);
-    onTabClick?.(tabId);
-  };
+  const tabsRef = useRef(null);
 
   const handleCloseTab = (e, tabId) => {
     e.stopPropagation();
     closeTab(tabId);
   };
 
-  const handleMiddleClick = (e, tabId) => {
-    if (e.button === 1) { // Middle click
+  // Middle-click to close (browser convention)
+  const handleMouseDown = (e, tabId) => {
+    if (e.button === 1) {
       e.preventDefault();
       closeTab(tabId);
     }
   };
 
   return (
-    <div className="flex items-center h-10 bg-[#0a1628]/80 backdrop-blur-sm border-b border-white/5 px-2">
-      {/* Tabs container */}
+    <div className="h-11 flex items-center bg-db-dark-base border-b border-white/5">
+      {/* Tabs scroll container */}
       <div
-        ref={tabsContainerRef}
-        className="flex-1 flex items-center gap-1 overflow-x-auto scrollbar-hide"
+        ref={tabsRef}
+        className="flex-1 flex items-center gap-0.5 px-2 overflow-x-auto scrollbar-hide"
       >
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => handleTabClick(tab.id)}
-            onMouseDown={(e) => handleMiddleClick(e, tab.id)}
-            className={`
-              group flex items-center gap-2 px-3 py-1.5 rounded-lg
-              text-sm font-medium transition-all duration-200
-              min-w-[100px] max-w-[200px]
-              ${activeTabId === tab.id
-                ? 'bg-white/10 text-white border border-white/10'
-                : 'text-white/60 hover:text-white/90 hover:bg-white/5'
-              }
-            `}
-          >
-            <span className="truncate flex-1 text-left">
-              {tab.title || 'Untitled'}
-            </span>
-            <span
-              onClick={(e) => handleCloseTab(e, tab.id)}
+        {tabs.map((tab) => {
+          const isActive = tab.id === activeTabId;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTabId(tab.id)}
+              onMouseDown={(e) => handleMouseDown(e, tab.id)}
               className={`
-                p-0.5 rounded hover:bg-white/20 transition-colors
-                ${activeTabId === tab.id
-                  ? 'opacity-60 hover:opacity-100'
-                  : 'opacity-0 group-hover:opacity-60 hover:!opacity-100'
+                group relative flex items-center gap-2 h-8 px-3 rounded-md
+                text-[13px] font-medium whitespace-nowrap
+                transition-all duration-150 ease-out
+                min-w-[120px] max-w-[180px]
+                ${isActive
+                  ? 'bg-white/10 text-white/95'
+                  : 'text-white/50 hover:text-white/80 hover:bg-white/5'
                 }
               `}
             >
-              <X size={14} />
-            </span>
-          </button>
-        ))}
+              {/* Document icon */}
+              <FileText size={14} className={`flex-shrink-0 ${isActive ? 'text-emerald-400' : 'text-white/30'}`} />
+
+              {/* Title */}
+              <span className="truncate flex-1 text-left">
+                {tab.title || 'Untitled'}
+              </span>
+
+              {/* Close button */}
+              <span
+                onClick={(e) => handleCloseTab(e, tab.id)}
+                className={`
+                  flex-shrink-0 p-0.5 rounded-sm
+                  transition-all duration-150
+                  hover:bg-white/20 hover:text-white
+                  ${isActive
+                    ? 'text-white/40 hover:text-white'
+                    : 'opacity-0 group-hover:opacity-100 text-white/40'
+                  }
+                `}
+              >
+                <X size={12} />
+              </span>
+
+              {/* Active indicator line */}
+              {isActive && (
+                <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-emerald-500 rounded-full" />
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* New tab button */}
-      <button
-        onClick={onNewTab}
-        className="flex-shrink-0 p-2 ml-1 rounded-lg text-white/60
-                   hover:text-white hover:bg-white/10 transition-all duration-200"
-        title="New document (Cmd+T)"
-      >
-        <Plus size={18} />
-      </button>
+      <div className="flex-shrink-0 px-2 border-l border-white/5">
+        <button
+          onClick={onNewTab}
+          className="flex items-center justify-center w-8 h-8 rounded-md
+                     text-white/50 hover:text-white hover:bg-white/10
+                     transition-all duration-150"
+          title="New document (⌘T)"
+        >
+          <Plus size={18} strokeWidth={1.5} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -465,18 +567,18 @@ The new structure should be:
 ```jsx
 // Inside Dashboard component, replace the main return
 return (
-  <div className="h-full flex flex-col bg-gradient-to-br from-db-dark-base via-db-dark-primary to-db-dark-secondary">
-    {/* Tab Bar */}
-    <TabBar
-      onNewTab={handleCreateNewTab}
-      onTabClick={handleTabClick}
-    />
+  // Outer container: fills viewport, no page scroll
+  <div className="h-screen flex flex-col overflow-hidden bg-gradient-to-br from-db-dark-base via-db-dark-primary to-db-dark-secondary">
 
-    {/* Main content area */}
-    <div className="flex-1 min-h-0 flex">
-      {/* Sidebar */}
+    {/* Tab Bar - fixed height, stays at top */}
+    <TabBar onNewTab={handleCreateNewTab} />
+
+    {/* Main area - fills remaining height */}
+    <div className="flex-1 min-h-0 flex overflow-hidden">
+
+      {/* Sidebar - fixed width, collapsible, full height */}
       <div
-        className="flex-shrink-0 h-full transition-all duration-300"
+        className="flex-shrink-0 h-full transition-all duration-300 ease-in-out"
         style={{ width: isSidebarCollapsed ? '80px' : '280px' }}
       >
         <ProjectExplorerV2
@@ -493,9 +595,10 @@ return (
         />
       </div>
 
-      {/* Document area */}
+      {/* Document area - takes remaining width, scrolls internally */}
       <div className="flex-1 min-w-0 h-full overflow-hidden">
         {activeTabId && activeDocument ? (
+          // ExpandedViewEnhanced handles its own internal scrolling
           <ExpandedViewEnhanced
             key={activeTabId}
             entry={activeDocument}
@@ -508,9 +611,25 @@ return (
           <EmptyState onCreateNew={handleCreateNewTab} />
         )}
       </div>
+
     </div>
   </div>
 );
+```
+
+**CSS Layout Breakdown:**
+```
+h-screen flex flex-col overflow-hidden   ← Viewport container, no page scroll
+│
+├─ TabBar (h-11)                         ← Fixed 44px height
+│
+└─ flex-1 min-h-0 flex overflow-hidden   ← Takes remaining height
+    │
+    ├─ Sidebar (w-72 or w-20)            ← Fixed width, collapsible
+    │   └─ h-full                        ← Full height of parent
+    │
+    └─ flex-1 min-w-0 overflow-hidden    ← Takes remaining width
+        └─ ExpandedViewEnhanced          ← Handles internal scroll
 ```
 
 **Add new handler functions** (in Dashboard component):
@@ -726,17 +845,148 @@ useEffect(() => {
 ## Phase 5: Sidebar Enhancements
 
 ### Overview
-Update sidebar with Inbox section, search persistence, and selection highlighting.
+Update sidebar with Inbox section, search, selection highlighting, and profile/settings footer.
 
 ### Changes Required:
 
-#### 1. Add Inbox Section to Sidebar
+#### 1. Create SidebarFooter Component
+
+**File**: `src/components/SidebarFooter.jsx` (NEW)
+
+```jsx
+import { Settings, LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContextOptimized';
+import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+
+export default function SidebarFooter() {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
+  const buttonRef = useRef(null);
+  const menuRef = useRef(null);
+
+  // Close menu on outside click
+  useEffect(() => {
+    if (!showMenu) return;
+
+    const handleClick = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target) &&
+          buttonRef.current && !buttonRef.current.contains(e.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    setTimeout(() => document.addEventListener('click', handleClick), 0);
+    return () => document.removeEventListener('click', handleClick);
+  }, [showMenu]);
+
+  const menuPosition = buttonRef.current?.getBoundingClientRect();
+
+  return (
+    <div className="flex-shrink-0 p-3 border-t border-white/5">
+      <div className="flex items-center gap-2">
+        {/* Settings Button */}
+        <button
+          onClick={() => navigate('/settings')}
+          className="flex items-center justify-center w-9 h-9 rounded-lg
+                     text-white/50 hover:text-white/90 hover:bg-white/10
+                     transition-all duration-150"
+          title="Settings"
+        >
+          <Settings size={18} />
+        </button>
+
+        {/* Profile Button */}
+        <button
+          ref={buttonRef}
+          onClick={() => setShowMenu(!showMenu)}
+          className="flex-1 flex items-center gap-3 px-2 py-1.5 rounded-lg
+                     hover:bg-white/5 transition-all duration-150"
+        >
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600
+                          flex items-center justify-center flex-shrink-0">
+            <span className="text-white text-sm font-medium">
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0 text-left">
+            <div className="text-sm text-white/90 truncate">
+              {user?.user_metadata?.full_name || 'User'}
+            </div>
+            <div className="text-xs text-white/40 truncate">
+              {user?.email}
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Profile Menu Dropdown */}
+      {showMenu && menuPosition && createPortal(
+        <div
+          ref={menuRef}
+          style={{
+            position: 'fixed',
+            bottom: window.innerHeight - menuPosition.top + 8,
+            left: menuPosition.left,
+            width: menuPosition.width + 40,
+            zIndex: 9999
+          }}
+          className="bg-[#0f1d32] border border-white/10 rounded-xl shadow-2xl
+                     overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-150"
+        >
+          <div className="p-1">
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                navigate('/settings');
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg
+                         text-white/70 hover:text-white hover:bg-white/10
+                         transition-colors text-sm"
+            >
+              <Settings size={16} />
+              Settings
+            </button>
+
+            <div className="h-px bg-white/10 my-1" />
+
+            <button
+              onClick={() => {
+                setShowMenu(false);
+                signOut();
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg
+                         text-red-400 hover:text-red-300 hover:bg-red-500/10
+                         transition-colors text-sm"
+            >
+              <LogOut size={16} />
+              Sign out
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+```
+
+#### 2. Add Inbox Section to Sidebar
 
 **File**: `src/components/ProjectExplorer/ProjectExplorerRedesigned.jsx`
 
 **Add Inbox section** (after Favorites, before Folders):
 
 ```jsx
+// Add imports
+import { Inbox } from 'lucide-react';
+import SidebarFooter from '../SidebarFooter';
+
+// Add Inbox state
+const [inboxExpanded, setInboxExpanded] = useState(true);
+
 // Add Inbox documents computation
 const inboxDocuments = useMemo(() => {
   return documents.filter(doc => !doc.folder_id);
@@ -744,32 +994,37 @@ const inboxDocuments = useMemo(() => {
 
 // In the render, add Inbox section:
 {/* Inbox Section */}
-{inboxDocuments.length > 0 && (
-  <div className="flex-shrink-0 px-3 py-2">
-    <SidebarSectionHeader
-      icon={<Inbox size={16} className="text-amber-400" />}
-      title="Inbox"
-      count={inboxDocuments.length}
-      isExpanded={inboxExpanded}
-      onToggle={() => setInboxExpanded(!inboxExpanded)}
-    />
+<div className="flex-shrink-0 px-3 py-2">
+  <SidebarSectionHeader
+    icon={<Inbox size={16} className="text-amber-400" />}
+    title="Inbox"
+    count={inboxDocuments.length}
+    isExpanded={inboxExpanded}
+    onToggle={() => setInboxExpanded(!inboxExpanded)}
+    showCount={true}
+  />
 
-    {inboxExpanded && (
-      <div className="mt-1 space-y-0.5">
-        {inboxDocuments.map(doc => (
-          <SidebarTreeItem
-            key={doc.id}
-            item={{ ...doc, type: 'document', name: doc.title }}
-            depth={0}
-            isExpanded={false}
-            onItemClick={handleItemClick}
-            isSelected={doc.id === selectedDocumentId}
-          />
-        ))}
-      </div>
-    )}
-  </div>
-)}
+  {inboxExpanded && inboxDocuments.length > 0 && (
+    <div className="mt-1 space-y-0.5">
+      {inboxDocuments.map(doc => (
+        <SidebarTreeItem
+          key={doc.id}
+          item={{ ...doc, type: 'document', name: doc.title }}
+          depth={0}
+          isExpanded={false}
+          onItemClick={handleItemClick}
+          isSelected={doc.id === selectedDocumentId}
+        />
+      ))}
+    </div>
+  )}
+
+  {inboxExpanded && inboxDocuments.length === 0 && (
+    <div className="px-3 py-4 text-center text-white/30 text-xs">
+      No unsorted documents
+    </div>
+  )}
+</div>
 ```
 
 #### 2. Add Selection Highlighting to SidebarTreeItem

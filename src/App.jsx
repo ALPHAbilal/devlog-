@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/react';
 import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { SidebarProvider } from './contexts/SidebarContext';
+import { TabProvider } from './contexts/TabContext';
 import { useGlobalAutoSave } from './hooks/useAutoSave';
 import { useAnalytics } from './hooks/useAnalytics';
 import { initMonitoring, setUserContext } from './utils/monitoring';
@@ -240,11 +241,13 @@ function App() {
         <AuthProvider>
           <SettingsProvider>
             <SidebarProvider>
-              <ToastProvider>
-                <AutoSaveProvider />
-                <AppContent />
-                <CookieConsentBanner />
-              </ToastProvider>
+              <TabProvider>
+                <ToastProvider>
+                  <AutoSaveProvider />
+                  <AppContent />
+                  <CookieConsentBanner />
+                </ToastProvider>
+              </TabProvider>
             </SidebarProvider>
           </SettingsProvider>
         </AuthProvider>

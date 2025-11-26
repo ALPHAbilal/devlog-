@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Star, FolderPlus, PanelLeft, FilePlus, Trash2, Inbox, User, Settings } from 'lucide-react';
+import { Star, FolderPlus, PanelLeft, FilePlus, Trash2, Inbox, User, Settings, Search, X } from 'lucide-react';
 import { useFolders } from '../../hooks/useFolders';
 import SidebarSectionHeader from './SidebarSectionHeader';
 import SidebarTreeItem from './SidebarTreeItem';
@@ -26,6 +26,7 @@ export default function ProjectExplorerRedesigned({
   const [explorerExpanded, setExplorerExpanded] = useState(true);
   const [favoritesExpanded, setFavoritesExpanded] = useState(true);
   const [inboxExpanded, setInboxExpanded] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Modal state
   const [showInputModal, setShowInputModal] = useState(false);
@@ -126,6 +127,24 @@ export default function ProjectExplorerRedesigned({
   const allFavorites = useMemo(() => {
     return [...favoriteFolders, ...favoriteDocuments];
   }, [favoriteFolders, favoriteDocuments]);
+
+  // Search filtered documents
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    return documents
+      .filter(doc =>
+        doc.type !== 'folder' &&
+        !doc.deleted_at &&
+        (doc.title?.toLowerCase().includes(query) || doc.name?.toLowerCase().includes(query))
+      )
+      .map(doc => ({
+        ...doc,
+        type: 'document',
+        name: doc.title
+      }))
+      .slice(0, 10); // Limit to 10 results
+  }, [documents, searchQuery]);
 
   // Handle item click (document or folder)
   const handleItemClick = (item) => {
@@ -237,6 +256,19 @@ export default function ProjectExplorerRedesigned({
         {/* Separator */}
         <div className="bg-white/10 mx-4 mb-2 h-px" />
 
+        {/* Search Icon - Expands sidebar on click */}
+        <div className="px-2 py-1">
+          <button
+            onClick={onToggleCollapse}
+            className="w-full flex items-center justify-center p-3 text-white/50 hover:text-white hover:bg-white/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
+            title="Search documents"
+          >
+            <Search className="w-5 h-5" />
+            {/* Active indicator */}
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-white rounded-full group-hover:h-8 transition-all duration-200" />
+          </button>
+        </div>
+
         {/* Inbox Icon */}
         <div className="px-2 py-1">
           <div
@@ -254,19 +286,29 @@ export default function ProjectExplorerRedesigned({
           </div>
         </div>
 
-        {/* Favorites Icon */}
-        {allFavorites.length > 0 && (
-          <div className="px-2 py-1">
-            <div
-              className="flex items-center justify-center p-3 text-amber-400/70 hover:text-amber-300 hover:bg-amber-400/10 rounded-xl cursor-pointer transition-all duration-200 group relative"
-              title={`Favorites (${allFavorites.length})`}
-            >
-              <Star className="w-5 h-5 fill-current" />
-              {/* Active indicator */}
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-amber-400 rounded-full group-hover:h-8 transition-all duration-200" />
-            </div>
+        {/* Favorites Icon - Always visible */}
+        <div className="px-2 py-1">
+          <div
+            className={`flex items-center justify-center p-3 rounded-xl cursor-pointer transition-all duration-200 group relative ${
+              allFavorites.length > 0
+                ? 'text-amber-400/70 hover:text-amber-300 hover:bg-amber-400/10'
+                : 'text-white/30 hover:text-white/50 hover:bg-white/5'
+            }`}
+            title={`Favorites (${allFavorites.length})`}
+            onClick={onToggleCollapse}
+          >
+            <Star className={`w-5 h-5 ${allFavorites.length > 0 ? 'fill-current' : ''}`} />
+            {allFavorites.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 text-white text-xs font-medium rounded-full flex items-center justify-center">
+                {allFavorites.length > 9 ? '9+' : allFavorites.length}
+              </span>
+            )}
+            {/* Active indicator */}
+            <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 rounded-full group-hover:h-8 transition-all duration-200 ${
+              allFavorites.length > 0 ? 'bg-amber-400' : 'bg-white/30'
+            }`} />
           </div>
-        )}
+        </div>
 
         {/* Spacer to push profile to bottom */}
         <div className="flex-1" />
@@ -292,6 +334,55 @@ export default function ProjectExplorerRedesigned({
     <div className={`w-72 bg-[#0a1628]/40 backdrop-blur-xl rounded-2xl border border-white/5 shadow-2xl shadow-black/20 overflow-hidden flex flex-col relative transition-all duration-300 ${height} ${className}`}>
       {/* Collapse Button at top */}
       <SidebarCollapseButton onToggle={onToggleCollapse} />
+
+      {/* Search Bar */}
+      <div className="px-4 pb-3 flex-shrink-0">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search documents..."
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-8 text-sm text-white/90 placeholder-white/30 focus:outline-none focus:border-emerald-500/50 focus:bg-white/10 transition-all duration-200"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Search Results */}
+        {searchQuery && (
+          <div className="mt-2 space-y-0.5 max-h-40 overflow-y-auto sidebar-scroll">
+            {searchResults.length > 0 ? (
+              searchResults.map((doc, index) => (
+                <SidebarTreeItem
+                  key={doc.id}
+                  item={doc}
+                  isExpanded={false}
+                  onToggle={() => {}}
+                  expandedFolders={expandedFolders}
+                  depth={0}
+                  isFavorite={false}
+                  isLast={index === searchResults.length - 1}
+                  onItemClick={handleItemClick}
+                  onContextMenu={handleContextMenu}
+                  isSelected={selectedDocumentId === doc.id}
+                />
+              ))
+            ) : (
+              <div className="text-xs text-white/30 text-center py-3">
+                No documents found
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Separator */}
       <div className="bg-white/10 mx-4 mb-3 h-px" />
@@ -350,42 +441,46 @@ export default function ProjectExplorerRedesigned({
         <div className="bg-white/5 mb-3 h-px" />
       </div>
 
-      {/* Favorites Section - No Scroll */}
+      {/* Favorites Section - Always Visible */}
       <div className="px-4 flex-shrink-0">
-        {allFavorites.length > 0 && (
-          <div className="pb-3">
-            <SidebarSectionHeader
-              title="Favorites"
-              isExpanded={favoritesExpanded}
-              onToggle={() => setFavoritesExpanded(!favoritesExpanded)}
-              icon={Star}
-              count={allFavorites.length}
-            />
+        <div className="pb-3">
+          <SidebarSectionHeader
+            title="Favorites"
+            isExpanded={favoritesExpanded}
+            onToggle={() => setFavoritesExpanded(!favoritesExpanded)}
+            icon={Star}
+            count={allFavorites.length}
+          />
 
-            {favoritesExpanded && (
-              <div className="mt-2 space-y-0.5 max-h-32 overflow-y-auto sidebar-scroll pr-1">
-                {allFavorites.map((item, index) => (
-                  <SidebarTreeItem
-                    key={item.id}
-                    item={item}
-                    isExpanded={expandedFolders.has(item.id)}
-                    onToggle={toggleFolder}
-                    expandedFolders={expandedFolders}
-                    depth={0}
-                    isFavorite={true}
-                    isLast={index === allFavorites.length - 1}
-                    onItemClick={handleItemClick}
-                    onContextMenu={handleContextMenu}
-                    isSelected={selectedDocumentId === item.id}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+          {favoritesExpanded && allFavorites.length > 0 && (
+            <div className="mt-2 space-y-0.5 max-h-32 overflow-y-auto sidebar-scroll pr-1">
+              {allFavorites.map((item, index) => (
+                <SidebarTreeItem
+                  key={item.id}
+                  item={item}
+                  isExpanded={expandedFolders.has(item.id)}
+                  onToggle={toggleFolder}
+                  expandedFolders={expandedFolders}
+                  depth={0}
+                  isFavorite={true}
+                  isLast={index === allFavorites.length - 1}
+                  onItemClick={handleItemClick}
+                  onContextMenu={handleContextMenu}
+                  isSelected={selectedDocumentId === item.id}
+                />
+              ))}
+            </div>
+          )}
+
+          {favoritesExpanded && allFavorites.length === 0 && (
+            <div className="mt-2 text-xs text-white/30 text-center py-2">
+              No favorites yet
+            </div>
+          )}
+        </div>
 
         {/* Separator */}
-        {allFavorites.length > 0 && <div className="bg-white/5 mb-3 h-px" />}
+        <div className="bg-white/5 mb-3 h-px" />
       </div>
 
       {/* Explorer Section - With Scroll */}

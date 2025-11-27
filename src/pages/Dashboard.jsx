@@ -896,6 +896,16 @@ export default function Dashboard() {
     );
     setEntries(updatedEntries);
 
+    // CRITICAL: Also update allDocuments (used by sidebar)
+    setAllDocuments(prev => prev.map(doc =>
+      doc.id === entryId ? { ...doc, ...updates, updated_at: new Date().toISOString() } : doc
+    ));
+
+    // CRITICAL: Update tab title if title changed
+    if (updates.title) {
+      updateTabTitle(entryId, updates.title);
+    }
+
     // Update expandedEntry if it's the one being edited (only for non-block updates)
     if (expandedEntry && expandedEntry.id === entryId) {
       if (!updatedEntry.id) {

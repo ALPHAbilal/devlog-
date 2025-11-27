@@ -164,6 +164,11 @@ export default function SidebarTreeItem({
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowMenu(false);
+                    console.log('[DEBUG-CREATE-1] SidebarTreeItem: New Document clicked for folder:', {
+                      folderId: item.id,
+                      folderName: item.name || item.title,
+                      action: 'newFile'
+                    });
                     if (onContextMenu) {
                       onContextMenu({ preventDefault: () => {}, stopPropagation: () => {} },
                         { ...item, action: 'newFile' });

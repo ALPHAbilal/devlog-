@@ -207,9 +207,13 @@ export default function ProjectExplorerRedesigned({
 
   // Create document in folder
   const handleCreateDocument = (folderId) => {
-    console.log('[DEBUG-SIDEBAR] Creating document in folder:', folderId);
+    console.log('[DEBUG-CREATE-2] ProjectExplorer handleCreateDocument called:', {
+      folderId: folderId,
+      hasOnDocumentSelect: !!onDocumentSelect
+    });
     // Send action to Dashboard to create document
     onDocumentSelect?.({ action: 'create', folderId: folderId });
+    console.log('[DEBUG-CREATE-2] Sent to Dashboard:', { action: 'create', folderId: folderId });
   };
 
   // Delete folder or document

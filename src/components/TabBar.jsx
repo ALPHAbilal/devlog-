@@ -51,7 +51,10 @@ export default function TabBar({ onNewTab, onTabClick }) {
 
         {/* New tab button */}
         <button
-          onClick={onNewTab}
+          onClick={() => {
+            console.log('[DEBUG-CREATE-5] TabBar mobile "+" button clicked');
+            onNewTab?.();
+          }}
           className="p-2 ml-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10
                      transition-all duration-150"
           title="New document"
@@ -164,7 +167,10 @@ export default function TabBar({ onNewTab, onTabClick }) {
       {/* New tab button */}
       <div className="flex-shrink-0 px-2 border-l border-white/5">
         <button
-          onClick={onNewTab}
+          onClick={() => {
+            console.log('[DEBUG-CREATE-5] TabBar desktop "+" button clicked');
+            onNewTab?.();
+          }}
           className="flex items-center justify-center w-8 h-8 rounded-md
                      text-white/50 hover:text-white hover:bg-white/10
                      transition-all duration-150"

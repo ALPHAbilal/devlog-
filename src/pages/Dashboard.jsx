@@ -250,6 +250,7 @@ export default function Dashboard() {
 
   // Create new entry function (moved up for keyboard shortcut access)
   const createNewEntry = useCallback(async (folderId = null) => {
+    console.log('[DEBUG-CREATE-6] createNewEntry called with folderId:', folderId);
     // Create a default text block for new documents
     const defaultBlock = {
       id: crypto.randomUUID(),
@@ -341,6 +342,7 @@ export default function Dashboard() {
 
   // Handle new tab creation (creates document and opens in tab)
   const handleCreateNewTab = useCallback(async () => {
+    console.log('[DEBUG-CREATE-4] handleCreateNewTab called - this always creates in INBOX (null folder_id)');
     // Create a default text block for new documents
     const defaultBlock = {
       id: crypto.randomUUID(),
@@ -1408,8 +1410,17 @@ export default function Dashboard() {
               className="h-full"
               onCreateDocument={handleCreateNewTab}
               onDocumentSelect={(data) => {
+                console.log('[DEBUG-CREATE-3] Dashboard onDocumentSelect received:', {
+                  action: data?.action,
+                  folderId: data?.folderId,
+                  id: data?.id,
+                  fullData: data
+                });
                 if (data?.action === 'create') {
-                  handleCreateNewTab();
+                  console.log('[DEBUG-CREATE-3] Action is "create", folderId:', data?.folderId);
+                  // FIX: Pass folderId to createNewEntry
+                  createNewEntry(data.folderId);
+                  console.log('[DEBUG-CREATE-3] Called createNewEntry with folderId:', data?.folderId);
                 } else if (data?.id) {
                   const doc = allDocuments.find(e => e.id === data.id);
                   if (doc) {

@@ -16,7 +16,10 @@ export default function EmptyState({ onCreateNew }) {
       </p>
 
       <button
-        onClick={onCreateNew}
+        onClick={() => {
+          console.log('[DEBUG-CREATE-7] EmptyState "New Document" button clicked');
+          onCreateNew?.();
+        }}
         className="flex items-center gap-2 px-4 py-2.5 rounded-xl
                    bg-emerald-500/20 text-emerald-400
                    hover:bg-emerald-500/30 transition-all duration-200

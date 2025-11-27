@@ -654,7 +654,17 @@ export default function Dashboard() {
   // Sync paginated documents to both allDocuments state AND IndexedDB cache
   useEffect(() => {
     if (paginatedDocuments && paginatedDocuments.length > 0) {
-      setAllDocuments(paginatedDocuments);
+      // Merge: Keep locally-created documents that aren't in paginatedDocuments yet
+      setAllDocuments(prev => {
+        const paginatedIds = new Set(paginatedDocuments.map(d => d.id));
+        const locallyCreated = prev.filter(d => d.metadata?.createdLocally && !paginatedIds.has(d.id));
+        console.log('[DEBUG-CREATE-8] Merging docs:', {
+          paginated: paginatedDocuments.length,
+          locallyCreated: locallyCreated.length,
+          localIds: locallyCreated.map(d => d.id)
+        });
+        return [...locallyCreated, ...paginatedDocuments];
+      });
       // Update IndexedDB cache with fresh Supabase data (background operation)
       updateCache(paginatedDocuments);
     }

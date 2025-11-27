@@ -25,6 +25,7 @@ import { useTouchGestures, usePullToRefresh } from '../hooks/useTouchGestures';
 import { Plus, User, Settings, LogOut, Grid3X3, Menu, FileText, Folder, ChevronRight, ChevronLeft, MoreVertical, Search } from 'lucide-react';
 import storageWrapper, { deleteEntry } from '../utils/storage/storageWrapper';
 import IndexedDBAdapter from '../utils/storage/IndexedDBAdapter';
+import { useIndexedDBCache } from '../hooks/useIndexedDBCache';
 import { useAuth } from '../contexts/AuthContextOptimized';
 import { sessionCache } from '../utils/sessionCache';
 import { useAutoSave } from '../hooks/useAutoSave';
@@ -78,6 +79,17 @@ export default function Dashboard() {
   // Folders hook - folders are auto-loaded by the hook
   const { folders, refreshFolders } = useFolders();
 
+  // IndexedDB cache for instant document access across navigation
+  const {
+    cachedDocuments,
+    isCacheLoaded,
+    loadFromCache,
+    updateCache,
+    updateDocumentInCache,
+    removeFromCache,
+    getDocument: getCachedDocument
+  } = useIndexedDBCache();
+
   // Initialize pagination hook for documents
   const {
     documents: paginatedDocuments,
@@ -126,10 +138,21 @@ export default function Dashboard() {
   } = useTabContext();
 
   // Find the active document based on activeTabId
+  // Falls back to IndexedDB cache to handle race conditions during navigation
   const activeDocument = useMemo(() => {
     if (!activeTabId) return null;
-    return allDocuments.find(doc => doc.id === activeTabId);
-  }, [activeTabId, allDocuments]);
+
+    // Try main documents first (from Supabase)
+    const fromMain = allDocuments.find(doc => doc.id === activeTabId);
+    if (fromMain) return fromMain;
+
+    // Fallback to IndexedDB cache (handles navigation race condition)
+    const fromCache = getCachedDocument(activeTabId);
+    if (fromCache) {
+      console.log('[Dashboard] Using cached document for activeTabId:', activeTabId);
+    }
+    return fromCache;
+  }, [activeTabId, allDocuments, getCachedDocument]);
 
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showMobileSidebarSheet, setShowMobileSidebarSheet] = useState(false);
@@ -276,12 +299,9 @@ export default function Dashboard() {
     // Open in tab instead of old expandedEntry
     openTab(newEntry);
 
-    // Save to IndexedDB for local backup (fast - ~22ms)
-    try {
-      await IndexedDBAdapter.saveDocument(newEntry);
-    } catch (error) {
-      console.error('Failed to save to IndexedDB:', error);
-    }
+    // Save to IndexedDB cache for local backup (fast - ~22ms)
+    // Using cache hook for consistent state management
+    updateDocumentInCache(newEntry);
 
     // Invalidate cache
     try {
@@ -317,7 +337,7 @@ export default function Dashboard() {
         // TODO: Implement retry logic
         // Could add to a sync queue for automatic retry
       });
-  }, [entries, openTab, trackDocumentEvent]);
+  }, [entries, openTab, trackDocumentEvent, updateDocumentInCache]);
 
   // Handle new tab creation (creates document and opens in tab)
   const handleCreateNewTab = useCallback(async () => {
@@ -370,12 +390,9 @@ export default function Dashboard() {
     // Open in tab
     openTab(newEntry);
 
-    // Save to IndexedDB for local backup
-    try {
-      await IndexedDBAdapter.saveDocument(newEntry);
-    } catch (error) {
-      console.error('Failed to save to IndexedDB:', error);
-    }
+    // Save to IndexedDB cache for local backup
+    // Using cache hook for consistent state management
+    updateDocumentInCache(newEntry);
 
     // Background sync to Supabase
     storageWrapper.saveDocument(newEntry)
@@ -390,7 +407,7 @@ export default function Dashboard() {
       });
 
     return newEntry;
-  }, [entries, user?.id, openTab, toast]);
+  }, [entries, user?.id, openTab, toast, updateDocumentInCache]);
 
   // Listen for keyboard shortcut to create new tab (from TabContext)
   useEffect(() => {
@@ -632,12 +649,14 @@ export default function Dashboard() {
     }
   }, [isPulling, updateStorageInfo]);
 
-  // Sync paginated documents to allDocuments state
+  // Sync paginated documents to both allDocuments state AND IndexedDB cache
   useEffect(() => {
     if (paginatedDocuments && paginatedDocuments.length > 0) {
       setAllDocuments(paginatedDocuments);
+      // Update IndexedDB cache with fresh Supabase data (background operation)
+      updateCache(paginatedDocuments);
     }
-  }, [paginatedDocuments]);
+  }, [paginatedDocuments, updateCache]);
 
   // Combine folders and documents whenever either changes (eliminates race condition)
   useEffect(() => {
@@ -726,14 +745,33 @@ export default function Dashboard() {
     setEntries(combined);
   }, [folders, allDocuments]); // Re-run whenever folders OR documents change
 
-  // Load initial documents on mount - moved to hook initialization
+  // Load initial documents on mount - IndexedDB FIRST, then background Supabase sync
   useEffect(() => {
-    console.log('[DEBUG-INIT] Dashboard mounted, user:', user?.id, 'paginatedDocs:', paginatedDocuments.length);
-    if (user?.id && paginatedDocuments.length === 0 && !isLoadingDocuments) {
-      console.log('[DEBUG-INIT] Triggering loadInitial()');
-      loadInitial();
-    }
-  }, [user?.id]);
+    const initializeDocuments = async () => {
+      console.log('[DEBUG-INIT] Dashboard mounted, user:', user?.id);
+
+      // Step 1: Load from IndexedDB immediately (5-20ms) - provides instant UI
+      console.log('[Dashboard] Loading from IndexedDB cache FIRST...');
+      const cached = await loadFromCache();
+
+      if (cached && cached.length > 0) {
+        console.log(`[Dashboard] Loaded ${cached.length} documents from IndexedDB cache`);
+        setAllDocuments(cached);
+      }
+
+      // Step 2: Background sync with Supabase (don't block UI)
+      if (user?.id) {
+        console.log('[Dashboard] Starting background Supabase sync...');
+        loadInitial().then(() => {
+          console.log('[Dashboard] Background Supabase sync complete');
+        }).catch(error => {
+          console.error('[Dashboard] Background sync failed:', error);
+        });
+      }
+    };
+
+    initializeDocuments();
+  }, [user?.id, loadFromCache, loadInitial]);
 
   // Server-side search effect
   useEffect(() => {
@@ -839,7 +877,10 @@ export default function Dashboard() {
         
         // Delete from storage first
         await storageWrapper.deleteEntry(entryId);
-        
+
+        // Remove from IndexedDB cache
+        removeFromCache(entryId);
+
         // Then update local state
         const updatedEntries = entries.filter(entry => entry.id !== entryId);
         setEntries(updatedEntries);
@@ -900,6 +941,9 @@ export default function Dashboard() {
     setAllDocuments(prev => prev.map(doc =>
       doc.id === entryId ? { ...doc, ...updates, updated_at: new Date().toISOString() } : doc
     ));
+
+    // Update IndexedDB cache for instant access across navigation
+    updateDocumentInCache(updatedEntry);
 
     // CRITICAL: Update tab title if title changed
     if (updates.title) {
@@ -966,7 +1010,7 @@ export default function Dashboard() {
         });
       }, 16); // Wait for next frame
     }
-  }, [entries, expandedEntry, updateStorageInfo]);
+  }, [entries, expandedEntry, updateStorageInfo, removeFromCache, updateDocumentInCache]);
 
   // Handle document link clicks
   useEffect(() => {

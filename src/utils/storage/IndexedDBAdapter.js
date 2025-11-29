@@ -199,6 +199,39 @@ class IndexedDBAdapter {
     }
   }
 
+  // Get a single document by ID
+  async getDocument(id) {
+    if (!this.isAvailable) {
+      // Fallback: search in localStorage
+      const entries = JSON.parse(localStorage.getItem('journeyLoggerEntries') || '[]');
+      return entries.find(e => e.id === id) || null;
+    }
+
+    try {
+      await this.init();
+
+      return new Promise((resolve, reject) => {
+        const transaction = this.db.transaction(['documents'], 'readonly');
+        const store = transaction.objectStore('documents');
+        const request = store.get(id);
+
+        request.onsuccess = () => {
+          resolve(request.result || null);
+        };
+
+        request.onerror = () => {
+          console.error('Error fetching document:', request.error);
+          reject(request.error);
+        };
+      });
+    } catch (error) {
+      console.error('Error in getDocument:', error);
+      // Fallback to localStorage
+      const entries = JSON.parse(localStorage.getItem('journeyLoggerEntries') || '[]');
+      return entries.find(e => e.id === id) || null;
+    }
+  }
+
   // Delete a document
   async deleteDocument(id) {
     if (!this.isAvailable) {

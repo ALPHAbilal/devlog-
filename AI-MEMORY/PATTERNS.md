@@ -43,7 +43,7 @@ useEffect(() => {
 
 ---
 
-### Blocks Not Loading After Reload (Stale entry.blocks from IndexedDB)
+### Blocks Not Loading After Reload (IndexedDB Cache Out of Sync)
 **Date**: 2025-11-29
 **Severity**: 🔴 CRITICAL - Blocks disappear after page reload
 **Symptoms**:
@@ -54,34 +54,50 @@ useEffect(() => {
 - But database has all 4+ blocks from successful sync
 
 **Root Cause**:
-`useOptimizedBlockLoader.js` had broken priority logic:
-1. Dashboard loads `entry` from IndexedDB (which has stale `blocks` array)
-2. Loader sees `entry.blocks` exists and has data
-3. **Loader uses stale entry.blocks instead of loading fresh from database**
-4. Fresh blocks synced by SmartSync never get loaded
+SmartSync was syncing blocks to Supabase but NOT updating IndexedDB cache:
+1. User adds blocks → SmartSync syncs to Supabase ✅
+2. IndexedDB still has old document with 1 block ❌
+3. On reload, Dashboard loads stale entry from IndexedDB
+4. Loader uses stale `entry.blocks` (1 block) instead of fresh data (9 blocks)
 
-The loader trusted `entry.blocks` as a cache source, but IndexedDB cache doesn't get updated when SmartSync syncs to Supabase.
+**The Fix**: Make SmartSync update IndexedDB cache after successful sync:
 
-**The Fix**: Skip `entry.blocks` and always load from database:
+1. Added `updateIndexedDBCache()` method to SmartSync (`smartSync.js:682-721`):
 ```javascript
-// OLD BROKEN CODE:
-if (entry?.blocks && entry.blocks.length > 0) {
-  setBlocks(entry.blocks); // STALE! Never loads from DB!
-  return;
-}
+async updateIndexedDBCache() {
+  // Get all blocks from SmartSync's internal DB
+  const allBlocks = await this.db.blocks
+    .where('documentId').equals(this.documentId)
+    .toArray();
 
-// NEW FIXED CODE:
-if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
-  console.log('[CACHE-TRACK] ⚠️ SKIP: entry.blocks - will load from database for freshness');
-  // Fall through to sessionCache/database loading
+  // Update IndexedDBAdapter cache
+  const IndexedDBAdapter = (await import('./storage/IndexedDBAdapter')).default;
+  const currentDoc = await IndexedDBAdapter.getDocument(this.documentId);
+  if (currentDoc) {
+    currentDoc.blocks = allBlocks.sort((a, b) => a.position - b.position);
+    await IndexedDBAdapter.saveDocument(currentDoc);
+  }
 }
 ```
 
-**Location**: `src/hooks/useOptimizedBlockLoader.js:49-67`
+2. Added `getDocument()` method to IndexedDBAdapter (`IndexedDBAdapter.js:202-233`)
 
-**Lesson**: Never trust `entry.blocks` from props/IndexedDB as the source of truth. The database is the source of truth; caches can be stale.
+3. Call `updateIndexedDBCache()` after successful sync (`smartSync.js:641`)
 
-**Related**: This is the second half of the SmartSync debounce fix. Even if sync works, loading was broken.
+**Locations**:
+- `src/utils/smartSync.js:641` - calls updateIndexedDBCache after sync
+- `src/utils/smartSync.js:678-721` - updateIndexedDBCache method
+- `src/utils/storage/IndexedDBAdapter.js:202-233` - getDocument method
+
+**Now the flow is**:
+1. SmartSync syncs to Supabase ✅
+2. SmartSync updates IndexedDB cache ✅
+3. On reload, entry.blocks has fresh data ✅
+4. Fast load from IndexedDB (5-20ms) ✅
+
+**Lesson**: All cache layers must stay in sync. If you sync to one store, sync to all caches too.
+
+**Related**: This is the second half of the SmartSync debounce fix. Even if sync works, caching was broken.
 
 ---
 

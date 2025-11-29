@@ -629,12 +629,16 @@ class SmartSyncManager {
 
       this.lastSyncTime = Date.now();
       console.log(`SmartSync: Successfully synced ${batch.length} changes`);
-      
+
       // Clear the cache to force fresh data on next load
       paginatedBlockLoader.clearCache(this.documentId);
 
       // Clean up old synced changes (keep last 100 for history)
       this.cleanupSyncedChanges();
+
+      // CRITICAL: Update IndexedDBAdapter cache with synced blocks
+      // This ensures the cache stays in sync with Supabase
+      await this.updateIndexedDBCache();
 
     } catch (error) {
       console.error('SmartSync: Sync failed, returning to queue:', error);
@@ -669,6 +673,51 @@ class SmartSyncManager {
         await this.executeBatchSync();
       }
     };
+  }
+
+  /**
+   * Update IndexedDBAdapter cache with current blocks after successful sync
+   * This ensures IndexedDB cache stays in sync with Supabase
+   */
+  async updateIndexedDBCache() {
+    try {
+      // Get all blocks for this document from SmartSync's internal DB
+      const allBlocks = await this.db.blocks
+        .where('documentId').equals(this.documentId)
+        .toArray();
+
+      if (allBlocks.length === 0) {
+        console.log('[INDEXEDDB-SYNC] No blocks to cache');
+        return;
+      }
+
+      // Import IndexedDBAdapter dynamically to avoid circular deps
+      const { default: IndexedDBAdapter } = await import('./storage/IndexedDBAdapter');
+      await IndexedDBAdapter.init();
+
+      // Get the current document from IndexedDBAdapter
+      const currentDoc = await IndexedDBAdapter.getDocument(this.documentId);
+
+      if (currentDoc) {
+        // Sort blocks by position
+        const sortedBlocks = allBlocks.sort((a, b) => (a.position || 0) - (b.position || 0));
+
+        // Update document with fresh blocks
+        const updatedDoc = {
+          ...currentDoc,
+          blocks: sortedBlocks,
+          updatedAt: new Date().toISOString()
+        };
+
+        await IndexedDBAdapter.saveDocument(updatedDoc);
+        console.log(`[INDEXEDDB-SYNC] ✅ Updated cache with ${sortedBlocks.length} blocks for document ${this.documentId.substring(0, 8)}`);
+      } else {
+        console.log(`[INDEXEDDB-SYNC] Document ${this.documentId.substring(0, 8)} not in cache, skipping`);
+      }
+    } catch (error) {
+      // Non-critical error - just log it
+      console.warn('[INDEXEDDB-SYNC] Failed to update cache:', error);
+    }
   }
 
   /**

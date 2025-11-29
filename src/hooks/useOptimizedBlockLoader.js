@@ -42,50 +42,14 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
 
       try {
         const loadStartTime = performance.now();
-        
+
         // [CACHE-TRACK] Log loader start
         console.log(`[CACHE-TRACK] 🚀 useOptimizedBlockLoader: Starting load for document ${documentId.substring(0, 8)}`);
-        
-        // Check if blocks are already in entry AND have content
-        // IMPORTANT: entry.blocks is now kept in sync with Supabase via SmartSync.updateIndexedDBCache()
-        // So we can trust it as a fast cache source (5-20ms vs 500ms database load)
-        if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
-          // [CACHE-TRACK] Log entry blocks found
-          console.log(`[CACHE-TRACK] ✅ SOURCE: entry.blocks - Found ${entry.blocks.length} blocks in entry prop`);
 
-          // CRITICAL FIX: Deserialize blocks from entry.blocks
-          // entry.blocks contains raw database format (with content JSON string)
-          // We need to deserialize them to restore block-specific fields like images
-          const { deserializeBlock } = await import('../utils/blockSerializer');
-          const deserializedBlocks = entry.blocks.map(block => {
-            // Check if block is already deserialized (has images field for image blocks, or language/filePath for code blocks)
-            if ((block.type === 'image' && block.images !== undefined) ||
-                (block.type === 'code' && (block.language !== undefined || block.filePath !== undefined))) {
-              // Already deserialized, use as-is
-              return block;
-            }
-            // Deserialize the block to restore block-specific fields
-            return deserializeBlock(block);
-          });
-
-          // If blocks array exists with content, they were already loaded
-          // CRITICAL: Don't normalize positions - it breaks references!
-          // The blocks array index IS the position
-          setBlocks(deserializedBlocks);
-          setIsLoading(false);
-          sessionCache.cacheBlocks(documentId, deserializedBlocks);
-
-          const loadTime = performance.now() - loadStartTime;
-          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry in ${loadTime.toFixed(2)}ms`);
-
-          // Track entry.blocks usage via sessionCache stats tracker
-          if (sessionCache.statsTracker) {
-            sessionCache.statsTracker.recordEntryBlocks(loadTime);
-          }
-          return;
-        }
-
-        // Check session cache
+        // CRITICAL: Check sessionCache FIRST, before entry.blocks!
+        // During a session, sessionCache is kept up-to-date by updateBlocks() calls,
+        // while entry.blocks is stale (it's the React prop from Dashboard, not updated after SmartSync).
+        // Only use entry.blocks as fallback for fresh page loads when sessionCache is empty.
         console.log(`[CACHE-TRACK] 🔍 CHECKING: sessionCache.getBlocks(${documentId.substring(0, 8)})`);
         const cacheCheckStart = performance.now();
         const cachedBlocks = sessionCache.getBlocks(documentId);
@@ -107,12 +71,39 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
           return;
         }
 
+        // SessionCache miss - check entry.blocks as fallback (for fresh page loads)
+        // entry.blocks comes from IndexedDB via Dashboard and is valid on page load
+        if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
+          console.log(`[CACHE-TRACK] ✅ SOURCE: entry.blocks - Found ${entry.blocks.length} blocks (sessionCache was empty)`);
+
+          // Deserialize blocks from entry.blocks
+          const { deserializeBlock } = await import('../utils/blockSerializer');
+          const deserializedBlocks = entry.blocks.map(block => {
+            if ((block.type === 'image' && block.images !== undefined) ||
+                (block.type === 'code' && (block.language !== undefined || block.filePath !== undefined))) {
+              return block;
+            }
+            return deserializeBlock(block);
+          });
+
+          setBlocks(deserializedBlocks);
+          setIsLoading(false);
+          sessionCache.cacheBlocks(documentId, deserializedBlocks);
+
+          const loadTime = performance.now() - loadStartTime;
+          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry.blocks in ${loadTime.toFixed(2)}ms`);
+
+          if (sessionCache.statsTracker) {
+            sessionCache.statsTracker.recordEntryBlocks(loadTime);
+          }
+          return;
+        }
+
         // [CACHE-TRACK] Log cache miss - loading from database
-        console.log(`[CACHE-TRACK] ❌ CACHE MISS: No blocks in cache, loading from database...`);
-        console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: database (cache miss)`);
+        console.log(`[CACHE-TRACK] ❌ CACHE MISS: No blocks in sessionCache or entry.blocks, loading from database...`);
+        console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: database (full cache miss)`);
 
         // Only show skeletons when we're actually loading from database
-        // This happens when entry.blocks is undefined (not loaded yet)
         const skeletons = OptimizedBlockLoader.generateSkeletons(null);
         setBlocks(skeletons);
 

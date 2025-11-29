@@ -95,7 +95,32 @@ async updateIndexedDBCache() {
 3. On reload, entry.blocks has fresh data ✅
 4. Fast load from IndexedDB (5-20ms) ✅
 
+**Additional Fix** (Session Staleness):
+The above fix works for PAGE RELOADS, but during the SAME SESSION, `entry.blocks` is still stale
+(React holds old reference). Fix: Check `sessionCache` BEFORE `entry.blocks`:
+
+```javascript
+// useOptimizedBlockLoader.js - CORRECT ORDER:
+// 1. sessionCache (fresh during session)
+const cachedBlocks = sessionCache.getBlocks(documentId);
+if (cachedBlocks?.length > 0) {
+  return cachedBlocks; // Fresh from current editing session
+}
+
+// 2. entry.blocks (fallback for page loads)
+if (entry?.blocks?.length > 0) {
+  return entry.blocks; // From IndexedDB, valid on fresh load
+}
+
+// 3. Database (last resort)
+return await loadFromDatabase();
+```
+
+**Location**: `src/hooks/useOptimizedBlockLoader.js:49-100`
+
 **Lesson**: All cache layers must stay in sync. If you sync to one store, sync to all caches too.
+Also: In-memory caches (sessionCache) should be checked before prop-based caches (entry.blocks)
+because React props don't update when external stores change.
 
 **Related**: This is the second half of the SmartSync debounce fix. Even if sync works, caching was broken.
 

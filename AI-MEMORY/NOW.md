@@ -1,7 +1,70 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Production Crash Fix - Node.contains() TypeError
+## Current Task: Document Creation & Block Addition Bugs
+Status: ✅ ROOT CAUSES FOUND - Fixes Applied
+Date: 2025-11-29
+
+### Issues Debugged
+
+**Issue 1: Blocks don't appear after adding (but save correctly)**
+- **Root Cause Found**: `TypeError: gi.updateCachedBlocks is not a function` (log line 2586)
+- **Why**: `usePaginatedBlockLoader.js` calls `paginatedBlockLoader.updateCachedBlocks()` but that method didn't exist
+- **Fix Applied**: Added `updateCachedBlocks()` method to `PaginatedBlockLoader` class
+- **File**: `src/utils/paginatedBlockLoader.js:288-311`
+
+**Issue 2: Title doesn't save (for all documents, not just subfolders)**
+- **Root Cause Found**: `PGRST204` error - invalid columns being sent to Supabase
+  - `"Could not find the 'blockCount' column of 'documents' in the schema cache"`
+  - `"Could not find the 'type' column of 'documents' in the schema cache"`
+- **Why**: `updateEntry` was destructuring only `blocks` and `updatedAt`, but documents also had `blockCount` and `type` fields
+- **IMPORTANT DATABASE SCHEMA**: From migration `20250116_create_document_with_folder_check.sql`:
+  - `metadata` IS a valid JSONB column - should NOT be removed from save
+  - `blockCount` is NOT a column (it's computed)
+  - `type` is NOT a column (documents don't have type)
+- **Fix Applied**:
+  1. Remove only `blockCount` and `type` before saving
+  2. Keep `metadata` but clean client-side flags like `createdLocally`
+- **File**: `src/pages/Dashboard.jsx:996-1008`
+
+### Debug Evidence from log.md
+
+1. **Block Error** (line 2586):
+```
+Uncaught TypeError: gi.updateCachedBlocks is not a function
+```
+
+2. **Title Save Error** (line 936, 1917):
+```
+Error saving document: {message: "Could not find the 'blockCount' column...", code: 'PGRST204'}
+```
+
+### Files Modified
+
+1. **src/utils/paginatedBlockLoader.js**
+   - Added `updateCachedBlocks(documentId, newBlocks)` method (lines 288-311)
+
+2. **src/pages/Dashboard.jsx**
+   - Fixed destructuring to remove invalid columns before save (lines 996-1003)
+
+### Previous Fixes (still valid)
+1. ✅ Added `entry?.blocks?.length` to stableEntry memo deps
+2. ✅ Improved merge logic to preserve blocks from locally-created docs
+3. ✅ Pass folderId from sidebar to createNewEntry
+
+### Testing Required
+**IMPORTANT: User must rebuild app first! (`npm run build`)**
+The log shows errors in `index-BLZypL0d.js` which is the old production bundle.
+
+After rebuild:
+- [ ] Add block → should appear immediately (no `updateCachedBlocks is not a function` error)
+- [ ] Change title → should save (check for `[DEBUG-TITLE-3]` log)
+- [ ] Reload → title and blocks should persist
+- [ ] Check console for any remaining PGRST204 errors
+
+---
+
+## Previous Task: Production Crash Fix - Node.contains() TypeError
 Status: ✅ COMPLETED - Critical production crash eliminated!
 Date: 2025-11-03
 

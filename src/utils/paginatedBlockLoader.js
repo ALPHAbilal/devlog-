@@ -286,6 +286,31 @@ export class PaginatedBlockLoader {
   }
 
   /**
+   * Update cached blocks directly (for optimistic updates)
+   */
+  updateCachedBlocks(documentId, newBlocks) {
+    console.log('[PAGINATED-CACHE] updateCachedBlocks called:', {
+      documentId: documentId?.substring(0, 8),
+      blockCount: newBlocks?.length
+    });
+
+    // Update the first page cache with new blocks
+    const pageCacheKey = `${documentId}-page-0`;
+    const existingPage = this.cache.get(pageCacheKey);
+
+    this.cache.set(pageCacheKey, {
+      blocks: newBlocks,
+      totalCount: newBlocks.length,
+      timestamp: Date.now()
+    });
+
+    // Also update total count
+    this.cache.set(`${documentId}-totalCount`, newBlocks.length);
+
+    console.log('[PAGINATED-CACHE] Cache updated for document:', documentId?.substring(0, 8));
+  }
+
+  /**
    * Remove a block from cache (for deletions)
    */
   removeBlockFromCache(documentId, blockId) {

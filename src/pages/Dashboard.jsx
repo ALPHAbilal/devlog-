@@ -992,8 +992,20 @@ export default function Dashboard() {
     const saveOperation = async () => {
       try {
         // Only save non-block updates (title, tags, etc.)
-        // Remove blocks, updatedAt (camelCase), and any other non-database fields
-        const { blocks, updatedAt, ...documentToSave } = updatedEntry;
+        // Remove blocks, updatedAt (camelCase), and client-side only fields
+        const {
+          blocks,
+          updatedAt,
+          blockCount,  // Not a database column (computed field)
+          type,        // Not a database column (documents don't have 'type')
+          ...documentToSave
+        } = updatedEntry;
+
+        // Clean metadata: remove client-side only flags like createdLocally
+        if (documentToSave.metadata) {
+          const { createdLocally, ...cleanMetadata } = documentToSave.metadata;
+          documentToSave.metadata = Object.keys(cleanMetadata).length > 0 ? cleanMetadata : null;
+        }
 
         console.log('[DEBUG-TITLE-2] Dashboard: Saving metadata only (no blocks):', {
           id: documentToSave.id?.substring(0, 8),

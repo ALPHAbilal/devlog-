@@ -3,6 +3,46 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### SmartSync: Blocks Not Saving (Debounce Lost on Tab Switch)
+**Date**: 2025-11-29
+**Severity**: 🔴 CRITICAL - Data loss on tab switch
+**Symptoms**:
+- Blocks typed but not saved to Supabase
+- `pending: 2` in logs then suddenly `pending: 0` after tab switch
+- `SmartSync: IndexedDB initialized` appearing when it shouldn't
+- No `SmartSync: Syncing X changes` log ever appearing
+
+**Root Cause**:
+SmartSync uses debounced sync (5 second delay). When user switches tabs quickly:
+1. Changes are queued in SmartSync manager
+2. Debounced sync scheduled (5s wait)
+3. User switches tab before 5s
+4. ExpandedView unmounts
+5. **Debounce callback never fires** because component is gone
+6. Pending changes LOST
+
+**The Fix**: Add cleanup effect to force sync on unmount in `ExpandedViewEnhanced.jsx`:
+```javascript
+useEffect(() => {
+  const syncManager = getSmartSyncManager(entry.id);
+  smartSyncManagerRef.current = syncManager;
+
+  // CRITICAL: Force sync on unmount
+  return () => {
+    if (syncManager) {
+      console.log('[CLEANUP] Forcing sync on unmount');
+      syncManager.forceSync().catch(console.error);
+    }
+  };
+}, [entry?.id]);
+```
+
+**Location**: `src/components/ExpandedViewEnhanced.jsx:465-474`
+
+**Lesson**: Any debounced async operation needs explicit cleanup/flush on component unmount.
+
+---
+
 ### Production Error: "Failed to execute 'contains' on 'Node': parameter 1 is not of type 'Node'"
 **Date**: 2025-11-03
 **Severity**: 🔴 CRITICAL - Production crash in Dashboard

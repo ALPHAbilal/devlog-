@@ -462,7 +462,16 @@ function ExpandedView({
       });
     }
 
-    // No interval needed - SyncStatusIndicator handles that
+    // CRITICAL: Force sync pending changes when component unmounts (tab switch, navigation, etc.)
+    // Without this, the debounced sync (5s delay) never fires if user switches tabs quickly
+    return () => {
+      if (syncManager) {
+        console.log('[CLEANUP] ExpandedView unmounting, forcing sync for document:', entry.id?.substring(0, 8));
+        syncManager.forceSync().catch(error => {
+          console.error('[CLEANUP] Force sync failed:', error);
+        });
+      }
+    };
   }, [entry?.id]);
 
   // Check for unsaved changes on mount

@@ -2,7 +2,7 @@ import { useTabContext } from '../contexts/TabContext';
 import { X, Plus, FileText, ChevronDown } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 
-export default function TabBar({ onNewTab, onTabClick }) {
+export default function TabBar({ onNewTab, onTabClick, onCloseTab }) {
   const { tabs, activeTabId, closeTab, setActiveTabId } = useTabContext();
   const tabsRef = useRef(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -14,16 +14,25 @@ export default function TabBar({ onNewTab, onTabClick }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Use custom handler if provided, otherwise just close the tab
   const handleCloseTab = (e, tabId) => {
     e.stopPropagation();
-    closeTab(tabId);
+    if (onCloseTab) {
+      onCloseTab(tabId);
+    } else {
+      closeTab(tabId);
+    }
   };
 
   // Middle-click to close (browser convention)
   const handleMouseDown = (e, tabId) => {
     if (e.button === 1) {
       e.preventDefault();
-      closeTab(tabId);
+      if (onCloseTab) {
+        onCloseTab(tabId);
+      } else {
+        closeTab(tabId);
+      }
     }
   };
 

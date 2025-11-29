@@ -144,27 +144,16 @@ export default function Dashboard() {
   // Find the active document based on activeTabId
   // Falls back to pendingDocumentRef (for new documents) and IndexedDB cache (for navigation)
   const activeDocument = useMemo(() => {
-    // [RELOAD-TRACE-4] Log activeDocument lookup
-    console.log('[RELOAD-TRACE-4] activeDocument lookup:', {
-      activeTabId: activeTabId?.substring(0, 8),
-      allDocumentsCount: allDocuments.length,
-      isCacheLoaded,
-      hasPendingDoc: !!pendingDocumentRef.current,
-      timestamp: performance.now().toFixed(2)
-    });
-
     if (!activeTabId) return null;
 
     // Check pending document first (handles race condition during creation)
     if (pendingDocumentRef.current?.id === activeTabId) {
-      console.log('[RELOAD-TRACE-4] → Found in pendingDocumentRef');
       return pendingDocumentRef.current;
     }
 
     // Try main documents (from Supabase/state)
     const fromMain = allDocuments.find(doc => doc.id === activeTabId);
     if (fromMain) {
-      console.log('[RELOAD-TRACE-4] → Found in allDocuments');
       // Clear pending ref if document is now in allDocuments
       if (pendingDocumentRef.current?.id === activeTabId) {
         pendingDocumentRef.current = null;
@@ -173,14 +162,8 @@ export default function Dashboard() {
     }
 
     // Fallback to IndexedDB cache (handles navigation race condition)
-    const fromCache = getCachedDocument(activeTabId);
-    if (fromCache) {
-      console.log('[RELOAD-TRACE-4] → Found in IndexedDB cache');
-    } else {
-      console.log('[RELOAD-TRACE-4] → NOT FOUND anywhere!');
-    }
-    return fromCache;
-  }, [activeTabId, allDocuments, getCachedDocument, isCacheLoaded]);
+    return getCachedDocument(activeTabId);
+  }, [activeTabId, allDocuments, getCachedDocument]);
 
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showMobileSidebarSheet, setShowMobileSidebarSheet] = useState(false);
@@ -248,7 +231,9 @@ export default function Dashboard() {
     // Open document in tab (or switch to existing tab)
     // No navigation - tabs stay on dashboard
     openTab(document);
-  }, [openTab]);
+    // Cache the document for instant access on reload
+    updateDocumentInCache(document);
+  }, [openTab, updateDocumentInCache]);
 
   // Update storage info
   const updateStorageInfo = useCallback(async () => {
@@ -444,6 +429,12 @@ export default function Dashboard() {
 
     return newEntry;
   }, [entries, user?.id, openTab, toast, updateDocumentInCache]);
+
+  // Handle closing a tab - removes from cache since document no longer needs instant access
+  const handleCloseTab = useCallback((tabId) => {
+    closeTab(tabId);
+    removeFromCache(tabId);
+  }, [closeTab, removeFromCache]);
 
   // Listen for keyboard shortcut to create new tab (from TabContext)
   useEffect(() => {
@@ -716,10 +707,10 @@ export default function Dashboard() {
         });
         return [...locallyCreatedNew, ...mergedPaginated];
       });
-      // Update IndexedDB cache with fresh Supabase data (background operation)
-      updateCache(paginatedDocuments);
+      // NOTE: We no longer overwrite IndexedDB cache with pagination data
+      // Cache is now tab-based: documents cached when opened, removed when tab closed
     }
-  }, [paginatedDocuments, updateCache]);
+  }, [paginatedDocuments]);
 
   // Combine folders and documents whenever either changes (eliminates race condition)
   useEffect(() => {
@@ -1458,7 +1449,7 @@ export default function Dashboard() {
         <div className="h-0.5 bg-emerald-500 flex-shrink-0" />
 
         {/* Tab Bar - fixed height, stays at top */}
-        <TabBar onNewTab={handleCreateNewTab} />
+        <TabBar onNewTab={handleCreateNewTab} onCloseTab={handleCloseTab} />
 
         {/* Main area - fills remaining height */}
         <div className="flex-1 min-h-0 flex overflow-hidden">
@@ -1535,22 +1526,11 @@ export default function Dashboard() {
 
           {/* Document area - takes remaining width, scrolls internally */}
           <div className="flex-1 min-w-0 h-full overflow-hidden">
-            {(() => {
-              // [RELOAD-TRACE] Log render decision
-              console.log('[RELOAD-TRACE-5] Render decision:', {
-                activeTabId: activeTabId?.substring(0, 8),
-                hasActiveDocument: !!activeDocument,
-                isCacheLoaded,
-                allDocumentsCount: allDocuments.length,
-                willRender: activeTabId && activeDocument ? 'ExpandedView' : 'EmptyState'
-              });
-              return null;
-            })()}
             {activeTabId && activeDocument ? (
               <ExpandedView
                 key={activeTabId}
                 entry={activeDocument}
-                onClose={() => closeTab(activeTabId)}
+                onClose={() => handleCloseTab(activeTabId)}
                 onUpdate={updateEntry}
                 allEntries={allDocuments}
                 onNavigateToDocument={(doc) => openTab(doc)}

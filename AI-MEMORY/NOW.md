@@ -63,28 +63,33 @@ Error saving document: {message: "Could not find the 'blockCount' column...", co
   - `activeDocument` checks ref first, finds document immediately
 - **Files**: `src/pages/Dashboard.jsx:75-77, 146-171, 311-320, 406-415`
 
-**Issue 4: Page reload shows "No document open" flash briefly**
-- **Root Cause Found**: Tab vs cache loading timing mismatch
-  - TabContext restores `activeTabId` from localStorage **synchronously**
-  - Dashboard loads documents from IndexedDB **asynchronously** (~17ms)
-  - First render: `activeTabId` set, but `allDocuments` empty → shows EmptyState
-  - After cache loads: document found → displays correctly
-- **Fix Applied**: Wait for `isCacheLoaded` before showing EmptyState
-  - Condition: If `activeTabId` exists but cache not loaded → show "Loading..."
-  - Only show EmptyState after cache loaded and document still not found
-- **File**: `src/pages/Dashboard.jsx:1535-1542`
+**Issue 4: Page reload shows "No document open" flash for 3+ seconds**
+- **Root Cause Found**: Cache architecture was wrong
+  - `updateCache(paginatedDocuments)` was overwriting ENTIRE IndexedDB cache with 50 most recent documents
+  - If the open document was older than top 50, it got KICKED OUT of cache
+  - On reload: cache loads 50 docs, but open document not among them → EmptyState
+  - Only after Supabase sync (3+ seconds) would the document appear
+- **Fix Applied**: Tab-based caching (not pagination-based)
+  1. **Removed** `updateCache(paginatedDocuments)` - no more cache overwrites
+  2. **Added** `updateDocumentInCache()` when opening a document
+  3. **Added** `removeFromCache()` when closing a tab
+  4. Cache now contains exactly what's in tabs, not arbitrary 50 docs
+- **Files**:
+  - `src/pages/Dashboard.jsx:719-722` - Removed cache overwrite
+  - `src/pages/Dashboard.jsx:247-253` - Added cache on document open
+  - `src/pages/Dashboard.jsx:448-452` - Added handleCloseTab with cache removal
+  - `src/components/TabBar.jsx:5-37` - Added onCloseTab prop support
 
 ### Testing Required
 **IMPORTANT: User must rebuild app first! (`npm run build`)**
-The log shows errors in `index-BLZypL0d.js` which is the old production bundle.
 
 After rebuild:
-- [ ] Click add button → document should appear INSTANTLY (no "No document open" flash)
-- [ ] Add block → should appear immediately (no `updateCachedBlocks is not a function` error)
-- [ ] Change title → should save (check for `[DEBUG-TITLE-3]` log)
-- [ ] Reload page → should show "Loading..." briefly then document (NO "No document open" flash)
-- [ ] Reload → title and blocks should persist
-- [ ] Check console for any remaining PGRST204 errors
+- [ ] Click add button → document should appear INSTANTLY
+- [ ] Add block → should appear immediately
+- [ ] Change title → should save
+- [ ] Reload page → document should appear instantly (from cache)
+- [ ] Close a tab, reload → that document should NOT be in cache
+- [ ] Open old document, reload → should still be in cache (tab-based)
 
 ---
 

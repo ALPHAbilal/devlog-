@@ -43,6 +43,48 @@ useEffect(() => {
 
 ---
 
+### Blocks Not Loading After Reload (Stale entry.blocks from IndexedDB)
+**Date**: 2025-11-29
+**Severity**: 🔴 CRITICAL - Blocks disappear after page reload
+**Symptoms**:
+- User creates document, adds blocks, blocks sync successfully
+- User refreshes page
+- Blocks are gone - only 1 block shows instead of 4+
+- Logs show: `[CACHE-TRACK] ✅ SOURCE: entry.blocks - Found 1 blocks in entry prop`
+- But database has all 4+ blocks from successful sync
+
+**Root Cause**:
+`useOptimizedBlockLoader.js` had broken priority logic:
+1. Dashboard loads `entry` from IndexedDB (which has stale `blocks` array)
+2. Loader sees `entry.blocks` exists and has data
+3. **Loader uses stale entry.blocks instead of loading fresh from database**
+4. Fresh blocks synced by SmartSync never get loaded
+
+The loader trusted `entry.blocks` as a cache source, but IndexedDB cache doesn't get updated when SmartSync syncs to Supabase.
+
+**The Fix**: Skip `entry.blocks` and always load from database:
+```javascript
+// OLD BROKEN CODE:
+if (entry?.blocks && entry.blocks.length > 0) {
+  setBlocks(entry.blocks); // STALE! Never loads from DB!
+  return;
+}
+
+// NEW FIXED CODE:
+if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
+  console.log('[CACHE-TRACK] ⚠️ SKIP: entry.blocks - will load from database for freshness');
+  // Fall through to sessionCache/database loading
+}
+```
+
+**Location**: `src/hooks/useOptimizedBlockLoader.js:49-67`
+
+**Lesson**: Never trust `entry.blocks` from props/IndexedDB as the source of truth. The database is the source of truth; caches can be stale.
+
+**Related**: This is the second half of the SmartSync debounce fix. Even if sync works, loading was broken.
+
+---
+
 ### Production Error: "Failed to execute 'contains' on 'Node': parameter 1 is not of type 'Node'"
 **Date**: 2025-11-03
 **Severity**: 🔴 CRITICAL - Production crash in Dashboard

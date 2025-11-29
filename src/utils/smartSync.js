@@ -488,11 +488,19 @@ class SmartSyncManager {
       }
 
       // ONE API call for entire batch
+      console.log('[SYNC-DEBUG] Calling RPC with:', {
+        documentId: this.documentId,
+        changesCount: batchPayload.length,
+        blockIds: batchPayload.map(c => c.block_id.substring(0, 8))
+      });
+
       const { data, error } = await this.supabase
         .rpc('batch_sync_changes', {
           p_document_id: this.documentId,
           p_changes: batchPayload
         });
+
+      console.log('[SYNC-DEBUG] Blocks should now be in database for document:', this.documentId);
 
       if (error) {
         console.error('SmartSync: RPC error:', error);

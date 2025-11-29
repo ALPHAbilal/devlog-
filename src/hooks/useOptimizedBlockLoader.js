@@ -46,43 +46,24 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
         // [CACHE-TRACK] Log loader start
         console.log(`[CACHE-TRACK] 🚀 useOptimizedBlockLoader: Starting load for document ${documentId.substring(0, 8)}`);
         
-        // Check if blocks are already in entry AND have content
+        // CRITICAL FIX: Do NOT use entry.blocks as a trusted source!
+        // entry.blocks comes from IndexedDB cache and can be stale after SmartSync
+        // has synced new blocks to Supabase. Always load from database to ensure
+        // we have the freshest blocks.
+        //
+        // The only exception is during active editing when we pass blocks through
+        // the entry prop intentionally - but that's handled by the sessionCache.
+        //
+        // OLD BROKEN LOGIC (was here before):
+        // if (entry?.blocks && entry.blocks.length > 0) {
+        //   setBlocks(entry.blocks); // STALE! Never loads from DB!
+        //   return;
+        // }
+        //
+        // NEW LOGIC: Skip entry.blocks entirely, let sessionCache or database handle it
         if (entry?.blocks && Array.isArray(entry.blocks) && entry.blocks.length > 0) {
-          // [CACHE-TRACK] Log entry blocks found
-          console.log(`[CACHE-TRACK] ✅ SOURCE: entry.blocks - Found ${entry.blocks.length} blocks in entry prop (no cache check needed)`);
-          
-          // CRITICAL FIX: Deserialize blocks from entry.blocks
-          // entry.blocks contains raw database format (with content JSON string)
-          // We need to deserialize them to restore block-specific fields like images
-          const { deserializeBlock } = await import('../utils/blockSerializer');
-          const deserializedBlocks = entry.blocks.map(block => {
-            // Check if block is already deserialized (has images field for image blocks, or language/filePath for code blocks)
-            if ((block.type === 'image' && block.images !== undefined) ||
-                (block.type === 'code' && (block.language !== undefined || block.filePath !== undefined))) {
-              // Already deserialized, use as-is
-              return block;
-            }
-            // Deserialize the block to restore block-specific fields
-            return deserializeBlock(block);
-          });
-          
-          // If blocks array exists with content, they were already loaded
-          // CRITICAL: Don't normalize positions - it breaks references!
-          // The blocks array index IS the position
-          setBlocks(deserializedBlocks);
-          setIsLoading(false);
-          sessionCache.cacheBlocks(documentId, deserializedBlocks);
-          
-          const loadTime = performance.now() - loadStartTime;
-          console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry in ${loadTime.toFixed(2)}ms`);
-          console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: entry.blocks (bypasses cache check)`);
-          
-          // Track entry.blocks usage via sessionCache stats tracker
-          // We'll expose a method to record this
-          if (sessionCache.statsTracker) {
-            sessionCache.statsTracker.recordEntryBlocks(loadTime);
-          }
-          return;
+          console.log(`[CACHE-TRACK] ⚠️ SKIP: entry.blocks has ${entry.blocks.length} blocks but we'll load from database to ensure freshness`);
+          // Don't use entry.blocks - fall through to sessionCache/database loading
         }
 
         // Check session cache

@@ -25,6 +25,11 @@ export const TabProvider = ({ children }) => {
       if (stored) {
         const { tabs: savedTabs, activeTabId: savedActiveId } = JSON.parse(stored);
         if (savedTabs && savedTabs.length > 0) {
+          console.log('[RELOAD-TRACE-1] TabContext: Restoring tabs from localStorage', {
+            tabCount: savedTabs.length,
+            activeTabId: savedActiveId?.substring(0, 8),
+            timestamp: performance.now().toFixed(2)
+          });
           setTabs(savedTabs);
           setActiveTabId(savedActiveId || savedTabs[0].id);
         }

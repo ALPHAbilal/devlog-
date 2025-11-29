@@ -63,6 +63,17 @@ Error saving document: {message: "Could not find the 'blockCount' column...", co
   - `activeDocument` checks ref first, finds document immediately
 - **Files**: `src/pages/Dashboard.jsx:75-77, 146-171, 311-320, 406-415`
 
+**Issue 4: Page reload shows "No document open" flash briefly**
+- **Root Cause Found**: Tab vs cache loading timing mismatch
+  - TabContext restores `activeTabId` from localStorage **synchronously**
+  - Dashboard loads documents from IndexedDB **asynchronously** (~17ms)
+  - First render: `activeTabId` set, but `allDocuments` empty → shows EmptyState
+  - After cache loads: document found → displays correctly
+- **Fix Applied**: Wait for `isCacheLoaded` before showing EmptyState
+  - Condition: If `activeTabId` exists but cache not loaded → show "Loading..."
+  - Only show EmptyState after cache loaded and document still not found
+- **File**: `src/pages/Dashboard.jsx:1535-1542`
+
 ### Testing Required
 **IMPORTANT: User must rebuild app first! (`npm run build`)**
 The log shows errors in `index-BLZypL0d.js` which is the old production bundle.
@@ -71,6 +82,7 @@ After rebuild:
 - [ ] Click add button → document should appear INSTANTLY (no "No document open" flash)
 - [ ] Add block → should appear immediately (no `updateCachedBlocks is not a function` error)
 - [ ] Change title → should save (check for `[DEBUG-TITLE-3]` log)
+- [ ] Reload page → should show "Loading..." briefly then document (NO "No document open" flash)
 - [ ] Reload → title and blocks should persist
 - [ ] Check console for any remaining PGRST204 errors
 

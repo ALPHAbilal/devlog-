@@ -18,11 +18,18 @@ export function useIndexedDBCache() {
   // Load documents from IndexedDB on mount (FAST - ~5-20ms)
   const loadFromCache = useCallback(async () => {
     const startTime = performance.now();
+    console.log('[RELOAD-TRACE-2] useIndexedDBCache: Starting cache load', {
+      timestamp: startTime.toFixed(2)
+    });
     try {
       await IndexedDBAdapter.init();
       const docs = await IndexedDBAdapter.getAllDocuments();
       const loadTime = Math.round(performance.now() - startTime);
-      console.log(`[IndexedDBCache] Loaded ${docs?.length || 0} documents in ${loadTime}ms`);
+      console.log('[RELOAD-TRACE-3] useIndexedDBCache: Cache loaded', {
+        documentCount: docs?.length || 0,
+        loadTimeMs: loadTime,
+        timestamp: performance.now().toFixed(2)
+      });
       setCachedDocuments(docs || []);
       setIsCacheLoaded(true);
       return docs || [];

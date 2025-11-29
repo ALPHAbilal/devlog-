@@ -144,17 +144,27 @@ export default function Dashboard() {
   // Find the active document based on activeTabId
   // Falls back to pendingDocumentRef (for new documents) and IndexedDB cache (for navigation)
   const activeDocument = useMemo(() => {
+    // [RELOAD-TRACE-4] Log activeDocument lookup
+    console.log('[RELOAD-TRACE-4] activeDocument lookup:', {
+      activeTabId: activeTabId?.substring(0, 8),
+      allDocumentsCount: allDocuments.length,
+      isCacheLoaded,
+      hasPendingDoc: !!pendingDocumentRef.current,
+      timestamp: performance.now().toFixed(2)
+    });
+
     if (!activeTabId) return null;
 
     // Check pending document first (handles race condition during creation)
     if (pendingDocumentRef.current?.id === activeTabId) {
-      console.log('[Dashboard] Using pending document for activeTabId:', activeTabId);
+      console.log('[RELOAD-TRACE-4] → Found in pendingDocumentRef');
       return pendingDocumentRef.current;
     }
 
     // Try main documents (from Supabase/state)
     const fromMain = allDocuments.find(doc => doc.id === activeTabId);
     if (fromMain) {
+      console.log('[RELOAD-TRACE-4] → Found in allDocuments');
       // Clear pending ref if document is now in allDocuments
       if (pendingDocumentRef.current?.id === activeTabId) {
         pendingDocumentRef.current = null;
@@ -165,10 +175,12 @@ export default function Dashboard() {
     // Fallback to IndexedDB cache (handles navigation race condition)
     const fromCache = getCachedDocument(activeTabId);
     if (fromCache) {
-      console.log('[Dashboard] Using cached document for activeTabId:', activeTabId);
+      console.log('[RELOAD-TRACE-4] → Found in IndexedDB cache');
+    } else {
+      console.log('[RELOAD-TRACE-4] → NOT FOUND anywhere!');
     }
     return fromCache;
-  }, [activeTabId, allDocuments, getCachedDocument]);
+  }, [activeTabId, allDocuments, getCachedDocument, isCacheLoaded]);
 
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showMobileSidebarSheet, setShowMobileSidebarSheet] = useState(false);
@@ -1523,6 +1535,17 @@ export default function Dashboard() {
 
           {/* Document area - takes remaining width, scrolls internally */}
           <div className="flex-1 min-w-0 h-full overflow-hidden">
+            {(() => {
+              // [RELOAD-TRACE] Log render decision
+              console.log('[RELOAD-TRACE-5] Render decision:', {
+                activeTabId: activeTabId?.substring(0, 8),
+                hasActiveDocument: !!activeDocument,
+                isCacheLoaded,
+                allDocumentsCount: allDocuments.length,
+                willRender: activeTabId && activeDocument ? 'ExpandedView' : 'EmptyState'
+              });
+              return null;
+            })()}
             {activeTabId && activeDocument ? (
               <ExpandedView
                 key={activeTabId}

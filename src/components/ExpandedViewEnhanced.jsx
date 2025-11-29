@@ -64,7 +64,7 @@ function ExpandedView({
       user_id: entry.user_id,
       folder_id: entry.folder_id
     };
-  }, [entry?.id, entry?.title, entry?.tags, entry?.blockCount, entry?.created_at, entry?.updated_at, entry?.user_id, entry?.folder_id]);
+  }, [entry?.id, entry?.title, entry?.tags, entry?.blocks?.length, entry?.blockCount, entry?.created_at, entry?.updated_at, entry?.user_id, entry?.folder_id]);
   
   // Analytics hooks
   const { trackEvent } = useAnalytics();

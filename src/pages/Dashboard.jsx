@@ -654,16 +654,33 @@ export default function Dashboard() {
   // Sync paginated documents to both allDocuments state AND IndexedDB cache
   useEffect(() => {
     if (paginatedDocuments && paginatedDocuments.length > 0) {
-      // Merge: Keep locally-created documents that aren't in paginatedDocuments yet
+      // Merge: Preserve locally-created documents with their blocks
       setAllDocuments(prev => {
         const paginatedIds = new Set(paginatedDocuments.map(d => d.id));
-        const locallyCreated = prev.filter(d => d.metadata?.createdLocally && !paginatedIds.has(d.id));
-        console.log('[DEBUG-CREATE-8] Merging docs:', {
-          paginated: paginatedDocuments.length,
-          locallyCreated: locallyCreated.length,
-          localIds: locallyCreated.map(d => d.id)
+
+        // Keep locally-created documents that aren't synced yet
+        const locallyCreatedNew = prev.filter(d => d.metadata?.createdLocally && !paginatedIds.has(d.id));
+
+        // For documents that exist in both, preserve blocks from local version
+        const mergedPaginated = paginatedDocuments.map(pDoc => {
+          const localDoc = prev.find(d => d.id === pDoc.id && d.metadata?.createdLocally && d.blocks?.length > 0);
+          if (localDoc) {
+            // Preserve blocks from locally-created document
+            console.log('[DEBUG-CREATE-9] Preserving blocks from local doc:', {
+              id: pDoc.id.substring(0, 8),
+              localBlocks: localDoc.blocks?.length || 0
+            });
+            return { ...pDoc, blocks: localDoc.blocks };
+          }
+          return pDoc;
         });
-        return [...locallyCreated, ...paginatedDocuments];
+
+        console.log('[DEBUG-CREATE-8] Merging docs:', {
+          paginated: mergedPaginated.length,
+          locallyCreatedNew: locallyCreatedNew.length,
+          localIds: locallyCreatedNew.map(d => d.id.substring(0, 8))
+        });
+        return [...locallyCreatedNew, ...mergedPaginated];
       });
       // Update IndexedDB cache with fresh Supabase data (background operation)
       updateCache(paginatedDocuments);
@@ -959,6 +976,7 @@ export default function Dashboard() {
 
     // CRITICAL: Update tab title if title changed
     if (updates.title) {
+      console.log('[DEBUG-TITLE-1] Updating tab title:', { entryId: entryId.substring(0, 8), newTitle: updates.title });
       updateTabTitle(entryId, updates.title);
     }
 
@@ -977,13 +995,14 @@ export default function Dashboard() {
         // Remove blocks, updatedAt (camelCase), and any other non-database fields
         const { blocks, updatedAt, ...documentToSave } = updatedEntry;
 
-        console.log('Dashboard: Saving metadata only (no blocks):', {
-          id: documentToSave.id,
+        console.log('[DEBUG-TITLE-2] Dashboard: Saving metadata only (no blocks):', {
+          id: documentToSave.id?.substring(0, 8),
           title: documentToSave.title,
           hasBlocks: false
         });
 
         await storageWrapper.saveDocument(documentToSave);
+        console.log('[DEBUG-TITLE-3] Document saved successfully:', { id: documentToSave.id?.substring(0, 8), title: documentToSave.title });
         // Update storage info after save
         updateStorageInfo();
       } catch (error) {

@@ -2,7 +2,7 @@
 > Single file for current session. Archive when done.
 
 ## Current Task: Document Creation & Block Addition Bugs
-Status: ✅ ROOT CAUSES FOUND - Fixes Applied
+Status: ✅ ALL FIXES APPLIED - Ready for Testing
 Date: 2025-11-29
 
 ### Issues Debugged
@@ -52,11 +52,23 @@ Error saving document: {message: "Could not find the 'blockCount' column...", co
 2. ✅ Improved merge logic to preserve blocks from locally-created docs
 3. ✅ Pass folderId from sidebar to createNewEntry
 
+**Issue 3: New documents show "No document open" for a few seconds**
+- **Root Cause Found**: Race condition with React state batching
+  - `setAllDocuments()` schedules async state update
+  - `openTab()` sets `activeTabId` in TabContext
+  - Re-render happens with NEW `activeTabId` but OLD `allDocuments`
+  - `activeDocument` useMemo can't find document → shows empty state
+- **Fix Applied**: Added `pendingDocumentRef` to hold new document synchronously
+  - Set ref BEFORE any async state updates
+  - `activeDocument` checks ref first, finds document immediately
+- **Files**: `src/pages/Dashboard.jsx:75-77, 146-171, 311-320, 406-415`
+
 ### Testing Required
 **IMPORTANT: User must rebuild app first! (`npm run build`)**
 The log shows errors in `index-BLZypL0d.js` which is the old production bundle.
 
 After rebuild:
+- [ ] Click add button → document should appear INSTANTLY (no "No document open" flash)
 - [ ] Add block → should appear immediately (no `updateCachedBlocks is not a function` error)
 - [ ] Change title → should save (check for `[DEBUG-TITLE-3]` log)
 - [ ] Reload → title and blocks should persist

@@ -71,6 +71,10 @@ export default function Dashboard() {
   const [storageInfo, setStorageInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const isInitialized = useRef(false);
+
+  // Ref to hold pending document during creation (prevents race condition)
+  // This ensures activeDocument can find new documents immediately
+  const pendingDocumentRef = useRef(null);
   
   // Analytics hooks
   const { trackEvent } = useAnalytics();
@@ -138,13 +142,25 @@ export default function Dashboard() {
   } = useTabContext();
 
   // Find the active document based on activeTabId
-  // Falls back to IndexedDB cache to handle race conditions during navigation
+  // Falls back to pendingDocumentRef (for new documents) and IndexedDB cache (for navigation)
   const activeDocument = useMemo(() => {
     if (!activeTabId) return null;
 
-    // Try main documents first (from Supabase)
+    // Check pending document first (handles race condition during creation)
+    if (pendingDocumentRef.current?.id === activeTabId) {
+      console.log('[Dashboard] Using pending document for activeTabId:', activeTabId);
+      return pendingDocumentRef.current;
+    }
+
+    // Try main documents (from Supabase/state)
     const fromMain = allDocuments.find(doc => doc.id === activeTabId);
-    if (fromMain) return fromMain;
+    if (fromMain) {
+      // Clear pending ref if document is now in allDocuments
+      if (pendingDocumentRef.current?.id === activeTabId) {
+        pendingDocumentRef.current = null;
+      }
+      return fromMain;
+    }
 
     // Fallback to IndexedDB cache (handles navigation race condition)
     const fromCache = getCachedDocument(activeTabId);
@@ -293,11 +309,14 @@ export default function Dashboard() {
     };
 
     // ✅ OPTIMISTIC UPDATE: Update UI immediately (instant response!)
+    // Set pending ref FIRST (synchronous) - ensures activeDocument finds it immediately
+    pendingDocumentRef.current = newEntry;
+
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
     setAllDocuments(prev => [newEntry, ...prev]);
 
-    // Open in tab instead of old expandedEntry
+    // Open in tab - pendingDocumentRef ensures document is found immediately
     openTab(newEntry);
 
     // Save to IndexedDB cache for local backup (fast - ~22ms)
@@ -385,11 +404,14 @@ export default function Dashboard() {
     };
 
     // Update UI immediately - update both entries and allDocuments
+    // Set pending ref FIRST (synchronous) - ensures activeDocument finds it immediately
+    pendingDocumentRef.current = newEntry;
+
     const updatedEntries = [newEntry, ...entries];
     setEntries(updatedEntries);
     setAllDocuments(prev => [newEntry, ...prev]);
 
-    // Open in tab
+    // Open in tab - pendingDocumentRef ensures document is found immediately
     openTab(newEntry);
 
     // Save to IndexedDB cache for local backup

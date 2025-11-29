@@ -144,16 +144,21 @@ export default function Dashboard() {
   // Find the active document based on activeTabId
   // Falls back to pendingDocumentRef (for new documents) and IndexedDB cache (for navigation)
   const activeDocument = useMemo(() => {
-    if (!activeTabId) return null;
+    if (!activeTabId) {
+      console.log('[ACTIVE-DOC] No activeTabId');
+      return null;
+    }
 
     // Check pending document first (handles race condition during creation)
     if (pendingDocumentRef.current?.id === activeTabId) {
+      console.log('[ACTIVE-DOC] Found in pendingDocumentRef');
       return pendingDocumentRef.current;
     }
 
     // Try main documents (from Supabase/state)
     const fromMain = allDocuments.find(doc => doc.id === activeTabId);
     if (fromMain) {
+      console.log('[ACTIVE-DOC] Found in allDocuments:', { id: activeTabId.substring(0, 8), title: fromMain.title });
       // Clear pending ref if document is now in allDocuments
       if (pendingDocumentRef.current?.id === activeTabId) {
         pendingDocumentRef.current = null;
@@ -162,7 +167,9 @@ export default function Dashboard() {
     }
 
     // Fallback to IndexedDB cache (handles navigation race condition)
-    return getCachedDocument(activeTabId);
+    const fromCache = getCachedDocument(activeTabId);
+    console.log('[ACTIVE-DOC] Checking IndexedDB cache:', { id: activeTabId.substring(0, 8), found: !!fromCache });
+    return fromCache;
   }, [activeTabId, allDocuments, getCachedDocument]);
 
   const [showCommandPalette, setShowCommandPalette] = useState(false);

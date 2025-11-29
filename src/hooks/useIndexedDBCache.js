@@ -22,7 +22,11 @@ export function useIndexedDBCache() {
       await IndexedDBAdapter.init();
       const docs = await IndexedDBAdapter.getAllDocuments();
       const loadTime = Math.round(performance.now() - startTime);
-      console.log(`[IndexedDBCache] Loaded ${docs?.length || 0} documents in ${loadTime}ms`);
+      console.log('[CACHE-LOAD]', {
+        docCount: docs?.length || 0,
+        loadTime_ms: loadTime,
+        docIds: docs?.slice(0, 5).map(d => d.id?.substring(0, 8))
+      });
       setCachedDocuments(docs || []);
       setIsCacheLoaded(true);
       return docs || [];
@@ -89,6 +93,7 @@ export function useIndexedDBCache() {
   // Update single document in cache
   const updateDocumentInCache = useCallback(async (document, fromSupabase = false) => {
     try {
+      console.log('[CACHE-ADD]', { id: document.id?.substring(0, 8), title: document.title, fromSupabase });
       await IndexedDBAdapter.saveDocument(document);
       setCachedDocuments(prev => {
         const exists = prev.some(d => d.id === document.id);
@@ -104,7 +109,7 @@ export function useIndexedDBCache() {
         [document.id]: fromSupabase ? 'synced' : 'pending'
       }));
 
-      console.log(`[IndexedDBCache] Document ${document.id} ${fromSupabase ? 'synced from server' : 'saved locally'}`);
+      console.log(`[IndexedDBCache] Document ${document.id?.substring(0, 8)} ${fromSupabase ? 'synced from server' : 'saved locally'}`);
     } catch (error) {
       console.error('[IndexedDBCache] Failed to update document:', error);
     }
@@ -130,7 +135,14 @@ export function useIndexedDBCache() {
 
   // Get single document by ID (instant - from state)
   const getDocument = useCallback((documentId) => {
-    return cachedDocuments.find(d => d.id === documentId) || null;
+    const found = cachedDocuments.find(d => d.id === documentId);
+    console.log('[CACHE-GET]', {
+      lookingFor: documentId?.substring(0, 8),
+      cacheSize: cachedDocuments.length,
+      found: !!found,
+      cachedIds: cachedDocuments.slice(0, 5).map(d => d.id?.substring(0, 8))
+    });
+    return found || null;
   }, [cachedDocuments]);
 
   // Get sync status for a document

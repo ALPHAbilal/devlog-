@@ -24,10 +24,17 @@ export const TabProvider = ({ children }) => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const { tabs: savedTabs, activeTabId: savedActiveId } = JSON.parse(stored);
+        console.log('[TAB-RESTORE]', {
+          tabCount: savedTabs?.length || 0,
+          activeTabId: savedActiveId?.substring(0, 8),
+          tabIds: savedTabs?.map(t => t.id?.substring(0, 8))
+        });
         if (savedTabs && savedTabs.length > 0) {
           setTabs(savedTabs);
           setActiveTabId(savedActiveId || savedTabs[0].id);
         }
+      } else {
+        console.log('[TAB-RESTORE] No saved tabs found');
       }
     } catch (e) {
       console.error('Failed to load tabs from storage:', e);

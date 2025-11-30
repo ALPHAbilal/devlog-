@@ -21,7 +21,7 @@ export default function SharedDocument() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [document, setDocument] = useState(null);
+  const [sharedDoc, setSharedDoc] = useState(null);
   const [password, setPassword] = useState('');
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -32,12 +32,12 @@ export default function SharedDocument() {
 
   // Hide body scrollbar to prevent double scrollbars
   useEffect(() => {
-    if (typeof document !== 'undefined' && document.body) {
-      document.body.style.overflow = 'hidden';
+    if (typeof window !== 'undefined' && window.document?.body) {
+      window.document.body.style.overflow = 'hidden';
     }
     return () => {
-      if (typeof document !== 'undefined' && document.body) {
-        document.body.style.overflow = '';
+      if (typeof window !== 'undefined' && window.document?.body) {
+        window.document.body.style.overflow = '';
       }
     };
   }, []);
@@ -59,8 +59,8 @@ export default function SharedDocument() {
         }
       } else {
         try {
-          const { document } = await shareService.getSharedDocument(shareCode, providedPassword);
-          setDocument(document);
+          const { document: doc } = await shareService.getSharedDocument(shareCode, providedPassword);
+          setSharedDoc(doc);
         } catch (err) {
           setError(err.message || 'Failed to load document');
         }
@@ -90,13 +90,13 @@ export default function SharedDocument() {
   };
 
   const handleDownload = () => {
-    if (!document?.permissions?.includes('download')) return;
-    const content = document.blocks.map(b => b.content).join('\n\n');
+    if (!sharedDoc?.permissions?.includes('download')) return;
+    const content = sharedDoc.blocks.map(b => b.content).join('\n\n');
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = window.document.createElement('a');
     a.href = url;
-    a.download = `${document.title}.txt`;
+    a.download = `${sharedDoc.title}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -172,12 +172,12 @@ export default function SharedDocument() {
     );
   }
 
-  if (!document) return null;
+  if (!sharedDoc) return null;
 
-  const { permissions = [], shareSettings = {} } = document;
+  const { permissions = [], shareSettings = {} } = sharedDoc;
   const canDownload = permissions.includes('download');
-  const authorName = document.profiles?.display_name || document.profiles?.username || 'Anonymous';
-  const dateStr = new Date(document.updated_at).toLocaleDateString('en-US', {
+  const authorName = sharedDoc.profiles?.display_name || sharedDoc.profiles?.username || 'Anonymous';
+  const dateStr = new Date(sharedDoc.updated_at).toLocaleDateString('en-US', {
     month: 'short', day: 'numeric'
   });
 
@@ -190,7 +190,7 @@ export default function SharedDocument() {
           <div className="flex items-center gap-2.5 min-w-0">
             <FileText className="w-4 h-4 text-text-secondary flex-shrink-0" />
             <span className="text-sm text-text-primary truncate font-medium">
-              {document.title}
+              {sharedDoc.title}
             </span>
             <span className="text-xs text-text-secondary/50 flex-shrink-0">
               {permissions[0]}
@@ -244,9 +244,9 @@ export default function SharedDocument() {
       {/* Content */}
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Tags */}
-        {document.tags && document.tags.length > 0 && (
+        {sharedDoc.tags && sharedDoc.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-6">
-            {document.tags.map((tag, index) => (
+            {sharedDoc.tags.map((tag, index) => (
               <span
                 key={index}
                 className="px-2 py-0.5 bg-accent-green/10 text-accent-green
@@ -260,17 +260,17 @@ export default function SharedDocument() {
 
         {/* Blocks */}
         <div className="space-y-2">
-          {document.blocks && document.blocks.length > 0 ? (
-            document.blocks.map((block, index) => (
+          {sharedDoc.blocks && sharedDoc.blocks.length > 0 ? (
+            sharedDoc.blocks.map((block, index) => (
               <div
                 key={block.id}
                 className="relative"
-                style={{ zIndex: document.blocks.length - index }}
+                style={{ zIndex: sharedDoc.blocks.length - index }}
               >
                 <Block
                   block={block}
                   isFirst={index === 0}
-                  isLast={index === document.blocks.length - 1}
+                  isLast={index === sharedDoc.blocks.length - 1}
                   onUpdate={() => {}}
                   onDelete={() => {}}
                   onAddBelow={() => {}}
@@ -294,7 +294,7 @@ export default function SharedDocument() {
       {shareSettings.watermark && (
         <div className="fixed inset-0 pointer-events-none z-30 flex items-center justify-center">
           <div className="rotate-45 text-5xl font-bold text-text-primary opacity-[0.015] select-none">
-            {document.watermark}
+            {sharedDoc.watermark}
           </div>
         </div>
       )}

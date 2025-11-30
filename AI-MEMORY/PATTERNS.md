@@ -3,6 +3,46 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### SharedDocument TypeError: Cannot read properties of null (reading 'body')
+**Date**: 2025-11-30
+**Severity**: 🔴 CRITICAL - Shared documents crash on load
+**Symptoms**:
+- Shared document page crashes immediately on load
+- Error: `TypeError: Cannot read properties of null (reading 'body')`
+- ErrorBoundary catches the error
+
+**Root Cause**:
+The state variable `document` in SharedDocument.jsx **SHADOWS** the global `window.document`:
+```javascript
+const [document, setDocument] = useState(null);  // ← BAD: shadows window.document
+
+// Later in useEffect:
+if (typeof document !== 'undefined' && document.body) {  // ← Checks STATE, not window.document!
+  document.body.style.overflow = 'hidden';  // ← null.body throws!
+}
+```
+
+**The Fix**:
+1. Rename state variable from `document` to `sharedDoc`
+2. Use `window.document` explicitly for DOM access:
+```javascript
+const [sharedDoc, setSharedDoc] = useState(null);  // ✓ No shadowing
+
+useEffect(() => {
+  if (typeof window !== 'undefined' && window.document?.body) {
+    window.document.body.style.overflow = 'hidden';
+  }
+  // ...
+}, []);
+```
+
+**Files Fixed**:
+- `src/pages/SharedDocument.jsx` - Renamed all `document` state references to `sharedDoc`
+
+**Key Insight**: NEVER name React state variables with global object names (`document`, `window`, `navigator`, etc.). They will shadow the globals and cause cryptic null reference errors.
+
+---
+
 ### Shared Document Shows Raw JSON Instead of Content
 **Date**: 2025-11-30
 **Severity**: 🔴 CRITICAL - Shared documents unreadable

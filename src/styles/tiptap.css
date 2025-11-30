@@ -4,9 +4,11 @@
 
 /* Base editor styles */
 .tiptap-editor {
-  /* Typography - larger, more comfortable */
-  font-size: var(--step-writing, 1.125rem);
-  line-height: var(--line-height-writing, 1.75);
+  /* Typography - clean developer-focused */
+  font-family: var(--font-sans, 'Inter', system-ui, -apple-system, sans-serif);
+  font-size: var(--step-writing, 0.9375rem);
+  line-height: var(--line-height-writing, 1.6);
+  letter-spacing: -0.01em; /* Tighter for dev feel */
   color: var(--color-text-primary, #e4e4e7);
 
   /* Remove container feel - borderless */

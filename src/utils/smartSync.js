@@ -301,6 +301,8 @@ class SmartSyncManager {
         await this.db.blocks.put({
           id: blockId,
           documentId: this.documentId,
+          type: blockType,        // CRITICAL: Store type for deserializer
+          position: position,     // CRITICAL: Store position for ordering
           content: content,
           updated_at: Date.now(),
           synced: false

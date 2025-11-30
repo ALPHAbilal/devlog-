@@ -126,6 +126,49 @@ because React props don't update when external stores change.
 
 ---
 
+### Blocks Show Raw JSON Instead of Content
+**Date**: 2025-11-29
+**Severity**: 🔴 CRITICAL - Content displays as `{"content":"actual text"}` instead of "actual text"
+**Symptoms**:
+- Text blocks show `{"content":"hello world"}` instead of "hello world"
+- All block types affected
+- Only happens after reload, not during editing
+
+**Root Cause**:
+SmartSync's internal `this.db.blocks.put()` was storing blocks WITHOUT `type` and `position`:
+```javascript
+// BROKEN - missing type and position
+await this.db.blocks.put({
+  id: blockId,
+  documentId: this.documentId,
+  content: content,  // JSON string like '{"content":"text"}'
+  updated_at: Date.now(),
+  synced: false
+});
+```
+
+When `updateIndexedDBCache()` copies these blocks to IndexedDBAdapter, they're missing `type`.
+Then `deserializeBlock()` can't process them (no type → no schema → returns unchanged).
+
+**The Fix**: Store `type` and `position` in SmartSync's internal blocks table:
+```javascript
+await this.db.blocks.put({
+  id: blockId,
+  documentId: this.documentId,
+  type: blockType,      // ADDED
+  position: position,   // ADDED
+  content: content,
+  updated_at: Date.now(),
+  synced: false
+});
+```
+
+**Location**: `src/utils/smartSync.js:301-309`
+
+**Lesson**: When caching data for later deserialization, include ALL fields the deserializer needs.
+
+---
+
 ### Production Error: "Failed to execute 'contains' on 'Node': parameter 1 is not of type 'Node'"
 **Date**: 2025-11-03
 **Severity**: 🔴 CRITICAL - Production crash in Dashboard

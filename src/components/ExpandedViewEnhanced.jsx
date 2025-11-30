@@ -1000,30 +1000,37 @@ function ExpandedView({
   const moveBlock = useCallback((blockId, direction) => {
     // Enhanced debug logging with unique invocation ID
     const invocationId = Math.random().toString(36).substring(7);
+
+    // CRITICAL FIX: Use blocksRef.current to avoid stale closure issue
+    // The memoized BlockRenderer captures old 'blocks' from closure,
+    // but blocksRef.current always has the latest blocks array
+    const currentBlocks = blocksRef.current;
+
     console.log('[DEBUG-MOVE-3] moveBlock START:', {
       invocationId,
       blockId,
       direction,
       timestamp: Date.now(),
+      blocksCount: currentBlocks?.length,
       callStack: new Error().stack.substring(0, 300)
     });
-    
-    const blockIndex = blocks.findIndex(b => b.id === blockId);
+
+    const blockIndex = currentBlocks.findIndex(b => b.id === blockId);
     if (blockIndex === -1) {
-      console.log('[DEBUG-MOVE-3] moveBlock ABORT - block not found:', { invocationId, blockId });
+      console.log('[DEBUG-MOVE-3] moveBlock ABORT - block not found:', { invocationId, blockId, blocksCount: currentBlocks?.length });
       return;
     }
-    
+
     const newIndex = direction === 'up' ? blockIndex - 1 : blockIndex + 1;
-    if (newIndex < 0 || newIndex >= blocks.length) {
+    if (newIndex < 0 || newIndex >= currentBlocks.length) {
       console.log('[DEBUG-MOVE-3] moveBlock ABORT - invalid index:', { invocationId, newIndex });
       return;
     }
-    
-    const updatedBlocks = [...blocks];
+
+    const updatedBlocks = [...currentBlocks];
     const [movedBlock] = updatedBlocks.splice(blockIndex, 1);
     updatedBlocks.splice(newIndex, 0, movedBlock);
-    
+
     console.log('[DEBUG-MOVE-3] moveBlock STATE UPDATE:', {
       invocationId,
       blockId,
@@ -1031,19 +1038,19 @@ function ExpandedView({
       newIndex,
       blockType: movedBlock.type
     });
-    
+
     startTransition(() => {
       updateLoadedBlocks(updatedBlocks);
     });
-    
+
     // Strategic logging for move position calculation
     console.log('[MOVE] Block move calculation:', {
       blockId: blockId,
       currentIndex: blockIndex,
       direction,
       newIndex,
-      totalBlocks: blocks.length,
-      currentPositions: blocks.slice(0, 5).map(b => ({id: b.id.substring(0,8), pos: blocks.indexOf(b)}))
+      totalBlocks: currentBlocks.length,
+      currentPositions: currentBlocks.slice(0, 5).map(b => ({id: b.id.substring(0,8), pos: currentBlocks.indexOf(b)}))
     });
 
     // CRITICAL FIX: Call Smart Sync for reorder operation
@@ -1071,12 +1078,12 @@ function ExpandedView({
     }
     
     console.log('[DEBUG-MOVE-3] moveBlock END:', { invocationId, timestamp: Date.now() });
-    
+
     // MILESTONE 2: Don't call onUpdate for blocks - Smart Sync handles this
     // if (onUpdate && !isInitialLoadRef.current) {
     //   onUpdate(entry.id, { blocks: updatedBlocks });
     // }
-  }, [blocks, updateLoadedBlocks]);
+  }, [updateLoadedBlocks]); // Note: removed 'blocks' - using blocksRef.current instead to avoid stale closures
 
   // Memoized move handlers to prevent breaking React.memo on Block components
   const handleMoveUp = useCallback((blockId) => moveBlock(blockId, 'up'), [moveBlock]);

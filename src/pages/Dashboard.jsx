@@ -437,10 +437,13 @@ export default function Dashboard() {
     return newEntry;
   }, [entries, user?.id, openTab, toast, updateDocumentInCache]);
 
-  // Handle closing a tab - removes from cache since document no longer needs instant access
+  // Handle closing a tab - removes from caches since document no longer needs instant access
   const handleCloseTab = useCallback((tabId) => {
     closeTab(tabId);
     removeFromCache(tabId);
+    // CRITICAL: Also clear from sessionCache to free memory immediately
+    sessionCache.removeDocument(tabId);
+    console.log(`[MULTI-TAB] 🗑️ Tab closed, cache cleared for document ${tabId?.substring(0, 8)}`);
   }, [closeTab, removeFromCache]);
 
   // Listen for keyboard shortcut to create new tab (from TabContext)

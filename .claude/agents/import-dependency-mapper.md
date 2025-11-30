@@ -2,7 +2,7 @@
 name: import-dependency-mapper
 description: "Maps all import/export relationships in the codebase. Creates visual dependency graphs and identifies circular dependencies, orphaned files, and usage patterns."
 tools: Bash, Grep, Glob, Read, LS
-model: claude-sonnet-4-5-20250929
+model: claude-opus-4-5-20251101
 ---
 
 🗺️ Import Dependency Mapper (Analysis Tool)

@@ -372,6 +372,36 @@ class SessionCache {
   }
 
   /**
+   * Remove a specific document and its blocks from cache
+   * Called when a tab is closed to free memory immediately
+   */
+  removeDocument(documentId) {
+    const docKey = this.getDocumentKey(documentId);
+    const blocksKey = this.getBlocksKey(documentId);
+    const metaKey = this.getMetadataKey(documentId);
+
+    let removed = 0;
+
+    if (this.cache.has(docKey)) {
+      this.cache.delete(docKey);
+      removed++;
+    }
+
+    if (this.cache.has(blocksKey)) {
+      this.cache.delete(blocksKey);
+      removed++;
+    }
+
+    if (this.cache.has(metaKey)) {
+      this.cache.delete(metaKey);
+      removed++;
+    }
+
+    console.log(`[CACHE-CLEANUP] 🗑️ Removed document ${documentId.substring(0, 8)} from sessionCache (${removed} entries cleared)`);
+    return removed > 0;
+  }
+
+  /**
    * Clear all cached data
    */
   clearAll() {

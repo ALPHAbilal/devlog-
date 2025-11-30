@@ -1,6 +1,6 @@
 ---
 description: Document codebase as-is with thoughts directory for historical context
-model: claude-sonnet-4-5-20250929
+model: claude-opus-4-5-20251101
 ---
 
 # Research Codebase

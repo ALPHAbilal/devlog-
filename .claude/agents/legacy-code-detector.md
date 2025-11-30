@@ -2,7 +2,7 @@
 name: legacy-code-detector
 description: "Detects unused, legacy, and redundant code in the codebase. Generates detailed report WITHOUT modifying any files. Analyzes imports, exports, and usage patterns to identify safe-to-remove code."
 tools: Bash, Glob, Grep, Read, LS
-model: haiku
+model: claude-opus-4-5-20251101
 ---
 
 🔍 Legacy Code Detector (Analysis Only)

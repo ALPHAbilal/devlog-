@@ -45,6 +45,55 @@ const mergedPaginated = paginatedDocuments.map(pDoc => {
 
 ---
 
+### Multi-Tab Cache Cleanup: SessionCache Not Cleared on Tab Close
+**Date**: 2025-11-30
+**Severity**: 🟡 MEDIUM - Memory leak, cache grows unbounded
+**Symptoms**:
+- Memory usage increases as more documents are opened
+- Stale cache data from closed tabs
+- LRU eviction not happening until cache is very full
+
+**Root Cause**:
+When a tab was closed, `sessionCache` was NOT being cleared. The flow was:
+1. User closes tab
+2. `handleCloseTab` calls `closeTab` + `removeFromCache`
+3. `removeFromCache` only clears IndexedDB
+4. **sessionCache still had the blocks in memory!**
+
+**The Fix**: Add `sessionCache.removeDocument(tabId)` to `handleCloseTab` in Dashboard.jsx:
+```javascript
+const handleCloseTab = useCallback((tabId) => {
+  closeTab(tabId);
+  removeFromCache(tabId);
+  // CRITICAL: Also clear from sessionCache to free memory immediately
+  sessionCache.removeDocument(tabId);
+  console.log(`[MULTI-TAB] 🗑️ Tab closed, cache cleared for document ${tabId?.substring(0, 8)}`);
+}, [closeTab, removeFromCache]);
+```
+
+And add `removeDocument` method to sessionCache.js:
+```javascript
+removeDocument(documentId) {
+  const docKey = this.getDocumentKey(documentId);
+  const blocksKey = this.getBlocksKey(documentId);
+  const metaKey = this.getMetadataKey(documentId);
+
+  this.cache.delete(docKey);
+  this.cache.delete(blocksKey);
+  this.cache.delete(metaKey);
+
+  console.log(`[CACHE-CLEANUP] 🗑️ Removed document ${documentId.substring(0, 8)} from sessionCache`);
+}
+```
+
+**Debug Logs to Look For**:
+```
+[MULTI-TAB] 🗑️ Tab closed, cache cleared for document xxxxxxxx
+[CACHE-CLEANUP] 🗑️ Removed document xxxxxxxx from sessionCache (3 entries cleared)
+```
+
+---
+
 ### SmartSync: Blocks Not Saving (Debounce Lost on Tab Switch)
 **Date**: 2025-11-29
 **Severity**: 🔴 CRITICAL - Data loss on tab switch

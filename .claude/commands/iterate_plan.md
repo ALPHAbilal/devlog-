@@ -1,6 +1,6 @@
 ---
 description: Iterate on existing implementation plans with thorough research and updates
-model: claude-sonnet-4-5-20250929
+model: claude-opus-4-5-20251101
 ---
 
 # Iterate Implementation Plan

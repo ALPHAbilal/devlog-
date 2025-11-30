@@ -318,18 +318,20 @@ export default function ImageViewer({
 
   // Prevent body scroll when lightbox is open
   useEffect(() => {
-    if (image) {
+    if (image && typeof document !== 'undefined' && document.body) {
       const scrollY = window.scrollY;
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-      
+
       return () => {
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
+        if (document.body) {
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.top = '';
+          document.body.style.width = '';
+        }
         window.scrollTo(0, scrollY);
       };
     }
@@ -494,6 +496,6 @@ export default function ImageViewer({
         </p>
       </div>
     </div>,
-    document.body
+    typeof document !== 'undefined' && document.body ? document.body : document.createElement('div')
   );
 }

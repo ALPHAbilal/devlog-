@@ -32,9 +32,13 @@ export default function SharedDocument() {
 
   // Hide body scrollbar to prevent double scrollbars
   useEffect(() => {
-    document.body.style.overflow = 'hidden';
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.style.overflow = 'hidden';
+    }
     return () => {
-      document.body.style.overflow = '';
+      if (typeof document !== 'undefined' && document.body) {
+        document.body.style.overflow = '';
+      }
     };
   }, []);
 

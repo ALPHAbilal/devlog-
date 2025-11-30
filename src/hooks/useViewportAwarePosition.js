@@ -167,6 +167,6 @@ function getScrollParent(element) {
     
     parent = parent.parentElement;
   }
-  
-  return document.body;
+
+  return typeof document !== 'undefined' && document.body ? document.body : null;
 }

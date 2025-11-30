@@ -285,6 +285,6 @@ export const useSwipe = (elementRef, { onSwipeLeft, onSwipeRight, threshold = 50
 
 // Hook for detecting horizontal swipe on the entire document
 export const useDocumentSwipe = ({ onSwipeLeft, onSwipeRight, threshold = 50 } = {}) => {
-  const documentRef = useRef(document.body);
+  const documentRef = useRef(typeof document !== 'undefined' ? document.body : null);
   return useSwipe(documentRef, { onSwipeLeft, onSwipeRight, threshold });
 };

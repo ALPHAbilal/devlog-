@@ -116,7 +116,7 @@ function ContextMenu({ x, y, onClose, items }) {
         )
       ))}
     </div>,
-    document.body
+    typeof document !== 'undefined' && document.body ? document.body : document.createElement('div')
   );
 }
 

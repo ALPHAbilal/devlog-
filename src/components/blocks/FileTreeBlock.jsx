@@ -192,7 +192,7 @@ function FileContentEditor({ file, onSave, onClose }) {
         </div>
       </div>
     </div>,
-    document.body
+    typeof document !== 'undefined' && document.body ? document.body : document.createElement('div')
   );
 }
 

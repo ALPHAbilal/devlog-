@@ -60,14 +60,14 @@ const getEstimatedHeight = (block) => {
   }
 };
 
-function Block({ 
-  block, 
-  onUpdate, 
-  onDelete, 
-  onAddBelow, 
-  onConvert, 
-  showAddButton, 
-  isFocused, 
+function Block({
+  block,
+  onUpdate,
+  onDelete,
+  onAddBelow,
+  onConvert,
+  showAddButton,
+  isFocused,
   onFocus,
   onDuplicate,
   onMoveUp,
@@ -85,7 +85,8 @@ function Block({
   draggedBlockId,
   dropTargetId,
   dropPosition,
-  isMobileView = false
+  isMobileView = false,
+  readOnly = false
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -188,14 +189,15 @@ function Block({
               estimatedHeight={getEstimatedHeight(block)}
             />
           ) : (
-            <BlockComponent 
-              block={block} 
+            <BlockComponent
+              block={block}
               onUpdate={onUpdate}
               onConvert={handleConvert}
               {...(block.type !== 'text' && block.type !== 'table' ? { isFocused, onFocus } : {})}
               onAddBelow={onAddBelow}
               allBlocks={allBlocks}
               onNavigateToBlock={onNavigateToBlock}
+              readOnly={readOnly}
             />
           )}
         </div>
@@ -355,14 +357,15 @@ function Block({
               estimatedHeight={getEstimatedHeight(block)}
             />
           ) : (
-            <BlockComponent 
-              block={block} 
+            <BlockComponent
+              block={block}
               onUpdate={onUpdate}
               onConvert={handleConvert}
               {...(block.type !== 'text' && block.type !== 'table' ? { isFocused, onFocus } : {})}
               onAddBelow={onAddBelow}
               allBlocks={allBlocks}
               onNavigateToBlock={onNavigateToBlock}
+              readOnly={readOnly}
             />
           )}
         </div>

@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContextOptimized';
 import InlineImage from '../InlineImage';
 import ImageViewer from '../ImageViewer';
 
-function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
+function ImageBlock({ block, onUpdate, onDelete, isFocused, readOnly }) {
   const { user } = useAuth();
   const [images, setImages] = useState([]);
   
@@ -255,13 +255,13 @@ function ImageBlock({ block, onUpdate, onDelete, isFocused }) {
   const handlePrev = () => navigateLightbox('prev');
 
   return (
-    <div 
+    <div
       className={`relative rounded-lg border transition-all ${
-        isFocused ? 'border-accent-green shadow-lg' : 'border-dark-secondary/50'
+        readOnly ? 'border-dark-secondary/50' : (isFocused ? 'border-accent-green shadow-lg' : 'border-dark-secondary/50')
       }`}
-      onPaste={handlePaste}
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
+      onPaste={!readOnly ? handlePaste : undefined}
+      onDrop={!readOnly ? handleDrop : undefined}
+      onDragOver={!readOnly ? handleDragOver : undefined}
     >
       {images.length === 0 ? (
         // Upload interface

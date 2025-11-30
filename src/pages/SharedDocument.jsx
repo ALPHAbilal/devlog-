@@ -172,7 +172,7 @@ export default function SharedDocument() {
   return (
     <div className="bg-dark-primary min-h-screen">
       {/* Minimal Header Bar */}
-      <div className="border-b border-gray-800/50 bg-dark-primary/95 backdrop-blur-sm sticky top-0 z-40">
+      <div className="border-b border-gray-800/50 bg-dark-primary sticky top-0 z-40">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Left: Icon + Title + Meta */}

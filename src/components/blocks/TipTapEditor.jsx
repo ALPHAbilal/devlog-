@@ -82,7 +82,7 @@ function TipTapEditor({
     editorProps: {
       attributes: {
         class: `tiptap-editor ${className}`.trim(),
-        spellcheck: 'true',
+        spellcheck: 'false',
       },
       // Handle paste events
       handlePaste: (view, event) => {

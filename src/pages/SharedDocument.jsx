@@ -30,6 +30,14 @@ export default function SharedDocument() {
     checkAccess();
   }, [shareCode]);
 
+  // Hide body scrollbar to prevent double scrollbars
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   const checkAccess = async (providedPassword = null) => {
     setLoading(true);
     setError(null);

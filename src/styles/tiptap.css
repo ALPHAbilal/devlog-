@@ -21,18 +21,11 @@
   transition: padding 0.15s ease, border-color 0.15s ease;
 }
 
-/* Focus indicator - subtle left accent */
+/* No focus indicator - seamless borderless experience */
 .tiptap-editor:focus,
 .tiptap-editor:focus-within,
 .ProseMirror:focus {
   outline: none;
-}
-
-.tiptap-editor.focused,
-.tiptap-editor:focus-within {
-  border-left: 2px solid var(--color-accent-green, #22c55e);
-  padding-left: 0.75rem;
-  margin-left: -0.75rem;
 }
 
 /* ProseMirror specific */

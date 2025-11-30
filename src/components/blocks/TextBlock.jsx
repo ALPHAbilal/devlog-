@@ -266,7 +266,6 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
       <div className={`
         transition-all duration-200
         ${isCollapsed ? 'max-h-[200px] overflow-hidden relative' : ''}
-        ${isFocused ? 'border-l-2 border-accent-green pl-3 -ml-3' : ''}
       `}>
         <TipTapEditor
           content={htmlContent}

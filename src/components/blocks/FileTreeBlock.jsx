@@ -1130,7 +1130,7 @@ function FileTreeBlock({ block, onUpdate }) {
                 </button>
 
                 {/* Hover tooltip */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 bg-dark-primary rounded text-xs text-text-primary opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-20 shadow-lg border border-dark-secondary/40" style={{ maxWidth: '250px' }}>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-2 py-1 bg-dark-primary rounded text-xs text-text-primary opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-[100] shadow-lg border border-dark-secondary/40" style={{ maxWidth: '250px' }}>
                   <div className="whitespace-nowrap">{snapshot.label}</div>
                   <div className="text-text-secondary/60 text-xs whitespace-nowrap">
                     {formatTimestamp(snapshot.timestamp)}
@@ -1161,7 +1161,7 @@ function FileTreeBlock({ block, onUpdate }) {
                       e.stopPropagation();
                       deleteSnapshot(snapshot.id);
                     }}
-                    className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dark-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-400 hover:text-dark-primary z-20 border border-dark-secondary/30"
+                    className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-dark-primary rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-400 hover:text-dark-primary z-[100] border border-dark-secondary/30"
                   >
                     <X size={10} />
                   </button>

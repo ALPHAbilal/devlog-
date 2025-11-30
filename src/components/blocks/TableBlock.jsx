@@ -642,7 +642,7 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
       </div>
 
       {/* Table - Modern design with subtle borders */}
-      <div className="bg-dark-primary/50 backdrop-blur-sm rounded-lg overflow-hidden border border-dark-secondary/30 shadow-lg shadow-dark-primary/20">
+      <div className="bg-dark-primary/50 backdrop-blur-sm rounded-lg border border-dark-secondary/30 shadow-lg shadow-dark-primary/20">
         <style dangerouslySetInnerHTML={{ __html: customStyles }} />
         <div className="overflow-x-auto table-scroll">
           <table className="w-full border-collapse table-auto">
@@ -652,7 +652,7 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
                 <th className="w-10"></th>
                 {tableData.headers.map((_, index) => (
                   <th key={index} className="relative p-0">
-                    <div className="absolute top-0 right-0 flex items-center gap-0.5 p-1 z-10 bg-dark-primary/90 backdrop-blur-sm rounded">
+                    <div className="absolute top-0 right-0 flex items-center gap-0.5 p-1 z-50 bg-dark-primary/90 backdrop-blur-sm rounded">
                       {Object.entries(alignmentIcons).map(([align, Icon]) => (
                         <button
                           key={align}

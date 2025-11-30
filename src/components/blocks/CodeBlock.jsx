@@ -277,7 +277,7 @@ function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
               {showFilePathSuggestions && filePathSuggestions.length > 0 && (
                 <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto
                                 bg-dark-secondary rounded-lg shadow-xl border border-dark-primary/50
-                                z-50">
+                                z-[100]">
                   {filePathSuggestions.map((suggestion, index) => (
                     <button
                       key={index}
@@ -477,8 +477,8 @@ function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
           </button>
           
           {showLanguageDropdown && (
-            <div className="absolute top-full right-0 mt-1 w-48 bg-dark-secondary rounded-lg 
-                            shadow-xl border border-dark-primary/50 overflow-hidden z-50
+            <div className="absolute top-full right-0 mt-1 w-48 bg-dark-secondary rounded-lg
+                            shadow-xl border border-dark-primary/50 overflow-hidden z-[100]
                             animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="max-h-64 overflow-y-auto">
                 {supportedLanguages.map(lang => (

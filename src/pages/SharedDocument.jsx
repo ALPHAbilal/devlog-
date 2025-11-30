@@ -250,19 +250,24 @@ export default function SharedDocument() {
         <div className="space-y-2">
           {document.blocks && document.blocks.length > 0 ? (
             document.blocks.map((block, index) => (
-              <Block
+              <div
                 key={block.id}
-                block={block}
-                isFirst={index === 0}
-                isLast={index === document.blocks.length - 1}
-                onUpdate={() => {}}
-                onDelete={() => {}}
-                onAddBelow={() => {}}
-                onConvert={() => {}}
-                showAddButton={false}
-                isFocused={true}
-                readOnly={true}
-              />
+                className="relative"
+                style={{ zIndex: document.blocks.length - index }}
+              >
+                <Block
+                  block={block}
+                  isFirst={index === 0}
+                  isLast={index === document.blocks.length - 1}
+                  onUpdate={() => {}}
+                  onDelete={() => {}}
+                  onAddBelow={() => {}}
+                  onConvert={() => {}}
+                  showAddButton={false}
+                  isFocused={true}
+                  readOnly={true}
+                />
+              </div>
             ))
           ) : (
             <div className="text-center py-12">

@@ -314,7 +314,10 @@ function ExpandedView({
   }) => {
 
     return (
-      <div className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}>
+      <div
+        className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
+        style={{ zIndex: isBlockFocused ? 50 : 1 }}
+      >
         {block?.isLoading ? (
           <OptimizedBlockSkeleton 
             type={block.type} 

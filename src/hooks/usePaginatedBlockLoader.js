@@ -74,12 +74,23 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
             return deserializeBlock(block);
           });
           
+          // DEBUG: Log block positions from entry.blocks
+          console.log('[DEBUG-LOAD-POSITIONS] Blocks loaded from entry.blocks with positions:',
+            deserializedBlocks.map((b, idx) => ({
+              arrayIndex: idx,
+              blockId: b.id?.substring(0, 8),
+              type: b.type,
+              position: b.position,
+              positionMatchesIndex: b.position === idx
+            }))
+          );
+
           setBlocks(deserializedBlocks);
           setTotalCount(deserializedBlocks.length);
           setHasMore(false);
           setIsLoading(false);
           sessionCache.cacheBlocks(documentId, deserializedBlocks);
-          
+
           const loadTime = performance.now() - loadStartTime;
           console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from entry in ${loadTime.toFixed(2)}ms`);
           console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: entry.blocks (bypasses cache check)`);
@@ -157,7 +168,18 @@ export function usePaginatedBlockLoader(documentId, entry, options = {}) {
         if (result && result.blocks) {
           // [CACHE-TRACK] Log blocks received
           console.log(`[CACHE-TRACK] 📦 RECEIVED: ${result.blocks.length} blocks from loader (totalCount: ${result.totalCount}, hasMore: ${result.hasMore}, fromCache: ${result.fromCache || false})`);
-          
+
+          // DEBUG: Log block positions from database
+          console.log('[DEBUG-LOAD-POSITIONS] Blocks loaded from database with positions:',
+            result.blocks.map((b, idx) => ({
+              arrayIndex: idx,
+              blockId: b.id?.substring(0, 8),
+              type: b.type,
+              position: b.position,
+              positionMatchesIndex: b.position === idx
+            }))
+          );
+
           startTransition(() => {
             setBlocks(result.blocks);
             setTotalCount(result.totalCount);

@@ -313,20 +313,40 @@ function ExpandedView({
     dropPosition
   }) => {
 
+    // DEBUG: Log what blocks.length is in this closure
+    const blocksLengthFromClosure = blocks?.length;
+    const blocksLengthFromRef = blocksRef.current?.length;
+    const canMoveUpCalc = index > 0;
+    const canMoveDownCalc = index < blocksLengthFromClosure - 1;
+    const canMoveDownFromRef = index < blocksLengthFromRef - 1;
+
+    console.log('[DEBUG-CANMOVE] BlockRenderer render:', {
+      blockId: block?.id?.substring(0, 8),
+      blockType: block?.type,
+      index,
+      blocksLengthFromClosure,
+      blocksLengthFromRef,
+      canMoveUp: canMoveUpCalc,
+      canMoveDown: canMoveDownCalc,
+      canMoveDownFromRef,
+      isLastBlock: index === blocksLengthFromClosure - 1,
+      timestamp: Date.now()
+    });
+
     return (
       <div
         className={`relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
         style={{ zIndex: isBlockFocused ? 50 : 1 }}
       >
         {block?.isLoading ? (
-          <OptimizedBlockSkeleton 
-            type={block.type} 
+          <OptimizedBlockSkeleton
+            type={block.type}
             estimatedHeight={block.estimatedHeight || 100}
           />
         ) : (
           <>
-            <BlockErrorBoundary 
-              blockType={block?.type} 
+            <BlockErrorBoundary
+              blockType={block?.type}
               blockId={block?.id}
             >
               <Block
@@ -337,8 +357,8 @@ function ExpandedView({
                 onDuplicate={duplicateBlock}
                 onMoveUp={handleMoveUp}
                 onMoveDown={handleMoveDown}
-                canMoveUp={index > 0}
-                canMoveDown={index < blocks.length - 1}
+                canMoveUp={canMoveUpCalc}
+                canMoveDown={canMoveDownCalc}
                 isMobileView={isMobileView}
                 onAddBelow={(data) => handleInlineBlockAdd(index, data)}
                 onConvert={convertBlock}
@@ -1053,26 +1073,52 @@ function ExpandedView({
       currentPositions: currentBlocks.slice(0, 5).map(b => ({id: b.id.substring(0,8), pos: currentBlocks.indexOf(b)}))
     });
 
-    // CRITICAL FIX: Call Smart Sync for reorder operation
+    // CRITICAL FIX: Call Smart Sync for ALL affected blocks, not just the moved one!
+    // When moving from index 3 to index 0:
+    // - Block at position 3 → position 0 (moved block)
+    // - Block at position 0 → position 1 (shifted)
+    // - Block at position 1 → position 2 (shifted)
+    // - Block at position 2 → position 3 (shifted)
     if (smartSyncManagerRef.current && movedBlock) {
-      // DEBUG: Log what we're sending for REORDER
-      console.log('[DEBUG-MOVE-4] Calling SmartSync.handleChange:', {
+      // Determine which blocks need position updates
+      const minIndex = Math.min(blockIndex, newIndex);
+      const maxIndex = Math.max(blockIndex, newIndex);
+
+      console.log('[DEBUG-MOVE-4] Sending REORDER for ALL affected blocks:', {
         invocationId,
-        blockId: movedBlock.id,
-        blockType: movedBlock.type,
-        position: newIndex,
-        action: 'REORDER',
+        movedBlockId: movedBlock.id,
+        fromIndex: blockIndex,
+        toIndex: newIndex,
+        affectedRange: `${minIndex} to ${maxIndex}`,
+        totalAffected: maxIndex - minIndex + 1,
         timestamp: Date.now()
       });
-      
-      // Send all required parameters for REORDER
-      smartSyncManagerRef.current.handleChange(
-        movedBlock.id,
-        null,               // REORDER doesn't need content - only position changes!
-        'REORDER',
-        movedBlock.type,    // ADD: block type (required!)
-        newIndex            // ADD: position as number (required!)
-      ).catch(error => {
+
+      // Send REORDER for each block that needs a position update
+      const reorderPromises = [];
+      for (let i = minIndex; i <= maxIndex; i++) {
+        const block = updatedBlocks[i];
+        if (block) {
+          console.log('[DEBUG-MOVE-4] Sending REORDER for block:', {
+            blockId: block.id.substring(0, 8),
+            blockType: block.type,
+            newPosition: i
+          });
+
+          reorderPromises.push(
+            smartSyncManagerRef.current.handleChange(
+              block.id,
+              null,           // REORDER doesn't need content
+              'REORDER',
+              block.type,     // Block type
+              i               // New position (array index)
+            )
+          );
+        }
+      }
+
+      // Wait for all REORDER operations
+      Promise.all(reorderPromises).catch(error => {
         console.error('[DEBUG-MOVE-4] Smart Sync move error:', { invocationId, error });
       });
     }
@@ -1103,6 +1149,16 @@ function ExpandedView({
   // This prevents ALL blocks from receiving prop changes when selector state changes
   const renderBlockItem = useCallback((index, block) => {
     if (!block) return null;
+
+    // DEBUG: Log what we're passing to BlockRenderer
+    console.log('[DEBUG-RENDERITEM] renderBlockItem called:', {
+      index,
+      blockId: block.id?.substring(0, 8),
+      blockType: block.type,
+      blocksLengthInScope: blocks?.length,
+      blocksRefLength: blocksRef.current?.length,
+      timestamp: Date.now()
+    });
 
     if (import.meta.env.DEV) {
       // Count renders per block

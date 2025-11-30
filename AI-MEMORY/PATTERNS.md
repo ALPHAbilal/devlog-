@@ -3,6 +3,42 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Shared Document Shows Raw JSON Instead of Content
+**Date**: 2025-11-30
+**Severity**: 🔴 CRITICAL - Shared documents unreadable
+**Symptoms**:
+- Shared documents show `{"content":"actual text"}` instead of "actual text"
+- All block types affected (text, code, heading, etc.)
+- Normal documents work fine, only shared ones broken
+
+**Root Cause**:
+Blocks are stored in the database with content as JSON (e.g., `{"content":"hello"}` for text blocks). The `blockSerializer.js` handles this transformation:
+- `serializeBlock()`: Wraps content in JSON for storage
+- `deserializeBlock()`: Extracts content from JSON for display
+
+**The Problem**: `shareService.js` and `sophisticatedShareService.js` were NOT deserializing blocks returned from the `get_shared_document_blocks` RPC function.
+
+```javascript
+// OLD (buggy): Raw database blocks passed directly
+blocks = blocksData || [];
+
+// NEW (fixed): Deserialize blocks to transform JSON content
+blocks = (blocksData || []).map(block => deserializeBlock(block));
+```
+
+**Files Fixed**:
+- `src/services/shareService.js:255-257` - Added deserializeBlock import and mapping
+- `src/services/sophisticatedShareService.js:155-156` - Same fix
+
+**Key Insight**: ANY code path that fetches blocks from the database and renders them MUST call `deserializeBlock()` on each block. The serialization/deserialization is NOT optional - blocks are stored as JSON in the database.
+
+**Related Files**:
+- `src/utils/blockSerializer.js` - The serialize/deserialize functions
+- `src/utils/blockSchemas.js` - Zod schemas for block validation
+- Normal document loading paths (Dashboard, ExpandedView) already deserialize correctly
+
+---
+
 ### Document Title Reverts to "Untitled Document (N)" After Few Seconds
 **Date**: 2025-11-30
 **Severity**: 🔴 CRITICAL - User-entered titles lost

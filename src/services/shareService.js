@@ -10,6 +10,7 @@
 
 import { supabase } from '../lib/supabase';
 import { logError } from '../utils/monitoring';
+import { deserializeBlock } from '../utils/blockSerializer';
 
 export class ShareService {
   /**
@@ -251,7 +252,9 @@ export class ShareService {
           // Don't throw, just leave blocks empty
           blocks = [];
         } else {
-          blocks = blocksData || [];
+          // CRITICAL FIX: Deserialize blocks to transform stored JSON content back to proper structure
+          // Without this, text blocks show raw JSON like {"content":"text"} instead of "text"
+          blocks = (blocksData || []).map(block => deserializeBlock(block));
         }
       }
 

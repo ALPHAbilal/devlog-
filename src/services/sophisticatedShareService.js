@@ -9,6 +9,7 @@
 
 import { supabase } from '../lib/supabase';
 import { logError } from '../utils/monitoring';
+import { deserializeBlock } from '../utils/blockSerializer';
 
 export class SophisticatedShareService {
   /**
@@ -151,7 +152,8 @@ export class SophisticatedShareService {
           p_share_code: shareCode,
           p_document_id: documentData.document_id
         });
-        blocks = blocksData || [];
+        // CRITICAL FIX: Deserialize blocks to transform stored JSON content back to proper structure
+        blocks = (blocksData || []).map(block => deserializeBlock(block));
       }
 
       // Get user profile

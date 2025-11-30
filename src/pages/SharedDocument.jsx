@@ -260,7 +260,8 @@ export default function SharedDocument() {
                 onAddBelow={() => {}}
                 onConvert={() => {}}
                 showAddButton={false}
-                isFocused={true}
+                isFocused={false}
+                readOnly={true}
               />
             ))
           ) : (

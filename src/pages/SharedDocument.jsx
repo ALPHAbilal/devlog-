@@ -5,8 +5,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Lock, Eye, Download, Copy, Check,
-  AlertCircle, Shield, Clock, User, FileText, Link
+  Lock, Download, Check, AlertCircle,
+  Shield, User, FileText, Link
 } from 'lucide-react';
 import { shareService } from '../services/shareService';
 import { useAuth } from '../contexts/AuthContextOptimized';
@@ -171,53 +171,50 @@ export default function SharedDocument() {
 
   return (
     <div className="h-screen bg-dark-primary overflow-y-auto">
-      {/* Minimal Header Bar */}
-      <div className="border-b border-gray-800/50 bg-dark-primary sticky top-0 z-40">
-        <div className="max-w-2xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left: Icon + Title + Meta */}
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="p-1.5 bg-accent-green/15 rounded-lg flex-shrink-0">
-                <Link className="w-3.5 h-3.5 text-accent-green" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-sm font-medium text-text-primary truncate">
-                  {document.title}
-                </h1>
-                <div className="flex items-center gap-2 text-xs text-text-secondary/70">
-                  <span>{authorName}</span>
-                  <span>•</span>
-                  <span>{dateStr}</span>
-                  <span>•</span>
-                  <span className="text-accent-green">{permissions[0]}</span>
-                </div>
-              </div>
-            </div>
+      {/* Toolbar Header */}
+      <div className="border-b border-gray-800/40 bg-dark-primary sticky top-0 z-40">
+        <div className="flex items-center justify-between h-11 px-4">
+          {/* Left: Icon + Title */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <FileText className="w-4 h-4 text-text-secondary flex-shrink-0" />
+            <span className="text-sm text-text-primary truncate font-medium">
+              {document.title}
+            </span>
+            <span className="text-xs text-text-secondary/50 flex-shrink-0">
+              {permissions[0]}
+            </span>
+          </div>
 
-            {/* Right: Actions */}
-            <div className="flex items-center gap-1.5 flex-shrink-0">
-              {canDownload && (
-                <button
-                  onClick={handleDownload}
-                  className="p-2 text-text-secondary hover:text-text-primary
-                           hover:bg-dark-lighter/50 rounded-lg transition-colors"
-                  title="Download"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-              )}
+          {/* Right: Icon Actions */}
+          <div className="flex items-center gap-0.5 flex-shrink-0">
+            <button
+              className="p-2 text-text-secondary/70 hover:text-text-primary
+                       hover:bg-white/5 rounded-md transition-colors"
+              title={`By ${authorName} • ${dateStr}`}
+            >
+              <User className="w-4 h-4" />
+            </button>
+            {canDownload && (
               <button
-                onClick={handleCopyLink}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  copied
-                    ? 'bg-accent-green text-white'
-                    : 'bg-accent-green/15 text-accent-green hover:bg-accent-green/25'
-                }`}
+                onClick={handleDownload}
+                className="p-2 text-text-secondary/70 hover:text-text-primary
+                         hover:bg-white/5 rounded-md transition-colors"
+                title="Download"
               >
-                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copied ? 'Copied' : 'Copy'}</span>
+                <Download className="w-4 h-4" />
               </button>
-            </div>
+            )}
+            <button
+              onClick={handleCopyLink}
+              className={`p-2 rounded-md transition-colors ${
+                copied
+                  ? 'text-accent-green bg-accent-green/10'
+                  : 'text-text-secondary/70 hover:text-text-primary hover:bg-white/5'
+              }`}
+              title={copied ? 'Copied!' : 'Copy link'}
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Link className="w-4 h-4" />}
+            </button>
           </div>
         </div>
       </div>

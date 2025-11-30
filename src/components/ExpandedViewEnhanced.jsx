@@ -313,25 +313,12 @@ function ExpandedView({
     dropPosition
   }) => {
 
-    // DEBUG: Log what blocks.length is in this closure
-    const blocksLengthFromClosure = blocks?.length;
-    const blocksLengthFromRef = blocksRef.current?.length;
+    // CRITICAL FIX: Use blocksRef.current.length instead of blocks.length
+    // The `blocks` variable in closure is stale (captured when blocks was empty)
+    // blocksRef.current always has the current blocks array
+    const blocksLength = blocksRef.current?.length || 0;
     const canMoveUpCalc = index > 0;
-    const canMoveDownCalc = index < blocksLengthFromClosure - 1;
-    const canMoveDownFromRef = index < blocksLengthFromRef - 1;
-
-    console.log('[DEBUG-CANMOVE] BlockRenderer render:', {
-      blockId: block?.id?.substring(0, 8),
-      blockType: block?.type,
-      index,
-      blocksLengthFromClosure,
-      blocksLengthFromRef,
-      canMoveUp: canMoveUpCalc,
-      canMoveDown: canMoveDownCalc,
-      canMoveDownFromRef,
-      isLastBlock: index === blocksLengthFromClosure - 1,
-      timestamp: Date.now()
-    });
+    const canMoveDownCalc = index < blocksLength - 1;
 
     return (
       <div
@@ -365,7 +352,7 @@ function ExpandedView({
                 showAddButton={true}
                 isFocused={isBlockFocused}
                 onFocus={setFocusedBlockId}
-                allBlocks={blocks}
+                allBlocks={blocksRef.current}
                 onDragStart={handleDragStart}
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
@@ -1149,16 +1136,6 @@ function ExpandedView({
   // This prevents ALL blocks from receiving prop changes when selector state changes
   const renderBlockItem = useCallback((index, block) => {
     if (!block) return null;
-
-    // DEBUG: Log what we're passing to BlockRenderer
-    console.log('[DEBUG-RENDERITEM] renderBlockItem called:', {
-      index,
-      blockId: block.id?.substring(0, 8),
-      blockType: block.type,
-      blocksLengthInScope: blocks?.length,
-      blocksRefLength: blocksRef.current?.length,
-      timestamp: Date.now()
-    });
 
     if (import.meta.env.DEV) {
       // Count renders per block

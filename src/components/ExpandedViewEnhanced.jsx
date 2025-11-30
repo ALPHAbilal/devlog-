@@ -452,6 +452,7 @@ function ExpandedView({
     // Get or create Smart Sync manager for this document
     const syncManager = getSmartSyncManager(entry.id);
     smartSyncManagerRef.current = syncManager;
+    console.log(`[MULTI-TAB] 📄 Document ${entry.id?.substring(0, 8)} opened in this tab`);
 
     // Load any snapshot for quick initialization
     if (syncManager) {
@@ -466,9 +467,9 @@ function ExpandedView({
     // Without this, the debounced sync (5s delay) never fires if user switches tabs quickly
     return () => {
       if (syncManager) {
-        console.log('[CLEANUP] ExpandedView unmounting, forcing sync for document:', entry.id?.substring(0, 8));
+        console.log(`[MULTI-TAB] 🚪 Document ${entry.id?.substring(0, 8)} unmounting - triggering force sync`);
         syncManager.forceSync().catch(error => {
-          console.error('[CLEANUP] Force sync failed:', error);
+          console.error('[MULTI-TAB] ❌ Force sync failed on unmount:', error);
         });
       }
     };

@@ -21,13 +21,17 @@ class SmartSyncManager {
   constructor(supabase, documentId) {
     this.supabase = supabase;
     this.documentId = documentId;
-    
+
+    // Generate unique tab ID for multi-tab debugging
+    this.tabId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    console.log(`[MULTI-TAB] 🆔 Tab ${this.tabId} initialized for document ${documentId?.substring(0, 8)}`);
+
     // Configuration
     this.BATCH_SIZE = 50;           // Max changes per API call
     this.MIN_SYNC_INTERVAL = 5000;  // Min 5 seconds between syncs
     this.MAX_SYNC_INTERVAL = 30000; // Max 30 seconds wait
     this.IDLE_THRESHOLD = 2000;     // User idle for 2 seconds
-    
+
     // State
     this.batchQueue = [];
     this.syncInProgress = false;
@@ -320,7 +324,7 @@ class SmartSyncManager {
 
       // Step 2: Add to batch queue
       this.batchQueue.push(change);
-      console.log('[SYNC-QUEUE-ADD] ✅ Change added to queue, size now:', this.batchQueue.length);
+      console.log(`[MULTI-TAB] 📝 Tab ${this.tabId} queued ${action} for block ${blockId?.substring(0, 8)} | Queue size: ${this.batchQueue.length}`);
 
       // Step 3: Schedule smart sync
       this.scheduleSmartSync();
@@ -630,7 +634,8 @@ class SmartSyncManager {
       );
 
       this.lastSyncTime = Date.now();
-      console.log(`SmartSync: Successfully synced ${batch.length} changes`);
+      const blockIds = batch.map(c => c.blockId?.substring(0, 8)).join(', ');
+      console.log(`[MULTI-TAB] ✅ Tab ${this.tabId} synced ${batch.length} changes to Supabase | Blocks: [${blockIds}]`);
 
       // Clear the cache to force fresh data on next load
       paginatedBlockLoader.clearCache(this.documentId);
@@ -816,7 +821,7 @@ class SmartSyncManager {
    * Force immediate sync (user-triggered)
    */
   async forceSync() {
-    console.log('SmartSync: Force sync requested');
+    console.log(`[MULTI-TAB] 🔄 Tab ${this.tabId} FORCE SYNC (closing/switching) | Pending: ${this.batchQueue.length}`);
     await this.immediateSync();
   }
 

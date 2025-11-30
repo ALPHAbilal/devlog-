@@ -126,6 +126,43 @@ because React props don't update when external stores change.
 
 ---
 
+### Save Pipeline Verification Pattern (How to Confirm Saves Work)
+**Date**: 2025-11-30
+**Purpose**: Use this pattern to verify the save pipeline is working correctly
+
+**Expected Log Sequence for Successful Save:**
+```
+1. [UPDATEBLOCK-ENTRY] updateBlock called: {blockId: 'xxx', updates: [...]}
+2. [SAVE-DEBUG] Save decision: {needsSave: true, isInitialLoad: false, hasSmartSyncManager: true, hasActualBlock: true}
+3. 🚀 SmartSync.handleChange INPUT: {blockId: 'xxx', action: 'UPDATE', blockType: 'code', position: 1}
+4. [SYNC-QUEUE-ADD] ✅ Change added to queue, size now: 1
+5. [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+6. SmartSync: Successfully synced X changes
+7. [INDEXEDDB-SYNC] ✅ Updated cache with X blocks for document yyy
+```
+
+**Expected Log Sequence After Page Reload:**
+```
+1. [CACHE-TRACK] ❌ MISS: getBlocks(xxx) - No blocks in cache (sessionCache empty on reload)
+2. [CACHE-TRACK] ✅ SOURCE: entry.blocks - Found X blocks (from IndexedDB cache)
+3. 🔎 BlockSerializer.deserialize INPUT: {type: 'text', hasContent: true}
+4. [BLOCKS-MEMO] Blocks array updated: X blocks
+```
+
+**If Save Appears Broken, Check:**
+1. `needsSave: false` → Block update didn't include saveable fields (content, data, etc.)
+2. `isInitialLoad: true` → Component still in initial load period (2s delay for existing docs)
+3. `hasSmartSyncManager: false` → Document ID missing or SmartSync not initialized
+4. `hasActualBlock: false` → Block not found in array (stale closure issue)
+5. No `[SYNC-QUEUE-ADD]` → handleChange never called
+6. No `SmartSync: Successfully synced` → Sync failed (check network/Supabase)
+
+**Key Insight**: If logs show the full sequence, save IS working. The issue is elsewhere (e.g., data format, deserialization).
+
+**Related**: See "Blocks Show Raw JSON Instead of Content" if blocks display but show wrong format.
+
+---
+
 ### Blocks Show Raw JSON Instead of Content
 **Date**: 2025-11-29
 **Severity**: 🔴 CRITICAL - Content displays as `{"content":"actual text"}` instead of "actual text"

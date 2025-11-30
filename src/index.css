@@ -21,6 +21,7 @@
 @import './styles/unified-gradients.css';
 @import './styles/section-transitions.css';
 @import './styles/legal-pages.css';
+@import './styles/tiptap.css';
 
 @tailwind base;
 @tailwind components;

@@ -608,13 +608,13 @@ const TableBlock = function TableBlock({ block, onUpdate }) {
 
 
   return (
-    <div className="group relative" ref={tableRef}>
+    <div className="group relative pt-10" ref={tableRef}>
       {/* Table icon indicator */}
-      <div className="absolute -left-8 top-0 text-text-secondary/30">
+      <div className="absolute -left-8 top-10 text-text-secondary/30">
         <Table size={18} />
       </div>
       {/* Table Controls - Subtle and elegant */}
-      <div className="absolute -top-8 right-0 flex items-center gap-1.5 opacity-60 hover:opacity-100">
+      <div className="absolute top-0 right-0 flex items-center gap-1.5 opacity-60 hover:opacity-100">
         <button
           onClick={toggleHeaderRow}
           className={`px-2.5 py-1 text-xs rounded-md font-medium transition-all ${

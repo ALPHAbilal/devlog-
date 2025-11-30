@@ -693,16 +693,30 @@ export default function Dashboard() {
         // Keep locally-created documents that aren't synced yet
         const locallyCreatedNew = prev.filter(d => d.metadata?.createdLocally && !paginatedIds.has(d.id));
 
-        // For documents that exist in both, preserve blocks from local version
+        // For documents that exist in both, preserve LOCAL data (blocks, title, etc.)
+        // This prevents Supabase data from overwriting unsaved local changes
         const mergedPaginated = paginatedDocuments.map(pDoc => {
-          const localDoc = prev.find(d => d.id === pDoc.id && d.metadata?.createdLocally && d.blocks?.length > 0);
+          const localDoc = prev.find(d => d.id === pDoc.id);
           if (localDoc) {
-            // Preserve blocks from locally-created document
-            console.log('[DEBUG-CREATE-9] Preserving blocks from local doc:', {
-              id: pDoc.id.substring(0, 8),
-              localBlocks: localDoc.blocks?.length || 0
-            });
-            return { ...pDoc, blocks: localDoc.blocks };
+            // CRITICAL: Preserve local title and blocks if local is newer
+            const localUpdated = new Date(localDoc.updatedAt || localDoc.updated_at || 0).getTime();
+            const serverUpdated = new Date(pDoc.updatedAt || pDoc.updated_at || 0).getTime();
+
+            if (localUpdated >= serverUpdated || localDoc.metadata?.createdLocally) {
+              console.log('[DEBUG-CREATE-9] Preserving local data (newer or locally created):', {
+                id: pDoc.id.substring(0, 8),
+                localTitle: localDoc.title,
+                serverTitle: pDoc.title,
+                localBlocks: localDoc.blocks?.length || 0,
+                reason: localDoc.metadata?.createdLocally ? 'createdLocally' : 'localNewer'
+              });
+              return {
+                ...pDoc,
+                title: localDoc.title,  // CRITICAL: Preserve local title
+                blocks: localDoc.blocks || pDoc.blocks,
+                metadata: { ...pDoc.metadata, ...localDoc.metadata }
+              };
+            }
           }
           return pDoc;
         });

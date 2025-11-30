@@ -3,6 +3,48 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### Document Title Reverts to "Untitled Document (N)" After Few Seconds
+**Date**: 2025-11-30
+**Severity**: 🔴 CRITICAL - User-entered titles lost
+**Symptoms**:
+- User changes document title
+- Title appears correctly for a few seconds
+- Title reverts to "Untitled Document (N)" after background sync
+
+**Root Cause**:
+When `paginatedDocuments` updates (from Supabase background sync), the merge logic in `Dashboard.jsx` was only preserving **blocks**, not **title**:
+```javascript
+// OLD (buggy): Only preserved blocks
+return { ...pDoc, blocks: localDoc.blocks };
+```
+
+**The Fix**: Preserve LOCAL title (and other data) when local version is newer.
+In `Dashboard.jsx` around line 696-722:
+```javascript
+// For documents that exist in both, preserve LOCAL data (blocks, title, etc.)
+const mergedPaginated = paginatedDocuments.map(pDoc => {
+  const localDoc = prev.find(d => d.id === pDoc.id);
+  if (localDoc) {
+    const localUpdated = new Date(localDoc.updatedAt || localDoc.updated_at || 0).getTime();
+    const serverUpdated = new Date(pDoc.updatedAt || pDoc.updated_at || 0).getTime();
+
+    if (localUpdated >= serverUpdated || localDoc.metadata?.createdLocally) {
+      return {
+        ...pDoc,
+        title: localDoc.title,  // CRITICAL: Preserve local title
+        blocks: localDoc.blocks || pDoc.blocks,
+        metadata: { ...pDoc.metadata, ...localDoc.metadata }
+      };
+    }
+  }
+  return pDoc;
+});
+```
+
+**Key Insight**: Background sync from Supabase should NEVER overwrite local changes that are newer. Always compare timestamps and preserve local data when local is newer.
+
+---
+
 ### SmartSync: Blocks Not Saving (Debounce Lost on Tab Switch)
 **Date**: 2025-11-29
 **Severity**: 🔴 CRITICAL - Data loss on tab switch

@@ -118,12 +118,20 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
       setShowToolbar(false);
       setSelectedText('');
       setToolbarPosition(null);
-      
+
+      // [TEXTBLOCK-SAVE-DEBUG] Log save attempt
+      console.log('[TEXTBLOCK-SAVE-DEBUG] handleSave called:', {
+        hasContentChanged,
+        contentLength: content?.length,
+        contentPreview: content?.substring(0, 50),
+        blockId: block.id?.substring(0, 8)
+      });
+
       // Only save if content actually changed
       if (hasContentChanged) {
         // Extract tags from content before saving
         const extractedTags = extractTagsFromContent(content);
-        
+
         // Track tag usage if tags were added
         const previousTags = block.tags || [];
         if (extractedTags.length > 0 && extractedTags.length !== previousTags.length) {
@@ -132,15 +140,24 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
             tags_added: extractedTags.length - previousTags.length
           });
         }
-        
+
+        // [TEXTBLOCK-SAVE-DEBUG] Log onUpdate call
+        console.log('[TEXTBLOCK-SAVE-DEBUG] Calling onUpdate:', {
+          blockId: block.id?.substring(0, 8),
+          content: content?.substring(0, 50),
+          tags: extractedTags
+        });
+
         // Remove isNew flag when saving
-        onUpdate(block.id, { 
-          content: content, 
-          tags: extractedTags, 
+        onUpdate(block.id, {
+          content: content,
+          tags: extractedTags,
           isNew: undefined,
           metadata: { ...block.metadata, isCollapsed }
         });
         setHasContentChanged(false); // Reset the change flag
+      } else {
+        console.log('[TEXTBLOCK-SAVE-DEBUG] Skipping save - no content change');
       }
       setIsEditing(false);
     };
@@ -459,6 +476,10 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
 
   const handleChange = (e) => {
     const newContent = e.target.value;
+    console.log('[TEXTBLOCK-CHANGE] User typing:', {
+      blockId: block.id?.substring(0, 8),
+      length: newContent.length
+    });
     setContent(newContent);
     setHasContentChanged(true); // Mark content as changed when user types
 

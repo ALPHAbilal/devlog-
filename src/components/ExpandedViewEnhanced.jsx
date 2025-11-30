@@ -534,6 +534,12 @@ function ExpandedView({
 
 
   const updateBlock = useCallback((blockId, updates) => {
+    // [UPDATEBLOCK-ENTRY] Log entry point
+    console.log('[UPDATEBLOCK-ENTRY] updateBlock called:', {
+      blockId: blockId?.substring(0, 8),
+      updates: Object.keys(updates || {})
+    });
+
     // Add defensive check for blockId
     if (!blockId || !updates) {
       console.warn('updateBlock called with invalid parameters:', { blockId, updates });
@@ -675,6 +681,16 @@ function ExpandedView({
     // Use the loader's updateBlock method
     startTransition(() => {
       updateSingleBlock(blockId, updates);
+    });
+
+    // [SAVE-DEBUG] Log save decision
+    console.log('[SAVE-DEBUG] Save decision:', {
+      needsSave,
+      isInitialLoad: isInitialLoadRef.current,
+      hasSmartSyncManager: !!smartSyncManagerRef.current,
+      hasActualBlock: !!actualBlock,
+      blockId: blockId?.substring(0, 8),
+      updates: Object.keys(updates)
     });
 
     // Skip saves during initial load

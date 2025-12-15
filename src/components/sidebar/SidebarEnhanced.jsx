@@ -113,11 +113,29 @@ export function SidebarEnhanced({
   // Desktop sidebar
   return (
     <motion.div
-      className="h-full flex bg-[#0a0a0a] border-r border-white/5"
+      className="h-full flex bg-[#0a0a0a] border-r border-white/5 relative"
       initial={false}
       animate={{ width: isCollapsed ? ACTIVITY_BAR_WIDTH : PANEL_WIDTH + ACTIVITY_BAR_WIDTH }}
       transition={{ type: 'spring', damping: 30, stiffness: 300 }}
     >
+      {/* Collapse toggle at TOP - same height in both states */}
+      <button
+        onClick={handleCollapse}
+        className="absolute top-3 right-2 p-1.5 hover:bg-white/10 rounded-lg transition-colors z-20"
+        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        style={{
+          // When collapsed, position relative to activity bar
+          // When expanded, position at right edge of panel
+          right: isCollapsed ? '8px' : '8px'
+        }}
+      >
+        {isCollapsed ? (
+          <ChevronsRight className="w-4 h-4 text-white/40 hover:text-white/70 transition-colors" />
+        ) : (
+          <ChevronsLeft className="w-4 h-4 text-white/40 hover:text-white/70 transition-colors" />
+        )}
+      </button>
+
       <ActivityBar
         activeView={activeView}
         onViewChange={setActiveView}
@@ -149,19 +167,6 @@ export function SidebarEnhanced({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Collapse toggle */}
-      <button
-        onClick={handleCollapse}
-        className="absolute bottom-3 left-1 p-1.5 hover:bg-white/10 rounded-lg transition-colors z-10"
-        title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-      >
-        {isCollapsed ? (
-          <ChevronsRight className="w-4 h-4 text-white/40" />
-        ) : (
-          <ChevronsLeft className="w-4 h-4 text-white/40" />
-        )}
-      </button>
     </motion.div>
   );
 }

@@ -87,8 +87,8 @@ export function SearchView({ documents, onOpenDocument }) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Search Header */}
-      <div className="p-3">
+      {/* Search Header - pt-10 to avoid overlap with collapse button */}
+      <div className="p-3 pt-10">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Search</h2>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />

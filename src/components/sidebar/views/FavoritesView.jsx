@@ -33,8 +33,8 @@ export function FavoritesView({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-3 border-b border-white/5">
+      {/* Header - pt-10 to avoid overlap with collapse button */}
+      <div className="p-3 pt-10 border-b border-white/5">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
           <Star className="w-3.5 h-3.5 text-amber-400" />
           Favorites

@@ -126,8 +126,8 @@ export function RecentView({ documents, onOpenDocument }) {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="p-3 border-b border-white/5">
+      {/* Header - pt-10 to avoid overlap with collapse button */}
+      <div className="p-3 pt-10 border-b border-white/5">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider">Recent</h2>
         <p className="text-xs text-white/30 mt-1">Recently edited documents</p>
       </div>

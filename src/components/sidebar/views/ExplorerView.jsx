@@ -183,7 +183,7 @@ export function ExplorerView({
 
       {/* Content */}
       <ScrollArea className="flex-1">
-        <div className={`${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'}`}>
+        <div className={`${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'} pr-4`}>
           {isLoading && treeData.length === 0 ? (
             <div className="px-3 py-8 text-center">
               <div className="animate-pulse text-white/30 text-sm">Loading...</div>

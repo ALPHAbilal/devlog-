@@ -10,9 +10,9 @@ import EmptyState from '../components/EmptyState';
 import { useTabContext } from '../contexts/TabContext';
 import ConfirmDialog from '../components/ConfirmDialog';
 import ProjectCard from '../components/ProjectCard';
-// import ProjectExplorer from '../components/ProjectExplorer/ProjectExplorer';
-// import ProjectExplorerV2 from '../components/ProjectExplorer/ProjectExplorerV2';
-import ProjectExplorerV2 from '../components/ProjectExplorer/ProjectExplorerRedesigned';
+// Old sidebar (kept for reference)
+// import ProjectExplorerV2 from '../components/ProjectExplorer/ProjectExplorerRedesigned';
+import { SidebarEnhanced } from '../components/sidebar';
 import ProjectModal from '../components/ProjectModal';
 import CustomDragOverlay from '../components/DragOverlay';
 import NavigationCommandPalette from '../components/NavigationCommandPalette';
@@ -1477,76 +1477,62 @@ export default function Dashboard() {
 
         {/* Main area - fills remaining height */}
         <div className="flex-1 min-h-0 flex overflow-hidden">
-          {/* Mobile Sidebar Overlay */}
-          {showSidebar && isMobile && (
-            <div
-              className="fixed inset-0 bg-black/50 z-20"
-              onClick={() => closeMobileSidebar()}
-            />
-          )}
-
-          {/* Sidebar - fixed width, collapsible */}
-          <div
-            className={`
-              flex-shrink-0 h-full transition-all duration-300 ease-in-out
-              ${isMobile ? 'fixed inset-y-0 left-0 z-40' : ''}
-              ${isMobile && !showSidebar ? '-translate-x-full' : 'translate-x-0'}
-            `}
-            style={{ width: isMobile ? '280px' : (isSidebarCollapsed ? '80px' : '280px') }}
-          >
-            <ProjectExplorerV2
-              isCollapsed={isSidebarCollapsed}
-              onToggleCollapse={toggleSidebarCollapse}
-              className="h-full"
-              onCreateDocument={handleCreateNewTab}
-              onDocumentSelect={(data) => {
-                console.log('[DEBUG-CREATE-3] Dashboard onDocumentSelect received:', {
-                  action: data?.action,
-                  folderId: data?.folderId,
-                  id: data?.id,
-                  fullData: data
-                });
-                if (data?.action === 'create') {
-                  console.log('[DEBUG-CREATE-3] Action is "create", folderId:', data?.folderId);
-                  // FIX: Pass folderId to createNewEntry
-                  createNewEntry(data.folderId);
-                  console.log('[DEBUG-CREATE-3] Called createNewEntry with folderId:', data?.folderId);
-                } else if (data?.id) {
-                  const doc = allDocuments.find(e => e.id === data.id);
-                  if (doc) {
-                    handleDocumentExpand(doc);
-                  }
-                } else if (data) {
-                  handleDocumentExpand(data);
-                }
-                // Close mobile sidebar after selection
-                if (isMobile) closeMobileSidebar();
-              }}
-              selectedDocumentId={activeTabId}
-              documents={allDocuments}
-              onDocumentMove={async (docId, folderId) => {
-                await updateEntry(docId, { folder_id: folderId });
-              }}
-              onDocumentDelete={(document) => {
-                const docId = document.id || document;
-                setConfirmDialogConfig({
-                  title: 'Delete Document',
-                  message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
-                  onConfirm: async () => {
-                    await deleteEntry(docId);
-                    // Close tab if open
-                    if (tabs.find(t => t.id === docId)) {
-                      closeTab(docId);
+          {/* Enhanced Sidebar with Activity Bar */}
+          <SidebarEnhanced
+            isOpen={showSidebar}
+            onClose={closeMobileSidebar}
+            isMobile={isMobile}
+            folders={folders}
+            documents={allDocuments}
+            onOpenDocument={(doc) => {
+              if (doc?.id) {
+                handleDocumentExpand(doc);
+              }
+              if (isMobile) closeMobileSidebar();
+            }}
+            onCreateFolder={async (parentId = null) => {
+              // TODO: Show input modal for folder name
+              const name = prompt('Enter folder name:');
+              if (name) {
+                const { createFolder } = await import('../hooks/useFolders').then(m => m.useFolders());
+                await createFolder(name, parentId);
+              }
+            }}
+            onCreateDocument={(folderId = null) => {
+              createNewEntry(folderId);
+            }}
+            onDeleteItem={(item) => {
+              const itemId = item.id;
+              const isDocument = item.type === 'document' || !item.type;
+              setConfirmDialogConfig({
+                title: isDocument ? 'Delete Document' : 'Delete Folder',
+                message: `Are you sure you want to delete "${item.title || item.name || 'this item'}"? This action cannot be undone.`,
+                onConfirm: async () => {
+                  if (isDocument) {
+                    await deleteEntry(itemId);
+                    if (tabs.find(t => t.id === itemId)) {
+                      closeTab(itemId);
                     }
-                    await loadEntries();
-                    toast.success('Document deleted successfully');
-                    setShowConfirmDialog(false);
+                  } else {
+                    const { deleteFolder } = await import('../hooks/useFolders').then(m => m.useFolders());
+                    await deleteFolder(itemId);
                   }
-                });
-                setShowConfirmDialog(true);
-              }}
-            />
-          </div>
+                  await loadEntries();
+                  toast.success(`${isDocument ? 'Document' : 'Folder'} deleted successfully`);
+                  setShowConfirmDialog(false);
+                }
+              });
+              setShowConfirmDialog(true);
+            }}
+            onToggleFavorite={async (item, isFavorite) => {
+              if (item.type === 'document') {
+                await updateEntry(item.id, { is_favorite: isFavorite });
+              }
+              // TODO: Implement folder favorites
+            }}
+            onRefresh={loadEntries}
+            isLoading={isLoadingDocuments}
+          />
 
           {/* Document area - takes remaining width, scrolls internally */}
           <div className="flex-1 min-w-0 h-full overflow-hidden">
@@ -1649,55 +1635,8 @@ export default function Dashboard() {
         />
       )}
       
-      {/* Mobile Bottom Sheet for Sidebar */}
-      {isMobile && (
-        <MobileBottomSheet
-          isOpen={showMobileSidebarSheet}
-          onClose={() => setShowMobileSidebarSheet(false)}
-          title="Projects & Folders"
-          snapPoints={['50%', '90%']}
-          defaultSnap={0}
-        >
-          <ProjectExplorerV2
-            isCollapsed={false}
-            onToggleCollapse={() => {}}
-            className="h-full"
-            onCreateDocument={handleCreateNewTab}
-            onDocumentSelect={(data) => {
-              if (data?.action === 'create') {
-                handleCreateNewTab();
-              } else if (data?.id) {
-                const doc = allDocuments.find(e => e.id === data.id);
-                if (doc) {
-                  handleDocumentExpand(doc);
-                }
-              } else if (data) {
-                handleDocumentExpand(data);
-              }
-              setShowMobileSidebarSheet(false);
-            }}
-            selectedDocumentId={activeTabId}
-            documents={allDocuments}
-            onDocumentMove={async (docId, folderId) => {
-              await updateEntry(docId, { folder_id: folderId });
-            }}
-            onDocumentDelete={(document) => {
-              const docId = document.id || document;
-              setConfirmDialogConfig({
-                title: 'Delete Document',
-                message: `Are you sure you want to delete "${document.title || 'this document'}"? This action cannot be undone.`,
-                onConfirm: async () => {
-                  await deleteEntry(docId);
-                  await loadEntries();
-                  toast.success('Document deleted successfully');
-                  setShowConfirmDialog(false);
-                }
-              });
-              setShowConfirmDialog(true);
-            }}
-          />
-        </MobileBottomSheet>
-      )}
+      {/* Mobile Bottom Sheet for Sidebar - Now handled by SidebarEnhanced */}
+      {/* The SidebarEnhanced component handles mobile mode internally with its own overlay */}
       
       {/* Mobile Context Menu */}
       {isMobile && showMobileContextMenu && contextMenuTarget && (

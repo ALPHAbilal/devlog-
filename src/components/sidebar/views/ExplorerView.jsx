@@ -211,7 +211,7 @@ export function ExplorerView({
             </div>
           ) : (
             // Tree/Compact view - hierarchical
-            <div className={`pl-2 pr-4 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
+            <div className={`px-2 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
               {treeData.map((item, index) => (
                 <SidebarTreeItemEnhanced
                   key={item.id}

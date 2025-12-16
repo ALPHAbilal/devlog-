@@ -186,7 +186,7 @@ export default function SidebarTreeItemEnhanced({
 
       <div
         className={`
-          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg
+          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-1
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile
@@ -194,7 +194,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px`, paddingRight: '8px' }}
+        style={{ paddingLeft: `${depth * 16 + 12}px` }}
         onClick={handleClick}
         title={item.name || item.title}
       >

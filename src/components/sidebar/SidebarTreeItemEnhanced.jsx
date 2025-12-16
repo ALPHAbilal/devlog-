@@ -251,7 +251,10 @@ export default function SidebarTreeItemEnhanced({
 
         {/* Count badge - NOT in compact mode */}
         {itemCount > 0 && viewMode !== 'compact' && (
-          <span className="text-[10px] text-white/40 bg-white/5 px-1 py-0.5 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0">
+          <span
+            className="text-[10px] text-white/40 bg-white/5 px-1 py-0.5 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0"
+            style={{ marginRight: '20px', backgroundColor: 'red' }}
+          >
             {itemCount}
           </span>
         )}

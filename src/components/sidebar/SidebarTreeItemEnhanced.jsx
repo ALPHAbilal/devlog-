@@ -210,7 +210,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px`, marginRight: '28px' }}
+        style={{ paddingLeft: `${depth * 16 + 12}px` }}
         onClick={handleClick}
         title={item.name || item.title}
       >

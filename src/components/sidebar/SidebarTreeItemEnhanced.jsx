@@ -186,7 +186,7 @@ export default function SidebarTreeItemEnhanced({
 
       <div
         className={`
-          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-2
+          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile
@@ -194,7 +194,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+        style={{ paddingLeft: `${depth * 16 + 12}px`, paddingRight: '8px' }}
         onClick={handleClick}
         title={item.name || item.title}
       >
@@ -229,13 +229,13 @@ export default function SidebarTreeItemEnhanced({
         )}
 
         {/* Name */}
-        <span className={`flex-1 truncate transition-all duration-200 ${isFile ? 'group-hover:translate-x-0.5' : ''}`}>
+        <span className={`flex-1 min-w-0 truncate transition-all duration-200 ${isFile ? 'group-hover:translate-x-0.5' : ''}`}>
           {item.name || item.title}
         </span>
 
         {/* Count badge - NOT in compact mode */}
         {itemCount > 0 && viewMode !== 'compact' && (
-          <span className="text-[11px] text-white/30 bg-white/5 px-1.5 py-0.5 rounded-md group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0 border border-white/5">
+          <span className="text-[10px] text-white/40 bg-white/5 px-1 py-0.5 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0">
             {itemCount}
           </span>
         )}
@@ -258,9 +258,9 @@ export default function SidebarTreeItemEnhanced({
             }
             setShowMenu(!showMenu);
           }}
-          className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200 flex-shrink-0"
+          className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 flex-shrink-0"
         >
-          <MoreHorizontal className={`${styles.iconSize} text-white/40 hover:text-white/80`} />
+          <MoreHorizontal className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
         </button>
 
         {/* Context Menu Portal */}

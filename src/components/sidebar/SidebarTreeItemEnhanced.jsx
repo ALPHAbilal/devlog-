@@ -19,6 +19,18 @@ export default function SidebarTreeItemEnhanced({
   const isFile = item.type === 'file' || item.type === 'document';
   const itemCount = item.count || (item.children ? item.children.length : 0);
 
+  // DEBUG: Comprehensive logging to trace rendering
+  console.log('[DEBUG-TREE-1] 🌳 SidebarTreeItemEnhanced RENDER:', {
+    itemName: item.name || item.title,
+    itemId: item.id,
+    viewMode,
+    depth,
+    isFile,
+    hasChildren,
+    itemCount,
+    timestamp: new Date().toISOString()
+  });
+
   // State for dropdown menu
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -186,6 +198,9 @@ export default function SidebarTreeItemEnhanced({
 
       <div
         data-debug="sidebar-tree-item-enhanced"
+        data-item-name={item.name || item.title}
+        data-view-mode={viewMode}
+        data-margin-right="28px"
         className={`
           flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg
           ${isSelected

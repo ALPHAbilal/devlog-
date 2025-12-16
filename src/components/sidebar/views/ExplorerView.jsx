@@ -83,6 +83,16 @@ export function ExplorerView({
   const totalFolders = folders.length;
   const totalDocs = documents.length;
 
+  // DEBUG: Log ExplorerView rendering
+  console.log('[DEBUG-EXPLORER-1] 📂 ExplorerView RENDER:', {
+    viewMode,
+    totalFolders,
+    totalDocs,
+    treeDataLength: treeData.length,
+    expandedFoldersCount: expandedFolders.size,
+    timestamp: new Date().toISOString()
+  });
+
   // Handle context menu actions
   const handleContextMenu = useCallback((event, item) => {
     if (item.action === 'newFolder') {

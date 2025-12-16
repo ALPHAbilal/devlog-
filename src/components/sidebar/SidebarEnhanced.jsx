@@ -47,6 +47,17 @@ export function SidebarEnhanced({
     if (isMobile) onClose?.();
   }, [navigate, isMobile, onClose]);
 
+  // DEBUG: Log SidebarEnhanced rendering
+  console.log('[DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER:', {
+    isOpen,
+    isMobile,
+    isCollapsed,
+    activeView,
+    foldersCount: folders?.length || 0,
+    documentsCount: documents?.length || 0,
+    timestamp: new Date().toISOString()
+  });
+
   // Mobile overlay sidebar
   if (isMobile) {
     return (

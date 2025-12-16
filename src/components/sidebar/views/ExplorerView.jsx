@@ -205,7 +205,7 @@ export function ExplorerView({
             </div>
           ) : viewMode === VIEW_MODES.TABLE ? (
             // Table view - flat list
-            <div className="px-2 space-y-0.5">
+            <div className="pl-2 pr-4 space-y-0.5">
               {flattenedItems.map((item) => (
                 <SidebarTreeItemEnhanced
                   key={item.id}
@@ -221,7 +221,7 @@ export function ExplorerView({
             </div>
           ) : (
             // Tree/Compact view - hierarchical
-            <div className={`px-2 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
+            <div className={`pl-2 pr-4 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
               {treeData.map((item, index) => (
                 <SidebarTreeItemEnhanced
                   key={item.id}

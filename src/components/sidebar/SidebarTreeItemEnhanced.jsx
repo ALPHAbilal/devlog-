@@ -19,9 +19,6 @@ export default function SidebarTreeItemEnhanced({
   const isFile = item.type === 'file' || item.type === 'document';
   const itemCount = item.count || (item.children ? item.children.length : 0);
 
-  // DEBUG: Log to verify component is rendering
-  console.log('[DEBUG-SIDEBAR-TREE] Rendering item:', item.name || item.title, 'viewMode:', viewMode, 'itemCount:', itemCount);
-
   // State for dropdown menu
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -190,7 +187,7 @@ export default function SidebarTreeItemEnhanced({
       <div
         data-debug="sidebar-tree-item-enhanced"
         className={`
-          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg mr-7
+          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile
@@ -198,7 +195,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+        style={{ paddingLeft: `${depth * 16 + 12}px`, marginRight: '28px' }}
         onClick={handleClick}
         title={item.name || item.title}
       >

@@ -186,7 +186,7 @@ export default function SidebarTreeItemEnhanced({
 
       <div
         className={`
-          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-1
+          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg mr-7
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile

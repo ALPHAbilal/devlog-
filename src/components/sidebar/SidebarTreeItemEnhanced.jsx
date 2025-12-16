@@ -210,7 +210,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+        style={{ paddingLeft: `${depth * 16 + 12}px`, marginRight: '12px' }}
         onClick={handleClick}
         title={item.name || item.title}
       >
@@ -251,10 +251,7 @@ export default function SidebarTreeItemEnhanced({
 
         {/* Count badge - NOT in compact mode */}
         {itemCount > 0 && viewMode !== 'compact' && (
-          <span
-            className="text-[10px] text-white/40 bg-white/5 px-1 py-0.5 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0"
-            style={{ marginRight: '20px', backgroundColor: 'red' }}
-          >
+          <span className="text-[10px] text-white/40 bg-white/5 px-1 py-0.5 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0">
             {itemCount}
           </span>
         )}

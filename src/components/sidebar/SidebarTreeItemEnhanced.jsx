@@ -89,7 +89,7 @@ export default function SidebarTreeItemEnhanced({
                 ? 'text-white/60 hover:text-white/90 cursor-pointer hover:bg-white/[0.03]'
                 : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-white/[0.03]'
             }
-            rounded-lg pl-2 pr-2
+            rounded-lg pl-2 pr-10
           `}
           onClick={handleClick}
         >
@@ -136,7 +136,7 @@ export default function SidebarTreeItemEnhanced({
             }
             setShowMenu(!showMenu);
           }}
-          className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-1.5 transition-all duration-200 z-20 bg-[#0a0a0a] border border-white/10"
+          className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-1.5 transition-all duration-200 z-20 bg-[#0a0a0a] border border-white/10"
         >
           <MoreHorizontal className={`${styles.iconSize} text-white/60 hover:text-white`} />
         </button>
@@ -194,7 +194,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px` }}
+        style={{ paddingLeft: `${depth * 16 + 12}px`, paddingRight: '40px' }}
         onClick={handleClick}
         title={item.name || item.title}
       >
@@ -262,7 +262,7 @@ export default function SidebarTreeItemEnhanced({
           }
           setShowMenu(!showMenu);
         }}
-        className="absolute right-0 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-1.5 transition-all duration-200 z-20 bg-[#0a0a0a] border border-white/10"
+        className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-1.5 transition-all duration-200 z-20 bg-[#0a0a0a] border border-white/10"
       >
         <MoreHorizontal className="w-3.5 h-3.5 text-white/60 hover:text-white" />
       </button>

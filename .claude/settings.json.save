@@ -1,0 +1,77 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)",
+      "Bash(npm test *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push)",
+      "Bash(git config *)",
+      "Bash(git tag: *)",
+      "Bash(git branch: *)",
+      "Bash(git checkout: *)",
+      "Bash(git stash *)",
+      "Bash(jq *)",
+      "Bash(node :*)",
+      "Bash(which *)",
+      "Bash(pwd)",
+      "Bash(ls :*)",
+      "Bash(grep -r \"test\" package.json)",
+      "Bash(tree:*)",
+      "Bash(git push:*)",
+      "Bash(npm run dev)",
+      "Bash(curl -I http://localhost:5173)",
+      "Bash(git add -A)",
+      "Bash(./hack/spec_metadata.sh)",
+      "Bash(hack/spec_metadata.sh)",
+      "Bash(bash hack/spec_metadata.sh)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(curl * | bash)",
+      "Bash(wget * | sh)",
+      "Bash(eval *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '📦 Container Rule: Check parent/container BEFORE modifying components\\n🔄 Small Batch: Make smallest change that works\\n⚡ Performance: 16ms animations, 100ms interactions'"
+        }]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [{
+          "type": "command",
+          "command": "echo '📊 Measure first, optimize second (Rule 7)\\n📦 Check container before component (Rule 1)'"
+        }]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [ $(git diff --numstat 2>/dev/null | awk '{s+=$1+$2} END {print s+0}') -gt 100 ]; then echo '⚠️ Large change detected. Consider Rule 9: Small Batch Verification'; fi"
+        }]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [{
+          "type": "command",
+          "command": "echo '📝 Session ending reminders:\\n• Update implementation plans\\n• Document blockers in terminal.md\\n• Note discoveries for next session'"
+        }]
+      }
+    ]
+  },
+  "includeCoAuthoredBy": true,
+  "MAX_MCP_OUTPUT_TOKENS": 100000
+}

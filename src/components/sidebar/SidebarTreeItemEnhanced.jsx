@@ -79,18 +79,18 @@ export default function SidebarTreeItemEnhanced({
   // Table view renders as a flat row with columns
   if (viewMode === 'table') {
     return (
-      <div className="relative w-full">
+      <div className="relative w-full group">
         <div
           data-debug-row="table-view-row"
           className={`
-            w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative
+            w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative
             ${isSelected
               ? 'bg-emerald-500/15 text-emerald-300'
               : isFile
                 ? 'text-white/60 hover:text-white/90 cursor-pointer hover:bg-white/[0.03]'
                 : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-white/[0.03]'
             }
-            rounded-lg pl-2 pr-8
+            rounded-lg pl-2 pr-2
           `}
           onClick={handleClick}
           onMouseEnter={() => console.log('[DEBUG-ROW] 🟡 TABLE ROW - Mouse ENTER (group should activate):', { item: item.name || item.title, viewMode })}
@@ -124,31 +124,30 @@ export default function SidebarTreeItemEnhanced({
             {item.type === 'document' ? 'file' : item.type}
           </div>
 
-          {/* Context Menu Button - ABSOLUTE POSITIONED to avoid clipping */}
-          <button
-            ref={buttonRef}
-            data-debug-btn="table-view-three-dots"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('[DEBUG-BTN] 🔴 TABLE VIEW - Button CLICKED:', { item: item.name || item.title, viewMode });
-              if (!showMenu && buttonRef.current) {
-                const rect = buttonRef.current.getBoundingClientRect();
-                console.log('[DEBUG-BTN] 📍 Button rect:', rect);
-                setMenuPosition({ top: rect.bottom + 4, left: rect.left });
-              }
-              setShowMenu(!showMenu);
-            }}
-            onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TABLE VIEW - Mouse ENTER:', { item: item.name || item.title })}
-            onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TABLE VIEW - Mouse LEAVE:', { item: item.name || item.title })}
-            className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 z-10 bg-red-500 border border-yellow-400"
-            style={{ minWidth: '20px', minHeight: '20px' }}
-          >
-            <MoreHorizontal className={`${styles.iconSize} text-white`} />
-          </button>
-
           {/* Hover indicator line */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-gradient-to-b from-emerald-400 to-emerald-500 rounded-full group-hover:h-4 transition-all duration-200 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
         </div>
+
+        {/* Context Menu Button - POSITIONED IN OUTER WRAPPER, floats over content */}
+        <button
+          ref={buttonRef}
+          data-debug-btn="table-view-three-dots"
+          onClick={(e) => {
+            e.stopPropagation();
+            console.log('[DEBUG-BTN] 🔴 TABLE VIEW - Button CLICKED:', { item: item.name || item.title, viewMode });
+            if (!showMenu && buttonRef.current) {
+              const rect = buttonRef.current.getBoundingClientRect();
+              console.log('[DEBUG-BTN] 📍 Button rect:', rect);
+              setMenuPosition({ top: rect.bottom + 4, left: rect.left });
+            }
+            setShowMenu(!showMenu);
+          }}
+          onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TABLE VIEW - Mouse ENTER:', { item: item.name || item.title })}
+          onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TABLE VIEW - Mouse LEAVE:', { item: item.name || item.title })}
+          className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-1 transition-all duration-200 z-20 bg-[#0d0d0d]/90 backdrop-blur-sm border border-white/10"
+        >
+          <MoreHorizontal className={`${styles.iconSize} text-white/70 hover:text-white`} />
+        </button>
 
         {/* Context Menu Portal */}
         {showMenu && createPortal(
@@ -184,7 +183,7 @@ export default function SidebarTreeItemEnhanced({
 
   // Tree and Compact view (hierarchical with children)
   return (
-    <div className="relative w-full">
+    <div className="relative w-full group">
       {/* Tree guide lines - only in tree/compact mode */}
       {viewMode !== 'table' && depth > 0 && (
         <div
@@ -196,7 +195,7 @@ export default function SidebarTreeItemEnhanced({
       <div
         data-debug-row="tree-compact-row"
         className={`
-          w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-8
+          w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative rounded-lg pr-2
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile
@@ -259,60 +258,59 @@ export default function SidebarTreeItemEnhanced({
           </span>
         )}
 
-        {/* Context Menu Button - ABSOLUTE POSITIONED to avoid clipping */}
-        <button
-          ref={buttonRef}
-          data-debug-btn="tree-view-three-dots"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('[DEBUG-BTN] 🔴 TREE/COMPACT VIEW - Button CLICKED:', { item: item.name || item.title, viewMode, depth });
-            if (!showMenu && buttonRef.current) {
-              const rect = buttonRef.current.getBoundingClientRect();
-              console.log('[DEBUG-BTN] 📍 Button rect:', rect);
-              setMenuPosition({ top: rect.bottom + 4, left: rect.left });
-            }
-            setShowMenu(!showMenu);
-          }}
-          onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TREE/COMPACT VIEW - Mouse ENTER:', { item: item.name || item.title, viewMode, depth })}
-          onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TREE/COMPACT VIEW - Mouse LEAVE:', { item: item.name || item.title, viewMode, depth })}
-          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 z-10 bg-red-500 border border-yellow-400"
-          style={{ minWidth: '20px', minHeight: '20px' }}
-        >
-          <MoreHorizontal className="w-3.5 h-3.5 text-white" />
-        </button>
-
-        {/* Context Menu Portal */}
-        {showMenu && createPortal(
-          <div
-            ref={menuRef}
-            style={{ position: 'fixed', top: `${menuPosition.top}px`, left: `${menuPosition.left}px`, zIndex: 9999 }}
-            className="bg-[#1a2942]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl w-48 py-1 animate-in fade-in slide-in-from-top-1 duration-150"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {!isFile && (
-              <>
-                <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
-                  onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'newFolder' }); }}>
-                  <FolderPlus className="w-4 h-4 text-blue-400" /><span>New Folder</span>
-                </button>
-                <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
-                  onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'newFile' }); }}>
-                  <FilePlus className="w-4 h-4 text-emerald-400" /><span>New Document</span>
-                </button>
-                <div className="h-px bg-white/10 my-1" />
-              </>
-            )}
-            <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/10 w-full text-left transition-colors"
-              onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'delete' }); }}>
-              <Trash2 className="w-4 h-4" /><span>Delete</span>
-            </button>
-          </div>,
-          document.body
-        )}
-
         {/* Hover indicator line */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-gradient-to-b from-emerald-400 to-emerald-500 rounded-full group-hover:h-4 transition-all duration-200 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
       </div>
+
+      {/* Context Menu Button - POSITIONED IN OUTER WRAPPER, floats over content */}
+      <button
+        ref={buttonRef}
+        data-debug-btn="tree-view-three-dots"
+        onClick={(e) => {
+          e.stopPropagation();
+          console.log('[DEBUG-BTN] 🔴 TREE/COMPACT VIEW - Button CLICKED:', { item: item.name || item.title, viewMode, depth });
+          if (!showMenu && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            console.log('[DEBUG-BTN] 📍 Button rect:', rect);
+            setMenuPosition({ top: rect.bottom + 4, left: rect.left });
+          }
+          setShowMenu(!showMenu);
+        }}
+        onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TREE/COMPACT VIEW - Mouse ENTER:', { item: item.name || item.title, viewMode, depth })}
+        onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TREE/COMPACT VIEW - Mouse LEAVE:', { item: item.name || item.title, viewMode, depth })}
+        className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/20 rounded p-1 transition-all duration-200 z-20 bg-[#0d0d0d]/90 backdrop-blur-sm border border-white/10"
+      >
+        <MoreHorizontal className="w-3.5 h-3.5 text-white/70 hover:text-white" />
+      </button>
+
+      {/* Context Menu Portal */}
+      {showMenu && createPortal(
+        <div
+          ref={menuRef}
+          style={{ position: 'fixed', top: `${menuPosition.top}px`, left: `${menuPosition.left}px`, zIndex: 9999 }}
+          className="bg-[#1a2942]/95 backdrop-blur-xl border border-white/10 rounded-lg shadow-xl w-48 py-1 animate-in fade-in slide-in-from-top-1 duration-150"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {!isFile && (
+            <>
+              <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+                onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'newFolder' }); }}>
+                <FolderPlus className="w-4 h-4 text-blue-400" /><span>New Folder</span>
+              </button>
+              <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+                onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'newFile' }); }}>
+                <FilePlus className="w-4 h-4 text-emerald-400" /><span>New Document</span>
+              </button>
+              <div className="h-px bg-white/10 my-1" />
+            </>
+          )}
+          <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/10 w-full text-left transition-colors"
+            onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'delete' }); }}>
+            <Trash2 className="w-4 h-4" /><span>Delete</span>
+          </button>
+        </div>,
+        document.body
+      )}
 
       {/* Render children recursively - not in table view */}
       {!isFile && isExpanded && hasChildren && viewMode !== 'table' && (

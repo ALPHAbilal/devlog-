@@ -81,6 +81,7 @@ export default function SidebarTreeItemEnhanced({
     return (
       <div className="relative">
         <div
+          data-debug-row="table-view-row"
           className={`
             flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative
             ${isSelected
@@ -92,6 +93,8 @@ export default function SidebarTreeItemEnhanced({
             rounded-lg px-2
           `}
           onClick={handleClick}
+          onMouseEnter={() => console.log('[DEBUG-ROW] 🟡 TABLE ROW - Mouse ENTER (group should activate):', { item: item.name || item.title, viewMode })}
+          onMouseLeave={() => console.log('[DEBUG-ROW] ⚪ TABLE ROW - Mouse LEAVE:', { item: item.name || item.title })}
         >
           {/* Icon + Name Column */}
           <div className="flex-1 flex items-center gap-2 min-w-0">
@@ -121,20 +124,26 @@ export default function SidebarTreeItemEnhanced({
             {item.type === 'document' ? 'file' : item.type}
           </div>
 
-          {/* Context Menu Button */}
+          {/* Context Menu Button - DEBUG MODE */}
           <button
             ref={buttonRef}
+            data-debug-btn="table-view-three-dots"
             onClick={(e) => {
               e.stopPropagation();
+              console.log('[DEBUG-BTN] 🔴 TABLE VIEW - Button CLICKED:', { item: item.name || item.title, viewMode });
               if (!showMenu && buttonRef.current) {
                 const rect = buttonRef.current.getBoundingClientRect();
+                console.log('[DEBUG-BTN] 📍 Button rect:', rect);
                 setMenuPosition({ top: rect.bottom + 4, left: rect.left });
               }
               setShowMenu(!showMenu);
             }}
-            className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+            onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TABLE VIEW - Mouse ENTER:', { item: item.name || item.title })}
+            onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TABLE VIEW - Mouse LEAVE:', { item: item.name || item.title })}
+            className="opacity-100 bg-red-500 border-2 border-yellow-400 hover:bg-red-600 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+            style={{ minWidth: '20px', minHeight: '20px' }}
           >
-            <MoreHorizontal className={`${styles.iconSize} text-white/40 hover:text-white/80`} />
+            <MoreHorizontal className={`${styles.iconSize} text-white`} />
           </button>
 
           {/* Hover indicator line */}
@@ -185,6 +194,7 @@ export default function SidebarTreeItemEnhanced({
       )}
 
       <div
+        data-debug-row="tree-compact-row"
         className={`
           flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-2
           ${isSelected
@@ -196,6 +206,8 @@ export default function SidebarTreeItemEnhanced({
         `}
         style={{ paddingLeft: `${depth * 16 + 12}px` }}
         onClick={handleClick}
+        onMouseEnter={() => console.log('[DEBUG-ROW] 🟡 TREE ROW - Mouse ENTER (group should activate):', { item: item.name || item.title, viewMode, depth })}
+        onMouseLeave={() => console.log('[DEBUG-ROW] ⚪ TREE ROW - Mouse LEAVE:', { item: item.name || item.title })}
         title={item.name || item.title}
       >
         {/* Chevron for folders with children - not in table view */}
@@ -247,20 +259,26 @@ export default function SidebarTreeItemEnhanced({
           </span>
         )}
 
-        {/* Context Menu Button */}
+        {/* Context Menu Button - DEBUG MODE */}
         <button
           ref={buttonRef}
+          data-debug-btn="tree-view-three-dots"
           onClick={(e) => {
             e.stopPropagation();
+            console.log('[DEBUG-BTN] 🔴 TREE/COMPACT VIEW - Button CLICKED:', { item: item.name || item.title, viewMode, depth });
             if (!showMenu && buttonRef.current) {
               const rect = buttonRef.current.getBoundingClientRect();
+              console.log('[DEBUG-BTN] 📍 Button rect:', rect);
               setMenuPosition({ top: rect.bottom + 4, left: rect.left });
             }
             setShowMenu(!showMenu);
           }}
-          className="opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+          onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TREE/COMPACT VIEW - Mouse ENTER:', { item: item.name || item.title, viewMode, depth })}
+          onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TREE/COMPACT VIEW - Mouse LEAVE:', { item: item.name || item.title, viewMode, depth })}
+          className="opacity-100 bg-red-500 border-2 border-yellow-400 hover:bg-red-600 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+          style={{ minWidth: '20px', minHeight: '20px' }}
         >
-          <MoreHorizontal className="w-3.5 h-3.5 text-white/40 hover:text-white/80" />
+          <MoreHorizontal className="w-3.5 h-3.5 text-white" />
         </button>
 
         {/* Context Menu Portal */}

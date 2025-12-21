@@ -79,18 +79,18 @@ export default function SidebarTreeItemEnhanced({
   // Table view renders as a flat row with columns
   if (viewMode === 'table') {
     return (
-      <div className="relative">
+      <div className="relative w-full">
         <div
           data-debug-row="table-view-row"
           className={`
-            flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative
+            w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative
             ${isSelected
               ? 'bg-emerald-500/15 text-emerald-300'
               : isFile
                 ? 'text-white/60 hover:text-white/90 cursor-pointer hover:bg-white/[0.03]'
                 : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-white/[0.03]'
             }
-            rounded-lg px-2
+            rounded-lg pl-2 pr-8
           `}
           onClick={handleClick}
           onMouseEnter={() => console.log('[DEBUG-ROW] 🟡 TABLE ROW - Mouse ENTER (group should activate):', { item: item.name || item.title, viewMode })}
@@ -184,7 +184,7 @@ export default function SidebarTreeItemEnhanced({
 
   // Tree and Compact view (hierarchical with children)
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Tree guide lines - only in tree/compact mode */}
       {viewMode !== 'table' && depth > 0 && (
         <div
@@ -196,7 +196,7 @@ export default function SidebarTreeItemEnhanced({
       <div
         data-debug-row="tree-compact-row"
         className={`
-          flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-2
+          w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 group relative rounded-lg pr-8
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile

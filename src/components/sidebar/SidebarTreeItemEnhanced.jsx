@@ -124,7 +124,7 @@ export default function SidebarTreeItemEnhanced({
             {item.type === 'document' ? 'file' : item.type}
           </div>
 
-          {/* Context Menu Button - DEBUG MODE */}
+          {/* Context Menu Button - ABSOLUTE POSITIONED to avoid clipping */}
           <button
             ref={buttonRef}
             data-debug-btn="table-view-three-dots"
@@ -140,7 +140,7 @@ export default function SidebarTreeItemEnhanced({
             }}
             onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TABLE VIEW - Mouse ENTER:', { item: item.name || item.title })}
             onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TABLE VIEW - Mouse LEAVE:', { item: item.name || item.title })}
-            className="opacity-100 bg-red-500 border-2 border-yellow-400 hover:bg-red-600 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+            className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 z-10 bg-red-500 border border-yellow-400"
             style={{ minWidth: '20px', minHeight: '20px' }}
           >
             <MoreHorizontal className={`${styles.iconSize} text-white`} />
@@ -259,7 +259,7 @@ export default function SidebarTreeItemEnhanced({
           </span>
         )}
 
-        {/* Context Menu Button - DEBUG MODE */}
+        {/* Context Menu Button - ABSOLUTE POSITIONED to avoid clipping */}
         <button
           ref={buttonRef}
           data-debug-btn="tree-view-three-dots"
@@ -275,7 +275,7 @@ export default function SidebarTreeItemEnhanced({
           }}
           onMouseEnter={() => console.log('[DEBUG-BTN] 🟢 TREE/COMPACT VIEW - Mouse ENTER:', { item: item.name || item.title, viewMode, depth })}
           onMouseLeave={() => console.log('[DEBUG-BTN] 🔵 TREE/COMPACT VIEW - Mouse LEAVE:', { item: item.name || item.title, viewMode, depth })}
-          className="opacity-100 bg-red-500 border-2 border-yellow-400 hover:bg-red-600 rounded p-0.5 transition-all duration-200 flex-shrink-0"
+          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-0.5 transition-all duration-200 z-10 bg-red-500 border border-yellow-400"
           style={{ minWidth: '20px', minHeight: '20px' }}
         >
           <MoreHorizontal className="w-3.5 h-3.5 text-white" />

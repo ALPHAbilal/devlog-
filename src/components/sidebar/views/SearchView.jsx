@@ -112,7 +112,7 @@ export function SearchView({ documents, onOpenDocument }) {
       </div>
 
       {/* Results Area */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
         <div className="px-3 pb-3">
           <AnimatePresence mode="wait">
             {searchTerm ? (

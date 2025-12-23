@@ -133,7 +133,7 @@ export function RecentView({ documents, onOpenDocument }) {
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
         <div className="p-3">
           {recentDocs.length === 0 ? (
             <div className="py-8 text-center">

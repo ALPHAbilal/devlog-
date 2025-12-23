@@ -86,7 +86,7 @@ export function SearchView({ documents, onOpenDocument }) {
   }, [searchResults.length]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Search Header - pt-10 to avoid overlap with collapse button */}
       <div className="p-3 pt-10">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Search</h2>
@@ -113,7 +113,7 @@ export function SearchView({ documents, onOpenDocument }) {
 
       {/* Results Area */}
       <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
-        <div className="px-3 pb-3">
+        <div className="px-3 pb-3 w-full min-w-0">
           <AnimatePresence mode="wait">
             {searchTerm ? (
               <motion.div
@@ -129,7 +129,7 @@ export function SearchView({ documents, onOpenDocument }) {
 
                 {/* Results list */}
                 {searchResults.length > 0 ? (
-                  <div className="space-y-1">
+                  <div className="w-full min-w-0 space-y-1">
                     {searchResults.map((doc, index) => (
                       <motion.button
                         key={doc.id}

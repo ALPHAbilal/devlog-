@@ -55,7 +55,7 @@ export function InboxView({ documents, onOpenDocument }) {
   }, [documents]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Header - pt-10 to avoid overlap with collapse button */}
       <div className="p-3 pt-10 border-b border-white/5">
         <div className="flex items-center gap-2 mb-1">
@@ -98,7 +98,7 @@ export function InboxView({ documents, onOpenDocument }) {
 
       {/* Content */}
       <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
-        <div className="p-3">
+        <div className="p-3 w-full min-w-0">
           <AnimatePresence mode="popLayout">
             {inboxItems.length === 0 ? (
               <motion.div
@@ -120,7 +120,7 @@ export function InboxView({ documents, onOpenDocument }) {
                 </div>
               </motion.div>
             ) : (
-              <div className="space-y-1">
+              <div className="w-full min-w-0 space-y-1">
                 {inboxItems.map((item, index) => (
                   <motion.button
                     key={item.id}

@@ -32,7 +32,7 @@ export function FavoritesView({
   }, [onToggleFavorite]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Header - pt-10 to avoid overlap with collapse button */}
       <div className="p-3 pt-10 border-b border-white/5">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider flex items-center gap-1.5">
@@ -67,7 +67,7 @@ export function FavoritesView({
 
       {/* Content */}
       <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
-        <div className="p-3">
+        <div className="p-3 w-full min-w-0">
           <AnimatePresence mode="popLayout">
             {favorites.length === 0 ? (
               <motion.div
@@ -84,7 +84,7 @@ export function FavoritesView({
                 </div>
               </motion.div>
             ) : (
-              <div className="space-y-1">
+              <div className="w-full min-w-0 space-y-1">
                 {favorites.map((item, index) => (
                   <motion.div
                     key={item.id}

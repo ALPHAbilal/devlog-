@@ -144,7 +144,7 @@ export default function SidebarTreeItemEnhanced({
                 }
               `} />
             )}
-            <span className="flex-1 truncate transition-all duration-200">
+            <span className="flex-1 min-w-0 truncate transition-all duration-200">
               {item.name || item.title}
             </span>
           </div>
@@ -269,7 +269,7 @@ export default function SidebarTreeItemEnhanced({
       {/* Render children recursively - not in table view */}
       {!isFile && isExpanded && hasChildren && viewMode !== 'table' && (
         <div className="overflow-hidden animate-in slide-in-from-top-1 duration-200">
-          <div className={viewMode === 'compact' ? 'space-y-0' : 'space-y-0.5 py-0.5'}>
+          <div className={`w-full min-w-0 ${viewMode === 'compact' ? 'space-y-0' : 'space-y-0.5 py-0.5'}`}>
             {item.children.map((child, index) => (
               <SidebarTreeItemEnhanced
                 key={child.id}

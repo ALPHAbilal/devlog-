@@ -122,7 +122,7 @@ export function ExplorerView({
   }, [treeData, viewMode, expandedFolders]);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Header - pt-10 to avoid overlap with collapse button */}
       <div className="p-3 pt-10 border-b border-white/5">
         <div className="flex items-center justify-between mb-3">
@@ -193,7 +193,7 @@ export function ExplorerView({
 
       {/* Content */}
       <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
-        <div className={`${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'}`}>
+        <div className={`w-full min-w-0 ${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'}`}>
           {isLoading && treeData.length === 0 ? (
             <div className="px-3 py-8 text-center">
               <div className="animate-pulse text-white/30 text-sm">Loading...</div>
@@ -205,7 +205,7 @@ export function ExplorerView({
             </div>
           ) : viewMode === VIEW_MODES.TABLE ? (
             // Table view - flat list
-            <div className="pl-2 pr-4 space-y-0.5">
+            <div className="w-full min-w-0 pl-2 pr-4 space-y-0.5">
               {flattenedItems.map((item) => (
                 <SidebarTreeItemEnhanced
                   key={item.id}
@@ -221,7 +221,7 @@ export function ExplorerView({
             </div>
           ) : (
             // Tree/Compact view - hierarchical
-            <div className={`pl-2 pr-4 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
+            <div className={`w-full min-w-0 pl-2 pr-4 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
               {treeData.map((item, index) => (
                 <SidebarTreeItemEnhanced
                   key={item.id}

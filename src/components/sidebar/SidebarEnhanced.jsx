@@ -161,7 +161,7 @@ export function SidebarEnhanced({
             animate={{ opacity: 1, width: PANEL_WIDTH }}
             exit={{ opacity: 0, width: 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="overflow-hidden bg-[#0d0d0d] border-r border-white/5 flex flex-col"
+            className="overflow-hidden bg-[#0d0d0d] border-r border-white/5 flex flex-col min-w-0"
           >
             <ViewContent
               activeView={activeView}

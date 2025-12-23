@@ -92,7 +92,7 @@ function DateGroup({ title, documents, onOpenDocument, startIndex = 0 }) {
           {documents.length}
         </span>
       </div>
-      <div className="space-y-0.5">
+      <div className="w-full min-w-0 space-y-0.5">
         {documents.map((doc, index) => (
           <DocumentItem
             key={doc.id}
@@ -125,7 +125,7 @@ export function RecentView({ documents, onOpenDocument }) {
   let runningIndex = 0;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-w-0">
       {/* Header - pt-10 to avoid overlap with collapse button */}
       <div className="p-3 pt-10 border-b border-white/5">
         <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider">Recent</h2>
@@ -134,7 +134,7 @@ export function RecentView({ documents, onOpenDocument }) {
 
       {/* Content */}
       <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
-        <div className="p-3">
+        <div className="p-3 w-full min-w-0">
           {recentDocs.length === 0 ? (
             <div className="py-8 text-center">
               <Clock className="w-8 h-8 text-white/20 mx-auto mb-3" />

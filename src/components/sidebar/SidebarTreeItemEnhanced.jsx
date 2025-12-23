@@ -117,10 +117,10 @@ export default function SidebarTreeItemEnhanced({
   // Table view renders as a flat row with columns
   if (viewMode === 'table') {
     return (
-      <div className="w-full group">
+      <div className="w-full min-w-0 overflow-hidden group">
         <div
           className={`
-            w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative
+            w-full min-w-0 overflow-hidden flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative
             ${isSelected
               ? 'bg-emerald-500/15 text-emerald-300'
               : isFile
@@ -179,7 +179,7 @@ export default function SidebarTreeItemEnhanced({
 
   // Tree and Compact view (hierarchical with children)
   return (
-    <div className="w-full group">
+    <div className="w-full min-w-0 overflow-hidden group">
       {/* Tree guide lines - only in tree/compact mode */}
       {viewMode !== 'table' && depth > 0 && (
         <div
@@ -190,7 +190,7 @@ export default function SidebarTreeItemEnhanced({
 
       <div
         className={`
-          w-full flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative rounded-lg
+          w-full min-w-0 overflow-hidden flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative rounded-lg
           ${isSelected
             ? 'bg-emerald-500/15 text-emerald-300 border-l-2 border-emerald-400'
             : isFile

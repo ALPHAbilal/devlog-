@@ -27,6 +27,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fix Radix ScrollArea internal div that expands beyond viewport */
+[data-radix-scroll-area-viewport] > div {
+  display: block !important;
+  max-width: 100% !important;
+}
+
 /* Global viewport fixes */
 @layer base {
   /* Ensure HTML and body take full height */

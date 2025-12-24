@@ -103,6 +103,7 @@ export function SidebarEnhanced({
                   activeView={activeView}
                   folders={folders}
                   documents={documents}
+                  activeDocumentId={activeDocumentId}
                   onOpenDocument={(doc) => {
                     onOpenDocument?.(doc);
                     onClose?.();
@@ -168,6 +169,7 @@ export function SidebarEnhanced({
               activeView={activeView}
               folders={folders}
               documents={documents}
+              activeDocumentId={activeDocumentId}
               onOpenDocument={onOpenDocument}
               onCreateFolder={onCreateFolder}
               onCreateDocument={onCreateDocument}
@@ -188,6 +190,7 @@ function ViewContent({
   activeView,
   folders,
   documents,
+  activeDocumentId,
   onOpenDocument,
   onCreateFolder,
   onCreateDocument,

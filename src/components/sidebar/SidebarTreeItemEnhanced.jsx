@@ -20,6 +20,15 @@ export default function SidebarTreeItemEnhanced({
   const isFile = item.type === 'file' || item.type === 'document';
   const itemCount = item.count || (item.children ? item.children.length : 0);
 
+  // Check if this folder contains the active document in its tree
+  const containsActiveDocument = !isFile && activeDocumentId && hasChildren && (function checkChildren(children) {
+    for (const child of children) {
+      if (child.id === activeDocumentId) return true;
+      if (child.children && checkChildren(child.children)) return true;
+    }
+    return false;
+  })(item.children);
+
   // State for dropdown menu
   const [showMenu, setShowMenu] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -226,9 +235,11 @@ export default function SidebarTreeItemEnhanced({
         ) : (
           <Folder className={`
             ${viewMode === 'compact' ? 'w-3.5 h-3.5' : 'w-4 h-4'} flex-shrink-0 transition-all duration-200
-            ${isFavorite
-              ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
-              : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
+            ${containsActiveDocument
+              ? 'text-emerald-400/80 drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]'
+              : isFavorite
+                ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
+                : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
             }
           `} />
         )}

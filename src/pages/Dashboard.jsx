@@ -9,6 +9,7 @@ import TabBar from '../components/TabBar';
 import EmptyState from '../components/EmptyState';
 import { useTabContext } from '../contexts/TabContext';
 import ConfirmDialog from '../components/ConfirmDialog';
+import InputModal from '../components/InputModal';
 import ProjectCard from '../components/ProjectCard';
 // Old sidebar (kept for reference)
 // import ProjectExplorerV2 from '../components/ProjectExplorer/ProjectExplorerRedesigned';
@@ -182,6 +183,10 @@ export default function Dashboard() {
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [confirmDialogConfig, setConfirmDialogConfig] = useState({ title: '', message: '', onConfirm: null });
+
+  // Folder creation modal state
+  const [showFolderModal, setShowFolderModal] = useState(false);
+  const [folderParentId, setFolderParentId] = useState(null);
 
   // Check if we're in projects view
   const isProjectsView = location.search.includes('view=projects');
@@ -1490,13 +1495,9 @@ export default function Dashboard() {
               }
               if (isMobile) closeMobileSidebar();
             }}
-            onCreateFolder={async (parentId = null) => {
-              // TODO: Show input modal for folder name
-              const name = prompt('Enter folder name:');
-              if (name) {
-                const { createFolder } = await import('../hooks/useFolders').then(m => m.useFolders());
-                await createFolder(name, parentId);
-              }
+            onCreateFolder={(parentId = null) => {
+              setFolderParentId(parentId);
+              setShowFolderModal(true);
             }}
             onCreateDocument={(folderId = null) => {
               createNewEntry(folderId);
@@ -1681,6 +1682,26 @@ export default function Dashboard() {
           }}
         />
       )}
+
+      {/* Folder Creation Modal */}
+      <InputModal
+        isOpen={showFolderModal}
+        onClose={() => {
+          setShowFolderModal(false);
+          setFolderParentId(null);
+        }}
+        onConfirm={async (name) => {
+          const { createFolder } = await import('../hooks/useFolders').then(m => m.useFolders());
+          await createFolder(name, folderParentId);
+          setShowFolderModal(false);
+          setFolderParentId(null);
+          await loadEntries();
+          toast.success('Folder created successfully');
+        }}
+        title="Create New Folder"
+        placeholder="Enter folder name..."
+        confirmText="Create Folder"
+      />
 
       {/* Confirmation Dialog */}
       <ConfirmDialog

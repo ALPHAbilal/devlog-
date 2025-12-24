@@ -82,7 +82,7 @@ export default function Dashboard() {
   const { trackDocumentEvent, startDocumentTimer, endDocumentTimer } = useDocumentAnalytics();
 
   // Folders hook - folders are auto-loaded by the hook
-  const { folders, refreshFolders } = useFolders();
+  const { folders, refreshFolders, createFolder, deleteFolder } = useFolders();
 
   // IndexedDB cache for instant document access across navigation
   const {
@@ -1515,7 +1515,6 @@ export default function Dashboard() {
                       closeTab(itemId);
                     }
                   } else {
-                    const { deleteFolder } = await import('../hooks/useFolders').then(m => m.useFolders());
                     await deleteFolder(itemId);
                   }
                   await loadEntries();
@@ -1691,7 +1690,6 @@ export default function Dashboard() {
           setFolderParentId(null);
         }}
         onConfirm={async (name) => {
-          const { createFolder } = await import('../hooks/useFolders').then(m => m.useFolders());
           await createFolder(name, folderParentId);
           setShowFolderModal(false);
           setFolderParentId(null);

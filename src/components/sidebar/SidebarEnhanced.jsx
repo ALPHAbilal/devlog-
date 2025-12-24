@@ -16,6 +16,7 @@ export function SidebarEnhanced({
   isMobile,
   folders,
   documents,
+  activeDocumentId,
   onOpenDocument,
   onCreateFolder,
   onCreateDocument,
@@ -209,6 +210,7 @@ function ViewContent({
         <ExplorerView
           folders={folders}
           documents={documents}
+          activeDocumentId={activeDocumentId}
           onOpenDocument={onOpenDocument}
           onCreateFolder={onCreateFolder}
           onCreateDocument={onCreateDocument}

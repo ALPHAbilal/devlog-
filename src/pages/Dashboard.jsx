@@ -1489,6 +1489,7 @@ export default function Dashboard() {
             isMobile={isMobile}
             folders={folders}
             documents={allDocuments}
+            activeDocumentId={activeTabId}
             onOpenDocument={(doc) => {
               if (doc?.id) {
                 handleDocumentExpand(doc);

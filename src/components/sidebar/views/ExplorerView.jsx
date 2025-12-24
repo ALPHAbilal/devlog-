@@ -14,6 +14,7 @@ const VIEW_MODES = {
 export function ExplorerView({
   folders,
   documents,
+  activeDocumentId,
   onOpenDocument,
   onCreateFolder,
   onCreateDocument,
@@ -215,6 +216,7 @@ export function ExplorerView({
                   expandedFolders={expandedFolders}
                   onItemClick={onOpenDocument}
                   onContextMenu={handleContextMenu}
+                  isSelected={item.id === activeDocumentId}
                   viewMode="table"
                 />
               ))}
@@ -232,6 +234,8 @@ export function ExplorerView({
                   isLast={index === treeData.length - 1}
                   onItemClick={onOpenDocument}
                   onContextMenu={handleContextMenu}
+                  isSelected={item.id === activeDocumentId}
+                  activeDocumentId={activeDocumentId}
                   viewMode={viewMode}
                 />
               ))}

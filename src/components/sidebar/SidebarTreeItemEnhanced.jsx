@@ -13,6 +13,7 @@ export default function SidebarTreeItemEnhanced({
   onItemClick,
   onContextMenu,
   isSelected = false,
+  activeDocumentId,
   viewMode = 'tree' // 'tree' | 'table' | 'compact'
 }) {
   const hasChildren = item.children && item.children.length > 0;
@@ -282,7 +283,8 @@ export default function SidebarTreeItemEnhanced({
                 isLast={index === item.children.length - 1}
                 onItemClick={onItemClick}
                 onContextMenu={onContextMenu}
-                isSelected={isSelected}
+                isSelected={child.id === activeDocumentId}
+                activeDocumentId={activeDocumentId}
                 viewMode={viewMode}
               />
             ))}

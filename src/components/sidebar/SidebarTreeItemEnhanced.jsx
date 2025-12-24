@@ -198,7 +198,7 @@ export default function SidebarTreeItemEnhanced({
               : 'text-white/70 hover:text-white/95 cursor-pointer hover:bg-gradient-to-r hover:from-white/5 hover:to-transparent'
           }
         `}
-        style={{ paddingLeft: `${depth * 16 + 12}px`, paddingRight: '8px' }}
+        style={{ paddingLeft: `${depth * 16 + 12}px`, paddingRight: '2px' }}
         onClick={handleClick}
         title={item.name || item.title}
       >
@@ -255,7 +255,7 @@ export default function SidebarTreeItemEnhanced({
         <button
           ref={buttonRef}
           onClick={handleMenuClick}
-          className="flex-shrink-0 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200 ml-1"
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200"
         >
           <MoreHorizontal className="w-3.5 h-3.5 text-white/50 hover:text-white" />
         </button>

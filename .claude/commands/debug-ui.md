@@ -1,10 +1,10 @@
 ---
-description: Collaborative frontend debugging with iterative browser data collection
+description: Collaborative frontend debugging with iterative browser data collection and session documentation
 ---
 
 # Debug UI
 
-You are a collaborative debugging partner for frontend issues. Work WITH the user iteratively - you analyze code, they provide browser data, repeat until bug is resolved.
+You are a collaborative debugging partner for frontend issues. Work WITH the user iteratively - you analyze code, they provide browser data, repeat until bug is resolved. Document sessions for future reference.
 
 ## CRITICAL: YOU CANNOT ACCESS THE BROWSER DIRECTLY
 - You MUST ask the user to check DevTools and share what they find
@@ -37,30 +37,29 @@ Then wait for user's description.
    - **Data**: wrong data, missing data, stale data
    - **Performance**: slow, janky, unresponsive
 
-2. **Ask user for first browser check:**
+2. **Check for past issues with this component:**
+   - Use **debug-history-locator** agent to check `thoughts/shared/debug/[ComponentName]/`
+   - If past issues exist, review them for patterns
+   - Mention to user: "This component had [X] issues before - let me check if related"
+
+3. **Ask user for first browser check:**
    - Request ONE specific thing based on issue type
    - Console errors for behavioral/data issues
    - Computed styles for visual issues
    - Network tab for data issues
    - Tell them exactly what to look for and copy
 
-3. **Spawn parallel agents while user checks browser:**
+4. **Spawn parallel agents while user checks browser:**
 
    **For finding relevant files:**
    - Use **ui-code-locator** agent to find WHERE UI code lives
-   - Components, styles, state management, event handlers
 
    **For understanding code behavior:**
    - Use **ui-behavior-analyzer** agent to understand HOW code works
    - Pass it the files found by ui-code-locator
-   - Focus analysis on the issue type (styling/events/state/data)
+   - Focus analysis on the issue type
 
-   The key is to use these agents intelligently:
-   - Locator finds files, analyzer understands them
-   - Run both in parallel while waiting for user's browser data
-   - Agents return file:line references you can connect to browser findings
-
-4. **When user shares browser data:**
+5. **When user shares browser data:**
    - Parse what they shared
    - Connect it to your code analysis findings
    - Form a hypothesis
@@ -68,19 +67,54 @@ Then wait for user's description.
      - Ask ONE follow-up question if you need more data
      - Propose a fix if you found the issue
 
-5. **Keep iterating (this is the core loop):**
+6. **Keep iterating (this is the core loop):**
    - User shares data → you analyze → ask follow-up OR propose fix
    - Don't stop until the bug is actually resolved
    - After each fix, ask user to verify it worked
 
-6. **Resolution:**
-   - When fix is applied, ask user to hard refresh and test
-   - If still broken, continue debugging
-   - If fixed, confirm and offer to help with anything else
+7. **Resolution and Documentation:**
+   - When fix is confirmed working, save debug session:
+   - Create folder if needed: `thoughts/shared/debug/[ComponentName]/`
+   - Save file: `YYYY-MM-DD-brief-issue-description.md`
+   - Tell user: "Debug session saved for future reference"
+
+## Debug Session Document Template
+
+```markdown
+---
+date: [ISO timestamp]
+component: [ComponentName]
+issue_type: [visual|behavioral|data|performance]
+status: resolved
+root_cause: [brief description]
+fix_file: [file where fix was applied]
+---
+
+# Debug: [Component] - [Brief Issue Description]
+
+## Issue Reported
+[What user described]
+
+## Browser Data Collected
+- Console: [errors found]
+- Network: [requests checked]
+- DevTools: [other findings]
+
+## Code Analysis
+- `file.tsx:line` - [what was found]
+- `file.css:line` - [what was found]
+
+## Root Cause
+[Why the bug happened]
+
+## Fix Applied
+[What was changed and where]
+
+## Verification
+[How it was confirmed fixed]
+```
 
 ## Browser Data Request Templates
-
-Use these exact prompts to request specific data:
 
 **Console errors:**
 > Open DevTools (F12) → Console tab → copy any red errors you see
@@ -100,13 +134,18 @@ Use these exact prompts to request specific data:
 **Event listeners:**
 > Inspect element → Event Listeners tab → any listeners for [click/change]?
 
+## Agents
+
+| Agent | Purpose |
+|-------|---------|
+| `debug-history-locator` | Find past issues for this component |
+| `ui-code-locator` | Find WHERE UI code lives |
+| `ui-behavior-analyzer` | Understand HOW code works |
+
 ## Important notes:
-- Always ask ONE thing at a time - don't overwhelm user
-- Explain WHY you're asking - helps user learn debugging too
-- Acknowledge what they share - parse it, explain what it means
-- Connect browser findings to code - "That error at line 45 matches this code..."
-- Keep the conversation going - this is iterative, not a report
-- Celebrate progress - "Good, we can rule out X, now let's check Y"
-- Agents work in parallel with user - don't wait for agents before asking user to check browser
-- File:line references help connect code to browser errors
-- The goal is resolution, not documentation
+- Check component history FIRST - patterns help debugging
+- Always ask ONE thing at a time
+- Connect browser findings to code analysis
+- Keep iterating until actually resolved
+- Save session at end for future reference
+- Component folder groups all issues together

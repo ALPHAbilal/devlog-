@@ -114,6 +114,35 @@ fix_file: [file where fix was applied]
 [How it was confirmed fixed]
 ```
 
+## RULE: The Invisible Layer Principle
+
+**If your fix doesn't work after 2 attempts, STOP adding code. The problem is in something you can't see.**
+
+### The Pattern
+1. You add a fix → doesn't work
+2. You add more fixes → still doesn't work
+3. **STOP** → The problem is NOT in your code
+
+### The Truth
+- Libraries create hidden DOM elements with NO classes
+- Your fixes only affect YOUR code, not theirs
+- You're fixing the wrong layer
+
+### The Solution
+**Trace reality, don't guess.** Use browser DevTools to:
+1. Walk UP the DOM tree from the problem element
+2. Find elements with **NO class names** (library internals)
+3. Measure their ACTUAL values (width, height, position)
+4. Compare parent vs child - find where values break
+5. Target the invisible element with global CSS using `[data-*]` attribute selectors
+
+### The Rule
+> **2 failed fixes = STOP and TRACE**
+>
+> Measure the actual DOM state. The culprit is an invisible element you're not seeing in your code.
+
+---
+
 ## Browser Data Request Templates
 
 **Console errors:**

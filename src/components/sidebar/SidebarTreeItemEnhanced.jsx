@@ -237,7 +237,16 @@ export default function SidebarTreeItemEnhanced({
           {item.name || item.title}
         </span>
 
-        {/* Count badge - always visible in tree mode */}
+        {/* Three-dots button - appears on hover, at edge */}
+        <button
+          ref={buttonRef}
+          onClick={handleMenuClick}
+          className="flex-shrink-0 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200"
+        >
+          <MoreHorizontal className="w-3.5 h-3.5 text-white/50 hover:text-white" />
+        </button>
+
+        {/* Count badge - after three-dots in tree mode */}
         {itemCount > 0 && viewMode !== 'compact' && (
           <span className="text-[10px] text-white/40 bg-white/5 px-1.5 py-0.5 rounded group-hover:bg-emerald-500/10 group-hover:text-emerald-400/90 transition-all duration-200 flex-shrink-0">
             {itemCount}
@@ -250,15 +259,6 @@ export default function SidebarTreeItemEnhanced({
             {itemCount}
           </span>
         )}
-
-        {/* Three-dots button - IN the flex flow, appears on hover */}
-        <button
-          ref={buttonRef}
-          onClick={handleMenuClick}
-          className="flex-shrink-0 opacity-0 group-hover:opacity-100 hover:bg-white/10 rounded p-1 transition-all duration-200"
-        >
-          <MoreHorizontal className="w-3.5 h-3.5 text-white/50 hover:text-white" />
-        </button>
 
         {/* Hover indicator line */}
         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-0 bg-gradient-to-b from-emerald-400 to-emerald-500 rounded-full group-hover:h-4 transition-all duration-200 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />

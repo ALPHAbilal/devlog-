@@ -15,6 +15,7 @@ export function ExplorerView({
   folders,
   documents,
   activeDocumentId,
+  recentlyCreatedFolderId,
   onOpenDocument,
   onCreateFolder,
   onCreateDocument,
@@ -217,6 +218,7 @@ export function ExplorerView({
                   onItemClick={onOpenDocument}
                   onContextMenu={handleContextMenu}
                   isSelected={item.id === activeDocumentId}
+                  recentlyCreatedFolderId={recentlyCreatedFolderId}
                   viewMode="table"
                 />
               ))}
@@ -236,6 +238,7 @@ export function ExplorerView({
                   onContextMenu={handleContextMenu}
                   isSelected={item.id === activeDocumentId}
                   activeDocumentId={activeDocumentId}
+                  recentlyCreatedFolderId={recentlyCreatedFolderId}
                   viewMode={viewMode}
                 />
               ))}

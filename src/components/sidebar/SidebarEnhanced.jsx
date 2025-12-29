@@ -17,6 +17,7 @@ export function SidebarEnhanced({
   folders,
   documents,
   activeDocumentId,
+  recentlyCreatedFolderId,
   onOpenDocument,
   onCreateFolder,
   onCreateDocument,
@@ -104,6 +105,7 @@ export function SidebarEnhanced({
                   folders={folders}
                   documents={documents}
                   activeDocumentId={activeDocumentId}
+                  recentlyCreatedFolderId={recentlyCreatedFolderId}
                   onOpenDocument={(doc) => {
                     onOpenDocument?.(doc);
                     onClose?.();
@@ -170,6 +172,7 @@ export function SidebarEnhanced({
               folders={folders}
               documents={documents}
               activeDocumentId={activeDocumentId}
+              recentlyCreatedFolderId={recentlyCreatedFolderId}
               onOpenDocument={onOpenDocument}
               onCreateFolder={onCreateFolder}
               onCreateDocument={onCreateDocument}
@@ -191,6 +194,7 @@ function ViewContent({
   folders,
   documents,
   activeDocumentId,
+  recentlyCreatedFolderId,
   onOpenDocument,
   onCreateFolder,
   onCreateDocument,
@@ -214,6 +218,7 @@ function ViewContent({
           folders={folders}
           documents={documents}
           activeDocumentId={activeDocumentId}
+          recentlyCreatedFolderId={recentlyCreatedFolderId}
           onOpenDocument={onOpenDocument}
           onCreateFolder={onCreateFolder}
           onCreateDocument={onCreateDocument}

@@ -187,6 +187,7 @@ export default function Dashboard() {
   // Folder creation modal state
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [folderParentId, setFolderParentId] = useState(null);
+  const [recentlyCreatedFolderId, setRecentlyCreatedFolderId] = useState(null);
 
   // Check if we're in projects view
   const isProjectsView = location.search.includes('view=projects');
@@ -245,6 +246,8 @@ export default function Dashboard() {
     openTab(document);
     // Cache the document for instant access on reload
     updateDocumentInCache(document);
+    // Clear recently created folder highlight when opening a document
+    setRecentlyCreatedFolderId(null);
   }, [openTab, updateDocumentInCache]);
 
   // Update storage info
@@ -327,6 +330,9 @@ export default function Dashboard() {
 
     // Open in tab - pendingDocumentRef ensures document is found immediately
     openTab(newEntry);
+
+    // Clear recently created folder highlight when creating a document
+    setRecentlyCreatedFolderId(null);
 
     // Save to IndexedDB cache for local backup (fast - ~22ms)
     // Using cache hook for consistent state management
@@ -422,6 +428,9 @@ export default function Dashboard() {
 
     // Open in tab - pendingDocumentRef ensures document is found immediately
     openTab(newEntry);
+
+    // Clear recently created folder highlight when creating a document
+    setRecentlyCreatedFolderId(null);
 
     // Save to IndexedDB cache for local backup
     // Using cache hook for consistent state management
@@ -1490,6 +1499,7 @@ export default function Dashboard() {
             folders={folders}
             documents={allDocuments}
             activeDocumentId={activeTabId}
+            recentlyCreatedFolderId={recentlyCreatedFolderId}
             onOpenDocument={(doc) => {
               if (doc?.id) {
                 handleDocumentExpand(doc);
@@ -1691,7 +1701,10 @@ export default function Dashboard() {
           setFolderParentId(null);
         }}
         onConfirm={async (name) => {
-          await createFolder(name, folderParentId);
+          const newFolder = await createFolder(name, folderParentId);
+          if (newFolder?.id) {
+            setRecentlyCreatedFolderId(newFolder.id);
+          }
           setShowFolderModal(false);
           setFolderParentId(null);
           await loadEntries();

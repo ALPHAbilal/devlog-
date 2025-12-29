@@ -14,6 +14,7 @@ export default function SidebarTreeItemEnhanced({
   onContextMenu,
   isSelected = false,
   activeDocumentId,
+  recentlyCreatedFolderId,
   viewMode = 'tree' // 'tree' | 'table' | 'compact'
 }) {
   const hasChildren = item.children && item.children.length > 0;
@@ -28,6 +29,9 @@ export default function SidebarTreeItemEnhanced({
     }
     return false;
   })(item.children);
+
+  // Check if this is a recently created folder
+  const isRecentlyCreated = !isFile && recentlyCreatedFolderId && item.id === recentlyCreatedFolderId;
 
   // State for dropdown menu
   const [showMenu, setShowMenu] = useState(false);
@@ -148,9 +152,11 @@ export default function SidebarTreeItemEnhanced({
             ) : (
               <Folder className={`
                 ${styles.iconSize} flex-shrink-0 transition-all duration-200
-                ${isFavorite
-                  ? 'text-amber-400/90 group-hover:text-amber-300'
-                  : 'text-blue-400/80 group-hover:text-blue-300'
+                ${isRecentlyCreated
+                  ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] animate-pulse'
+                  : isFavorite
+                    ? 'text-amber-400/90 group-hover:text-amber-300'
+                    : 'text-blue-400/80 group-hover:text-blue-300'
                 }
               `} />
             )}
@@ -235,11 +241,13 @@ export default function SidebarTreeItemEnhanced({
         ) : (
           <Folder className={`
             ${viewMode === 'compact' ? 'w-3.5 h-3.5' : 'w-4 h-4'} flex-shrink-0 transition-all duration-200
-            ${containsActiveDocument
-              ? 'text-emerald-400/80 drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]'
-              : isFavorite
-                ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
-                : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
+            ${isRecentlyCreated
+              ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] animate-pulse'
+              : containsActiveDocument
+                ? 'text-emerald-400/80 drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]'
+                : isFavorite
+                  ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
+                  : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
             }
           `} />
         )}
@@ -296,6 +304,7 @@ export default function SidebarTreeItemEnhanced({
                 onContextMenu={onContextMenu}
                 isSelected={child.id === activeDocumentId}
                 activeDocumentId={activeDocumentId}
+                recentlyCreatedFolderId={recentlyCreatedFolderId}
                 viewMode={viewMode}
               />
             ))}

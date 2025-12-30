@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { ChevronDown, Plus, X, Check, AlertCircle, Clock, Code, Target, Trash2 } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
-import TimelineBranch, { VerticalConnector } from './TimelineBranch';
 import GitGraphBranching from './GitGraphBranching';
 import './IssueTrackerBlock.css';
 

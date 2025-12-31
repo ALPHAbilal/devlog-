@@ -2,6 +2,9 @@ import "./instrument"; // Import Sentry first for early initialization
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import * as Sentry from '@sentry/react'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { queryClient } from './api/queryClient'
 import './index.css'
 import './styles/hero-knowledge-constellation.css'
 import App from './App.jsx'
@@ -27,6 +30,16 @@ const root = createRoot(container, {
 
 root.render(
   <StrictMode>
-    <App />
+    {/* QueryClientProvider at root - enables TanStack Query for ALL components */}
+    <QueryClientProvider client={queryClient}>
+      <App />
+      {/* DevTools only in development */}
+      {import.meta.env.DEV && (
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-right"
+        />
+      )}
+    </QueryClientProvider>
   </StrictMode>,
 )

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -34,5 +35,19 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173
+  },
+
+  // Path aliases (must match tsconfig.json)
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
+      '@/components': resolve(__dirname, './src/components'),
+      '@/hooks': resolve(__dirname, './src/hooks'),
+      '@/utils': resolve(__dirname, './src/utils'),
+      '@/contexts': resolve(__dirname, './src/contexts'),
+      '@/services': resolve(__dirname, './src/services'),
+      '@/types': resolve(__dirname, './src/types'),
+      '@/api': resolve(__dirname, './src/api')
+    }
   }
 })

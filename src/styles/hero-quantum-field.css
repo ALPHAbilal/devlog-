@@ -274,8 +274,12 @@
     display: none;
   }
   
-  @keyframes code-float,
-  @keyframes ai-float,
+  @keyframes code-float {
+    0%, 100% { transform: translate(-50%, -50%); }
+  }
+  @keyframes ai-float {
+    0%, 100% { transform: translate(-50%, -50%); }
+  }
   @keyframes text-float {
     0%, 100% { transform: translate(-50%, -50%); }
   }

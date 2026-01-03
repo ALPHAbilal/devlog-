@@ -6,28 +6,36 @@ import { fadeInUp, problemCardContainer, problemCardItem, iconFloat } from '@/sh
 
 const problems = [
   {
+    id: '01',
     icon: <BookOpen size={24} />,
     title: 'No time to document',
     description: 'You solve problems daily but never capture the solutions properly',
-    opacity: 0.9
+    opacity: 0.9,
+    tag: 'time_sink'
   },
   {
+    id: '02',
     icon: <MessageSquare size={24} />,
     title: 'Knowledge scattered everywhere',
     description: 'Solutions in Slack, notes in Notion, code in GitHub - nothing connected',
-    opacity: 0.7
+    opacity: 0.7,
+    tag: 'entropy'
   },
   {
+    id: '03',
     icon: <Brain size={24} />,
     title: 'Context evaporates',
     description: 'Three months later, you can\'t remember why that solution worked',
-    opacity: 0.5
+    opacity: 0.5,
+    tag: 'memory_leak'
   },
   {
+    id: '04',
     icon: <Search size={24} />,
     title: 'Can\'t find what you wrote',
     description: 'You documented it somewhere, but good luck finding it when you need it',
-    opacity: 0.3
+    opacity: 0.3,
+    tag: 'access_denied'
   }
 ];
 
@@ -79,61 +87,45 @@ function ProblemCard({ problem, index }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
       custom={index}
+      style={{ perspective: 1000 }}
     >
-      {/* Gradient orbs */}
-      <div className="gradient-orb" style={{ opacity: problem.opacity * 0.3 }} />
-      
       <motion.div 
-        className="problem-card"
+        className="problem-card group"
         style={{
           rotateX: isHovered ? rotateX : 0,
           rotateY: isHovered ? rotateY : 0,
+          background: 'rgba(22, 27, 34, 0.4)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(45, 51, 59, 0.5)',
+          borderRadius: '16px',
         }}
+        whileHover={{ borderColor: 'rgba(16, 185, 129, 0.3)' }}
       >
-        {/* Card glow effect */}
-        <div className="card-glow" style={{ opacity: problem.opacity * 0.2 }} />
-        
-        {/* Animated gradient border */}
-        <div className={`card-border-gradient ${isHovered ? 'card-border-gradient-animated' : ''}`} style={{ opacity: problem.opacity * 0.5 }} />
-        
-        {/* Card content */}
-        <div className="card-content">
-          <div className="flex items-start gap-4">
-            <motion.div 
-              className="icon-wrapper"
-              variants={iconFloat}
-              initial="rest"
-              whileHover="hover"
-            >
-              <div className="icon-glow" style={{ opacity: problem.opacity * 0.4 }} />
-              <span style={{ color: `rgba(255, 255, 255, ${problem.opacity})` }}>
-                {problem.icon}
-              </span>
-            </motion.div>
+        {/* Monospace Indicator */}
+        <div className="absolute top-4 right-6 font-['JetBrains_Mono',_monospace] text-[11px] text-slate-500 opacity-50 select-none">
+          // {problem.tag}
+        </div>
+
+        {/* Card Content */}
+        <div className="card-content flex flex-col h-full">
+          <div className="flex items-start gap-4 mb-4">
+            <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+              {problem.icon}
+            </div>
             
-            <div className="text-content flex-1">
-              <h3 className="text-lg font-semibold text-text-primary mb-2">
+            <div className="text-content flex-1 pt-1">
+              <div className="text-[12px] font-['JetBrains_Mono',_monospace] text-emerald-500/60 mb-1">
+                ERROR_{problem.id}
+              </div>
+              <h3 className="text-[20px] font-medium text-white leading-tight tracking-tight mb-2 font-['Arial',_sans-serif]">
                 {problem.title}
               </h3>
-              <p className="text-text-secondary">
+              <p className="text-[15px] text-slate-400 leading-relaxed font-['Arial',_sans-serif]">
                 {problem.description}
               </p>
             </div>
           </div>
-          
-          {/* Progress indicator */}
-          <div className="card-indicator" style={{ 
-            background: `linear-gradient(to right, rgba(255, 255, 255, ${problem.opacity * 0.1}), rgba(255, 255, 255, ${problem.opacity * 0.05}))` 
-          }} />
         </div>
-        
-        {/* Noise texture */}
-        <div 
-          className="card-noise"
-          style={{
-            backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Cfilter id="noise"%3E%3CfeTurbulence baseFrequency="0.9" /%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)" opacity="0.03"/%3E%3C/svg%3E")'
-          }}
-        />
       </motion.div>
     </motion.div>
   );
@@ -145,37 +137,57 @@ export default function ProblemSection() {
   return (
     <section 
       id="problem-section" 
-      className="px-4 md:px-6 overflow-hidden gradient-problem relative" 
+      className="px-4 md:px-6 overflow-hidden relative bg-[#0d1117]" 
+      style={{ paddingTop: '100px', paddingBottom: '100px' }}
       ref={ref}
     >
-      {/* Subtle noise texture overlay for premium feel */}
-      <div
-        className="absolute inset-0 opacity-[0.015] pointer-events-none"
-        style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Cfilter id="noise"%3E%3CfeTurbulence baseFrequency="0.9" numOctaves="4" /%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noise)"/%3E%3C/svg%3E")',
-          backgroundRepeat: 'repeat',
-          mixBlendMode: 'overlay'
-        }}
-      />
+      {/* Subtle Noise Texture */}
+      <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
       
-      <div className="max-w-6xl mx-auto relative py-16 md:py-20">
+      <div className="max-w-6xl mx-auto relative">
+        {/* Heading Zone - Matching Hero UI */}
         <motion.div 
-          className="text-center mb-12 md:mb-16"
+          className="text-center mb-16 md:mb-24"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 md:mb-6">
-            The documentation problem
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/10 mb-8">
+            <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-red-500 text-[13px] font-['JetBrains_Mono',_monospace]">System Leakage</span>
+          </div>
+
+          <h2 
+            className="text-white mb-6"
+            style={{
+              fontSize: 'clamp(40px, 6vw, 72px)',
+              lineHeight: '1.1',
+              letterSpacing: '-1.44px',
+              fontWeight: 400,
+              fontFamily: 'Arial, sans-serif'
+            }}
+          >
+            The Documentation <br className="hidden md:block" />
+            <span className="text-slate-500">Infrastructure Problem</span>
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-text-secondary max-w-3xl mx-auto px-2">
-            You're too busy coding to document properly. And when you do, 
-            it's scattered across tools that weren't built for developers.
+          
+          <p 
+            className="text-slate-400 mx-auto"
+            style={{
+              fontSize: '18px',
+              lineHeight: '1.6',
+              maxWidth: '640px',
+              fontFamily: 'Arial, sans-serif'
+            }}
+          >
+            Your context is evaporating in real-time. Documentation shouldn't be 
+            a chore—it should be a byproduct of your workflow.
           </p>
         </motion.div>
 
+        {/* Problems Grid */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12 md:mb-16"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 mb-24"
           variants={problemCardContainer}
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -185,42 +197,42 @@ export default function ProblemSection() {
           ))}
         </motion.div>
 
-        {/* The shift to solution */}
+        {/* Transition to solution */}
         <motion.div 
           className="text-center"
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
+          transition={{ delay: 0.4, duration: 0.8 }}
         >
-          <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
-                          text-accent-green rounded-full text-sm font-medium mb-6"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            <span className="text-accent-green">●</span>
-            There's a better way
-          </motion.div>
-          
-          <h3 className="text-3xl font-bold mb-4">
-            Documentation that{' '}
-            <motion.span 
-              className="text-accent-green inline-block"
-              initial={{ opacity: 0, x: -20 }}
-              animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
-              transition={{ delay: 0.6, duration: 0.6, ease: "easeOut" }}
+          <div className="flex flex-col items-center">
+            <div className="w-px h-24 bg-gradient-to-b from-transparent via-slate-700 to-emerald-500 mb-8" />
+            
+            <div
+              className="flex items-center gap-3 px-4 py-1.5 rounded-full border border-[rgba(16,185,129,0.3)] bg-[rgba(16,185,129,0.05)] mb-8"
             >
-              actually works
-            </motion.span>
-          </h3>
-          
-          <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            DevLog makes documenting as natural as coding. Capture solutions in context, 
-            connect related concepts, and build a searchable knowledge base that grows with you.
-          </p>
+               <span className="text-emerald-500 text-[14px] font-['JetBrains_Mono',_monospace]">LOG: SOLUTION_FOUND</span>
+            </div>
+            
+            <h3 
+              className="text-white mb-6"
+              style={{
+                fontSize: 'clamp(32px, 4vw, 48px)',
+                lineHeight: '1.1',
+                fontWeight: 400,
+                fontFamily: 'Arial, sans-serif',
+                letterSpacing: '-1px'
+              }}
+            >
+              Building a <span className="text-emerald-500">Resilient Brain</span>
+            </h3>
+            
+            <p className="text-slate-400 max-w-2xl mx-auto text-[17px] font-['Arial',_sans-serif]">
+              DevLog bridges the gap between solving and recording. Automatically preserves 
+              AI context, manages code versions, and connects everything you learn.
+            </p>
+          </div>
         </motion.div>
       </div>
-
     </section>
   );
 }

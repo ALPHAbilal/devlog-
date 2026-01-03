@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
+import CinematicDocumentDemo from './CinematicDocumentDemo';
 import { staggerContainer, staggerItem } from '@/shared/lib';
-import InstantCaptureDemo from './InstantCaptureDemo';
 
 const showcaseItems = [
   {
     id: 'capture',
     title: 'Instant Capture',
     description: 'Paste code snippets, save solutions, and document fixes in seconds. No formatting required.',
-    customComponent: <InstantCaptureDemo />, // NEW: Use live animated demo
+    customComponent: <CinematicDocumentDemo />, // NEW: Use high-fidelity cinematic demo
     accentColor: 'rgba(255, 255, 255, 0.03)', // Subtle mono accent
   },
   {

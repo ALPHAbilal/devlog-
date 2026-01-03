@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/shared/api';
 import { deserializeBlock } from './blockSerializer';
 
 /**

@@ -15,10 +15,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, ArrowLeft } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContextOptimized';
-import { storageWrapper } from '../utils/storage/storageWrapper';
-import { useDocumentAnalytics } from '../hooks/useAnalytics';
-import { useResponsive } from '../hooks/useResponsive';
+import { useAuth } from '@/app/providers';
+import { storageWrapper } from '@/shared/lib';
+import { useDocumentAnalytics } from '@/features/analytics';
+import { useResponsive } from '@/shared/hooks';
 import ExpandedViewEnhanced from '../components/ExpandedViewEnhanced';
 import MobileDocumentViewer from '../components/MobileDocumentViewer';
 

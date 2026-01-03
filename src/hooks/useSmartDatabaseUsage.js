@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContextOptimized';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
+import { supabase } from '@/shared/api';
+import { useAuth } from '@/app/providers';
+import { eventBus, EVENT_TYPES } from '@/shared/lib';
 
 // Cache for database size with 5-minute TTL
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes

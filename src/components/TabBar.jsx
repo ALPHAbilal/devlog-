@@ -1,4 +1,4 @@
-import { useTabContext } from '../contexts/TabContext';
+import { useTabContext } from '@/app/providers';
 import { X, Plus, FileText, ChevronDown } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 

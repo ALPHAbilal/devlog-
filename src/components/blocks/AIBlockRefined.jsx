@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Bot, User, Plus, Copy, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
-import { parseMarkdown } from '../../utils/parseMarkdown.jsx';
+import { parseMarkdown } from '@/shared/lib';
 import '../AIBlockScroll.css';
 
 function AIBlock({ block, onUpdate }) {

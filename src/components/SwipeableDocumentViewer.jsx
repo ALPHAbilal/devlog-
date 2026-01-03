@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, FileText } from 'lucide-react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
-import { useTouchGestures } from '../hooks/useTouchGestures';
-import { useResponsive } from '../hooks/useResponsive';
+import { useTouchGestures } from '@/shared/hooks';
+import { useResponsive } from '@/shared/hooks';
 
 /**
  * SwipeableDocumentViewer Component

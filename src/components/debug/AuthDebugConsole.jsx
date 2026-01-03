@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { debugHelpers } from '../../utils/debugHelpers';
+import { debugHelpers } from '@/shared/lib';
 import { X, Download, Copy, Move, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import '../../styles/auth-debug.css';
 

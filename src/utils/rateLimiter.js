@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseOptimized';
+import { supabase } from '@/shared/api';
 
 // Rate limiter utility for client-side rate limit checking
 class RateLimiter {

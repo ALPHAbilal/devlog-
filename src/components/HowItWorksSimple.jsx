@@ -1,6 +1,6 @@
 import { Zap, Link2, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { staggerContainer, staggerItem } from '../utils/animations';
+import { staggerContainer, staggerItem } from '@/shared/lib';
 
 const steps = [
   {

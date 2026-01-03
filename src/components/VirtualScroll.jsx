@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useResponsive } from '../hooks/useResponsive';
+import { useResponsive } from '@/shared/hooks';
 
 /**
  * VirtualScroll Component

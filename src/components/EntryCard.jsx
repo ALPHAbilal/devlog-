@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
-import { optimizedBlockLoader } from '../utils/optimizedBlockLoader';
+import { optimizedBlockLoader } from '@/shared/lib';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Check, MoreVertical } from 'lucide-react';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useTouchGestures } from '@/shared/hooks';
 
 export default function EntryCard({ entry, onExpand, isSelected = false, onSelect, selectionMode = false, onContextMenu }) {
   const [touchActive, setTouchActive] = useState(false);

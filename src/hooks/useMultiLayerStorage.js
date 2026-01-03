@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import multiLayerStorage from '../utils/storage/MultiLayerStorage';
 import syncEngine from '../utils/storage/SyncEngine';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
-import { useAuth } from '../contexts/AuthContextOptimized';
+import { eventBus, EVENT_TYPES } from '@/shared/lib';
+import { useAuth } from '@/app/providers';
 
 /**
  * Hook for using the multi-layer storage system

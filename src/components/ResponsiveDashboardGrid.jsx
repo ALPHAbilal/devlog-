@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { Grip, MoreVertical, Maximize2, Minimize2 } from 'lucide-react';
 import { motion, Reorder, useDragControls } from 'framer-motion';
-import { useResponsive, useComponentResponsive } from '../hooks/useResponsive';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useResponsive, useComponentResponsive } from '@/shared/hooks';
+import { useTouchGestures } from '@/shared/hooks';
 
 /**
  * ResponsiveDashboardGrid Component

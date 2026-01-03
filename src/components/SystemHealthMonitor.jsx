@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Shield, AlertTriangle, CheckCircle, Activity, Lock, Database, RefreshCw, Zap } from 'lucide-react';
-import lockManager from '../utils/locking/LockManager';
-import transactionManager from '../utils/transactions/TransactionManager';
-import circuitBreakerManager from '../utils/network/CircuitBreaker';
-import dataIntegrityManager from '../utils/integrity/DataIntegrityManager';
-import recoveryManager from '../utils/recovery/RecoveryManager';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
+import { LockManager as lockManager } from '@/shared/lib';
+import { TransactionManager as transactionManager } from '@/shared/lib';
+import { circuitBreakerManager } from '@/shared/lib';
+import { DataIntegrityManager as dataIntegrityManager } from '@/shared/lib';
+import { RecoveryManager as recoveryManager } from '@/shared/lib';
+import { eventBus, EVENT_TYPES } from '@/shared/lib';
 
 /**
  * System Health Monitor

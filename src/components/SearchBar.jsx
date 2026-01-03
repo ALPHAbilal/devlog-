@@ -1,5 +1,5 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
+import { eventBus, EVENT_TYPES } from '@/shared/lib';
 
 const SearchBar = forwardRef(({ value, onChange }, ref) => {
   const debounceTimer = useRef(null);

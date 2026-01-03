@@ -26,9 +26,9 @@ import {
 } from 'lucide-react';
 import SearchBar from './SearchBar';
 import ContextMenu from './ContextMenu';
-import { useToast } from '../../hooks/useToast';
-import { useFolders } from '../../hooks/useFolders';
-import { useProjectStructure } from '../../hooks/useBatchLoader';
+import { useToast } from '@/shared/hooks';
+import { useFolders } from '@/features/document';
+import { useProjectStructure } from '@/features/storage';
 import '../VirtualizedGrid.css';
 import {
   DndContext,

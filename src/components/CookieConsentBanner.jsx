@@ -4,8 +4,8 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { getAnalytics } from '../services/analytics/AnalyticsService';
-import { ConsentManager } from '../services/analytics/consent';
+import { getAnalytics } from '@/features/analytics';
+import { ConsentManager } from '@/features/analytics';
 
 export default function CookieConsentBanner() {
   const [showBanner, setShowBanner] = useState(false);

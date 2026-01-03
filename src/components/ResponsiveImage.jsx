@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image as ImageIcon, AlertCircle, X } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useResponsive } from '../hooks/useResponsive';
+import { useResponsive } from '@/shared/hooks';
 
 /**
  * ResponsiveImage Component

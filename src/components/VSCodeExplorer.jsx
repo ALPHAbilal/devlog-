@@ -32,8 +32,8 @@ import { useDroppable, useDraggable, DndContext, closestCenter, PointerSensor, u
 import { CSS } from '@dnd-kit/utilities';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { createPortal } from 'react-dom';
-import storageWrapper from '../utils/storage/storageWrapper';
-import { useToast } from '../hooks/useToast';
+import { storageWrapper } from '@/shared/lib';
+import { useToast } from '@/shared/hooks';
 
 // File type icon mapping
 const getFileIcon = (document) => {

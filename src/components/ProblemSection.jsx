@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
 import { MessageSquare, Search, BookOpen, Brain } from 'lucide-react';
 import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fadeInUp, problemCardContainer, problemCardItem, iconFloat } from '../utils/animations';
+import { useScrollAnimation } from '@/shared/hooks';
+import { fadeInUp, problemCardContainer, problemCardItem, iconFloat } from '@/shared/lib';
 
 const problems = [
   {

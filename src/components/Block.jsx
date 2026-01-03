@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { useBlockLazyLoading } from '../hooks/useBlockLazyLoading';
+import { useBlockLazyLoading } from '@/features/block';
 import LazyBlockSkeleton from './blocks/LazyBlockSkeleton';
 import TextBlock from './blocks/TextBlock';
 import CodeBlock from './blocks/CodeBlock';
@@ -14,7 +14,7 @@ import OptimizedIssueTrackerBlock from './blocks/OptimizedIssueTrackerBlock';
 import BlockDivider from './BlockDivider';
 import InlineActionBar from './InlineActionBar';
 import MobileBlockControls from './MobileBlockControls';
-import { useResponsive } from '../hooks/useResponsive';
+import { useResponsive } from '@/shared/hooks';
 
 const blockComponents = {
   text: TextBlock,

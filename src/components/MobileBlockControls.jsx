@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { MoreHorizontal, Trash2, Copy, ChevronUp, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useTouchGestures } from '@/shared/hooks';
 import MobileBottomSheet from './MobileBottomSheet';
 
 export default function MobileBlockControls({ 

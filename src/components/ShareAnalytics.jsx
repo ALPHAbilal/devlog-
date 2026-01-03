@@ -9,7 +9,7 @@ import {
   BarChart, TrendingUp, Users, Eye, Clock, 
   Calendar, Globe, Activity, PieChart
 } from 'lucide-react';
-import { shareService } from '../services/shareService';
+import { shareService } from '@/features/share';
 
 export function ShareAnalytics({ shareId, onClose }) {
   const [analytics, setAnalytics] = useState(null);

@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/shared/api';
 import { optimizedBlockLoader } from './optimizedBlockLoader';
 import { LRUCache } from './storage/LRUCache';
 

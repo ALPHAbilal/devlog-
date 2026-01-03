@@ -14,8 +14,8 @@ import {
   Shield, Globe, X, Check, AlertCircle, Trash2,
   BarChart, Clock, User
 } from 'lucide-react';
-import { shareService } from '../services/shareService';
-import { useToast } from '../hooks/useToast';
+import { shareService } from '@/features/share';
+import { useToast } from '@/shared/hooks';
 
 export function ShareDialog({ document, isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('quick');

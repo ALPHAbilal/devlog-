@@ -12,10 +12,10 @@ import {
   FilePlus,
   Trash2
 } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { useFolders } from '../../hooks/useFolders';
-import { useProjectStructure } from '../../hooks/useBatchLoader';
-import { useToast } from '../../hooks/useToast';
+import { cn } from '@/shared/lib';
+import { useFolders } from '@/features/document';
+import { useProjectStructure } from '@/features/storage';
+import { useToast } from '@/shared/hooks';
 import {
   DndContext,
   closestCenter,

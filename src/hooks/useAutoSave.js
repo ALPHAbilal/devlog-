@@ -4,9 +4,9 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react';
-import { useSettings } from '../contexts/SettingsContext';
+import { useSettings } from '@/app/providers';
 import { createSmartSync } from '../utils/smartSync';
-import { supabase } from '../lib/supabaseOptimized';
+import { supabase } from '@/shared/api';
 
 // Global reference for Smart Sync managers
 const smartSyncManagers = new Map();

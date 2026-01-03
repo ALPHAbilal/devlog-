@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle, Clock, Users } from 'lucide-react';
-import { rateLimiter } from '../utils/rateLimiter';
+import { rateLimiter } from '@/shared/lib';
 
 export default function RateLimitMonitor() {
   const [status, setStatus] = useState({

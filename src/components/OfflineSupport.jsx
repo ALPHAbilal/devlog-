@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { WifiOff, Wifi, RefreshCw, Cloud, CloudOff, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useResponsive } from '../hooks/useResponsive';
+import { useResponsive } from '@/shared/hooks';
 
 /**
  * OfflineSupport Component

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, Save, Home } from 'lucide-react';
 import * as Sentry from '@sentry/react';
-import storageWrapper from '../utils/storage/storageWrapper';
+import { storageWrapper } from '@/shared/lib';
 
 /**
  * Global Error Boundary

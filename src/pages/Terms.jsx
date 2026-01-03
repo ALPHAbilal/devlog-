@@ -4,7 +4,7 @@ import LogoMinimal from '../components/LogoMinimal';
 import NoiseOverlay from '../components/NoiseOverlay';
 import { ArrowLeft, ChevronDown, ChevronUp, FileCheck, Users, Shield, AlertTriangle, FileText, CreditCard, Lock, Scale, Ban, Gavel, RefreshCw, Building, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem } from '@/shared/lib';
 
 export default function Terms() {
   const navigate = useNavigate();

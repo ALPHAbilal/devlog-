@@ -7,7 +7,7 @@
  * - Private: Specific user invitation system
  */
 
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/shared/api';
 import { logError } from '../utils/monitoring';
 import { deserializeBlock } from '../utils/blockSerializer';
 

@@ -1,0 +1,609 @@
+import { createClient } from '@supabase/supabase-js';
+// TODO: Update import after migrating secureStorage to FSD structure
+import { secureStorage, sessionMonitor } from '@/utils/secureStorage';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Correct storage key for Supabase v2
+const STORAGE_KEY = 'sb-zqcjipwiznesnbgbocnu-auth-token';
+
+/**
+ * Optimized Supabase Client with:
+ * - Secure token storage
+ * - Session monitoring
+ * - Smart refresh handling
+ * - Connection pooling
+ * - Request deduplication
+ * - Automatic token refresh with 3-day inactivity timeout
+ *
+ * Session Management:
+ * Sessions persist through automatic token refresh.
+ * Users are automatically signed out after 3 days (72 hours) of inactivity.
+ * Activity monitoring resets the timer on user interaction (mouse, keyboard, scroll, touch).
+ */
+class OptimizedSupabaseClient {
+  constructor() {
+    this.client = null;
+    this.sessionCache = null;
+    this.sessionCacheTime = 0;
+    this.sessionCacheDuration = 5 * 60 * 1000; // 5 minutes
+    this.pendingRequests = new Map();
+    this.authSubscribers = new Set();
+    this.initialized = false;
+    this.refreshPromise = null; // Track ongoing refresh
+    this.lastRefreshTime = 0;
+    this.sessionTimeout = null;
+    // Inactivity timeout set to 3 days (72 hours)
+    // Sessions will remain active for 3 days of inactivity before automatic signout
+    this.inactivityTimeout = 3 * 24 * 60 * 60 * 1000; // 3 days in milliseconds (259200000 ms)
+
+    // [DEBUG-TIMEOUT] Log initial timeout configuration
+    console.log('[DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized:', {
+      defaultTimeout_ms: this.inactivityTimeout,
+      defaultTimeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      defaultTimeout_days: this.inactivityTimeout / (24 * 60 * 60 * 1000),
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  /**
+   * Get or create Supabase client instance
+   */
+  getClient() {
+    if (!this.client) {
+      this.client = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          autoRefreshToken: true,     // Enable auto-refresh for security
+          persistSession: true,
+          detectSessionInUrl: true,
+          flowType: 'pkce',
+          refreshThreshold: 300,      // Refresh 5 minutes before expiry
+          // Custom storage adapter using secure storage
+          storage: {
+            getItem: (key) => {
+              try {
+                sessionMonitor.logActivity('storage_access', { action: 'get', key });
+                
+                // Use secure storage for auth token
+                if (key === STORAGE_KEY) {
+                  return secureStorage.getItem('auth_token');
+                }
+                return localStorage.getItem(key);
+              } catch (e) {
+                console.error('Storage getItem error:', e);
+                return null;
+              }
+            },
+            setItem: (key, value) => {
+              try {
+                sessionMonitor.logActivity('storage_access', { action: 'set', key });
+                
+                // Use secure storage for auth token
+                if (key === STORAGE_KEY) {
+                  secureStorage.setItem('auth_token', value);
+                } else {
+                  localStorage.setItem(key, value);
+                }
+              } catch (e) {
+                console.error('Storage setItem error:', e);
+              }
+            },
+            removeItem: (key) => {
+              try {
+                sessionMonitor.logActivity('storage_access', { action: 'remove', key });
+                
+                // Use secure storage for auth token
+                if (key === STORAGE_KEY) {
+                  secureStorage.removeItem('auth_token');
+                } else {
+                  localStorage.removeItem(key);
+                }
+              } catch (e) {
+                console.error('Storage removeItem error:', e);
+              }
+            }
+          }
+        },
+        realtime: {
+          params: {
+            eventsPerSecond: 2 // Limit realtime events
+          }
+        },
+        global: {
+          headers: {
+            'x-client-info': 'journey-log-compass',
+            'x-connection-pooling': 'session',
+            'Accept': 'application/json',
+            // Don't set Content-Type globally - let each API set it appropriately
+            // This fixes file uploads which need multipart/form-data
+            'Prefer': 'return=representation'
+          },
+          // Fix QUIC protocol errors by forcing HTTP/2
+          fetch: (url, options = {}) => {
+            // Add retry logic with exponential backoff
+            const maxRetries = 3;
+            const retryDelay = (attempt) => Math.min(1000 * Math.pow(2, attempt), 5000);
+            
+            const attemptFetch = async (attempt = 0) => {
+              try {
+                // Force HTTP/2 instead of QUIC
+                const modifiedOptions = {
+                  ...options,
+                  // Disable QUIC protocol
+                  mode: 'cors',
+                  credentials: 'same-origin',
+                  // Add timeout
+                  signal: AbortSignal.timeout(30000)
+                };
+                
+                const response = await fetch(url, modifiedOptions);
+                
+                // Check for network errors
+                if (!response.ok && response.status === 0) {
+                  throw new Error('Network error - possible QUIC issue');
+                }
+                
+                return response;
+              } catch (error) {
+                // Log QUIC errors specifically
+                if (error.message?.includes('QUIC') || error.message?.includes('ERR_QUIC')) {
+                  console.warn(`[Supabase] QUIC error detected, retrying with HTTP/2 (attempt ${attempt + 1}/${maxRetries})`);
+                }
+                
+                if (attempt < maxRetries - 1) {
+                  const delay = retryDelay(attempt);
+                  console.log(`[Supabase] Retrying after ${delay}ms...`);
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                  return attemptFetch(attempt + 1);
+                }
+                
+                throw error;
+              }
+            };
+            
+            return attemptFetch();
+          }
+        },
+        db: {
+          schema: 'public'
+        },
+        // Connection pooling configuration
+        connectionTimeout: 10000, // 10 seconds
+        poolSize: 50 // Increased for Reddit traffic surge
+      });
+
+      // Initialize auth state only once
+      if (!this.initialized) {
+        this.initializeAuth();
+        this.initialized = true;
+      }
+    }
+    return this.client;
+  }
+
+  /**
+   * Initialize auth state and listeners
+   */
+  async initializeAuth() {
+    // First, try to restore existing session
+    try {
+      const { data: { session }, error } = await this.client.auth.getSession();
+      if (session) {
+        console.log('[Supabase] Restored existing session:', session.user.id);
+        // Start timer for restored session (fixes issue where timer never starts on page refresh)
+        this.startInactivityTimer();
+      } else if (error) {
+        console.error('[Supabase] Error restoring session:', error);
+      }
+    } catch (err) {
+      console.error('[Supabase] Failed to restore session:', err);
+    }
+    
+    const { data: { subscription } } = this.client.auth.onAuthStateChange(async (event, session) => {
+      console.log(`[Supabase] Auth event: ${event}`);
+      sessionMonitor.logActivity('auth_event', { event, hasSession: !!session });
+      
+      // Handle different auth events
+      switch (event) {
+        case 'SIGNED_IN':
+          this.startInactivityTimer();
+          sessionMonitor.reset();
+          break;
+          
+        case 'SIGNED_OUT':
+          this.stopInactivityTimer();
+          sessionMonitor.reset();
+          secureStorage.clear();
+          break;
+          
+        case 'TOKEN_REFRESHED':
+          // Implement smart refresh handling
+          const now = Date.now();
+          if (now - this.lastRefreshTime < 5000) {
+            console.warn('[Supabase] Ignoring rapid token refresh');
+            return;
+          }
+          this.lastRefreshTime = now;
+          
+          sessionMonitor.logActivity('token_refresh', { timestamp: now });
+          
+          // Check for suspicious activity
+          const suspiciousActivity = sessionMonitor.isSuspicious();
+          if (suspiciousActivity) {
+            console.error('[Supabase] Suspicious activity detected, forcing re-authentication');
+            await this.client.auth.signOut();
+            return;
+          }
+          
+          this.resetInactivityTimer();
+          break;
+          
+        case 'USER_UPDATED':
+          this.resetInactivityTimer();
+          break;
+      }
+      
+      // Notify all subscribers
+      this.authSubscribers.forEach(callback => callback(event, session));
+    });
+
+    // Store subscription for cleanup
+    this.authSubscription = subscription;
+    
+    // Set up activity monitoring
+    this.setupActivityMonitoring();
+  }
+
+  /**
+   * Set up activity monitoring for session timeout
+   * Monitors user activity (mouse, keyboard, scroll, touch) to reset the inactivity timer
+   * Default timeout is 3 days of inactivity before automatic signout
+   */
+  setupActivityMonitoring() {
+    // Skip setup if inactivity timeout is disabled
+    if (this.inactivityTimeout === 0) {
+      console.log('[Supabase] Activity monitoring disabled - sessions use automatic token refresh');
+      return;
+    }
+
+    // [DEBUG-TIMEOUT] Log activity monitoring setup
+    console.log('[DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED:', {
+      events: ['mousedown', 'keydown', 'scroll', 'touchstart'],
+      timeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      timestamp: new Date().toISOString()
+    });
+
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    let activityCount = 0;
+    let lastActivityLog = 0;
+
+    const handleActivity = () => {
+      activityCount++;
+      const now = Date.now();
+
+      // [DEBUG-TIMEOUT] Log activity every 60 seconds max (prevent spam)
+      if (now - lastActivityLog > 60000) {
+        console.log('[DEBUG-TIMEOUT-7] 🖱️ User activity detected:', {
+          activityCount,
+          lastEvent: event.type,
+          timerWillReset: true,
+          timestamp: new Date().toISOString()
+        });
+        lastActivityLog = now;
+      }
+
+      this.resetInactivityTimer();
+    };
+
+    activityEvents.forEach(event => {
+      document.addEventListener(event, handleActivity, { passive: true });
+    });
+
+    // Clean up on window unload
+    window.addEventListener('beforeunload', () => {
+      activityEvents.forEach(event => {
+        document.removeEventListener(event, handleActivity);
+      });
+    });
+  }
+
+  /**
+   * Start inactivity timer
+   */
+  startInactivityTimer() {
+    this.resetInactivityTimer();
+  }
+
+  /**
+   * Stop inactivity timer
+   */
+  stopInactivityTimer() {
+    if (this.sessionTimeout) {
+      clearTimeout(this.sessionTimeout);
+      this.sessionTimeout = null;
+    }
+  }
+
+  /**
+   * Reset inactivity timer
+   */
+  resetInactivityTimer() {
+    this.stopInactivityTimer();
+
+    // Don't set timeout if it's disabled (0 means never timeout)
+    if (this.inactivityTimeout === 0) {
+      // [DEBUG-TIMEOUT] Log disabled timeout
+      console.log('[DEBUG-TIMEOUT-3] ℹ️ Inactivity timer NOT started (timeout disabled)');
+      return;
+    }
+
+    // [DEBUG-TIMEOUT] Log timer reset
+    console.log('[DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET:', {
+      timeout_ms: this.inactivityTimeout,
+      timeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      willExpireAt: new Date(Date.now() + this.inactivityTimeout).toISOString(),
+      timestamp: new Date().toISOString()
+    });
+
+    this.sessionTimeout = setTimeout(async () => {
+      // [DEBUG-TIMEOUT] Log timeout trigger
+      console.error('[DEBUG-TIMEOUT-5] 🚨 TIMEOUT TRIGGERED - Signing out user:', {
+        timeout_ms: this.inactivityTimeout,
+        timeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+        triggeredAt: new Date().toISOString(),
+        reason: 'inactivity'
+      });
+      console.log('[Supabase] Session timeout due to inactivity');
+      sessionMonitor.logActivity('session_timeout', { reason: 'inactivity' });
+      await this.client.auth.signOut();
+    }, this.inactivityTimeout);
+  }
+
+  /**
+   * Set custom inactivity timeout
+   * @param {number} minutes - Minutes until timeout (0 = disabled)
+   *
+   * Note: By default, inactivity timeout is disabled (0).
+   * Sessions rely on Supabase's automatic token refresh instead.
+   * Only enable this if your application has specific security requirements.
+   */
+  setInactivityTimeout(minutes) {
+    const oldTimeout = this.inactivityTimeout;
+    this.inactivityTimeout = minutes === 0 ? 0 : minutes * 60 * 1000;
+
+    // [DEBUG-TIMEOUT] Log timeout override
+    console.log('[DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout():', {
+      oldTimeout_ms: oldTimeout,
+      oldTimeout_hours: oldTimeout / (60 * 60 * 1000),
+      newTimeout_minutes: minutes,
+      newTimeout_ms: this.inactivityTimeout,
+      newTimeout_hours: this.inactivityTimeout / (60 * 60 * 1000),
+      source: 'setInactivityTimeout() call',
+      stackTrace: new Error().stack.split('\n').slice(2, 5).join('\n'), // Show caller
+      timestamp: new Date().toISOString()
+    });
+
+    // Reset timer with new timeout (will start if session exists)
+    if (this.client) {
+      this.resetInactivityTimer();
+    }
+  }
+
+  /**
+   * Subscribe to auth changes
+   */
+  onAuthStateChange(callback) {
+    this.authSubscribers.add(callback);
+    return () => this.authSubscribers.delete(callback);
+  }
+
+  /**
+   * Get session with secure caching and refresh
+   */
+  async getSession() {
+    // Prevent concurrent getSession calls
+    const key = 'getSession';
+    return this.deduplicateRequest(key, async () => {
+      try {
+        const result = await this.getClient().auth.getSession();
+        
+        // Check if refresh is needed
+        if (result.data.session) {
+          const expiresAt = result.data.session.expires_at;
+          const nowInSeconds = Math.floor(Date.now() / 1000);
+          const timeUntilExpiry = expiresAt - nowInSeconds;
+
+          // [DEBUG-TIMEOUT] Log token expiry status
+          console.log('[DEBUG-TIMEOUT-8] 🔑 JWT Token status:', {
+            expiresAt: new Date(expiresAt * 1000).toISOString(),
+            timeUntilExpiry_seconds: timeUntilExpiry,
+            timeUntilExpiry_minutes: Math.floor(timeUntilExpiry / 60),
+            refreshThreshold_seconds: 300,
+            willRefreshSoon: timeUntilExpiry < 300,
+            timestamp: new Date().toISOString()
+          });
+
+          // Refresh if less than 5 minutes until expiry
+          if (timeUntilExpiry < 300 && !this.refreshPromise) {
+            console.log('[DEBUG-TIMEOUT-9] 🔄 Proactive token refresh TRIGGERED');
+            console.log('[Supabase] Proactively refreshing token');
+            this.refreshPromise = this.refreshSession();
+            const refreshResult = await this.refreshPromise;
+            this.refreshPromise = null;
+            return refreshResult || result;
+          }
+        }
+        
+        return result;
+      } catch (error) {
+        console.error('[Supabase] getSession error:', error);
+        sessionMonitor.logActivity('session_error', { error: error.message });
+        return { data: { session: null }, error };
+      }
+    });
+  }
+
+  /**
+   * Refresh session with error handling
+   */
+  async refreshSession() {
+    try {
+      // [DEBUG-TIMEOUT] Log refresh attempt
+      console.log('[DEBUG-TIMEOUT-10] 🔄 Token refresh STARTED:', {
+        attemptTimestamp: new Date().toISOString(),
+        failedRefreshCount: sessionMonitor.suspiciousPatterns.failedRefreshes
+      });
+
+      sessionMonitor.logActivity('refresh_attempt', { timestamp: Date.now() });
+
+      const { data, error } = await this.getClient().auth.refreshSession();
+
+      if (error) {
+        // [DEBUG-TIMEOUT] Log refresh failure
+        console.error('[DEBUG-TIMEOUT-11] ❌ Token refresh FAILED:', {
+          error: error.message,
+          errorCode: error.code,
+          failedRefreshCount: sessionMonitor.suspiciousPatterns.failedRefreshes + 1,
+          willForceSignOut: sessionMonitor.suspiciousPatterns.failedRefreshes >= 3,
+          timestamp: new Date().toISOString()
+        });
+
+        sessionMonitor.logActivity('refresh_failed', { error: error.message });
+        throw error;
+      }
+
+      // [DEBUG-TIMEOUT] Log refresh success
+      console.log('[DEBUG-TIMEOUT-12] ✅ Token refresh SUCCESS:', {
+        newExpiresAt: new Date(data.session.expires_at * 1000).toISOString(),
+        timestamp: new Date().toISOString()
+      });
+
+      sessionMonitor.logActivity('refresh_success', { timestamp: Date.now() });
+      return { data, error: null };
+    } catch (error) {
+      console.error('[Supabase] Refresh session error:', error);
+
+      // If refresh fails too many times, force re-authentication
+      if (sessionMonitor.suspiciousPatterns.failedRefreshes > 3) {
+        // [DEBUG-TIMEOUT] Log forced sign-out
+        console.error('[DEBUG-TIMEOUT-13] 🚨 FORCED SIGN-OUT after multiple refresh failures:', {
+          failedRefreshCount: sessionMonitor.suspiciousPatterns.failedRefreshes,
+          timestamp: new Date().toISOString()
+        });
+        await this.client.auth.signOut();
+      }
+
+      return { data: { session: null }, error };
+    }
+  }
+
+  /**
+   * Deduplicate concurrent requests
+   */
+  async deduplicateRequest(key, requestFn) {
+    // Check if request is already pending
+    if (this.pendingRequests.has(key)) {
+      return this.pendingRequests.get(key);
+    }
+
+    // Create new request
+    const promise = requestFn().finally(() => {
+      this.pendingRequests.delete(key);
+    });
+
+    this.pendingRequests.set(key, promise);
+    return promise;
+  }
+
+  /**
+   * Create batch operation helper
+   */
+  createBatchOperation() {
+    const operations = [];
+    const execute = async () => {
+      if (operations.length === 0) return [];
+      
+      // Execute all operations in parallel
+      return Promise.all(operations.map(op => op()));
+    };
+
+    return {
+      add: (operation) => operations.push(operation),
+      execute,
+      size: () => operations.length
+    };
+  }
+}
+
+// Create singleton instance
+const optimizedSupabase = new OptimizedSupabaseClient();
+
+// Create and export the client instance once
+export const supabase = optimizedSupabase.getClient();
+
+// Export the optimized instance for advanced usage
+export { optimizedSupabase };
+
+// Helper functions
+export const getSession = () => optimizedSupabase.getSession();
+export const onAuthStateChange = (callback) => optimizedSupabase.onAuthStateChange(callback);
+export const deduplicateRequest = (key, fn) => optimizedSupabase.deduplicateRequest(key, fn);
+export const setInactivityTimeout = (minutes) => optimizedSupabase.setInactivityTimeout(minutes);
+
+// Track last auth check to prevent rapid retries
+let lastAuthCheckTime = 0;
+const MIN_AUTH_CHECK_INTERVAL = 500; // 500ms minimum between checks (reduced from 1000ms)
+
+// Helper to ensure authenticated session before operations
+export const ensureAuthenticated = async () => {
+  // Rate limit auth checks - but be more lenient
+  const now = Date.now();
+  if (now - lastAuthCheckTime < MIN_AUTH_CHECK_INTERVAL) {
+    // Instead of throwing, just wait a bit and continue
+    await new Promise(resolve => setTimeout(resolve, MIN_AUTH_CHECK_INTERVAL));
+  }
+  lastAuthCheckTime = now;
+  
+  const { data: { session }, error } = await getSession();
+  
+  if (error) {
+    console.error('[Supabase] Auth check error:', error);
+    throw new Error('Authentication error: ' + error.message);
+  }
+  
+  if (!session) {
+    console.error('[Supabase] No active session');
+    throw new Error('No active session. Please sign in again.');
+  }
+  
+  // Check if session is about to expire (within 5 minutes)
+  const expiresAt = session.expires_at;
+  const nowInSeconds = Math.floor(Date.now() / 1000);
+  const timeUntilExpiry = expiresAt - nowInSeconds;
+  
+  if (timeUntilExpiry < 300) {
+    console.log('[Supabase] Session expiring soon, refreshing...');
+    const { error: refreshError } = await optimizedSupabase.refreshSession();
+    if (refreshError) {
+      throw new Error('Failed to refresh session: ' + refreshError.message);
+    }
+  }
+  
+  return session;
+};
+
+// Emergency helper to clear auth issues
+export const clearAuthIssues = () => {
+  console.log('[Supabase] Clearing auth issues...');
+  // Clear all auth-related storage
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem('SUPABASE_DISABLE_REFRESH');
+  secureStorage.clear();
+  // Clear caches
+  optimizedSupabase.sessionCache = null;
+  optimizedSupabase.sessionCacheTime = 0;
+  sessionMonitor.reset();
+  // Sign out
+  optimizedSupabase.getClient().auth.signOut();
+};

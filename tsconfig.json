@@ -24,10 +24,21 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
 
-    // Path aliases (match vite.config.js if aliases added)
+    // Path aliases (match vite.config.js)
+    // FSD-first paths for new code, legacy paths for migration compatibility
     "baseUrl": ".",
     "paths": {
+      // Primary alias
       "@/*": ["src/*"],
+
+      // FSD Layer aliases (new structure)
+      "@/shared/*": ["src/shared/*"],
+      "@/app/*": ["src/app/*"],
+      "@/features/*": ["src/features/*"],
+      "@/entities/*": ["src/entities/*"],
+      "@/widgets/*": ["src/widgets/*"],
+
+      // Legacy aliases (for migration compatibility - remove after FSD complete)
       "@/components/*": ["src/components/*"],
       "@/hooks/*": ["src/hooks/*"],
       "@/utils/*": ["src/utils/*"],

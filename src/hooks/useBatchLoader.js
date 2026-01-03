@@ -9,8 +9,8 @@
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '../lib/supabaseOptimized';
-import { useAuth } from '../contexts/AuthContextOptimized';
+import { supabase } from '@/shared/api';
+import { useAuth } from '@/app/providers';
 import { useToast } from './useToast';
 
 // Cache management

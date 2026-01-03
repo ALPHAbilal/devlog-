@@ -1,0 +1,1749 @@
+/* Claude.ai Inspired Settings - Devlog Brand Colors */
+
+/* Import Cousine font for API key display */
+@import url('https://fonts.googleapis.com/css2?family=Cousine:wght@400&display=swap');
+
+/* CSS Variables */
+:root {
+  /* Brand Colors - Updated to Teal from Figma */
+  --brand-primary: #00bc7d;
+  --brand-primary-end: #00bba7;
+  --brand-primary-hover: #00a06a;
+  --api-key-text: #00d492;
+
+  /* Dark Theme Colors - Updated to Darker Figma Theme */
+  --bg-primary: #0f172b;
+  --bg-secondary: #020618;
+  --bg-elevated: rgba(15, 23, 43, 0.5);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(49, 65, 88, 0.5);
+  --border-section: rgba(29, 41, 61, 0.5);
+
+  /* Text Colors - Figma Design Specification */
+  --text-primary: #ffffff;              /* Pure white for main titles */
+  --text-secondary: #90a1b9;            /* Light blue-gray for descriptions */
+  --text-tertiary: #cad5e2;             /* Lighter for labels */
+  --text-muted: #62748e;                /* Darkest gray for small labels */
+  --text-disabled: rgba(243, 244, 246, 0.4);
+
+  /* Semantic Colors */
+  --color-success: #10b981;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-danger: #ff6467;
+
+  /* Spacing Scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Typography - Arial from Figma */
+  --font-ui: Arial, -apple-system, system-ui, sans-serif;
+  --transition: 200ms ease;
+}
+
+/* Custom Scrollbar Styling */
+/* Global scrollbar for entire settings page */
+.settings-page ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.settings-page ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 5px;
+}
+
+.settings-page ::-webkit-scrollbar-thumb {
+  background: rgba(0, 188, 125, 0.25);
+  border-radius: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.settings-page ::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 125, 0.4);
+}
+
+.settings-page ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Specific styling for main content scrollbar */
+/* Works in Webkit browsers (Chrome, Safari, Edge) */
+.settings-content::-webkit-scrollbar {
+  width: 12px;
+  background: transparent;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px;
+  margin: 20px 0; /* Add margin to avoid overlapping with rounded corner */
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 188, 125, 0.3) 0%,
+    rgba(0, 187, 167, 0.25) 100%
+  );
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 188, 125, 0.5) 0%,
+    rgba(0, 187, 167, 0.4) 100%
+  );
+  border: 1px solid rgba(0, 188, 125, 0.2);
+  box-shadow: 0 0 10px rgba(0, 188, 125, 0.3);
+}
+
+.settings-content::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 188, 125, 0.6) 0%,
+    rgba(0, 187, 167, 0.5) 100%
+  );
+}
+
+/* Firefox scrollbar styling */
+.settings-content {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 188, 125, 0.3) rgba(255, 255, 255, 0.02);
+}
+
+/* Apply scrollbar to other scrollable elements */
+.modal::-webkit-scrollbar,
+.setup-accordion-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal::-webkit-scrollbar-track,
+.setup-accordion-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.modal::-webkit-scrollbar-thumb,
+.setup-accordion-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 188, 125, 0.25);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.modal::-webkit-scrollbar-thumb:hover,
+.setup-accordion-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 188, 125, 0.4);
+}
+
+/* Base */
+.settings-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+}
+
+/* Mobile Header */
+.mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+  height: 60px;
+  backdrop-filter: blur(10px);
+  background: rgba(2, 6, 24, 0.95); /* Darker to match new theme */
+}
+
+.mobile-header h1 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.875rem;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all var(--transition);
+  font-weight: 500;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.back-button:active {
+  transform: scale(0.95);
+}
+
+.menu-button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: var(--space-2);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all var(--transition);
+}
+
+.menu-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.menu-button:active {
+  transform: scale(0.95);
+}
+
+/* Layout */
+.settings-layout {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-secondary); /* Set dark background for the gap effect */
+}
+
+/* Sidebar */
+.settings-sidebar {
+  width: 256px; /* Updated from 240px per Figma */
+  background: var(--bg-secondary);
+  /* Add subtle gradient for depth */
+  background: linear-gradient(
+    180deg,
+    var(--bg-secondary) 0%,
+    rgba(2, 6, 24, 0.98) 100%
+  );
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1; /* Ensure sidebar is behind the rounded content */
+}
+
+.back-button-settings {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 16px 16px;
+  margin-top: 32px; /* Increased margin to push button even lower */
+  margin-bottom: 8px; /* Add bottom margin for separation */
+  font-family: var(--font-ui);
+  line-height: 20px;
+  height: 20px;
+  transition: color var(--transition);
+  opacity: 0.8;
+}
+
+.back-button-settings:hover {
+  color: var(--text-tertiary);
+  opacity: 1;
+}
+
+.back-button-settings span {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  color: inherit;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: 0.25rem;
+  transition: var(--transition);
+}
+
+.close-button:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Navigation */
+.nav-sections {
+  flex: 1;
+  padding: var(--space-4);
+  margin-top: 16px; /* Reduced since back button is now lower */
+  border: none;
+  border-top: none;
+}
+
+.nav-item {
+  display: block;
+  width: 100%;
+  padding: 10px var(--space-4);
+  background: rgba(255, 255, 255, 0.02);
+  border: none;
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  line-height: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 6px;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: linear-gradient(to bottom, rgba(0, 188, 125, 0.1), rgba(0, 187, 167, 0.1));
+  border: 1px solid rgba(0, 188, 125, 0.2);
+  border-radius: 10px;
+  height: 42px; /* Specific height from Figma */
+  color: #00d492;
+  font-weight: normal; /* Not bold in Figma */
+}
+
+/* Main Content */
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--bg-primary);
+  border-top-left-radius: 24px; /* Enhanced: even more prominent rounded corner */
+  border-top-right-radius: 0; /* Explicitly set to 0 for clarity */
+  margin-top: 40px; /* Enhanced: beautiful gap for visual breathing room */
+  margin-left: 0; /* Ensure it's flush with sidebar */
+  box-shadow:
+    0px 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0px -2px 10px rgba(0, 0, 0, 0.1), /* Top shadow for depth */
+    inset 1px 1px 0 rgba(255, 255, 255, 0.02); /* Subtle inner highlight */
+  width: 100%;
+  height: calc(100% - 40px); /* Adjust height for larger margin */
+  display: flex;
+  flex-direction: column;
+  position: relative; /* For proper shadow rendering */
+  /* Create a subtle inner border effect */
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Add a subtle gradient overlay for depth */
+.settings-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.01) 0%,
+    transparent 100%
+  );
+  border-top-left-radius: 24px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.content-section {
+  width: 100%;
+  max-width: 832px; /* Updated from 800px to match Figma */
+  padding: 48px 48px; /* More reasonable padding for actual use */
+  margin: 0 auto;
+  position: relative;
+  z-index: 1; /* Ensure content is above the gradient overlay */
+}
+
+.section-title {
+  font-family: var(--font-ui);
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 36px;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-8) 0;
+}
+
+/* Setting Groups */
+.setting-group {
+  margin-bottom: var(--space-8);
+}
+
+.setting-group-title {
+  font-family: var(--font-ui);
+  font-size: 20px; /* Changed from 18px per Figma */
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--text-primary);
+  margin: 0 0 16px 0; /* 16px margin per Figma */
+}
+
+/* Setting Items */
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-content {
+  flex: 1;
+  padding-right: var(--space-4);
+}
+
+.setting-label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
+}
+
+.setting-description {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.setting-value {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background-color var(--transition);
+  flex-shrink: 0;
+}
+
+.toggle-switch:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.toggle-switch.active {
+  background: var(--brand-primary);
+}
+
+.toggle-switch.active:hover:not(:disabled) {
+  background: var(--brand-primary-hover);
+}
+
+.toggle-switch:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-switch.active .toggle-thumb {
+  transform: translateX(20px);
+}
+
+/* Select */
+.setting-select {
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.setting-select:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.setting-select:focus {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  font-family: var(--font-ui);
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Button Variants */
+.btn-primary {
+  background: linear-gradient(to bottom, #00bc7d, #00bba7); /* Gradient from Figma */
+  color: white;
+  border-radius: 8px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: normal;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(to bottom, #00a06a, #009f8f);
+}
+
+.btn-secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn-danger {
+  background: var(--color-error);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+/* Button Sizes */
+.btn-small {
+  padding: var(--space-1) var(--space-3);
+  font-size: 0.875rem;
+}
+
+.btn-medium {
+  padding: var(--space-2) var(--space-4);
+  font-size: 1rem;
+}
+
+.btn-large {
+  padding: var(--space-3) var(--space-6);
+  font-size: 1.125rem;
+}
+
+/* Forms */
+.form-field {
+  margin-bottom: var(--space-4);
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-tertiary);
+}
+
+.form-field input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  transition: var(--transition);
+}
+
+.form-field input:focus {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+.password-form {
+  max-width: 400px;
+}
+
+/* Password Trigger Button */
+.password-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.password-trigger-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.password-trigger-btn:active {
+  transform: scale(0.98);
+}
+
+/* Mobile Password Content */
+.mobile-password-content {
+  padding: var(--space-6) var(--space-4);
+}
+
+.mobile-password-content .form-field {
+  margin-bottom: var(--space-4);
+}
+
+.mobile-actions {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.mobile-actions button {
+  flex: 1;
+}
+
+/* File Input */
+.file-input {
+  display: none;
+}
+
+.file-label {
+  display: inline-block;
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.file-label:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ============================================ */
+/* Data & Privacy Cards - Matching API Key Design */
+/* ============================================ */
+
+/* Data Privacy Card - Same style as API Key Card */
+.data-privacy-card {
+  background: rgba(15, 23, 43, 0.5); /* Same as API key cards */
+  border: 1px solid rgba(49, 65, 88, 0.5);
+  border-radius: 10px;
+  padding: 21px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.data-privacy-card:hover {
+  border-color: rgba(49, 65, 88, 0.7);
+  background: rgba(15, 23, 43, 0.6);
+}
+
+/* Storage Card Specific Styling */
+.storage-card {
+  min-height: 120px;
+}
+
+.storage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.storage-header-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.storage-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(0, 188, 125, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #00d492;
+}
+
+.storage-info-section {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.storage-label {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #ffffff;
+}
+
+.storage-value-container {
+  flex-shrink: 0;
+}
+
+.storage-value {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #00d492; /* Teal color for emphasis */
+}
+
+.storage-bar-container {
+  width: 100%;
+}
+
+.storage-bar {
+  height: 8px;
+  background: rgba(2, 6, 24, 0.5); /* Darker background like API preview */
+  border: 1px solid #314158;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.storage-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00bc7d 0%, #00bba7 100%);
+  transition: width 0.3s ease;
+}
+
+.storage-description {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  line-height: 16px;
+  color: #90a1b9;
+  margin: 0;
+}
+
+
+
+/* Danger Zone */
+.danger-zone {
+  background: rgba(70, 8, 9, 0.1);
+  border: 1px solid rgba(130, 24, 26, 0.3);
+  border-radius: 0.5rem;
+  padding: var(--space-4);
+}
+
+.danger-zone h4 {
+  margin: 0 0 var(--space-2) 0;
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
+  color: var(--color-danger);
+}
+
+.danger-zone p {
+  margin: 0 0 var(--space-4) 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+}
+
+/* Messages */
+.error-message {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-error);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 0.5rem;
+  margin-bottom: var(--space-4);
+  font-size: 0.875rem;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.modal {
+  background: var(--bg-secondary);
+  border-radius: 0.5rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.modal-title {
+  font-family: var(--font-ui);
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 32px;
+  color: var(--text-primary);
+  margin: 0;
+  padding: var(--space-6) var(--space-6) 0;
+}
+
+.modal-content {
+  padding: var(--space-6);
+}
+
+.modal-content p {
+  margin: var(--space-4) 0;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+}
+
+.modal-content ul {
+  margin: var(--space-2) 0 var(--space-6) var(--space-6);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+}
+
+.alert-danger {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--color-error);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 0.5rem;
+  margin-bottom: var(--space-4);
+}
+
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+  margin-top: var(--space-6);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .mobile-header {
+    display: flex;
+  }
+  
+  .desktop-only {
+    display: none;
+  }
+  
+  .settings-layout {
+    position: relative;
+    height: 100%;
+    padding-top: 60px; /* Account for fixed header */
+  }
+  
+  .settings-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .settings-sidebar.show {
+    transform: translateX(0);
+  }
+  
+  .mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 99;
+  }
+  
+  .settings-content {
+    padding-top: 76px; /* 60px header + 16px spacing */
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Remove rounded corner on mobile for full-width experience */
+    border-top-left-radius: 0;
+    margin-top: 0;
+    height: 100%;
+  }
+
+  /* Hide the gradient overlay on mobile */
+  .settings-content::before {
+    display: none;
+  }
+  
+  .content-section {
+    padding: var(--space-4);
+    padding-top: 0; /* Remove extra padding since we have it on container */
+  }
+  
+  .section-title {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 32px;
+    margin-bottom: var(--space-4);
+    color: var(--text-primary);
+  }
+  
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  
+  .setting-content {
+    padding-right: 0;
+  }
+  
+  .modal {
+    margin: var(--space-4);
+  }
+  
+  /* Mobile Setting Group Improvements */
+  .setting-group {
+    margin-bottom: var(--space-6);
+    padding: var(--space-4);
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .setting-group-title {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    margin-bottom: var(--space-4);
+  }
+  
+  /* Improve button sizes on mobile */
+  .btn {
+    min-height: 48px;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  /* Ensure form fields are properly sized */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 48px;
+  }
+}
+
+/* API Keys Section */
+.api-keys-link {
+  margin-top: var(--space-4);
+}
+
+.setup-instructions {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: var(--space-6);
+  margin-top: var(--space-4);
+}
+
+.setup-steps {
+  list-style: decimal;
+  padding-left: var(--space-6);
+  color: var(--text-secondary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.setup-steps li {
+  margin-bottom: var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.setup-steps code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-family: 'Monaco', 'Menlo', monospace;
+  color: var(--brand-primary);
+}
+
+.setup-link {
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.external-link {
+  color: var(--brand-primary);
+  text-decoration: none;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  transition: color var(--transition);
+}
+
+.external-link:hover {
+  color: var(--brand-primary-hover);
+  text-decoration: underline;
+}
+
+/* ============================================ */
+/* API Keys Management Styles */
+/* ============================================ */
+
+/* API Key Card - Exact Figma Specifications */
+.api-key-card {
+  background: rgba(15, 23, 43, 0.5); /* Semi-transparent dark background from Figma */
+  border: 1px solid rgba(49, 65, 88, 0.5); /* Subtle border from Figma */
+  border-radius: 10px;
+  padding: 21px;
+  margin-bottom: 16px;
+  min-height: 132px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.api-key-card:hover {
+  border-color: rgba(49, 65, 88, 0.7);
+  background: rgba(15, 23, 43, 0.6);
+}
+
+.api-key-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.api-key-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.api-key-name {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.api-key-metadata {
+  display: flex;
+  gap: 16px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: #62748e;
+}
+
+.api-key-metadata span {
+  color: #62748e;
+}
+
+/* API Key Preview Container */
+.api-key-preview-container {
+  width: 100%;
+}
+
+.api-key-preview {
+  background: rgba(2, 6, 24, 0.5);
+  border: 1px solid #314158;
+  border-radius: 4px;
+  padding: 10px 13px;
+  height: 38px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+}
+
+.api-key-preview code {
+  flex: 1;
+  font-family: 'Cousine', Consolas, Monaco, monospace;
+  font-size: 12px;
+  line-height: 16px;
+  color: #00d492; /* Teal color from Figma */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: transparent;
+  padding: 0;
+  border: none;
+}
+
+/* Preview Action Buttons */
+.api-key-preview-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.preview-action-btn {
+  background: transparent;
+  border: none;
+  color: #90a1b9;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.2s ease;
+}
+
+.preview-action-btn:hover {
+  color: #cad5e2;
+}
+
+.preview-action-btn.copy-success {
+  color: #00d492;
+}
+
+.api-key-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.delete-button {
+  background: transparent;
+  border: none;
+  color: #ff6467;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.delete-button:hover {
+  background: rgba(255, 100, 103, 0.1);
+}
+
+/* Confirm Delete Actions */
+.confirm-delete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.confirm-text {
+  font-size: 12px;
+  color: #ff6467;
+  margin-right: 4px;
+}
+
+.cancel-btn,
+.confirm-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  padding: 0;
+}
+
+.cancel-btn {
+  color: #90a1b9;
+  border-color: rgba(144, 161, 185, 0.3);
+}
+
+.cancel-btn:hover {
+  background: rgba(144, 161, 185, 0.1);
+  border-color: rgba(144, 161, 185, 0.5);
+}
+
+.confirm-btn {
+  color: #ff6467;
+  border-color: rgba(255, 100, 103, 0.3);
+}
+
+.confirm-btn:hover {
+  background: rgba(255, 100, 103, 0.1);
+  border-color: rgba(255, 100, 103, 0.5);
+}
+
+
+/* Empty & Loading States */
+.empty-state,
+.loading-state {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  margin: var(--space-4) 0;
+}
+
+.empty-icon {
+  margin: 0 auto var(--space-4);
+  color: rgba(16, 185, 129, 0.4);
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-2) 0;
+  color: var(--text-primary);
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--brand-primary);
+  border-radius: 50%;
+  margin: 0 auto var(--space-4);
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  color: var(--text-secondary);
+}
+
+/* Setup Guide */
+.setup-guide {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: var(--space-6);
+}
+
+.setup-intro {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+/* Setup Accordion */
+.setup-accordion {
+  background: var(--bg-elevated); /* Translucent background from Figma */
+  border: 1px solid var(--border-subtle); /* Updated border color */
+  border-radius: 10px; /* Consistent with other cards */
+  height: auto; /* Dynamic height based on content */
+  min-height: 54px; /* Minimum height from Figma */
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all var(--transition);
+}
+
+.setup-accordion.open {
+  border-color: rgba(0, 188, 125, 0.3); /* Teal border when open */
+}
+
+.setup-accordion-header {
+  width: 100%;
+  padding: 16px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  transition: all var(--transition);
+  min-height: 54px;
+}
+
+.setup-accordion-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.setup-accordion-title {
+  flex: 1;
+}
+
+.setup-accordion-title h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 var(--space-1) 0;
+}
+
+.setup-accordion-title p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.recommended-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: rgba(0, 188, 125, 0.1); /* Updated to teal */
+  color: var(--api-key-text); /* Use teal color */
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: var(--space-2);
+}
+
+.setup-accordion-content {
+  padding: 0 var(--space-4) var(--space-4);
+  border-top: 1px solid var(--border-color);
+}
+
+.setup-content {
+  padding-top: var(--space-4);
+}
+
+.setup-step {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  background: var(--brand-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.step-content {
+  flex: 1;
+}
+
+.step-content p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+/* Code Block */
+.code-block {
+  position: relative;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.code-block pre {
+  margin: 0;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-copy-button {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: var(--space-2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.code-copy-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* API Key Success Message */
+.api-key-success {
+  background: linear-gradient(135deg, rgba(0, 188, 125, 0.15) 0%, rgba(0, 187, 167, 0.05) 100%);
+  border: 1px solid rgba(0, 188, 125, 0.3);
+  border-radius: 12px;
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  position: relative;
+}
+
+.success-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.success-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(0, 188, 125, 0.2);
+  border: 1px solid rgba(0, 188, 125, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--api-key-text);
+  font-weight: bold;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.success-content h3 {
+  margin: 0 0 var(--space-1) 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.success-content p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.api-key-display {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  padding: var(--space-4);
+  border-radius: 8px;
+  margin-bottom: var(--space-4);
+}
+
+.api-key-full {
+  flex: 1;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  padding: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.close-success {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+}
+
+.close-success:hover {
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+/* Create Key Section */
+.create-key-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.create-key-inline {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-end;
+}
+
+.key-name-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-family: var(--font-ui);
+  transition: all var(--transition);
+}
+
+.key-name-input:focus {
+  outline: none;
+  border-color: var(--brand-primary);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.key-name-input::placeholder {
+  color: var(--text-disabled);
+}
+
+.api-keys-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.section-description {
+  font-family: var(--font-ui);
+  font-size: 16px; /* Updated from 0.875rem per Figma */
+  line-height: 24px;
+  color: #90a1b9; /* Specific gray from Figma */
+  margin-top: 6px; /* Specific margin from Figma */
+  margin-bottom: var(--space-6);
+}
+
+/* Section Dividers - New from Figma */
+.section-divider {
+  height: 1px;
+  background: var(--border-section);
+  margin: 32px 0;
+  width: 100%;
+}
+
+/* Mobile Specific */
+.mobile-create-content {
+  padding: var(--space-6) var(--space-4);
+}
+
+.field-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: var(--space-2);
+}
+
+/* ============================================ */
+/* Mobile Responsive Styles */
+/* ============================================ */
+@media (max-width: 768px) {
+  .api-key-success {
+    padding: var(--space-4);
+  }
+
+  .api-key-display {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .api-key-full {
+    word-break: break-all;
+  }
+
+  .setup-guide {
+    padding: var(--space-4);
+  }
+
+  .api-keys-list {
+    margin: 0;
+  }
+
+  .api-key-card {
+    border-radius: 12px;
+    margin-bottom: var(--space-3);
+    padding: 16px;
+  }
+
+  .api-key-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .api-key-preview {
+    flex-direction: column;
+    height: auto;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .api-key-preview code {
+    width: 100%;
+    word-break: break-all;
+  }
+
+  .api-key-preview-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* Data & Privacy Cards - Mobile */
+  .data-privacy-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .storage-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .storage-value-container {
+    align-self: flex-start;
+  }
+
+  .create-key-inline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .key-name-input {
+    width: 100%;
+  }
+}

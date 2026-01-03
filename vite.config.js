@@ -38,9 +38,20 @@ export default defineConfig({
   },
 
   // Path aliases (must match tsconfig.json)
+  // FSD-first paths for new code, legacy paths for migration compatibility
   resolve: {
     alias: {
+      // Primary alias
       '@': resolve(__dirname, './src'),
+
+      // FSD Layer aliases (new structure)
+      '@/shared': resolve(__dirname, './src/shared'),
+      '@/app': resolve(__dirname, './src/app'),
+      '@/features': resolve(__dirname, './src/features'),
+      '@/entities': resolve(__dirname, './src/entities'),
+      '@/widgets': resolve(__dirname, './src/widgets'),
+
+      // Legacy aliases (for migration compatibility - remove after FSD complete)
       '@/components': resolve(__dirname, './src/components'),
       '@/hooks': resolve(__dirname, './src/hooks'),
       '@/utils': resolve(__dirname, './src/utils'),

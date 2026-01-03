@@ -1,4 +1,4 @@
-import { cn } from '../utils/cn';
+import { cn } from '@/shared/lib';
 
 export default function CardContainer({ children, className = '', onClick }) {
   return (

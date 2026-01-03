@@ -1,0 +1,20 @@
+{
+  "name": "barrel-auditor",
+  "version": "1.0.0",
+  "description": "Audit barrel files (index.ts) for missing/incorrect exports",
+  "main": "src/index.ts",
+  "scripts": {
+    "audit": "npx ts-node src/index.ts",
+    "audit:markdown": "npx ts-node src/index.ts --format markdown --output barrel-audit-report.md"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.23.0",
+    "@babel/traverse": "^7.23.0"
+  },
+  "devDependencies": {
+    "@types/babel__traverse": "^7.20.0",
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  }
+}

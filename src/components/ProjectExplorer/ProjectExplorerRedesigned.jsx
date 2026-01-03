@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Star, FolderPlus, PanelLeft, FilePlus, Trash2, Inbox, User, Settings, Search, X } from 'lucide-react';
-import { useFolders } from '../../hooks/useFolders';
+import { useFolders } from '@/features/document';
 import SidebarSectionHeader from './SidebarSectionHeader';
 import SidebarTreeItem from './SidebarTreeItem';
 import SidebarCollapseButton from './SidebarCollapseButton';

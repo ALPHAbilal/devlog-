@@ -1,0 +1,291 @@
+/* Core Features - Premium Visual Design (Optimized) */
+
+/* CSS Variables for feature cards */
+:root {
+  /* Monochromatic gradient system */
+  --gradient-mono: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  
+  /* Mono glow system */
+  --glow-mono-subtle: rgba(255, 255, 255, 0.1);
+  --glow-mono-medium: rgba(255, 255, 255, 0.15);
+  --glow-mono-strong: rgba(255, 255, 255, 0.2);
+  
+  /* Monochromatic border colors */
+  --border-mono-subtle: rgba(255, 255, 255, 0.1);
+  --border-mono-medium: rgba(255, 255, 255, 0.15);
+  --border-mono-strong: rgba(255, 255, 255, 0.2);
+  
+  /* Reusable shadows */
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.02), 0 4px 8px rgba(0, 0, 0, 0.04), 0 8px 16px rgba(0, 0, 0, 0.08), 0 16px 32px rgba(0, 0, 0, 0.12), 0 32px 64px rgba(0, 0, 0, 0.16);
+  --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.03), 0 6px 12px rgba(0, 0, 0, 0.06), 0 12px 24px rgba(0, 0, 0, 0.12), 0 24px 48px rgba(0, 0, 0, 0.18), 0 48px 96px rgba(0, 0, 0, 0.24);
+}
+
+/* Feature Card Wrapper */
+.feature-card-wrapper {
+  position: relative;
+  height: 100%;
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* Gradient Orbs for Features */
+.feature-gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+  z-index: 0;
+  will-change: opacity;
+  transform: translateZ(0); /* Hardware acceleration */
+  contain: strict;
+}
+
+/* Single gradient orb style - position variations via data attributes */
+.feature-gradient-orb {
+  width: 250px;
+  height: 250px;
+  background: var(--gradient-mono);
+}
+
+.feature-card[data-feature="document"] .feature-gradient-orb {
+  top: -80px;
+  left: -80px;
+}
+
+.feature-card[data-feature="connect"] .feature-gradient-orb {
+  bottom: -100px;
+  right: -100px;
+}
+
+.feature-card[data-feature="search"] .feature-gradient-orb {
+  top: -120px;
+  right: -120px;
+}
+
+.feature-card[data-feature="context"] .feature-gradient-orb {
+  bottom: -90px;
+  left: -90px;
+}
+
+.feature-card:hover .feature-gradient-orb {
+  opacity: 0.4;
+}
+
+/* Main Feature Card */
+.feature-card {
+  position: relative;
+  height: 100%;
+  background: rgba(26, 35, 50, 0.3);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-radius: 24px;
+  padding: 40px;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+  z-index: 1;
+  box-shadow: var(--shadow-base);
+  transform: translate3d(0, 0, 0); /* Hardware acceleration */
+}
+
+.feature-card:hover {
+  transform: translate3d(0, -4px, 0);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Feature Card Glow - Disabled for performance */
+.feature-card-glow {
+  display: none;
+}
+
+/* Glow effects removed for performance */
+
+/* Animated Border Gradient - Simplified */
+.feature-border-gradient {
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  padding: 2px;
+  background: linear-gradient(135deg, transparent, var(--border-color), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  transform: translateZ(0);
+}
+
+.feature-border-gradient {
+  --border-color: var(--border-mono-medium);
+}
+
+.feature-card:hover .feature-border-gradient {
+  opacity: 0.8;
+}
+
+/* Card Content Container */
+.feature-card .card-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Icon Wrapper with Effects */
+.feature-icon-wrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  background: rgba(10, 22, 40, 0.6);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transform: translate3d(0, 0, 0);
+}
+
+.feature-card:hover .feature-icon-wrapper {
+  background: rgba(10, 22, 40, 0.8);
+  transform: translate3d(0, -8px, 0);
+}
+
+/* Icon Glow Effect - Disabled for performance */
+.feature-icon-glow {
+  display: none;
+}
+
+/* Particle Effects - Disabled for performance */
+.feature-icon-particles,
+.feature-particle {
+  display: none;
+}
+
+/* Text Content Styling */
+.feature-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-content h4 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.3;
+  transition: color 0.3s ease;
+}
+
+.feature-card:hover .feature-content h4 {
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feature-content p {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.feature-card:hover .feature-content p {
+  color: #b8c5d6;
+}
+
+/* Progress Indicator - Optimized */
+.feature-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  border-radius: 0 0 24px 24px;
+  contain: strict;
+}
+
+.feature-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: var(--progress-color);
+  transition: width 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+  transform-origin: left;
+  will-change: width;
+}
+
+.feature-card[data-feature="document"] .feature-progress-fill { --progress-color: var(--feature-blue); }
+.feature-card[data-feature="connect"] .feature-progress-fill { --progress-color: var(--feature-green); }
+.feature-card[data-feature="search"] .feature-progress-fill { --progress-color: var(--feature-indigo); }
+.feature-card[data-feature="context"] .feature-progress-fill { --progress-color: var(--feature-cyan); }
+
+.feature-card:hover .feature-progress-fill {
+  width: 100%;
+}
+
+/* Noise Texture Overlay - Disabled for performance */
+.feature-noise {
+  display: none;
+}
+
+/* Animations removed for performance */
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .feature-card {
+    padding: 32px;
+  }
+  
+  .feature-icon-wrapper {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .feature-gradient-orb {
+    display: none; /* Hide orbs on mobile */
+  }
+  
+  .feature-content h4 {
+    font-size: 1.25rem;
+  }
+  
+  .feature-content p {
+    font-size: 0.95rem;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .feature-gradient-orb,
+  .feature-progress-fill,
+  .feature-border-gradient {
+    animation: none !important;
+  }
+  
+  .feature-card,
+  .feature-icon-wrapper {
+    transition: none !important;
+  }
+}
+
+/* Progressive Enhancement */
+@supports (backdrop-filter: blur(24px)) {
+  .feature-card {
+    background: rgba(26, 35, 50, 0.3);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+}
+
+@supports not (backdrop-filter: blur(24px)) {
+  .feature-card {
+    background: rgba(26, 35, 50, 0.95);
+  }
+}

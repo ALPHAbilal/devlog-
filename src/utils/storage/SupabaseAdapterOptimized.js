@@ -1,4 +1,4 @@
-import { optimizedSupabase, deduplicateRequest } from '../../lib/supabaseOptimized';
+import { optimizedSupabase, deduplicateRequest } from '@/shared/api';
 import circuitBreakerManager from '../network/CircuitBreaker';
 
 /**

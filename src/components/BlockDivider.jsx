@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import MobileBlockDivider from './MobileBlockDivider';
-import { useResponsive } from '../hooks/useResponsive';
+import { useResponsive } from '@/shared/hooks';
 
 export default function BlockDivider({ onAdd, isMobileView }) {
   const [isHovered, setIsHovered] = useState(false);

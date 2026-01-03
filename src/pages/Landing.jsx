@@ -6,10 +6,10 @@ import { Code2, Link2, Zap, GitBranch, Search, ArrowRight, Menu, X } from 'lucid
 import HeroSectionV3 from '../components/HeroSectionV3';
 import ProblemSection from '../components/ProblemSection';
 import HowItWorksVideo from '../components/HowItWorksVideo';
-import { DemoModeProvider } from '../contexts/DemoModeContext';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
-import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover, featureReveal, tiltEffect } from '../utils/animations';
-import { throttle } from '../utils/performance';
+import { DemoModeProvider } from '@/app/providers';
+import { useScrollAnimation } from '@/shared/hooks';
+import { fadeInUp, staggerContainer, staggerItem, iconLift, buttonHover, featureReveal, tiltEffect } from '@/shared/lib';
+import { throttle } from '@/shared/lib';
 import NoiseOverlay from '../components/NoiseOverlay';
 import LandingPerformanceMonitor from '../components/LandingPerformanceMonitor';
 // Removed section transitions for cleaner, uninterrupted flow

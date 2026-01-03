@@ -1,0 +1,374 @@
+/* =====================================================
+   UNIFIED GRADIENT SYSTEM - DEVLOG LANDING PAGE
+   
+   Mature Monochromatic Design System:
+   - Sophisticated dark base throughout
+   - Depth through opacity and layering
+   - Minimal green accent for CTAs only
+   - Premium feel like Vercel/Linear/Stripe
+   ===================================================== */
+
+:root {
+  /* Core Dark Palette - Used Throughout - Updated to match Figma */
+  --dark-base: #0a1628;
+  --dark-primary: #0d1117;
+  --dark-secondary: #0f1419;
+  --dark-accent: #111922;
+
+  /* Universal Gradient Colors - No Section Variations - Updated to match Figma */
+  --gradient-primary: #0a1628;
+  --gradient-secondary: #050d1a;
+  --gradient-accent: rgba(16, 185, 129, 0.08);
+  
+  /* All sections use the same base */
+  --gradient-hero-primary: var(--gradient-primary);
+  --gradient-hero-secondary: var(--gradient-secondary);
+  --gradient-hero-accent: var(--gradient-accent);
+  
+  --gradient-problem-primary: var(--gradient-primary);
+  --gradient-problem-secondary: var(--gradient-secondary);
+  --gradient-problem-accent: rgba(255, 255, 255, 0.02);
+  
+  --gradient-video-primary: var(--gradient-primary);
+  --gradient-video-secondary: var(--gradient-secondary);
+  --gradient-video-accent: rgba(255, 255, 255, 0.03);
+  
+  --gradient-features-primary: var(--gradient-primary);
+  --gradient-features-secondary: var(--gradient-secondary);
+  --gradient-features-accent: rgba(255, 255, 255, 0.02);
+  
+  --gradient-pricing-primary: var(--gradient-primary);
+  --gradient-pricing-secondary: var(--gradient-secondary);
+  --gradient-pricing-accent: rgba(16, 185, 129, 0.05);
+  
+  --gradient-cta-primary: var(--gradient-primary);
+  --gradient-cta-secondary: var(--gradient-secondary);
+  --gradient-cta-accent: rgba(16, 185, 129, 0.1);
+  
+  --gradient-footer-primary: #080a0d;
+  --gradient-footer-secondary: #0a0c0f;
+  
+  /* Removed transition blends - sections connect directly */
+  --blend-hero-problem: var(--gradient-primary);
+  --blend-problem-video: var(--gradient-primary);
+  --blend-video-features: var(--gradient-primary);
+  --blend-features-pricing: var(--gradient-primary);
+  --blend-pricing-cta: var(--gradient-primary);
+  --blend-cta-footer: var(--gradient-primary);
+  
+  /* Minimal Accent System */
+  --accent-green: rgba(16, 185, 129, 0.15);
+  --accent-green-bright: #00ff88;
+  --accent-mono-light: rgba(255, 255, 255, 0.05);
+  --accent-mono-medium: rgba(255, 255, 255, 0.08);
+  --accent-mono-dark: rgba(0, 0, 0, 0.2);
+  
+  /* Text Colors */
+  --text-primary: rgba(255, 255, 255, 0.9);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  
+  /* Noise Texture Opacity */
+  --noise-opacity: 0.015;
+  --noise-opacity-heavy: 0.025;
+  
+  /* GPU Acceleration Hints */
+  --transform-gpu: translateZ(0);
+  --will-change-safe: transform;
+}
+
+/* Section Background Gradients */
+.gradient-hero {
+  background: 
+    radial-gradient(
+      ellipse 2000px 1200px at 50% -20%,
+      var(--gradient-hero-accent) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      var(--accent-neural) 0%,
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      var(--gradient-hero-primary) 0%,
+      var(--gradient-hero-secondary) 100%
+    );
+}
+
+.gradient-problem {
+  background: 
+    radial-gradient(
+      ellipse 1600px 900px at 50% -10%,
+      var(--gradient-problem-accent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 90%,
+      var(--accent-mono-light) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--gradient-problem-primary) 0%,
+      var(--gradient-problem-secondary) 100%
+    );
+}
+
+.gradient-video {
+  background: 
+    radial-gradient(
+      ellipse 1800px 1000px at 50% 50%,
+      var(--gradient-video-accent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 10% 50%,
+      var(--accent-mono-light) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--gradient-video-primary) 0%,
+      var(--gradient-video-secondary) 100%
+    );
+}
+
+.gradient-features {
+  background: 
+    radial-gradient(
+      circle 1200px at 70% 30%,
+      var(--gradient-features-accent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle 1000px at 30% 70%,
+      var(--accent-mono-medium) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--gradient-features-primary) 0%,
+      var(--gradient-features-secondary) 100%
+    );
+}
+
+.gradient-pricing {
+  background: 
+    radial-gradient(
+      ellipse 2000px 1200px at 50% 20%,
+      var(--gradient-pricing-accent) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 90% 80%,
+      var(--accent-mono-light) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--gradient-pricing-primary) 0%,
+      var(--gradient-pricing-secondary) 100%
+    );
+}
+
+.gradient-cta {
+  background: 
+    radial-gradient(
+      ellipse 2400px 1000px at 50% 50%,
+      var(--gradient-cta-accent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 20% 20%,
+      var(--accent-green) 0%,
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      var(--accent-green) 0%,
+      transparent 40%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--gradient-cta-primary) 0%,
+      var(--gradient-cta-secondary) 100%
+    );
+}
+
+.gradient-footer {
+  background: 
+    linear-gradient(
+      to bottom,
+      var(--gradient-footer-primary) 0%,
+      var(--gradient-footer-secondary) 100%
+    );
+}
+
+/* Noise Overlay Styles */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: var(--noise-opacity);
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  will-change: opacity;
+  transform: var(--transform-gpu);
+}
+
+.noise-overlay-heavy {
+  opacity: var(--noise-opacity-heavy);
+}
+
+/* Glassmorphism Enhancement for Sections */
+.glass-overlay {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(100px);
+  -webkit-backdrop-filter: blur(100px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Feature Card Gradients */
+.feature-gradient-base {
+  background: 
+    radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      var(--accent-mono-medium) 0%,
+      transparent 50%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(10, 15, 20, 0.8) 0%,
+      rgba(13, 17, 23, 0.9) 100%
+    );
+}
+
+/* Pricing Card Premium Gradients */
+.pricing-card-gradient {
+  background: 
+    radial-gradient(
+      circle at 50% -20%,
+      var(--accent-mono-light) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(10, 15, 20, 0.9) 0%,
+      rgba(15, 20, 25, 0.95) 100%
+    );
+}
+
+.pricing-card-popular {
+  background: 
+    radial-gradient(
+      circle at 50% -20%,
+      var(--accent-green) 0%,
+      transparent 60%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(10, 15, 20, 0.95) 0%,
+      rgba(13, 18, 23, 0.98) 100%
+    );
+}
+
+/* ZERO spacing between sections - sections flow directly into each other */
+.gradient-hero,
+.gradient-problem,
+.gradient-video,
+.gradient-features,
+.gradient-pricing,
+.gradient-cta,
+.gradient-footer {
+  margin: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Remove all section transitions */
+.gradient-problem::before,
+.gradient-video::before,
+.gradient-features::before,
+.gradient-pricing::before,
+.gradient-cta::before {
+  display: none !important;
+}
+
+/* Ensure sections connect seamlessly */
+section + section {
+  margin-top: 0 !important;
+}
+
+/* Force sections to connect */
+.hero-container {
+  margin-bottom: 0 !important;
+}
+
+.how-it-works-video {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Remove any default spacing on sections */
+section {
+  margin: 0 !important;
+}
+
+/* Ensure main container has no gaps */
+#root > div > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Force adjacent sections to connect */
+.gradient-hero + *,
+.gradient-problem + *,
+.gradient-video + *,
+.gradient-features + *,
+.gradient-pricing + *,
+.gradient-cta + * {
+  margin-top: 0 !important;
+}
+
+/* Responsive Gradient Adjustments */
+@media (max-width: 768px) {
+  :root {
+    --noise-opacity: 0.01;
+    --noise-opacity-heavy: 0.02;
+  }
+  
+  /* Simplify gradients on mobile for performance */
+  .gradient-hero,
+  .gradient-problem,
+  .gradient-video,
+  .gradient-features,
+  .gradient-pricing,
+  .gradient-cta {
+    background-attachment: scroll;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .noise-overlay {
+    animation: none;
+  }
+  
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark Mode Enhancement (if needed) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --noise-opacity: 0.02;
+  }
+}

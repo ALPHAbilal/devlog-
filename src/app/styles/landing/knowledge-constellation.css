@@ -1,0 +1,293 @@
+/* Knowledge Constellation - Professional Hero Animation Styles */
+
+/* Container */
+.knowledge-constellation-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: auto;
+  contain: layout style paint;
+  cursor: crosshair;
+}
+
+/* Canvas */
+.knowledge-constellation-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: optimizeSpeed;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  will-change: transform;
+}
+
+/* Labels Overlay */
+.knowledge-labels-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Knowledge Label */
+.knowledge-label {
+  position: absolute;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: center bottom;
+  will-change: transform, opacity;
+}
+
+.knowledge-label-content {
+  background: rgba(10, 22, 40, 0.95);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  border-radius: 24px;
+  padding: 6px 16px;
+  backdrop-filter: blur(12px);
+  box-shadow: 
+    0 4px 20px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(16, 185, 129, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer effect on labels */
+.knowledge-label-content::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  transform: rotate(45deg) translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.knowledge-label:hover .knowledge-label-content::before {
+  transform: rotate(45deg) translateX(100%);
+}
+
+.knowledge-label-type {
+  font-size: 11px;
+  font-weight: 600;
+  color: #10b981;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.knowledge-label-preview {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+  display: block;
+  transition: opacity 0.3s ease;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Instructions */
+.constellation-instructions {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 22, 40, 0.8);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 30px;
+  padding: 12px 24px;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  animation: fadeInUp 1s ease 2s forwards;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.constellation-instructions p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+/* Node type specific colors */
+.knowledge-label[data-type="code"] .knowledge-label-type {
+  color: #3b82f6;
+}
+
+.knowledge-label[data-type="ai-chat"] .knowledge-label-type {
+  color: #8b5cf6;
+}
+
+.knowledge-label[data-type="documentation"] .knowledge-label-type {
+  color: #10b981;
+}
+
+.knowledge-label[data-type="error"] .knowledge-label-type {
+  color: #ef4444;
+}
+
+.knowledge-label[data-type="solution"] .knowledge-label-type {
+  color: #22c55e;
+}
+
+.knowledge-label[data-type="version"] .knowledge-label-type {
+  color: #f59e0b;
+}
+
+.knowledge-label[data-type="search"] .knowledge-label-type {
+  color: #06b6d4;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .knowledge-label-content {
+    padding: 4px 12px;
+    border-radius: 16px;
+  }
+  
+  .knowledge-label-type {
+    font-size: 10px;
+  }
+  
+  .knowledge-label-preview {
+    font-size: 9px;
+  }
+  
+  .constellation-instructions {
+    bottom: 20px;
+    padding: 8px 16px;
+  }
+  
+  .constellation-instructions p {
+    font-size: 11px;
+  }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .knowledge-label {
+    transition: none;
+  }
+  
+  .knowledge-label-content::before {
+    display: none;
+  }
+  
+  .constellation-instructions {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .knowledge-label-content {
+    background: rgba(0, 0, 0, 0.95);
+    border-width: 2px;
+  }
+  
+  .knowledge-label-type {
+    font-weight: 700;
+  }
+}
+
+/* Dark mode enhancement (already dark by default) */
+@media (prefers-color-scheme: light) {
+  .knowledge-label-content {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 
+      0 4px 20px rgba(0, 0, 0, 0.1),
+      0 0 40px rgba(16, 185, 129, 0.05);
+  }
+  
+  .knowledge-label-type {
+    color: #059669;
+  }
+  
+  .knowledge-label-preview {
+    color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .constellation-instructions {
+    background: rgba(255, 255, 255, 0.9);
+  }
+  
+  .constellation-instructions p {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* GPU Acceleration */
+.knowledge-constellation-container,
+.knowledge-constellation-canvas,
+.knowledge-label {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Cursor enhancements */
+.knowledge-constellation-container:hover {
+  cursor: none;
+}
+
+/* Custom cursor (optional enhancement) */
+.knowledge-constellation-container::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(16, 185, 129, 0.6);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  transition: all 0.1s ease;
+  opacity: 0;
+  z-index: 10;
+}
+
+.knowledge-constellation-container:hover::after {
+  opacity: 1;
+}
+
+/* Loading state (if needed) */
+.knowledge-constellation-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+}

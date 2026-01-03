@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, FileText, Settings, Plus, Search, User } from 'lucide-react';
 import MobileNavigation from './MobileNavigation';
 import MobileDrawer, { DrawerNavItem, DrawerSection, DrawerFooter } from './MobileDrawer';
-import { useResponsive } from '../hooks/useResponsive';
-import { useSwipe } from '../hooks/useTouchGestures';
+import { useResponsive } from '@/shared/hooks';
+import { useSwipe } from '@/shared/hooks';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ResponsiveLayout({ children, sidebar }) {

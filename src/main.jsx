@@ -4,11 +4,11 @@ import { createRoot } from 'react-dom/client'
 import * as Sentry from '@sentry/react'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { queryClient } from './api/queryClient'
+import { queryClient } from '@/shared/api'
 import './index.css'
 import './styles/hero-knowledge-constellation.css'
 import App from './App.jsx'
-import { getAnalytics } from './services/analytics/AnalyticsService'
+import { getAnalytics } from '@/features/analytics'
 
 // Smart Sync is now initialized through useAutoSave hook
 

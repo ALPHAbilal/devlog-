@@ -4,7 +4,7 @@ import {
   ChevronUp, ChevronDown, Edit2 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useTouchGestures } from '@/shared/hooks';
 
 export default function TouchOptimizedBlock({
   block,

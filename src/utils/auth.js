@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseOptimized'
+import { supabase } from '@/shared/api'
 
 // Helper function to get the correct URL for redirects
 export const getURL = () => {

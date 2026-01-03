@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseOptimized';
+import { supabase } from '@/shared/api';
 import eventBus, { EVENT_TYPES } from './eventBus';
 
 class RealtimeManager {

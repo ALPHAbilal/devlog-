@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect, memo, useCallback } from 'react';
 import TipTapEditor from './TipTapEditor';
-import { markdownToHtml, htmlToMarkdown } from '../../utils/markdownConverter';
-import { extractTagsFromContent } from '../../utils/parseMarkdown.jsx';
-import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
-import { useAuth } from '../../contexts/AuthContextOptimized';
+import { markdownToHtml, htmlToMarkdown } from '@/shared/lib';
+import { extractTagsFromContent } from '@/shared/lib';
+import { uploadImageToSupabase, compressImage } from '@/shared/lib';
+import { useAuth } from '@/app/providers';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useAnalytics } from '../../hooks/useAnalytics';
+import { useAnalytics } from '@/features/analytics';
 
 /**
  * TextBlock - TipTap-based WYSIWYG text editor

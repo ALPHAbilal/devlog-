@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContextOptimized';
+import { useAuth } from '@/app/providers';
 import LogoMinimal from '../components/LogoMinimal';
 import { ArrowLeft, Mail, Zap, CheckCircle } from 'lucide-react';
-import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem } from '@/shared/lib';
 
 export default function Upgrade() {
   const navigate = useNavigate();

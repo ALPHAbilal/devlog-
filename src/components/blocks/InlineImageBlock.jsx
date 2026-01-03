@@ -1,8 +1,8 @@
 import { useState, useRef, memo } from 'react'; // ✅ Add memo import
 import { Image as ImageIcon, X, Upload, Edit2 } from 'lucide-react';
 import InlineImage from '../InlineImage';
-import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
-import { useAuth } from '../../contexts/AuthContextOptimized';
+import { uploadImageToSupabase, compressImage } from '@/shared/lib';
+import { useAuth } from '@/app/providers';
 
 function InlineImageBlock({ block, onUpdate, onDelete, isFocused }) { // ✅ Remove export default
   const { user } = useAuth();

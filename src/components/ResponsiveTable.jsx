@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { ChevronDown, ChevronRight, MoreVertical, Copy, Trash2, Edit } from 'lucide-react';
-import { useResponsive } from '../hooks/useResponsive';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useResponsive } from '@/shared/hooks';
+import { useTouchGestures } from '@/shared/hooks';
 
 /**
  * ResponsiveTable Component

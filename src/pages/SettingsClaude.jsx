@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContextOptimized';
-import { supabase } from '../lib/supabase';
-import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
-import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '@/app/providers';
+import { supabase } from '@/shared/api';
+import { useSmartDatabaseUsage } from '@/features/storage';
+import { useSettings } from '@/app/providers';
 import { X, ChevronLeft, Lock, Key, Copy, Trash2, CheckCircle, Shield, ChevronUp, ChevronDown, Eye, EyeOff, Check, HardDrive } from 'lucide-react';
 import MobileBottomSheet from '../components/MobileBottomSheet';
-import { useToast } from '../hooks/useToast';
-import { useAnalytics } from '../hooks/useAnalytics';
+import { useToast } from '@/shared/hooks';
+import { useAnalytics } from '@/features/analytics';
 import '../styles/settings-claude.css';
 
 // Toggle Switch Component - Claude.ai style

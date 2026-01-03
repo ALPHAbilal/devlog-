@@ -8,10 +8,10 @@ import {
   Lock, Download, Check, AlertCircle,
   Shield, User, FileText, Link
 } from 'lucide-react';
-import { shareService } from '../services/shareService';
-import { useAuth } from '../contexts/AuthContextOptimized';
+import { shareService } from '@/features/share';
+import { useAuth } from '@/app/providers';
 import Block from '../components/Block';
-import { useToast } from '../hooks/useToast';
+import { useToast } from '@/shared/hooks';
 
 export default function SharedDocument() {
   const { shareCode } = useParams();

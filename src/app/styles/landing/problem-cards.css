@@ -1,0 +1,232 @@
+/* Problem Cards - Premium UI Design (Optimized) */
+
+/* CSS Variables for dynamic effects */
+:root {
+  /* Monochromatic gradient system */
+  --gradient-mono: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  
+  /* Mono glow system */
+  --glow-mono-light: rgba(255, 255, 255, 0.1);
+  --glow-mono-medium: rgba(255, 255, 255, 0.15);
+  --glow-mono-heavy: rgba(255, 255, 255, 0.2);
+  
+  /* Shadow depths - reusable */
+  --card-shadow-base: 0 2px 8px rgba(0, 0, 0, 0.04), 0 4px 16px rgba(0, 0, 0, 0.08), 0 8px 32px rgba(0, 0, 0, 0.12), 0 16px 64px rgba(0, 0, 0, 0.16);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.12), 0 16px 48px rgba(0, 0, 0, 0.18), 0 32px 96px rgba(0, 0, 0, 0.24);
+}
+
+/* Card Wrapper for 3D perspective */
+.problem-card-wrapper {
+  position: relative;
+  contain: layout style paint;
+  content-visibility: auto;
+}
+
+/* Gradient Orbs - Background elements */
+.gradient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  will-change: opacity;
+  transform: translateZ(0);
+  contain: strict;
+}
+
+/* Single gradient orb style with variations via inline styles */
+.gradient-orb {
+  background: var(--gradient-mono);
+}
+
+.problem-card-wrapper:hover .gradient-orb {
+  opacity: 0.3;
+}
+
+/* Main Card Container */
+.problem-card {
+  position: relative;
+  background: rgba(26, 35, 50, 0.4);
+  backdrop-filter: blur(20px) saturate(150%);
+  border-radius: 20px;
+  padding: 32px;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+  z-index: 1;
+  box-shadow: var(--card-shadow-base);
+  transform: translate3d(0, 0, 0);
+}
+
+.problem-card:hover {
+  transform: translate3d(0, -4px, 0);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Card Glow Effect - Disabled for performance */
+.card-glow {
+  display: none;
+}
+
+/* Glow effects removed for performance */
+
+/* Animated Gradient Border - Simplified */
+.card-border-gradient {
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.5;
+  transition: opacity 0.4s ease;
+  transform: translateZ(0);
+}
+
+.card-border-gradient {
+  --border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-border-gradient-animated {
+  opacity: 1;
+}
+
+/* Card Content */
+.card-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Icon Wrapper */
+.icon-wrapper {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  background: rgba(10, 22, 40, 0.8);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), background-color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  flex-shrink: 0;
+  transform: translate3d(0, 0, 0);
+}
+
+.problem-card:hover .icon-wrapper {
+  background: rgba(10, 22, 40, 0.9);
+  transform: translate3d(0, -4px, 0) scale(1.1);
+}
+
+/* Icon Glow - Disabled for performance */
+.icon-glow {
+  display: none;
+}
+
+/* Text Content */
+.text-content h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.problem-card:hover .text-content h3 {
+  color: #ffffff;
+}
+
+.text-content p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #9ca3af;
+  transition: color 0.3s ease;
+}
+
+.problem-card:hover .text-content p {
+  color: #b8bdc6;
+}
+
+/* Progress Indicator - Optimized */
+.card-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--indicator-color);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  will-change: transform;
+  contain: strict;
+}
+
+.card-indicator {
+  --indicator-color: rgba(255, 255, 255, 0.1);
+}
+/* Color-specific classes removed - using monochromatic system */
+
+.problem-card:hover .card-indicator {
+  transform: scaleX(1);
+}
+
+/* Noise Texture Overlay - Disabled for performance */
+.card-noise {
+  display: none;
+}
+
+/* Animations removed for performance */
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .problem-card {
+    padding: 24px;
+  }
+  
+  .icon-wrapper {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .gradient-orb {
+    display: none; /* Hide orbs on mobile */
+  }
+  
+  .text-content h3 {
+    font-size: 1.125rem;
+  }
+  
+  .text-content p {
+    font-size: 0.875rem;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .gradient-orb,
+  .card-indicator {
+    animation: none !important;
+  }
+  
+  .problem-card,
+  .icon-wrapper {
+    transition: none !important;
+  }
+}
+
+/* Progressive Enhancement */
+@supports (backdrop-filter: blur(20px)) {
+  .problem-card {
+    background: rgba(26, 35, 50, 0.4);
+    backdrop-filter: blur(20px) saturate(150%);
+  }
+}
+
+@supports not (backdrop-filter: blur(20px)) {
+  .problem-card {
+    background: rgba(26, 35, 50, 0.95);
+  }
+}

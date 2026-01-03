@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Copy, Check, Link } from 'lucide-react';
-import { shareService } from '../services/shareService';
-import { useToast } from '../hooks/useToast';
+import { shareService } from '@/features/share';
+import { useToast } from '@/shared/hooks';
 
 export function ShareDialogSimple({ document, isOpen, onClose }) {
   const [shareUrl, setShareUrl] = useState('');

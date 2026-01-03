@@ -2,7 +2,7 @@ import { useState, useRef, useLayoutEffect, useEffect } from 'react';
 import { Check, X, Zap, Users, Building2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 // Removed useScrollAnimation - using whileInView instead
-import { fadeInUp, staggerContainer, staggerItem, buttonHover } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem, buttonHover } from '@/shared/lib';
 
 export default function PricingSection() {
   const [billingPeriod, setBillingPeriod] = useState('monthly');

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import storageWrapper from '../../../utils/storage/storageWrapper';
-import { useToast } from '../../../hooks/useToast';
+import { storageWrapper } from '@/shared/lib';
+import { useToast } from '@/shared/hooks';
 
 export function useFileTree() {
   const [treeData, setTreeData] = useState([]);

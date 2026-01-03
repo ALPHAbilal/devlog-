@@ -19,9 +19,9 @@ import {
   Zap, Sparkles, QrCode, UserPlus, Settings, ExternalLink,
   CheckCircle, XCircle, Loader2, Info
 } from 'lucide-react';
-import { shareService } from '../services/shareService';
-import { useToast } from '../hooks/useToast';
-import { useAuth } from '../contexts/AuthContextOptimized';
+import { shareService } from '@/features/share';
+import { useToast } from '@/shared/hooks';
+import { useAuth } from '@/app/providers';
 import { ShareAnalytics } from './ShareAnalytics';
 
 export function ShareDialogEnhanced({ document, isOpen, onClose }) {

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Upload, X, Maximize2, Download, Trash2, Image as ImageIcon, Plus, Grid3x3, Move, Edit2, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, RotateCw } from 'lucide-react';
-import { uploadImageToSupabase, compressImage } from '../../utils/imageUploader';
-import { useAuth } from '../../contexts/AuthContextOptimized';
+import { uploadImageToSupabase, compressImage } from '@/shared/lib';
+import { useAuth } from '@/app/providers';
 import InlineImage from '../InlineImage';
 import ImageViewer from '../ImageViewer';
 

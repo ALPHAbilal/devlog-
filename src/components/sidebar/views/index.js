@@ -1,3 +1,4 @@
+// Sidebar views barrel file
 export { SearchView } from './SearchView';
 export { ExplorerView } from './ExplorerView';
 export { RecentView } from './RecentView';

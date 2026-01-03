@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase, ensureAuthenticated } from '../lib/supabaseOptimized';
-import { useAuth } from '../contexts/AuthContextOptimized';
+import { supabase, ensureAuthenticated } from '@/shared/api';
+import { useAuth } from '@/app/providers';
 import { useToast } from './useToast';
 
 // Cache folders across component unmounts

@@ -1,0 +1,598 @@
+import { optimizedSupabase, deduplicateRequest } from '@/shared/api';
+import circuitBreakerManager from '../../network/circuit-breaker';
+
+/**
+ * Optimized Supabase Storage Adapter
+ * Implements batching, caching, and pagination
+ */
+export class SupabaseAdapterOptimized {
+  constructor() {
+    this.supabase = optimizedSupabase.getClient();
+    this.cache = new Map();
+    this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
+    this.batchQueue = [];
+    this.batchTimeout = null;
+    this.batchDelay = 50; // 50ms delay for batching
+    this.pageSize = 50;
+  }
+
+  /**
+   * Get cached data if available
+   */
+  getCached(key) {
+    const cached = this.cache.get(key);
+    if (cached && Date.now() - cached.time < this.cacheExpiry) {
+      return cached.data;
+    }
+    this.cache.delete(key);
+    return null;
+  }
+
+  /**
+   * Set cache data
+   */
+  setCache(key, data) {
+    this.cache.set(key, {
+      data,
+      time: Date.now()
+    });
+  }
+
+  /**
+   * Clear cache for a specific key pattern
+   */
+  clearCache(pattern) {
+    if (!pattern) {
+      this.cache.clear();
+      return;
+    }
+    
+    for (const key of this.cache.keys()) {
+      if (key.includes(pattern)) {
+        this.cache.delete(key);
+      }
+    }
+  }
+
+  /**
+   * Get documents without pagination (backwards compatibility)
+   * Returns all documents for the user
+   */
+  async getDocuments() {
+    if (!this.userId) {
+      console.error('SupabaseAdapterOptimized: No userId set');
+      return [];
+    }
+
+    const cacheKey = `docs:${this.userId}:all`;
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const { data, error } = await this.supabase
+        .from('documents')
+        .select('id, title, tags, created_at, updated_at, metadata, is_template, project_id, folder_id, position')
+        .eq('user_id', this.userId)
+        .is('deleted_at', null)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Transform to app format
+      const documents = (data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        preview: doc.metadata?.preview || 'Click to view document...',
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        tags: doc.tags || [],
+        isTemplate: doc.is_template || false,
+        projectId: doc.project_id,
+        folder_id: doc.folder_id,
+        position: doc.position,
+        metadata: doc.metadata || {}
+      }));
+
+      this.setCache(cacheKey, documents);
+      return documents;
+    } catch (error) {
+      console.error('Error getting documents:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Load all documents with pagination and caching
+   */
+  async loadAllDocuments(userId, options = {}) {
+    const {
+      page = 0,
+      limit = this.pageSize,
+      orderBy = 'updated_at',
+      ascending = false,
+      includeDeleted = false
+    } = options;
+
+    const cacheKey = `docs:${userId}:${page}:${limit}:${orderBy}:${ascending}`;
+
+    console.log('[PAGINATION-DB] 🔍 loadAllDocuments called:', {
+      page,
+      limit,
+      offset: page * limit,
+      range: `${page * limit} to ${(page + 1) * limit - 1}`,
+      orderBy,
+      ascending,
+      cacheKey
+    });
+
+    const cached = this.getCached(cacheKey);
+    if (cached) {
+      console.log('[PAGINATION-DB] ✅ Cache HIT - returning cached data:', {
+        documentCount: cached.documents?.length,
+        totalCount: cached.totalCount,
+        hasMore: cached.hasMore
+      });
+      return cached;
+    }
+
+    console.log('[PAGINATION-DB] ❌ Cache MISS - querying database');
+
+    try {
+      const result = await deduplicateRequest(cacheKey, async () => {
+        console.log('[PAGINATION-DB] 📡 Executing Supabase query:', {
+          table: 'documents',
+          userId,
+          range: `${page * limit} to ${(page + 1) * limit - 1}`,
+          orderBy,
+          ascending,
+          includeDeleted
+        });
+
+        let query = this.supabase
+          .from('documents')
+          .select('*', { count: 'exact' })
+          .eq('user_id', userId)
+          .range(page * limit, (page + 1) * limit - 1)
+          .order(orderBy, { ascending });
+
+        if (!includeDeleted) {
+          query = query.is('deleted_at', null);
+        }
+
+        return query;
+      });
+
+      if (result.error) throw result.error;
+
+      console.log('[PAGINATION-DB] ✅ Query successful:', {
+        rowsReturned: result.data?.length,
+        totalCount: result.count,
+        hasMore: (page + 1) * limit < result.count
+      });
+
+      // Transform to app format
+      const documents = (result.data || []).map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        preview: doc.metadata?.preview || 'Click to view document...',
+        createdAt: doc.created_at,
+        updatedAt: doc.updated_at,
+        tags: doc.tags || [],
+        isTemplate: doc.is_template || false,
+        projectId: doc.project_id,
+        folder_id: doc.folder_id,
+        position: doc.position,
+        metadata: doc.metadata || {}
+      }));
+
+      const response = {
+        documents,
+        totalCount: result.count,
+        page,
+        pageSize: limit,
+        hasMore: (page + 1) * limit < result.count
+      };
+
+      console.log('[PAGINATION-DB] 💾 Caching response and returning:', {
+        documentCount: documents.length,
+        totalCount: response.totalCount,
+        page: response.page,
+        pageSize: response.pageSize,
+        hasMore: response.hasMore,
+        percentageLoaded: response.totalCount > 0 ? ((page + 1) * limit / response.totalCount * 100).toFixed(1) + '%' : '0%'
+      });
+
+      this.setCache(cacheKey, response);
+      return response;
+    } catch (error) {
+      console.error('[PAGINATION-DB] ❌ Error loading documents:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get single document with blocks (alias for loadDocument)
+   */
+  async getDocument(documentId) {
+    return this.loadDocument(documentId);
+  }
+
+  /**
+   * Delete document
+   */
+  async deleteDocument(documentId) {
+    this.clearCache(`doc:${documentId}`);
+    this.clearCache(`docs:`); // Clear all document caches
+
+    try {
+      const { error } = await this.supabase
+        .from('documents')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', documentId);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting document:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get blocks for a document
+   */
+  async getBlocks(documentId) {
+    try {
+      const { data, error } = await this.supabase
+        .from('blocks')
+        .select('*')
+        .eq('document_id', documentId)
+        .order('position', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting blocks:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Invalidate cache for debugging/testing
+   */
+  invalidateCache() {
+    this.cache.clear();
+  }
+
+  /**
+   * Load document with blocks - optimized query
+   */
+  async loadDocument(documentId) {
+    const cacheKey = `doc:${documentId}`;
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Use circuit breaker for resilience
+      const breaker = circuitBreakerManager.getBreaker('supabase-read', {
+        failureThreshold: 3,
+        resetTimeout: 30000,
+        timeout: 15000,
+        fallback: () => {
+          console.warn('Supabase read circuit open - using cached data');
+          return null;
+        }
+      });
+
+      const result = await breaker.execute(async () => {
+        return deduplicateRequest(cacheKey, async () => {
+          // Single query with joins
+          return this.supabase
+            .from('documents')
+            .select(`
+              *,
+              blocks (
+                id,
+                type,
+                content,
+                position,
+                metadata
+              )
+            `)
+            .eq('id', documentId)
+            .single();
+        });
+      });
+
+      if (result?.error) throw result.error;
+
+      if (result?.data) {
+        this.setCache(cacheKey, result.data);
+        return result.data;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error loading document:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Save document with intelligent batching
+   */
+  async saveDocument(document) {
+    // CRITICAL FIX: Always strip blocks from document saves
+    // Blocks are stored in a separate table, not as a column in documents
+    // This prevents "blocks column not found" errors (PGRST204)
+    let blocksToSave = null;
+    if (document.blocks) {
+      blocksToSave = document.blocks;
+      const { blocks, ...documentWithoutBlocks } = document;
+      document = documentWithoutBlocks;
+
+      // If Smart Sync is active, it will handle block saves
+      if (window.__smartSyncManagers) {
+        const smartSyncManager = window.__smartSyncManagers.get(document.id);
+        if (smartSyncManager) {
+          console.log('SupabaseAdapterOptimized: Smart Sync is handling blocks for', document.id);
+          blocksToSave = null; // Smart Sync will handle it
+        }
+      }
+    }
+
+    // Clear relevant caches
+    this.clearCache(`doc:${document.id}`);
+    this.clearCache(`docs:${document.user_id}`);
+
+    // Add to batch queue
+    return new Promise(async (resolve, reject) => {
+      this.batchQueue.push({
+        type: 'document',
+        data: document,
+        resolve: async (result) => {
+          // After document is saved, save blocks if needed
+          if (blocksToSave && blocksToSave.length > 0) {
+            try {
+              console.log('SupabaseAdapterOptimized: Saving blocks separately for new document', document.id);
+              await this.saveBlocks(document.id, blocksToSave);
+            } catch (blockError) {
+              console.error('Error saving blocks for new document:', blockError);
+              // Don't fail the whole operation if blocks fail - document was saved
+            }
+          }
+          resolve(result);
+        },
+        reject
+      });
+
+      // Clear existing timeout
+      if (this.batchTimeout) {
+        clearTimeout(this.batchTimeout);
+      }
+
+      // Set new timeout for batch execution
+      this.batchTimeout = setTimeout(() => {
+        this.executeBatch();
+      }, this.batchDelay);
+    });
+  }
+
+  /**
+   * Execute batched operations
+   */
+  async executeBatch() {
+    if (this.batchQueue.length === 0) return;
+
+    const batch = this.batchQueue.splice(0, this.batchQueue.length);
+    const documentUpdates = batch.filter(op => op.type === 'document');
+
+    // Group by operation type
+    if (documentUpdates.length > 0) {
+      try {
+        // Prepare bulk upsert
+        const documents = documentUpdates.map(op => ({
+          ...op.data,
+          updated_at: new Date().toISOString()
+        }));
+
+        // Use circuit breaker for writes
+        const breaker = circuitBreakerManager.getBreaker('supabase-write', {
+          failureThreshold: 2,
+          resetTimeout: 60000,
+          timeout: 20000,
+          fallback: () => {
+            console.warn('Supabase write circuit open - queueing for retry');
+            // Queue for later retry
+            documents.forEach((doc, index) => {
+              this.batchQueue.push(documentUpdates[index]);
+            });
+            return { error: new Error('Circuit open - queued for retry') };
+          }
+        });
+
+        const result = await breaker.execute(async () => {
+          return this.supabase
+            .from('documents')
+            .upsert(documents, {
+              onConflict: 'id',
+              returning: 'minimal'
+            });
+        });
+
+        const { data, error } = result;
+        if (error) throw error;
+
+        // Resolve all promises
+        documentUpdates.forEach(op => op.resolve(op.data));
+      } catch (error) {
+        // Reject all promises
+        documentUpdates.forEach(op => op.reject(error));
+      }
+    }
+  }
+
+  /**
+   * Search documents using full-text search across titles, tags, and block content
+   * @param {string} userId - User ID
+   * @param {string} query - Search query
+   * @param {object} options - Search options
+   * @param {number} options.limit - Maximum results (default: 50)
+   * @param {number} options.offset - Offset for pagination (default: 0)
+   * @returns {Promise<Array>} Array of documents with match_reason and match_score
+   */
+  async searchDocuments(userId, query, options = {}) {
+    const { limit = 50, offset = 0 } = options;
+    const cacheKey = `search:${userId}:${query}:${limit}:${offset}`;
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const result = await deduplicateRequest(cacheKey, async () => {
+        // Call the full-text search RPC function
+        const { data, error } = await this.supabase.rpc('search_documents_with_blocks', {
+          p_user_id: userId,
+          p_search_query: query,
+          p_limit: limit,
+          p_offset: offset
+        });
+
+        if (error) throw error;
+
+        return { data, error: null };
+      });
+
+      if (result.error) throw result.error;
+
+      // Sort by relevance score (highest first)
+      const sorted = result.data.sort((a, b) => b.match_score - a.match_score);
+
+      this.setCache(cacheKey, sorted);
+      return sorted;
+    } catch (error) {
+      console.error('Error searching documents:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Bulk operations for blocks
+   */
+  async saveBlocks(documentId, blocks) {
+    const cacheKey = `doc:${documentId}`;
+    this.cache.delete(cacheKey);
+
+    try {
+      // Delete existing blocks and insert new ones in a transaction
+      const { error: deleteError } = await this.supabase
+        .from('blocks')
+        .delete()
+        .eq('document_id', documentId);
+
+      if (deleteError) throw deleteError;
+
+      if (blocks.length > 0) {
+        const blocksWithMeta = blocks.map((block, index) => ({
+          ...block,
+          document_id: documentId,
+          position: index,
+          created_at: block.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }));
+
+        const { error: insertError } = await this.supabase
+          .from('blocks')
+          .insert(blocksWithMeta);
+
+        if (insertError) throw insertError;
+      }
+
+      return blocks;
+    } catch (error) {
+      console.error('Error saving blocks:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get user statistics with caching
+   */
+  async getUserStats(userId) {
+    const cacheKey = `stats:${userId}`;
+    const cached = this.getCached(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const [docsResult, sharedResult, tagsResult] = await Promise.all([
+        this.supabase
+          .from('documents')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', userId)
+          .is('deleted_at', null),
+        
+        this.supabase
+          .from('document_shares')
+          .select('id', { count: 'exact', head: true })
+          .eq('shared_with_id', userId),
+        
+        this.supabase
+          .from('documents')
+          .select('tags')
+          .eq('user_id', userId)
+          .is('deleted_at', null)
+      ]);
+
+      // Extract unique tags
+      const allTags = new Set();
+      tagsResult.data?.forEach(doc => {
+        doc.tags?.forEach(tag => allTags.add(tag));
+      });
+
+      const stats = {
+        totalDocuments: docsResult.count || 0,
+        sharedWithMe: sharedResult.count || 0,
+        uniqueTags: allTags.size,
+        tags: Array.from(allTags)
+      };
+
+      this.setCache(cacheKey, stats);
+      return stats;
+    } catch (error) {
+      console.error('Error getting user stats:', error);
+      return {
+        totalDocuments: 0,
+        sharedWithMe: 0,
+        uniqueTags: 0,
+        tags: []
+      };
+    }
+  }
+
+  /**
+   * Prefetch related data
+   */
+  async prefetchRelated(documentId) {
+    // Prefetch in background without blocking
+    setTimeout(async () => {
+      try {
+        // Prefetch document shares
+        await this.supabase
+          .from('document_shares')
+          .select('*')
+          .eq('document_id', documentId);
+
+        // Prefetch share links
+        await this.supabase
+          .from('share_links')
+          .select('*')
+          .eq('document_id', documentId);
+      } catch (error) {
+        // Silent fail for prefetch
+        console.debug('Prefetch error:', error);
+      }
+    }, 100);
+  }
+}
+
+// Create singleton instance
+export const supabaseAdapter = new SupabaseAdapterOptimized();

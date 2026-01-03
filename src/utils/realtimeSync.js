@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabaseOptimized';
+import { supabase } from '@/shared/api';
 
 /**
  * Real-time Sync Manager for Supabase

@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { createLazyLoader } from '../utils/performance';
+import { createLazyLoader } from '@/shared/lib';
 
 function OptimizedImage({ 
   src, 

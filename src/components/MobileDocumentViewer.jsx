@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { useResponsive } from '../hooks/useResponsive';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useResponsive } from '@/shared/hooks';
+import { useTouchGestures } from '@/shared/hooks';
 import ExpandedViewEnhanced from './ExpandedViewEnhanced';
 import MobileDocumentHeader from './MobileDocumentHeader';
 import MobileBottomSheet from './MobileBottomSheet';

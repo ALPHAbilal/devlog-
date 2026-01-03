@@ -14,8 +14,8 @@ import {
   ChevronRight, Info, AlertCircle, CheckCircle,
   Mail, Building, User
 } from 'lucide-react';
-import { sophisticatedShareService } from '../services/sophisticatedShareService';
-import { useToast } from '../hooks/useToast';
+import { sophisticatedShareService } from '@/features/share';
+import { useToast } from '@/shared/hooks';
 
 export default function EnhancedShareDialog({ document, isOpen, onClose, onUpdate }) {
   const { showToast } = useToast();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabase } from './lib/supabaseOptimized';
+import { supabase } from '@/shared/api';
 
 export default function Test() {
   const [status, setStatus] = useState('Checking...');

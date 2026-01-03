@@ -4,7 +4,7 @@ import LogoMinimal from '../components/LogoMinimal';
 import NoiseOverlay from '../components/NoiseOverlay';
 import { ArrowLeft, ChevronDown, ChevronUp, Shield, Eye, Lock, Database, Share2, FileText, Clock, Mail, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { fadeInUp, staggerContainer, staggerItem } from '../utils/animations';
+import { fadeInUp, staggerContainer, staggerItem } from '@/shared/lib';
 
 export default function Privacy() {
   const navigate = useNavigate();

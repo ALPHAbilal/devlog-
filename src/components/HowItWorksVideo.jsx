@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
-import { staggerContainer, staggerItem } from '../utils/animations';
+import { staggerContainer, staggerItem } from '@/shared/lib';
 import InstantCaptureDemo from './InstantCaptureDemo';
 
 const showcaseItems = [

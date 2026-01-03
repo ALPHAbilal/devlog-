@@ -1,0 +1,627 @@
+/* =====================================================
+   Auth Page - No-Scroll Intelligent Scaling System
+   Modern solution that eliminates scrolling entirely
+   ===================================================== */
+
+/* =====================================================
+   CSS Custom Properties - Dynamic Calculations
+   ===================================================== */
+:root {
+  /* Viewport dimensions */
+  --viewport-width: 100vw;
+  --viewport-height: 100vh;
+  --viewport-height-dynamic: 100dvh;
+  
+  /* Form natural dimensions */
+  --form-natural-width: 480px;
+  --form-natural-height: 800px;
+  
+  /* Dynamic scale calculation */
+  --available-height: calc(var(--viewport-height-dynamic) - 2rem);
+  --available-width: calc(var(--viewport-width) - 2rem);
+  
+  --scale-factor-height: calc(var(--available-height) / var(--form-natural-height));
+  --scale-factor-width: calc(var(--available-width) / var(--form-natural-width));
+  --scale-factor: min(var(--scale-factor-height), var(--scale-factor-width), 1);
+  
+  /* Minimum scale to maintain readability */
+  --min-scale: 0.65;
+  --applied-scale: max(var(--scale-factor), var(--min-scale));
+  
+  /* Viewport-aware typography */
+  --font-size-base: clamp(14px, 2vmin, 16px);
+  --font-size-sm: clamp(12px, 1.5vmin, 14px);
+  --font-size-lg: clamp(16px, 2.5vmin, 20px);
+  --font-size-xl: clamp(20px, 3vmin, 24px);
+  --font-size-2xl: clamp(24px, 4vmin, 32px);
+  --font-size-3xl: clamp(28px, 5vmin, 40px);
+  
+  /* Dynamic spacing that scales with viewport */
+  --spacing-xs: clamp(0.25rem, 1vmin, 0.5rem);
+  --spacing-sm: clamp(0.5rem, 2vmin, 1rem);
+  --spacing-md: clamp(0.75rem, 3vmin, 1.5rem);
+  --spacing-lg: clamp(1rem, 4vmin, 2rem);
+  --spacing-xl: clamp(1.5rem, 5vmin, 3rem);
+  
+  /* Compact mode thresholds */
+  --compact-threshold: 750px;
+  --ultra-compact-threshold: 600px;
+  
+  /* Colors */
+  --auth-bg-primary: #0a1628;
+  --auth-bg-secondary: #1a2332;
+  --auth-accent: #10b981;
+  --auth-accent-hover: #059669;
+  --auth-text-primary: #f3f4f6;
+  --auth-text-secondary: #9ca3af;
+  --auth-border: rgba(75, 85, 99, 0.3);
+}
+
+/* Compact mode adjustments */
+@media (max-height: 750px) {
+  :root {
+    --form-natural-height: 700px;
+    --spacing-md: clamp(0.5rem, 2vmin, 1rem);
+    --spacing-lg: clamp(0.75rem, 3vmin, 1.5rem);
+    --spacing-xl: clamp(1rem, 4vmin, 2rem);
+  }
+}
+
+/* Ultra-compact mode */
+@media (max-height: 600px) {
+  :root {
+    --form-natural-height: 550px;
+    --spacing-sm: clamp(0.25rem, 1vmin, 0.5rem);
+    --spacing-md: clamp(0.375rem, 1.5vmin, 0.75rem);
+    --spacing-lg: clamp(0.5rem, 2vmin, 1rem);
+  }
+}
+
+/* =====================================================
+   Base Layout - No Scroll Foundation
+   ===================================================== */
+
+/* Desktop Brand Mark - Removed */
+/* Logo elements have been removed from the auth page */
+
+.auth-page-wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--auth-bg-primary);
+  display: flex;
+  flex-direction: column;
+  
+  /* Prevent scrollbar space */
+  scrollbar-gutter: stable;
+}
+
+/* Mobile: Hide branding panel */
+.auth-branding-panel {
+  display: none;
+}
+
+/* Form panel - always fits viewport */
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: transparent;
+  position: relative;
+  overflow: hidden; /* Prevent any scrolling */
+  
+  /* Use dynamic viewport height */
+  height: var(--viewport-height-dynamic);
+  height: var(--viewport-height); /* Fallback */
+}
+
+/* Form scaling container */
+.auth-form-scaling-wrapper {
+  transform: scale(var(--applied-scale));
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Maintain aspect ratio */
+  width: var(--form-natural-width);
+  max-width: calc(90vw / var(--applied-scale));
+}
+
+/* Form container */
+.auth-form-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+  padding: var(--spacing-md);
+}
+
+/* =====================================================
+   Component Styles - Viewport Aware
+   ===================================================== */
+
+/* Mobile Branding */
+.auth-mobile-branding {
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out;
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Logo group and text - Removed */
+/* Logo elements have been removed from the auth page */
+
+.auth-mobile-tagline {
+  font-size: var(--font-size-lg);
+  color: var(--auth-text-primary);
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Form Header */
+.auth-form-header {
+  text-align: center;
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.auth-form-header h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--auth-text-primary);
+  margin: 0;
+}
+
+/* Form Wrapper */
+.auth-form-wrapper {
+  background: transparent;
+  backdrop-filter: none;
+  border: 1px solid var(--auth-border);
+  border-radius: 0.75rem;
+  padding: var(--spacing-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: scaleIn 0.5s ease-out 0.2s both;
+}
+
+/* Footer */
+.auth-form-footer {
+  text-align: center;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(75, 85, 99, 0.2);
+}
+
+.auth-form-footer p {
+  font-size: var(--font-size-sm);
+  color: var(--auth-text-secondary);
+  margin: 0;
+}
+
+.auth-form-footer a {
+  color: var(--auth-accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.auth-form-footer a:hover {
+  color: var(--auth-accent-hover);
+}
+
+/* =====================================================
+   Supabase Auth UI - Dynamic Sizing
+   ===================================================== */
+
+/* Form Container */
+.supabase-auth-ui_ui-container {
+  gap: var(--spacing-md) !important;
+}
+
+/* Buttons - minimum 44px touch target */
+.supabase-auth-ui_ui-button {
+  font-size: var(--font-size-base) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  min-height: max(44px, calc(2.5rem * var(--applied-scale))) !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+  width: 100% !important;
+}
+
+.supabase-auth-ui_ui-button:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.supabase-auth-ui_ui-button:active:not([disabled]) {
+  transform: translateY(0);
+}
+
+/* Social Buttons */
+.supabase-auth-ui_ui-button[title*="Google"] {
+  background: #ffffff !important;
+  color: #3c4043 !important;
+  border: 1px solid #dadce0 !important;
+}
+
+.supabase-auth-ui_ui-button[title*="Google"]:hover {
+  background: #f8f9fa !important;
+  border-color: #d2d3d4 !important;
+}
+
+.supabase-auth-ui_ui-button[title*="GitHub"] {
+  background: #24292e !important;
+  color: #ffffff !important;
+  border: 1px solid #24292e !important;
+}
+
+.supabase-auth-ui_ui-button[title*="GitHub"]:hover {
+  background: #2b3137 !important;
+  border-color: #363b42 !important;
+}
+
+/* Primary Button */
+.supabase-auth-ui_ui-button:not([title*="GitHub"]):not([title*="Google"]) {
+  background: linear-gradient(135deg, var(--auth-accent) 0%, var(--auth-accent-hover) 100%) !important;
+  border: none !important;
+  color: white !important;
+}
+
+.supabase-auth-ui_ui-button:not([title*="GitHub"]):not([title*="Google"]):hover {
+  background: linear-gradient(135deg, var(--auth-accent-hover) 0%, #047857 100%) !important;
+}
+
+/* Inputs */
+.supabase-auth-ui_ui-input {
+  font-size: var(--font-size-base) !important;
+  padding: var(--spacing-sm) var(--spacing-md) !important;
+  min-height: max(44px, calc(2.5rem * var(--applied-scale))) !important;
+  background: rgba(10, 22, 40, 0.2) !important;
+  backdrop-filter: none !important;
+  border: 1px solid var(--auth-border) !important;
+  border-radius: 0.5rem !important;
+  color: var(--auth-text-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.supabase-auth-ui_ui-input:hover {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+
+.supabase-auth-ui_ui-input:focus {
+  outline: none !important;
+  border-color: var(--auth-accent) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Labels */
+.supabase-auth-ui_ui-label {
+  font-size: var(--font-size-sm) !important;
+  font-weight: 600 !important;
+  color: var(--auth-text-primary) !important;
+  margin-bottom: var(--spacing-xs) !important;
+}
+
+/* Divider */
+.supabase-auth-ui_ui-divider {
+  position: relative !important;
+  text-align: center !important;
+  margin: var(--spacing-md) 0 !important;
+}
+
+.supabase-auth-ui_ui-divider::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 1px !important;
+  background: linear-gradient(to right, transparent, var(--auth-border), transparent) !important;
+}
+
+.supabase-auth-ui_ui-divider span {
+  background: transparent !important;
+  padding: 0 var(--spacing-md) !important;
+  position: relative !important;
+  color: var(--auth-text-secondary) !important;
+  font-size: var(--font-size-sm) !important;
+  font-weight: 500 !important;
+}
+
+/* Messages */
+.supabase-auth-ui_ui-message {
+  border-radius: 0.5rem !important;
+  padding: var(--spacing-sm) !important;
+  margin: var(--spacing-sm) 0 !important;
+  font-size: var(--font-size-sm) !important;
+}
+
+.supabase-auth-ui_ui-message-error {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  color: #f87171 !important;
+}
+
+/* =====================================================
+   Tablet Breakpoint (768px+)
+   ===================================================== */
+@media (min-width: 768px) {
+  :root {
+    --form-natural-width: 440px;
+  }
+  
+  .auth-form-wrapper {
+    padding: var(--spacing-xl);
+  }
+}
+
+/* =====================================================
+   Desktop Breakpoint (1024px+) - Two Column Layout
+   ===================================================== */
+@media (min-width: 1024px) {
+  /* Desktop Brand Mark - Removed */
+  /* Logo elements have been removed from the auth page */
+  
+  .auth-page-wrapper {
+    display: grid;
+    grid-template-columns: 1fr minmax(480px, min(35vw, 640px));
+    position: fixed;
+    inset: 0;
+  }
+  
+  /* Reset scale for desktop if viewport is large enough */
+  @media (min-height: 850px) {
+    :root {
+      --applied-scale: 1;
+    }
+  }
+  
+  /* Show branding panel */
+  .auth-branding-panel {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-xl);
+    background: linear-gradient(135deg, var(--auth-bg-primary) 0%, var(--auth-bg-secondary) 50%, var(--auth-bg-primary) 100%);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+  
+  /* Background pattern */
+  .auth-pattern-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  /* Gradient orbs */
+  .auth-gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(3rem);
+    pointer-events: none;
+  }
+  
+  .auth-gradient-orb-1 {
+    top: 20%;
+    left: 10%;
+    width: clamp(15rem, 30vw, 25rem);
+    height: clamp(15rem, 30vw, 25rem);
+    background: rgba(16, 185, 129, 0.2);
+  }
+  
+  .auth-gradient-orb-2 {
+    bottom: 20%;
+    right: 10%;
+    width: clamp(15rem, 30vw, 25rem);
+    height: clamp(15rem, 30vw, 25rem);
+    background: rgba(59, 130, 246, 0.1);
+  }
+  
+  /* Branding content */
+  .auth-branding-content {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+    width: 100%;
+    animation: fadeInLeft 0.8s ease-out;
+  }
+  
+  .auth-tagline {
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--auth-text-primary);
+    margin: var(--spacing-lg) 0;
+    line-height: 1.2;
+  }
+  
+  .auth-tagline-accent {
+    color: var(--auth-accent);
+    font-weight: 800;
+  }
+  
+  .auth-subtitle {
+    font-size: var(--font-size-lg);
+    color: var(--auth-text-secondary);
+    margin-bottom: var(--spacing-xl);
+    font-weight: 500;
+  }
+  
+  /* Code snippets */
+  .auth-code-snippets {
+    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xl);
+  }
+  
+  .auth-code-line {
+    color: rgba(243, 244, 246, 0.7);
+    margin-bottom: var(--spacing-sm);
+    opacity: 0;
+    animation: slideIn 0.5s ease-out forwards;
+  }
+  
+  .auth-code-prompt {
+    color: var(--auth-accent);
+    margin-right: var(--spacing-xs);
+  }
+  
+  /* Features */
+  .auth-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-lg);
+  }
+  
+  .auth-feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    color: var(--auth-text-secondary);
+    font-size: var(--font-size-sm);
+    opacity: 0;
+    animation: slideIn 0.5s ease-out forwards;
+  }
+  
+  .auth-feature-icon {
+    color: var(--auth-accent);
+    flex-shrink: 0;
+  }
+  
+  /* Hide mobile branding */
+  .auth-mobile-branding {
+    display: none !important;
+  }
+  
+  /* Form panel */
+  .auth-form-panel {
+    background: transparent;
+    padding: var(--spacing-lg);
+  }
+  
+  /* Desktop compact modes */
+  @media (max-height: 700px) {
+    .auth-tagline {
+      font-size: var(--font-size-2xl);
+      margin: var(--spacing-md) 0;
+    }
+    
+    .auth-subtitle {
+      font-size: var(--font-size-base);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .auth-features {
+      gap: var(--spacing-md);
+    }
+  }
+  
+  @media (max-height: 600px) {
+    .auth-code-snippets {
+      display: none;
+    }
+    
+    .auth-branding-panel {
+      padding: var(--spacing-lg);
+    }
+  }
+}
+
+/* =====================================================
+   Large Desktop (1440px+)
+   ===================================================== */
+@media (min-width: 1440px) {
+  .auth-page-wrapper {
+    grid-template-columns: 1fr minmax(520px, min(33vw, 680px));
+  }
+  
+  :root {
+    --form-natural-width: 480px;
+  }
+}
+
+/* =====================================================
+   Ultra Wide (1920px+)
+   ===================================================== */
+@media (min-width: 1920px) {
+  .auth-page-wrapper {
+    grid-template-columns: 1fr 720px;
+    max-width: 2400px;
+    margin: 0 auto;
+  }
+  
+  .auth-branding-content {
+    max-width: 600px;
+  }
+}
+
+/* =====================================================
+   Animations
+   ===================================================== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .auth-form-scaling-wrapper {
+    transition: none !important;
+  }
+}

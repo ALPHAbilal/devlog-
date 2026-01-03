@@ -16,7 +16,7 @@ import {
   Edit2,
   GripVertical
 } from 'lucide-react';
-import { cn } from '../../utils/cn';
+import { cn } from '@/shared/lib';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 

@@ -6,20 +6,19 @@ import Block from './Block';
 import CompactBlockLine from './CompactBlockLine';
 import AddBlockRow from './AddBlockRow';
 import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
-import { getBacklinks } from '../utils/extractLinks';
-import { useOptimizedBlockLoader } from '../hooks/useOptimizedBlockLoader';
-import { usePaginatedBlockLoader } from '../hooks/usePaginatedBlockLoader';
-import { getSmartSyncManager } from '../hooks/useAutoSave';
-import { sessionCache } from '../utils/sessionCache';
-import { serializeBlock } from '../utils/blockSerializer';
-import storageWrapper from '../utils/storage/storageWrapper';
+import { getBacklinks } from '@/shared/lib';
+import { useOptimizedBlockLoader, usePaginatedBlockLoader } from '@/features/block';
+import { getSmartSyncManager } from '@/features/block';
+import { sessionCache } from '@/shared/lib';
+import { serializeBlock } from '@/features/block';
+import { storageWrapper } from '@/shared/lib';
 import { ShareDialogSimple } from './ShareDialogSimple';
 import SyncStatusIndicator from './SyncStatusIndicator';
 import FloatingControlsTrigger from './FloatingControlsTrigger';
 import ScrollToTop from './ScrollToTop';
 import MobileBottomSheet from './MobileBottomSheet';
 import BlockErrorBoundary from './BlockErrorBoundary';
-import { useAnalytics, useDocumentAnalytics } from '../hooks/useAnalytics';
+import { useAnalytics, useDocumentAnalytics } from '@/features/analytics';
 // import OpacityForensics from './debug/OpacityForensics'; // Removed - was interfering with opacity transitions
 import './VirtualizedGrid.css'; // For scrollbar styles
 

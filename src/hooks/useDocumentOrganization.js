@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import storageWrapper from '../utils/storage/storageWrapper';
+import { storageWrapper } from '@/shared/lib';
 
 const useDocumentOrganization = create((set, get) => ({
   // Selection state

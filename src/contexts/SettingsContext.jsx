@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/shared/api';
 import { useAuth } from './AuthContextOptimized';
-import { setInactivityTimeout } from '../lib/supabaseOptimized';
+import { setInactivityTimeout } from '@/shared/api';
 
 const SettingsContext = createContext({});
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, AlertCircle } from 'lucide-react';
 import MobileAddBlockRow from './MobileAddBlockRow';
-import { useResponsive } from '../hooks/useResponsive';
+import { useResponsive } from '@/shared/hooks';
 
 const blockTypes = [
   { type: 'text', label: 'text', icon: Type },

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import EntryCard from './EntryCard';
 import EntryCardRedesigned from './EntryCardRedesigned';
 import ActivityWaveChart from './ActivityWaveChart';
-import { useTouchGestures } from '../hooks/useTouchGestures';
+import { useTouchGestures } from '@/shared/hooks';
 import './VirtualizedGrid.css';
 
 export default function VirtualizedGrid({ 

@@ -86,6 +86,7 @@ For each modification:
 - [ ] Numbered step-by-step sequence exists
 - [ ] Dependencies between steps are clear
 - [ ] No ambiguous ordering ("do these in any order")
+- [ ] Each step is atomic (one action, no "and" chains)
 
 #### Category F: Success Verification
 - [ ] Specific commands to run listed
@@ -102,6 +103,12 @@ If the plan mentions "pick one" or "choose a file":
 1. *Use the **codebase-locator** agent to find candidate files*
 2. *Use the **codebase-analyzer** agent to evaluate which is simplest*
 3. *Include the recommendation in your gap instructions*
+
+#### Category H: Goal Coverage
+- [ ] Plan states a clear goal/objective
+- [ ] Each success criterion maps to at least one step that achieves it
+- [ ] No "orphan steps" that don't contribute to any success criterion
+- [ ] No "orphan criteria" with no step to achieve them
 
 #### Spawning Research Agents
 
@@ -124,7 +131,7 @@ Create a structured report:
 
 ### Status: [READY TO EXECUTE | NEEDS PREPARATION]
 
-### Completeness Score: X/7 categories complete
+### Completeness Score: X/8 categories complete
 
 ---
 
@@ -134,9 +141,9 @@ Create a structured report:
 ### What's Missing
 
 #### [Category Name]
-| Missing Item | Why It's Needed | Priority |
-|--------------|-----------------|----------|
-| [Item] | [Explanation] | High/Medium/Low |
+| Missing Item | Why It's Needed | Priority | Source | Blocks |
+|--------------|-----------------|----------|--------|--------|
+| [Item] | [Explanation] | High/Med/Low | 📚/🔍 | ⛔ Gap N / - |
 
 ---
 
@@ -147,26 +154,84 @@ Create a structured report:
 
 ### Step 4: Generate Fill Instructions
 
-For each gap, generate a paragraph instruction that another AI can execute. Format:
+For each gap, generate a paragraph instruction that another AI can execute.
+
+**Source Classification:**
+- **📚 Docs** = Requires external documentation (library APIs, official specs, version-specific syntax)
+- **🔍 Codebase** = Solvable via codebase analysis (file locations, existing patterns, local decisions)
+
+**When to flag 📚:**
+- New tool/library being introduced (need API docs)
+- Version-specific changes (v4 → v5 migration)
+- Config syntax not seen in existing codebase
+- **Ask: "Does this reference something with an official spec/docs?"** (methodologies, patterns, tool APIs)
+
+**IMPORTANT: Do NOT research 📚 gaps.** Just flag them. The research happens separately.
+
+**When to flag 🔍:**
+- Adapting existing patterns to new use case
+- Finding/categorizing files
+- Understanding current code behavior
+- Local decisions (which files, what order)
+
+Format:
 
 ```
 ## Instructions for AI
 
-### Gap 1: [Category - Missing Item]
+### Gap 1: [Category - Missing Item] 📚/🔍
 
 **Instructions for AI:**
 
 [Single paragraph with specific, actionable instructions. Include:
 - Exactly what to add/create
 - Where to add it in the plan
-- What to research if needed
+- What to research if needed (if 📚: specify which docs)
 - Expected format of the addition]
 
-### Gap 2: [Category - Missing Item]
+### Gap 2: [Category - Missing Item] 📚/🔍
 
 **Instructions for AI:**
 
 [Next instruction paragraph...]
+```
+
+### Step 4b: Generate Gap Execution Order
+
+After identifying all gaps, determine the ORDER to fill them:
+
+1. **Map dependencies**: Which gaps depend on other gaps being filled first?
+2. **Renumber sequentially**: Steps are 1, 2, 3... regardless of original gap numbers
+3. **Find critical gaps**: Mark gaps that block multiple other gaps with ⛔
+4. **Output execution order** (split by source):
+
+```
+### Gap Execution Order
+
+**📚 Research First (before iterate_plan):**
+
+**Gap N → Step X: [name]**
+Copy to Perplexity:
+```
+I'm working on [brief context of what you're implementing].
+
+Please answer:
+1. [specific question needing authoritative answer]
+2. [another specific question]
+3. [request for concrete output: config, code example, etc.]
+
+Use [authoritative source] as reference.
+```
+
+**🔍 Fill with iterate_plan (in dependency order):**
+Follow Step order. For each Step, copy the matching Gap instruction to iterate_plan.
+
+| Step | Gap   | Name        | Note                          |
+|------|-------|-------------|-------------------------------|
+| ⛔ 1 | Gap X | [name]      | CRITICAL - blocks: Gap Y, Z   |
+| 2    | Gap Y | [name]      | Depends on: Gap X             |
+| 3    | Gap N | [name]      | After 📚 research done        |
+...
 ```
 
 ### Step 5: Present Results
@@ -174,8 +239,9 @@ For each gap, generate a paragraph instruction that another AI can execute. Form
 Output the complete validation report with:
 1. Overall status
 2. What's already complete
-3. What's missing (with table)
+3. What's missing (with table including Blocks column)
 4. Instructions for each gap
+5. Gap Execution Order (dependencies resolved)
 
 Then ask:
 ```
@@ -289,6 +355,10 @@ When generating instructions for another AI:
 
 6. **Make it copy-pasteable**: The instruction should be directly usable by the next AI
 
+7. **Reference, don't embed**: Tell iterate_plan what to READ, not what you found. "Read src/utils/" not "there are 49 files in utils"
+
+8. **Name the agent for 🔍 gaps**: "Use codebase-locator to find..." not just "find files in..."
+
 ## Priority Levels
 
 - **High**: Blocks implementation entirely (missing config content, no execution order)
@@ -316,6 +386,7 @@ Recommended workflow:
 
 ## Important Notes
 
+- **📚 Docs gaps are expensive** - flag them clearly; they require web research and may have version-specific gotchas
 - Read the ENTIRE plan before analyzing - partial reads miss context
 - Don't be pedantic - if something is obviously clear from context, it's fine
 - Focus on gaps that would cause an implementer to stop and ask questions

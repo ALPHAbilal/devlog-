@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Eye, EyeOff, Github, Mail, Lock, Check, X, AlertCircle, Loader2 } from 'lucide-react'
-import { supabase } from '../lib/supabaseOptimized'
+import { supabase } from '@/shared/api'
 
 const AuthFormElite = ({ authView, onViewChange, onAuth, isLoading, error, successMessage }) => {
   const [email, setEmail] = useState('')

@@ -1,0 +1,211 @@
+/* Block controls - Enterprise pattern with always-visible trigger */
+.block-wrapper {
+  position: relative;
+  isolation: isolate; /* Create clean stacking context */
+}
+
+/* Always-visible trigger button (enterprise pattern) */
+.block-controls-trigger {
+  /* Critical: Always in DOM, always visible */
+  opacity: 0.3 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  /* Subtle initial state */
+  filter: blur(0.5px);
+}
+
+/* Progressive enhancement on hover */
+.block-wrapper:hover .block-controls-trigger {
+  opacity: 0.5 !important;
+  filter: blur(0px);
+}
+
+.block-controls-trigger:hover,
+.block-controls-trigger:focus {
+  opacity: 0.8 !important;
+  filter: blur(0px);
+}
+
+/* Active state when controls are shown */
+.block-controls-trigger.active {
+  opacity: 1 !important;
+  transform: rotate(90deg) !important;
+}
+
+/* Controls panel - positioned relative to trigger */
+.block-wrapper .block-controls {
+  /* Removed positioning since it's inline */
+  /* Ensure proper stacking */
+  z-index: 20 !important;
+  
+  /* Enterprise pattern: always in DOM */
+  /* Visual styles handled inline for production reliability */
+}
+
+/* Ensure proper flex layout */
+.block-controls {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 0.25rem !important; /* gap-1 equivalent */
+}
+
+/* Mobile always visible */
+.block-controls.show-always {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Reset any inherited opacity values */
+.block-controls * {
+  opacity: inherit;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .block-controls-trigger {
+    /* Closer positioning on mobile */
+    left: -2.5rem !important;
+    opacity: 0.5 !important;
+  }
+  
+  .block-wrapper .block-controls {
+    /* Adjust panel position on mobile */
+    left: -2.75rem !important;
+  }
+}
+
+/* Touch-friendly hover states */
+@media (hover: none) and (pointer: coarse) {
+  .block-controls-trigger {
+    opacity: 0.6 !important;
+    filter: none !important;
+  }
+}
+
+/* Version tracking gutter indicators */
+.code-block-gutter {
+  position: relative;
+  /* Reserve ample space for gutter indicators with 3x increased spacing */
+  margin-left: 7.5rem; /* Increased from 3.5rem to accommodate -7rem positioning */
+}
+
+/* Gutter dot indicators */
+.version-indicator-dot {
+  /* Smooth transitions for progressive disclosure */
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Ensure proper hit target for hover */
+  cursor: pointer;
+  position: relative;
+}
+
+/* Pulse animation for recent changes */
+@keyframes version-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
+  }
+}
+
+.version-indicator-recent {
+  animation: version-pulse 2s infinite;
+}
+
+/* Version timeline - subtle dotted line */
+.version-timeline {
+  /* Use CSS for dotted lines instead of SVG for better performance */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 4px,
+    rgba(76, 175, 80, 0.3) 4px,
+    rgba(76, 175, 80, 0.3) 6px
+  );
+  width: 1px;
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Temporal heat map overlay */
+.code-block-heat-map {
+  /* Very subtle background tint */
+  background-color: rgba(76, 175, 80, 0.02);
+  transition: background-color 500ms ease-in-out;
+  pointer-events: none;
+}
+
+/* Version tooltip styling */
+.version-tooltip {
+  /* Glassmorphism effect */
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(10, 22, 40, 0.95);
+  border: 1px solid rgba(30, 58, 95, 0.5);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Ensure gutter indicators don't interfere with scrolling */
+.version-gutter-container {
+  position: absolute;
+  left: -7rem; /* Adjusted to match new dot position with 3x spacing */
+  top: 0;
+  bottom: 0;
+  width: 7rem;
+  pointer-events: none;
+}
+
+.version-gutter-container > * {
+  pointer-events: auto;
+}
+
+/* DEBUG MODE - Forces controls visible with visual indicators */
+.debug-block-controls .block-controls {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  pointer-events: auto !important;
+  border: 3px solid red !important;
+  background: rgba(255, 255, 0, 0.3) !important;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5) !important;
+  min-width: 100px !important;
+  min-height: 100px !important;
+  padding: 10px !important;
+}
+
+/* Force all inner content visible in debug mode */
+.debug-block-controls .block-controls * {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  border: 1px solid blue !important;
+}
+
+/* Specifically target buttons and drag handles */
+.debug-block-controls .block-controls button,
+.debug-block-controls .block-controls .drag-handle {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: flex !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  background: rgba(0, 255, 0, 0.5) !important;
+  color: black !important;
+}
+
+/* Debug info overlay */
+.debug-block-controls::before {
+  content: "DEBUG: BlockControls CSS Loaded" !important;
+  position: fixed !important;
+  top: 10px !important;
+  right: 10px !important;
+  background: red !important;
+  color: white !important;
+  padding: 10px !important;
+  z-index: 99999 !important;
+  font-size: 14px !important;
+}

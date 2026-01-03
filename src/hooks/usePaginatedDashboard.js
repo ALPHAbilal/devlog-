@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useAuth } from '../contexts/AuthContextOptimized';
-import { loadDocumentsPaginated } from '../utils/storage/storageWrapper';
+import { useAuth } from '@/app/providers';
+import { loadDocumentsPaginated } from '@/shared/lib';
 import { getDocumentsWithRealActivity } from '../lib/supabase-optimizations';
 
 /**

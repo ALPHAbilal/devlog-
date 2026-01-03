@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { supabase } from '../lib/supabaseOptimized'
-import { getURL } from '../utils/auth'
+import { supabase } from '@/shared/api'
+import { getURL } from '@/shared/lib'
 import { useNavigate } from 'react-router-dom'
 import AuthBackground from './AuthBackground'
 import AuthFormElite from './AuthFormElite'

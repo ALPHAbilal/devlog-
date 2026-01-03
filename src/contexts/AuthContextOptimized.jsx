@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
-import { optimizedSupabase, onAuthStateChange, getSession } from '../lib/supabaseOptimized';
+import { optimizedSupabase, onAuthStateChange, getSession } from '@/shared/api';
 import { performanceMonitor } from '../utils/performanceMonitor';
 
 const AuthContext = createContext({});

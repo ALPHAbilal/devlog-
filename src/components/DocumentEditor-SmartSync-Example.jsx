@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSmartSync } from '../hooks/useSmartSync';
+import { useSmartSync } from '@/features/storage';
 import { useParams } from 'react-router-dom';
 
 export function DocumentEditor() {

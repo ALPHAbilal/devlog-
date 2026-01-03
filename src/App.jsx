@@ -1,15 +1,15 @@
 import React, { Suspense, lazy, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import * as Sentry from '@sentry/react';
-import { AuthProviderOptimized as AuthProvider, useAuth } from './contexts/AuthContextOptimized';
-import { SettingsProvider } from './contexts/SettingsContext';
-import { SidebarProvider } from './contexts/SidebarContext';
-import { TabProvider } from './contexts/TabContext';
-import { useGlobalAutoSave } from './hooks/useAutoSave';
-import { useAnalytics } from './hooks/useAnalytics';
-import { initMonitoring, setUserContext } from './utils/monitoring';
-import { register as registerServiceWorker } from './utils/serviceWorker';
-import { preloadResources } from './utils/performance';
+import { AuthProviderOptimized as AuthProvider, useAuth } from '@/app/providers';
+import { SettingsProvider } from '@/app/providers';
+import { SidebarProvider } from '@/app/providers';
+import { TabProvider } from '@/app/providers';
+import { useGlobalAutoSave } from '@/features/block';
+import { useAnalytics } from '@/features/analytics';
+import { initMonitoring, setUserContext } from '@/shared/lib';
+import { register as registerServiceWorker } from '@/shared/lib';
+import { preloadResources } from '@/shared/lib';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import SettingsClaude from './pages/SettingsClaude';
@@ -24,7 +24,7 @@ import Upgrade from './pages/Upgrade';
 import ErrorBoundary from './components/ErrorBoundary';
 import CookieConsentBanner from './components/CookieConsentBanner';
 
-import { ToastProvider } from './hooks/useToast';
+import { ToastProvider } from '@/shared/hooks';
 import { useEffect } from 'react';
 
 // Create Sentry-enhanced routing component

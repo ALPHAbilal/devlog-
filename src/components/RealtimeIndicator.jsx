@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
-import { useSmartDatabaseUsage } from '../hooks/useSmartDatabaseUsage';
+import { eventBus, EVENT_TYPES } from '@/shared/lib';
+import { useSmartDatabaseUsage } from '@/features/storage';
 
 /**
  * Realtime Connection Indicator

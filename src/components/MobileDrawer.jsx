@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTouchGestures } from '../hooks/useTouchGestures';
-import { lockBodyScroll, unlockBodyScroll } from '../utils/responsive';
+import { useTouchGestures } from '@/shared/hooks';
+import { lockBodyScroll, unlockBodyScroll } from '@/shared/lib';
 
 /**
  * MobileDrawer Component

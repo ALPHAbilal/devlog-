@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/shared/api';
 
 // Export all user data from Supabase
 export const exportSupabaseData = async () => {

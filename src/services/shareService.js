@@ -8,7 +8,7 @@
  * - Handling collaborative features
  */
 
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/shared/api';
 import { logError } from '../utils/monitoring';
 import { deserializeBlock } from '../utils/blockSerializer';
 

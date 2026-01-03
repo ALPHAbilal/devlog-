@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Activity, Database, Zap, TrendingUp, Clock, Layers } from 'lucide-react';
-import { useMultiLayerStorage } from '../hooks/useMultiLayerStorage';
-import eventBus, { EVENT_TYPES } from '../utils/eventBus';
+import { useMultiLayerStorage } from '@/features/storage';
+import { eventBus, EVENT_TYPES } from '@/shared/lib';
 
 /**
  * Performance Monitor Component

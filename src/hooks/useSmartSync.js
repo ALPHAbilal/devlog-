@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { supabase } from '../lib/supabaseOptimized';
+import { supabase } from '@/shared/api';
 import { createSmartSync } from '../utils/smartSync';
 
 export function useSmartSync(documentId) {

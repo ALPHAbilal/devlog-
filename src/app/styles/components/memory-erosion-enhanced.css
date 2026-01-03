@@ -1,0 +1,387 @@
+/* Enhanced Memory Erosion - Award-Winning Additional Styles */
+
+/* Import base styles */
+@import './MemoryErosion.css';
+
+/* Enhanced container */
+.memory-erosion-container.enhanced {
+  background: 
+    radial-gradient(ellipse at top, rgba(13, 17, 23, 0) 0%, rgba(0, 0, 0, 0.9) 100%),
+    linear-gradient(180deg, #0a0a0a 0%, #0f0f1a 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.memory-erosion-container.enhanced::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: 
+    repeating-conic-gradient(
+      from 0deg at 50% 50%,
+      transparent 0deg,
+      rgba(0, 255, 136, 0.03) 1deg,
+      transparent 2deg
+    );
+  animation: rotateBackground 120s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes rotateBackground {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Enhanced fragment styling */
+.fragment-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.fragment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fragment-type {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+}
+
+.fragment-age {
+  color: rgba(255, 107, 107, 0.6);
+  font-weight: 300;
+}
+
+.fragment-content {
+  position: relative;
+  z-index: 2;
+}
+
+/* Crystallization layer */
+.crystallization-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: 
+    linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%),
+    linear-gradient(135deg, 
+      rgba(0, 255, 136, 0.05) 0%, 
+      rgba(0, 180, 255, 0.05) 50%, 
+      rgba(255, 0, 180, 0.05) 100%);
+  mix-blend-mode: screen;
+  border-radius: inherit;
+}
+
+.crystallization-layer::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.03) 10px,
+      rgba(255, 255, 255, 0.03) 20px
+    );
+  border-radius: inherit;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-20px); }
+  to { transform: translateX(20px); }
+}
+
+/* Fragment SVG filters */
+.fragment-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* Stage-based restoration */
+.memory-fragment.stage-1-restored {
+  animation: stage1Pulse 2s ease-in-out infinite;
+}
+
+.memory-fragment.stage-2-restored {
+  animation: stage2Glow 1.5s ease-in-out infinite;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(0, 255, 136, 0.2),
+    inset 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+.memory-fragment.stage-3-restored {
+  animation: stage3Radiate 1s ease-in-out infinite;
+}
+
+@keyframes stage1Pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes stage2Glow {
+  0%, 100% { 
+    filter: brightness(1) hue-rotate(0deg);
+    border-color: rgba(0, 255, 136, 0.3);
+  }
+  50% { 
+    filter: brightness(1.2) hue-rotate(10deg);
+    border-color: rgba(0, 255, 136, 0.6);
+  }
+}
+
+@keyframes stage3Radiate {
+  0%, 100% {
+    box-shadow: 
+      0 0 30px rgba(0, 255, 136, 0.3),
+      0 0 60px rgba(0, 180, 255, 0.2),
+      0 0 90px rgba(255, 0, 180, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 40px rgba(0, 255, 136, 0.5),
+      0 0 80px rgba(0, 180, 255, 0.3),
+      0 0 120px rgba(255, 0, 180, 0.2);
+  }
+}
+
+/* Enhanced header with glitch effect */
+.erosion-header {
+  position: relative;
+  z-index: 1000;
+}
+
+.erosion-title.glitch {
+  position: relative;
+  color: #ffffff;
+  animation: glitchAnimation 3s infinite;
+}
+
+.erosion-title.glitch::before,
+.erosion-title.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.erosion-title.glitch::before {
+  animation: glitch1 0.5s infinite;
+  color: #00ff88;
+  z-index: -1;
+}
+
+.erosion-title.glitch::after {
+  animation: glitch2 0.5s infinite;
+  color: #ff00b4;
+  z-index: -2;
+}
+
+@keyframes glitchAnimation {
+  0%, 100% { text-shadow: 0 0 30px rgba(255, 255, 255, 0.5); }
+  20% { text-shadow: 3px 0 30px rgba(0, 255, 136, 0.5); }
+  40% { text-shadow: -3px 0 30px rgba(255, 0, 180, 0.5); }
+  60% { text-shadow: 0 3px 30px rgba(0, 180, 255, 0.5); }
+  80% { text-shadow: 0 -3px 30px rgba(255, 255, 255, 0.5); }
+}
+
+@keyframes glitch1 {
+  0%, 100% { clip: rect(42px, 9999px, 44px, 0); transform: translate(0); }
+  20% { clip: rect(12px, 9999px, 85px, 0); transform: translate(-2px, -2px); }
+  40% { clip: rect(35px, 9999px, 140px, 0); transform: translate(2px, 2px); }
+  60% { clip: rect(76px, 9999px, 120px, 0); transform: translate(-1px, 1px); }
+  80% { clip: rect(25px, 9999px, 90px, 0); transform: translate(1px, -1px); }
+}
+
+@keyframes glitch2 {
+  0%, 100% { clip: rect(85px, 9999px, 140px, 0); transform: translate(0); }
+  20% { clip: rect(20px, 9999px, 30px, 0); transform: translate(2px, 2px); }
+  40% { clip: rect(100px, 9999px, 120px, 0); transform: translate(-2px, -2px); }
+  60% { clip: rect(50px, 9999px, 90px, 0); transform: translate(1px, -1px); }
+  80% { clip: rect(70px, 9999px, 80px, 0); transform: translate(-1px, 1px); }
+}
+
+/* Typewriter effect */
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0 auto;
+  letter-spacing: 0.1em;
+  animation: typing 3.5s steps(40, end), blinkCaret 0.75s step-end infinite;
+  border-right: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blinkCaret {
+  from, to { border-color: transparent; }
+  50% { border-color: rgba(255, 255, 255, 0.5); }
+}
+
+/* Quality indicator */
+.quality-indicator {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: monospace;
+  z-index: 1000;
+}
+
+.quality-ultra { color: #00ff88; }
+.quality-high { color: #00b4ff; }
+.quality-medium { color: #ffb400; }
+.quality-low { color: #ff6b6b; }
+
+/* Interaction hints */
+.interaction-hints {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0;
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+.hint:nth-child(1) { animation-delay: 2s; }
+.hint:nth-child(2) { animation-delay: 2.5s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hint-icon {
+  font-size: 20px;
+  filter: grayscale(0.5);
+}
+
+/* Particle canvas */
+.particle-canvas {
+  mix-blend-mode: screen;
+}
+
+/* Connection paths */
+svg path {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+
+/* Fragment importance indicators */
+.memory-fragment[data-importance="1"] {
+  border-color: rgba(255, 215, 0, 0.3);
+}
+
+.memory-fragment[data-importance="0.9"],
+.memory-fragment[data-importance="0.8"] {
+  border-color: rgba(255, 140, 0, 0.3);
+}
+
+.memory-fragment[data-importance="0.7"],
+.memory-fragment[data-importance="0.6"] {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Advanced syntax highlighting */
+.language-javascript { color: #f0db4f; }
+.language-sql { color: #336791; }
+.language-json { color: #90b4fe; }
+.language-regex { color: #ff6b6b; }
+.language-error { color: #ff6b6b; }
+.language-ai { color: #b4a7d6; }
+.language-bash { color: #4eaa25; }
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .memory-fragment {
+    max-width: 280px;
+    font-size: 0.85em;
+  }
+  
+  .interaction-hints {
+    bottom: 10px;
+    right: 10px;
+  }
+  
+  .hint {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  .erosion-title.glitch {
+    font-size: 3rem;
+  }
+}
+
+/* Ultra quality effects */
+@supports (backdrop-filter: blur(10px)) {
+  .memory-fragment.stage-3-restored {
+    backdrop-filter: blur(5px) brightness(1.1);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .memory-erosion-container.enhanced::before {
+    animation: none;
+  }
+  
+  .erosion-title.glitch::before,
+  .erosion-title.glitch::after {
+    display: none;
+  }
+  
+  .memory-fragment {
+    animation-duration: 0s !important;
+  }
+}

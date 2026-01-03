@@ -22,30 +22,30 @@ function FeatureCard({ feature, index }) {
   const cardRef = useRef(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const rafRef = useRef(null);
-  
+
   // Throttled mouse move handler
   const handleMouseMove = useCallback(
     throttle((e) => {
       if (!cardRef.current) return;
-      
+
       // Cancel any pending animation frame
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
-      
+
       rafRef.current = requestAnimationFrame(() => {
         const rect = cardRef.current.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
+
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        
+
         const rotateX = ((y - centerY) / centerY) * -10;
         const rotateY = ((x - centerX) / centerX) * 10;
-        
+
         setRotation({ x: rotateX, y: rotateY });
-        
+
         // Update CSS variables for glow effect
         if (cardRef.current) {
           cardRef.current.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
@@ -55,27 +55,24 @@ function FeatureCard({ feature, index }) {
     }, 16), // 16ms = ~60fps
     []
   );
-  
+
   const handleMouseLeave = useCallback(() => {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
     }
     setRotation({ x: 0, y: 0 });
   }, []);
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="feature-card-wrapper"
       variants={featureReveal}
       custom={index}
+      style={{ perspective: 1000 }}
     >
-      {/* Gradient Orb */}
-      <div className="feature-gradient-orb" />
-      
       <motion.div
         ref={cardRef}
-        className="feature-card"
-        data-feature={feature.dataFeature}
+        className="feature-card group"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         animate={rotation}
@@ -84,46 +81,33 @@ function FeatureCard({ feature, index }) {
         style={{
           '--rotate-x': `${rotation.x}deg`,
           '--rotate-y': `${rotation.y}deg`,
+          background: 'rgba(22, 27, 34, 0.4)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(45, 51, 59, 0.4)',
+          borderRadius: '16px',
         }}
       >
-        {/* Card Glow Effect */}
-        <div className="feature-card-glow" />
-        
-        {/* Animated Border */}
-        <div className="feature-border-gradient" />
-        
+        {/* Monospace Indicator */}
+        <div className="absolute top-4 right-6 font-['JetBrains_Mono',_monospace] text-[10px] text-slate-500 opacity-40 select-none">
+          // {feature.tag}
+        </div>
+
         {/* Card Content */}
-        <div className="card-content">
-          {/* Icon with Effects */}
-          <div className="feature-icon-wrapper">
-            <div className="feature-icon-glow" />
-            <div className="feature-icon-particles">
-              <span className="feature-particle" />
-              <span className="feature-particle" />
-              <span className="feature-particle" />
-              <span className="feature-particle" />
-            </div>
-            <span style={{ 
-              color: `rgba(255, 255, 255, ${feature.opacity || 0.9})` 
-            }}>
+        <div className="card-content p-6">
+          <div className="feature-icon-wrapper mb-6">
+            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 w-fit">
               {feature.icon}
-            </span>
+            </div>
           </div>
-          
-          {/* Text Content */}
+
           <div className="feature-content">
-            <h4>{feature.title}</h4>
-            <p>{feature.description}</p>
+            <div className="text-[11px] font-['JetBrains_Mono',_monospace] text-emerald-500/50 mb-1">
+              MODULE_{feature.id}
+            </div>
+            <h4 className="text-[22px] font-medium text-white mb-2 font-['Arial',_sans-serif] tracking-tight">{feature.title}</h4>
+            <p className="text-[15px] text-slate-400 leading-relaxed font-['Arial',_sans-serif]">{feature.description}</p>
           </div>
         </div>
-        
-        {/* Progress Indicator */}
-        <div className="feature-progress">
-          <div className="feature-progress-fill" />
-        </div>
-        
-        {/* Noise Texture */}
-        <div className="feature-noise" />
       </motion.div>
     </motion.div>
   );
@@ -134,45 +118,49 @@ function LandingContent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
-  
+
   // Handle navigation bar scroll effect
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const features = [
     {
+      id: '01',
       icon: <Code2 size={32} />,
       title: 'Document in 30 seconds',
       description: 'Paste code, add context, done. No formatting needed.',
       opacity: 0.9,
-      dataFeature: 'document'
+      tag: 'instant_capture'
     },
     {
+      id: '02',
       icon: <Link2 size={32} />,
       title: 'Everything connected',
       description: 'Organize with projects and folders. Share knowledge easily.',
       opacity: 0.7,
-      dataFeature: 'connect'
+      tag: 'knowledge_graph'
     },
     {
+      id: '03',
       icon: <Search size={32} />,
       title: 'Find anything in 2 seconds',
       description: 'Remember that fix from last year? It\'s one search away.',
       opacity: 0.5,
-      dataFeature: 'search'
+      tag: 'vector_search'
     },
     {
+      id: '04',
       icon: <GitBranch size={32} />,
       title: 'Never lose context',
       description: 'See how your code evolved and why you made those changes.',
       opacity: 0.3,
-      dataFeature: 'context'
+      tag: 'version_sync'
     }
   ];
 
@@ -222,8 +210,8 @@ function LandingContent() {
             >
               <div className="w-3.5 h-3.5 flex items-center justify-center">
                 <svg viewBox="0 0 14 14" fill="none" className="w-full h-full">
-                  <circle cx="7" cy="7" r="6" stroke="#10b981" strokeWidth="1.5" fill="none"/>
-                  <circle cx="7" cy="7" r="2" fill="#10b981"/>
+                  <circle cx="7" cy="7" r="6" stroke="#10b981" strokeWidth="1.5" fill="none" />
+                  <circle cx="7" cy="7" r="2" fill="#10b981" />
                 </svg>
               </div>
               <span className="text-[#10b981] text-[13px] font-['Consolas']">Beta</span>
@@ -289,7 +277,7 @@ function LandingContent() {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="p-4 space-y-4">
               <a
                 href="#pricing"
@@ -327,39 +315,49 @@ function LandingContent() {
 
       {/* Problem Section */}
       <ProblemSection />
-      
+
       {/* How It Works - Video Showcase */}
       <HowItWorksVideo />
 
       {/* Features Grid */}
-      <section className="px-4 md:px-6 gradient-features relative">
-        {/* Noise overlay for premium texture */}
-        <div className="noise-overlay" />
-        <div className="max-w-6xl mx-auto relative z-10 py-16 md:py-20">
-          <motion.div className="text-center mb-8 md:mb-16">
-            <motion.h3 
-              className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
+      <section className="px-4 md:px-6 relative bg-[#0d1117] overflow-hidden" style={{ paddingTop: '100px', paddingBottom: '100px' }}>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <motion.div className="text-center mb-16 md:mb-24">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 mb-8">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-emerald-500 text-[13px] font-['JetBrains_Mono',_monospace]">System Utilities</span>
+            </div>
+
+            <motion.h3
+              className="text-white mb-6"
+              style={{
+                fontSize: 'clamp(36px, 5vw, 64px)',
+                lineHeight: '1.1',
+                letterSpacing: '-1.28px',
+                fontWeight: 400,
+                fontFamily: 'Arial, sans-serif'
+              }}
               initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
               whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-                Core Features
-              </span>
+              Building Blocks Of Your <br className="hidden md:block" />
+              <span className="text-slate-500">Knowledge Infrastructure</span>
             </motion.h3>
             <motion.p
-              className="text-lg text-text-secondary max-w-2xl mx-auto"
+              className="text-[18px] text-slate-400 max-w-2xl mx-auto leading-relaxed font-['Arial',_sans-serif]"
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Everything you need to build your second brain for code
+              Every tool you need to preserve, organize, and retrieve your technical mastery
+              without disrupting your coding state.
             </motion.p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className="fluid-grid-features"
             variants={staggerContainer}
             initial="hidden"
@@ -379,32 +377,28 @@ function LandingContent() {
       </Suspense>
 
       {/* CTA Section */}
-      <section className="px-4 md:px-6 gradient-cta relative">
-        {/* Noise overlay for premium texture */}
-        <div className="noise-overlay" />
-        <div className="max-w-4xl mx-auto text-center relative z-10 py-16 md:py-20">
-          {/* Beta - Launch pricing hidden until ready
-          <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 bg-accent-green/10 
-                          text-accent-green rounded-full text-sm font-medium mb-6"
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-          >
-            <span className="inline-block w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
-            Launch pricing ends Friday at midnight
-          </motion.div> */}
-          
-          <motion.h3 
-            className="text-3xl md:text-4xl font-bold mb-4 md:mb-6"
+      <section className="px-4 md:px-6 relative bg-[#050d1a]" style={{ paddingTop: '120px', paddingBottom: '120px' }}>
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <div className="w-px h-16 bg-gradient-to-b from-transparent to-emerald-500 mx-auto mb-10" />
+
+          <motion.h3
+            className="text-white mb-6"
+            style={{
+              fontSize: 'clamp(40px, 6vw, 72px)',
+              lineHeight: '1.05',
+              letterSpacing: '-1.44px',
+              fontWeight: 400,
+              fontFamily: 'Arial, sans-serif'
+            }}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            Stop Losing Solutions Forever
+            Stop Losing <br className="hidden md:block" />
+            <span className="text-emerald-500">Solutions Forever</span>
           </motion.h3>
-          <motion.p 
+          <motion.p
             className="text-lg md:text-xl text-text-secondary mb-6 md:mb-8 px-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -415,7 +409,7 @@ function LandingContent() {
             7,000+ developers already building their second brain. Start today. */}
             Join the beta and start building your second brain today.
           </motion.p>
-          <motion.div 
+          <motion.div
             className="flex flex-col items-center gap-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -423,37 +417,37 @@ function LandingContent() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <motion.button
-                onClick={() => navigate('/auth')}
-                className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-accent-green text-dark-primary 
+              onClick={() => navigate('/auth')}
+              className="inline-flex items-center gap-2 px-6 md:px-8 py-3 md:py-4 bg-accent-green text-dark-primary 
                            rounded-lg font-medium text-base md:text-lg shadow-lg shadow-accent-green/20
                            relative overflow-hidden group"
-                variants={buttonHover}
-                initial="rest"
-                whileHover="hover"
-                whileTap="tap"
-              >
-                <motion.span
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.6 }}
-                />
-                <span className="relative z-10">Start Building Now</span>
-                <ArrowRight size={24} className="relative z-10" />
-              </motion.button>
+              variants={buttonHover}
+              initial="rest"
+              whileHover="hover"
+              whileTap="tap"
+            >
+              <motion.span
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: "100%" }}
+                transition={{ duration: 0.6 }}
+              />
+              <span className="relative z-10">Start Building Now</span>
+              <ArrowRight size={24} className="relative z-10" />
+            </motion.button>
             <p className="text-sm text-text-secondary/70">
               14-day free trial • Cancel anytime • Export your data
             </p>
           </motion.div>
         </div>
-        
+
       </section>
 
       {/* Footer */}
       <footer className="px-4 md:px-6 gradient-footer relative">
         {/* Subtle gradient background with noise */}
         <div className="noise-overlay" />
-        
+
         <div className="max-w-6xl mx-auto text-center relative z-10 py-12 md:py-16">
           {/* Centered logo and tagline */}
           <div className="flex flex-col items-center gap-3 mb-6">
@@ -462,20 +456,20 @@ function LandingContent() {
               Your second brain for code
             </p>
           </div>
-          
+
           {/* Minimal legal links */}
           <div className="flex items-center justify-center gap-6 text-xs text-text-secondary/40">
             <span>© 2025 Devlog</span>
             <span className="w-px h-3 bg-text-secondary/20" />
-            <a 
-              href="/privacy" 
+            <a
+              href="/privacy"
               className="hover:text-text-secondary/60 transition-colors"
             >
               Privacy
             </a>
             <span className="w-px h-3 bg-text-secondary/20" />
-            <a 
-              href="/terms" 
+            <a
+              href="/terms"
               className="hover:text-text-secondary/60 transition-colors"
             >
               Terms

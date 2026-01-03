@@ -10,7 +10,7 @@ export default function PricingSection() {
   const monthlyRef = useRef(null);
   const annualRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
-  
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -30,26 +30,26 @@ export default function PricingSection() {
         annual: '...'
       },
       features: [
-        { 
-          text: 'Never lose AI insights again', 
+        {
+          text: 'Never lose AI insights again',
           included: true,
           description: 'Save every ChatGPT & Claude solution permanently. Find that React optimization from 3 months ago in seconds.',
           jobStory: 'When my ChatGPT solutions disappear after closing the tab'
         },
-        { 
-          text: 'Time travel through your knowledge', 
+        {
+          text: 'Time travel through your knowledge',
           included: true,
           description: 'Git-style version control shows exactly when and why you made critical decisions.',
           jobStory: 'When I can\'t explain past architecture choices'
         },
-        { 
-          text: 'Works everywhere you do', 
+        {
+          text: 'Works everywhere you do',
           included: true,
           description: 'Code on planes, trains, anywhere. Everything syncs when you\'re back online.',
           jobStory: 'When WiFi drops during critical work'
         },
-        { 
-          text: 'Save 4 hours every week', 
+        {
+          text: 'Save 4 hours every week',
           included: true,
           description: 'Stop hunting through Slack, browser history, and screenshots. Everything\'s in one searchable place.',
           value: '$200+ monthly value'
@@ -70,30 +70,30 @@ export default function PricingSection() {
         annual: '...'
       },
       features: [
-        { 
-          text: 'Everything in Personal', 
+        {
+          text: 'Everything in Personal',
           included: true
         },
-        { 
-          text: 'Turn your team into a knowledge powerhouse', 
+        {
+          text: 'Turn your team into a knowledge powerhouse',
           included: true,
           description: 'Share documented solutions with secure links. Perfect for onboarding new devs 60% faster.',
           jobStory: 'When knowledge is trapped in individual silos'
         },
-        { 
-          text: 'Ship with confidence', 
+        {
+          text: 'Ship with confidence',
           included: true,
           description: 'Branch your docs like code. Test ideas without breaking main documentation.',
           jobStory: 'When experimenting might break existing docs'
         },
-        { 
-          text: 'Capture $10K+ of team insights', 
+        {
+          text: 'Capture $10K+ of team insights',
           included: true,
           description: '5 team seats to preserve everyone\'s AI conversations and critical decisions.',
           value: 'ROI in first month'
         },
-        { 
-          text: 'No vendor lock-in', 
+        {
+          text: 'No vendor lock-in',
           included: true,
           description: 'Export everything as JSON anytime. Your knowledge stays yours forever.',
           jobStory: 'When switching tools means losing history'
@@ -120,12 +120,12 @@ export default function PricingSection() {
     };
 
     measureButtons();
-    
+
     // Set up ResizeObserver for dynamic content changes
     const resizeObserver = new ResizeObserver(measureButtons);
     if (monthlyRef.current) resizeObserver.observe(monthlyRef.current);
     if (annualRef.current) resizeObserver.observe(annualRef.current);
-    
+
     return () => resizeObserver.disconnect();
   }, [billingPeriod]); // Re-measure when billing period changes
 
@@ -141,30 +141,44 @@ export default function PricingSection() {
     <section id="pricing" className="px-4 md:px-6 gradient-pricing relative">
       {/* Noise overlay for premium texture */}
       <div className="noise-overlay" />
-      
+
       <div className="max-w-6xl mx-auto relative z-10 py-16 md:py-20">
-        <motion.div 
-          className="text-center mb-8 md:mb-12"
+        <motion.div
+          className="text-center mb-16 md:mb-24"
           initial={isMobile ? { opacity: 1 } : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8 }}
         >
-          <h3 className="text-2xl md:text-3xl font-bold mb-3 md:mb-4">
-            Turn AI Conversations Into Permanent Team Knowledge
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 mb-8">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-emerald-500 text-[13px] font-['JetBrains_Mono',_monospace]">Infrastructure Scaling</span>
+          </div>
+
+          <h3
+            className="text-white mb-6"
+            style={{
+              fontSize: 'clamp(36px, 5vw, 64px)',
+              lineHeight: '1.1',
+              letterSpacing: '-1.28px',
+              fontWeight: 400,
+              fontFamily: 'Arial, sans-serif'
+            }}
+          >
+            Turn AI Conversations Into <br className="hidden md:block" />
+            <span className="text-slate-500">Permanent Team Knowledge</span>
           </h3>
-          <p className="text-text-secondary text-base md:text-lg mb-2">
-            Don't lose another $100 ChatGPT solution. Capture every insight permanently.
-          </p>
-          {/* Beta - Community size hidden until launch
-          <p className="text-accent-green text-sm mb-6 md:mb-8">
-            Join 10,000+ developers who save 4 hours every week
-          </p> */}
-          <p className="text-accent-green text-sm mb-6 md:mb-8">
-            <span className="inline-flex items-center gap-2 px-3 py-1 bg-accent-green/10 rounded-full">
-              <span className="w-2 h-2 bg-accent-green rounded-full animate-pulse"></span>
-              Beta - Pricing Coming Soon
-            </span>
+          <p
+            className="text-slate-400 mx-auto mb-10"
+            style={{
+              fontSize: '18px',
+              lineHeight: '1.6',
+              maxWidth: '640px',
+              fontFamily: 'Arial, sans-serif'
+            }}
+          >
+            Don't lose another $100 ChatGPT solution. Capture every insight
+            permanently and build a shared intelligence layer for your team.
           </p>
 
           {/* Billing Toggle */}
@@ -182,11 +196,10 @@ export default function PricingSection() {
             <button
               ref={monthlyRef}
               onClick={() => setBillingPeriod('monthly')}
-              className={`px-4 py-2 rounded-md transition-all relative z-10 ${
-                billingPeriod === 'monthly'
+              className={`px-4 py-2 rounded-md transition-all relative z-10 ${billingPeriod === 'monthly'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
-              }`}
+                }`}
               aria-pressed={billingPeriod === 'monthly'}
             >
               Monthly
@@ -194,11 +207,10 @@ export default function PricingSection() {
             <button
               ref={annualRef}
               onClick={() => setBillingPeriod('annual')}
-              className={`px-4 py-2 rounded-md transition-all relative z-10 flex items-center ${
-                billingPeriod === 'annual'
+              className={`px-4 py-2 rounded-md transition-all relative z-10 flex items-center ${billingPeriod === 'annual'
                   ? 'text-dark-primary font-medium'
                   : 'text-text-secondary hover:text-text-primary'
-              }`}
+                }`}
               aria-pressed={billingPeriod === 'annual'}
             >
               Annual
@@ -220,7 +232,7 @@ export default function PricingSection() {
         </motion.div>
 
         {/* Pricing Cards */}
-        <motion.div 
+        <motion.div
           className="fluid-grid-pricing mb-8 md:mb-12"
           variants={isMobile ? {} : staggerContainer}
           initial={isMobile ? { opacity: 1 } : "hidden"}
@@ -230,25 +242,23 @@ export default function PricingSection() {
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
-              className={`relative rounded-lg border transition-all hover:border-accent-green/30 ${
-                plan.popular
-                  ? 'border-accent-green shadow-lg shadow-accent-green/10 pricing-card-popular'
-                  : 'border-dark-secondary/50 pricing-card-gradient'
-              } glass-overlay`}
+              className={`relative rounded-2xl border transition-all duration-300 ${plan.popular
+                  ? 'border-emerald-500 bg-[rgba(16,185,129,0.03)] shadow-2xl shadow-emerald-500/5'
+                  : 'border-white/5 bg-white/[0.02]'
+                } backdrop-blur-xl group hover:border-emerald-500/40`}
               variants={isMobile ? {} : staggerItem}
               style={isMobile ? { opacity: 1 } : {}}
             >
+              <div className="absolute top-4 right-6 font-['JetBrains_Mono',_monospace] text-[10px] text-slate-500 opacity-40 select-none">
+                // {plan.name === 'Personal' ? 'STABLE_NODE' : 'QUANTUM_NODE'}
+              </div>
+
               {plan.popular && (
-                <motion.div 
-                  className="absolute -top-4 left-1/2 -translate-x-1/2 z-10"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <div className="bg-accent-green text-dark-primary text-sm font-medium px-3 py-1 rounded">
-                    Most Popular
+                <div className="absolute -top-3 left-6">
+                  <div className="bg-emerald-500 text-[#050d1a] text-[11px] font-bold px-3 py-0.5 rounded-full font-['JetBrains_Mono',_monospace] tracking-tight">
+                    RECOMMENDED
                   </div>
-                </motion.div>
+                </div>
               )}
 
               <div className="p-4 md:p-6">
@@ -258,27 +268,26 @@ export default function PricingSection() {
                 </div>
                 <p className="text-text-secondary text-xs md:text-sm mb-4 md:mb-6">{plan.description}</p>
 
-                <div className="mb-4 md:mb-6">
+                <div className="mb-8">
                   <div className="flex items-baseline gap-1">
                     <AnimatePresence mode="wait">
-                      <motion.span 
+                      <motion.span
                         key={billingPeriod}
-                        className="text-3xl md:text-4xl font-bold"
-                        initial={{ opacity: 0, y: -20 }}
+                        className="text-4xl font-medium text-white tracking-tight font-['Arial',_sans-serif]"
+                        initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 20 }}
-                        transition={{ duration: 0.3 }}
+                        exit={{ opacity: 0, y: 10 }}
                       >
                         {plan.price[billingPeriod]}
                       </motion.span>
                     </AnimatePresence>
-                    <span className="text-text-secondary">
+                    <span className="text-slate-500 text-sm font-['JetBrains_Mono',_monospace]">
                       /month
                     </span>
                   </div>
                   <AnimatePresence>
                     {billingPeriod === 'annual' && plan.savingText && (
-                      <motion.div 
+                      <motion.div
                         className="text-accent-green text-sm mt-1"
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
@@ -298,27 +307,16 @@ export default function PricingSection() {
 
                 <motion.button
                   onClick={() => handlePlanClick(plan.name, plan.cta)}
-                  className={`w-full py-2.5 md:py-3 rounded font-medium relative overflow-hidden text-sm md:text-base ${
-                    plan.ctaVariant === 'primary'
-                      ? 'bg-accent-green text-dark-primary'
-                      : 'bg-dark-primary text-text-primary border border-dark-primary hover:border-accent-green/50'
-                  }`}
-                  variants={buttonHover}
-                  initial="rest"
-                  whileHover="hover"
-                  whileTap="tap"
+                  className={`w-full py-3.5 rounded-xl font-medium text-[15px] transition-all duration-300 ${plan.ctaVariant === 'primary'
+                      ? 'bg-emerald-500 text-[#050d1a] shadow-lg shadow-emerald-500/20'
+                      : 'bg-white/5 text-white border border-white/10 hover:bg-white/10'
+                    }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  {plan.ctaVariant === 'primary' && (
-                    <motion.span
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ x: "100%" }}
-                      transition={{ duration: 0.6 }}
-                    />
-                  )}
-                  <span className="relative z-10">{plan.cta}</span>
+                  {plan.cta}
                 </motion.button>
-                
+
                 {plan.upgradeReason && (
                   <p className="text-xs text-center text-accent-green mt-3">
                     {plan.upgradeReason}
@@ -336,9 +334,8 @@ export default function PricingSection() {
                         )}
                         <div className="flex-1">
                           <span
-                            className={`text-xs md:text-sm ${
-                              feature.included ? 'text-text-primary' : 'text-text-secondary/50'
-                            }`}
+                            className={`text-xs md:text-sm ${feature.included ? 'text-text-primary' : 'text-text-secondary/50'
+                              }`}
                           >
                             {feature.text}
                           </span>
@@ -378,11 +375,11 @@ export default function PricingSection() {
               Cancel anytime
             </span>
           </div>
-          
+
           <p className="text-text-secondary mb-4">
             100% user-supported. No ads. Your data stays yours.
           </p>
-          
+
           <p className="text-sm text-text-secondary/70">
             <a href="mailto:support@devlog.app" className="text-accent-green hover:underline">
               Get help in minutes

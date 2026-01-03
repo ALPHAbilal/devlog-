@@ -53,8 +53,11 @@ function VideoShowcaseItem({ item, index }) {
       >
         {/* Content Section */}
         <div className="showcase-content">
-          <h3 className="showcase-title">{item.title}</h3>
-          <p className="showcase-description">{item.description}</p>
+          <div className="text-[11px] font-['JetBrains_Mono',_monospace] text-emerald-500/50 mb-2">
+            SYSTEM_OP: CAPTURE_INIT
+          </div>
+          <h3 className="showcase-title font-['Arial',_sans-serif] text-[28px] font-medium tracking-tight mb-4">{item.title}</h3>
+          <p className="showcase-description font-['Arial',_sans-serif] text-[16px] text-slate-400 leading-relaxed mb-6">{item.description}</p>
 
           <motion.div
             className="showcase-features"
@@ -63,13 +66,16 @@ function VideoShowcaseItem({ item, index }) {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            <div className="feature-tag">No setup required</div>
-            <div className="feature-tag">Works instantly</div>
+            <div className="feature-tag font-['JetBrains_Mono',_monospace] text-[11px]">No setup required</div>
+            <div className="feature-tag font-['JetBrains_Mono',_monospace] text-[11px]">Works instantly</div>
           </motion.div>
         </div>
 
         {/* Custom Component Section */}
-        <div className="showcase-media">
+        <div className="showcase-media relative">
+          <div className="absolute -top-4 -right-4 font-['JetBrains_Mono',_monospace] text-[10px] text-slate-600 opacity-40">
+            // LIVE_RUNTIME
+          </div>
           {item.customComponent}
         </div>
       </motion.div>
@@ -122,8 +128,11 @@ function VideoShowcaseItem({ item, index }) {
     >
       {/* Content Section */}
       <div className="showcase-content">
-        <h3 className="showcase-title">{item.title}</h3>
-        <p className="showcase-description">{item.description}</p>
+        <div className="text-[11px] font-['JetBrains_Mono',_monospace] text-emerald-500/50 mb-2">
+          SYSTEM_OP: {item.id.toUpperCase()}_INIT
+        </div>
+        <h3 className="showcase-title font-['Arial',_sans-serif] text-[28px] font-medium tracking-tight mb-4">{item.title}</h3>
+        <p className="showcase-description font-['Arial',_sans-serif] text-[16px] text-slate-400 leading-relaxed mb-6">{item.description}</p>
 
         <motion.div
           className="showcase-features"
@@ -132,18 +141,21 @@ function VideoShowcaseItem({ item, index }) {
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
-          <div className="feature-tag">No setup required</div>
-          <div className="feature-tag">Works instantly</div>
+          <div className="feature-tag font-['JetBrains_Mono',_monospace] text-[11px]">High performance</div>
+          <div className="feature-tag font-['JetBrains_Mono',_monospace] text-[11px]">Local storage</div>
         </motion.div>
       </div>
 
       {/* Media Section */}
       <motion.div
-        className="showcase-media"
+        className="showcase-media relative"
         onMouseEnter={() => setShowControls(true)}
         onMouseLeave={() => setShowControls(false)}
         style={{ '--accent-color': item.accentColor }}
       >
+        <div className="absolute -top-4 -right-4 font-['JetBrains_Mono',_monospace] text-[10px] text-slate-600 opacity-40">
+          // MEDIA_PLAYBACK_{index + 1}
+        </div>
         <div className="media-container">
           {useGif ? (
             <img
@@ -210,7 +222,7 @@ export default function HowItWorksVideo() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -225,34 +237,47 @@ export default function HowItWorksVideo() {
   };
 
   return (
-    <section className="how-it-works-video gradient-video relative">
+    <section className="how-it-works-video relative bg-[#0d1117]" style={{ paddingTop: '100px', paddingBottom: '100px' }}>
       {/* Noise overlay for premium texture */}
       <div className="noise-overlay" />
-      
+
       <div className="container-wrapper relative z-10">
-        <motion.div 
-          className="section-header"
+        <motion.div
+          className="section-header text-center mb-16 md:mb-24"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.8 }}
         >
-          <div className="header-badge">
-            <span className="badge-dot" />
-            How it works
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 mb-8">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-emerald-500 text-[13px] font-['JetBrains_Mono',_monospace]">Infrastructure Visualization</span>
           </div>
-          
-          <h2 className="section-title">
-            See Devlog in Action
+
+          <h2
+            className="text-white mb-6"
+            style={{
+              fontSize: 'clamp(36px, 5vw, 64px)',
+              lineHeight: '1.1',
+              letterSpacing: '-1.28px',
+              fontWeight: 400,
+              fontFamily: 'Arial, sans-serif'
+            }}
+          >
+            See DevLog <br className="hidden md:block" />
+            <span className="text-slate-500">In Real-Time Action</span>
           </h2>
-          
-          <p className="section-subtitle">
-            Watch how developers capture, organize, and find their solutions in seconds
+
+          <p
+            className="text-[18px] text-slate-400 max-w-2xl mx-auto leading-relaxed font-['Arial',_sans-serif]"
+          >
+            Watch how developers capture, organize, and find their solutions
+            in milliseconds, without ever leaving the flow state.
           </p>
         </motion.div>
 
         {/* Desktop Layout */}
-        <motion.div 
+        <motion.div
           className="showcase-list desktop-only"
           variants={staggerContainer}
           initial="hidden"
@@ -274,23 +299,23 @@ export default function HowItWorksVideo() {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.3 }}
             >
-              <VideoShowcaseItem 
-                item={showcaseItems[mobileActiveIndex]} 
-                index={mobileActiveIndex} 
+              <VideoShowcaseItem
+                item={showcaseItems[mobileActiveIndex]}
+                index={mobileActiveIndex}
               />
             </motion.div>
           </AnimatePresence>
-          
+
           {/* Mobile Navigation */}
           <div className="carousel-navigation">
-            <button 
+            <button
               onClick={prevSlide}
               className="carousel-nav-button"
               aria-label="Previous"
             >
               <ChevronLeft size={20} />
             </button>
-            
+
             <div className="carousel-indicators">
               {showcaseItems.map((_, index) => (
                 <button
@@ -301,8 +326,8 @@ export default function HowItWorksVideo() {
                 />
               ))}
             </div>
-            
-            <button 
+
+            <button
               onClick={nextSlide}
               className="carousel-nav-button"
               aria-label="Next"
@@ -313,7 +338,7 @@ export default function HowItWorksVideo() {
         </div>
 
         {/* Bottom CTA */}
-        <motion.div 
+        <motion.div
           className="section-cta"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -325,18 +350,18 @@ export default function HowItWorksVideo() {
           </p>
           <button className="cta-button">
             Start Free Trial
-            <svg 
-              className="cta-arrow" 
-              width="20" 
-              height="20" 
-              viewBox="0 0 20 20" 
+            <svg
+              className="cta-arrow"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
               fill="none"
             >
-              <path 
-                d="M7 10H13M13 10L10 7M13 10L10 13" 
-                stroke="currentColor" 
-                strokeWidth="1.5" 
-                strokeLinecap="round" 
+              <path
+                d="M7 10H13M13 10L10 7M13 10L10 13"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>

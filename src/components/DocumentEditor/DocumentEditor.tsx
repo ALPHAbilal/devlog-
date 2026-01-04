@@ -254,7 +254,8 @@ function DocumentEditorComponent({
         block={block}
         index={index}
         isMobileView={isMobileView}
-        isBlockFocused={focusedBlockId === block.id}
+        // CRITICAL: When no block is focused (null), pass null not false to avoid graying all blocks
+        isBlockFocused={focusedBlockId === null ? null : focusedBlockId === block.id}
         isShowingSelector={blockOps.showBlockSelector && blockOps.selectorPosition === block.id}
         draggedBlockId={dragDrop.draggedBlockId}
         dropTargetId={dragDrop.dropTargetId}

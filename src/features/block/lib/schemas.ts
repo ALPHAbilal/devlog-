@@ -210,8 +210,9 @@ export const BaseBlockSchema = z.object({
   data: z.record(z.unknown()).optional(),
   metadata: BlockMetadataSchema.optional(),
   position: z.number(),
-  created_at: z.number(),
-  updated_at: z.number().optional(),
+  // Accept both number (timestamp) and string (ISO date) - Supabase returns strings
+  created_at: z.union([z.number(), z.string()]),
+  updated_at: z.union([z.number(), z.string()]).optional(),
   isNew: z.boolean().optional(),
 });
 
@@ -468,8 +469,9 @@ export const SerializedBlockSchema = z.object({
   type: BlockTypeSchema,
   position: z.number(),
   metadata: BlockMetadataSchema.optional(),
-  created_at: z.number(),
-  updated_at: z.number().optional(),
+  // Accept both number (timestamp) and string (ISO date) - Supabase returns strings
+  created_at: z.union([z.number(), z.string()]),
+  updated_at: z.union([z.number(), z.string()]).optional(),
   content: z.string(), // JSON-stringified content
 });
 

@@ -15,19 +15,20 @@ const CinematicDocumentDemo = () => {
     const [saveStatus, setSaveStatus] = useState(null);
     const scope = useRef(null);
 
-    // 1. Linked Motion Values for Deterministic Tracking
-    const cursorX = useMotionValue(1000); // Start far off-screen
-    const cursorY = useMotionValue(1000);
+    // 1. Relative Motion Values (0-100 scale for responsiveness)
+    const cursorX = useMotionValue(120); // Start off-screen right
+    const cursorY = useMotionValue(120); // Start off-screen bottom
     const cursorOpacity = useMotionValue(0);
 
     // Camera values pull towards the cursor with spring physics
     const springConfig = { stiffness: 100, damping: 20, mass: 1 };
-    const cameraSpringConfig = { stiffness: 40, damping: 20, mass: 2 }; // Softer, heavier pull for cinematic feel
+    const cameraSpringConfig = { stiffness: 45, damping: 25, mass: 1.5 }; // More stable follow
 
-    // Optimized Centered Tracking: 
-    // Increased intensity to 0.8x and adjusted centering to ensure action is never cut off.
-    const cameraX = useSpring(useTransform(cursorX, (val) => (400 - val) * 0.8), cameraSpringConfig);
-    const cameraY = useSpring(useTransform(cursorY, (val) => (200 - val) * 0.8), cameraSpringConfig);
+    // Centered Tracking (Percentage based): 
+    // We target 50% as the center. 
+    // A multiplier of 0.6 provided a balanced cinematic follow.
+    const cameraX = useSpring(useTransform(cursorX, (val) => (50 - val) * 0.6), cameraSpringConfig);
+    const cameraY = useSpring(useTransform(cursorY, (val) => (40 - val) * 0.6), cameraSpringConfig);
     const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
@@ -84,8 +85,8 @@ const CinematicDocumentDemo = () => {
             // RESET
             setBlocks([]);
             setSaveStatus(null);
-            cursorX.set(800);
-            cursorY.set(600);
+            cursorX.set(120);
+            cursorY.set(120);
             cursorOpacity.set(0);
             cameraScale.set(1);
             cameraBlur.set(0);
@@ -93,10 +94,9 @@ const CinematicDocumentDemo = () => {
             await new Promise(r => setTimeout(r, 1000));
 
             // SEQUENCE 1: Entrance
-            // Move cursor in; Camera naturally "pulls" towards it via useSpring link
             const entrance = animate(cursorOpacity, 1, { duration: 0.5 });
-            animate(cursorX, 200, { duration: 1.5, ease: [0.22, 1, 0.36, 1] });
-            animate(cursorY, 150, { duration: 1.5, ease: [0.22, 1, 0.36, 1] });
+            animate(cursorX, 45, { duration: 1.5, ease: [0.22, 1, 0.36, 1] });
+            animate(cursorY, 35, { duration: 1.5, ease: [0.22, 1, 0.36, 1] });
             await entrance;
 
             // SEQUENCE 2: Heading
@@ -104,9 +104,9 @@ const CinematicDocumentDemo = () => {
             await new Promise(r => setTimeout(r, 800));
 
             // SEQUENCE 3: Navigate to Code
-            animate(cursorX, 150, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
-            animate(cursorY, 400, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
-            cameraScale.set(1.1); // Zoom in as we approach
+            animate(cursorX, 35, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
+            animate(cursorY, 55, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
+            cameraScale.set(1.15); // Moderated zoom
             await new Promise(r => setTimeout(r, 600));
 
             // SEQUENCE 4: Typing Simulation
@@ -129,7 +129,7 @@ const CinematicDocumentDemo = () => {
             // SEQUENCE 5: Save & Blur (Infrastructure Capture)
             animate(cursorOpacity, 0, { duration: 0.8 });
             animate(cameraBlur, 8, { duration: 1 });
-            cameraScale.set(1.35); // Stronger cinematic zoom
+            cameraScale.set(1.25); // Moderated final zoom
 
             setSaveStatus('saving');
             await new Promise(r => setTimeout(r, 1200));
@@ -227,7 +227,11 @@ const CinematicDocumentDemo = () => {
             {/* 3. High-Precision Cursor */}
             <motion.div
                 className="absolute z-50 pointer-events-none"
-                style={{ x: cursorX, y: cursorY, opacity: cursorOpacity }}
+                style={{
+                    left: useTransform(cursorX, (v) => `${v}%`),
+                    top: useTransform(cursorY, (v) => `${v}%`),
+                    opacity: cursorOpacity
+                }}
             >
                 <MousePointer2 className="w-6 h-6 fill-white stroke-[3px] text-white drop-shadow-2xl" />
                 <motion.div

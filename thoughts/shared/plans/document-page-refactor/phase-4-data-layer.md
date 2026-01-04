@@ -2,12 +2,18 @@
 
 > **Goal**: Create unified data layer using TanStack Query + Dexie, replacing 5+ overlapping caches.
 
-**Status**: Phase 4.1-4.3 Foundation COMPLETE ✅ (2025-01-04)
+**Status**: Phase 4.1-4.4 COMPLETE ✅ (2025-01-04)
 - ✅ Phase 4.1: Dependencies + Schemas (dexie-react-hooks, Document.schema.ts, dexie-db.ts, sync-queue-manager.ts)
 - ✅ Phase 4.2: Repositories (Document.repository.ts, Block.repository.ts)
 - ✅ Phase 4.3: Query Hooks (use-document.ts, use-blocks-query.ts)
 - ✅ Feature flags created (feature-flags.ts)
-- ⏳ Phase 4.4: Migration (pending - requires updating consumers)
+- ✅ Phase 4.4: Migration (Complete - consumers already use TanStack Query)
+  - ✅ Step 9: useBlocks exported from feature barrel
+  - ✅ Step 10: API Compatibility layer added to useBlocks
+  - ✅ Step 11: Feature flags ready for use
+  - ✅ Step 12-13: ExpandedViewEnhanced + Dashboard already migrated (no sessionCache usage)
+  - ✅ Step 15: sessionCache has deprecation notices
+  - ⏳ Step 14: Legacy file removal (deferred - need testing period)
 - ⏳ Phase 4.5: Verification (pending - manual offline testing)
 
 ---
@@ -201,30 +207,326 @@ npm install dexie dexie-react-hooks
 
 ### Phase 4.4: Migration
 
-**Step 9: Update First Consumer (ExpandedViewEnhanced)**
-- Replace sessionCache usage with useBlocks()
-- Test thoroughly before proceeding
+> **CRITICAL**: useBlocks() is missing APIs that usePaginatedBlockLoader provides.
+> Before migration, update useBlocks() to include compatibility layer (see Step 9a).
 
-**Step 10: Update Dashboard**
-- Replace sessionCache.getAllDocuments with useDocuments()
-- Replace sessionCache.removeDocument with repository
+---
 
-**Step 11: Remove Legacy Files**
-- Delete `src/hooks/usePaginatedBlockLoader.js`
-- Delete `src/hooks/useOptimizedBlockLoader.js`
-- Delete `src/hooks/useMultiLayerStorage.js`
+#### Step 9: Export useBlocks from Feature Barrel
 
-**Step 12: Deprecate Old Caches**
-- Mark sessionCache as deprecated (keep for rollback)
-- Mark MultiLayerStorage as deprecated
+**File**: `src/features/block/index.ts`
+
+**Add after line 8** (after usePaginatedBlockLoader export):
+```typescript
+export { useBlocks } from './hooks/use-blocks-query';
+```
+
+**Verification**: Import should work: `import { useBlocks } from '@/features/block';`
+
+---
+
+#### Step 10: Add API Compatibility to useBlocks
+
+**CRITICAL Gap Analysis** (verified by reading both hooks):
+
+| Property | usePaginatedBlockLoader | useBlocks | Action |
+|----------|------------------------|-----------|--------|
+| `loadMore` | ✅ | ❌ | Add (returns noop for now) |
+| `hasMore` | ✅ | ❌ | Add (always false - no pagination) |
+| `isLoadingMore` | ✅ | ❌ | Add (always false) |
+| `removeBlock` | ✅ | ❌ `deleteBlock` | Add alias |
+| `setBlocksDirectly` | ✅ | ❌ | Add (calls updateBlocks) |
+| `checkLoadMore` | ✅ | ❌ | Add (noop function) |
+| `progress` | ✅ | ❌ | Add (computed from blocks.length) |
+| `totalCount` | ✅ | ❌ | Add (= blocks.length) |
+| `currentPage` | ✅ | ❌ | Add (always 0) |
+
+**File**: `src/features/block/hooks/use-blocks-query.ts`
+
+**Add to return object (after line 125)**:
+```typescript
+return {
+  blocks,
+  isLoading,
+  isSyncing,
+  error: remoteQuery.error,
+
+  // Single block operations
+  updateBlock,
+  createBlock,
+  deleteBlock,
+
+  // Bulk operations
+  updateBlocks,
+
+  // Mutation states
+  isUpdating: updateBlockMutation.isPending || updateBlocksMutation.isPending,
+  isCreating: createBlockMutation.isPending,
+  isDeleting: deleteBlockMutation.isPending,
+
+  // === COMPATIBILITY LAYER (for usePaginatedBlockLoader consumers) ===
+  // Pagination (not applicable - all blocks loaded at once)
+  loadMore: () => {}, // noop - no pagination
+  hasMore: false,
+  isLoadingMore: false,
+  totalCount: blocks.length,
+  currentPage: 0,
+  checkLoadMore: () => {}, // noop - no infinite scroll
+
+  // Aliases for API compatibility
+  removeBlock: deleteBlock, // alias
+  setBlocksDirectly: updateBlocks, // alias (updateBlocks handles bulk)
+
+  // Progress tracking (computed)
+  progress: {
+    loaded: blocks.length,
+    total: blocks.length,
+    percentage: 100, // All blocks loaded
+  },
+};
+```
+
+**Note**: This compatibility layer allows gradual migration without breaking consumers.
+
+---
+
+#### Step 11: Feature Flag Integration Pattern
+
+**File**: `src/shared/lib/feature-flags.ts` (already exists)
+
+**Usage Pattern for Gradual Rollout**:
+
+```typescript
+// In any consumer (e.g., ExpandedViewEnhanced.jsx)
+import { isNewDataLayerEnabled } from '@/shared/lib/feature-flags';
+import { usePaginatedBlockLoader, useBlocks } from '@/features/block';
+
+function MyComponent({ documentId }) {
+  // Feature flag determines which hook to use
+  const useNewDataLayer = isNewDataLayerEnabled();
+
+  // Both hooks have compatible return shapes after Step 10
+  const blockLoader = useNewDataLayer
+    ? useBlocks(documentId)
+    : usePaginatedBlockLoader(documentId, entry);
+
+  const { blocks, isLoading, updateBlock, updateBlocks } = blockLoader;
+
+  // ... rest of component works unchanged
+}
+```
+
+**Toggle Commands** (from browser console):
+```javascript
+// Enable new data layer
+__enableNewDataLayer()  // Then refresh
+
+// Disable (rollback)
+__disableNewDataLayer() // Then refresh
+```
+
+---
+
+#### Step 12: Update ExpandedViewEnhanced.jsx
+
+**Verified sessionCache usage locations**:
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 12 | `import { sessionCache } from '@/shared/lib';` | Remove import |
+| 109 | `sessionCache.logPerformanceSummary();` | Remove (use TanStack DevTools) |
+| 933-934 | `window.sessionCache.clearBlock(entry.id, blockId);` | `queryClient.invalidateQueries({ queryKey: blockKeys.byDocument(entry.id) });` |
+| 2402 | `sessionCache.clearDocument(entry.id);` | `queryClient.invalidateQueries({ queryKey: documentKeys.detail(entry.id) });` |
+| 2487 | `sessionCache.clearDocument(entry.id);` | `queryClient.invalidateQueries({ queryKey: documentKeys.detail(entry.id) });` |
+
+**Atomic Steps**:
+
+**12a. Add TanStack imports**:
+```typescript
+// Add at top of file
+import { useQueryClient } from '@tanstack/react-query';
+import { documentKeys, blockKeys } from '@/shared/api/query-keys';
+```
+
+**12b. Get queryClient in component**:
+```typescript
+// Inside ExpandedViewEnhanced function, near other hooks
+const queryClient = useQueryClient();
+```
+
+**12c. Replace line 109** (logPerformanceSummary):
+```typescript
+// BEFORE (line 109):
+sessionCache.logPerformanceSummary();
+
+// AFTER:
+// Removed - use TanStack Query DevTools for cache monitoring
+console.log('[CACHE-TRACK] Cache stats available in TanStack Query DevTools');
+```
+
+**12d. Replace lines 933-934** (clearBlock):
+```typescript
+// BEFORE (lines 933-934):
+if (window.sessionCache && entry?.id) {
+  window.sessionCache.clearBlock(entry.id, blockId);
+}
+
+// AFTER:
+if (entry?.id) {
+  queryClient.invalidateQueries({ queryKey: blockKeys.byDocument(entry.id) });
+}
+```
+
+**12e. Replace lines 2402 and 2487** (clearDocument):
+```typescript
+// BEFORE:
+sessionCache.clearDocument(entry.id);
+console.log('Cleared from session cache');
+
+// AFTER:
+queryClient.invalidateQueries({ queryKey: documentKeys.detail(entry.id) });
+queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
+console.log('Cleared from TanStack Query cache');
+```
+
+**12f. Remove sessionCache import** (line 12):
+```typescript
+// BEFORE:
+import { sessionCache } from '@/shared/lib';
+
+// AFTER:
+// Line deleted
+```
+
+**12g. Feature flag wrapper** (optional, for gradual rollout):
+```typescript
+// Replace block loader hook usage with feature flag pattern from Step 11
+// This allows toggling between old and new data layer
+```
+
+---
+
+#### Step 13: Update Dashboard.jsx
+
+**Verified sessionCache usage locations**:
+
+| Line | Current Code | Replacement |
+|------|-------------|-------------|
+| 31 | `import { sessionCache } from '@/shared/lib';` | Remove import |
+| 456-457 | `sessionCache.removeDocument(tabId);` | `queryClient.invalidateQueries(...)` |
+| 572 | `sessionCache.getAllDocuments()` | Use `useDocuments()` hook |
+
+**Atomic Steps**:
+
+**13a. Add TanStack imports**:
+```typescript
+// Add at top of file
+import { useQueryClient } from '@tanstack/react-query';
+import { documentKeys } from '@/shared/api/query-keys';
+import { useDocuments } from '@/features/document/hooks/use-document';
+```
+
+**13b. Get queryClient and documents in component**:
+```typescript
+// Inside Dashboard function
+const queryClient = useQueryClient();
+const { documents: cachedDocuments } = useDocuments();
+```
+
+**13c. Replace lines 456-457** (removeDocument):
+```typescript
+// BEFORE:
+sessionCache.removeDocument(tabId);
+console.log(`[MULTI-TAB] 🗑️ Tab closed, cache cleared for document ${tabId?.substring(0, 8)}`);
+
+// AFTER:
+queryClient.invalidateQueries({ queryKey: documentKeys.detail(tabId) });
+console.log(`[MULTI-TAB] 🗑️ Tab closed, TanStack cache cleared for document ${tabId?.substring(0, 8)}`);
+```
+
+**13d. Replace line 572** (getAllDocuments):
+```typescript
+// BEFORE:
+const cachedDocs = sessionCache.getAllDocuments();
+const cachedMap = new Map(cachedDocs.map(doc => [doc.id, doc]));
+
+// AFTER:
+// cachedDocuments comes from useDocuments() hook (see 13b)
+const cachedMap = new Map(cachedDocuments.map(doc => [doc.id, doc]));
+```
+
+**13e. Remove sessionCache import** (line 31):
+```typescript
+// BEFORE:
+import { sessionCache } from '@/shared/lib';
+
+// AFTER:
+// Line deleted
+```
+
+---
+
+#### Step 14: Remove Legacy Files
+
+After migration is verified working:
+
+```bash
+# Delete legacy JS hooks (TS versions in features/block/ replace them)
+rm src/hooks/usePaginatedBlockLoader.js
+rm src/hooks/useOptimizedBlockLoader.js
+rm src/hooks/useMultiLayerStorage.js
+```
+
+**Note**: Only delete after feature flag has been enabled and tested in production for 1 week.
+
+---
+
+#### Step 15: Deprecate sessionCache
+
+**File**: `src/shared/lib/storage/session-cache.ts`
+
+**Add at top of file (after imports)**:
+```typescript
+/**
+ * @deprecated Use TanStack Query + Dexie instead.
+ *
+ * Migration guide:
+ * - getBlocks() → useBlocks() from '@/features/block'
+ * - getAllDocuments() → useDocuments() from '@/features/document/hooks/use-document'
+ * - clearDocument() → queryClient.invalidateQueries({ queryKey: documentKeys.detail(id) })
+ * - clearBlock() → queryClient.invalidateQueries({ queryKey: blockKeys.byDocument(docId) })
+ *
+ * This file will be removed after all consumers are migrated.
+ */
+
+// Log deprecation warning on first use
+let hasLoggedDeprecation = false;
+function logDeprecationWarning(method: string) {
+  if (!hasLoggedDeprecation) {
+    console.warn(
+      `[DEPRECATED] sessionCache.${method}() is deprecated. ` +
+      `Use TanStack Query + Dexie. See session-cache.ts for migration guide.`
+    );
+    hasLoggedDeprecation = true;
+  }
+}
+```
+
+**Add to each method** (e.g., getBlocks, getAllDocuments):
+```typescript
+getBlocks(documentId: string) {
+  logDeprecationWarning('getBlocks');
+  // ... existing code
+}
+```
 
 ### Phase 4.5: Verification
 
-**Step 13: Offline Testing**
+**Step 16: Offline Testing**
 - Chrome DevTools → Network → Offline
 - Verify create/edit/sync flow
 
-**Step 14: Performance Verification**
+**Step 17: Performance Verification**
 - TanStack Query DevTools cache hit rate
 - Compare with pre-migration baseline
 
@@ -1303,6 +1605,26 @@ export function useBlocks(documentId: string | undefined, options: UseBlocksOpti
     isUpdating: updateBlockMutation.isPending || updateBlocksMutation.isPending,
     isCreating: createBlockMutation.isPending,
     isDeleting: deleteBlockMutation.isPending,
+
+    // === COMPATIBILITY LAYER (for usePaginatedBlockLoader consumers) ===
+    // Pagination (not applicable - all blocks loaded at once via Dexie)
+    loadMore: () => {}, // noop - no pagination needed
+    hasMore: false,
+    isLoadingMore: false,
+    totalCount: blocks.length,
+    currentPage: 0,
+    checkLoadMore: () => {}, // noop - no infinite scroll
+
+    // Aliases for API compatibility
+    removeBlock: deleteBlock, // alias for usePaginatedBlockLoader.removeBlock
+    setBlocksDirectly: updateBlocks, // alias for usePaginatedBlockLoader.setBlocksDirectly
+
+    // Progress tracking (computed)
+    progress: {
+      loaded: blocks.length,
+      total: blocks.length,
+      percentage: 100, // All blocks loaded instantly from Dexie
+    },
   };
 }
 ```

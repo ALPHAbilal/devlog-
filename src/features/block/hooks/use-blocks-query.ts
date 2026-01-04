@@ -123,5 +123,25 @@ export function useBlocks(documentId: string | undefined, options: UseBlocksOpti
     isUpdating: updateBlockMutation.isPending || updateBlocksMutation.isPending,
     isCreating: createBlockMutation.isPending,
     isDeleting: deleteBlockMutation.isPending,
+
+    // === COMPATIBILITY LAYER (for usePaginatedBlockLoader consumers) ===
+    // Pagination (not applicable - all blocks loaded at once via Dexie)
+    loadMore: () => {}, // noop - no pagination needed
+    hasMore: false,
+    isLoadingMore: false,
+    totalCount: blocks.length,
+    currentPage: 0,
+    checkLoadMore: () => {}, // noop - no infinite scroll
+
+    // Aliases for API compatibility
+    removeBlock: deleteBlock, // alias for usePaginatedBlockLoader.removeBlock
+    setBlocksDirectly: updateBlocks, // alias for usePaginatedBlockLoader.setBlocksDirectly
+
+    // Progress tracking (computed)
+    progress: {
+      loaded: blocks.length,
+      total: blocks.length,
+      percentage: 100, // All blocks loaded instantly from Dexie
+    },
   };
 }

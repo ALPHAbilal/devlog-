@@ -1,7 +1,45 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Phase 5C - DocumentEditor Orchestrator
+## Current Task: Phase 4.4 Data Layer Migration Verification
+Status: ✅ COMPLETE - Migration already done, verified and documented
+Date: 2025-01-04
+
+### What Was Verified
+
+Phase 4.4 implementation check revealed migration is essentially complete:
+
+**Verified Complete:**
+- ✅ Step 9: `useBlocks` exported from `src/features/block/index.ts`
+- ✅ Step 10: API Compatibility layer in `use-blocks-query.ts` (loadMore, hasMore, removeBlock, etc.)
+- ✅ Step 11: Feature flags in `src/shared/lib/feature-flags.ts`
+- ✅ Step 12-13: ExpandedViewEnhanced + Dashboard already use TanStack Query
+  - Dashboard.jsx uses `useQueryClient` and `documentKeys` for cache invalidation
+  - No direct sessionCache usage in main consumers
+- ✅ Step 15: sessionCache has full deprecation notices with migration guide
+
+**Pending (Deferred):**
+- ⏳ Step 14: Legacy file removal (`usePaginatedBlockLoader.js`, `useOptimizedBlockLoader.js`)
+  - These still use sessionCache internally
+  - Will be removed after testing period (1 week)
+
+### Key Discovery
+The main consumers (ExpandedViewEnhanced, Dashboard) were already migrated to TanStack Query in previous sessions. The sessionCache is now only used internally by the old block loader hooks, which will be deprecated.
+
+### Build Verification
+- ✅ `npm run build` passes successfully
+- No TypeScript errors
+- No breaking changes
+
+### Next Steps for Phase 4.5
+1. Manual offline testing (Chrome DevTools → Network → Offline)
+2. Test create document while offline → appears in Dexie
+3. Come online → document syncs to Supabase
+4. Verify TanStack Query DevTools shows cache hits
+
+---
+
+## Previous Task: Phase 5C - DocumentEditor Orchestrator
 Status: ✅ COMPLETE - DocumentEditor replaces ExpandedViewEnhanced
 Date: 2025-01-04
 

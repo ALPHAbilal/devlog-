@@ -6,6 +6,7 @@ export { useAutoSave, useGlobalAutoSave, getSmartSyncManager } from './hooks/use
 export { useBlockLazyLoading, useProgressiveContent } from './hooks/use-lazy-loading';
 export { useOptimizedBlockLoader } from './hooks/use-optimized-loader';
 export { usePaginatedBlockLoader } from './hooks/use-paginated-loader';
+export { useBlocks } from './hooks/use-blocks-query';
 export { useCanvasCleanup, useBlockMemoryManagement, useMemoryMonitor } from './hooks/use-memory-management';
 // Alias for backward compatibility
 export { useBlockMemoryManagement as useMemoryManagement } from './hooks/use-memory-management';

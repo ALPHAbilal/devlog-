@@ -1,8 +1,30 @@
 /**
  * Session-based cache for documents and blocks
  * Now using LRU cache to prevent memory leaks
+ *
+ * @deprecated Use TanStack Query + Dexie instead.
+ *
+ * Migration guide:
+ * - getBlocks() → useBlocks() from '@/features/block'
+ * - getAllDocuments() → useDocuments() from '@/features/document/hooks/use-document'
+ * - clearDocument() → queryClient.invalidateQueries({ queryKey: documentKeys.detail(id) })
+ * - clearBlock() → queryClient.invalidateQueries({ queryKey: blockKeys.byDocument(docId) })
+ *
+ * This file will be removed after all consumers are migrated.
  */
 import { getSessionCache } from '../cache/lru-cache';
+
+// Log deprecation warning on first use
+let hasLoggedDeprecation = false;
+function logDeprecationWarning(method: string) {
+  if (!hasLoggedDeprecation) {
+    console.warn(
+      `[DEPRECATED] sessionCache.${method}() is deprecated. ` +
+      `Use TanStack Query + Dexie. See session-cache.ts for migration guide.`
+    );
+    hasLoggedDeprecation = true;
+  }
+}
 
 // Get the singleton LRU cache instance
 const lruCache = getSessionCache();
@@ -237,8 +259,10 @@ class SessionCache {
 
   /**
    * Get cached blocks
+   * @deprecated Use useBlocks() from '@/features/block' instead
    */
   getBlocks(documentId) {
+    logDeprecationWarning('getBlocks');
     const cacheKey = this.getBlocksKey(documentId);
     const lookupStart = performance.now();
     const blocks = this.cache.get(cacheKey);
@@ -285,8 +309,10 @@ class SessionCache {
 
   /**
    * Get all cached documents
+   * @deprecated Use useDocuments() from '@/features/document/hooks/use-document' instead
    */
   getAllDocuments() {
+    logDeprecationWarning('getAllDocuments');
     const documents = [];
     const keys = this.cache.keys();
     
@@ -349,8 +375,10 @@ class SessionCache {
 
   /**
    * Clear cache for a specific document
+   * @deprecated Use queryClient.invalidateQueries({ queryKey: documentKeys.detail(id) }) instead
    */
   clearDocument(documentId) {
+    logDeprecationWarning('clearDocument');
     this.cache.delete(this.getDocumentKey(documentId));
     this.cache.delete(this.getBlocksKey(documentId));
     this.cache.delete(this.getMetadataKey(documentId));
@@ -359,8 +387,10 @@ class SessionCache {
 
   /**
    * Clear a specific block from cache
+   * @deprecated Use queryClient.invalidateQueries({ queryKey: blockKeys.byDocument(docId) }) instead
    */
   clearBlock(documentId, blockId) {
+    logDeprecationWarning('clearBlock');
     const blocks = this.getBlocks(documentId);
     if (blocks && Array.isArray(blocks)) {
       const filteredBlocks = blocks.filter(block => block.id !== blockId);
@@ -374,8 +404,10 @@ class SessionCache {
   /**
    * Remove a specific document and its blocks from cache
    * Called when a tab is closed to free memory immediately
+   * @deprecated Use queryClient.invalidateQueries({ queryKey: documentKeys.detail(id) }) instead
    */
   removeDocument(documentId) {
+    logDeprecationWarning('removeDocument');
     const docKey = this.getDocumentKey(documentId);
     const blocksKey = this.getBlocksKey(documentId);
     const metaKey = this.getMetadataKey(documentId);

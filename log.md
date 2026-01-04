@@ -1,98 +1,833 @@
-11:51:28.377 Running build in Washington, D.C., USA (East) – iad1
-11:51:28.378 Build machine configuration: 2 cores, 8 GB
-11:51:28.499 Cloning github.com/ALPHAbilal/devlog- (Branch: main, Commit: 2ccdf97)
-11:51:29.857 Warning: Failed to fetch one or more git submodules
-11:51:29.858 Cloning completed: 1.358s
-11:51:30.342 Restored build cache from previous deployment (9XmPCB4DR4sWny7EM6idsoHGhsFf)
-11:51:30.968 Running "vercel build"
-11:51:31.601 Vercel CLI 50.1.3
-11:51:32.752 Installing dependencies...
-11:51:41.270 
-11:51:41.271 added 239 packages, removed 39 packages, and changed 103 packages in 8s
-11:51:41.271 
-11:51:41.271 179 packages are looking for funding
-11:51:41.271   run `npm fund` for details
-11:51:41.421 
-11:51:41.421 > journey-log-compass@0.0.0 build
-11:51:41.421 > vite build
-11:51:41.421 
-11:51:43.243 [36mvite v6.4.1 [32mbuilding for production...[36m[39m
-11:51:43.273 [sentry-vite-plugin] Info: Sending telemetry data on issues and performance to Sentry. To disable telemetry, set `options.telemetry` to `false`.
-11:51:43.611 transforming...
-11:51:48.056 [33m[plugin vite:resolve] Module "crypto" has been externalized for browser compatibility, imported by "/vercel/path0/src/shared/api/auth.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.[39m
-11:51:58.205 [32m✓[39m 3503 modules transformed.
-11:52:00.039 rendering chunks...
-11:52:01.007 [33m[plugin vite:reporter] 
-11:52:01.008 (!) /vercel/path0/src/shared/lib/markdown/converter.ts is dynamically imported by /vercel/path0/src/shared/lib/index.ts, /vercel/path0/src/shared/lib/index.ts but also statically imported by /vercel/path0/src/shared/lib/index.ts, dynamic import will not move module into another chunk.
-11:52:01.008 [39m
-11:52:01.008 [33m[plugin vite:reporter] 
-11:52:01.009 (!) /vercel/path0/src/shared/lib/index.ts is dynamically imported by /vercel/path0/src/features/storage/lib/smart-sync.ts but also statically imported by /vercel/path0/src/App.jsx, /vercel/path0/src/app/providers/auth-provider.tsx, /vercel/path0/src/components/AuthPageRedesign.jsx, /vercel/path0/src/components/ErrorBoundary.jsx, /vercel/path0/src/components/HeroSectionV3.jsx, /vercel/path0/src/components/HowItWorksVideo.jsx, /vercel/path0/src/components/PricingSection.jsx, /vercel/path0/src/components/ProblemSection.jsx, /vercel/path0/src/components/blocks/AIBlockRefined.jsx, /vercel/path0/src/components/blocks/ImageBlock.jsx, /vercel/path0/src/components/blocks/InlineImageBlock.jsx, /vercel/path0/src/components/blocks/TextBlock.jsx, /vercel/path0/src/components/ui/dropdown-menu.jsx, /vercel/path0/src/components/ui/scroll-area.jsx, /vercel/path0/src/components/ui/tooltip.jsx, /vercel/path0/src/features/block/hooks/use-optimized-loader.ts, /vercel/path0/src/features/block/hooks/use-paginated-loader.ts, /vercel/path0/src/features/document/hooks/use-document-state.ts, /vercel/path0/src/features/document/hooks/use-organization.ts, /vercel/path0/src/features/document/hooks/use-paginated-dashboard.ts, /vercel/path0/src/features/share/api/share-service.ts, /vercel/path0/src/features/share/api/sophisticated-share.ts, /vercel/path0/src/features/storage/hooks/use-database-usage.ts, /vercel/path0/src/features/storage/hooks/use-multi-layer.ts, /vercel/path0/src/features/storage/lib/realtime-manager.ts, /vercel/path0/src/features/storage/lib/smart-sync.ts, /vercel/path0/src/pages/Dashboard.jsx, /vercel/path0/src/pages/DocumentPage.jsx, /vercel/path0/src/pages/Landing.jsx, /vercel/path0/src/pages/Privacy.jsx, /vercel/path0/src/pages/Terms.jsx, /vercel/path0/src/pages/Upgrade.jsx, /vercel/path0/src/shared/hooks/use-performance.ts, dynamic import will not move module into another chunk.
-11:52:01.012 [39m
-11:52:01.012 [33m[plugin vite:reporter] 
-11:52:01.013 (!) /vercel/path0/src/features/block/lib/serializer.ts is dynamically imported by /vercel/path0/src/features/block/hooks/use-optimized-loader.ts, /vercel/path0/src/features/block/hooks/use-paginated-loader.ts but also statically imported by /vercel/path0/src/features/block/index.ts, dynamic import will not move module into another chunk.
-11:52:01.013 [39m
-11:52:04.333 computing gzip size...
-11:52:04.637 [sentry-vite-plugin] Error: An error occurred. Couldn't finish all operations: Error: Command failed: /vercel/path0/node_modules/@sentry/cli-linux-x64/bin/sentry-cli releases new 2ccdf974f98684f50acfa0aba66f50988b1851a8
-11:52:04.638 error: API request failed
-11:52:04.638 
-11:52:04.638 Caused by:
-11:52:04.638     sentry reported an error: You do not have permission to perform this action. (http status: 403)
-11:52:04.638 
-11:52:04.638 Add --log-level=[info|debug] or export SENTRY_LOG_LEVEL=[info|debug] to see more output.
-11:52:04.638 Please attach the full debug log to all bug reports.
-11:52:04.638 
-11:52:04.638     at genericNodeError (node:internal/errors:983:15)
-11:52:04.638     at wrappedFn (node:internal/errors:537:14)
-11:52:04.638     at ChildProcess.exithandler (node:child_process:417:12)
-11:52:04.639     at ChildProcess.emit (node:events:519:28)
-11:52:04.639     at maybeClose (node:internal/child_process:1101:16)
-11:52:04.639     at Socket.<anonymous> (node:internal/child_process:456:11)
-11:52:04.639     at Socket.emit (node:events:519:28)
-11:52:04.639     at Pipe.<anonymous> (node:net:346:12) {
-11:52:04.639   code: 1,
-11:52:04.639   killed: false,
-11:52:04.639   signal: null,
-11:52:04.640   cmd: '/vercel/path0/node_modules/@sentry/cli-linux-x64/bin/sentry-cli releases new 2ccdf974f98684f50acfa0aba66f50988b1851a8'
-11:52:04.640 }
-11:52:04.745 [2mdist/[22m[32mindex.html                                   [39m[1m[2m    9.39 kB[22m[1m[22m[2m │ gzip:   2.74 kB[22m
-11:52:04.745 [2mdist/[22m[2massets/[22m[35mIssueTrackerBlock-Bfhw57nf.css        [39m[1m[2m    6.25 kB[22m[1m[22m[2m │ gzip:   1.59 kB[22m
-11:52:04.745 [2mdist/[22m[2massets/[22m[35mindex-C-LPQ4p7.css                    [39m[1m[2m  414.56 kB[22m[1m[22m[2m │ gzip:  55.19 kB[22m
-11:52:04.745 [2mdist/[22m[2massets/[22m[36mAIConversationSaver-vFLRsQha.js       [39m[1m[2m   10.30 kB[22m[1m[22m[2m │ gzip:   2.61 kB[22m[2m │ map:    18.48 kB[22m
-11:52:04.745 [2mdist/[22m[2massets/[22m[36mPricingSection-BHNQJon5.js            [39m[1m[2m   10.78 kB[22m[1m[22m[2m │ gzip:   3.97 kB[22m[2m │ map:    25.88 kB[22m
-11:52:04.745 [2mdist/[22m[2massets/[22m[36mNotionAlternative-BTUCtzKQ.js         [39m[1m[2m   12.11 kB[22m[1m[22m[2m │ gzip:   3.22 kB[22m[2m │ map:    24.16 kB[22m
-11:52:04.746 [2mdist/[22m[2massets/[22m[36mAIConversationManagement-Dk-OTDDd.js  [39m[1m[2m   21.27 kB[22m[1m[22m[2m │ gzip:   4.69 kB[22m[2m │ map:    40.60 kB[22m
-11:52:04.746 [2mdist/[22m[2massets/[22m[36mDevLogVsNotion-CPGjGFEb.js            [39m[1m[2m   25.55 kB[22m[1m[22m[2m │ gzip:   4.76 kB[22m[2m │ map:    52.15 kB[22m
-11:52:04.746 [2mdist/[22m[2massets/[22m[36mIssueTrackerBlock-CYEyNztX.js         [39m[1m[2m   48.84 kB[22m[1m[22m[2m │ gzip:  14.33 kB[22m[2m │ map:   182.40 kB[22m
-11:52:04.746 [2mdist/[22m[2massets/[22m[36mindex-qm_bkoa6.js                     [39m[1m[33m2,305.50 kB[39m[22m[2m │ gzip: 690.75 kB[22m[2m │ map: 9,834.30 kB[22m
-11:52:04.746 [33m
-11:52:04.746 (!) Some chunks are larger than 500 kB after minification. Consider:
-11:52:04.746 - Using dynamic import() to code-split the application
-11:52:04.746 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
-11:52:04.746 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
-11:52:04.835 > Found 14 files
-11:52:04.838 > Analyzing 14 sources
-11:52:04.851 > Analyzing completed in 0.013s
-11:52:04.853 > Adding source map references
-11:52:05.372 > Bundling completed in 0.518s
-11:52:05.372 > Bundled 14 files for upload
-11:52:05.372 > Bundle ID: 146c9fc0-f1c6-5d4b-b028-85dd87bd3eb7
-11:52:05.384 > Optimizing completed in 0.012s
-11:52:05.476 error: API request failed
-11:52:05.476 
-11:52:05.476 Caused by:
-11:52:05.476     sentry reported an error: You do not have permission to perform this action. (http status: 403)
-11:52:05.482 
-11:52:05.483 Add --log-level=[info|debug] or export SENTRY_LOG_LEVEL=[info|debug] to see more output.
-11:52:05.483 Please attach the full debug log to all bug reports.
-11:52:05.483 [sentry-vite-plugin] Error: An error occurred. Couldn't finish all operations: Error: Command --header sentry-trace:6a749e5cdbc14fd0a61c0acc91dc4bf7-86f1d1fffec0942f-1 --header baggage:sentry-environment=production,sentry-release=3.6.1,sentry-public_key=4c2bae7d9fbc413e8f7385f55c515d51,sentry-trace_id=6a749e5cdbc14fd0a61c0acc91dc4bf7,sentry-sample_rate=1,sentry-transaction=Sentry%20Bundler%20Plugin%20execution,sentry-sampled=true sourcemaps upload --release 2ccdf974f98684f50acfa0aba66f50988b1851a8 /tmp/sentry-bundler-plugin-upload-BeuyVx --ignore node_modules --no-rewrite failed with exit code 1
-11:52:05.485     at ChildProcess.<anonymous> (/vercel/path0/node_modules/@sentry/cli/js/helper.js:321:32)
-11:52:05.485     at ChildProcess.emit (node:events:519:28)
-11:52:05.485     at ChildProcess._handle.onexit (node:internal/child_process:293:12)
-11:52:05.493 [32m✓ built in 22.22s[39m
-11:52:08.429 Build Completed in /vercel/output [36s]
-11:52:08.610 Deploying outputs...
-11:52:14.548 Deployment completed
-11:52:15.513 Creating build cache...
-11:53:05.390 Created build cache: 49.865s
-11:53:05.391 Uploading build cache [80.88 MB]
-11:53:06.375 Build cache uploaded: 994.682ms
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized: {defaultTimeout_ms: 259200000, defaultTimeout_hours: 72, defaultTimeout_days: 3, timestamp: '2026-01-04T11:19:12.841Z'}
+index-DzooI87W.js:26 IndexedDB initialized successfully
+index-DzooI87W.js:26 [TAB-RESTORE] {tabCount: 1, activeTabId: '5d2e90e6', tabIds: Array(1)}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-14] ⚙️ Settings from LOCALSTORAGE: {source: 'localStorage.devlogSettings', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, timestamp: '2026-01-04T11:19:12.886Z'}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 259200000, oldTimeout_hours: 72, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:12.888Z', timestamp: '2026-01-04T11:19:12.888Z'}
+index-DzooI87W.js:26 [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:12.899Z', timestamp: '2026-01-04T11:19:12.899Z'}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED: {events: Array(4), timeout_hours: 0.5, timestamp: '2026-01-04T11:19:12.899Z'}
+index-DzooI87W.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-DzooI87W.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+index-DzooI87W.js:26 Error loading settings from profiles: TypeError: At.from(...).select(...).eq is not a function
+    at index-DzooI87W.js:735:7202
+    at index-DzooI87W.js:735:7950
+    at jg (index-DzooI87W.js:106:93670)
+    at VI (index-DzooI87W.js:106:109004)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109025)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109050)
+    at f2 (index-DzooI87W.js:106:122264)
+    at index-DzooI87W.js:106:119557
+    at MessagePort.W (index-DzooI87W.js:91:1608)
+(anonymous) @ index-DzooI87W.js:26
+(anonymous) @ index-DzooI87W.js:735
+(anonymous) @ index-DzooI87W.js:735
+jg @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+f2 @ index-DzooI87W.js:106
+(anonymous) @ index-DzooI87W.js:106
+W @ index-DzooI87W.js:91
+index-DzooI87W.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-8] 🔑 JWT Token status: {expiresAt: '2026-01-04T11:57:03.000Z', timeUntilExpiry_seconds: 2270, timeUntilExpiry_minutes: 37, refreshThreshold_seconds: 300, willRefreshSoon: false, …}
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [CACHE-GET] {lookingFor: '5d2e90e6', cacheSize: 0, found: false, cachedIds: Array(0)}
+index-DzooI87W.js:26 [ACTIVE-DOC] Checking IndexedDB cache: {id: '5d2e90e6', found: false}
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 0, treeDataLength: 0, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 Loading folders for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DzooI87W.js:26 Error loading folders: TypeError: At.from(...).select(...).eq is not a function
+    at index-DzooI87W.js:846:12
+    at index-DzooI87W.js:849:3964
+    at jg (index-DzooI87W.js:106:93670)
+    at VI (index-DzooI87W.js:106:109004)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+(anonymous) @ index-DzooI87W.js:26
+(anonymous) @ index-DzooI87W.js:849
+(anonymous) @ index-DzooI87W.js:849
+jg @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+f2 @ index-DzooI87W.js:106
+Ob @ index-DzooI87W.js:106
+v2 @ index-DzooI87W.js:106
+$g @ index-DzooI87W.js:106
+u2 @ index-DzooI87W.js:106
+a2 @ index-DzooI87W.js:106
+QI @ index-DzooI87W.js:106
+ZI @ index-DzooI87W.js:106
+y2 @ index-DzooI87W.js:106
+W @ index-DzooI87W.js:91
+index-DzooI87W.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
+index-DzooI87W.js:26 [DEBUG-INIT] Dashboard mounted, user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DzooI87W.js:26 [Dashboard] Loading from IndexedDB cache FIRST...
+index-DzooI87W.js:26 [PAGINATION-SCROLL] ⚠️ Scroll container not found
+index-DzooI87W.js:26 Error loading settings from profiles: TypeError: At.from(...).select(...).eq is not a function
+    at index-DzooI87W.js:735:7202
+    at index-DzooI87W.js:735:7950
+    at jg (index-DzooI87W.js:106:93670)
+    at VI (index-DzooI87W.js:106:109004)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109025)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109050)
+    at f2 (index-DzooI87W.js:106:122264)
+    at Ob (index-DzooI87W.js:106:122041)
+    at v2 (index-DzooI87W.js:106:125646)
+    at $g (index-DzooI87W.js:106:124208)
+    at u2 (index-DzooI87W.js:106:121898)
+    at a2 (index-DzooI87W.js:106:119759)
+    at QI (index-DzooI87W.js:106:114723)
+    at ZI (index-DzooI87W.js:106:114204)
+    at y2 (index-DzooI87W.js:106:125542)
+    at MessagePort.W (index-DzooI87W.js:91:1608)
+(anonymous) @ index-DzooI87W.js:26
+(anonymous) @ index-DzooI87W.js:735
+(anonymous) @ index-DzooI87W.js:735
+jg @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+f2 @ index-DzooI87W.js:106
+Ob @ index-DzooI87W.js:106
+v2 @ index-DzooI87W.js:106
+$g @ index-DzooI87W.js:106
+u2 @ index-DzooI87W.js:106
+a2 @ index-DzooI87W.js:106
+QI @ index-DzooI87W.js:106
+ZI @ index-DzooI87W.js:106
+y2 @ index-DzooI87W.js:106
+W @ index-DzooI87W.js:91
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 0, treeDataLength: 0, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-DASHBOARD] Waiting for documents to load: 0
+index-DzooI87W.js:26 [CACHE-LOAD] {docCount: 1, loadTime_ms: 33, docIds: Array(1)}
+index-DzooI87W.js:26 [Dashboard] Loaded 1 documents from IndexedDB cache
+index-DzooI87W.js:26 [Dashboard] Starting background Supabase sync...
+index-DzooI87W.js:26 usePaginatedDashboard: loadInitial() CALLED {userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', loadingRef: false, pageSize: 50, orderBy: 'updated_at'}
+index-DzooI87W.js:26 usePaginatedDashboard: Calling getDocumentsWithRealActivity with page 0
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [ACTIVE-DOC] Found in allDocuments: {id: '5d2e90e6', title: 'Untitled Document'}
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 1, treeDataLength: 0, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ⏳ Waiting for SmartSync manager...
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ⚠️ Not ready to start polling: {hasDocumentId: true, managerReady: false, hasManagerRef: false}
+index-DzooI87W.js:26 [CACHE-TRACK] 🚀 usePaginatedBlockLoader: Starting load for document 5d2e90e6
+index-DzooI87W.js:26 [CACHE-TRACK] 🔍 CHECKING: paginatedBlockLoader.getCachedBlocks(5d2e90e6)
+index-DzooI87W.js:26 [CACHE-TRACK] 🔍 CHECKING: sessionCache.getBlocks(5d2e90e6) as fallback
+index-DzooI87W.js:26 [CACHE-TRACK] ❌ MISS: getBlocks(5d2e90e6) - No blocks in cache (lookup: 0.00ms)
+index-DzooI87W.js:26 [CACHE-TRACK] ❌ CACHE MISS: No blocks in any cache, loading from database...
+index-DzooI87W.js:26 [CACHE-TRACK] 📊 SOURCE TYPE: database (cache miss)
+index-DzooI87W.js:26 Error loading page: TypeError: At.from(...).select(...).eq is not a function
+    at index-DzooI87W.js:161:3187
+    at aH.loadDocumentPage (index-DzooI87W.js:161:4459)
+    at aH.loadDocumentFirstPage (index-DzooI87W.js:161:2751)
+    at index-DzooI87W.js:824:124677
+    at index-DzooI87W.js:824:125864
+    at jg (index-DzooI87W.js:106:93670)
+    at VI (index-DzooI87W.js:106:109004)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+(anonymous) @ index-DzooI87W.js:26
+(anonymous) @ index-DzooI87W.js:161
+loadDocumentPage @ index-DzooI87W.js:161
+loadDocumentFirstPage @ index-DzooI87W.js:161
+(anonymous) @ index-DzooI87W.js:824
+(anonymous) @ index-DzooI87W.js:824
+jg @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+f2 @ index-DzooI87W.js:106
+Ob @ index-DzooI87W.js:106
+v2 @ index-DzooI87W.js:106
+$g @ index-DzooI87W.js:106
+u2 @ index-DzooI87W.js:106
+a2 @ index-DzooI87W.js:106
+QI @ index-DzooI87W.js:106
+ZI @ index-DzooI87W.js:106
+y2 @ index-DzooI87W.js:106
+W @ index-DzooI87W.js:91
+index-DzooI87W.js:26 [MULTI-TAB] 🆔 Tab 951YEC initialized for document 5d2e90e6
+index-DzooI87W.js:26 [MULTI-TAB] 📄 Document 5d2e90e6 opened in this tab
+index-DzooI87W.js:26 [DEBUG-DASHBOARD] Combined: 0 folders + 0 documents = 0 total items
+index-DzooI87W.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: []
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 1, treeDataLength: 0, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ✅ SmartSync manager ready
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ✅ Starting status polling for document: 5d2e90e6-9585-4c74-9ab2-349649cdc1cc
+index-DzooI87W.js:26 Error loading blocks: TypeError: At.from(...).select(...).eq is not a function
+    at index-DzooI87W.js:161:3187
+    at aH.loadDocumentPage (index-DzooI87W.js:161:4459)
+    at aH.loadDocumentFirstPage (index-DzooI87W.js:161:2751)
+    at index-DzooI87W.js:824:124677
+    at index-DzooI87W.js:824:125864
+    at jg (index-DzooI87W.js:106:93670)
+    at VI (index-DzooI87W.js:106:109004)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:109772)
+    at il (index-DzooI87W.js:106:108888)
+    at VI (index-DzooI87W.js:106:108984)
+    at il (index-DzooI87W.js:106:108888)
+(anonymous) @ index-DzooI87W.js:26
+(anonymous) @ index-DzooI87W.js:824
+await in (anonymous)
+(anonymous) @ index-DzooI87W.js:824
+jg @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+il @ index-DzooI87W.js:106
+VI @ index-DzooI87W.js:106
+f2 @ index-DzooI87W.js:106
+Ob @ index-DzooI87W.js:106
+v2 @ index-DzooI87W.js:106
+$g @ index-DzooI87W.js:106
+u2 @ index-DzooI87W.js:106
+a2 @ index-DzooI87W.js:106
+QI @ index-DzooI87W.js:106
+ZI @ index-DzooI87W.js:106
+y2 @ index-DzooI87W.js:106
+W @ index-DzooI87W.js:91
+index-DzooI87W.js:26 SmartSync: IndexedDB initialized
+index-DzooI87W.js:26 ExpandedView: Initial load period complete, enabling saves
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 usePaginatedDashboard: Got real activity documents: {documentCount: 50, sampleActivity: null, documentsWithActivity: 33, allDocumentIds: Array(50)}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 1, treeDataLength: 0, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [Dashboard] Background Supabase sync complete
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 1, treeDataLength: 0, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [PAGINATION-SCROLL] ⚠️ Scroll container not found
+index-DzooI87W.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '5d2e90e6', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'createdLocally'}
+index-DzooI87W.js:26 [DEBUG-CREATE-8] Merging docs: {paginated: 50, locallyCreatedNew: 0, localIds: Array(0)}
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [ACTIVE-DOC] Found in allDocuments: {id: '5d2e90e6', title: 'Untitled Document'}
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 50, treeDataLength: 44, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-DASHBOARD] Combined: 0 folders + 44 documents = 44 total items
+index-DzooI87W.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
+index-DzooI87W.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 50, treeDataLength: 44, expandedFoldersCount: 0, …}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 ExpandedView: Initial load period complete, enabling saves
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-7] 🖱️ User activity detected: {activityCount: 1, lastEvent: 'mousedown', timerWillReset: true, timestamp: '2026-01-04T11:19:20.190Z'}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:20.191Z', timestamp: '2026-01-04T11:19:20.191Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:20.787Z', timestamp: '2026-01-04T11:19:20.787Z'}
+index-DzooI87W.js:26 [SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly: {blockCount: 1}
+index-DzooI87W.js:26 [PAGINATED-CACHE] updateCachedBlocks called: {documentId: '5d2e90e6', blockCount: 1}
+index-DzooI87W.js:26 [PAGINATED-CACHE] Cache updated for document: 5d2e90e6
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'd437af68-1a8d-41c0-8cee-d24fcac4ffd4', type: 'image', hasContent: true, hasData: false, blockKeys: Array(6)}
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'd437af68-1a8d-41c0-8cee-d24fcac4ffd4', type: 'image', position: 0, contentLength: 41, contentPreview: '{"images":[],"layout":"grid","columns":3}'}
+index-DzooI87W.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'd437af68-1a8d-41c0-8cee-d24fcac4ffd4', action: 'CREATE', blockType: 'image', position: 0, contentLength: 41, …}
+index-DzooI87W.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 0, visibleCount: 1}
+index-DzooI87W.js:26 🌆 ImageBlock d437af68-1a8d-41c0-8cee-d24fcac4ffd4 rendered at 2026-01-04T11:19:20.900Z
+index-DzooI87W.js:26 [MULTI-TAB] 📝 Tab 951YEC queued CREATE for block d437af68 | Queue size: 1
+index-DzooI87W.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 1, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:22.710Z', timestamp: '2026-01-04T11:19:22.710Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 1, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 1, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:23.531Z', timestamp: '2026-01-04T11:19:23.531Z'}
+index-DzooI87W.js:26 [SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly: {blockCount: 2}
+index-DzooI87W.js:26 [PAGINATED-CACHE] updateCachedBlocks called: {documentId: '5d2e90e6', blockCount: 2}
+index-DzooI87W.js:26 [PAGINATED-CACHE] Cache updated for document: 5d2e90e6
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', type: 'heading', hasContent: true, hasData: false, blockKeys: Array(7)}
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', type: 'heading', position: 1, contentLength: 14, contentPreview: '{"content":""}'}
+index-DzooI87W.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', action: 'CREATE', blockType: 'heading', position: 1, contentLength: 14, …}
+index-DzooI87W.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 1, visibleCount: 2}
+index-DzooI87W.js:26 [BLOCK-MEMO] imageBlock d437af68 - Props changed: canMoveDown
+index-DzooI87W.js:26 📌 HeadingBlock f701db4a-a33d-4ad2-a09a-5f34fd7c62cf rendered at 2026-01-04T11:19:23.643Z
+index-DzooI87W.js:26 [MULTI-TAB] 📝 Tab 951YEC queued CREATE for block f701db4a | Queue size: 2
+index-DzooI87W.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 2, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:24.318Z', timestamp: '2026-01-04T11:19:24.318Z'}
+index-DzooI87W.js:26 [BLOCK-UPDATE-PAGINATED-DEBUG] Value changed: isNew for block: f701db4a
+index-DzooI87W.js:26 [BLOCK-UPDATE-PAGINATED] Changes detected, updating block: f701db4a
+index-DzooI87W.js:26 [BLOCK-REF-STABILITY] 1/2 blocks kept same reference
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', type: 'heading', hasContent: true, hasData: false, blockKeys: Array(7)}
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', type: 'heading', position: 1, contentLength: 14, contentPreview: '{"content":""}'}
+index-DzooI87W.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', action: 'UPDATE', blockType: 'heading', position: 1, contentLength: 14, …}
+index-DzooI87W.js:26 [BLOCK-MEMO] headingBlock f701db4a - PREVENTED
+index-DzooI87W.js:26 [MULTI-TAB] 📝 Tab 951YEC queued UPDATE for block f701db4a | Queue size: 3
+index-DzooI87W.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:25.242Z', timestamp: '2026-01-04T11:19:25.242Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 3, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 [SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly: {blockCount: 3}
+index-DzooI87W.js:26 [PAGINATED-CACHE] updateCachedBlocks called: {documentId: '5d2e90e6', blockCount: 3}
+index-DzooI87W.js:26 [PAGINATED-CACHE] Cache updated for document: 5d2e90e6
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'e9fc5e0c-638e-4004-94c8-dc59737b4deb', type: 'filetree', hasContent: true, hasData: false, blockKeys: Array(6)}
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'e9fc5e0c-638e-4004-94c8-dc59737b4deb', type: 'filetree', position: 2, contentLength: 88, contentPreview: '{"treeData":[],"expanded":[],"snapshots":[],"currentSnapshotId":null,"snapshotLimit":50}'}
+index-DzooI87W.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'e9fc5e0c-638e-4004-94c8-dc59737b4deb', action: 'CREATE', blockType: 'filetree', position: 2, contentLength: 88, …}
+index-DzooI87W.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 2, visibleCount: 3}
+index-DzooI87W.js:26 [BLOCK-MEMO] imageBlock d437af68 - Props changed: canMoveDown
+index-DzooI87W.js:26 [BLOCK-MEMO] headingBlock f701db4a - Props changed: canMoveDown
+index-DzooI87W.js:26 [MULTI-TAB] 📝 Tab 951YEC queued CREATE for block e9fc5e0c | Queue size: 4
+index-DzooI87W.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-DzooI87W.js:26 📁 FileTreeBlock e9fc5e0c-638e-4004-94c8-dc59737b4deb rendered at 2026-01-04T11:19:25.422Z
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:27.032Z', timestamp: '2026-01-04T11:19:27.032Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:29.175Z', timestamp: '2026-01-04T11:19:29.175Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 4, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:30.050Z', timestamp: '2026-01-04T11:19:30.050Z'}
+index-DzooI87W.js:26 [SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly: {blockCount: 4}
+index-DzooI87W.js:26 [PAGINATED-CACHE] updateCachedBlocks called: {documentId: '5d2e90e6', blockCount: 4}
+index-DzooI87W.js:26 [PAGINATED-CACHE] Cache updated for document: 5d2e90e6
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize INPUT: {id: '3246128c-2d8f-4d90-884a-d893369ed3ee', type: 'issue-tracker', hasContent: true, hasData: true, blockKeys: Array(7)}
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: '3246128c-2d8f-4d90-884a-d893369ed3ee', type: 'issue-tracker', position: 3, contentLength: 37, contentPreview: '{"data":{"milestone":"","issues":[]}}'}
+index-DzooI87W.js:26 🚀 SmartSync.handleChange INPUT: {blockId: '3246128c-2d8f-4d90-884a-d893369ed3ee', action: 'CREATE', blockType: 'issue-tracker', position: 3, contentLength: 37, …}
+index-DzooI87W.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 3, visibleCount: 4}
+index-DzooI87W.js:26 [BLOCK-MEMO] imageBlock d437af68 - Props changed: canMoveDown
+index-DzooI87W.js:26 [BLOCK-MEMO] headingBlock f701db4a - PREVENTED
+index-DzooI87W.js:26 [BLOCK-MEMO] filetreeBlock e9fc5e0c - Props changed: canMoveDown
+index-DzooI87W.js:26 [MULTI-TAB] 📝 Tab 951YEC queued CREATE for block 3246128c | Queue size: 5
+index-DzooI87W.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 5, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 🎯 IssueTrackerBlock initialization: {blockId: '3246128c-2d8f-4d90-884a-d893369ed3ee', hasData: true, milestone: '', issuesCount: 0, rawBlock: {…}}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 5, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 5, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:31.596Z', timestamp: '2026-01-04T11:19:31.596Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 5, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 5, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:32.583Z', timestamp: '2026-01-04T11:19:32.583Z'}
+index-DzooI87W.js:26 [SET-BLOCKS-DIRECTLY] Bypassing reference preservation, setting blocks directly: {blockCount: 5}
+index-DzooI87W.js:26 [PAGINATED-CACHE] updateCachedBlocks called: {documentId: '5d2e90e6', blockCount: 5}
+index-DzooI87W.js:26 [PAGINATED-CACHE] Cache updated for document: 5d2e90e6
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize INPUT: {id: 'a9dd99a4-94c0-4a50-8fd9-c4f00e5a0b67', type: 'text', hasContent: true, hasData: false, blockKeys: Array(6)}
+index-DzooI87W.js:26 🔍 BlockSerializer.serialize OUTPUT: {id: 'a9dd99a4-94c0-4a50-8fd9-c4f00e5a0b67', type: 'text', position: 4, contentLength: 14, contentPreview: '{"content":""}'}
+index-DzooI87W.js:26 🚀 SmartSync.handleChange INPUT: {blockId: 'a9dd99a4-94c0-4a50-8fd9-c4f00e5a0b67', action: 'CREATE', blockType: 'text', position: 4, contentLength: 14, …}
+index-DzooI87W.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 4, visibleCount: 5}
+index-DzooI87W.js:26 [BLOCK-MEMO] imageBlock d437af68 - Props changed: canMoveDown
+index-DzooI87W.js:26 [BLOCK-MEMO] headingBlock f701db4a - PREVENTED
+index-DzooI87W.js:26 [BLOCK-MEMO] filetreeBlock e9fc5e0c - Props changed: canMoveDown
+index-DzooI87W.js:26 [BLOCK-MEMO] issue-trackerBlock 3246128c - Props changed: canMoveDown
+index-DzooI87W.js:26 📝 TextBlock a9dd99a4-94c0-4a50-8fd9-c4f00e5a0b67 rendered at 2026-01-04T11:19:32.724Z
+index-DzooI87W.js:26 [MULTI-TAB] 📝 Tab 951YEC queued CREATE for block a9dd99a4 | Queue size: 6
+index-DzooI87W.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:33.943Z', timestamp: '2026-01-04T11:19:33.943Z'}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-04T11:49:35.088Z', timestamp: '2026-01-04T11:19:35.088Z'}
+index-DzooI87W.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 0, …}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 FileTreeBlock memo: PREVENTED
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 6, syncing: false, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 SmartSync: Syncing 6 changes
+index-DzooI87W.js:26 SmartSync: Changes being sent: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+index-DzooI87W.js:26 SmartSync: Current user ID: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+index-DzooI87W.js:26 [SYNC-DEBUG] Calling RPC with: {documentId: '5d2e90e6-9585-4c74-9ab2-349649cdc1cc', changesCount: 6, blockIds: Array(6)}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: true, lastSync: 1767525553294, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 5d2e90e6-9585-4c74-9ab2-349649cdc1cc
+index-DzooI87W.js:26 SmartSync: RPC response: {total: 6, errors: Array(0), success: true, processed: 6, timestamp: 1767525577816.904}
+index-DzooI87W.js:26 [SYNC-DEBUG] Full RPC Response: {
+  "total": 6,
+  "errors": [],
+  "success": true,
+  "processed": 6,
+  "timestamp": 1767525577816.904
+}
+index-DzooI87W.js:26 [SYNC-DEBUG] Blocks should now be in database for document: 5d2e90e6-9585-4c74-9ab2-349649cdc1cc
+index-DzooI87W.js:26 [SYNC-DEBUG] === CRITICAL FIELDS SENT TO RPC ===
+index-DzooI87W.js:26 [SYNC-DEBUG] RPC Function needs block_type and position to save properly!
+index-DzooI87W.js:26 [SYNC-DEBUG] Change 1: {action: 'CREATE', block_id: 'd437af68-1a8d-41c0-8cee-d24fcac4ffd4', block_type: 'image', position: 0, has_type: true, …}
+index-DzooI87W.js:26 [SYNC-DEBUG] Change 2: {action: 'CREATE', block_id: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', block_type: 'heading', position: 1, has_type: true, …}
+index-DzooI87W.js:26 [SYNC-DEBUG] Change 3: {action: 'UPDATE', block_id: 'f701db4a-a33d-4ad2-a09a-5f34fd7c62cf', block_type: 'heading', position: 1, has_type: true, …}
+index-DzooI87W.js:26 [SYNC-DEBUG] Change 4: {action: 'CREATE', block_id: 'e9fc5e0c-638e-4004-94c8-dc59737b4deb', block_type: 'filetree', position: 2, has_type: true, …}
+index-DzooI87W.js:26 [SYNC-DEBUG] Change 5: {action: 'CREATE', block_id: '3246128c-2d8f-4d90-884a-d893369ed3ee', block_type: 'issue-tracker', position: 3, has_type: true, …}
+index-DzooI87W.js:26 [SYNC-DEBUG] Change 6: {action: 'CREATE', block_id: 'a9dd99a4-94c0-4a50-8fd9-c4f00e5a0b67', block_type: 'text', position: 4, has_type: true, …}
+index-DzooI87W.js:26 [SYNC-DEBUG] === END CRITICAL FIELDS ===
+index-DzooI87W.js:26 [SYNC-DEBUG] NOTE: If block_type or position is missing, blocks will not persist!
+index-DzooI87W.js:26 [SYNC-DEBUG] Changes that were sent: (6) [{…}, {…}, {…}, {…}, {…}, {…}]
+index-DzooI87W.js:26 [MULTI-TAB] ✅ Tab 951YEC synced 6 changes to Supabase | Blocks: [d437af68, f701db4a, f701db4a, e9fc5e0c, 3246128c, a9dd99a4]
+index-DzooI87W.js:26 [INDEXEDDB-SYNC] ✅ Updated cache with 5 blocks for document 5d2e90e6
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 Auto-save failed: TypeError: $n.getUnsavedDocuments is not a function
+    at bfe.performAutoSave (index-DzooI87W.js:161:18589)
+    at index-DzooI87W.js:161:18508
+    at r (index-DzooI87W.js:26:9338)
+(anonymous) @ index-DzooI87W.js:26
+performAutoSave @ index-DzooI87W.js:161
+(anonymous) @ index-DzooI87W.js:161
+r @ index-DzooI87W.js:26
+setInterval
+(anonymous) @ index-DzooI87W.js:29
+startAutoSave @ index-DzooI87W.js:161
+initializeRecovery @ index-DzooI87W.js:161
+bfe @ index-DzooI87W.js:161
+(anonymous) @ index-DzooI87W.js:161
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}
+index-DzooI87W.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1767525578796, online: true}

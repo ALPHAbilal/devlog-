@@ -28,7 +28,8 @@ import { storageWrapper, deleteEntry } from '@/shared/lib';
 import { IndexedDBAdapter } from '@/shared/lib';
 import { useIndexedDBCache } from '@/shared/hooks';
 import { useAuth } from '@/app/providers';
-import { sessionCache } from '@/shared/lib';
+import { useQueryClient } from '@tanstack/react-query';
+import { documentKeys } from '@/shared/api/query-keys';
 import { useAutoSave } from '@/features/block';
 import { useToast } from '@/shared/hooks';
 import { useSidebar } from '@/app/providers';
@@ -78,6 +79,9 @@ export default function Dashboard() {
   // Analytics hooks
   const { trackEvent } = useAnalytics();
   const { trackDocumentEvent, startDocumentTimer, endDocumentTimer } = useDocumentAnalytics();
+
+  // TanStack Query client for cache invalidation
+  const queryClient = useQueryClient();
 
   // Folders hook - folders are auto-loaded by the hook
   const { folders, refreshFolders, createFolder, deleteFolder } = useFolders();
@@ -453,10 +457,10 @@ export default function Dashboard() {
   const handleCloseTab = useCallback((tabId) => {
     closeTab(tabId);
     removeFromCache(tabId);
-    // CRITICAL: Also clear from sessionCache to free memory immediately
-    sessionCache.removeDocument(tabId);
-    console.log(`[MULTI-TAB] 🗑️ Tab closed, cache cleared for document ${tabId?.substring(0, 8)}`);
-  }, [closeTab, removeFromCache]);
+    // Invalidate TanStack Query cache
+    queryClient.invalidateQueries({ queryKey: documentKeys.detail(tabId) });
+    console.log(`[MULTI-TAB] 🗑️ Tab closed, TanStack cache cleared for document ${tabId?.substring(0, 8)}`);
+  }, [closeTab, removeFromCache, queryClient]);
 
   // Listen for keyboard shortcut to create new tab (from TabContext)
   useEffect(() => {
@@ -568,23 +572,8 @@ export default function Dashboard() {
       console.log(`Dashboard: Total load time: ${Math.round(performance.now() - startTime)}ms`);
 
       if (savedEntries && savedEntries.length > 0) {
-        // Check session cache first for any cached documents
-        const cachedDocs = sessionCache.getAllDocuments();
-        const cachedMap = new Map(cachedDocs.map(doc => [doc.id, doc]));
-        
-        // Merge cached data with saved entries
-        const mergedEntries = savedEntries.map(entry => {
-          const cached = cachedMap.get(entry.id);
-          if (cached) {
-            // Use cached version but update with any newer fields
-            return {
-              ...entry,
-              ...cached,
-              updatedAt: entry.updatedAt > cached.updatedAt ? entry.updatedAt : cached.updatedAt
-            };
-          }
-          
-          // Clean up any stale isNew flags
+        // Clean up any stale isNew flags from entries
+        const cleanedEntries = savedEntries.map(entry => {
           if (entry.blocks) {
             return {
               ...entry,
@@ -601,12 +590,12 @@ export default function Dashboard() {
         });
 
         // Store ALL documents for sidebar (includes documents in folders)
-        setAllDocuments(mergedEntries);
+        setAllDocuments(cleanedEntries);
 
         // Note: Folders are combined with documents in the re-combine effect (lines 503-547)
         // This ensures folders are always included regardless of load timing
         // For now, just set root documents sorted by recent action - folders will be added by re-combine effect
-        const rootDocuments = mergedEntries
+        const rootDocuments = cleanedEntries
           .filter(doc => !doc.folder_id)  // Only root-level documents
           .map(doc => ({ ...doc, type: 'document' }))  // Add type field
           .sort((a, b) => {

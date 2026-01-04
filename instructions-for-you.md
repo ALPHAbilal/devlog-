@@ -1,86 +1,79 @@
+ What's Missing
+
+  | Missing Item                                     | Why It's Needed                                                                                                  | Priority | Source | Blocks   |       
+  |--------------------------------------------------|------------------------------------------------------------------------------------------------------------------|----------|--------|----------|       
+  | Exact modifications for ExpandedViewEnhanced.jsx | Plan says "Replace sessionCache usage with useBlocks()" but doesn't show before/after for 5 usage locations      | High     | 🔍     | ⛔ Gap 1 |       
+  | useBlocks() export from feature barrel           | Plan doesn't mention adding export to src/features/block/index.ts                                                | High     | 🔍     | ⛔ Gap 2 |       
+  | Dashboard.jsx exact modifications                | Plan says "Replace sessionCache.getAllDocuments with useDocuments()" but no before/after                         | High     | 🔍     | Gap 3    |       
+  | useDocuments() hook definition                   | Plan shows useDocuments in use-document.ts but it uses Dexie directly - unclear if TanStack Query wrapper needed | Med      | 🔍     | Gap 4    |       
+  | Feature flag integration pattern                 | Plan has feature flag file but doesn't show how to wrap consumers for gradual rollout                            | Med      | 🔍     | Gap 5    |       
+  | Numbered execution order for Phase 4.4           | Steps 9-12 are vague ("Update first consumer", "Update Dashboard") - need atomic steps                           | High     | 🔍     | Gap 6    |       
+  | sessionCache deprecation approach                | Step 12 says "Mark sessionCache as deprecated" but no specific code changes shown                                | Low      | 🔍     | Gap 7    |       
+  | API compatibility bridge                         | useBlocks() returns different shape than usePaginatedBlockLoader - may need adapter                              | High     | 🔍     | ⛔ Gap 8 |       
+
   ---
   Instructions for AI
 
-  Gap 1: Hook File Specifications 🔍
+  Gap 1: ExpandedViewEnhanced.jsx exact modifications 🔍
 
   Instructions for AI:
 
-  Generate detailed specifications for each hook to be extracted from ExpandedViewEnhanced.jsx. For each hook in the decomposition map (useDocumentState, useBlockOperations, useDragDrop, useBlockSync, useBacklinks), provide: (1) exact file path following FSD convention src/features/document/hooks/use-{name}.ts, (2) complete TypeScript interface for return type, (3) line ranges from ExpandedViewEnhanced.jsx to extract (use the codebase-analyzer results showing updateBlock is lines 546-871, deleteBlock is 873-954, etc.), (4) dependencies to inject as parameters, (5) a skeleton implementation template. Follow the hook pattern from src/features/block/hooks/use-blocks-query.ts for return type format (object with data, loading states, actions). Each hook specification should be ~20-30 lines of documentation.
+  Read src/components/ExpandedViewEnhanced.jsx and analyze lines 12, 109, 933, 2402, and 2487 where sessionCache is used. For each usage location, document: (1) the current sessionCache method call, (2) the exact replacement using useBlocks() or TanStack Query invalidation, and (3) any surrounding code that needs updating. Add this as a subsection under "Step 9: Update First Consumer (ExpandedViewEnhanced)" with before/after code blocks for each location. Note that clearDocument and clearBlock calls should be replaced with TanStack Query queryClient.invalidateQueries(), while logPerformanceSummary can likely be removed or replaced with TanStack Query DevTools.
 
-  Gap 2: Component File Specifications 🔍
-
-  Instructions for AI:
-
-  Generate detailed specifications for each component to be extracted (DocumentHeader, BlockList, BlockSelector, DocumentActions, and new ones identified: TitleEditor, TagManager, BacklinksSection, DeleteConfirmation, ViewModeToggle). For each component provide: (1) exact file path in a new src/components/ExpandedViewEnhanced/components/ directory structure, (2) complete Props TypeScript interface, (3) line ranges from ExpandedViewEnhanced.jsx to extract, (4) JSX template showing structure, (5) any state that moves with the component vs stays in parent. Reference the codebase-analyzer results which identified TitleEditor (~40 lines), TagManager (~95 lines), BacklinksSection (~32 lines), DeleteConfirmation (~85 lines), ViewModeToggle (~40 lines), HeaderControls (~80 lines), BlockListView (~120 lines), LinesView (~50 lines).
-
-  Gap 3: ExpandedViewEnhanced.jsx Modification Steps 🔍
+  Gap 2: useBlocks() export from feature barrel 🔍
 
   Instructions for AI:
 
-  Create a step-by-step modification log for ExpandedViewEnhanced.jsx showing how it transforms from 2,570 lines to ~200 lines. Each step should show: (1) what lines to remove, (2) what import to add, (3) what to replace the removed code with (hook call or component). Use the "one extraction per commit" rule from the plan. Start with hooks (they have no UI dependencies) then components. Calculate expected line count after each extraction step to verify progress toward <200 line target. Include git commit message format for each step.
+  Add a new step before Step 9 (renumber as Step 9, making current steps 9-14 become 10-15). This new step should: (1) Read src/features/block/index.ts to understand current exports, (2) Add export for useBlocks from ./hooks/use-blocks-query, (3) Show the exact line to add. This is critical because consumers import from the barrel file, not the hook file directly.
 
-  Gap 4: Barrel File and Import Updates 🔍
-
-  Instructions for AI:
-
-  List all barrel files and imports that need updating after extractions. Use codebase-locator to find all files that import from ExpandedViewEnhanced.jsx (check src/pages/DocumentPage.jsx at minimum). For each extracted hook, add to src/features/document/hooks/index.ts or create src/features/document/index.ts if needed. Document the exact export lines to add. Document any path alias updates needed. Follow the barrel file patterns found in src/features/block/index.ts.
-
-  Gap 5: Orchestrator (DocumentEditor.tsx) Specification 🔍
+  Gap 3: Dashboard.jsx exact modifications 🔍
 
   Instructions for AI:
 
-  Generate the complete specification for the final DocumentEditor.tsx orchestrator component. This is what ExpandedViewEnhanced.jsx becomes after all extractions. Show: (1) all imports from extracted hooks and components, (2) the ~200 lines of orchestration code that wires everything together, (3) how state flows between hooks and components, (4) the JSX composition pattern. Reference how the current component receives entry, allEntries, onNavigateBack, isMobileView as props.
+  Read src/pages/Dashboard.jsx and analyze lines 31, 457, and 572 where sessionCache is used. For each location, document: (1) the current sessionCache method (removeDocument, getAllDocuments), (2) the exact replacement using documentRepository or useDocuments() hook, and (3) how to wire up the repository import. Add this as a subsection under "Step 10: Update Dashboard" with before/after code blocks. The getAllDocuments() usage may require understanding how documents are merged with Supabase data.
 
-  Gap 6: Numbered Execution Order 🔍
-
-  Instructions for AI:
-
-  Replace the "High-Level Steps" (6 items) with a numbered execution order of ~15-20 atomic steps. Each step format: "Step N: Extract {thing} - Expected: {file created}, Lines remaining: {count}, Verify: {command}". Order should follow the "hooks before components" and "leaf before root" rules. Start with simplest extractions (useBacklinks ~30 lines) before complex ones (useBlockOperations ~800 lines). Include dependency order (e.g., BlockListView depends on useBlockOperations being extracted first). Each step gets one commit.
-
-  Gap 7: Verification Commands 🔍
+  Gap 4: useDocuments() hook completeness 🔍
 
   Instructions for AI:
 
-  Convert the Success Criteria into runnable verification commands. For "No file >400 lines": provide find or wc -l command to check. For "All tests pass": identify if document/editor tests exist or need creation (check src/**/*.test.ts). For "Build succeeds": npm run build. For "TypeScript compiles": npm run typecheck or npx tsc --noEmit. For "Dependency Cruiser passes": provide the .dependency-cruiser.js command. For manual verification, provide a testing script or checklist with specific actions.
+  Read src/features/document/hooks/use-document.ts and verify the useDocuments() hook is complete for Dashboard.jsx needs. Check if: (1) it returns documents in the format Dashboard.jsx expects, (2) it handles the getAllDocuments() use case at line 572 where cached documents are merged with server data. If the current implementation is insufficient, document what changes are needed to make useDocuments() compatible with Dashboard.jsx requirements.
+
+  Gap 5: Feature flag integration pattern 🔍
+
+  Instructions for AI:
+
+  Add a subsection to Phase 4.4 showing how to wrap consumers with the feature flag for gradual rollout. The pattern should be: (1) import isNewDataLayerEnabled from feature-flags, (2) conditionally use old hooks vs new useBlocks() hook, (3) provide example code showing the conditional pattern in ExpandedViewEnhanced.jsx. This allows toggling back to old behavior if issues arise.
+
+  Gap 6: Numbered atomic execution order for Phase 4.4 🔍
+
+  Instructions for AI:
+
+  Replace the current Steps 9-12 with specific atomic steps. Break down each step into sub-steps with exact file paths and actions. For example, Step 9 "Update First Consumer (ExpandedViewEnhanced)" should become: 9a. Add useBlocks export to barrel, 9b. Import useBlocks in ExpandedViewEnhanced, 9c. Replace usePaginatedBlockLoader call, 9d. Replace sessionCache.clearDocument calls, etc. Each sub-step should be one atomic action that can be verified independently.
+
+  Gap 7: sessionCache deprecation approach 🔍
+
+  Instructions for AI:
+
+  Add specifics to Step 12 about how to mark sessionCache as deprecated. Options include: (1) Add @deprecated JSDoc comment to session-cache.ts exports, (2) Add console.warn on first usage, (3) Add comment explaining migration path. Provide the exact code changes to make in src/shared/lib/storage/session-cache.ts.
+
+  Gap 8: API compatibility bridge 🔍
+
+  Instructions for AI:
+
+  Read both src/features/block/hooks/use-paginated-loader.ts and src/features/block/hooks/use-blocks-query.ts to compare their return shapes. Document: (1) What usePaginatedBlockLoader returns (blocks, isLoading, loadMore, hasMore, etc.), (2) What useBlocks returns, (3) Any missing properties that consumers depend on. If there's a mismatch, add a note about creating an adapter hook or updating useBlocks to include missing properties like loadMore, hasMore, pagination state, etc.
 
   ---
   Gap Execution Order
 
-  📚 Research First (before iterate_plan):
-
-  None - all gaps are solvable via codebase analysis
-
   🔍 Fill with iterate_plan (in dependency order):
 
-  | Step | Gap   | Name                                   | Note                                         |
-  |------|-------|----------------------------------------|----------------------------------------------|
-  | ⛔ 1 | Gap 1 | Hook File Specifications               | CRITICAL - defines all hooks to extract      |
-  | ⛔ 2 | Gap 2 | Component File Specifications          | CRITICAL - defines all components to extract |
-  | ⛔ 3 | Gap 6 | Numbered Execution Order               | CRITICAL - defines order of all steps        |
-  | 4    | Gap 3 | ExpandedViewEnhanced.jsx Modifications | Depends on: Gap 1, Gap 2, Gap 6              |
-  | 5    | Gap 4 | Barrel File Updates                    | Depends on: Gap 1, Gap 2                     |
-  | 6    | Gap 5 | Orchestrator Specification             | Depends on: Gap 1, Gap 2                     |
-  | 7    | Gap 7 | Verification Commands                  | Can be done anytime                          |
-
-  ---
-
-● Summary
-
-  Phase 5 is an OVERVIEW document, not an executable plan. It has:
-  - ✅ Best practices and rules
-  - ✅ High-level objectives
-  - ✅ Decomposition preview
-  - ❌ No concrete file specifications
-  - ❌ No TypeScript interfaces
-  - ❌ No numbered execution steps
-  - ❌ No before/after code
-
-  7 gaps need to be filled before this plan is executable:
-
-  1. Hook specifications (paths, interfaces, line ranges)
-  2. Component specifications (paths, Props interfaces, templates)
-  3. ExpandedViewEnhanced modification log
-  4. Barrel file/import updates
-  5. Orchestrator final specification
-  6. Numbered execution order (15-20 atomic steps)
-  7. Verification commands
+  | Step | Gap   | Name                               | Note                                   |
+  |------|-------|------------------------------------|----------------------------------------|
+  | ⛔ 1 | Gap 2 | useBlocks() export from barrel     | CRITICAL - blocks: Gap 1, 3, 5, 6, 8   |
+  | ⛔ 2 | Gap 8 | API compatibility bridge           | CRITICAL - blocks: Gap 1, 3, 6         |
+  | 3    | Gap 4 | useDocuments() hook completeness   | Depends on: understanding current impl |
+  | 4    | Gap 1 | ExpandedViewEnhanced modifications | Depends on: Gap 2, 8                   |
+  | 5    | Gap 3 | Dashboard.jsx modifications        | Depends on: Gap 2, 4                   |
+  | 6    | Gap 5 | Feature flag integration pattern   | Depends on: Gap 1, 3                   |
+  | 7    | Gap 6 | Numbered atomic execution order    | Depends on: Gap 1-5                    |
+  | 8    | Gap 7 | sessionCache deprecation           | After all consumers migrated           |

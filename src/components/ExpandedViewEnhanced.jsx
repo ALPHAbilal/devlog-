@@ -9,7 +9,8 @@ import OptimizedBlockSkeleton from './blocks/OptimizedBlockSkeleton';
 import { getBacklinks } from '@/shared/lib';
 import { useOptimizedBlockLoader, usePaginatedBlockLoader } from '@/features/block';
 import { getSmartSyncManager } from '@/features/block';
-import { sessionCache } from '@/shared/lib';
+import { useQueryClient } from '@tanstack/react-query';
+import { documentKeys, blockKeys } from '@/shared/api/query-keys';
 import { serializeBlock } from '@/features/block';
 import { storageWrapper } from '@/shared/lib';
 import { ShareDialogSimple } from './ShareDialogSimple';
@@ -68,7 +69,10 @@ function ExpandedView({
   // Analytics hooks
   const { trackEvent } = useAnalytics();
   const { trackDocumentEvent } = useDocumentAnalytics();
-  
+
+  // TanStack Query client for cache invalidation
+  const queryClient = useQueryClient();
+
   // Track document view on mount (not as page view)
   useEffect(() => {
     if (stableEntry?.id && stableEntry?.title) {
@@ -106,7 +110,8 @@ function ExpandedView({
     }
     window.__cacheStatsLogCount++;
     if (window.__cacheStatsLogCount % 5 === 0) {
-      sessionCache.logPerformanceSummary();
+      // Removed - use TanStack Query DevTools for cache monitoring
+      console.log('[CACHE-TRACK] Cache stats available in TanStack Query DevTools');
     }
   }, [stableEntry.id, stableEntry.blockCount, shouldUsePagination]);
 
@@ -929,9 +934,9 @@ function ExpandedView({
           syncResult: result
         });
         
-        // Clear from session cache to prevent reappearance
-        if (window.sessionCache && entry?.id) {
-          window.sessionCache.clearBlock(entry.id, blockId);
+        // Invalidate TanStack Query cache to refetch blocks
+        if (entry?.id) {
+          queryClient.invalidateQueries({ queryKey: blockKeys.byDocument(entry.id) });
         }
         
         // Clear from paginated block loader cache
@@ -2397,18 +2402,19 @@ function ExpandedView({
                   try {
                     setIsDeleting(true);
                     console.log('Starting document deletion for:', entry.id);
-                    
-                    // Clear from session cache first
-                    sessionCache.clearDocument(entry.id);
-                    console.log('Cleared from session cache');
-                    
+
+                    // Invalidate TanStack Query cache
+                    queryClient.invalidateQueries({ queryKey: documentKeys.detail(entry.id) });
+                    queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
+                    console.log('Cleared from TanStack Query cache');
+
                     // Delete from storage using the proper delete method
                     await storageWrapper.deleteEntry(entry.id);
                     console.log('Successfully deleted document from storage');
-                    
+
                     // Close the delete confirmation modal
                     setShowDeleteConfirm(false);
-                    
+
                     // Notify parent component to update the list
                     if (onUpdate) {
                       onUpdate(entry.id, null);
@@ -2482,18 +2488,19 @@ function ExpandedView({
                   try {
                     setIsDeleting(true);
                     console.log('Starting document deletion for:', entry.id);
-                    
-                    // Clear from session cache first
-                    sessionCache.clearDocument(entry.id);
-                    console.log('Cleared from session cache');
-                    
+
+                    // Invalidate TanStack Query cache
+                    queryClient.invalidateQueries({ queryKey: documentKeys.detail(entry.id) });
+                    queryClient.invalidateQueries({ queryKey: documentKeys.lists() });
+                    console.log('Cleared from TanStack Query cache');
+
                     // Delete from storage using the proper delete method
                     await storageWrapper.deleteEntry(entry.id);
                     console.log('Successfully deleted document from storage');
-                    
+
                     // Close the delete confirmation modal
                     setShowDeleteConfirm(false);
-                    
+
                     // Notify parent component to update the list
                     // The Dashboard will handle closing the expanded view
                     if (onUpdate) {

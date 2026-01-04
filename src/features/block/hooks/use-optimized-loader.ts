@@ -59,14 +59,26 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
           // [CACHE-TRACK] Log cache hit
           const loadTime = performance.now() - loadStartTime;
           console.log(`[CACHE-TRACK] ✅ CACHE HIT: Found ${cachedBlocks.length} blocks in sessionCache - Load time: ${loadTime.toFixed(2)}ms`);
-          console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: sessionCache (cache hit)`);
+          console.log(`[CACHE-TRACK] 📊 SOURCE TYPE: sessionCache (cache hit) - NO DESERIALIZE`);
           console.log(`[CACHE-TRACK] ⚡ PERFORMANCE: Cache lookup ${cacheCheckTime.toFixed(2)}ms, Total ${loadTime.toFixed(2)}ms`);
-          
+
+          // DEBUG: Check filetree blocks for content
+          const filetreeBlocks = cachedBlocks.filter((b: { type: string }) => b.type === 'filetree');
+          if (filetreeBlocks.length > 0) {
+            console.log('🌲 [CACHE] FileTree blocks from sessionCache:', filetreeBlocks.map((b: { id: string; treeData?: unknown[]; snapshots?: Array<{comment?: string}> }) => ({
+              id: b.id?.substring(0, 8),
+              hasTreeData: !!b.treeData,
+              treeDataLength: (b.treeData as unknown[] || []).length,
+              snapshotCount: (b.snapshots || []).length,
+              hasComments: (b.snapshots || []).some(s => s?.comment)
+            })));
+          }
+
           // CRITICAL: Don't normalize positions - it breaks references!
           // The blocks array index IS the position
           setBlocks(cachedBlocks);
           setIsLoading(false);
-          
+
           console.log(`[CACHE-TRACK] ⏱️ COMPLETE: Loaded from cache in ${loadTime.toFixed(2)}ms`);
           return;
         }

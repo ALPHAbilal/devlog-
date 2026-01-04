@@ -1,25 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, animate } from 'framer-motion';
 import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, AlertCircle, MousePointer2, Save, Check } from 'lucide-react';
 
 /**
- * CinematicDocumentDemo - High Fidelity Edition
+ * CinematicDocumentDemo - "Next Level" Orchestration
  * 
- * Recreates the DevLog document page experience with 1:1 UI fidelity.
- * Features:
- * - Deterministic Camera Tracking (Percentage-based)
- * - 1:1 AddBlockRow & BlockDivider Mocks
- * - Character-by-character Typing Engine
- * - Biomechanical Cursor Physics
+ * Implements ref-based targeting and semantic camera framing.
+ * - Cursor hits exact DOM elements (Refs).
+ * - Component-relative coordinate mapping.
+ * - Per-character typing for both Header and Code.
+ * - Dynamic centering physics.
  */
 const CinematicDocumentDemo = () => {
     const [blocks, setBlocks] = useState([]);
     const [saveStatus, setSaveStatus] = useState(null);
     const [showAddMenu, setShowAddMenu] = useState(false);
-    const scope = useRef(null);
 
-    // 1. Relative Motion Values (0-100 scale)
-    const cursorX = useMotionValue(120);
+    // Refs for Target-Aware logic
+    const viewportRef = useRef(null);
+    const dividerRef = useRef(null);
+    const codeIconRef = useRef(null);
+    const headerRef = useRef(null);
+
+    // 1. Perspective Motion Values
+    const cursorX = useMotionValue(120); // % scale
     const cursorY = useMotionValue(120);
     const cursorOpacity = useMotionValue(0);
 
@@ -32,10 +36,23 @@ const CinematicDocumentDemo = () => {
     const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
-    // --- 1:1 UI Mock Components ---
+    // --- Helper: Dynamic Coordinate Resolver ---
+    const getTargetCoords = useCallback((el) => {
+        if (!el || !viewportRef.current) return { x: 50, y: 50 };
+        const viewRect = viewportRef.current.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        // Calculate center as % relative to viewport
+        const x = ((elRect.left + elRect.width / 2 - viewRect.left) / viewRect.width) * 100;
+        const y = ((elRect.top + elRect.height / 2 - viewRect.top) / viewRect.height) * 100;
+
+        return { x, y };
+    }, []);
+
+    // --- High-Fidelity Mock Components ---
 
     const BlockDividerMock = ({ isHovered = false }) => (
-        <div className="relative h-10 -my-2 flex items-center justify-center pointer-events-none">
+        <div ref={dividerRef} className="relative h-10 -my-2 flex items-center justify-center pointer-events-none">
             <div className={`absolute inset-x-8 h-px transition-opacity duration-300 ${isHovered ? 'opacity-0' : 'bg-gradient-to-r from-transparent via-white/10 to-transparent'}`} />
             <div className={`bg-[#0d1117] border border-white/10 text-white/40 rounded-full w-7 h-7 flex items-center justify-center transition-all duration-300 ${isHovered ? 'opacity-100 scale-100 border-emerald-500/50 text-emerald-500 bg-emerald-500/10' : 'opacity-0 scale-90'}`}>
                 <Plus size={16} />
@@ -52,18 +69,10 @@ const CinematicDocumentDemo = () => {
         >
             <div className="w-7 h-7 rounded-full flex items-center justify-center text-white/40"><Plus size={18} /></div>
             <div className="w-px h-5 bg-white/10 mx-1" />
-            {[
-                { icon: Type, label: 'text' },
-                { icon: Heading, label: 'heading' },
-                { icon: Code, label: 'code', active: true },
-                { icon: Table, label: 'table' },
-                { icon: MessageSquare, label: 'ai' }
-            ].map((item, i) => (
-                <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium transition-colors ${item.active ? 'bg-white/10 text-white' : 'text-white/40'}`}>
-                    <item.icon size={12} />
-                    <span>{item.label}</span>
-                </div>
-            ))}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-white/40"><Type size={12} /><span>text</span></div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-white/40"><Heading size={12} /><span>heading</span></div>
+            <div ref={codeIconRef} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium bg-white/10 text-white"><Code size={12} /><span>code</span></div>
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium text-white/40"><Table size={12} /><span>table</span></div>
         </motion.div>
     );
 
@@ -97,78 +106,83 @@ const CinematicDocumentDemo = () => {
         );
     };
 
-    // --- Interaction Engine ---
-
-    const typeText = async (blockId, fullText) => {
-        let currentText = "";
+    // --- Character Typing Engine ---
+    const typeInto = async (setter, fullText, delayRange = [30, 70]) => {
         for (let i = 0; i <= fullText.length; i++) {
-            currentText = fullText.slice(0, i);
-            setBlocks(prev => prev.map(b => b.id === blockId ? { ...b, content: currentText } : b));
-            const delay = 30 + Math.random() * 40; // Variable human speed
-            await new Promise(r => setTimeout(r, delay));
-
-            // Random camera jitters for "intensity"
-            if (i % 5 === 0) {
-                cameraX.set(cameraX.get() + (Math.random() - 0.5) * 0.5);
-            }
+            setter(fullText.slice(0, i));
+            await new Promise(r => setTimeout(r, delayRange[0] + Math.random() * (delayRange[1] - delayRange[0])));
+            if (i % 6 === 0) cameraX.set(cameraX.get() + (Math.random() - 0.5) * 0.4);
         }
     };
 
+    // --- Timeline Logic ---
     const playTimeline = async () => {
-        if (!scope.current) return;
+        if (!viewportRef.current) return;
 
         // RESET
-        setBlocks([{ id: 'h1', type: 'heading', content: 'Distributed Engine' }]);
+        setBlocks([{ id: 'h1', type: 'heading', content: '' }]);
         setSaveStatus(null);
         setShowAddMenu(false);
         cursorX.set(120); cursorY.set(120); cursorOpacity.set(0);
         cameraScale.set(1); cameraBlur.set(0);
 
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 1000));
 
-        // 1. Entrance & Hover Divider
+        // 1. Header Typing & Entrance
         animate(cursorOpacity, 1, { duration: 0.5 });
-        await animate(cursorX, 50, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
-        await animate(cursorY, 40, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
+        const initialTarget = getTargetCoords(headerRef.current);
+        animate(cursorX, initialTarget.x + 5, { duration: 1.5 });
+        animate(cursorY, initialTarget.y, { duration: 1.5 });
 
-        // 2. Click to Add Block
+        await typeInto((content) => setBlocks(prev => prev.map(b => b.id === 'h1' ? { ...b, content } : b)), "Distributed Intelligence Core");
+        await new Promise(r => setTimeout(r, 300));
+
+        // 2. Move to Divider (Ref Aware)
+        const divPoint = getTargetCoords(dividerRef.current);
+        await Promise.all([
+            animate(cursorX, divPoint.x, { duration: 1, ease: [0.22, 1, 0.36, 1] }),
+            animate(cursorY, divPoint.y, { duration: 1, ease: [0.22, 1, 0.36, 1] })
+        ]);
+
+        // 3. Click Divider & Select Menu
         setShowAddMenu(true);
         await new Promise(r => setTimeout(r, 800));
 
-        // Move to 'Code' icon in menu
-        await animate(cursorX, 52, { duration: 0.4 });
-        await animate(cursorY, 45, { duration: 0.4 });
+        const menuPoint = getTargetCoords(codeIconRef.current);
+        await Promise.all([
+            animate(cursorX, menuPoint.x, { duration: 0.6 }),
+            animate(cursorY, menuPoint.y, { duration: 0.6 })
+        ]);
 
-        // 3. New Block Appears
+        // 4. Block Appearance
         setShowAddMenu(false);
-        setBlocks(prev => [...prev, {
-            id: 'c1', type: 'code', filePath: 'src/lib/sync.ts', content: ''
-        }]);
+        setBlocks(prev => [...prev, { id: 'c1', type: 'code', filePath: 'src/lib/sync.ts', content: '' }]);
+        await new Promise(r => setTimeout(r, 500));
 
-        await new Promise(r => setTimeout(r, 400));
+        // 5. Typing Sequence (Character Level)
+        cameraScale.set(1.25);
+        await typeInto(
+            (content) => setBlocks(prev => prev.map(b => b.id === 'c1' ? { ...b, content } : b)),
+            'const sync = async () => {\n  const res = await vault.pull();\n  return res.data;\n};',
+            [20, 50]
+        );
 
-        // 4. Typing Sequence
-        cameraScale.set(1.2);
-        await animate(cursorY, 65, { duration: 0.8 });
-        await typeText('c1', 'const sync = async () => {\n  const res = await vault.pull();\n  return res.data;\n};');
-
-        // 5. Save Sequence
+        // 6. Save & Resolve
         await new Promise(r => setTimeout(r, 1000));
         animate(cursorOpacity, 0, { duration: 0.8 });
-        animate(cameraBlur, 10, { duration: 1.5 });
+        animate(cameraBlur, 8, { duration: 1.5 });
         cameraScale.set(1.3);
 
         setSaveStatus('saving');
         await new Promise(r => setTimeout(r, 1200));
         setSaveStatus('saved');
 
-        // 6. Loop Reset
-        await new Promise(r => setTimeout(r, 2500));
+        await new Promise(r => setTimeout(r, 2000));
         animate(cameraBlur, 0, { duration: 2 });
         cameraScale.set(1);
 
         await new Promise(r => setTimeout(r, 4000));
-        if (scope.current) playTimeline();
+        if (viewportRef.current) playTimeline();
     };
 
     useEffect(() => {
@@ -176,7 +190,7 @@ const CinematicDocumentDemo = () => {
     }, []);
 
     return (
-        <div ref={scope} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl font-sans text-white">
+        <div ref={viewportRef} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl font-sans text-white">
             {/* Background Texture */}
             <motion.div className="absolute inset-0 z-0" style={{ filter: useTransform(cameraBlur, (v) => `blur(${v}px)`) }}>
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.1),transparent_70%)]" />
@@ -186,7 +200,7 @@ const CinematicDocumentDemo = () => {
 
             {/* Cinematic Viewport */}
             <motion.div
-                className="relative w-full h-full p-12 md:p-16 z-10"
+                className="relative w-full h-full p-12 md:p-14 z-10"
                 style={{ x: cameraX, y: cameraY, scale: cameraScale, transformOrigin: 'center center' }}
                 animate={{ rotateX: [0, 0.5, 0], rotateY: [0, 0.3, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -197,13 +211,12 @@ const CinematicDocumentDemo = () => {
                         <div key={block.id}>
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
                                 {block.type === 'heading' ? (
-                                    <div className="text-3xl font-bold tracking-tight px-2 py-4">{block.content}</div>
+                                    <div ref={headerRef} className="text-3xl font-bold tracking-tight px-2 py-4 h-16">{block.content}</div>
                                 ) : (
                                     <CodeBlockRaw content={block.content} filePath={block.filePath} />
                                 )}
                             </motion.div>
 
-                            {/* In-house Divider Logic */}
                             {i === 0 && (
                                 <div className="py-2">
                                     <BlockDividerMock isHovered={showAddMenu} />
@@ -219,7 +232,14 @@ const CinematicDocumentDemo = () => {
             </motion.div>
 
             {/* Precision Cursor */}
-            <motion.div className="absolute z-50 pointer-events-none" style={{ left: useTransform(cursorX, (v) => `${v}%`), top: useTransform(cursorY, (v) => `${v}%`), opacity: cursorOpacity }}>
+            <motion.div
+                className="absolute z-50 pointer-events-none"
+                style={{
+                    left: useTransform(cursorX, (v) => `${v}%`),
+                    top: useTransform(cursorY, (v) => `${v}%`),
+                    opacity: cursorOpacity
+                }}
+            >
                 <MousePointer2 className="w-6 h-6 fill-white stroke-[3px] drop-shadow-2xl" />
                 <motion.div className="absolute -inset-4 bg-white/5 blur-xl rounded-full" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
             </motion.div>

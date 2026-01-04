@@ -8,35 +8,41 @@
  */
 
 import { getBlockContentSchema } from './schemas';
+import type { BlockData, SerializedBlock, FileTreeNode, TypedBlockData } from './schemas';
 
 /**
  * Helper: Remove file content from tree nodes for snapshot storage
- * @param {Array} nodes - Tree nodes to sanitize
- * @returns {Array} Sanitized nodes without content field
+ * Returns a sanitized copy without the content field
  */
-function sanitizeTreeForSnapshot(nodes) {
+function sanitizeTreeForSnapshot(nodes: FileTreeNode[]): FileTreeNode[] {
   if (!Array.isArray(nodes)) return [];
-  return nodes.map(node => ({
-    id: node.id,
-    name: node.name,
-    isFolder: node.isFolder !== undefined ? node.isFolder : node.type === 'folder',
-    type: node.type || (node.isFolder ? 'folder' : 'file'),
-    children: node.children ? sanitizeTreeForSnapshot(node.children) : undefined,
-    // Explicitly exclude content field
-  }));
+  return nodes.map(node => {
+    const sanitized: FileTreeNode = {
+      id: node.id,
+      name: node.name,
+      isFolder: node.isFolder !== undefined ? node.isFolder : node.type === 'folder',
+      type: node.type || (node.isFolder ? 'folder' : 'file'),
+    };
+    if (node.children) {
+      sanitized.children = sanitizeTreeForSnapshot(node.children);
+    }
+    return sanitized;
+  });
+}
+
+// Helper function to safely get property from record
+function get<T>(obj: Record<string, unknown>, key: string): T | undefined {
+  return obj[key] as T | undefined;
 }
 
 /**
  * Serializes a block for storage in the database
  * Uses Zod schemas to automatically validate and filter invalid fields
- *
- * @param {Object} block - The block to serialize
- * @returns {Object} The serialized block with normalized content field
  */
-export function serializeBlock(block) {
+export function serializeBlock(block: BlockData | TypedBlockData): SerializedBlock {
   if (!block || !block.type) {
     console.warn('BlockSerializer: Invalid block provided for serialization', block);
-    return block;
+    return block as unknown as SerializedBlock;
   }
 
   // Log input for debugging
@@ -44,14 +50,12 @@ export function serializeBlock(block) {
     id: block.id,
     type: block.type,
     hasContent: 'content' in block,
-    hasMessages: 'messages' in block,
-    hasImages: 'images' in block,
     hasData: 'data' in block,
     blockKeys: Object.keys(block)
   });
 
   // Base structure
-  const serialized = {
+  const serialized: Record<string, unknown> = {
     id: block.id,
     type: block.type,
     position: block.position,
@@ -64,191 +68,130 @@ export function serializeBlock(block) {
 
   if (!schema) {
     console.warn(`BlockSerializer: No schema for type '${block.type}', using fallback`);
-    serialized.content = block.content || '';
-    return serialized;
+    serialized['content'] = get(block as unknown as Record<string, unknown>, 'content') || '';
+    return serialized as SerializedBlock;
   }
 
-  // CRITICAL FIX: Declare dataToValidate BEFORE try block so catch block can access it
-  let dataToValidate = {};
+  // Declare dataToValidate BEFORE try block so catch block can access it
+  let dataToValidate: Record<string, unknown> = {};
+  const b = block as unknown as Record<string, unknown>;
 
   try {
     // Extract data based on block type
-
     if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
-      dataToValidate = { content: block.content || '' };
+      dataToValidate = { content: get(b, 'content') || '' };
     } else if (block.type === 'ai') {
       dataToValidate = {
-        messages: block.messages || [],
-        metadata: block.metadata || {}
+        messages: get(b, 'messages') || [],
+        metadata: get(b, 'metadata') || {}
       };
     } else if (block.type === 'image') {
       dataToValidate = {
-        images: block.images || [],
-        layout: block.layout || 'grid',
-        columns: block.columns || 3
+        images: get(b, 'images') || [],
+        layout: get(b, 'layout') || 'grid',
+        columns: get(b, 'columns') || 3
       };
-    } else if (block.type === 'inline-image' || block.type === 'inlineImage') {
+    } else if (block.type === 'inline-image') {
       dataToValidate = {
-        url: block.url || '',
-        alt: block.alt || '',
-        caption: block.caption || '',
-        dimensions: block.dimensions || null
+        url: get(b, 'url') || '',
+        alt: get(b, 'alt') || '',
+        caption: get(b, 'caption') || '',
+        dimensions: get(b, 'dimensions') || null
       };
     } else if (block.type === 'table') {
-      // [TABLE-SAVE] Log table block before serialization
-      console.log('[TABLE-SAVE] Step: blockSerializer.serializeBlock Entry (table)', {
-        blockId: block.id,
-        blockType: block.type,
-        inputBlock: {
-          hasData: 'data' in block,
-          dataStructure: block.data ? {
-            hasHeaders: Array.isArray(block.data.headers),
-            headersCount: block.data.headers?.length || 0,
-            hasRows: Array.isArray(block.data.rows),
-            rowsCount: block.data.rows?.length || 0,
-            hasColumnAlignments: Array.isArray(block.data.columnAlignments),
-            columnAlignmentsCount: block.data.columnAlignments?.length || 0,
-            hasHeaderRow: typeof block.data.hasHeaderRow === 'boolean' ? block.data.hasHeaderRow : undefined,
-            dataSize: JSON.stringify(block.data).length,
-            fullData: block.data,
-            dataPreview: {
-              headers: block.data.headers?.slice(0, 5),
-              firstRow: block.data.rows?.[0]?.slice(0, 5),
-              lastRow: block.data.rows?.[block.data.rows?.length - 1]?.slice(0, 5),
-              columnAlignments: block.data.columnAlignments?.slice(0, 5)
-            }
-          } : null,
-          willUseDefault: !block.data
-        }
-      });
-
-      // CRITICAL: Only extract table fields, Zod will filter out any invalid ones (milestone, issues, etc.)
+      const data = get<Record<string, unknown>>(b, 'data');
       dataToValidate = {
         data: {
-          headers: block.data?.headers || ['Column 1', 'Column 2'],
-          rows: block.data?.rows || [['', '']],
-          columnAlignments: block.data?.columnAlignments || ['left', 'left'],
-          hasHeaderRow: block.data?.hasHeaderRow !== undefined ? block.data.hasHeaderRow : true
-          // Any other fields (milestone, issues, etc.) will be automatically filtered by Zod
+          headers: data?.['headers'] || ['Column 1', 'Column 2'],
+          rows: data?.['rows'] || [['', '']],
+          columnAlignments: data?.['columnAlignments'] || ['left', 'left'],
+          hasHeaderRow: data?.['hasHeaderRow'] !== undefined ? data['hasHeaderRow'] : true
         }
       };
     } else if (block.type === 'todo') {
+      const data = get<Record<string, unknown>>(b, 'data');
       dataToValidate = {
         data: {
-          todos: block.data?.todos || []
+          todos: data?.['todos'] || []
         }
       };
-    } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-      // CRITICAL: Only extract issue tracker fields, Zod will filter out any invalid ones (headers, rows, etc.)
+    } else if (block.type === 'issue-tracker') {
+      const data = get<Record<string, unknown>>(b, 'data');
       dataToValidate = {
         data: {
-          milestone: block.data?.milestone || '',
-          issues: block.data?.issues || []
-          // Any other fields (headers, rows, etc.) will be automatically filtered by Zod
+          milestone: data?.['milestone'] || '',
+          issues: data?.['issues'] || []
         }
       };
     } else if (block.type === 'filetree') {
-      // CRITICAL FIX: Include snapshots and snapshot state in content
       dataToValidate = {
-        treeData: block.treeData || [],
-        expanded: block.expanded || [],
-        snapshots: block.snapshots || [],
-        currentSnapshotId: block.currentSnapshotId || null,
-        snapshotLimit: block.snapshotLimit || 50
+        treeData: get(b, 'treeData') || [],
+        expanded: get(b, 'expanded') || [],
+        snapshots: get(b, 'snapshots') || [],
+        currentSnapshotId: get(b, 'currentSnapshotId') || null,
+        snapshotLimit: get(b, 'snapshotLimit') || 50
       };
     }
 
     // Zod validates and filters invalid fields automatically
     const validated = schema.parse(dataToValidate);
-    serialized.content = JSON.stringify(validated);
-
-    // [TABLE-SAVE] Log after serialization for table blocks
-    if (block.type === 'table') {
-      console.log('[TABLE-SAVE] Step: blockSerializer.serializeBlock Complete (table)', {
-        blockId: block.id,
-        serialized: {
-          contentLength: serialized.content.length,
-          contentPreview: serialized.content.substring(0, 300),
-          fullContent: serialized.content,
-          parsedContent: (() => {
-            try {
-              const parsed = JSON.parse(serialized.content);
-              return {
-                hasData: !!parsed.data,
-                dataStructure: parsed.data ? {
-                  headersCount: parsed.data.headers?.length || 0,
-                  rowsCount: parsed.data.rows?.length || 0,
-                  columnAlignmentsCount: parsed.data.columnAlignments?.length || 0,
-                  hasHeaderRow: parsed.data.hasHeaderRow,
-                  fullData: parsed.data
-                } : null
-              };
-            } catch (e) {
-              return { error: 'Failed to parse serialized content', message: e.message };
-            }
-          })()
-        }
-      });
-    }
+    serialized['content'] = JSON.stringify(validated);
 
   } catch (error) {
     console.error(`BlockSerializer: Validation failed for ${block.type}:`, error);
     console.error(`BlockSerializer: Failed data:`, dataToValidate);
 
-    // CRITICAL: Preserve original data instead of wiping with empty defaults
-    // Try to use original content if it exists, otherwise use minimal valid structure
-    if (block.content && typeof block.content === 'string') {
-      // Already has serialized content, preserve it
-      serialized.content = block.content;
-    } else if (block.content && typeof block.content === 'object') {
-      // Has object content, stringify it even if invalid
-      serialized.content = JSON.stringify(block.content);
+    // Preserve original data instead of wiping with empty defaults
+    const content = get(b, 'content');
+    if (content && typeof content === 'string') {
+      serialized['content'] = content;
+    } else if (content && typeof content === 'object') {
+      serialized['content'] = JSON.stringify(content);
     } else {
-      // Last resort: try safe defaults
       const safeDefault = schema.safeParse({});
       if (safeDefault.success) {
-        serialized.content = JSON.stringify(safeDefault.data);
+        serialized['content'] = JSON.stringify(safeDefault.data);
       } else {
-        // Absolute last resort: empty string
-        serialized.content = JSON.stringify(dataToValidate); // Save what we tried to validate
+        serialized['content'] = JSON.stringify(dataToValidate);
       }
     }
   }
 
   // Add direct fields to metadata (for code blocks: language, filePath)
+  const metadata = serialized['metadata'] as Record<string, unknown>;
   if (block.type === 'code') {
-    if (block.language) serialized.metadata.language = block.language;
-    if (block.filePath) serialized.metadata.filePath = block.filePath;
+    const lang = get(b, 'language');
+    const path = get(b, 'filePath');
+    if (lang) metadata['language'] = lang;
+    if (path) metadata['filePath'] = path;
   }
-  if (block.type === 'heading' && block.level) {
-    serialized.metadata.level = block.level;
+  if (block.type === 'heading') {
+    const level = get(b, 'level');
+    if (level) metadata['level'] = level;
   }
 
   // Log output
   console.log('🔍 BlockSerializer.serialize OUTPUT:', {
-    id: serialized.id,
-    type: serialized.type,
-    position: serialized.position,
-    contentLength: serialized.content?.length,
-    contentPreview: serialized.content?.substring(0, 100)
+    id: serialized['id'],
+    type: serialized['type'],
+    position: serialized['position'],
+    contentLength: (serialized['content'] as string)?.length,
+    contentPreview: (serialized['content'] as string)?.substring(0, 100)
   });
 
-  return serialized;
+  return serialized as SerializedBlock;
 }
 
 /**
  * Deserializes a block from database storage
  * Uses Zod schemas to automatically validate and filter invalid fields
- *
- * @param {Object} block - The serialized block from database
- * @returns {Object} The deserialized block with proper field structure
  */
-export function deserializeBlock(block) {
+export function deserializeBlock(block: SerializedBlock): TypedBlockData {
   // Log input
   console.log('🔎 BlockSerializer.deserialize INPUT:', {
     id: block?.id,
     type: block?.type,
-    hasContent: 'content' in (block || {}),
+    hasContent: block ? 'content' in block : false,
     contentType: typeof block?.content,
     contentLength: block?.content?.length,
     blockKeys: Object.keys(block || {})
@@ -261,11 +204,11 @@ export function deserializeBlock(block) {
       blockType: block?.type,
       blockId: block?.id
     });
-    return block;
+    return block as unknown as TypedBlockData;
   }
 
   // Base structure
-  const deserialized = {
+  const deserialized: Record<string, unknown> = {
     id: block.id,
     type: block.type,
     position: block.position || 0,
@@ -278,16 +221,19 @@ export function deserializeBlock(block) {
 
   if (!schema) {
     console.warn(`BlockSerializer: No schema for type '${block.type}', using fallback`);
-    deserialized.content = block.content || '';
-    return deserialized;
+    deserialized['content'] = block.content || '';
+    return deserialized as TypedBlockData;
   }
+
+  // Declare parsed OUTSIDE the try block so catch block can access it
+  let parsed: unknown = null;
 
   // Parse content
   if (block.content) {
     try {
-      // Parse content - Zod schemas now handle both legacy (plain string) and new (JSON) formats
-      const parsed = typeof block.content === 'string'
-        ? (function() {
+      // Parse content - Zod schemas handle both legacy (plain string) and new (JSON) formats
+      parsed = typeof block.content === 'string'
+        ? (() => {
             try {
               return JSON.parse(block.content);
             } catch {
@@ -297,73 +243,63 @@ export function deserializeBlock(block) {
           })()
         : block.content;
 
-      // Zod validates and automatically handles both formats:
-      // - Legacy: "plain text" → transforms to {content: "plain text"}
-      // - New: {content: "text"} → validates and passes through
-      const validated = schema.parse(parsed);
+      // Zod validates and automatically handles both formats
+      const validated = schema.parse(parsed) as Record<string, unknown>;
 
       // Map validated data back to block structure
       if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
-        // Zod transform already normalized both formats to {content: string}
-        deserialized.content = validated.content || '';
+        deserialized['content'] = validated['content'] || '';
       } else if (block.type === 'ai') {
-        deserialized.messages = validated.messages || [];
-        if (validated.metadata) {
-          deserialized.metadata = { ...deserialized.metadata, ...validated.metadata };
+        deserialized['messages'] = validated['messages'] || [];
+        const validatedMeta = validated['metadata'];
+        if (validatedMeta) {
+          deserialized['metadata'] = {
+            ...(deserialized['metadata'] as object),
+            ...(validatedMeta as object)
+          };
         }
       } else if (block.type === 'image') {
-        deserialized.images = validated.images || [];
-        deserialized.layout = validated.layout || 'grid';
-        deserialized.columns = validated.columns || 3;
-      } else if (block.type === 'inline-image' || block.type === 'inlineImage') {
-        deserialized.url = validated.url || '';
-        deserialized.alt = validated.alt || '';
-        deserialized.caption = validated.caption || '';
-        deserialized.dimensions = validated.dimensions || null;
+        deserialized['images'] = validated['images'] || [];
+        deserialized['layout'] = validated['layout'] || 'grid';
+        deserialized['columns'] = validated['columns'] || 3;
+      } else if (block.type === 'inline-image') {
+        deserialized['url'] = validated['url'] || '';
+        deserialized['alt'] = validated['alt'] || '';
+        deserialized['caption'] = validated['caption'] || '';
+        deserialized['dimensions'] = validated['dimensions'] || null;
       } else if (block.type === 'table') {
-        // CRITICAL: Zod has already filtered out any invalid fields (milestone, issues, etc.)
-        deserialized.data = validated.data || {
+        deserialized['data'] = validated['data'] || {
           headers: ['Column 1', 'Column 2'],
           rows: [['', '']],
           columnAlignments: ['left', 'left'],
           hasHeaderRow: true
         };
       } else if (block.type === 'todo') {
-        deserialized.data = validated.data || { todos: [] };
-      } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-        // CRITICAL: Zod has already filtered out any invalid fields (headers, rows, etc.)
-        deserialized.data = validated.data || {
+        deserialized['data'] = validated['data'] || { todos: [] };
+      } else if (block.type === 'issue-tracker') {
+        deserialized['data'] = validated['data'] || {
           milestone: '',
           issues: []
         };
       } else if (block.type === 'filetree') {
-        deserialized.treeData = validated.treeData || [];
-        deserialized.expanded = validated.expanded || []; // Fixed: Use array to match Zod schema
+        deserialized['treeData'] = validated['treeData'] || [];
+        deserialized['expanded'] = validated['expanded'] || [];
+        deserialized['snapshots'] = validated['snapshots'] || [];
+        deserialized['currentSnapshotId'] = validated['currentSnapshotId'] || null;
+        deserialized['snapshotLimit'] = validated['snapshotLimit'] || 50;
 
-        // CRITICAL FIX: Read snapshots from content (not metadata)
-        deserialized.snapshots = validated.snapshots || [];
-        deserialized.currentSnapshotId = validated.currentSnapshotId || null;
-        deserialized.snapshotLimit = validated.snapshotLimit || 50;
-
-        // Debug logging
-        console.log('[DEBUG-DESERIALIZE] FileTree block.id:', block.id);
-        console.log('[DEBUG-DESERIALIZE] FileTree validated.snapshots:', validated.snapshots);
-        console.log('[DEBUG-DESERIALIZE] FileTree validated.currentSnapshotId:', validated.currentSnapshotId);
-
-        console.log('[DEBUG-DESERIALIZE] FileTree deserialized.snapshots:', deserialized.snapshots);
-        console.log('[DEBUG-DESERIALIZE] FileTree deserialized.currentSnapshotId:', deserialized.currentSnapshotId);
-
-        // CRITICAL FIX #4: Backward compatibility with persistence flag
-        if (deserialized.snapshots.length === 0 && deserialized.treeData.length > 0) {
-          console.log('[DEBUG-DESERIALIZE] FileTree: Creating initial snapshot (backward compatibility)');
-          deserialized.snapshots = [{
+        // Backward compatibility: create initial snapshot if none exists
+        const snapshots = deserialized['snapshots'] as unknown[];
+        const treeData = deserialized['treeData'] as FileTreeNode[];
+        if (snapshots.length === 0 && treeData.length > 0) {
+          deserialized['snapshots'] = [{
             id: 'initial',
             timestamp: Date.now(),
             label: 'Initial state',
-            tree: sanitizeTreeForSnapshot(deserialized.treeData)
+            tree: sanitizeTreeForSnapshot(treeData)
           }];
-          deserialized.currentSnapshotId = 'initial';
-          deserialized._needsInitialSnapshotSave = true;
+          deserialized['currentSnapshotId'] = 'initial';
+          deserialized['_needsInitialSnapshotSave'] = true;
         }
       }
 
@@ -371,43 +307,43 @@ export function deserializeBlock(block) {
       console.warn(`BlockSerializer: Failed to parse/validate content for ${block.type}:`, error);
       console.warn(`BlockSerializer: Failed to parse content:`, block.content);
 
-      // CRITICAL: Try to preserve original data instead of using empty defaults
-      // Attempt to use the parsed content even if validation failed
-      if (parsed && typeof parsed === 'object') {
+      // Try to preserve original data instead of using empty defaults
+      const parsedObj = parsed as Record<string, unknown> | null;
+      if (parsedObj && typeof parsedObj === 'object') {
         console.warn(`BlockSerializer: Using parsed (but invalid) content to preserve user data`);
 
         if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
-          deserialized.content = parsed.content || parsed || '';
+          deserialized['content'] = parsedObj['content'] || parsedObj || '';
         } else if (block.type === 'ai') {
-          deserialized.messages = parsed.messages || [];
+          deserialized['messages'] = parsedObj['messages'] || [];
         } else if (block.type === 'image') {
-          deserialized.images = parsed.images || [];
-          deserialized.layout = parsed.layout || 'grid';
-          deserialized.columns = parsed.columns || 3;
+          deserialized['images'] = parsedObj['images'] || [];
+          deserialized['layout'] = parsedObj['layout'] || 'grid';
+          deserialized['columns'] = parsedObj['columns'] || 3;
         } else if (block.type === 'table') {
-          deserialized.data = parsed.data || {headers: [], rows: [], columnAlignments: [], hasHeaderRow: true};
-        } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-          deserialized.data = parsed.data || {milestone: '', issues: []};
+          deserialized['data'] = parsedObj['data'] || {headers: [], rows: [], columnAlignments: [], hasHeaderRow: true};
+        } else if (block.type === 'issue-tracker') {
+          deserialized['data'] = parsedObj['data'] || {milestone: '', issues: []};
         } else if (block.type === 'todo') {
-          deserialized.data = parsed.data || {todos: []};
+          deserialized['data'] = parsedObj['data'] || {todos: []};
         } else if (block.type === 'filetree') {
-          deserialized.treeData = parsed.treeData || [];
-          deserialized.expanded = parsed.expanded || [];
+          deserialized['treeData'] = parsedObj['treeData'] || [];
+          deserialized['expanded'] = parsedObj['expanded'] || [];
         }
       } else {
         // Only use empty defaults if we have no data at all
         const safeDefault = schema.safeParse({});
         if (safeDefault.success) {
-          const defaults = safeDefault.data;
+          const defaults = safeDefault.data as Record<string, unknown>;
           if (block.type === 'table') {
-            deserialized.data = defaults.data;
-          } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-            deserialized.data = defaults.data;
+            deserialized['data'] = defaults['data'];
+          } else if (block.type === 'issue-tracker') {
+            deserialized['data'] = defaults['data'];
           } else if (block.type === 'todo') {
-            deserialized.data = defaults.data;
+            deserialized['data'] = defaults['data'];
           } else if (block.type === 'filetree') {
-            deserialized.treeData = defaults.treeData || [];
-            deserialized.expanded = defaults.expanded || [];
+            deserialized['treeData'] = defaults['treeData'] || [];
+            deserialized['expanded'] = defaults['expanded'] || [];
           }
         }
       }
@@ -416,75 +352,79 @@ export function deserializeBlock(block) {
     // No content, use defaults
     const safeDefault = schema.safeParse({});
     if (safeDefault.success) {
-      const defaults = safeDefault.data;
+      const defaults = safeDefault.data as Record<string, unknown>;
       if (block.type === 'table') {
-        deserialized.data = defaults.data;
-      } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-        deserialized.data = defaults.data;
+        deserialized['data'] = defaults['data'];
+      } else if (block.type === 'issue-tracker') {
+        deserialized['data'] = defaults['data'];
       } else if (block.type === 'todo') {
-        deserialized.data = defaults.data;
+        deserialized['data'] = defaults['data'];
       } else if (block.type === 'filetree') {
-        deserialized.treeData = defaults.treeData || [];
-        deserialized.expanded = defaults.expanded || {};
+        deserialized['treeData'] = defaults['treeData'] || [];
+        deserialized['expanded'] = defaults['expanded'] || [];
       }
     }
   }
 
-  // Restore direct fields from metadata (for code blocks, heading level, etc.)
-  if (block.metadata) {
+  // Restore direct fields from metadata
+  const blockMetadata = block.metadata as Record<string, unknown> | undefined;
+  const blockRecord = block as unknown as Record<string, unknown>;
+  if (blockMetadata) {
     if (block.type === 'code') {
-      deserialized.language = block.metadata.language || block.language;
-      deserialized.filePath = block.metadata.filePath || block.file_path;
+      deserialized['language'] = blockMetadata['language'] || blockRecord['language'];
+      deserialized['filePath'] = blockMetadata['filePath'] || blockRecord['file_path'];
     }
     if (block.type === 'heading') {
-      deserialized.level = block.metadata.level || block.level;
+      deserialized['level'] = blockMetadata['level'] || blockRecord['level'];
     }
   }
 
-  return deserialized;
+  return deserialized as TypedBlockData;
 }
 
 /**
  * Validates if a block has the required fields for its type
- *
- * @param {Object} block - The block to validate
- * @returns {boolean} True if valid, false otherwise
  */
-export function validateBlock(block) {
-  if (!block || !block.id || !block.type) {
+export function validateBlock(block: unknown): block is BlockData {
+  if (!block || typeof block !== 'object') {
     return false;
   }
 
-  const schema = getBlockContentSchema(block.type);
+  const blockObj = block as Record<string, unknown>;
+  if (!blockObj['id'] || !blockObj['type']) {
+    return false;
+  }
+
+  const schema = getBlockContentSchema(blockObj['type'] as string);
 
   if (!schema) {
     // Unknown type, consider valid if has content
-    return block.content !== undefined;
+    return blockObj['content'] !== undefined;
   }
 
   try {
-    // Extract data similar to serialize
-    let dataToValidate = {};
+    let dataToValidate: Record<string, unknown> = {};
+    const type = blockObj['type'];
 
-    if (block.type === 'text' || block.type === 'heading' || block.type === 'code') {
-      dataToValidate = { content: block.content || '' };
-    } else if (block.type === 'ai') {
-      dataToValidate = { messages: block.messages || [], metadata: {} };
-    } else if (block.type === 'image') {
-      dataToValidate = { images: block.images || [], layout: 'grid', columns: 3 };
-    } else if (block.type === 'table') {
-      dataToValidate = { data: block.data || { headers: [], rows: [], columnAlignments: [], hasHeaderRow: true } };
-    } else if (block.type === 'todo') {
-      dataToValidate = { data: block.data || { todos: [] } };
-    } else if (block.type === 'issue-tracker' || block.type === 'issueTracker') {
-      dataToValidate = { data: block.data || { milestone: '', issues: [] } };
-    } else if (block.type === 'filetree') {
-      dataToValidate = { treeData: block.treeData || [], expanded: [] };
+    if (type === 'text' || type === 'heading' || type === 'code') {
+      dataToValidate = { content: blockObj['content'] || '' };
+    } else if (type === 'ai') {
+      dataToValidate = { messages: blockObj['messages'] || [], metadata: {} };
+    } else if (type === 'image') {
+      dataToValidate = { images: blockObj['images'] || [], layout: 'grid', columns: 3 };
+    } else if (type === 'table') {
+      dataToValidate = { data: blockObj['data'] || { headers: [], rows: [], columnAlignments: [], hasHeaderRow: true } };
+    } else if (type === 'todo') {
+      dataToValidate = { data: blockObj['data'] || { todos: [] } };
+    } else if (type === 'issue-tracker') {
+      dataToValidate = { data: blockObj['data'] || { milestone: '', issues: [] } };
+    } else if (type === 'filetree') {
+      dataToValidate = { treeData: blockObj['treeData'] || [], expanded: [] };
     }
 
     schema.parse(dataToValidate);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -494,4 +434,3 @@ export default {
   deserializeBlock,
   validateBlock
 };
-

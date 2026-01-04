@@ -1,8 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 
-const SidebarContext = createContext();
+interface SidebarContextValue {
+  isCollapsed: boolean;
+  setIsCollapsed: (value: boolean) => void;
+  toggleCollapsed: () => void;
+  showMobileSidebar: boolean;
+  toggleMobileSidebar: () => void;
+  closeMobileSidebar: () => void;
+}
 
-export const useSidebar = () => {
+const SidebarContext = createContext<SidebarContextValue | null>(null);
+
+export const useSidebar = (): SidebarContextValue => {
   const context = useContext(SidebarContext);
   if (!context) {
     throw new Error('useSidebar must be used within a SidebarProvider');
@@ -10,7 +19,11 @@ export const useSidebar = () => {
   return context;
 };
 
-export const SidebarProvider = ({ children }) => {
+interface SidebarProviderProps {
+  children: ReactNode;
+}
+
+export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   // Initialize collapsed state from localStorage
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem('sidebarCollapsed') === 'true';
@@ -38,14 +51,14 @@ export const SidebarProvider = ({ children }) => {
   
   // Keyboard shortcut handler
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       // Cmd/Ctrl + B to toggle sidebar
       if ((event.metaKey || event.ctrlKey) && event.key === 'b') {
         event.preventDefault();
         toggleCollapsed();
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);

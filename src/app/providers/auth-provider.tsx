@@ -1,16 +1,31 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { optimizedSupabase, onAuthStateChange, getSession } from '@/shared/api';
 import { performanceMonitor } from '@/shared/lib';
+import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 
-const AuthContext = createContext({});
+interface AuthContextValue {
+  user: User | null;
+  loading: boolean;
+  error: string | null;
+  signIn: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>;
+  signUp: (email: string, password: string) => Promise<{ data: unknown; error: unknown }>;
+  signOut: () => Promise<void>;
+  supabase: ReturnType<typeof optimizedSupabase.getClient>;
+}
 
-export function AuthProviderOptimized({ children }) {
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export function AuthProviderOptimized({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   
   // Memoize auth functions to prevent re-renders
-  const signIn = useCallback(async (email, password) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     const timerId = performanceMonitor.startTimer('auth:signIn');
     try {
       setError(null);
@@ -18,18 +33,19 @@ export function AuthProviderOptimized({ children }) {
         email,
         password
       });
-      
+
       if (error) throw error;
       performanceMonitor.endTimer(timerId, true);
       return { data, error: null };
     } catch (err) {
       performanceMonitor.endTimer(timerId, false);
-      setError(err.message);
+      const message = err instanceof Error ? err.message : 'Sign in failed';
+      setError(message);
       return { data: null, error: err };
     }
   }, []);
 
-  const signUp = useCallback(async (email, password) => {
+  const signUp = useCallback(async (email: string, password: string) => {
     const timerId = performanceMonitor.startTimer('auth:signUp');
     try {
       setError(null);
@@ -37,13 +53,14 @@ export function AuthProviderOptimized({ children }) {
         email,
         password
       });
-      
+
       if (error) throw error;
       performanceMonitor.endTimer(timerId, true);
       return { data, error: null };
     } catch (err) {
       performanceMonitor.endTimer(timerId, false);
-      setError(err.message);
+      const message = err instanceof Error ? err.message : 'Sign up failed';
+      setError(message);
       return { data: null, error: err };
     }
   }, []);
@@ -53,11 +70,12 @@ export function AuthProviderOptimized({ children }) {
     try {
       const { error } = await optimizedSupabase.getClient().auth.signOut();
       if (error) throw error;
-      
-      // Clear all caches
-      optimizedSupabase.sessionCache = null;
-      optimizedSupabase.sessionCacheTime = 0;
-      
+
+      // Clear all caches - use type assertion for internal cache properties
+      const client = optimizedSupabase as unknown as Record<string, unknown>;
+      if ('sessionCache' in client) client['sessionCache'] = null;
+      if ('sessionCacheTime' in client) client['sessionCacheTime'] = 0;
+
       performanceMonitor.endTimer(timerId, true);
     } catch (err) {
       performanceMonitor.endTimer(timerId, false);
@@ -100,7 +118,8 @@ export function AuthProviderOptimized({ children }) {
       } catch (err) {
         if (mounted) {
           console.error('Auth initialization error:', err);
-          setError(err.message);
+          const message = err instanceof Error ? err.message : 'Auth initialization failed';
+          setError(message);
           setLoading(false);
           performanceMonitor.endTimer(timerId, false);
         }
@@ -110,8 +129,8 @@ export function AuthProviderOptimized({ children }) {
     initializeAuth();
 
     // Subscribe to auth changes with debouncing for TOKEN_REFRESHED
-    let authChangeTimeout;
-    const unsubscribe = onAuthStateChange((event, session) => {
+    let authChangeTimeout: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (mounted) {
         console.log('[AuthContext] Auth state change received:', event, {
           mounted,

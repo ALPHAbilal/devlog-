@@ -2,6 +2,28 @@ import React, { useState, useRef, useEffect, memo } from 'react';
 import { Copy, Check, Maximize2, Minimize2, ChevronDown, ChevronUp, Code } from 'lucide-react';
 import { Highlight, themes } from 'prism-react-renderer';
 
+/**
+ * @typedef {import('@/features/block').CodeBlockData} CodeBlockData
+ * @typedef {import('@/features/block').BlockData} BlockData
+ */
+
+/**
+ * CodeBlock - Syntax-highlighted code editor
+ *
+ * Features:
+ * - Syntax highlighting via Prism
+ * - Language selection dropdown
+ * - File path with autocomplete from FileTree blocks
+ * - Copy to clipboard
+ * - Fullscreen mode
+ * - Collapsible for long code
+ *
+ * @param {object} props
+ * @param {CodeBlockData} props.block - The code block data
+ * @param {(id: string, updates: Partial<CodeBlockData>) => void} props.onUpdate - Update callback
+ * @param {BlockData[]} [props.allBlocks] - All blocks in document (for file path suggestions)
+ * @param {(blockId: string) => void} [props.onNavigateToBlock] - Navigate to block callback
+ */
 function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
   const [isEditing, setIsEditing] = useState(block.isNew && !block.content ? true : false);
   const [code, setCode] = useState(block.content || '');

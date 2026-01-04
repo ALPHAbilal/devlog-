@@ -1,10 +1,31 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 
-const TabContext = createContext();
+interface Tab {
+  id: string;
+  title: string;
+  isUnsaved: boolean;
+}
+
+interface TabContextValue {
+  tabs: Tab[];
+  activeTabId: string | null;
+  isInitialized: boolean;
+  openTab: (document: { id: string; title?: string }) => void;
+  closeTab: (tabId: string) => void;
+  closeOtherTabs: (keepTabId: string) => void;
+  closeTabsToRight: (tabId: string) => void;
+  updateTabTitle: (tabId: string, newTitle: string) => void;
+  setActiveTabId: (tabId: string | null) => void;
+  switchToNextTab: () => void;
+  switchToPrevTab: () => void;
+  switchToTabByIndex: (index: number) => void;
+}
+
+const TabContext = createContext<TabContextValue | null>(null);
 
 const STORAGE_KEY = 'devlog_tabs';
 
-export const useTabContext = () => {
+export const useTabContext = (): TabContextValue => {
   const context = useContext(TabContext);
   if (!context) {
     throw new Error('useTabContext must be used within a TabProvider');
@@ -12,10 +33,14 @@ export const useTabContext = () => {
   return context;
 };
 
-export const TabProvider = ({ children }) => {
+interface TabProviderProps {
+  children: ReactNode;
+}
+
+export const TabProvider = ({ children }: TabProviderProps) => {
   // Tab state: array of { id, title, isUnsaved }
-  const [tabs, setTabs] = useState([]);
-  const [activeTabId, setActiveTabId] = useState(null);
+  const [tabs, setTabs] = useState<Tab[]>([]);
+  const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
   // Load tabs from localStorage on mount
@@ -27,7 +52,7 @@ export const TabProvider = ({ children }) => {
         console.log('[TAB-RESTORE]', {
           tabCount: savedTabs?.length || 0,
           activeTabId: savedActiveId?.substring(0, 8),
-          tabIds: savedTabs?.map(t => t.id?.substring(0, 8))
+          tabIds: savedTabs?.map((t: Tab) => t.id?.substring(0, 8))
         });
         if (savedTabs && savedTabs.length > 0) {
           setTabs(savedTabs);
@@ -56,14 +81,14 @@ export const TabProvider = ({ children }) => {
   }, [tabs, activeTabId, isInitialized]);
 
   // Open a new tab (or switch to existing)
-  const openTab = useCallback((document) => {
+  const openTab = useCallback((document: { id: string; title?: string }) => {
     const existingTab = tabs.find(t => t.id === document.id);
     if (existingTab) {
       setActiveTabId(document.id);
       return;
     }
 
-    const newTab = {
+    const newTab: Tab = {
       id: document.id,
       title: document.title || 'Untitled',
       isUnsaved: false
@@ -74,7 +99,7 @@ export const TabProvider = ({ children }) => {
   }, [tabs]);
 
   // Close a tab
-  const closeTab = useCallback((tabId) => {
+  const closeTab = useCallback((tabId: string) => {
     setTabs(prev => {
       const newTabs = prev.filter(t => t.id !== tabId);
 
@@ -82,7 +107,8 @@ export const TabProvider = ({ children }) => {
       if (activeTabId === tabId && newTabs.length > 0) {
         const closedIndex = prev.findIndex(t => t.id === tabId);
         const newActiveIndex = Math.min(closedIndex, newTabs.length - 1);
-        setActiveTabId(newTabs[newActiveIndex].id);
+        const newActiveTab = newTabs[newActiveIndex];
+        if (newActiveTab) setActiveTabId(newActiveTab.id);
       } else if (newTabs.length === 0) {
         setActiveTabId(null);
       }
@@ -92,13 +118,13 @@ export const TabProvider = ({ children }) => {
   }, [activeTabId]);
 
   // Close all tabs except one
-  const closeOtherTabs = useCallback((keepTabId) => {
+  const closeOtherTabs = useCallback((keepTabId: string) => {
     setTabs(prev => prev.filter(t => t.id === keepTabId));
     setActiveTabId(keepTabId);
   }, []);
 
   // Close tabs to the right
-  const closeTabsToRight = useCallback((tabId) => {
+  const closeTabsToRight = useCallback((tabId: string) => {
     setTabs(prev => {
       const index = prev.findIndex(t => t.id === tabId);
       return prev.slice(0, index + 1);
@@ -106,7 +132,7 @@ export const TabProvider = ({ children }) => {
   }, []);
 
   // Update tab title (when document title changes)
-  const updateTabTitle = useCallback((tabId, newTitle) => {
+  const updateTabTitle = useCallback((tabId: string, newTitle: string) => {
     setTabs(prev => prev.map(t =>
       t.id === tabId ? { ...t, title: newTitle || 'Untitled' } : t
     ));
@@ -117,26 +143,29 @@ export const TabProvider = ({ children }) => {
     if (tabs.length <= 1) return;
     const currentIndex = tabs.findIndex(t => t.id === activeTabId);
     const nextIndex = (currentIndex + 1) % tabs.length;
-    setActiveTabId(tabs[nextIndex].id);
+    const nextTab = tabs[nextIndex];
+    if (nextTab) setActiveTabId(nextTab.id);
   }, [tabs, activeTabId]);
 
   const switchToPrevTab = useCallback(() => {
     if (tabs.length <= 1) return;
     const currentIndex = tabs.findIndex(t => t.id === activeTabId);
     const prevIndex = (currentIndex - 1 + tabs.length) % tabs.length;
-    setActiveTabId(tabs[prevIndex].id);
+    const prevTab = tabs[prevIndex];
+    if (prevTab) setActiveTabId(prevTab.id);
   }, [tabs, activeTabId]);
 
   // Switch to tab by index (1-9)
-  const switchToTabByIndex = useCallback((index) => {
-    if (index >= 0 && index < tabs.length) {
-      setActiveTabId(tabs[index].id);
+  const switchToTabByIndex = useCallback((index: number) => {
+    const tab = tabs[index];
+    if (tab) {
+      setActiveTabId(tab.id);
     }
   }, [tabs]);
 
   // Keyboard shortcuts
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + T = New tab
       if ((e.metaKey || e.ctrlKey) && e.key === 't') {
         e.preventDefault();

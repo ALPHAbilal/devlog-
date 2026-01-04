@@ -1,12 +1,32 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { supabase, setInactivityTimeout } from '@/shared/api';
 import { useAuth } from './auth-provider';
 
-const SettingsContext = createContext({});
+interface Settings {
+  defaultCodeLanguage: string;
+  autoSaveInterval: number;
+  showLineNumbers: boolean;
+  enableTextCollapse: boolean;
+  sessionTimeout: number;
+  [key: string]: unknown; // Allow additional settings
+}
 
-export function SettingsProvider({ children }) {
+interface SettingsContextValue {
+  settings: Settings;
+  updateSetting: (key: string, value: unknown) => Promise<void>;
+  updateSettings: (updates: Partial<Settings>) => Promise<void>;
+  isLoading: boolean;
+}
+
+const SettingsContext = createContext<SettingsContextValue | null>(null);
+
+interface SettingsProviderProps {
+  children: ReactNode;
+}
+
+export function SettingsProvider({ children }: SettingsProviderProps) {
   const { user } = useAuth();
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<Settings>({
     defaultCodeLanguage: 'javascript',
     autoSaveInterval: 30, // Changed from 1 to 30 seconds for production stability
     showLineNumbers: true,
@@ -100,7 +120,7 @@ export function SettingsProvider({ children }) {
   }, [user]);
 
   // Update a single setting
-  const updateSetting = async (key, value) => {
+  const updateSetting = async (key: string, value: unknown) => {
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     
@@ -125,7 +145,7 @@ export function SettingsProvider({ children }) {
   };
 
   // Update multiple settings at once
-  const updateSettings = async (updates) => {
+  const updateSettings = async (updates: Partial<Settings>) => {
     const newSettings = { ...settings, ...updates };
     setSettings(newSettings);
     
@@ -161,7 +181,7 @@ export function SettingsProvider({ children }) {
   );
 }
 
-export function useSettings() {
+export function useSettings(): SettingsContextValue {
   const context = useContext(SettingsContext);
   if (!context) {
     throw new Error('useSettings must be used within a SettingsProvider');

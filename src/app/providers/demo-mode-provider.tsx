@@ -1,7 +1,41 @@
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
+
+// Types for demo data
+interface DemoBlock {
+  id: string;
+  type: string;
+  content: string;
+  position: number;
+  metadata?: { isCollapsed?: boolean; version?: number };
+  language?: string;
+  filePath?: string;
+}
+
+interface DemoDocument {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  tags: string[];
+  blocks: DemoBlock[];
+}
+
+interface DemoModeContextValue {
+  isDemoMode: boolean;
+  setIsDemoMode: (value: boolean) => void;
+  demoDocuments: DemoDocument[];
+  activeDemoDocument: DemoDocument | undefined;
+  setActiveDemoDocument: (doc: DemoDocument | undefined) => void;
+  updateDemoDocument: (documentId: string, updates: Partial<DemoDocument>) => void;
+  addDemoBlock: (documentId: string, block: Partial<DemoBlock>) => DemoBlock;
+  updateDemoBlock: (documentId: string, blockId: string, updates: Partial<DemoBlock>) => void;
+  deleteDemoBlock: (documentId: string, blockId: string) => void;
+  reorderDemoBlocks: (documentId: string, sourceIndex: number, destinationIndex: number) => void;
+  searchDemoDocuments: (query: string) => DemoDocument[];
+}
 
 // Demo data that showcases Devlog's features
-const DEMO_DOCUMENTS = [
+const DEMO_DOCUMENTS: DemoDocument[] = [
   {
     id: 'demo-1',
     title: 'React Performance Optimization Guide',
@@ -139,9 +173,9 @@ app.use(cors(corsOptions));`,
   }
 ];
 
-const DemoModeContext = createContext();
+const DemoModeContext = createContext<DemoModeContextValue | null>(null);
 
-export const useDemoMode = () => {
+export const useDemoMode = (): DemoModeContextValue => {
   const context = useContext(DemoModeContext);
   if (!context) {
     throw new Error('useDemoMode must be used within DemoModeProvider');
@@ -149,32 +183,38 @@ export const useDemoMode = () => {
   return context;
 };
 
-export const DemoModeProvider = ({ children }) => {
+interface DemoModeProviderProps {
+  children: ReactNode;
+}
+
+export const DemoModeProvider = ({ children }: DemoModeProviderProps) => {
   const [isDemoMode, setIsDemoMode] = useState(true);
-  const [demoDocuments, setDemoDocuments] = useState(DEMO_DOCUMENTS);
-  const [activeDemoDocument, setActiveDemoDocument] = useState(DEMO_DOCUMENTS[0]);
+  const [demoDocuments, setDemoDocuments] = useState<DemoDocument[]>(DEMO_DOCUMENTS);
+  const [activeDemoDocument, setActiveDemoDocument] = useState<DemoDocument | undefined>(DEMO_DOCUMENTS[0]);
 
   // Simulate document operations
-  const updateDemoDocument = useCallback((documentId, updates) => {
-    setDemoDocuments(docs => 
-      docs.map(doc => 
-        doc.id === documentId 
+  const updateDemoDocument = useCallback((documentId: string, updates: Partial<DemoDocument>) => {
+    setDemoDocuments(docs =>
+      docs.map(doc =>
+        doc.id === documentId
           ? { ...doc, ...updates, updated_at: new Date().toISOString() }
           : doc
       )
     );
-    
+
     if (activeDemoDocument?.id === documentId) {
-      setActiveDemoDocument(prev => ({ ...prev, ...updates }));
+      setActiveDemoDocument(prev => prev ? { ...prev, ...updates } : prev);
     }
   }, [activeDemoDocument]);
 
   // Simulate block operations
-  const addDemoBlock = useCallback((documentId, block) => {
-    const newBlock = {
-      ...block,
+  const addDemoBlock = useCallback((documentId: string, block: Partial<DemoBlock>): DemoBlock => {
+    const newBlock: DemoBlock = {
       id: `demo-block-${Date.now()}`,
-      position: activeDemoDocument?.blocks?.length || 0
+      type: block.type || 'text',
+      content: block.content || '',
+      position: activeDemoDocument?.blocks?.length || 0,
+      ...block
     };
 
     setDemoDocuments(docs =>
@@ -186,16 +226,15 @@ export const DemoModeProvider = ({ children }) => {
     );
 
     if (activeDemoDocument?.id === documentId) {
-      setActiveDemoDocument(prev => ({
-        ...prev,
-        blocks: [...(prev.blocks || []), newBlock]
-      }));
+      setActiveDemoDocument(prev =>
+        prev ? { ...prev, blocks: [...(prev.blocks || []), newBlock] } : prev
+      );
     }
 
     return newBlock;
   }, [activeDemoDocument]);
 
-  const updateDemoBlock = useCallback((documentId, blockId, updates) => {
+  const updateDemoBlock = useCallback((documentId: string, blockId: string, updates: Partial<DemoBlock>) => {
     setDemoDocuments(docs =>
       docs.map(doc =>
         doc.id === documentId
@@ -210,16 +249,20 @@ export const DemoModeProvider = ({ children }) => {
     );
 
     if (activeDemoDocument?.id === documentId) {
-      setActiveDemoDocument(prev => ({
-        ...prev,
-        blocks: prev.blocks.map(block =>
-          block.id === blockId ? { ...block, ...updates } : block
-        )
-      }));
+      setActiveDemoDocument(prev =>
+        prev
+          ? {
+              ...prev,
+              blocks: prev.blocks.map(block =>
+                block.id === blockId ? { ...block, ...updates } : block
+              )
+            }
+          : prev
+      );
     }
   }, [activeDemoDocument]);
 
-  const deleteDemoBlock = useCallback((documentId, blockId) => {
+  const deleteDemoBlock = useCallback((documentId: string, blockId: string) => {
     setDemoDocuments(docs =>
       docs.map(doc =>
         doc.id === documentId
@@ -234,23 +277,29 @@ export const DemoModeProvider = ({ children }) => {
     );
 
     if (activeDemoDocument?.id === documentId) {
-      setActiveDemoDocument(prev => ({
-        ...prev,
-        blocks: prev.blocks
-          .filter(block => block.id !== blockId)
-          .map((block, index) => ({ ...block, position: index }))
-      }));
+      setActiveDemoDocument(prev =>
+        prev
+          ? {
+              ...prev,
+              blocks: prev.blocks
+                .filter(block => block.id !== blockId)
+                .map((block, index) => ({ ...block, position: index }))
+            }
+          : prev
+      );
     }
   }, [activeDemoDocument]);
 
-  const reorderDemoBlocks = useCallback((documentId, sourceIndex, destinationIndex) => {
+  const reorderDemoBlocks = useCallback((documentId: string, sourceIndex: number, destinationIndex: number) => {
     setDemoDocuments(docs =>
       docs.map(doc => {
         if (doc.id !== documentId) return doc;
 
         const blocks = [...doc.blocks];
         const [removed] = blocks.splice(sourceIndex, 1);
-        blocks.splice(destinationIndex, 0, removed);
+        if (removed) {
+          blocks.splice(destinationIndex, 0, removed);
+        }
 
         return {
           ...doc,
@@ -262,17 +311,20 @@ export const DemoModeProvider = ({ children }) => {
     if (activeDemoDocument?.id === documentId) {
       const blocks = [...activeDemoDocument.blocks];
       const [removed] = blocks.splice(sourceIndex, 1);
-      blocks.splice(destinationIndex, 0, removed);
+      if (removed) {
+        blocks.splice(destinationIndex, 0, removed);
+      }
 
-      setActiveDemoDocument(prev => ({
-        ...prev,
-        blocks: blocks.map((block, index) => ({ ...block, position: index }))
-      }));
+      setActiveDemoDocument(prev =>
+        prev
+          ? { ...prev, blocks: blocks.map((block, index) => ({ ...block, position: index })) }
+          : prev
+      );
     }
   }, [activeDemoDocument]);
 
   // Search simulation
-  const searchDemoDocuments = useCallback((query) => {
+  const searchDemoDocuments = useCallback((query: string): DemoDocument[] => {
     if (!query) return demoDocuments;
 
     const lowerQuery = query.toLowerCase();

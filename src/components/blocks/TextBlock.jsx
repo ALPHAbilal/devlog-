@@ -8,6 +8,12 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useAnalytics } from '@/features/analytics';
 
 /**
+ * @typedef {import('@/features/block').TextBlockData} TextBlockData
+ * @typedef {import('@/features/block').BlockType} BlockType
+ * @typedef {import('@/features/block').BlockData} BlockData
+ */
+
+/**
  * TextBlock - TipTap-based WYSIWYG text editor
  *
  * Features:
@@ -17,6 +23,13 @@ import { useAnalytics } from '@/features/analytics';
  * - Slash commands for block conversion
  * - Image paste support
  * - Collapsible long content
+ *
+ * @param {object} props
+ * @param {TextBlockData} props.block - The text block data
+ * @param {(id: string, updates: Partial<TextBlockData>) => void} props.onUpdate - Update callback
+ * @param {(newType: BlockType, metadata?: Record<string, unknown>) => void} [props.onConvert] - Convert block type
+ * @param {(blockData: Partial<BlockData> & { type: BlockType }) => void} [props.onAddBelow] - Add block below
+ * @param {BlockData[]} [props.allBlocks] - All blocks in document
  */
 function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
   const { user } = useAuth();

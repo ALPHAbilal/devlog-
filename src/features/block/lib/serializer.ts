@@ -124,10 +124,30 @@ export function serializeBlock(block: BlockData | TypedBlockData): SerializedBlo
         }
       };
     } else if (block.type === 'filetree') {
+      const rawSnapshots = get(b, 'snapshots') || [];
+      const rawTreeData = get(b, 'treeData') || [];
+
+      // DEBUG: Log tree data with file content
+      const countContent = (nodes: unknown[]): number => {
+        return (nodes as Array<{content?: string; children?: unknown[]}>).reduce((acc, n) => {
+          const hasContent = n?.content ? 1 : 0;
+          const childContent = n?.children ? countContent(n.children) : 0;
+          return acc + hasContent + childContent;
+        }, 0);
+      };
+
+      console.log('🌲 FileTree SERIALIZE:', {
+        treeDataLength: (rawTreeData as unknown[]).length,
+        filesWithContent: countContent(rawTreeData as unknown[]),
+        snapshotCount: (rawSnapshots as unknown[]).length,
+        hasComments: (rawSnapshots as Array<{comment?: string}>).some(s => s?.comment),
+        rawTreeDataSample: JSON.stringify(rawTreeData).substring(0, 200)
+      });
+
       dataToValidate = {
-        treeData: get(b, 'treeData') || [],
+        treeData: rawTreeData,
         expanded: get(b, 'expanded') || [],
-        snapshots: get(b, 'snapshots') || [],
+        snapshots: rawSnapshots,
         currentSnapshotId: get(b, 'currentSnapshotId') || null,
         snapshotLimit: get(b, 'snapshotLimit') || 50
       };

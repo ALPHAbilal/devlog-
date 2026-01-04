@@ -329,6 +329,10 @@ export function deserializeBlock(block: SerializedBlock): TypedBlockData {
         } else if (block.type === 'filetree') {
           deserialized['treeData'] = parsedObj['treeData'] || [];
           deserialized['expanded'] = parsedObj['expanded'] || [];
+          // CRITICAL: Restore snapshots data (includes comments!)
+          deserialized['snapshots'] = parsedObj['snapshots'] || [];
+          deserialized['currentSnapshotId'] = parsedObj['currentSnapshotId'] || null;
+          deserialized['snapshotLimit'] = parsedObj['snapshotLimit'] || 50;
         }
       } else {
         // Only use empty defaults if we have no data at all
@@ -344,6 +348,9 @@ export function deserializeBlock(block: SerializedBlock): TypedBlockData {
           } else if (block.type === 'filetree') {
             deserialized['treeData'] = defaults['treeData'] || [];
             deserialized['expanded'] = defaults['expanded'] || [];
+            deserialized['snapshots'] = defaults['snapshots'] || [];
+            deserialized['currentSnapshotId'] = defaults['currentSnapshotId'] || null;
+            deserialized['snapshotLimit'] = defaults['snapshotLimit'] || 50;
           }
         }
       }
@@ -362,6 +369,9 @@ export function deserializeBlock(block: SerializedBlock): TypedBlockData {
       } else if (block.type === 'filetree') {
         deserialized['treeData'] = defaults['treeData'] || [];
         deserialized['expanded'] = defaults['expanded'] || [];
+        deserialized['snapshots'] = defaults['snapshots'] || [];
+        deserialized['currentSnapshotId'] = defaults['currentSnapshotId'] || null;
+        deserialized['snapshotLimit'] = defaults['snapshotLimit'] || 50;
       }
     }
   }

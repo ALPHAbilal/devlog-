@@ -659,6 +659,27 @@ export const storageWrapper = {
     // Fallback for IndexedDB
     const allDocs = await adapter.loadEntries();
     return allDocs.slice(offset, offset + limit);
+  },
+
+  /**
+   * Get all documents synchronously (for RecoveryManager)
+   * Returns empty array since async loading is preferred
+   */
+  getAllDocuments() {
+    // RecoveryManager calls this synchronously for checkpoint saves
+    // Since our storage is async, return empty array
+    // Real document backup is handled by SmartSync
+    return [];
+  },
+
+  /**
+   * Get documents with unsaved changes (for RecoveryManager auto-save)
+   * Returns empty array since SmartSync handles saving
+   */
+  getUnsavedDocuments() {
+    // SmartSync tracks and saves changes automatically
+    // RecoveryManager auto-save is a legacy fallback
+    return [];
   }
 };
 

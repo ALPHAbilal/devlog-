@@ -25,16 +25,15 @@ const CinematicDocumentDemo = () => {
     const cameraSpringConfig = { stiffness: 40, damping: 20, mass: 2 }; // Softer, heavier pull for cinematic feel
 
     // Optimized Centered Tracking: 
-    // We want the camera to shift its view to keep the cursor relatively central when zooming.
-    // Tracking intensity increased to 0.4 for dramatic cinematic follow.
-    const cameraX = useSpring(useTransform(cursorX, (val) => (400 - val) * 0.4), cameraSpringConfig);
-    const cameraY = useSpring(useTransform(cursorY, (val) => (300 - val) * 0.4), cameraSpringConfig);
+    // Increased intensity to 0.8x and adjusted centering to ensure action is never cut off.
+    const cameraX = useSpring(useTransform(cursorX, (val) => (400 - val) * 0.8), cameraSpringConfig);
+    const cameraY = useSpring(useTransform(cursorY, (val) => (200 - val) * 0.8), cameraSpringConfig);
     const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
-    // 1:1 Block UI Components
+    // 1:1 Block UI Components (Tightened for Visibility)
     const BlockWrapper = ({ children, isFocused = true }) => (
-        <div className={`group block-wrapper relative transition-all duration-700 mb-10 ${isFocused ? 'opacity-100' : 'opacity-20'}`}>
+        <div className={`group block-wrapper relative transition-all duration-700 mb-6 ${isFocused ? 'opacity-100' : 'opacity-20'}`}>
             {children}
         </div>
     );
@@ -172,7 +171,7 @@ const CinematicDocumentDemo = () => {
 
             {/* 2. Cinematic Viewport (With Tracking + Drift) */}
             <motion.div
-                className="relative w-full h-full p-20 md:p-28 z-10"
+                className="relative w-full h-full p-12 md:p-14 z-10"
                 style={{
                     x: cameraX,
                     y: cameraY,
@@ -187,7 +186,7 @@ const CinematicDocumentDemo = () => {
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
                 {/* Meta Header */}
-                <div className="flex items-center justify-between mb-20 opacity-10">
+                <div className="flex items-center justify-between mb-10 opacity-10">
                     <div className="flex gap-2">
                         {[1, 2, 3].map(i => <div key={i} className="w-2 h-2 rounded-full bg-white" />)}
                     </div>

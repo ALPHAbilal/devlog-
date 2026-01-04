@@ -22,10 +22,7 @@ import {
   type BlockData,
 } from '@/features/document';
 
-import {
-  useOptimizedBlockLoader,
-  usePaginatedBlockLoader,
-} from '@/features/block';
+import { useBlocks } from '@/features/block';
 
 import { useAnalytics, useDocumentAnalytics } from '@/features/analytics';
 
@@ -122,33 +119,27 @@ function DocumentEditorComponent({
     backlinks,
   } = useDocumentState({ entry, allEntries });
 
-  // Block loader selection
-  const shouldUsePagination = !stableEntry.blocks || stableEntry.blockCount > 50;
-
-  const paginatedLoader = usePaginatedBlockLoader(entry?.id || null, entry, {
-    pageSize: 50,
-    enableInfiniteScroll: true,
-    skip: !shouldUsePagination || !entry?.id,
-  });
-
-  const optimizedLoader = useOptimizedBlockLoader(entry?.id || null, entry, {
-    skip: shouldUsePagination || !entry?.id,
-  });
-
-  const loader = shouldUsePagination ? paginatedLoader : optimizedLoader;
-
+  // Block loading via TanStack Query + Dexie
+  // New architecture: Local-first with Dexie, background sync to Supabase
   const {
     blocks: loadedBlocks,
     isLoading: isLoadingBlocks,
-    isLoadingMore = false,
-    hasMore = false,
-    loadMore = () => {},
+    isLoadingMore,
+    hasMore,
+    loadMore,
     updateBlocks: updateLoadedBlocks,
     setBlocksDirectly,
     updateBlock: updateSingleBlock,
     removeBlock,
-    progress = null,
-  } = loader;
+    progress,
+  } = useBlocks(entry?.id || undefined, {
+    enabled: !!entry?.id,
+    // Pass entry.blocks to seed Dexie for instant display
+    initialBlocks: entry?.blocks,
+  });
+
+  // For progress display compatibility
+  const shouldUsePagination = false; // New architecture loads all blocks instantly from Dexie
 
   // Memoize blocks to prevent unnecessary re-renders
   const blocks = useMemo(() => loadedBlocks || [], [loadedBlocks]);

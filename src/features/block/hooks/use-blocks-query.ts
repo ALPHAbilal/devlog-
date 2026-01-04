@@ -4,23 +4,32 @@
  *
  * Hybrid pattern: Dexie useLiveQuery + TanStack Query.
  * Replaces sessionCache, useOptimizedBlockLoader, usePaginatedBlockLoader.
+ *
+ * Data flow:
+ * 1. Dexie useLiveQuery provides instant reactivity for local changes
+ * 2. TanStack Query handles remote Supabase sync in background
+ * 3. initialBlocks (from Dashboard entry.blocks) seeds Dexie if empty
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '@/shared/lib/storage/dexie-db';
+import { db, type LocalBlock } from '@/shared/lib/storage/dexie-db';
 import { blockRepository } from '@/entities/Block/Block.repository';
 import { blockKeys } from '@/shared/api/query-keys';
 import type { BlockData } from '@/features/block/lib/schemas';
+import { deserializeBlock } from '@/features/block/lib/serializer';
 
 interface UseBlocksOptions {
   enabled?: boolean;
+  /** Initial blocks from Dashboard entry.blocks - seeds Dexie if empty */
+  initialBlocks?: unknown[];
 }
 
 export function useBlocks(documentId: string | undefined, options: UseBlocksOptions = {}) {
-  const { enabled = true } = options;
+  const { enabled = true, initialBlocks } = options;
   const queryClient = useQueryClient();
+  const hasSeededRef = useRef(false);
 
   // Local-first: Dexie live query for instant reactivity
   const localBlocks = useLiveQuery(
@@ -33,6 +42,42 @@ export function useBlocks(documentId: string | undefined, options: UseBlocksOpti
     [documentId],
     []
   );
+
+  // Seed Dexie with initialBlocks (from entry.blocks) if Dexie is empty
+  // This provides instant display while Supabase sync happens in background
+  useEffect(() => {
+    if (!documentId || hasSeededRef.current) return;
+    if (!initialBlocks || initialBlocks.length === 0) return;
+    if (localBlocks && localBlocks.length > 0) return; // Dexie already has data
+
+    hasSeededRef.current = true;
+
+    // Seed Dexie with deserialized blocks from entry.blocks
+    const seedBlocks = async () => {
+      console.log(`[useBlocks] Seeding Dexie with ${initialBlocks.length} blocks from entry.blocks`);
+
+      await db.transaction('rw', db.blocks, async () => {
+        for (const rawBlock of initialBlocks) {
+          // Deserialize block (entry.blocks may be serialized from IndexedDB)
+          const block = deserializeBlock(rawBlock as { id: string; type: string; content?: string });
+
+          const localBlock: LocalBlock = {
+            ...(block as BlockData),
+            document_id: documentId,
+            _isSynced: true, // Assume synced since it came from storage
+            _localUpdatedAt: Date.now(),
+          };
+          await db.blocks.put(localBlock);
+        }
+      });
+
+      console.log(`[useBlocks] Seeded ${initialBlocks.length} blocks to Dexie`);
+    };
+
+    seedBlocks().catch(err => {
+      console.error('[useBlocks] Failed to seed Dexie:', err);
+    });
+  }, [documentId, initialBlocks, localBlocks]);
 
   // Remote sync: TanStack Query for Supabase (background)
   const remoteQuery = useQuery({

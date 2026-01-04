@@ -2,19 +2,58 @@
 
 > **Goal**: Create unified data layer using TanStack Query + Dexie, replacing 5+ overlapping caches.
 
-**Status**: Phase 4.1-4.4 COMPLETE ✅ (2025-01-04)
+**Status**: Phase 4 COMPLETE ✅ (2025-01-04)
 - ✅ Phase 4.1: Dependencies + Schemas (dexie-react-hooks, Document.schema.ts, dexie-db.ts, sync-queue-manager.ts)
 - ✅ Phase 4.2: Repositories (Document.repository.ts, Block.repository.ts)
 - ✅ Phase 4.3: Query Hooks (use-document.ts, use-blocks-query.ts)
 - ✅ Feature flags created (feature-flags.ts)
-- ✅ Phase 4.4: Migration (Complete - consumers already use TanStack Query)
+- ✅ Phase 4.4: Migration COMPLETE (2025-01-04)
   - ✅ Step 9: useBlocks exported from feature barrel
   - ✅ Step 10: API Compatibility layer added to useBlocks
   - ✅ Step 11: Feature flags ready for use
-  - ✅ Step 12-13: ExpandedViewEnhanced + Dashboard already migrated (no sessionCache usage)
+  - ✅ Step 12-13: DocumentEditor wired to use useBlocks() hook
   - ✅ Step 15: sessionCache has deprecation notices
-  - ⏳ Step 14: Legacy file removal (deferred - need testing period)
-- ⏳ Phase 4.5: Verification (pending - manual offline testing)
+  - ✅ ExpandedViewEnhanced.jsx DELETED (replaced by DocumentEditor.tsx)
+  - ⏳ Step 14: Legacy file removal (use-optimized-loader.ts, use-paginated-loader.ts - deferred)
+- ⏳ Phase 4.5: Verification (pending - manual testing)
+
+## Current Architecture (Post-Migration)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    DocumentEditor.tsx                        │
+│                    (uses useBlocks hook)                    │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    useBlocks() hook                          │
+│  - useLiveQuery (Dexie) → instant local reactivity          │
+│  - useQuery (TanStack) → background Supabase sync           │
+│  - initialBlocks → seeds Dexie from entry.blocks            │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  BlockRepository                             │
+│  - getBlocks() → Dexie first, Supabase fallback             │
+│  - updateBlock() → Dexie only (SmartSync handles Supabase)  │
+│  - fetchBlocksFromServer() → deserialize Supabase data      │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+        ┌─────────────┴─────────────┐
+        ▼                           ▼
+┌───────────────┐           ┌───────────────┐
+│    Dexie      │           │   Supabase    │
+│  (Local DB)   │           │   (Remote)    │
+│  Instant R/W  │           │   via         │
+│  useLiveQuery │           │   SmartSync   │
+└───────────────┘           └───────────────┘
+
+NOTE: BlockRepository stores to Dexie for local reactivity.
+SmartSync (via useBlockOperations) handles Supabase syncing.
+This avoids double-syncing conflicts.
+```
 
 ---
 

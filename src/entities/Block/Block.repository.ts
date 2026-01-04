@@ -4,12 +4,19 @@
  *
  * Same hybrid pattern as DocumentRepository:
  * Dexie first, Supabase sync in background.
+ *
+ * CRITICAL: This repository handles serialization/deserialization:
+ * - Dexie stores DESERIALIZED blocks (expanded format for fast local access)
+ * - Supabase stores SERIALIZED blocks (content as JSON string)
  */
 
 import { db, type LocalBlock } from '@/shared/lib/storage/dexie-db';
-import { syncQueueManager } from '@/shared/lib/storage/sync-queue-manager';
 import { optimizedSupabase } from '@/shared/api';
-import { BaseBlockSchema, type BlockData } from '@/features/block/lib/schemas';
+import { BaseBlockSchema, type BlockData, type SerializedBlock } from '@/features/block/lib/schemas';
+import { deserializeBlock } from '@/features/block/lib/serializer';
+
+// NOTE: Supabase syncing is handled by SmartSync (via useBlockOperations.handleChange())
+// BlockRepository only manages local Dexie storage for instant reactivity via useLiveQuery
 
 export class BlockRepository {
   /**
@@ -45,87 +52,76 @@ export class BlockRepository {
 
   /**
    * Update single block
+   * NOTE: Only stores to Dexie. SmartSync handles Supabase syncing via useBlockOperations.
    */
   async updateBlock(id: string, updates: Partial<BlockData>): Promise<BlockData | null> {
     const existing = await db.blocks.get(id);
     if (!existing) return null;
 
+    // Store DESERIALIZED in Dexie for fast local access
     const updated: LocalBlock = {
       ...existing,
       ...updates,
-      _isSynced: false,
+      _isSynced: false, // Mark as needing sync (SmartSync will handle it)
       _localUpdatedAt: Date.now(),
     };
 
     await db.blocks.put(updated);
 
-    // Queue for sync
-    await syncQueueManager.enqueue(
-      'block',
-      id,
-      'UPDATE',
-      this.toBlockData(updated) as Record<string, unknown>
-    );
+    // NOTE: Supabase syncing is handled by SmartSync via useBlockOperations.handleChange()
+    // This avoids double-syncing conflicts between syncQueueManager and SmartSync.
 
     return this.toBlockData(updated);
   }
 
   /**
    * Create new block
+   * NOTE: Only stores to Dexie. SmartSync handles Supabase syncing via useBlockOperations.
    */
   async createBlock(documentId: string, block: BlockData): Promise<BlockData> {
+    // Store DESERIALIZED in Dexie for fast local access
     const localBlock: LocalBlock = {
       ...block,
       document_id: documentId,
-      _isSynced: false,
+      _isSynced: false, // Mark as needing sync (SmartSync will handle it)
       _localUpdatedAt: Date.now(),
     };
 
     await db.blocks.put(localBlock);
 
-    await syncQueueManager.enqueue(
-      'block',
-      block.id,
-      'CREATE',
-      { ...block, document_id: documentId } as Record<string, unknown>
-    );
+    // NOTE: Supabase syncing is handled by SmartSync via useBlockOperations.handleChange()
 
     return block;
   }
 
   /**
    * Delete block
+   * NOTE: Only deletes from Dexie. SmartSync handles Supabase syncing via useBlockOperations.
    */
   async deleteBlock(id: string): Promise<void> {
     await db.blocks.delete(id);
-    await syncQueueManager.enqueue('block', id, 'DELETE', { id });
+    // NOTE: Supabase syncing is handled by SmartSync via useBlockOperations.handleChange()
   }
 
   /**
    * Bulk update blocks (for reordering, etc.)
+   * NOTE: Only stores to Dexie. SmartSync handles Supabase syncing via useBlockOperations.
    */
   async updateBlocks(documentId: string, blocks: BlockData[]): Promise<void> {
+    // Store DESERIALIZED in Dexie for fast local access
     await db.transaction('rw', db.blocks, async () => {
       for (const block of blocks) {
         const localBlock: LocalBlock = {
           ...block,
           document_id: documentId,
-          _isSynced: false,
+          _isSynced: false, // Mark as needing sync (SmartSync will handle it)
           _localUpdatedAt: Date.now(),
         };
         await db.blocks.put(localBlock);
       }
     });
 
-    // Queue sync for each block
-    for (const block of blocks) {
-      await syncQueueManager.enqueue(
-        'block',
-        block.id,
-        'UPDATE',
-        { ...block, document_id: documentId } as Record<string, unknown>
-      );
-    }
+    // NOTE: Supabase syncing is handled by SmartSync via useBlockOperations.handleChange()
   }
 
   /**
@@ -144,6 +140,7 @@ export class BlockRepository {
 
   /**
    * Fetch blocks from Supabase
+   * CRITICAL: Supabase stores SERIALIZED blocks, must deserialize for local use
    */
   private async fetchBlocksFromServer(documentId: string): Promise<BlockData[]> {
     const supabase = optimizedSupabase.getClient();
@@ -154,7 +151,15 @@ export class BlockRepository {
       .order('position', { ascending: true });
 
     if (error || !data) return [];
-    return data.map((block: unknown) => BaseBlockSchema.parse(block));
+
+    // CRITICAL: Deserialize blocks from Supabase format
+    // Supabase has content as JSON string, we need expanded format
+    return data.map((block: unknown) => {
+      // First validate base structure
+      const validated = BaseBlockSchema.parse(block);
+      // Then deserialize to expand content
+      return deserializeBlock(validated as SerializedBlock);
+    });
   }
 
   /**

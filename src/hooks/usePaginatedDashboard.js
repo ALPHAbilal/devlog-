@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/app/providers';
 import { loadDocumentsPaginated } from '@/shared/lib';
-import { getDocumentsWithRealActivity } from '../lib/supabase-optimizations';
+import { getDocumentsWithRealActivity } from '@/shared/api';
 
 /**
  * Hook for paginated dashboard document loading with infinite scroll

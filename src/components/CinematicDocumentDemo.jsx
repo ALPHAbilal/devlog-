@@ -21,12 +21,14 @@ const CinematicDocumentDemo = () => {
     const cursorOpacity = useMotionValue(0);
 
     // Camera values pull towards the cursor with spring physics
-    // Research-backed 'Professional Cursor' constants
     const springConfig = { stiffness: 100, damping: 20, mass: 1 };
+    const cameraSpringConfig = { stiffness: 40, damping: 20, mass: 2 }; // Softer, heavier pull for cinematic feel
 
-    // We transform cursor position into a camera lean (subtle offset)
-    const cameraX = useSpring(useTransform(cursorX, (val) => -val * 0.05 + 10), springConfig);
-    const cameraY = useSpring(useTransform(cursorY, (val) => -val * 0.05 + 20), springConfig);
+    // Optimized Centered Tracking: 
+    // We want the camera to shift its view to keep the cursor relatively central when zooming.
+    // Tracking intensity increased to 0.4 for dramatic cinematic follow.
+    const cameraX = useSpring(useTransform(cursorX, (val) => (400 - val) * 0.4), cameraSpringConfig);
+    const cameraY = useSpring(useTransform(cursorY, (val) => (300 - val) * 0.4), cameraSpringConfig);
     const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
@@ -128,7 +130,7 @@ const CinematicDocumentDemo = () => {
             // SEQUENCE 5: Save & Blur (Infrastructure Capture)
             animate(cursorOpacity, 0, { duration: 0.8 });
             animate(cameraBlur, 8, { duration: 1 });
-            cameraScale.set(1.2);
+            cameraScale.set(1.35); // Stronger cinematic zoom
 
             setSaveStatus('saving');
             await new Promise(r => setTimeout(r, 1200));
@@ -148,16 +150,27 @@ const CinematicDocumentDemo = () => {
 
     return (
         <div ref={scope} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
-            {/* 1. Backdrop Layer (Shimmer Fix: Separate from content) */}
+            {/* 1. Backdrop Layer (Shimmer Fix + Cinematic Overlays) */}
             <motion.div
                 className="absolute inset-0 z-0"
                 style={{ filter: useTransform(cameraBlur, (v) => `blur(${v}px)`) }}
             >
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.1),transparent_70%)]" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
+
+                {/* Cinematic Light Leak */}
+                <motion.div
+                    className="absolute -inset-20 bg-gradient-to-tr from-emerald-500/10 via-transparent to-blue-500/10 blur-[100px] pointer-events-none"
+                    animate={{
+                        opacity: [0.3, 0.5, 0.3],
+                        rotate: [0, 5, 0],
+                        scale: [1, 1.1, 1]
+                    }}
+                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                />
             </motion.div>
 
-            {/* 2. Cinematic Viewport */}
+            {/* 2. Cinematic Viewport (With Tracking + Drift) */}
             <motion.div
                 className="relative w-full h-full p-20 md:p-28 z-10"
                 style={{
@@ -166,6 +179,12 @@ const CinematicDocumentDemo = () => {
                     scale: cameraScale,
                     transformOrigin: 'center center'
                 }}
+                animate={{
+                    // Subtle Handheld Drift
+                    rotateX: [0, 0.5, 0],
+                    rotateY: [0, 0.3, 0],
+                }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
                 {/* Meta Header */}
                 <div className="flex items-center justify-between mb-20 opacity-10">

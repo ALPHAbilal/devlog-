@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import ExpandedView from '../components/ExpandedViewEnhanced';
+import { DocumentEditor as ExpandedView } from '../components/DocumentEditor';
 import MobileDocumentViewer from '../components/MobileDocumentViewer';
 import { useResponsive } from '@/shared/hooks';
 import DocumentLinkModal from '../components/DocumentLinkModal';

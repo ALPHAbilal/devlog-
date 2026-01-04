@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useResponsive } from '@/shared/hooks';
 import { useTouchGestures } from '@/shared/hooks';
-import ExpandedViewEnhanced from './ExpandedViewEnhanced';
+import { DocumentEditor as ExpandedViewEnhanced } from './DocumentEditor';
 import MobileDocumentHeader from './MobileDocumentHeader';
 import MobileBottomSheet from './MobileBottomSheet';
 import { motion, AnimatePresence } from 'framer-motion';

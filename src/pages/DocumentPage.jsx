@@ -19,7 +19,7 @@ import { useAuth } from '@/app/providers';
 import { storageWrapper } from '@/shared/lib';
 import { useDocumentAnalytics } from '@/features/analytics';
 import { useResponsive } from '@/shared/hooks';
-import ExpandedViewEnhanced from '../components/ExpandedViewEnhanced';
+import { DocumentEditor as ExpandedViewEnhanced } from '../components/DocumentEditor';
 import MobileDocumentViewer from '../components/MobileDocumentViewer';
 
 export default function DocumentPage() {

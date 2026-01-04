@@ -1,7 +1,137 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Document Creation & Block Addition Bugs
+## Current Task: Phase 5C - DocumentEditor Orchestrator
+Status: ✅ COMPLETE - DocumentEditor replaces ExpandedViewEnhanced
+Date: 2025-01-04
+
+### What Was Implemented (Phase 5C)
+
+**Step 17: Create DocumentEditor orchestrator**
+- Created `src/components/DocumentEditor/DocumentEditor.tsx` (295 lines)
+- Composes all extracted hooks and components:
+  - useDocumentState, useTagOperations, useBlockSync, useBlockMove, useDragDrop, useBlockOperations
+  - HeaderControls, BlockListView, LinesView, TagManager, BacklinksSection, DeleteConfirmation, BlockRenderer
+- Memoized with custom comparison for optimal re-renders
+
+**Step 18: Create barrel file**
+- Updated `src/components/DocumentEditor/index.ts` with main orchestrator export
+- Named and default exports for backwards compatibility
+
+**Step 19: Update imports in consumers**
+- `src/pages/Dashboard.jsx` → `import { DocumentEditor as ExpandedView }`
+- `src/pages/DocumentPage.jsx` → `import { DocumentEditor as ExpandedViewEnhanced }`
+- `src/components/MobileDocumentViewer.jsx` → `import { DocumentEditor as ExpandedViewEnhanced }`
+
+**Step 20: Delete old ExpandedViewEnhanced.jsx**
+- Deferred pending integration testing
+- Old file kept as backup until manual verification complete
+
+### Verification
+- ✅ TypeScript compiles without errors
+- ✅ `npm run build` succeeds
+- ⏳ Manual testing required before deleting old file
+
+### Files Created/Modified
+1. **Created**: `src/components/DocumentEditor/DocumentEditor.tsx` (295 lines)
+2. **Updated**: `src/components/DocumentEditor/index.ts`
+3. **Updated**: `src/pages/Dashboard.jsx` (import change)
+4. **Updated**: `src/pages/DocumentPage.jsx` (import change)
+5. **Updated**: `src/components/MobileDocumentViewer.jsx` (import change)
+
+### Next Steps
+1. **Manual Testing**: Verify document editing works in browser
+2. **Delete Legacy**: Remove `ExpandedViewEnhanced.jsx` after testing
+3. **Phase 6**: Continue with remaining refactoring phases
+
+---
+
+## Previous Task: Phase 4 Data Layer Implementation
+Status: ✅ FOUNDATION COMPLETE - Ready for Consumer Migration
+Date: 2025-01-04
+
+### What Was Implemented
+
+**Phase 4.1: Foundation (Dependencies + Schemas)**
+- ✅ Installed `dexie-react-hooks` package
+- ✅ Created `src/entities/Document/Document.schema.ts` - Zod schemas for Document entity
+- ✅ Created `src/shared/lib/storage/dexie-db.ts` - Dexie v4 database with sync metadata
+- ✅ Created `src/shared/lib/storage/sync-queue-manager.ts` - Background sync queue
+
+**Phase 4.2: Repositories**
+- ✅ Created `src/entities/Document/Document.repository.ts` - Hybrid offline-first pattern
+- ✅ Created `src/entities/Block/Block.repository.ts` - Same pattern for blocks
+
+**Phase 4.3: Query Hooks**
+- ✅ Created `src/features/document/hooks/use-document.ts` - useDocument + useDocuments hooks
+- ✅ Created `src/features/block/hooks/use-blocks-query.ts` - useBlocks hook
+
+**Feature Flags**
+- ✅ Created `src/shared/lib/feature-flags.ts` - Gradual rollout controls
+
+### Architecture Implemented
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    React Components                      │
+│   useDocument(id)      useBlocks(docId)                 │
+└────────────┬─────────────────────┬──────────────────────┘
+             │                     │
+             ▼                     ▼
+┌─────────────────────────────────────────────────────────┐
+│                   Repository Layer                       │
+│   DocumentRepository         BlockRepository             │
+└────────────┬─────────────────────┬──────────────────────┘
+             │                     │
+     ┌───────┴───────┐     ┌──────┴──────┐
+     ▼               ▼     ▼             ▼
+┌─────────┐    ┌─────────┐    ┌─────────────┐
+│TanStack │    │  Dexie  │    │  Supabase   │
+│ Query   │    │ (Local) │    │  (Remote)   │
+└─────────┘    └─────────┘    └─────────────┘
+```
+
+### Files Created (9 new files)
+
+1. `src/entities/Document/Document.schema.ts` - Document Zod schemas
+2. `src/entities/Document/Document.repository.ts` - Document repository
+3. `src/entities/Document/index.ts` - Document entity barrel
+4. `src/entities/Block/Block.repository.ts` - Block repository
+5. `src/shared/lib/storage/dexie-db.ts` - Dexie database
+6. `src/shared/lib/storage/sync-queue-manager.ts` - Sync queue manager
+7. `src/features/document/hooks/use-document.ts` - useDocument hooks
+8. `src/features/block/hooks/use-blocks-query.ts` - useBlocks hook
+9. `src/shared/lib/feature-flags.ts` - Feature flags
+
+### Verification
+
+- ✅ `npm run build` passes
+- ✅ No TypeScript errors in new files
+- ✅ Lint passes on all new files
+
+### Next Steps (Phase 4.4 Migration)
+
+1. **Update first consumer** - ExpandedViewEnhanced to use useBlocks()
+2. **Update Dashboard** - Replace sessionCache with repository
+3. **Delete legacy files** after migration complete
+4. **Manual offline testing** - Chrome DevTools Network → Offline
+
+### Feature Flag Usage
+
+```javascript
+// Enable new data layer (browser console)
+window.__enableNewDataLayer()
+
+// Disable (rollback)
+window.__disableNewDataLayer()
+
+// Check status
+window.__isNewDataLayerEnabled()
+```
+
+---
+
+## Previous Task: Document Creation & Block Addition Bugs
 Status: ✅ ALL FIXES APPLIED - Ready for Testing
 Date: 2025-11-29
 

@@ -1,48 +1,70 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useAnimation, useMotionValue, useSpring, useTransform, animate } from 'framer-motion';
-import { Copy, Check, MousePointer2, Save, Code, FileText, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, animate } from 'framer-motion';
+import { Plus, Type, Code, MessageSquare, Heading, Folder, Table, Image, AlertCircle, MousePointer2, Save, Check } from 'lucide-react';
 
 /**
- * CinematicDocumentDemo - Motion 11 High-Precision Edition
+ * CinematicDocumentDemo - High Fidelity Edition
  * 
- * Recreates the DevLog document page with deterministic camera tracking.
- * - Camera pull-tracking via useSpring (Linked to cursor)
- * - Biomechanical constants for human-like momentum
- * - animate() timeline orchestration
+ * Recreates the DevLog document page experience with 1:1 UI fidelity.
+ * Features:
+ * - Deterministic Camera Tracking (Percentage-based)
+ * - 1:1 AddBlockRow & BlockDivider Mocks
+ * - Character-by-character Typing Engine
+ * - Biomechanical Cursor Physics
  */
 const CinematicDocumentDemo = () => {
     const [blocks, setBlocks] = useState([]);
     const [saveStatus, setSaveStatus] = useState(null);
+    const [showAddMenu, setShowAddMenu] = useState(false);
     const scope = useRef(null);
 
-    // 1. Relative Motion Values (0-100 scale for responsiveness)
-    const cursorX = useMotionValue(120); // Start off-screen right
-    const cursorY = useMotionValue(120); // Start off-screen bottom
+    // 1. Relative Motion Values (0-100 scale)
+    const cursorX = useMotionValue(120);
+    const cursorY = useMotionValue(120);
     const cursorOpacity = useMotionValue(0);
 
-    // Camera values pull towards the cursor with spring physics
     const springConfig = { stiffness: 100, damping: 20, mass: 1 };
-    const cameraSpringConfig = { stiffness: 45, damping: 25, mass: 1.5 }; // More stable follow
+    const cameraSpringConfig = { stiffness: 45, damping: 25, mass: 1.5 };
 
-    // Centered Tracking (Percentage based): 
-    // We target 50% as the center. 
-    // A multiplier of 0.6 provided a balanced cinematic follow.
+    // Centered Tracking
     const cameraX = useSpring(useTransform(cursorX, (val) => (50 - val) * 0.6), cameraSpringConfig);
     const cameraY = useSpring(useTransform(cursorY, (val) => (40 - val) * 0.6), cameraSpringConfig);
     const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
-    // 1:1 Block UI Components (Tightened for Visibility)
-    const BlockWrapper = ({ children, isFocused = true }) => (
-        <div className={`group block-wrapper relative transition-all duration-700 mb-6 ${isFocused ? 'opacity-100' : 'opacity-20'}`}>
-            {children}
+    // --- 1:1 UI Mock Components ---
+
+    const BlockDividerMock = ({ isHovered = false }) => (
+        <div className="relative h-10 -my-2 flex items-center justify-center pointer-events-none">
+            <div className={`absolute inset-x-8 h-px transition-opacity duration-300 ${isHovered ? 'opacity-0' : 'bg-gradient-to-r from-transparent via-white/10 to-transparent'}`} />
+            <div className={`bg-[#0d1117] border border-white/10 text-white/40 rounded-full w-7 h-7 flex items-center justify-center transition-all duration-300 ${isHovered ? 'opacity-100 scale-100 border-emerald-500/50 text-emerald-500 bg-emerald-500/10' : 'opacity-0 scale-90'}`}>
+                <Plus size={16} />
+            </div>
         </div>
     );
 
-    const HeadingBlockRaw = ({ content }) => (
-        <div className="text-text-primary px-2 py-1 tracking-tight font-bold text-3xl">
-            {content}
-        </div>
+    const AddBlockRowMock = () => (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="flex items-center gap-1 bg-[#0d1117]/90 backdrop-blur-md rounded-full px-2 py-1 border border-white/10 shadow-2xl my-3"
+        >
+            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white/40"><Plus size={18} /></div>
+            <div className="w-px h-5 bg-white/10 mx-1" />
+            {[
+                { icon: Type, label: 'text' },
+                { icon: Heading, label: 'heading' },
+                { icon: Code, label: 'code', active: true },
+                { icon: Table, label: 'table' },
+                { icon: MessageSquare, label: 'ai' }
+            ].map((item, i) => (
+                <div key={i} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium transition-colors ${item.active ? 'bg-white/10 text-white' : 'text-white/40'}`}>
+                    <item.icon size={12} />
+                    <span>{item.label}</span>
+                </div>
+            ))}
+        </motion.div>
     );
 
     const CodeBlockRaw = ({ content, filePath }) => {
@@ -50,18 +72,16 @@ const CinematicDocumentDemo = () => {
         return (
             <div className="group relative pt-5">
                 {filePath && (
-                    <div className="absolute -top-3 left-0 text-[10px] text-accent-green/90 
-                          bg-dark-primary px-3 py-1.5 rounded-t font-mono z-30
-                          border border-accent-green/30 border-b-0">
+                    <div className="absolute -top-3 left-0 text-[10px] text-emerald-400 bg-[#0d1117] px-3 py-1.5 rounded-t font-mono border border-white/10 border-b-0">
                         {filePath}
                     </div>
                 )}
-                <div className="bg-[#01060b] border border-white/10 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/5">
+                <div className="bg-[#01060b] border border-white/10 rounded-xl overflow-hidden shadow-2xl">
                     <div className="flex">
-                        <div className="select-none text-text-secondary/20 text-[11px] font-mono p-4 pr-3 text-right border-r border-white/5 bg-black/20">
+                        <div className="select-none text-white/10 text-[11px] font-mono p-4 pr-3 text-right border-r border-white/5 bg-black/20">
                             {lines.map((_, i) => <div key={i} className="leading-7">{i + 1}</div>)}
                         </div>
-                        <pre className="flex-1 p-5 pl-5 overflow-hidden text-sm leading-7 font-mono">
+                        <pre className="flex-1 p-5 pl-5 text-sm leading-7 font-mono overflow-hidden">
                             <code className="text-[#9cdcfe]">
                                 {content.split(/(\/\/.*|\bwindow\b|\bevent\b|\bif\b|\bconst\b|\bfunction\b)/g).map((part, i) => {
                                     if (part.startsWith('//')) return <span key={i} className="text-[#6a9955]">{part}</span>;
@@ -77,193 +97,143 @@ const CinematicDocumentDemo = () => {
         );
     };
 
-    // Choreography Engine
-    useEffect(() => {
-        const playTimeline = async () => {
-            if (!scope.current) return;
+    // --- Interaction Engine ---
 
-            // RESET
-            setBlocks([]);
-            setSaveStatus(null);
-            cursorX.set(120);
-            cursorY.set(120);
-            cursorOpacity.set(0);
-            cameraScale.set(1);
-            cameraBlur.set(0);
+    const typeText = async (blockId, fullText) => {
+        let currentText = "";
+        for (let i = 0; i <= fullText.length; i++) {
+            currentText = fullText.slice(0, i);
+            setBlocks(prev => prev.map(b => b.id === blockId ? { ...b, content: currentText } : b));
+            const delay = 30 + Math.random() * 40; // Variable human speed
+            await new Promise(r => setTimeout(r, delay));
 
-            await new Promise(r => setTimeout(r, 1000));
-
-            // SEQUENCE 1: Entrance
-            const entrance = animate(cursorOpacity, 1, { duration: 0.5 });
-            animate(cursorX, 45, { duration: 1.5, ease: [0.22, 1, 0.36, 1] });
-            animate(cursorY, 35, { duration: 1.5, ease: [0.22, 1, 0.36, 1] });
-            await entrance;
-
-            // SEQUENCE 2: Heading
-            setBlocks([{ id: 'h1', type: 'heading', content: 'Atomic Sync Layer' }]);
-            await new Promise(r => setTimeout(r, 800));
-
-            // SEQUENCE 3: Navigate to Code
-            animate(cursorX, 35, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
-            animate(cursorY, 55, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
-            cameraScale.set(1.15); // Moderated zoom
-            await new Promise(r => setTimeout(r, 600));
-
-            // SEQUENCE 4: Typing Simulation
-            setBlocks(prev => [...prev, {
-                id: 'c1', type: 'code', filePath: 'src/lib/runtime.ts',
-                content: '// Init sequence'
-            }]);
-
-            const codeParts = [
-                '// Init sequence\nconst sync = () => {',
-                '// Init sequence\nconst sync = () => {\n  const id = "node_01";',
-                '// Init sequence\nconst sync = () => {\n  const id = "node_01";\n  broadcast(id);\n};'
-            ];
-
-            for (const part of codeParts) {
-                setBlocks(prev => prev.map(b => b.id === 'c1' ? { ...b, content: part } : b));
-                await new Promise(r => setTimeout(r, 500));
+            // Random camera jitters for "intensity"
+            if (i % 5 === 0) {
+                cameraX.set(cameraX.get() + (Math.random() - 0.5) * 0.5);
             }
+        }
+    };
 
-            // SEQUENCE 5: Save & Blur (Infrastructure Capture)
-            animate(cursorOpacity, 0, { duration: 0.8 });
-            animate(cameraBlur, 8, { duration: 1 });
-            cameraScale.set(1.25); // Moderated final zoom
+    const playTimeline = async () => {
+        if (!scope.current) return;
 
-            setSaveStatus('saving');
-            await new Promise(r => setTimeout(r, 1200));
-            setSaveStatus('saved');
+        // RESET
+        setBlocks([{ id: 'h1', type: 'heading', content: 'Distributed Engine' }]);
+        setSaveStatus(null);
+        setShowAddMenu(false);
+        cursorX.set(120); cursorY.set(120); cursorOpacity.set(0);
+        cameraScale.set(1); cameraBlur.set(0);
 
-            // SEQUENCE 6: Reset View
-            await new Promise(r => setTimeout(r, 2000));
-            animate(cameraBlur, 0, { duration: 2 });
-            cameraScale.set(1);
+        await new Promise(r => setTimeout(r, 1500));
 
-            await new Promise(r => setTimeout(r, 4000));
-            if (scope.current) playTimeline();
-        };
+        // 1. Entrance & Hover Divider
+        animate(cursorOpacity, 1, { duration: 0.5 });
+        await animate(cursorX, 50, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
+        await animate(cursorY, 40, { duration: 1.2, ease: [0.22, 1, 0.36, 1] });
 
+        // 2. Click to Add Block
+        setShowAddMenu(true);
+        await new Promise(r => setTimeout(r, 800));
+
+        // Move to 'Code' icon in menu
+        await animate(cursorX, 52, { duration: 0.4 });
+        await animate(cursorY, 45, { duration: 0.4 });
+
+        // 3. New Block Appears
+        setShowAddMenu(false);
+        setBlocks(prev => [...prev, {
+            id: 'c1', type: 'code', filePath: 'src/lib/sync.ts', content: ''
+        }]);
+
+        await new Promise(r => setTimeout(r, 400));
+
+        // 4. Typing Sequence
+        cameraScale.set(1.2);
+        await animate(cursorY, 65, { duration: 0.8 });
+        await typeText('c1', 'const sync = async () => {\n  const res = await vault.pull();\n  return res.data;\n};');
+
+        // 5. Save Sequence
+        await new Promise(r => setTimeout(r, 1000));
+        animate(cursorOpacity, 0, { duration: 0.8 });
+        animate(cameraBlur, 10, { duration: 1.5 });
+        cameraScale.set(1.3);
+
+        setSaveStatus('saving');
+        await new Promise(r => setTimeout(r, 1200));
+        setSaveStatus('saved');
+
+        // 6. Loop Reset
+        await new Promise(r => setTimeout(r, 2500));
+        animate(cameraBlur, 0, { duration: 2 });
+        cameraScale.set(1);
+
+        await new Promise(r => setTimeout(r, 4000));
+        if (scope.current) playTimeline();
+    };
+
+    useEffect(() => {
         playTimeline();
     }, []);
 
     return (
-        <div ref={scope} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl">
-            {/* 1. Backdrop Layer (Shimmer Fix + Cinematic Overlays) */}
-            <motion.div
-                className="absolute inset-0 z-0"
-                style={{ filter: useTransform(cameraBlur, (v) => `blur(${v}px)`) }}
-            >
+        <div ref={scope} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl font-sans text-white">
+            {/* Background Texture */}
+            <motion.div className="absolute inset-0 z-0" style={{ filter: useTransform(cameraBlur, (v) => `blur(${v}px)`) }}>
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.1),transparent_70%)]" />
                 <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-
-                {/* Cinematic Light Leak */}
-                <motion.div
-                    className="absolute -inset-20 bg-gradient-to-tr from-emerald-500/10 via-transparent to-blue-500/10 blur-[100px] pointer-events-none"
-                    animate={{
-                        opacity: [0.3, 0.5, 0.3],
-                        rotate: [0, 5, 0],
-                        scale: [1, 1.1, 1]
-                    }}
-                    transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                />
+                <motion.div className="absolute -inset-20 bg-gradient-to-tr from-emerald-500/10 via-transparent to-blue-500/10 blur-[100px]" animate={{ opacity: [0.3, 0.5, 0.3], rotate: [0, 5, 0], scale: [1, 1.1, 1] }} transition={{ duration: 10, repeat: Infinity }} />
             </motion.div>
 
-            {/* 2. Cinematic Viewport (With Tracking + Drift) */}
+            {/* Cinematic Viewport */}
             <motion.div
-                className="relative w-full h-full p-12 md:p-14 z-10"
-                style={{
-                    x: cameraX,
-                    y: cameraY,
-                    scale: cameraScale,
-                    transformOrigin: 'center center'
-                }}
-                animate={{
-                    // Subtle Handheld Drift
-                    rotateX: [0, 0.5, 0],
-                    rotateY: [0, 0.3, 0],
-                }}
+                className="relative w-full h-full p-12 md:p-16 z-10"
+                style={{ x: cameraX, y: cameraY, scale: cameraScale, transformOrigin: 'center center' }}
+                animate={{ rotateX: [0, 0.5, 0], rotateY: [0, 0.3, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
             >
-                {/* Meta Header */}
-                <div className="flex items-center justify-between mb-10 opacity-10">
-                    <div className="flex gap-2">
-                        {[1, 2, 3].map(i => <div key={i} className="w-2 h-2 rounded-full bg-white" />)}
-                    </div>
-                    <div className="font-mono text-[8px] tracking-[.5em] uppercase">Secured_Vault_Channel</div>
-                </div>
-
                 {/* 1:1 Content */}
-                <div className="max-w-4xl mx-auto space-y-4">
-                    <AnimatePresence>
-                        {blocks.map((block) => (
-                            <motion.div
-                                key={block.id}
-                                initial={{ opacity: 0, y: 30, scale: 0.98 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.95 }}
-                                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                            >
-                                <BlockWrapper>
-                                    {block.type === 'heading' ? (
-                                        <HeadingBlockRaw content={block.content} />
-                                    ) : (
-                                        <CodeBlockRaw content={block.content} filePath={block.filePath} />
-                                    )}
-                                </BlockWrapper>
+                <div className="max-w-4xl mx-auto space-y-2">
+                    {blocks.map((block, i) => (
+                        <div key={block.id}>
+                            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+                                {block.type === 'heading' ? (
+                                    <div className="text-3xl font-bold tracking-tight px-2 py-4">{block.content}</div>
+                                ) : (
+                                    <CodeBlockRaw content={block.content} filePath={block.filePath} />
+                                )}
                             </motion.div>
-                        ))}
-                    </AnimatePresence>
 
-                    {/* Infrastructure Placeholder */}
-                    <div className="pt-10 opacity-[0.03]">
-                        <div className="border border-dashed border-white/50 rounded-2xl h-16 flex items-center justify-center font-mono text-[10px] uppercase tracking-[.3em]">
-                            Waiting_For_Sequence_Input...
+                            {/* In-house Divider Logic */}
+                            {i === 0 && (
+                                <div className="py-2">
+                                    <BlockDividerMock isHovered={showAddMenu} />
+                                    <AnimatePresence>
+                                        {showAddMenu && <div className="flex justify-center"><AddBlockRowMock /></div>}
+                                    </AnimatePresence>
+                                </div>
+                            )}
                         </div>
-                    </div>
+                    ))}
+                    <div className="pt-10 opacity-[0.03] font-mono text-[10px] tracking-[.3em] text-center uppercase">System_Waiting_For_Sequence</div>
                 </div>
             </motion.div>
 
-            {/* 3. High-Precision Cursor */}
-            <motion.div
-                className="absolute z-50 pointer-events-none"
-                style={{
-                    left: useTransform(cursorX, (v) => `${v}%`),
-                    top: useTransform(cursorY, (v) => `${v}%`),
-                    opacity: cursorOpacity
-                }}
-            >
-                <MousePointer2 className="w-6 h-6 fill-white stroke-[3px] text-white drop-shadow-2xl" />
-                <motion.div
-                    className="absolute -inset-4 bg-white/5 blur-xl rounded-full"
-                    animate={{ scale: [1, 1.4, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                />
+            {/* Precision Cursor */}
+            <motion.div className="absolute z-50 pointer-events-none" style={{ left: useTransform(cursorX, (v) => `${v}%`), top: useTransform(cursorY, (v) => `${v}%`), opacity: cursorOpacity }}>
+                <MousePointer2 className="w-6 h-6 fill-white stroke-[3px] drop-shadow-2xl" />
+                <motion.div className="absolute -inset-4 bg-white/5 blur-xl rounded-full" animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, repeat: Infinity }} />
             </motion.div>
 
-            {/* 4. Global HUD (Save Success) */}
+            {/* HUD Status */}
             <AnimatePresence>
                 {saveStatus && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        className="absolute bottom-16 right-16 p-6 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2rem] flex items-center gap-5 z-20 shadow-[-20px_20px_60px_rgba(0,0,0,0.5)]"
-                    >
-                        <div className="w-12 h-12 rounded-full bg-accent-green/10 flex items-center justify-center border border-accent-green/30">
-                            {saveStatus === 'saving' ? (
-                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
-                                    <Save className="text-accent-green w-6 h-6" />
-                                </motion.div>
-                            ) : (
-                                <Check className="text-accent-green w-6 h-6" />
-                            )}
+                    <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8 }} className="absolute bottom-16 right-16 p-6 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2rem] flex items-center gap-5 z-20 shadow-2xl">
+                        <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30">
+                            {saveStatus === 'saving' ? <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}><Save className="text-emerald-500 w-6 h-6" /></motion.div> : <Check className="text-emerald-500 w-6 h-6" />}
                         </div>
                         <div className="flex flex-col">
                             <span className="text-[9px] font-mono text-white/40 uppercase tracking-[.3em] mb-1">Infrastructure_State</span>
-                            <span className="font-mono text-white font-bold tracking-tighter">
-                                {saveStatus === 'saving' ? 'WRITING_SNAPSHOT' : 'COMMIT_SUCCESSFUL'}
-                            </span>
+                            <span className="font-mono text-white font-bold">{saveStatus === 'saving' ? 'WRITING_SNAPSHOT' : 'COMMIT_SUCCESSFUL'}</span>
                         </div>
                     </motion.div>
                 )}

@@ -308,6 +308,21 @@ export function deserializeBlock(block: SerializedBlock): TypedBlockData {
         deserialized['currentSnapshotId'] = validated['currentSnapshotId'] || null;
         deserialized['snapshotLimit'] = validated['snapshotLimit'] || 50;
 
+        // DEBUG: Log deserialized filetree data
+        const countContent = (nodes: unknown[]): number => {
+          return (nodes as Array<{content?: string; children?: unknown[]}>).reduce((acc, n) => {
+            const hasContent = n?.content ? 1 : 0;
+            const childContent = n?.children ? countContent(n.children) : 0;
+            return acc + hasContent + childContent;
+          }, 0);
+        };
+        console.log('🌲 FileTree DESERIALIZE:', {
+          treeDataLength: (validated['treeData'] as unknown[] || []).length,
+          filesWithContent: countContent(validated['treeData'] as unknown[] || []),
+          snapshotCount: (validated['snapshots'] as unknown[] || []).length,
+          hasComments: (validated['snapshots'] as Array<{comment?: string}> || []).some(s => s?.comment),
+        });
+
         // Backward compatibility: create initial snapshot if none exists
         const snapshots = deserialized['snapshots'] as unknown[];
         const treeData = deserialized['treeData'] as FileTreeNode[];

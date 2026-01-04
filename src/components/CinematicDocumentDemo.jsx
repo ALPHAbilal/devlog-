@@ -20,6 +20,7 @@ const CinematicDocumentDemo = () => {
     const headerRef = useRef(null);
     const dividerRefs = useRef({});
     const menuIconRefs = useRef({});
+    const blockRefs = useRef({}); // Added blockRefs
 
     // 1. Perspective Motion Values
     const cursorX = useMotionValue(110);
@@ -29,11 +30,11 @@ const CinematicDocumentDemo = () => {
     const springConfig = { stiffness: 100, damping: 20, mass: 1 };
     const cameraSpringConfig = { stiffness: 60, damping: 30, mass: 1.2 };
 
-    // --- Direct Centering Logic ---
-    // Multiplier of 1.0 ensures the cursor remains at a fixed viewport offset (e.g., 40% height)
-    // regardless of the absolute content height.
+    // --- Anchor Tracking Logic ---
+    // cameraY_target will be the absolute pixel offset needed to center the target
+    const cameraY_target = useMotionValue(0);
+    const cameraY = useSpring(cameraY_target, cameraSpringConfig);
     const cameraX = useSpring(useTransform(cursorX, (v) => 50 - v), cameraSpringConfig);
-    const cameraY = useSpring(useTransform(cursorY, (v) => 40 - v), cameraSpringConfig);
     const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
@@ -43,6 +44,27 @@ const CinematicDocumentDemo = () => {
 
     // Inverse Scale for Cursor
     const cursorInverseScale = useTransform(cameraScale, (s) => 1 / s);
+
+    // --- Helper: Centering Engine ---
+    const centerOnElement = useCallback((el) => {
+        if (!el || !viewportRef.current) return;
+        const viewportHeight = viewportRef.current.offsetHeight;
+        const canvas = viewportRef.current.querySelector('.content-canvas');
+        if (!canvas) return;
+
+        const canvasRect = canvas.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        // Calculate the element's position relative to the SCROLLABLE CANVAS
+        // We want this element to sit at 40% of the VIEWPORT height.
+        // Current cameraY is eliding the canvas, so we need to account for it.
+        const currentY = cameraY_target.get();
+        const elementCenterY = elRect.top + elRect.height / 2 - (canvasRect.top - currentY);
+
+        // Target camera translation:
+        const targetTranslation = (viewportHeight * 0.4) - elementCenterY;
+        animate(cameraY_target, targetTranslation, { ...cameraSpringConfig, duration: 1.5 });
+    }, [cameraY_target, cameraSpringConfig]);
 
     // --- Helper: Content Coordinate Resolver ---
     const getContentCoords = useCallback((el) => {
@@ -99,7 +121,7 @@ const CinematicDocumentDemo = () => {
     const CodeBlockRaw = ({ content, filePath }) => {
         const lines = content.split('\n');
         return (
-            <div className="group relative pt-5">
+            <div className="group relative pt-5 code-block-target">
                 {filePath && (
                     <div className="absolute -top-3 left-0 text-[10px] text-emerald-400 bg-[#0d1117] px-3 py-1.5 rounded-t font-mono border border-white/10 border-b-0">{filePath}</div>
                 )}
@@ -166,19 +188,25 @@ const CinematicDocumentDemo = () => {
         setActiveMenuId(null);
         cursorX.set(110); cursorY.set(90); cursorOpacity.set(0);
         cameraScale.set(1); cameraBlur.set(0);
+        cameraY_target.set(0);
 
         await new Promise(r => setTimeout(r, 1200));
 
         // 1. Header Typing
         animate(cursorOpacity, 1, { duration: 0.5 });
         const hPos = getContentCoords(headerRef.current);
-        await Promise.all([animate(cursorX, hPos.x + 10, { duration: 1 }), animate(cursorY, hPos.y, { duration: 1 })]);
+        await Promise.all([
+            animate(cursorX, hPos.x + 10, { duration: 1 }),
+            animate(cursorY, hPos.y, { duration: 1 })
+        ]);
+        centerOnElement(headerRef.current);
         await typeInto((content) => setBlocks([{ id: 'h1', type: 'heading', content }]), "Distributed Intelligent Sync");
         await new Promise(r => setTimeout(r, 600));
 
-        // 2. Add File Tree (Divider After H1)
+        // 2. Add File Tree
         const d1 = getContentCoords(dividerRefs.current['h1']);
         await Promise.all([animate(cursorX, d1.x, { duration: 0.7 }), animate(cursorY, d1.y, { duration: 0.7 })]);
+        centerOnElement(dividerRefs.current['h1']);
         setActiveMenuId('h1');
         await new Promise(r => setTimeout(r, 600));
         const treeIcon = getContentCoords(menuIconRefs.current['h1-tree']);
@@ -186,11 +214,12 @@ const CinematicDocumentDemo = () => {
 
         setActiveMenuId(null);
         setBlocks(prev => [...prev, { id: 'tree1', type: 'filetree' }]);
-        await new Promise(r => setTimeout(r, 800)); // Delay for layout update
+        await new Promise(r => setTimeout(r, 800));
 
-        // 3. Add Code Block (Divider After Tree)
+        // 3. Add Code Block
         const d2 = getContentCoords(dividerRefs.current['tree1']);
         await Promise.all([animate(cursorX, d2.x, { duration: 0.6 }), animate(cursorY, d2.y, { duration: 0.6 })]);
+        centerOnElement(dividerRefs.current['tree1']);
         setActiveMenuId('tree1');
         await new Promise(r => setTimeout(r, 600));
         const codeIcon = getContentCoords(menuIconRefs.current['tree1-code']);
@@ -200,8 +229,12 @@ const CinematicDocumentDemo = () => {
         setBlocks(prev => [...prev.slice(0, 2), { id: 'c1', type: 'code', filePath: 'src/lib/sync.ts', content: '' }]);
         await new Promise(r => setTimeout(r, 800));
 
-        // 4. Implement Logic (Typing)
+        // 4. Implement Logic
+        const codeBlock = viewportRef.current.querySelector('.code-block-target'); // Assuming class added
         cameraScale.set(1.2);
+        // Special case: during typing we center the block itself
+        centerOnElement(blockRefs.current['c1']);
+
         await typeInto(
             (content) => setBlocks(prev => prev.map(b => b.id === 'c1' ? { ...b, content } : b)),
             'const sync = async () => {\n  await vault.push("origin");\n  return { ok: true };\n};',
@@ -209,10 +242,11 @@ const CinematicDocumentDemo = () => {
         );
         await new Promise(r => setTimeout(r, 800));
 
-        // 5. Verify Milestone (Divider After Code)
+        // 5. Verify Milestone
         const d3 = getContentCoords(dividerRefs.current['c1']);
         cameraScale.set(1.15);
         await Promise.all([animate(cursorX, d3.x, { duration: 0.6 }), animate(cursorY, d3.y, { duration: 0.6 })]);
+        centerOnElement(dividerRefs.current['c1']);
         setActiveMenuId('c1');
         await new Promise(r => setTimeout(r, 600));
         const issueIcon = getContentCoords(menuIconRefs.current['c1-issue']);
@@ -220,6 +254,8 @@ const CinematicDocumentDemo = () => {
 
         setActiveMenuId(null);
         setBlocks(prev => [...prev.slice(0, 3), { id: 'i1', type: 'issue', status: 'active' }]);
+        await new Promise(r => setTimeout(r, 600));
+        centerOnElement(blockRefs.current['i1']);
         await new Promise(r => setTimeout(r, 1000));
 
         // 6. Resolution & HUD
@@ -269,7 +305,12 @@ const CinematicDocumentDemo = () => {
                     <div className="space-y-1">
                         {blocks.map((block, i) => (
                             <React.Fragment key={block.id}>
-                                <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+                                <motion.div
+                                    ref={el => blockRefs.current[block.id] = el}
+                                    initial={{ opacity: 0, y: 15 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6 }}
+                                >
                                     {block.type === 'heading' && <div ref={headerRef} className="text-3xl font-bold tracking-tight px-2 py-4 min-h-[4rem]">{block.content}</div>}
                                     {block.type === 'filetree' && <FileTreeMock />}
                                     {block.type === 'code' && <CodeBlockRaw content={block.content} filePath={block.filePath} />}

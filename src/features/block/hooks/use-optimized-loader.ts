@@ -339,6 +339,10 @@ export function useOptimizedBlockLoader(documentId, entry, options = {}) {
       const unchangedCount = newBlocks.filter((block, i) => block === prevBlocks[i]).length;
       console.log(`[BLOCK-REF-STABILITY] ${unchangedCount}/${newBlocks.length} blocks kept same reference`);
 
+      // CRITICAL FIX: Update sessionCache to prevent stale data on refresh
+      // This was missing - updateBlock only updated React state but not cache
+      sessionCache.updateBlocks(documentId, newBlocks);
+
       return newBlocks;
     });
   };

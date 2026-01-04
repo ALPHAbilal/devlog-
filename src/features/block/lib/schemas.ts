@@ -162,7 +162,10 @@ export const BlockContentSchemas = {
       label: z.string().optional(),
       timestamp: z.number(),
       treeData: z.array(FileTreeNodeSchema).optional(),
-      tree: z.array(FileTreeNodeSchema).optional()
+      tree: z.array(FileTreeNodeSchema).optional(),
+      // CRITICAL: These fields were missing - comments were being stripped by Zod
+      comment: z.string().optional(),
+      changes: z.string().optional()
     })).default([]),
     currentSnapshotId: z.string().nullable().default(null),
     snapshotLimit: z.number().default(50)

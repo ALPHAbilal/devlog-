@@ -33,7 +33,7 @@ export interface BlockRendererProps {
   block: BlockData;
   index: number;
   isMobileView: boolean;
-  isBlockFocused: boolean;
+  isBlockFocused: boolean | null; // null = no block focused, true = this block focused, false = other block focused
   isShowingSelector: boolean;
   draggedBlockId: string | null;
   dropTargetId: string | null;

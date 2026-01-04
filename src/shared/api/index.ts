@@ -14,8 +14,10 @@ export {
   clearAuthIssues
 } from './supabase/optimized-client';
 
-// From rate-limited-client.ts
-export { supabaseWithRateLimit } from './supabase/rate-limited-client';
+// REMOVED: rate-limited-client.ts was mutating the shared supabase object
+// and breaking the query builder chain (.eq is not a function error)
+// See: https://github.com/... for details
+// export { supabaseWithRateLimit } from './supabase/rate-limited-client';
 
 // From optimizations.ts - Performance optimizations and batch operations
 export {

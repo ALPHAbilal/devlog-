@@ -46,29 +46,36 @@ const CinematicDocumentDemo = () => {
     const shakeY = useMotionValue(0);
 
     // Inverse Scale for Cursor
-    const cursorInverseScale = useTransformation(cameraScale, (s) => 1 / s);
+    const cursorInverseScale = useTransform(cameraScale, (s) => 1 / s);
 
     // --- Helper: Centering Engine (Scale-Invariant) ---
     const centerOnElement = useCallback((el) => {
         if (!el || !viewportRef.current || !cameraRef.current) return;
 
-        // 1. Extract Current State via DOMMatrix (Source of Truth)
+        // 1. Get Viewport/Container Geometry
+        const viewportRect = viewportRef.current.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+
+        // 2. Extract Current State via DOMMatrix (Absolute Source of Truth)
+        // This ensures the formula works even if called mid-animation
         const matrix = new DOMMatrix(getComputedStyle(cameraRef.current).transform);
         const currentY = matrix.m42;
         const currentScale = Math.sqrt(matrix.a * matrix.a + matrix.b * matrix.b) || 1;
 
-        // 2. Measure Viewport and Target
-        const viewportHeight = viewportRef.current.offsetHeight;
-        const elRect = el.getBoundingClientRect();
+        // 3. The Target: We want the element's CENTER to be at 40% of the VIEWPORT container
+        // We calculate positions relative to the VIEWPORT CONTAINER (demo box)
+        const targetInnerY = viewportRect.height * 0.4;
+        const elementInnerY = (elRect.top + elRect.height / 2) - viewportRect.top;
 
-        // 3. The Formula: How many pixels away from 40% height are we?
-        const targetViewportY = viewportHeight * 0.4;
-        const diffInViewportPixels = targetViewportY - (elRect.top + elRect.height / 2);
+        // 4. Calculate the discrepancy in physical viewport pixels
+        const diffInViewportPixels = targetInnerY - elementInnerY;
 
-        // 4. Correct for Scale: To move the viewport by X, move content by X/Scale
-        const newTargetY = currentY + (diffInViewportPixels / currentScale);
+        // 5. The Magic: To compensate for a viewport shift of X, we must shift the 
+        // underlying content by (X / Scale) because the content is already being scaled.
+        const targetYDelta = diffInViewportPixels / currentScale;
+        const newTargetY = currentY + targetYDelta;
 
-        // 5. Commit with Spring
+        // 6. Set the target (The useSpring will handle the smooth transition)
         cameraY_target.set(newTargetY);
     }, [cameraY_target]);
 
@@ -86,7 +93,7 @@ const CinematicDocumentDemo = () => {
         };
     }, []);
 
-    // --- Mock Components ---
+    // --- High-Fidelity Mock Components ---
 
     const FileTreeMock = () => (
         <div className="bg-[#0d1117]/50 rounded-xl p-4 border border-white/5 font-mono text-[11px] space-y-1 shadow-inner">
@@ -278,11 +285,6 @@ const CinematicDocumentDemo = () => {
     useEffect(() => {
         playTimeline();
     }, []);
-
-    // Helper for transformation mapping
-    function useTransformation(value, transformer) {
-        return useTransform(value, transformer);
-    }
 
     return (
         <div ref={viewportRef} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl font-sans text-white">

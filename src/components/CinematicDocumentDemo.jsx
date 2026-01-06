@@ -3,13 +3,12 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, anima
 import { Plus, Type, Code, MessageSquare, Heading, Folder, FolderOpen, File, Table, AlertCircle, Target, Check, Save, MousePointer2, ChevronDown, ChevronRight, Clock } from 'lucide-react';
 
 /**
- * CinematicDocumentDemo - Performance & Tracking Refinement
+ * CinematicDocumentDemo - Expert Tracking Edition
  * 
- * Fixes:
- * 1. 1:1 Follow Intensity: Camera now perfectly centers the "Action Zone" (40% Y height).
- * 2. Shake Decoupling: Typing jitters use separate motion values to avoid spring conflicts.
- * 3. Layout Sync: Added micro-delays to ensure refs are updated before coordinate calculation.
- * 4. Content-Pinned Cursor: Perfectly stable relative to growing blocks.
+ * Implements the DEFINITIVE solution for scale-invariant camera centering:
+ * 1. Mathematical Correction: newY = currentY + (diff / scale)
+ * 2. Point-of-Action Centering: Targets always hit 40% viewport height.
+ * 3. Spring Decoupling: Targets are set on MotionValues, Springs handle the silk.
  */
 const CinematicDocumentDemo = () => {
     const [blocks, setBlocks] = useState([]);
@@ -17,10 +16,11 @@ const CinematicDocumentDemo = () => {
     const [activeMenuId, setActiveMenuId] = useState(null);
 
     const viewportRef = useRef(null);
+    const cameraRef = useRef(null); // The transformed container
     const headerRef = useRef(null);
     const dividerRefs = useRef({});
     const menuIconRefs = useRef({});
-    const blockRefs = useRef({}); // Added blockRefs
+    const blockRefs = useRef({});
 
     // 1. Perspective Motion Values
     const cursorX = useMotionValue(110);
@@ -28,45 +28,50 @@ const CinematicDocumentDemo = () => {
     const cursorOpacity = useMotionValue(0);
 
     const springConfig = { stiffness: 100, damping: 20, mass: 1 };
-    const cameraSpringConfig = { stiffness: 60, damping: 30, mass: 1.2 };
+    const cameraSpringConfig = { stiffness: 80, damping: 35, mass: 1 };
 
-    // --- Anchor Tracking Logic ---
-    // cameraY_target will be the absolute pixel offset needed to center the target
+    // --- Expert Anchor Tracking ---
+    // Target values (Layer 1)
     const cameraY_target = useMotionValue(0);
+    const cameraScale_target = useMotionValue(1);
+
+    // Animated Springs (Layer 2)
     const cameraY = useSpring(cameraY_target, cameraSpringConfig);
+    const cameraScale = useSpring(cameraScale_target, springConfig);
     const cameraX = useSpring(useTransform(cursorX, (v) => 50 - v), cameraSpringConfig);
-    const cameraScale = useSpring(1, springConfig);
     const cameraBlur = useMotionValue(0);
 
-    // 2. Shake Values (for typing) - Decoupled from primary springs
+    // 2. Shake Values (for typing)
     const shakeX = useMotionValue(0);
     const shakeY = useMotionValue(0);
 
     // Inverse Scale for Cursor
-    const cursorInverseScale = useTransform(cameraScale, (s) => 1 / s);
+    const cursorInverseScale = useTransformation(cameraScale, (s) => 1 / s);
 
-    // --- Helper: Centering Engine ---
+    // --- Helper: Centering Engine (Scale-Invariant) ---
     const centerOnElement = useCallback((el) => {
-        if (!el || !viewportRef.current) return;
-        const viewportHeight = viewportRef.current.offsetHeight;
-        const canvas = viewportRef.current.querySelector('.content-canvas');
-        if (!canvas) return;
+        if (!el || !viewportRef.current || !cameraRef.current) return;
 
-        const canvasRect = canvas.getBoundingClientRect();
+        // 1. Extract Current State via DOMMatrix (Source of Truth)
+        const matrix = new DOMMatrix(getComputedStyle(cameraRef.current).transform);
+        const currentY = matrix.m42;
+        const currentScale = Math.sqrt(matrix.a * matrix.a + matrix.b * matrix.b) || 1;
+
+        // 2. Measure Viewport and Target
+        const viewportHeight = viewportRef.current.offsetHeight;
         const elRect = el.getBoundingClientRect();
 
-        // Calculate the element's position relative to the SCROLLABLE CANVAS
-        // We want this element to sit at 40% of the VIEWPORT height.
-        // Current cameraY is eliding the canvas, so we need to account for it.
-        const currentY = cameraY_target.get();
-        const elementCenterY = elRect.top + elRect.height / 2 - (canvasRect.top - currentY);
+        // 3. The Formula: How many pixels away from 40% height are we?
+        const targetViewportY = viewportHeight * 0.4;
+        const diffInViewportPixels = targetViewportY - (elRect.top + elRect.height / 2);
 
-        // Target camera translation:
-        const targetTranslation = (viewportHeight * 0.4) - elementCenterY;
-        animate(cameraY_target, targetTranslation, { ...cameraSpringConfig, duration: 1.5 });
-    }, [cameraY_target, cameraSpringConfig]);
+        // 4. Correct for Scale: To move the viewport by X, move content by X/Scale
+        const newTargetY = currentY + (diffInViewportPixels / currentScale);
 
-    // --- Helper: Content Coordinate Resolver ---
+        // 5. Commit with Spring
+        cameraY_target.set(newTargetY);
+    }, [cameraY_target]);
+
     const getContentCoords = useCallback((el) => {
         if (!el || !viewportRef.current) return { x: 50, y: 50 };
         const canvas = viewportRef.current.querySelector('.content-canvas');
@@ -75,14 +80,13 @@ const CinematicDocumentDemo = () => {
         const canvasRect = canvas.getBoundingClientRect();
         const elRect = el.getBoundingClientRect();
 
-        // Return percentages relative to the canvas's visual bounds
         return {
             x: ((elRect.left + elRect.width / 2 - canvasRect.left) / canvasRect.width) * 100,
             y: ((elRect.top + elRect.height / 2 - canvasRect.top) / canvasRect.height) * 100
         };
     }, []);
 
-    // --- High-Fidelity Mock Components ---
+    // --- Mock Components ---
 
     const FileTreeMock = () => (
         <div className="bg-[#0d1117]/50 rounded-xl p-4 border border-white/5 font-mono text-[11px] space-y-1 shadow-inner">
@@ -91,7 +95,6 @@ const CinematicDocumentDemo = () => {
             <div className="flex items-center gap-2 text-white/50 pl-6"><Folder size={14} /><span>components</span></div>
             <div className="flex items-center gap-2 text-white/90 pl-6"><FolderOpen size={14} className="text-emerald-500/60" /><span>lib</span></div>
             <div className="flex items-center gap-2 text-emerald-500 pl-10"><File size={14} /><span>sync.ts</span></div>
-            <div className="flex items-center gap-2 text-white/40 pl-10"><File size={14} /><span>auth.ts</span></div>
         </div>
     );
 
@@ -110,7 +113,7 @@ const CinematicDocumentDemo = () => {
                     </div>
                     <div className="flex-1">
                         <div className="text-[12px] font-medium text-white/90">Resolve Atomic Sync Drift</div>
-                        <div className="text-[10px] text-white/40 mt-1">Verification of distributed node pull/push cycles.</div>
+                        <div className="text-[10px] text-white/40 mt-1">Verification of distributed node cycles.</div>
                         {status === 'solved' && <motion.div initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} className="mt-2 text-[9px] text-emerald-500 font-mono bg-emerald-500/10 px-2 py-1 rounded inline-block">COMMIT_SUCCESS_ID_482</motion.div>}
                     </div>
                 </div>
@@ -165,7 +168,7 @@ const CinematicDocumentDemo = () => {
         </motion.div>
     );
 
-    // --- Typing Engine with Decoupled Shake ---
+    // --- Typing Engine ---
     const typeInto = async (setter, fullText, delayRange = [20, 50]) => {
         for (let i = 0; i <= fullText.length; i++) {
             setter(fullText.slice(0, i));
@@ -178,32 +181,29 @@ const CinematicDocumentDemo = () => {
         }
     };
 
-    // --- Timeline Orchestration ---
+    // --- Storyboard Timeline ---
     const playTimeline = async () => {
         if (!viewportRef.current) return;
 
-        // Reset Sequence
+        // Act 0: Reset
         setBlocks([{ id: 'h1', type: 'heading', content: '' }]);
         setSaveStatus(null);
         setActiveMenuId(null);
         cursorX.set(110); cursorY.set(90); cursorOpacity.set(0);
-        cameraScale.set(1); cameraBlur.set(0);
+        cameraScale_target.set(1); cameraBlur.set(0);
         cameraY_target.set(0);
 
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 1500));
 
-        // 1. Header Typing
+        // Act 1: Foundation
         animate(cursorOpacity, 1, { duration: 0.5 });
         const hPos = getContentCoords(headerRef.current);
-        await Promise.all([
-            animate(cursorX, hPos.x + 10, { duration: 1 }),
-            animate(cursorY, hPos.y, { duration: 1 })
-        ]);
+        await Promise.all([animate(cursorX, hPos.x + 10, { duration: 1 }), animate(cursorY, hPos.y, { duration: 1 })]);
         centerOnElement(headerRef.current);
         await typeInto((content) => setBlocks([{ id: 'h1', type: 'heading', content }]), "Distributed Intelligent Sync");
         await new Promise(r => setTimeout(r, 600));
 
-        // 2. Add File Tree
+        // Act 2: Architecture
         const d1 = getContentCoords(dividerRefs.current['h1']);
         await Promise.all([animate(cursorX, d1.x, { duration: 0.7 }), animate(cursorY, d1.y, { duration: 0.7 })]);
         centerOnElement(dividerRefs.current['h1']);
@@ -214,9 +214,9 @@ const CinematicDocumentDemo = () => {
 
         setActiveMenuId(null);
         setBlocks(prev => [...prev, { id: 'tree1', type: 'filetree' }]);
-        await new Promise(r => setTimeout(r, 800));
+        await new Promise(r => setTimeout(r, 800)); // Sync pause
 
-        // 3. Add Code Block
+        // Act 3: Implementation
         const d2 = getContentCoords(dividerRefs.current['tree1']);
         await Promise.all([animate(cursorX, d2.x, { duration: 0.6 }), animate(cursorY, d2.y, { duration: 0.6 })]);
         centerOnElement(dividerRefs.current['tree1']);
@@ -229,10 +229,9 @@ const CinematicDocumentDemo = () => {
         setBlocks(prev => [...prev.slice(0, 2), { id: 'c1', type: 'code', filePath: 'src/lib/sync.ts', content: '' }]);
         await new Promise(r => setTimeout(r, 800));
 
-        // 4. Implement Logic
-        const codeBlock = viewportRef.current.querySelector('.code-block-target'); // Assuming class added
-        cameraScale.set(1.2);
-        // Special case: during typing we center the block itself
+        cameraScale_target.set(1.2);
+        // Wait for zoom to start before measuring
+        await new Promise(r => setTimeout(r, 200));
         centerOnElement(blockRefs.current['c1']);
 
         await typeInto(
@@ -242,9 +241,9 @@ const CinematicDocumentDemo = () => {
         );
         await new Promise(r => setTimeout(r, 800));
 
-        // 5. Verify Milestone
+        // Act 4: Verification
         const d3 = getContentCoords(dividerRefs.current['c1']);
-        cameraScale.set(1.15);
+        cameraScale_target.set(1.1);
         await Promise.all([animate(cursorX, d3.x, { duration: 0.6 }), animate(cursorY, d3.y, { duration: 0.6 })]);
         centerOnElement(dividerRefs.current['c1']);
         setActiveMenuId('c1');
@@ -256,23 +255,23 @@ const CinematicDocumentDemo = () => {
         setBlocks(prev => [...prev.slice(0, 3), { id: 'i1', type: 'issue', status: 'active' }]);
         await new Promise(r => setTimeout(r, 600));
         centerOnElement(blockRefs.current['i1']);
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(r => setTimeout(r, 1200));
 
-        // 6. Resolution & HUD
+        // Closure
         setBlocks(prev => prev.map(b => b.id === 'i1' ? { ...b, status: 'solved' } : b));
-        cameraScale.set(1.3);
-        animate(cameraBlur, 10, { duration: 1.5 });
+        cameraScale_target.set(1.3);
+        animate(cameraBlur, 12, { duration: 2 });
         animate(cursorOpacity, 0, { duration: 0.5 });
 
         setSaveStatus('saving');
         await new Promise(r => setTimeout(r, 1200));
         setSaveStatus('saved');
 
-        // Loop Reset Cycle
-        await new Promise(r => setTimeout(r, 3000));
+        // Loop Reset
+        await new Promise(r => setTimeout(r, 4000));
         animate(cameraBlur, 0, { duration: 2 });
-        cameraScale.set(1);
-        await new Promise(r => setTimeout(r, 5000));
+        cameraScale_target.set(1);
+        await new Promise(r => setTimeout(r, 3000));
         if (viewportRef.current) playTimeline();
     };
 
@@ -280,16 +279,22 @@ const CinematicDocumentDemo = () => {
         playTimeline();
     }, []);
 
+    // Helper for transformation mapping
+    function useTransformation(value, transformer) {
+        return useTransform(value, transformer);
+    }
+
     return (
         <div ref={viewportRef} className="relative w-full aspect-[16/10] bg-[#02040a] rounded-[2.5rem] overflow-hidden border border-white/5 shadow-2xl font-sans text-white">
-            {/* Ambient Background */}
+            {/* Ambient FX */}
             <motion.div className="absolute inset-0 z-0" style={{ filter: useTransform(cameraBlur, (v) => `blur(${v}px)`) }}>
                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_50%_0%,rgba(16,185,129,0.1),transparent_70%)]" />
                 <motion.div className="absolute -inset-20 bg-gradient-to-tr from-emerald-500/10 via-transparent to-blue-500/10 blur-[100px]" animate={{ opacity: [0.3, 0.5, 0.3], rotate: [0, 5, 0] }} transition={{ duration: 10, repeat: Infinity }} />
             </motion.div>
 
-            {/* Content-Centric Camera Viewport */}
+            {/* Stable Camera Container */}
             <motion.div
+                ref={cameraRef}
                 className="relative w-full h-full z-10"
                 style={{
                     x: useTransform([cameraX, shakeX], ([cx, sx]) => cx + sx),
@@ -297,13 +302,13 @@ const CinematicDocumentDemo = () => {
                     scale: cameraScale,
                     transformOrigin: 'center center'
                 }}
-                animate={{ rotateX: [0, 0.2, 0], rotateY: [0, 0.1, 0] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ rotateX: [0, 0.15, 0], rotateY: [0, 0.1, 0] }}
+                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
             >
                 {/* Content Canvas */}
                 <div className="content-canvas relative w-full h-full p-12 md:p-16 max-w-4xl mx-auto">
                     <div className="space-y-1">
-                        {blocks.map((block, i) => (
+                        {blocks.map((block) => (
                             <React.Fragment key={block.id}>
                                 <motion.div
                                     ref={el => blockRefs.current[block.id] = el}

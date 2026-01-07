@@ -13,8 +13,29 @@
 import { replicateSupabase } from 'rxdb/plugins/replication-supabase';
 import type { RxReplicationState } from 'rxdb/plugins/replication';
 import type { RxCollection } from 'rxdb';
-import { supabase } from '@/shared/api';
+import { createClient } from '@supabase/supabase-js';
 import type { DevlogDatabase } from './rxdb';
+
+// Create a RAW Supabase client for RxDB replication
+// The optimized client wrapper may interfere with RxDB's channel access
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+const replicationClient = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false, // Don't interfere with main client
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10 // Allow more events for replication
+    }
+  }
+});
+
+// Verify channel method exists
+console.log('[RxDB Replication] Client channel method:', typeof replicationClient.channel);
 
 // =============================================================================
 // Sync State Tracking (Workaround for Bug #7612)
@@ -100,7 +121,7 @@ export function setupCollectionReplication<T extends { id: string; _deleted?: bo
   const replicationState = replicateSupabase<T, any>({
     replicationIdentifier: `supabase-${tableName}-${userId}`,
     collection,
-    supabaseClient: supabase,
+    supabaseClient: replicationClient, // Use raw client, not optimized wrapper
     table: tableName,
 
     pull: {

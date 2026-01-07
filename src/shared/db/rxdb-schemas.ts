@@ -40,7 +40,7 @@ export const documentSchema: RxJsonSchema<any> = {
   required: ['id', 'user_id', 'title'],
   indexes: [
     'user_id',
-    'folder_id',
+    // Note: folder_id removed from index - nullable fields can't be indexed in Dexie
     'updated_at',
     '_modified'
   ],
@@ -70,7 +70,7 @@ export const folderSchema: RxJsonSchema<any> = {
   required: ['id', 'user_id', 'name'],
   indexes: [
     'user_id',
-    'parent_id',
+    // Note: parent_id removed from index - nullable fields can't be indexed in Dexie
     '_modified'
   ],
 };

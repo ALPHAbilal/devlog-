@@ -264,14 +264,48 @@ const CinematicDocumentDemo = () => {
         centerOnElement(blockRefs.current['i1']);
         await new Promise(r => setTimeout(r, 1200));
 
-        // Closure
+        // Act 5: Resolution & Infinite Burst
         setBlocks(prev => prev.map(b => b.id === 'i1' ? { ...b, status: 'solved' } : b));
-        cameraScale_target.set(1.3);
-        animate(cameraBlur, 12, { duration: 2 });
-        animate(cursorOpacity, 0, { duration: 0.5 });
+        await new Promise(r => setTimeout(r, 800));
 
+        // Start the infinite impression
+        animate(cursorOpacity, 0, { duration: 0.3 });
+        cameraScale_target.set(0.9); // Zoom out slightly to see the speed
+
+        // Rapid fire block generation
+        const dummyTypes = ['heading', 'text', 'code', 'issue'];
+        const dummyContents = [
+            "Scaling Mesh Nodes...",
+            "Validating auth cycles...",
+            "const mesh = new Cluster();",
+            "Latency verification: 12ms",
+            "Re-routing sync traffic...",
+            "Sync engine stabilized.",
+        ];
+
+        for (let i = 0; i < 12; i++) {
+            const id = `inf-${i}`;
+            const type = dummyTypes[i % dummyTypes.length];
+            setBlocks(prev => [...prev, {
+                id,
+                type: type === 'text' ? 'heading' : type, // Simplify for speed
+                content: dummyContents[i % dummyContents.length],
+                status: 'solved',
+                filePath: type === 'code' ? 'src/core/mesh.ts' : null
+            }]);
+
+            // Accelerate camera as we go
+            const speed = 150 + (i * 200);
+            cameraY_target.set(cameraY_target.get() - speed);
+
+            await new Promise(r => setTimeout(r, 100 - (i * 5))); // Accelerate timing
+        }
+
+        // Act 6: Cinematic Closure
+        cameraScale_target.set(1.4);
+        animate(cameraBlur, 15, { duration: 1.5 });
         setSaveStatus('saving');
-        await new Promise(r => setTimeout(r, 1200));
+        await new Promise(r => setTimeout(r, 1000));
         setSaveStatus('saved');
 
         // Loop Reset

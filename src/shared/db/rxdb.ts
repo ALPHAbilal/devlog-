@@ -38,18 +38,36 @@ const DB_NAME = 'devlog-rxdb';
 async function clearDatabase(): Promise<void> {
   console.log('[RxDB] Clearing old database due to schema change...');
 
+  // Destroy existing instance first if it exists
+  if (dbInstance) {
+    try {
+      await dbInstance.destroy();
+      dbInstance = null;
+      console.log('[RxDB] Destroyed existing instance');
+    } catch (e) {
+      console.warn('[RxDB] Error destroying instance:', e);
+    }
+  }
+
+  // Small delay to allow connections to close
+  await new Promise(resolve => setTimeout(resolve, 100));
+
   // Delete all IndexedDB databases with our prefix
   const databases = await indexedDB.databases();
   for (const dbInfo of databases) {
-    if (dbInfo.name?.startsWith(DB_NAME) || dbInfo.name?.startsWith('rxdb')) {
+    if (dbInfo.name?.startsWith(DB_NAME) || dbInfo.name?.startsWith('rxdb-dexie-' + DB_NAME)) {
       console.log(`[RxDB] Deleting database: ${dbInfo.name}`);
-      await new Promise<void>((resolve, reject) => {
+      await new Promise<void>((resolve) => {
         const req = indexedDB.deleteDatabase(dbInfo.name!);
         req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
+        req.onerror = () => {
+          console.warn(`[RxDB] Error deleting ${dbInfo.name}:`, req.error);
+          resolve(); // Continue even on error
+        };
         req.onblocked = () => {
-          console.warn(`[RxDB] Database ${dbInfo.name} blocked, forcing delete`);
-          resolve();
+          console.warn(`[RxDB] Database ${dbInfo.name} blocked, waiting...`);
+          // Wait a bit for connections to close then resolve
+          setTimeout(resolve, 500);
         };
       });
     }
@@ -76,6 +94,7 @@ export async function getDatabase(): Promise<DevlogDatabase> {
       storage: getRxStorageDexie(),
       multiInstance: true, // Enable multi-tab sync
       eventReduce: true,   // Optimize change events
+      ignoreDuplicate: true, // Allow reusing existing database instance
     });
 
     // Add collections
@@ -89,10 +108,10 @@ export async function getDatabase(): Promise<DevlogDatabase> {
 
     return dbInstance;
   } catch (error: any) {
-    // Handle schema mismatch (DB6) or index errors (DXE1)
-    if (error?.code === 'DB6' || error?.code === 'DXE1' ||
-        error?.message?.includes('DB6') || error?.message?.includes('DXE1')) {
-      console.warn('[RxDB] Schema mismatch detected, clearing and retrying...');
+    // Handle schema mismatch (DB6), duplicate database (DB8), or index errors (DXE1)
+    if (error?.code === 'DB6' || error?.code === 'DB8' || error?.code === 'DXE1' ||
+        error?.message?.includes('DB6') || error?.message?.includes('DB8') || error?.message?.includes('DXE1')) {
+      console.warn('[RxDB] Schema mismatch or duplicate database detected, clearing and retrying...');
 
       // Clear and retry once
       await clearDatabase();
@@ -108,6 +127,7 @@ export async function getDatabase(): Promise<DevlogDatabase> {
         storage: getRxStorageDexie(),
         multiInstance: true,
         eventReduce: true,
+        ignoreDuplicate: true,
       });
 
       await dbInstance.addCollections({

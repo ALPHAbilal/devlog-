@@ -42,10 +42,11 @@ export type DevlogDatabase = RxDatabase<{
 let dbInstance: DevlogDatabase | null = null;
 let dbPromise: Promise<DevlogDatabase> | null = null;
 
-const DB_NAME = 'devlog-rxdb';
-
 // Schema version - increment when schema changes to force fresh DB
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
+
+// Database name includes version to avoid RxDB registry conflicts
+const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;
 const SCHEMA_VERSION_KEY = 'rxdb-schema-version';
 
 /**

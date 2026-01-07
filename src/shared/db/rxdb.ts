@@ -44,7 +44,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 
 // Schema version - increment when schema changes to force fresh DB
 // v4: Removed ignoreDuplicate (causes DB9 in production)
-const SCHEMA_VERSION = 4;
+// v5: Removed manual IndexedDB deletion (causes DatabaseClosedError)
+const SCHEMA_VERSION = 5;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;
@@ -76,62 +77,32 @@ function saveSchemaVersion(): void {
 /**
  * Clear ALL RxDB related databases
  *
- * IMPORTANT: Must call close() before remove() to clear RxDB's in-memory registry.
- * The registry survives IndexedDB deletion but NOT instance.close().
+ * Uses destroy() to clear RxDB's in-memory registry, then removeRxDatabase()
+ * to clean up IndexedDB. Don't manually delete IndexedDB - it causes Dexie
+ * to close its connection prematurely.
  */
 async function clearAllDatabases(): Promise<void> {
   console.log('[RxDB] Clearing all databases...');
 
-  // Close then destroy existing instance
+  // Destroy existing instance (clears from RxDB's internal registry)
   if (dbInstance) {
     try {
-      // close() clears the in-memory registry entry
-      await dbInstance.close();
+      await dbInstance.destroy();
+      console.log('[RxDB] Instance destroyed');
     } catch (e) {
-      console.log('[RxDB] close() error (may be already closed):', e);
-    }
-    try {
-      await dbInstance.remove(); // remove() also deletes the underlying storage
-    } catch (e) {
-      console.log('[RxDB] remove() error:', e);
+      console.log('[RxDB] destroy() error:', e);
     }
     dbInstance = null;
     dbPromise = null;
   }
 
-  // Try RxDB's official removal with same storage instance
+  // Use RxDB's official removal - don't manually delete IndexedDB
+  // as that causes Dexie to close its connection (DatabaseClosedError)
   try {
     await removeRxDatabase(DB_NAME, getStorage());
     console.log('[RxDB] removeRxDatabase succeeded');
   } catch (e: any) {
     console.log('[RxDB] removeRxDatabase:', e?.message || e);
-  }
-
-  // Manually clear all related IndexedDB databases
-  try {
-    if (typeof indexedDB !== 'undefined' && indexedDB.databases) {
-      const databases = await indexedDB.databases();
-      for (const dbInfo of databases) {
-        const name = dbInfo.name;
-        if (!name) continue;
-
-        // Delete anything related to RxDB or our app
-        if (name.includes('rxdb') || name.includes('devlog') || name.includes('dexie')) {
-          console.log(`[RxDB] Deleting IndexedDB: ${name}`);
-          await new Promise<void>((resolve) => {
-            const req = indexedDB.deleteDatabase(name);
-            req.onsuccess = () => resolve();
-            req.onerror = () => resolve();
-            req.onblocked = () => {
-              console.warn(`[RxDB] Delete blocked: ${name}`);
-              resolve();
-            };
-          });
-        }
-      }
-    }
-  } catch (e) {
-    console.log('[RxDB] IndexedDB cleanup error:', e);
   }
 
   // Clear localStorage schema version to force re-init
@@ -141,8 +112,8 @@ async function clearAllDatabases(): Promise<void> {
     // Ignore
   }
 
-  // Wait for IndexedDB operations to settle
-  await new Promise(r => setTimeout(r, 200));
+  // Brief wait for cleanup to settle
+  await new Promise(r => setTimeout(r, 100));
   console.log('[RxDB] Cleanup complete');
 }
 
@@ -228,15 +199,9 @@ export async function getDatabase(): Promise<DevlogDatabase> {
 
 /**
  * Destroy database (for logout/cleanup)
- * Uses close() to clear in-memory registry, then destroy() to clean up resources.
  */
 export async function destroyDatabase(): Promise<void> {
   if (dbInstance) {
-    try {
-      await dbInstance.close(); // Clears in-memory registry
-    } catch (e) {
-      console.log('[RxDB] close() error:', e);
-    }
     try {
       await dbInstance.destroy();
     } catch (e) {

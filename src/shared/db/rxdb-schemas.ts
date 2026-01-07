@@ -40,9 +40,8 @@ export const documentSchema: RxJsonSchema<any> = {
   required: ['id', 'user_id', 'title'],
   indexes: [
     'user_id',
-    // Note: folder_id removed from index - nullable fields can't be indexed in Dexie
-    'updated_at',
-    '_modified'
+    'updated_at'
+    // Note: _modified removed - RxDB manages replication indexes internally
   ],
 };
 
@@ -69,9 +68,8 @@ export const folderSchema: RxJsonSchema<any> = {
   },
   required: ['id', 'user_id', 'name'],
   indexes: [
-    'user_id',
-    // Note: parent_id removed from index - nullable fields can't be indexed in Dexie
-    '_modified'
+    'user_id'
+    // Note: _modified removed - RxDB manages replication indexes internally
   ],
 };
 
@@ -102,7 +100,7 @@ export const blockSchema: RxJsonSchema<any> = {
   required: ['id', 'document_id', 'type', 'position'],
   indexes: [
     'document_id',
-    'position',
-    '_modified'
+    'position'
+    // Note: _modified removed - RxDB manages replication indexes internally
   ],
 };

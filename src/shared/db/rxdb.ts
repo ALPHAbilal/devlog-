@@ -45,7 +45,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 // Schema version - increment when schema changes to force fresh DB
 // v4: Removed ignoreDuplicate (causes DB9 in production)
 // v5: Removed manual IndexedDB deletion (causes DatabaseClosedError)
-const SCHEMA_VERSION = 5;
+// v6: Removed _modified from custom indexes (RxDB manages replication indexes internally)
+const SCHEMA_VERSION = 6;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;

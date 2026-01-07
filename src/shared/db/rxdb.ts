@@ -43,7 +43,8 @@ let dbInstance: DevlogDatabase | null = null;
 let dbPromise: Promise<DevlogDatabase> | null = null;
 
 // Schema version - increment when schema changes to force fresh DB
-const SCHEMA_VERSION = 3;
+// v4: Removed ignoreDuplicate (causes DB9 in production)
+const SCHEMA_VERSION = 4;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;
@@ -74,20 +75,25 @@ function saveSchemaVersion(): void {
 
 /**
  * Clear ALL RxDB related databases
+ *
+ * IMPORTANT: Must call close() before remove() to clear RxDB's in-memory registry.
+ * The registry survives IndexedDB deletion but NOT instance.close().
  */
 async function clearAllDatabases(): Promise<void> {
   console.log('[RxDB] Clearing all databases...');
 
-  // Destroy existing instance
+  // Close then destroy existing instance
   if (dbInstance) {
+    try {
+      // close() clears the in-memory registry entry
+      await dbInstance.close();
+    } catch (e) {
+      console.log('[RxDB] close() error (may be already closed):', e);
+    }
     try {
       await dbInstance.remove(); // remove() also deletes the underlying storage
     } catch (e) {
-      try {
-        await dbInstance.destroy();
-      } catch {
-        // Ignore
-      }
+      console.log('[RxDB] remove() error:', e);
     }
     dbInstance = null;
     dbPromise = null;
@@ -142,6 +148,9 @@ async function clearAllDatabases(): Promise<void> {
 
 /**
  * Create the database
+ *
+ * NOTE: ignoreDuplicate is NOT used - it's only allowed in dev-mode.
+ * Instead, we properly cache the instance and close before recreation.
  */
 async function createDatabase(): Promise<DevlogDatabase> {
   console.log('[RxDB] Creating database...');
@@ -155,7 +164,7 @@ async function createDatabase(): Promise<DevlogDatabase> {
     storage: getStorage(), // Use singleton storage
     multiInstance: true,
     eventReduce: true,
-    ignoreDuplicate: true,
+    // ❌ REMOVED: ignoreDuplicate: true - causes DB9 in production!
   });
 
   await db.addCollections({
@@ -219,10 +228,20 @@ export async function getDatabase(): Promise<DevlogDatabase> {
 
 /**
  * Destroy database (for logout/cleanup)
+ * Uses close() to clear in-memory registry, then destroy() to clean up resources.
  */
 export async function destroyDatabase(): Promise<void> {
   if (dbInstance) {
-    await dbInstance.destroy();
+    try {
+      await dbInstance.close(); // Clears in-memory registry
+    } catch (e) {
+      console.log('[RxDB] close() error:', e);
+    }
+    try {
+      await dbInstance.destroy();
+    } catch (e) {
+      console.log('[RxDB] destroy() error:', e);
+    }
     dbInstance = null;
     dbPromise = null;
     console.log('[RxDB] Database destroyed');

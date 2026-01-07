@@ -1,64 +1,65 @@
-index-epWRM1MB.js:26 [DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized: {defaultTimeout_ms: 259200000, defaultTimeout_hours: 72, defaultTimeout_days: 3, timestamp: '2026-01-07T18:27:40.698Z'}
-index-epWRM1MB.js:26 IndexedDB initialized successfully
-index-epWRM1MB.js:26 [TAB-RESTORE] {tabCount: 0, activeTabId: undefined, tabIds: Array(0)}
-index-epWRM1MB.js:26 [DEBUG-TIMEOUT-15] ℹ️ No localStorage settings found, using defaults
-index-epWRM1MB.js:26 [DatabaseProvider] Initializing RxDB...
-index-epWRM1MB.js:26 [RxDB] Schema version changed, clearing old data...
-index-epWRM1MB.js:26 [RxDB] Clearing all databases for fresh start...
-index-epWRM1MB.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
-index-epWRM1MB.js:26 [DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED: {events: Array(4), timeout_hours: 72, timestamp: '2026-01-07T18:27:40.853Z'}
-index-epWRM1MB.js:26 [Supabase] Auth event: INITIAL_SESSION
-index-epWRM1MB.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: false, userId: undefined}
-index-epWRM1MB.js:26 [RxDB] Deleting: rxdb-dexie-devlog-rxdb--0--_rxdb_internal
-index-epWRM1MB.js:26 Another connection wants to delete database 'rxdb-dexie-devlog-rxdb--0--_rxdb_internal'. Closing db now to resume the delete request.
-(anonymous) @ index-epWRM1MB.js:26
-(anonymous) @ index-epWRM1MB.js:831
-(anonymous) @ index-epWRM1MB.js:831
-(anonymous) @ index-epWRM1MB.js:831
-index-epWRM1MB.js:26 [RxDB] Cleanup complete
-index-epWRM1MB.js:26 [RxDB] Creating database...
-index-epWRM1MB.js:26 [RxDB] Init failed: DB9
-(anonymous) @ index-epWRM1MB.js:26
-(anonymous) @ index-epWRM1MB.js:832
+index-C1ZnxqZ-.js:26 [DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized: {defaultTimeout_ms: 259200000, defaultTimeout_hours: 72, defaultTimeout_days: 3, timestamp: '2026-01-07T18:40:21.027Z'}
+index-C1ZnxqZ-.js:26 IndexedDB initialized successfully
+index-C1ZnxqZ-.js:26 [TAB-RESTORE] {tabCount: 0, activeTabId: undefined, tabIds: Array(0)}
+index-C1ZnxqZ-.js:26 [DEBUG-TIMEOUT-15] ℹ️ No localStorage settings found, using defaults
+index-C1ZnxqZ-.js:26 [DatabaseProvider] Initializing RxDB...
+index-C1ZnxqZ-.js:26 [RxDB] Schema version changed, clearing old data...
+index-C1ZnxqZ-.js:26 [RxDB] Clearing all databases...
+index-C1ZnxqZ-.js:26 [DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED: {events: Array(4), timeout_hours: 72, timestamp: '2026-01-07T18:40:21.241Z'}
+index-C1ZnxqZ-.js:26 [Supabase] Auth event: INITIAL_SESSION
+index-C1ZnxqZ-.js:26 [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: false, userId: undefined}
+index-C1ZnxqZ-.js:26 [RxDB] removeRxDatabase succeeded
+index-C1ZnxqZ-.js:26 [RxDB] Deleting IndexedDB: rxdb-dexie-devlog-rxdb-v3--0--_rxdb_internal
+index-C1ZnxqZ-.js:26 Another connection wants to delete database 'rxdb-dexie-devlog-rxdb-v3--0--_rxdb_internal'. Closing db now to resume the delete request.
+(anonymous) @ index-C1ZnxqZ-.js:26
+(anonymous) @ index-C1ZnxqZ-.js:831
+(anonymous) @ index-C1ZnxqZ-.js:831
+(anonymous) @ index-C1ZnxqZ-.js:831
+index-C1ZnxqZ-.js:26 [RxDB] Cleanup complete
+index-C1ZnxqZ-.js:26 [RxDB] Creating database...
+index-C1ZnxqZ-.js:26 [RxDB] Init failed: DB9
+(anonymous) @ index-C1ZnxqZ-.js:26
+(anonymous) @ index-C1ZnxqZ-.js:832
 await in (anonymous)
-zCe @ index-epWRM1MB.js:832
-(anonymous) @ index-epWRM1MB.js:832
-(anonymous) @ index-epWRM1MB.js:832
-Qy @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-XB @ index-epWRM1MB.js:106
-(anonymous) @ index-epWRM1MB.js:106
-V @ index-epWRM1MB.js:91
-index-epWRM1MB.js:26 [RxDB] Clearing corrupted database and retrying...
-index-epWRM1MB.js:26 [RxDB] Clearing all databases for fresh start...
-index-epWRM1MB.js:26 [RxDB] removeRxDatabase: $ {name: 'DatabaseClosedError', message: 'Database has been closed', inner: null}
-index-epWRM1MB.js:26 [RxDB] Cleanup complete
-index-epWRM1MB.js:26 [RxDB] Creating database...
-index-epWRM1MB.js:26 [DatabaseProvider] Failed to initialize RxDB: RxError (DB9): 
+UCe @ index-C1ZnxqZ-.js:832
+(anonymous) @ index-C1ZnxqZ-.js:832
+(anonymous) @ index-C1ZnxqZ-.js:832
+Zy @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+ZB @ index-C1ZnxqZ-.js:106
+(anonymous) @ index-C1ZnxqZ-.js:106
+V @ index-C1ZnxqZ-.js:91
+index-C1ZnxqZ-.js:26 [RxDB] Clearing and retrying...
+index-C1ZnxqZ-.js:26 [RxDB] Clearing all databases...
+index-C1ZnxqZ-.js:26 [RxDB] removeRxDatabase: Database has been closed
+index-C1ZnxqZ-.js:26 [RxDB] Cleanup complete
+index-C1ZnxqZ-.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-C1ZnxqZ-.js:26 [RxDB] Creating database...
+index-C1ZnxqZ-.js:26 [DatabaseProvider] Failed to initialize RxDB: RxError (DB9): 
 
         RxDB Error-Code: DB9.
         Hint: Error messages are not included in RxDB core to reduce build size.
@@ -69,44 +70,44 @@ Find out more about this error here: https://rxdb.info/errors.html?console=error
 
 --------------------
 Parameters:
-database: "devlog-rxdb"
+database: "devlog-rxdb-v3"
 
-    at Dt (index-epWRM1MB.js:822:27)
-    at index-epWRM1MB.js:829:100098
-    at WEe (index-epWRM1MB.js:829:100411)
-    at Bz (index-epWRM1MB.js:832:11651)
-    at index-epWRM1MB.js:832:12324
-    at async index-epWRM1MB.js:832:28729
-(anonymous) @ index-epWRM1MB.js:26
-(anonymous) @ index-epWRM1MB.js:832
+    at Dt (index-C1ZnxqZ-.js:822:27)
+    at index-C1ZnxqZ-.js:829:100098
+    at KEe (index-C1ZnxqZ-.js:829:100411)
+    at zz (index-C1ZnxqZ-.js:832:11896)
+    at index-C1ZnxqZ-.js:832:12576
+    at async index-C1ZnxqZ-.js:832:28981
+(anonymous) @ index-C1ZnxqZ-.js:26
+(anonymous) @ index-C1ZnxqZ-.js:832
 await in (anonymous)
-(anonymous) @ index-epWRM1MB.js:832
-Qy @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-vl @ index-epWRM1MB.js:106
-NB @ index-epWRM1MB.js:106
-XB @ index-epWRM1MB.js:106
-(anonymous) @ index-epWRM1MB.js:106
-V @ index-epWRM1MB.js:91
+(anonymous) @ index-C1ZnxqZ-.js:832
+Zy @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+vl @ index-C1ZnxqZ-.js:106
+DB @ index-C1ZnxqZ-.js:106
+ZB @ index-C1ZnxqZ-.js:106
+(anonymous) @ index-C1ZnxqZ-.js:106
+V @ index-C1ZnxqZ-.js:91

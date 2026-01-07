@@ -6,7 +6,13 @@ export { useAutoSave, useGlobalAutoSave, getSmartSyncManager } from './hooks/use
 export { useBlockLazyLoading, useProgressiveContent } from './hooks/use-lazy-loading';
 export { useOptimizedBlockLoader } from './hooks/use-optimized-loader';
 export { usePaginatedBlockLoader } from './hooks/use-paginated-loader';
-export { useBlocks } from './hooks/use-blocks-query';
+
+// RxDB Migration: useBlocks now uses RxDB instead of Dexie + TanStack Query
+// This provides real-time reactivity via RxDB subscriptions with automatic Supabase sync
+export { useRxBlocks as useBlocks } from '@/shared/db';
+// Keep old hook available for gradual migration (will be removed in Phase 8)
+export { useBlocks as useBlocksLegacy } from './hooks/use-blocks-query';
+
 export { useCanvasCleanup, useBlockMemoryManagement, useMemoryMonitor } from './hooks/use-memory-management';
 // Alias for backward compatibility
 export { useBlockMemoryManagement as useMemoryManagement } from './hooks/use-memory-management';

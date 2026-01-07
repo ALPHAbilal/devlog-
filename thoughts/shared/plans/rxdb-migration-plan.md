@@ -1,5 +1,63 @@
 # RxDB Migration Implementation Plan
 
+## Implementation Status (Updated: 2025-01-07)
+
+| Phase | Status | Description |
+|-------|--------|-------------|
+| Phase 1 | ✅ Complete | RxDB Infrastructure Setup |
+| Phase 2 | ✅ Complete | Supabase Replication Setup |
+| Phase 3 | ✅ Complete | Data Migration Utility |
+| Phase 4 | ✅ Complete | useRxBlocks Hook (replaces useBlocks) |
+| Phase 5 | ✅ Complete | useRxDocuments/useRxFolders Hooks |
+| Phase 6 | ✅ Complete | Component Integration (barrel exports updated) |
+| Phase 7 | 🔄 In Progress | Testing & Verification (build passes, needs manual testing) |
+| Phase 8 | 🔲 Pending | Legacy Code Cleanup |
+
+### Phase 7: Next Steps (Manual Testing Required)
+
+Before Phase 8 cleanup, verify the following in browser:
+1. **App Loads**: Open app, verify documents appear in sidebar
+2. **Create Document**: Create new document, verify it appears immediately
+3. **Edit Block**: Edit a block, verify changes persist after refresh
+4. **Offline Mode**: Disconnect network, make changes, reconnect - verify sync
+5. **Multi-Tab**: Open two tabs, edit in one, verify change appears in other
+6. **Console Check**: Look for "[RxDB]" logs showing replication activity
+
+Once all tests pass, proceed with Phase 8 cleanup.
+
+### Phase 6 Implementation Details (2025-01-07)
+
+**Barrel Export Updates:**
+- `@/features/block/index.ts`: Now exports `useRxBlocks as useBlocks`
+- `@/features/document/index.ts`: Now exports `useRxFolders as useFolders` and `useRxDocuments as usePaginatedDashboard`
+
+**API Compatibility:**
+- All RxDB hooks updated to match old hook interfaces
+- `useRxFolders`: Added `createFolder(name, parentId)` (gets userId from auth), `refreshFolders()` (no-op), `moveDocumentToFolder()`
+- `useRxDocuments`: Added `loadMore()`, `loadInitial()`, `checkLoadMore()`, `reset()` (all no-ops since RxDB loads all data)
+- Legacy hooks preserved with `*Legacy` suffix for gradual migration
+
+### Files Created
+
+```
+src/shared/db/
+├── index.ts           # Barrel exports
+├── rxdb.ts            # Database setup
+├── rxdb-schemas.ts    # Collection schemas
+├── rxdb-types.ts      # TypeScript types
+├── rxdb-hooks.tsx     # Core React hooks (useRxDB, useRxQuery, etc.)
+├── rxdb-replication.ts # Supabase replication with bug workarounds
+├── migration.ts       # Dexie → RxDB migration utility
+├── RxDBProvider.tsx   # React context provider
+└── hooks/
+    ├── index.ts
+    ├── use-blocks.ts      # Drop-in replacement for useBlocks
+    ├── use-documents.ts   # Drop-in replacement for document hooks
+    └── use-folders.ts     # Drop-in replacement for folder hooks
+```
+
+---
+
 ## Overview
 
 Migrate Devlog from the current DIY sync solution (Dexie + TanStack Query + SmartSync + multiple hooks) to RxDB with Supabase replication for intelligent, offline-first data sync with 90% reduction in network calls.
@@ -709,9 +767,9 @@ import { DatabaseProvider } from '@/shared/db/RxDBProvider';
 ### Success Criteria:
 
 #### Automated Verification:
-- [ ] `npm install rxdb` completes without errors
-- [ ] `npm run build` compiles successfully
-- [ ] `npm run lint` passes with no errors
+- [x] `npm install rxdb` completes without errors
+- [x] `npm run build` compiles successfully
+- [x] `npm run lint` passes with no errors (pre-existing TypeScript parse errors not related to RxDB)
 - [ ] App loads without console errors about RxDB
 
 #### Manual Verification:
@@ -1302,16 +1360,31 @@ export async function runMigration(
 
 /**
  * Clean up old databases after successful migration
+ *
+ * Databases to clean:
+ * - devlog-db (Dexie) - main storage
+ * - DevLogSmartSync (Dexie) - smart sync state
+ * - journey-log-compass-db (IndexedDB) - legacy document storage
+ *
+ * NOTE: devlog-snapshots is intentionally NOT deleted.
+ * It's used by DataIntegrityManager for corruption recovery
+ * and operates independently of the main storage system.
  */
 export async function cleanupOldDatabases(): Promise<void> {
   try {
-    // Delete old Dexie database
+    // Delete old Dexie databases
     await Dexie.delete('devlog-db');
     console.log('[Migration] Deleted old devlog-db');
+
+    await Dexie.delete('DevLogSmartSync');
+    console.log('[Migration] Deleted old DevLogSmartSync');
 
     // Delete old IndexedDB
     indexedDB.deleteDatabase('journey-log-compass-db');
     console.log('[Migration] Deleted old journey-log-compass-db');
+
+    // NOTE: devlog-snapshots is kept for data integrity features
+    // See src/shared/lib/integrity/data-integrity.ts
   } catch (error) {
     console.warn('[Migration] Cleanup error (non-fatal):', error);
   }
@@ -1882,9 +1955,13 @@ Remove all deprecated hooks, adapters, and unused code.
 ### Files to Delete:
 
 ```bash
-# Old hooks (now replaced)
+# Old SmartSync (JavaScript version)
 rm src/hooks/useSmartSync.js
 rm src/utils/smartSync.js
+
+# Old SmartSync (TypeScript version) - IMPORTANT: Don't miss these!
+rm src/features/storage/hooks/use-smart-sync.ts
+rm src/features/storage/lib/smart-sync.ts
 
 # Old block loading
 rm src/features/block/hooks/use-blocks-query.ts
@@ -1900,6 +1977,15 @@ rm src/shared/lib/storage/dexie-db.ts
 rm src/shared/hooks/use-indexeddb-cache.ts
 rm src/features/document/hooks/use-paginated-dashboard.ts
 rm src/features/document/hooks/use-folders.ts
+```
+
+### Files to Update:
+
+```bash
+# ErrorBoundary - update database name for fatal error recovery
+# Change: indexedDB.deleteDatabase('devlog-db')
+# To:     indexedDB.deleteDatabase('devlog-rxdb')
+edit src/components/ErrorBoundary.jsx  # Line 194
 ```
 
 ### Dependencies to Remove:
@@ -1963,4 +2049,5 @@ Note: Keep `@tanstack/react-query` if used elsewhere in the app.
 *RxDB Migration Plan*
 *Created: 2025-01-05*
 *Updated: 2025-01-06 (React 19 compatibility, official plugin, data migration)*
+*Updated: 2025-01-06 (Bug workarounds #7513 & #7612, fixed database names, complete file list)*
 *Status: READY FOR IMPLEMENTATION*

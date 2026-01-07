@@ -3,8 +3,18 @@
 
 // ============== Hooks ==============
 export { default as useDocumentOrganization } from './hooks/use-organization';
-export { useFolders } from './hooks/use-folders';
-export { usePaginatedDashboard } from './hooks/use-paginated-dashboard';
+
+// RxDB Migration: useFolders now uses RxDB instead of Supabase + useState
+// This provides real-time reactivity via RxDB subscriptions with automatic Supabase sync
+export { useRxFolders as useFolders } from '@/shared/db';
+// Keep old hook available for gradual migration (will be removed in Phase 8)
+export { useFolders as useFoldersLegacy } from './hooks/use-folders';
+
+// RxDB Migration: usePaginatedDashboard now uses RxDB for documents
+// Local-first with automatic Supabase replication
+export { useRxDocuments as usePaginatedDashboard } from '@/shared/db';
+// Keep old hook available for gradual migration (will be removed in Phase 8)
+export { usePaginatedDashboard as usePaginatedDashboardLegacy } from './hooks/use-paginated-dashboard';
 
 // Phase 5: Component Decomposition hooks
 export { useDocumentState } from './hooks/use-document-state';

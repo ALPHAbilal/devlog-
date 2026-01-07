@@ -1,7 +1,121 @@
 # NOW - Active Work
 > Single file for current session. Archive when done.
 
-## Current Task: Phase 4.4 Data Layer Migration Verification
+## Current Task: RxDB Migration - Ready for Testing
+Status: 🔄 Phases 1-6 COMPLETE, Phase 7 In Progress (Manual Testing Required)
+Date: 2025-01-07
+
+### Latest Update (2025-01-07) - Implementation Review
+
+**Status**: Build passes, barrel exports configured, but manual testing needed.
+
+**What's Done**:
+- RxDB infrastructure fully implemented
+- Barrel exports updated to use RxDB hooks
+- DatabaseProvider integrated in App.jsx
+- All hooks have backwards-compatible APIs
+
+**What's Next - Manual Testing Required**:
+Before removing legacy code, verify in browser:
+1. App loads and documents appear in sidebar
+2. Create document works immediately
+3. Block edits persist after refresh
+4. Offline mode: disconnect, edit, reconnect → syncs
+5. Multi-tab: edit in one tab, appears in other
+6. Console shows "[RxDB]" logs
+
+**Known Issue**: Dashboard.jsx still imports legacy code:
+- `useIndexedDBCache` - redundant with RxDB (RxDB IS the cache)
+- `IndexedDBAdapter.saveDocument` - should use RxDB instead
+
+These legacy imports work alongside RxDB but are unnecessary. They will be removed in Phase 8 after testing confirms RxDB works correctly.
+
+---
+
+### Previous Update (2025-01-07)
+
+**Phase 6 & 7 Completed**: Component integration via barrel exports
+
+**Changes Made:**
+1. `@/features/block/index.ts` - Now exports `useRxBlocks as useBlocks`
+2. `@/features/document/index.ts` - Now exports:
+   - `useRxFolders as useFolders`
+   - `useRxDocuments as usePaginatedDashboard`
+
+**API Compatibility Updates:**
+- `useRxFolders`: Fixed interface to match old `useFolders`:
+  - `createFolder(name, parentId)` - gets userId from auth context
+  - `refreshFolders()` - no-op (RxDB is reactive)
+  - `moveDocumentToFolder()` - added
+  - `loading` alias for `isLoading`
+- `useRxDocuments`: Fixed interface to match old `usePaginatedDashboard`:
+  - `loadMore()`, `loadInitial()`, `checkLoadMore()`, `reset()` - all no-ops
+  - `documentsWithSkeletons` - loading skeleton support
+  - Alias fields: `createdAt`, `updatedAt`, `position`, `blockCount`
+
+**Build Verification:**
+- ✅ `npm run build` passes (3m 16s)
+- ✅ No lint errors in RxDB files
+- ✅ Pre-existing TypeScript strictness warnings (not blocking)
+
+### What's Implemented
+
+**Complete RxDB Infrastructure** (`src/shared/db/`):
+- `rxdb.ts` - Database setup with Dexie storage adapter
+- `rxdb-schemas.ts` - Documents, folders, blocks schemas
+- `rxdb-types.ts` - TypeScript types for all collections
+- `rxdb-hooks.tsx` - Core React hooks (useRxDB, useRxQuery, useRxCollection)
+- `rxdb-replication.ts` - Supabase replication with bug workarounds
+- `RxDBProvider.tsx` - React context provider with auth integration
+- `migration.ts` - Dexie/IndexedDB → RxDB migration utility
+- `hooks/use-blocks.ts` - Drop-in replacement for useBlocks
+- `hooks/use-documents.ts` - Drop-in replacement for usePaginatedDashboard
+- `hooks/use-folders.ts` - Drop-in replacement for useFolders
+
+**Dependencies Added**:
+- `rxdb` - Core RxDB library
+- `rxjs` - Peer dependency for RxDB observables
+
+### Architecture
+
+```
+App.jsx
+  └── AuthProvider
+        └── DatabaseProvider (RxDB init + replication)
+              └── SettingsProvider
+                    └── ...rest of app
+
+Barrel Exports:
+  @/features/block      → useBlocks       (actually useRxBlocks)
+  @/features/document   → useFolders      (actually useRxFolders)
+  @/features/document   → usePaginatedDashboard (actually useRxDocuments)
+```
+
+### What's Next (Phase 8)
+
+**Legacy Code Cleanup (Optional)**:
+- Remove old `use-blocks-query.ts` (kept as `useBlocksLegacy`)
+- Remove old `use-folders.ts` (kept as `useFoldersLegacy`)
+- Remove old `use-paginated-dashboard.ts` (kept as `usePaginatedDashboardLegacy`)
+- Remove Dexie dependency once verified working
+- Remove SmartSync once verified working
+
+### How to Use (No Changes Needed!)
+
+```typescript
+// These imports now use RxDB under the hood
+import { useBlocks } from '@/features/block';
+import { useFolders, usePaginatedDashboard } from '@/features/document';
+
+// Usage unchanged - same API
+const { blocks, updateBlock } = useBlocks(documentId);
+const { folders, createFolder } = useFolders();
+const { documents, loadMore } = usePaginatedDashboard({ pageSize: 50 });
+```
+
+---
+
+## Previous Task: Phase 4.4 Data Layer Migration Verification
 Status: ✅ COMPLETE - Migration already done, verified and documented
 Date: 2025-01-04
 

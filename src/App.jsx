@@ -5,6 +5,7 @@ import { AuthProviderOptimized as AuthProvider, useAuth } from '@/app/providers'
 import { SettingsProvider } from '@/app/providers';
 import { SidebarProvider } from '@/app/providers';
 import { TabProvider } from '@/app/providers';
+import { DatabaseProvider } from '@/shared/db';
 import { useGlobalAutoSave } from '@/features/block';
 import { useAnalytics } from '@/features/analytics';
 import { initMonitoring, setUserContext } from '@/shared/lib';
@@ -239,17 +240,19 @@ function App() {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
-          <SettingsProvider>
-            <SidebarProvider>
-              <TabProvider>
-                <ToastProvider>
-                  <AutoSaveProvider />
-                  <AppContent />
-                  <CookieConsentBanner />
-                </ToastProvider>
-              </TabProvider>
-            </SidebarProvider>
-          </SettingsProvider>
+          <DatabaseProvider>
+            <SettingsProvider>
+              <SidebarProvider>
+                <TabProvider>
+                  <ToastProvider>
+                    <AutoSaveProvider />
+                    <AppContent />
+                    <CookieConsentBanner />
+                  </ToastProvider>
+                </TabProvider>
+              </SidebarProvider>
+            </SettingsProvider>
+          </DatabaseProvider>
         </AuthProvider>
       </BrowserRouter>
     </ErrorBoundary>

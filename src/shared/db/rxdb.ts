@@ -6,7 +6,7 @@
  * Uses Dexie storage adapter for IndexedDB access.
  */
 
-import { createRxDatabase, addRxPlugin, removeRxDatabase, type RxDatabase } from 'rxdb';
+import { createRxDatabase, addRxPlugin, removeRxDatabase, type RxDatabase, type RxStorage } from 'rxdb';
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
@@ -14,11 +14,22 @@ import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
 import { documentSchema, folderSchema, blockSchema } from './rxdb-schemas';
 import type { DocumentCollection, FolderCollection, BlockCollection } from './rxdb-types';
 
-// Add plugins once
+// Add plugins once at module load
 if (import.meta.env.DEV) {
   addRxPlugin(RxDBDevModePlugin);
 }
 addRxPlugin(RxDBQueryBuilderPlugin);
+
+// ============================================================================
+// CRITICAL: Create storage ONCE as singleton to avoid DB9 errors
+// ============================================================================
+let _storage: RxStorage<any, any> | null = null;
+function getStorage(): RxStorage<any, any> {
+  if (!_storage) {
+    _storage = getRxStorageDexie();
+  }
+  return _storage;
+}
 
 // Database type
 export type DevlogDatabase = RxDatabase<{
@@ -33,12 +44,12 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 
 const DB_NAME = 'devlog-rxdb';
 
-// Schema version - increment this when schema changes
+// Schema version - increment when schema changes to force fresh DB
 const SCHEMA_VERSION = 2;
 const SCHEMA_VERSION_KEY = 'rxdb-schema-version';
 
 /**
- * Check if schema version changed (needs migration)
+ * Check if schema version changed
  */
 function needsMigration(): boolean {
   try {
@@ -56,7 +67,7 @@ function saveSchemaVersion(): void {
   try {
     localStorage.setItem(SCHEMA_VERSION_KEY, String(SCHEMA_VERSION));
   } catch {
-    // Ignore localStorage errors
+    // Ignore
   }
 }
 
@@ -64,63 +75,75 @@ function saveSchemaVersion(): void {
  * Clear ALL RxDB related databases
  */
 async function clearAllDatabases(): Promise<void> {
-  console.log('[RxDB] Clearing all databases for fresh start...');
+  console.log('[RxDB] Clearing all databases...');
 
-  // Destroy existing instance first
+  // Destroy existing instance
   if (dbInstance) {
     try {
-      await dbInstance.destroy();
+      await dbInstance.remove(); // remove() also deletes the underlying storage
     } catch (e) {
-      // Ignore
+      try {
+        await dbInstance.destroy();
+      } catch {
+        // Ignore
+      }
     }
     dbInstance = null;
+    dbPromise = null;
   }
 
-  // Get storage instance for removeRxDatabase
-  const storage = getRxStorageDexie();
-
-  // Try RxDB's official removal
+  // Try RxDB's official removal with same storage instance
   try {
-    await removeRxDatabase(DB_NAME, storage);
-  } catch (e) {
-    console.log('[RxDB] removeRxDatabase:', e);
+    await removeRxDatabase(DB_NAME, getStorage());
+    console.log('[RxDB] removeRxDatabase succeeded');
+  } catch (e: any) {
+    console.log('[RxDB] removeRxDatabase:', e?.message || e);
   }
 
-  // Also manually clear IndexedDB as backup
+  // Manually clear all related IndexedDB databases
   try {
-    const databases = await indexedDB.databases();
-    const toDelete = databases.filter(db =>
-      db.name?.includes('devlog') ||
-      db.name?.includes('rxdb') ||
-      db.name?.includes(DB_NAME)
-    );
+    if (typeof indexedDB !== 'undefined' && indexedDB.databases) {
+      const databases = await indexedDB.databases();
+      for (const dbInfo of databases) {
+        const name = dbInfo.name;
+        if (!name) continue;
 
-    for (const dbInfo of toDelete) {
-      if (!dbInfo.name) continue;
-      console.log(`[RxDB] Deleting: ${dbInfo.name}`);
-      await new Promise<void>((resolve) => {
-        const req = indexedDB.deleteDatabase(dbInfo.name!);
-        req.onsuccess = () => resolve();
-        req.onerror = () => resolve();
-        req.onblocked = () => resolve();
-      });
+        // Delete anything related to RxDB or our app
+        if (name.includes('rxdb') || name.includes('devlog') || name.includes('dexie')) {
+          console.log(`[RxDB] Deleting IndexedDB: ${name}`);
+          await new Promise<void>((resolve) => {
+            const req = indexedDB.deleteDatabase(name);
+            req.onsuccess = () => resolve();
+            req.onerror = () => resolve();
+            req.onblocked = () => {
+              console.warn(`[RxDB] Delete blocked: ${name}`);
+              resolve();
+            };
+          });
+        }
+      }
     }
   } catch (e) {
     console.log('[RxDB] IndexedDB cleanup error:', e);
   }
 
-  // Small delay for IndexedDB to settle
-  await new Promise(r => setTimeout(r, 100));
+  // Clear localStorage schema version to force re-init
+  try {
+    localStorage.removeItem(SCHEMA_VERSION_KEY);
+  } catch {
+    // Ignore
+  }
+
+  // Wait for IndexedDB operations to settle
+  await new Promise(r => setTimeout(r, 200));
   console.log('[RxDB] Cleanup complete');
 }
 
 /**
- * Create the database with collections
+ * Create the database
  */
-async function initDatabase(): Promise<DevlogDatabase> {
+async function createDatabase(): Promise<DevlogDatabase> {
   console.log('[RxDB] Creating database...');
-
-  const storage = getRxStorageDexie();
 
   const db = await createRxDatabase<{
     documents: DocumentCollection;
@@ -128,7 +151,7 @@ async function initDatabase(): Promise<DevlogDatabase> {
     blocks: BlockCollection;
   }>({
     name: DB_NAME,
-    storage,
+    storage: getStorage(), // Use singleton storage
     multiInstance: true,
     eventReduce: true,
     ignoreDuplicate: true,
@@ -154,34 +177,30 @@ export async function getDatabase(): Promise<DevlogDatabase> {
   // Return pending promise (prevent concurrent init)
   if (dbPromise) return dbPromise;
 
-  // Start initialization
   dbPromise = (async () => {
     try {
-      // Check if we need to migrate (schema version changed)
+      // Check if migration needed
       if (needsMigration()) {
         console.log('[RxDB] Schema version changed, clearing old data...');
         await clearAllDatabases();
       }
 
-      // Try to create database
+      // Create database
       try {
-        dbInstance = await initDatabase();
+        dbInstance = await createDatabase();
         saveSchemaVersion();
         return dbInstance;
       } catch (error: any) {
-        // If any RxDB error, clear and retry ONCE
         const errorStr = String(error?.code || error?.message || error);
         console.warn('[RxDB] Init failed:', errorStr);
 
-        if (errorStr.includes('DB') || errorStr.includes('DXE')) {
-          console.log('[RxDB] Clearing corrupted database and retrying...');
+        // Any RxDB error - clear and retry once
+        if (errorStr.includes('DB') || errorStr.includes('DXE') || errorStr.includes('RxError')) {
+          console.log('[RxDB] Clearing and retrying...');
           await clearAllDatabases();
+          await new Promise(r => setTimeout(r, 500));
 
-          // Wait a bit more
-          await new Promise(r => setTimeout(r, 300));
-
-          // Retry
-          dbInstance = await initDatabase();
+          dbInstance = await createDatabase();
           saveSchemaVersion();
           return dbInstance;
         }
@@ -189,7 +208,7 @@ export async function getDatabase(): Promise<DevlogDatabase> {
         throw error;
       }
     } catch (error) {
-      dbPromise = null; // Allow retry on next call
+      dbPromise = null;
       throw error;
     }
   })();

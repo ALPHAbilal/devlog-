@@ -3,6 +3,97 @@
 
 ## 🔴 Critical Patterns (Check These First)
 
+### RxDB Supabase Replication: "Cannot read properties of undefined (reading 'channel')"
+**Date**: 2025-01-08
+**Severity**: 🔴 CRITICAL - Replication fails completely, no data sync
+**Symptoms**:
+- Error: `TypeError: Cannot read properties of undefined (reading 'channel')`
+- Stack trace shows `h.start` in minified code (RxDB replication start method)
+- Logs show: `[RxDB Replication] documents: Inactive` immediately after setup
+- Documents/folders don't load from Supabase
+- Multiple errors repeating for each collection (documents, folders, blocks)
+
+**Root Cause**:
+**WebSocket Race Condition** - The Supabase realtime WebSocket connection is NOT yet established when `replicateSupabase()` tries to call `.channel()`.
+
+- ✅ `typeof supabase.channel === "function"` — Method exists on client object
+- ✅ `typeof supabase.realtime === "object"` — Realtime namespace exists
+- ❌ **BUT** `supabase.realtime.socket.readyState !== WebSocket.OPEN` — Not connected yet!
+
+When `.channel()` is called, it internally depends on the WebSocket being in OPEN state, which fails during the race condition window.
+
+**The Fix**:
+Add `waitForRealtimeReady()` function and call it BEFORE starting replication:
+
+```typescript
+// src/shared/db/rxdb-replication.ts
+
+/**
+ * Wait for Supabase Realtime WebSocket to be fully connected.
+ */
+export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> {
+  const startTime = Date.now();
+
+  return new Promise((resolve) => {
+    const check = () => {
+      const socket = (supabase as any).realtime?.socket;
+      const isReady = socket?.readyState === WebSocket.OPEN;
+
+      if (isReady) {
+        console.log('[RxDB Replication] ✅ Realtime WebSocket is OPEN');
+        resolve(true);
+        return;
+      }
+
+      if (Date.now() - startTime > maxWaitMs) {
+        console.warn('[RxDB Replication] ⚠️ Timeout waiting for Realtime WebSocket');
+        resolve(false);
+        return;
+      }
+
+      setTimeout(check, 100);
+    };
+    check();
+  });
+}
+
+// In startAllReplications():
+export async function startAllReplications(db, userId) {
+  // FIX: Wait for WebSocket before starting
+  console.log('[RxDB Replication] Waiting for Realtime WebSocket...');
+  const isReady = await waitForRealtimeReady(10000);
+
+  if (!isReady) {
+    console.error('[RxDB Replication] ❌ Realtime WebSocket not ready!');
+  }
+
+  // NOW safe to start replications
+  // ... replicateSupabase() calls
+}
+```
+
+**Files Fixed**:
+- `src/shared/db/rxdb-replication.ts` - Added `waitForRealtimeReady()` and `forceRealtimeConnect()` functions, updated `startAllReplications()` to wait for WebSocket
+
+**Key Insight**:
+- Supabase v2 realtime WebSocket connection takes 2-3 seconds to establish (by design for multi-tenant clustering)
+- `createClient()` returns immediately, but realtime isn't ready yet
+- RxDB's `autoStart: true` tries to use `.channel()` during that gap
+- Solution: Poll for `WebSocket.OPEN` state before starting replication
+
+**Expected Log Sequence After Fix**:
+```
+[RxDB Replication] Waiting for Realtime WebSocket...
+[RxDB Replication] ⏳ Waiting for Realtime WebSocket... {elapsed: "100ms", socketExists: true, readyState: 0}
+[RxDB Replication] ✅ Realtime WebSocket is OPEN
+[RxDB Replication] Setting up replication for documents
+[RxDB Replication] documents: Active
+```
+
+**Reference**: See `resources.md` for full research and multiple solution approaches.
+
+---
+
 ### SharedDocument TypeError: Cannot read properties of null (reading 'body')
 **Date**: 2025-11-30
 **Severity**: 🔴 CRITICAL - Shared documents crash on load

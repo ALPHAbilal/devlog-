@@ -7,35 +7,22 @@
  * - Bug #7513: push.modifier not called → Use pre-insert hooks
  * - Bug #7612: Deletion fails for unsynced docs → Track sync state
  *
+ * CRITICAL: Uses singleton Supabase client from @/shared/api
+ * Creating multiple clients causes GoTrueClient conflicts and breaks realtime.
+ *
  * Reference: resources/rxdb-migration-guide.md Part 2
  */
 
 import { replicateSupabase } from 'rxdb/plugins/replication-supabase';
 import type { RxReplicationState } from 'rxdb/plugins/replication';
 import type { RxCollection } from 'rxdb';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '@/shared/api'; // Use SINGLETON client - DO NOT create new client!
 import type { DevlogDatabase } from './rxdb';
 
-// Create a RAW Supabase client for RxDB replication
-// The optimized client wrapper may interfere with RxDB's channel access
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-const replicationClient = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: false, // Don't interfere with main client
-  },
-  realtime: {
-    params: {
-      eventsPerSecond: 10 // Allow more events for replication
-    }
-  }
-});
-
-// Verify channel method exists
-console.log('[RxDB Replication] Client channel method:', typeof replicationClient.channel);
+// Verify client is ready
+console.log('[RxDB Replication] Using singleton client');
+console.log('[RxDB Replication] Client channel method:', typeof supabase.channel);
+console.log('[RxDB Replication] Realtime available:', typeof supabase.realtime);
 
 // =============================================================================
 // Sync State Tracking (Workaround for Bug #7612)
@@ -121,18 +108,25 @@ export function setupCollectionReplication<T extends { id: string; _deleted?: bo
   const replicationState = replicateSupabase<T, any>({
     replicationIdentifier: `supabase-${tableName}-${userId}`,
     collection,
-    supabaseClient: replicationClient, // Use raw client, not optimized wrapper
+    supabaseClient: supabase, // Use SINGLETON client - critical for realtime to work
     table: tableName,
 
     pull: {
       batchSize: tableName === 'blocks' ? 200 : 100,
-      // Transform Supabase nulls to undefined for RxDB
+      // Transform Supabase nulls to empty strings (sentinel values) for RxDB
       modifier: (doc: any) => {
-        if (doc.folder_id === null) delete doc.folder_id;
-        if (doc.parent_id === null) delete doc.parent_id;
+        // Convert nulls to sentinel values (empty strings)
+        if (doc.folder_id === null) doc.folder_id = '';
+        if (doc.parent_id === null) doc.parent_id = '';
+        // Ensure timestamps have defaults
+        if (!doc.created_at) doc.created_at = '';
+        if (!doc.updated_at) doc.updated_at = '';
         // Ensure _modified is number
         if (typeof doc._modified === 'string') {
           doc._modified = new Date(doc._modified).getTime();
+        }
+        if (doc._modified === null || doc._modified === undefined) {
+          doc._modified = 0;
         }
         // Mark as synced when pulled from server (it exists on server)
         markAsSynced(tableName, doc.id);

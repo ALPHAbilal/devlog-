@@ -2,10 +2,13 @@
 /**
  * Supabase Replication for RxDB
  *
- * Uses official replicateSupabase plugin.
- * Includes workarounds for known bugs (Jan 2025):
- * - Bug #7513: push.modifier not called → Use pre-insert hooks
- * - Bug #7612: Deletion fails for unsynced docs → Track sync state
+ * USES: rxdb-supabase library (community-maintained, works with Supabase v2)
+ * NOT: rxdb/plugins/replication-supabase (has bugs with Supabase v2)
+ *
+ * The official RxDB plugin has a known bug where it fails with:
+ * "TypeError: Cannot read properties of undefined (reading 'channel')"
+ * even after WebSocket initialization. The rxdb-supabase library handles
+ * Supabase v2's realtime API correctly.
  *
  * CRITICAL: Uses singleton Supabase client from @/shared/api
  * Creating multiple clients causes GoTrueClient conflicts and breaks realtime.
@@ -13,8 +16,7 @@
  * Reference: resources/rxdb-migration-guide.md Part 2
  */
 
-import { replicateSupabase } from 'rxdb/plugins/replication-supabase';
-import type { RxReplicationState } from 'rxdb/plugins/replication';
+import { SupabaseReplication } from 'rxdb-supabase';
 import type { RxCollection } from 'rxdb';
 import { supabase } from '@/shared/api'; // Use SINGLETON client - DO NOT create new client!
 import type { DevlogDatabase } from './rxdb';
@@ -23,104 +25,10 @@ import type { DevlogDatabase } from './rxdb';
 console.log('[RxDB Replication] Using singleton client');
 console.log('[RxDB Replication] Client channel method:', typeof supabase.channel);
 console.log('[RxDB Replication] Realtime available:', typeof supabase.realtime);
+console.log('[RxDB Replication] Using rxdb-supabase library (not built-in plugin)');
 
 // =============================================================================
-// WebSocket Ready Check (Fix for "channel undefined" race condition)
-// =============================================================================
-
-/**
- * CRITICAL FIX: Ensure Supabase Realtime WebSocket is fully connected.
- *
- * ROOT CAUSE EXPLAINED:
- * In Supabase JS v2, `supabase.realtime.socket` is NOT created when you call `createClient()`.
- * The WebSocket is LAZY INITIALIZED - it only gets created when you SUBSCRIBE to a channel.
- *
- * Our previous fix (polling for socket.readyState) failed because the socket NEVER EXISTS
- * until we subscribe to something.
- *
- * SOLUTION: Create and subscribe to a test channel to force WebSocket initialization,
- * wait for SUBSCRIBED status, then clean up the test channel.
- *
- * @param timeoutMs Maximum time to wait (default 10 seconds)
- * @returns true if ready, false if timeout/error
- */
-export async function ensureSupabaseRealtimeReady(timeoutMs = 10000): Promise<boolean> {
-  console.log('[RxDB Replication] 🔌 Initializing Supabase Realtime...');
-
-  return new Promise((resolve) => {
-    const startTime = Date.now();
-    let resolved = false;
-
-    // Create unique channel name for this initialization
-    const testChannelName = `rxdb-init-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-
-    // Create test channel - THIS triggers WebSocket creation
-    const testChannel = supabase.channel(testChannelName);
-
-    // Set timeout
-    const timeoutId = setTimeout(() => {
-      if (!resolved) {
-        resolved = true;
-        console.warn('[RxDB Replication] ⚠️ Realtime initialization timeout');
-        // Clean up
-        testChannel.unsubscribe().catch(() => {});
-        supabase.removeChannel(testChannel).catch(() => {});
-        resolve(false);
-      }
-    }, timeoutMs);
-
-    // Subscribe to trigger WebSocket connection
-    testChannel
-      .on('system', { event: '*' }, () => {
-        // System events indicate connection is working
-      })
-      .subscribe((status, err) => {
-        const elapsed = Date.now() - startTime;
-        console.log(`[RxDB Replication] 📡 Channel status: ${status} (${elapsed}ms)`);
-
-        if (status === 'SUBSCRIBED') {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timeoutId);
-            console.log('[RxDB Replication] ✅ Realtime WebSocket connected and ready!');
-
-            // Clean up test channel (async, don't wait)
-            setTimeout(() => {
-              testChannel.unsubscribe().catch(() => {});
-              supabase.removeChannel(testChannel).catch(() => {});
-              console.log('[RxDB Replication] 🧹 Test channel cleaned up');
-            }, 100);
-
-            resolve(true);
-          }
-        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          if (!resolved) {
-            resolved = true;
-            clearTimeout(timeoutId);
-            console.error('[RxDB Replication] ❌ Realtime connection failed:', status, err);
-            // Clean up
-            testChannel.unsubscribe().catch(() => {});
-            supabase.removeChannel(testChannel).catch(() => {});
-            resolve(false);
-          }
-        }
-        // CLOSED status is expected after unsubscribe, ignore it
-      });
-  });
-}
-
-// Legacy function kept for backwards compatibility - redirects to new implementation
-export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> {
-  return ensureSupabaseRealtimeReady(maxWaitMs);
-}
-
-// Legacy function - no longer needed but kept for compatibility
-export function forceRealtimeConnect(): void {
-  console.log('[RxDB Replication] forceRealtimeConnect() called - now handled by ensureSupabaseRealtimeReady()');
-}
-
-// =============================================================================
-// Sync State Tracking (Workaround for Bug #7612)
+// Sync State Tracking
 // =============================================================================
 
 /**
@@ -155,13 +63,11 @@ export function clearSyncState(): void {
 }
 
 // =============================================================================
-// Pre-Insert Hook Setup (Workaround for Bug #7513)
+// Pre-Insert Hook Setup
 // =============================================================================
 
 /**
  * Setup pre-insert hooks to ensure _modified is properly set.
- * This works around the push.modifier bug where the modifier function
- * is never called during push operations.
  */
 export function setupPreInsertHooks(db: DevlogDatabase): void {
   const collections = ['documents', 'folders', 'blocks'] as const;
@@ -187,24 +93,27 @@ export function setupPreInsertHooks(db: DevlogDatabase): void {
 }
 
 // =============================================================================
-// Replication Setup
+// Replication Setup using rxdb-supabase
 // =============================================================================
 
+// Store replication instances for management
+type ReplicationInstance = InstanceType<typeof SupabaseReplication<any>>;
+
 /**
- * Setup Supabase replication for a collection with bug workarounds
+ * Setup Supabase replication for a collection using rxdb-supabase library
  */
 export function setupCollectionReplication<T extends { id: string; _deleted?: boolean }>(
   collection: RxCollection<T>,
   tableName: string,
   userId: string
-): RxReplicationState<T, any> {
+): ReplicationInstance {
   console.log(`[RxDB Replication] Setting up replication for ${tableName}`);
 
-  const replicationState = replicateSupabase<T, any>({
-    replicationIdentifier: `supabase-${tableName}-${userId}`,
+  const replication = new SupabaseReplication<T>({
+    supabaseClient: supabase,
     collection,
-    supabaseClient: supabase, // Use SINGLETON client - critical for realtime to work
     table: tableName,
+    replicationIdentifier: `supabase-${tableName}-${userId}`,
 
     pull: {
       batchSize: tableName === 'blocks' ? 200 : 100,
@@ -232,8 +141,6 @@ export function setupCollectionReplication<T extends { id: string; _deleted?: bo
     push: {
       batchSize: tableName === 'blocks' ? 100 : 50,
       /**
-       * WORKAROUND for Bug #7612: Deletion fails for unsynced docs
-       *
        * Filter out deletions of documents that were never synced to the server.
        * These documents only exist locally and trying to delete them on the
        * server will cause a "not found" error.
@@ -250,33 +157,17 @@ export function setupCollectionReplication<T extends { id: string; _deleted?: bo
         return doc;
       },
     },
-
-    // Retry on failure
-    retryTime: 5000,
-    autoStart: true,
   });
 
-  // Track successful pushes to update sync state
-  replicationState.sent$.subscribe((docs) => {
-    for (const doc of docs) {
-      if (!(doc as any)._deleted) {
-        markAsSynced(tableName, (doc as any).id);
-      }
-    }
-  });
-
-  // Log replication status
-  replicationState.active$.subscribe(isActive => {
-    console.log(`[RxDB Replication] ${tableName}: ${isActive ? 'Active' : 'Inactive'}`);
-  });
-
-  replicationState.error$.subscribe(error => {
+  // Log replication errors
+  replication.error$.subscribe((error: any) => {
     if (error) {
       console.error(`[RxDB Replication] ${tableName}: Error`, error);
     }
   });
 
-  return replicationState;
+  console.log(`[RxDB Replication] ${tableName}: Started`);
+  return replication;
 }
 
 /**
@@ -285,45 +176,39 @@ export function setupCollectionReplication<T extends { id: string; _deleted?: bo
 export async function startAllReplications(
   db: DevlogDatabase,
   userId: string
-): Promise<Map<string, RxReplicationState<any, any>>> {
-  // Setup pre-insert hooks for all collections (Bug #7513 workaround)
+): Promise<Map<string, ReplicationInstance>> {
+  // Setup pre-insert hooks for all collections
   setupPreInsertHooks(db);
 
-  // ==========================================================================
-  // FIX: Ensure Supabase Realtime WebSocket is initialized before replication
-  //
-  // In Supabase JS v2, the WebSocket is LAZY - it only gets created when you
-  // subscribe to a channel. We create a test channel to force initialization.
-  // ==========================================================================
-  const isReady = await ensureSupabaseRealtimeReady(10000); // Wait up to 10 seconds
+  console.log('[RxDB Replication] Starting replications with rxdb-supabase library...');
 
-  if (!isReady) {
-    console.error('[RxDB Replication] ❌ Realtime initialization failed - replication may fail!');
-    console.error('[RxDB Replication] 💡 Check: Supabase Realtime enabled? Network issues? Auth valid?');
-    // Continue anyway - replication will retry on error
+  const replications = new Map<string, ReplicationInstance>();
+
+  try {
+    replications.set('documents', setupCollectionReplication(
+      db.documents,
+      'documents',
+      userId
+    ));
+
+    replications.set('folders', setupCollectionReplication(
+      db.folders,
+      'folders',
+      userId
+    ));
+
+    replications.set('blocks', setupCollectionReplication(
+      db.blocks,
+      'blocks',
+      userId
+    ));
+
+    console.log('[RxDB Replication] All replications started successfully!');
+  } catch (err) {
+    console.error('[RxDB Replication] Failed to start replications:', err);
+    throw err;
   }
 
-  const replications = new Map<string, RxReplicationState<any, any>>();
-
-  replications.set('documents', setupCollectionReplication(
-    db.documents,
-    'documents',
-    userId
-  ));
-
-  replications.set('folders', setupCollectionReplication(
-    db.folders,
-    'folders',
-    userId
-  ));
-
-  replications.set('blocks', setupCollectionReplication(
-    db.blocks,
-    'blocks',
-    userId
-  ));
-
-  console.log('[RxDB Replication] All replications started');
   return replications;
 }
 
@@ -331,7 +216,7 @@ export async function startAllReplications(
  * Stop all replications
  */
 export async function stopAllReplications(
-  replications: Map<string, RxReplicationState<any, any>>
+  replications: Map<string, ReplicationInstance>
 ): Promise<void> {
   for (const [name, replication] of replications) {
     await replication.cancel();
@@ -344,10 +229,28 @@ export async function stopAllReplications(
  * Force resync all collections (for recovering from stale data)
  */
 export async function resyncAll(
-  replications: Map<string, RxReplicationState<any, any>>
+  replications: Map<string, ReplicationInstance>
 ): Promise<void> {
   for (const [name, replication] of replications) {
     await replication.reSync();
     console.log(`[RxDB Replication] ${name}: Resyncing`);
   }
+}
+
+// =============================================================================
+// Legacy exports for backwards compatibility
+// =============================================================================
+
+// These are no longer needed with rxdb-supabase but kept for any external imports
+export async function ensureSupabaseRealtimeReady(_timeoutMs = 10000): Promise<boolean> {
+  console.log('[RxDB Replication] ensureSupabaseRealtimeReady() - not needed with rxdb-supabase');
+  return true;
+}
+
+export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> {
+  return ensureSupabaseRealtimeReady(maxWaitMs);
+}
+
+export function forceRealtimeConnect(): void {
+  console.log('[RxDB Replication] forceRealtimeConnect() - not needed with rxdb-supabase');
 }

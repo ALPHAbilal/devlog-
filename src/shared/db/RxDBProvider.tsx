@@ -13,7 +13,10 @@ import { getDatabase, type DevlogDatabase } from './rxdb';
 import { startAllReplications, stopAllReplications, clearSyncState } from './rxdb-replication';
 import { runMigration, isMigrationNeeded } from './migration';
 import { useAuth } from '@/app/providers';
-import type { RxReplicationState } from 'rxdb/plugins/replication';
+
+// Using any for replication type since we switched from rxdb built-in plugin to rxdb-supabase
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ReplicationMap = Map<string, any>;
 
 interface Props {
   children: ReactNode;
@@ -23,7 +26,7 @@ export function DatabaseProvider({ children }: Props) {
   const [db, setDb] = useState<DevlogDatabase | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const { user } = useAuth();
-  const replicationsRef = useRef<Map<string, RxReplicationState<any, any>>>(new Map());
+  const replicationsRef = useRef<ReplicationMap>(new Map());
 
   // Initialize database
   useEffect(() => {

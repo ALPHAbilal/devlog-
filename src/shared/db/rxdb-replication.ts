@@ -29,74 +29,94 @@ console.log('[RxDB Replication] Realtime available:', typeof supabase.realtime);
 // =============================================================================
 
 /**
- * Wait for Supabase Realtime WebSocket to be fully connected.
+ * CRITICAL FIX: Ensure Supabase Realtime WebSocket is fully connected.
  *
- * ROOT CAUSE: The Supabase client's .channel() method exists immediately,
- * but internally depends on the WebSocket being in OPEN state.
- * RxDB's replicateSupabase() calls .channel() immediately on autoStart,
- * causing "Cannot read properties of undefined (reading 'channel')" error.
+ * ROOT CAUSE EXPLAINED:
+ * In Supabase JS v2, `supabase.realtime.socket` is NOT created when you call `createClient()`.
+ * The WebSocket is LAZY INITIALIZED - it only gets created when you SUBSCRIBE to a channel.
  *
- * SOLUTION: Poll for WebSocket.OPEN state before starting replication.
+ * Our previous fix (polling for socket.readyState) failed because the socket NEVER EXISTS
+ * until we subscribe to something.
  *
- * @param maxWaitMs Maximum time to wait (default 10 seconds)
- * @returns true if ready, false if timeout
+ * SOLUTION: Create and subscribe to a test channel to force WebSocket initialization,
+ * wait for SUBSCRIBED status, then clean up the test channel.
+ *
+ * @param timeoutMs Maximum time to wait (default 10 seconds)
+ * @returns true if ready, false if timeout/error
  */
-export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> {
-  const startTime = Date.now();
+export async function ensureSupabaseRealtimeReady(timeoutMs = 10000): Promise<boolean> {
+  console.log('[RxDB Replication] 🔌 Initializing Supabase Realtime...');
 
   return new Promise((resolve) => {
-    const check = () => {
-      // Check if realtime socket exists and is connected
-      const socket = (supabase as any).realtime?.socket;
-      const isReady = socket?.readyState === WebSocket.OPEN;
+    const startTime = Date.now();
+    let resolved = false;
 
-      if (isReady) {
-        console.log('[RxDB Replication] ✅ Realtime WebSocket is OPEN');
-        resolve(true);
-        return;
-      }
+    // Create unique channel name for this initialization
+    const testChannelName = `rxdb-init-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 
-      // Log current state for debugging
-      const elapsed = Date.now() - startTime;
-      if (elapsed % 1000 < 100) { // Log every ~1 second
-        console.log('[RxDB Replication] ⏳ Waiting for Realtime WebSocket...', {
-          elapsed: `${elapsed}ms`,
-          socketExists: !!socket,
-          readyState: socket?.readyState,
-          readyStateLabel: socket ? ['CONNECTING', 'OPEN', 'CLOSING', 'CLOSED'][socket.readyState] : 'N/A'
-        });
-      }
+    // Create test channel - THIS triggers WebSocket creation
+    const testChannel = supabase.channel(testChannelName);
 
-      // Timeout check
-      if (elapsed > maxWaitMs) {
-        console.warn('[RxDB Replication] ⚠️ Timeout waiting for Realtime WebSocket');
+    // Set timeout
+    const timeoutId = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        console.warn('[RxDB Replication] ⚠️ Realtime initialization timeout');
+        // Clean up
+        testChannel.unsubscribe().catch(() => {});
+        supabase.removeChannel(testChannel).catch(() => {});
         resolve(false);
-        return;
       }
+    }, timeoutMs);
 
-      // Check again in 100ms
-      setTimeout(check, 100);
-    };
+    // Subscribe to trigger WebSocket connection
+    testChannel
+      .on('system', { event: '*' }, () => {
+        // System events indicate connection is working
+      })
+      .subscribe((status, err) => {
+        const elapsed = Date.now() - startTime;
+        console.log(`[RxDB Replication] 📡 Channel status: ${status} (${elapsed}ms)`);
 
-    check();
+        if (status === 'SUBSCRIBED') {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            console.log('[RxDB Replication] ✅ Realtime WebSocket connected and ready!');
+
+            // Clean up test channel (async, don't wait)
+            setTimeout(() => {
+              testChannel.unsubscribe().catch(() => {});
+              supabase.removeChannel(testChannel).catch(() => {});
+              console.log('[RxDB Replication] 🧹 Test channel cleaned up');
+            }, 100);
+
+            resolve(true);
+          }
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          if (!resolved) {
+            resolved = true;
+            clearTimeout(timeoutId);
+            console.error('[RxDB Replication] ❌ Realtime connection failed:', status, err);
+            // Clean up
+            testChannel.unsubscribe().catch(() => {});
+            supabase.removeChannel(testChannel).catch(() => {});
+            resolve(false);
+          }
+        }
+        // CLOSED status is expected after unsubscribe, ignore it
+      });
   });
 }
 
-/**
- * Force connect the Supabase Realtime client.
- * Call this before waiting if you want to speed up connection.
- */
+// Legacy function kept for backwards compatibility - redirects to new implementation
+export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> {
+  return ensureSupabaseRealtimeReady(maxWaitMs);
+}
+
+// Legacy function - no longer needed but kept for compatibility
 export function forceRealtimeConnect(): void {
-  try {
-    // Attempt to connect realtime if not already connected
-    const realtime = (supabase as any).realtime;
-    if (realtime && typeof realtime.connect === 'function') {
-      console.log('[RxDB Replication] 🔌 Forcing Realtime connection...');
-      realtime.connect();
-    }
-  } catch (err) {
-    console.warn('[RxDB Replication] Could not force realtime connect:', err);
-  }
+  console.log('[RxDB Replication] forceRealtimeConnect() called - now handled by ensureSupabaseRealtimeReady()');
 }
 
 // =============================================================================
@@ -270,15 +290,16 @@ export async function startAllReplications(
   setupPreInsertHooks(db);
 
   // ==========================================================================
-  // FIX: Wait for Supabase Realtime WebSocket to be ready
-  // This fixes "Cannot read properties of undefined (reading 'channel')" error
+  // FIX: Ensure Supabase Realtime WebSocket is initialized before replication
+  //
+  // In Supabase JS v2, the WebSocket is LAZY - it only gets created when you
+  // subscribe to a channel. We create a test channel to force initialization.
   // ==========================================================================
-  console.log('[RxDB Replication] Waiting for Realtime WebSocket...');
-  forceRealtimeConnect(); // Trigger connection if not already started
-  const isReady = await waitForRealtimeReady(10000); // Wait up to 10 seconds
+  const isReady = await ensureSupabaseRealtimeReady(10000); // Wait up to 10 seconds
 
   if (!isReady) {
-    console.error('[RxDB Replication] ❌ Realtime WebSocket not ready - replication may fail!');
+    console.error('[RxDB Replication] ❌ Realtime initialization failed - replication may fail!');
+    console.error('[RxDB Replication] 💡 Check: Supabase Realtime enabled? Network issues? Auth valid?');
     // Continue anyway - replication will retry on error
   }
 

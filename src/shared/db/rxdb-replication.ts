@@ -231,7 +231,9 @@ export async function setupCollectionReplication<T extends { id: string; _delete
     },
 
     // Enable Realtime streaming for live updates
-    live: true,
+    // DEBUG: Temporarily disable live mode to test if that's causing the 'channel' error
+    // Set to true once fixed
+    live: false, // TODO: Re-enable after fixing Realtime channel issue
 
     // Retry failed operations
     retryTime: 5000,

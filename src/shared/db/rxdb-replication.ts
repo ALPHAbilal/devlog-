@@ -1,30 +1,33 @@
 // src/shared/db/rxdb-replication.ts
 /**
- * Supabase Replication for RxDB
+ * Supabase Replication for RxDB using GENERIC replication
  *
- * USES: Official RxDB Supabase plugin (rxdb/plugins/replication-supabase)
- * RELEASED: v16.19.0 (September 4, 2025)
- * STATUS: Beta but actively maintained by RxDB core team
+ * WHY replicateRxCollection instead of replicateSupabase?
+ * - replicateSupabase IGNORES custom pull.handler / push.handler
+ * - We NEED custom handlers to filter by user_id: .eq('user_id', userId)
+ * - replicateRxCollection gives us FULL control over the sync logic
  *
- * This plugin provides:
- * - Pull: PostgREST HTTP requests with checkpoint-based incremental sync
- * - Push: Optimistic concurrency guards via PostgREST
- * - Live: Supabase Realtime channels for streaming updates
+ * Trade-offs:
+ * - ✅ Full control over queries (can filter by user_id)
+ * - ✅ Custom checkpoint logic
+ * - ❌ No automatic Supabase Realtime (must add manually if needed)
  *
  * CRITICAL: Uses singleton Supabase client from @/shared/api
- * Creating multiple clients causes GoTrueClient conflicts and breaks realtime.
+ * Creating multiple clients causes GoTrueClient conflicts.
  *
- * Reference: https://rxdb.info/replication-supabase.html
+ * Reference: https://rxdb.info/replication.html
  */
 
-import { replicateSupabase } from 'rxdb/plugins/replication-supabase';
+// Solution 2: Using replicateRxCollection for full handler control
+// replicateSupabase ignores custom handlers, but we need .eq('user_id', userId) filter
+import { replicateRxCollection } from 'rxdb/plugins/replication';
 import type { RxCollection, RxReplicationState } from 'rxdb';
 import { supabase } from '@/shared/api'; // Use SINGLETON client - DO NOT create new client!
 import type { DevlogDatabase } from './rxdb';
 
 // Verify client is ready
 console.log('[RxDB Replication] Using singleton Supabase client');
-console.log('[RxDB Replication] Using OFFICIAL RxDB Supabase plugin (v16.19.0+)');
+console.log('[RxDB Replication] Using replicateRxCollection (custom handlers)');
 
 // =============================================================================
 // DEBUG: Schema Verification Helper
@@ -244,63 +247,95 @@ export async function setupCollectionReplication<T extends { id: string; _delete
     }
   };
 
-  // ✅ CRITICAL FIX: Custom push handler as arrow function
+  // ✅ Push handler for replicateRxCollection
+  // Format: receives rows with { newDocumentState, assumedMasterState }
+  // Returns: array of conflicts (empty = all succeeded)
   const pushHandler = async (
-    docs: T[]
+    rows: { newDocumentState: T; assumedMasterState: T | null }[]
   ): Promise<T[]> => {
     try {
-      console.log(`[RxDB Replication] ${tableName}: Push starting`, { count: docs.length });
+      console.log(`[RxDB Replication] ${tableName}: Push starting`, { count: rows.length });
 
-      const results: T[] = [];
+      const conflicts: T[] = [];
 
-      for (const doc of docs) {
+      for (const row of rows) {
+        const newDoc = row.newDocumentState;
+        const assumedMasterState = row.assumedMasterState; // null = INSERT, otherwise UPDATE
+
         // Skip deletion of never-synced documents
-        if ((doc as any)._deleted === true && !wasSynced(tableName, doc.id)) {
-          console.log(`[RxDB Replication] Skipping deletion of never-synced doc: ${doc.id}`);
+        if ((newDoc as any)._deleted === true && !wasSynced(tableName, newDoc.id)) {
+          console.log(`[RxDB Replication] Skipping deletion of never-synced doc: ${newDoc.id}`);
           continue;
         }
 
-        // Strip _modified - Supabase generates this via trigger
-        const { _modified, ...docToUpsert } = doc as any;
+        // Strip _modified and _rev - Supabase generates _modified via trigger
+        const { _modified, _rev, ...docToUpsert } = newDoc as any;
 
-        const { error } = await supabase
-          .from(tableName)
-          .upsert(docToUpsert, { onConflict: 'id' });
+        if (!assumedMasterState) {
+          // INSERT - new document
+          const { error } = await supabase
+            .from(tableName)
+            .insert([docToUpsert]);
 
-        if (error) {
-          console.error(`[RxDB Replication] ${tableName}: Push error for ${doc.id}`, error);
-          throw error;
+          if (error) {
+            if (error.code === '23505') {
+              // Conflict - document already exists
+              console.log(`[RxDB Replication] ${tableName}: Conflict on INSERT ${newDoc.id}`);
+              conflicts.push(newDoc);
+            } else {
+              console.error(`[RxDB Replication] ${tableName}: Insert error for ${newDoc.id}`, error);
+              throw error;
+            }
+          } else {
+            markAsSynced(tableName, newDoc.id);
+          }
+        } else {
+          // UPDATE with optimistic concurrency
+          const { data, error } = await supabase
+            .from(tableName)
+            .update(docToUpsert)
+            .eq('id', newDoc.id)
+            .select();
+
+          if (error) {
+            console.error(`[RxDB Replication] ${tableName}: Update error for ${newDoc.id}`, error);
+            throw error;
+          }
+
+          if (!data || data.length === 0) {
+            // Conflict - document was modified or deleted
+            console.log(`[RxDB Replication] ${tableName}: Conflict on UPDATE ${newDoc.id}`);
+            conflicts.push(newDoc);
+          } else {
+            markAsSynced(tableName, newDoc.id);
+          }
         }
-
-        // Mark as synced after successful push
-        markAsSynced(tableName, doc.id);
-        results.push(doc);
       }
 
-      console.log(`[RxDB Replication] ${tableName}: Pushed ${results.length} docs`);
-      return results;
+      console.log(`[RxDB Replication] ${tableName}: Pushed ${rows.length - conflicts.length} docs, ${conflicts.length} conflicts`);
+      return conflicts;
     } catch (err) {
       console.error(`[RxDB Replication] ${tableName}: Push handler error`, err);
       throw err;
     }
   };
 
-  const replication = await replicateSupabase<T, { modified: number }>({
-    supabaseClient: supabase,
+  // Using replicateRxCollection - our custom handlers WILL be called
+  const replication = replicateRxCollection<T, { modified: number }>({
     collection,
     replicationIdentifier: `supabase-${tableName}-${userId}`,
 
     pull: {
       batchSize,
-      handler: pullHandler,  // ✅ Custom arrow function handler
+      handler: pullHandler,  // ✅ WILL be called (unlike replicateSupabase)
     },
 
     push: {
       batchSize: tableName === 'blocks' ? 100 : 50,
-      handler: pushHandler,  // ✅ Custom arrow function handler
+      handler: pushHandler,  // ✅ WILL be called (unlike replicateSupabase)
     },
 
-    // Disable live mode for now (has separate 'channel' error)
+    // No live mode with generic replication (would need manual Realtime setup)
     live: false,
 
     // Retry failed operations
@@ -355,7 +390,7 @@ export async function startAllReplications(
   // Setup pre-insert hooks for all collections
   setupPreInsertHooks(db);
 
-  console.log('[RxDB Replication] Starting replications with OFFICIAL RxDB plugin...');
+  console.log('[RxDB Replication] Starting replications with replicateRxCollection...');
 
   // DEBUG: Verify Supabase schema has required columns BEFORE starting replication
   console.log('[RxDB Replication] 🔍 Verifying Supabase schema...');

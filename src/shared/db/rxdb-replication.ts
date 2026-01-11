@@ -34,34 +34,49 @@ console.log('[RxDB Replication] Using OFFICIAL RxDB Supabase plugin (v16.19.0+)'
  * Check if Supabase tables have required _modified column
  * This is critical for RxDB replication to work
  */
-async function verifySupabaseSchema(tableName: string): Promise<{ hasModified: boolean; hasDeleted: boolean; error?: string }> {
+async function verifySupabaseSchema(tableName: string): Promise<{ hasModified: boolean; hasDeleted: boolean; rowCount: number; error?: string }> {
   try {
     // Try to query with _modified column - if it fails, column doesn't exist
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from(tableName)
-      .select('id, _modified, _deleted')
-      .limit(1);
+      .select('id, _modified, _deleted', { count: 'exact' })
+      .limit(5);
 
     if (error) {
       // Check if error is about missing column
       if (error.message?.includes('_modified') || error.code === '42703') {
         console.error(`[RxDB Replication] ❌ Table "${tableName}" missing _modified column!`);
-        return { hasModified: false, hasDeleted: false, error: error.message };
+        return { hasModified: false, hasDeleted: false, rowCount: 0, error: error.message };
       }
       if (error.message?.includes('_deleted')) {
         console.error(`[RxDB Replication] ❌ Table "${tableName}" missing _deleted column!`);
-        return { hasModified: true, hasDeleted: false, error: error.message };
+        return { hasModified: true, hasDeleted: false, rowCount: 0, error: error.message };
       }
       console.error(`[RxDB Replication] ❌ Schema check error for "${tableName}":`, error);
-      return { hasModified: false, hasDeleted: false, error: error.message };
+      return { hasModified: false, hasDeleted: false, rowCount: 0, error: error.message };
     }
 
-    console.log(`[RxDB Replication] ✅ Table "${tableName}" has required columns (_modified, _deleted)`);
-    return { hasModified: true, hasDeleted: true };
+    const rowCount = count ?? data?.length ?? 0;
+    console.log(`[RxDB Replication] ✅ Table "${tableName}" has required columns. Row count: ${rowCount}`);
+
+    // DEBUG: Log sample data to verify _modified values
+    if (data && data.length > 0) {
+      console.log(`[RxDB Replication] 📊 Sample ${tableName} data:`,
+        data.slice(0, 2).map((d: any) => ({
+          id: d.id?.substring(0, 8),
+          _modified: d._modified,
+          _deleted: d._deleted
+        }))
+      );
+    } else {
+      console.log(`[RxDB Replication] ℹ️ Table "${tableName}" is empty (0 rows)`);
+    }
+
+    return { hasModified: true, hasDeleted: true, rowCount };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error(`[RxDB Replication] ❌ Failed to verify schema for "${tableName}":`, message);
-    return { hasModified: false, hasDeleted: false, error: message };
+    return { hasModified: false, hasDeleted: false, rowCount: 0, error: message };
   }
 }
 

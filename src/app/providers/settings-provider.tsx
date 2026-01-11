@@ -75,12 +75,13 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     const loadSettings = async () => {
       try {
         // Load settings from profiles table
+        // Use maybeSingle() instead of single() to handle case where profile doesn't exist
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('settings')
           .eq('id', user.id)
-          .single();
-        
+          .maybeSingle();
+
         if (error) {
           console.error('Error loading profile settings:', error);
         } else if (profile?.settings) {

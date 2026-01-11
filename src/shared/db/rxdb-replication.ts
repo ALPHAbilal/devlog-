@@ -27,6 +27,45 @@ console.log('[RxDB Replication] Using singleton Supabase client');
 console.log('[RxDB Replication] Using OFFICIAL RxDB Supabase plugin (v16.19.0+)');
 
 // =============================================================================
+// DEBUG: Schema Verification Helper
+// =============================================================================
+
+/**
+ * Check if Supabase tables have required _modified column
+ * This is critical for RxDB replication to work
+ */
+async function verifySupabaseSchema(tableName: string): Promise<{ hasModified: boolean; hasDeleted: boolean; error?: string }> {
+  try {
+    // Try to query with _modified column - if it fails, column doesn't exist
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('id, _modified, _deleted')
+      .limit(1);
+
+    if (error) {
+      // Check if error is about missing column
+      if (error.message?.includes('_modified') || error.code === '42703') {
+        console.error(`[RxDB Replication] ❌ Table "${tableName}" missing _modified column!`);
+        return { hasModified: false, hasDeleted: false, error: error.message };
+      }
+      if (error.message?.includes('_deleted')) {
+        console.error(`[RxDB Replication] ❌ Table "${tableName}" missing _deleted column!`);
+        return { hasModified: true, hasDeleted: false, error: error.message };
+      }
+      console.error(`[RxDB Replication] ❌ Schema check error for "${tableName}":`, error);
+      return { hasModified: false, hasDeleted: false, error: error.message };
+    }
+
+    console.log(`[RxDB Replication] ✅ Table "${tableName}" has required columns (_modified, _deleted)`);
+    return { hasModified: true, hasDeleted: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[RxDB Replication] ❌ Failed to verify schema for "${tableName}":`, message);
+    return { hasModified: false, hasDeleted: false, error: message };
+  }
+}
+
+// =============================================================================
 // Sync State Tracking
 // =============================================================================
 
@@ -198,6 +237,25 @@ export async function setupCollectionReplication<T extends { id: string; _delete
     }
   });
 
+  // DEBUG: Log when documents are received from pull
+  replication.received$.subscribe((docs: any) => {
+    console.log(`[RxDB Replication] ${tableName}: Received ${docs?.length || 0} docs from pull`,
+      docs?.slice(0, 2).map((d: any) => ({ id: d.id?.substring(0, 8), title: d.title }))
+    );
+  });
+
+  // DEBUG: Log when documents are sent via push
+  replication.sent$.subscribe((docs: any) => {
+    console.log(`[RxDB Replication] ${tableName}: Sent ${docs?.length || 0} docs via push`);
+  });
+
+  // DEBUG: Log replication state for debugging
+  console.log(`[RxDB Replication] ${tableName}: Replication object created`, {
+    isStopped: replication.isStopped(),
+    collection: collection.name,
+    identifier: `supabase-${tableName}-${userId}`,
+  });
+
   console.log(`[RxDB Replication] ${tableName}: Started`);
   return replication;
 }
@@ -213,6 +271,27 @@ export async function startAllReplications(
   setupPreInsertHooks(db);
 
   console.log('[RxDB Replication] Starting replications with OFFICIAL RxDB plugin...');
+
+  // DEBUG: Verify Supabase schema has required columns BEFORE starting replication
+  console.log('[RxDB Replication] 🔍 Verifying Supabase schema...');
+  const schemaChecks = await Promise.all([
+    verifySupabaseSchema('documents'),
+    verifySupabaseSchema('folders'),
+    verifySupabaseSchema('blocks'),
+  ]);
+
+  const [docsSchema, foldersSchema, blocksSchema] = schemaChecks;
+  const allSchemasValid = docsSchema.hasModified && foldersSchema.hasModified && blocksSchema.hasModified;
+
+  if (!allSchemasValid) {
+    console.error('[RxDB Replication] ❌ SCHEMA MISMATCH DETECTED!');
+    console.error('[RxDB Replication] Required columns (_modified, _deleted) missing from Supabase tables.');
+    console.error('[RxDB Replication] Run migration: supabase/migrations/20260111_rxdb_replication_columns.sql');
+    console.error('[RxDB Replication] Schema check results:', { documents: docsSchema, folders: foldersSchema, blocks: blocksSchema });
+    // Continue anyway to see what happens, but warn the user
+  } else {
+    console.log('[RxDB Replication] ✅ All Supabase tables have required columns');
+  }
 
   // CRITICAL: Force Supabase Realtime WebSocket to initialize BEFORE replication
   // Supabase v2 uses lazy initialization - socket doesn't exist until first subscribe

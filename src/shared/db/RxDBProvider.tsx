@@ -83,9 +83,43 @@ export function DatabaseProvider({ children }: Props) {
             if (mounted) {
               replicationsRef.current = replications;
               console.log('[DatabaseProvider] Replications started');
+
+              // Health check: Wait a bit and verify data is being pulled
+              setTimeout(async () => {
+                if (!mounted) return;
+                try {
+                  const docCount = await db.documents.count().exec();
+                  const folderCount = await db.folders.count().exec();
+                  console.log('[DatabaseProvider] Replication health check:', {
+                    documents: docCount,
+                    folders: folderCount,
+                    replications: replicationsRef.current.size,
+                  });
+
+                  if (docCount === 0 && folderCount === 0) {
+                    console.warn(
+                      '[DatabaseProvider] ⚠️ No data after replication. Possible causes:\n' +
+                      '1. User has no documents yet (OK if new user)\n' +
+                      '2. Supabase tables missing _modified/_deleted columns (run migration)\n' +
+                      '3. RLS policies blocking queries\n' +
+                      '4. Supabase Realtime not enabled for tables'
+                    );
+                  }
+                } catch (e) {
+                  console.error('[DatabaseProvider] Health check failed:', e);
+                }
+              }, 3000); // Check after 3 seconds
             }
           } catch (err) {
             console.error('[DatabaseProvider] Failed to start replications:', err);
+            // Log more details about the error
+            if (err instanceof Error) {
+              console.error('[DatabaseProvider] Error details:', {
+                message: err.message,
+                name: err.name,
+                stack: err.stack?.split('\n').slice(0, 3).join('\n'),
+              });
+            }
           }
         }
       } else {

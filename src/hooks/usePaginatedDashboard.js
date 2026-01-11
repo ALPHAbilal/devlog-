@@ -51,7 +51,7 @@ export function usePaginatedDashboard(options = {}) {
 
     if (!user?.id || loadingRef.current) {
       console.log('usePaginatedDashboard: loadInitial() BLOCKED - no user or already loading');
-      return;
+      return Promise.resolve(); // Return resolved Promise to prevent .then() errors
     }
 
     loadingRef.current = true;

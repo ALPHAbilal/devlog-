@@ -214,6 +214,13 @@ export async function startAllReplications(
 
   console.log('[RxDB Replication] Starting replications with OFFICIAL RxDB plugin...');
 
+  // CRITICAL: Force Supabase Realtime WebSocket to initialize BEFORE replication
+  // Supabase v2 uses lazy initialization - socket doesn't exist until first subscribe
+  const realtimeReady = await ensureSupabaseRealtimeReady(10000);
+  if (!realtimeReady) {
+    console.warn('[RxDB Replication] ⚠️ Realtime may not be ready, proceeding anyway...');
+  }
+
   const replications = new Map<string, ReplicationInstance>();
 
   try {
@@ -277,10 +284,52 @@ export async function resyncAll(
 // Legacy exports for backwards compatibility
 // =============================================================================
 
-// These functions are no longer needed with the official plugin but kept for external imports
-export async function ensureSupabaseRealtimeReady(_timeoutMs = 10000): Promise<boolean> {
-  console.log('[RxDB Replication] ensureSupabaseRealtimeReady() - handled by official plugin');
-  return true;
+/**
+ * Force Supabase Realtime WebSocket to initialize.
+ *
+ * CRITICAL: In Supabase v2, the WebSocket is LAZY INITIALIZED.
+ * It doesn't exist until you subscribe to your first channel.
+ * The RxDB plugin assumes it exists, causing "channel undefined" errors.
+ *
+ * This function creates a test channel and subscribes to force WebSocket creation.
+ */
+export async function ensureSupabaseRealtimeReady(timeoutMs = 10000): Promise<boolean> {
+  console.log('[RxDB Replication] 🔌 Forcing Supabase Realtime WebSocket initialization...');
+
+  return new Promise((resolve) => {
+    const timeoutId = setTimeout(() => {
+      console.warn('[RxDB Replication] ⚠️ Realtime initialization timeout - proceeding anyway');
+      resolve(false);
+    }, timeoutMs);
+
+    // Create a unique test channel name
+    const testChannelName = `rxdb-init-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+    const testChannel = supabase.channel(testChannelName);
+
+    testChannel
+      .on('system', { event: '*' }, () => {
+        // System events listener (required for subscription)
+      })
+      .subscribe((status, err) => {
+        console.log(`[RxDB Replication] Channel status: ${status}`, err ? err : '');
+
+        if (status === 'SUBSCRIBED') {
+          console.log('[RxDB Replication] ✅ Realtime WebSocket connected and ready!');
+          clearTimeout(timeoutId);
+
+          // Clean up test channel
+          testChannel.unsubscribe().then(() => {
+            supabase.removeChannel(testChannel);
+          });
+
+          resolve(true);
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.error('[RxDB Replication] ❌ Realtime connection failed:', err);
+          clearTimeout(timeoutId);
+          resolve(false);
+        }
+      });
+  });
 }
 
 export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> {
@@ -288,5 +337,6 @@ export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> 
 }
 
 export function forceRealtimeConnect(): void {
-  console.log('[RxDB Replication] forceRealtimeConnect() - handled by official plugin');
+  // Fire and forget - just triggers WebSocket initialization
+  ensureSupabaseRealtimeReady(5000).catch(console.error);
 }

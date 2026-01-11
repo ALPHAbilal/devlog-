@@ -14,9 +14,10 @@ import { startAllReplications, stopAllReplications, clearSyncState } from './rxd
 import { runMigration, isMigrationNeeded } from './migration';
 import { useAuth } from '@/app/providers';
 
-// Using any for replication type since we switched from rxdb built-in plugin to rxdb-supabase
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ReplicationMap = Map<string, any>;
+import type { RxReplicationState } from 'rxdb';
+
+// Type for replication instances from official RxDB Supabase plugin
+type ReplicationMap = Map<string, RxReplicationState<any, any>>;
 
 interface Props {
   children: ReactNode;

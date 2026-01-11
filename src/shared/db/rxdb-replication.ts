@@ -2,30 +2,29 @@
 /**
  * Supabase Replication for RxDB
  *
- * USES: rxdb-supabase library (community-maintained, works with Supabase v2)
- * NOT: rxdb/plugins/replication-supabase (has bugs with Supabase v2)
+ * USES: Official RxDB Supabase plugin (rxdb/plugins/replication-supabase)
+ * RELEASED: v16.19.0 (September 4, 2025)
+ * STATUS: Beta but actively maintained by RxDB core team
  *
- * The official RxDB plugin has a known bug where it fails with:
- * "TypeError: Cannot read properties of undefined (reading 'channel')"
- * even after WebSocket initialization. The rxdb-supabase library handles
- * Supabase v2's realtime API correctly.
+ * This plugin provides:
+ * - Pull: PostgREST HTTP requests with checkpoint-based incremental sync
+ * - Push: Optimistic concurrency guards via PostgREST
+ * - Live: Supabase Realtime channels for streaming updates
  *
  * CRITICAL: Uses singleton Supabase client from @/shared/api
  * Creating multiple clients causes GoTrueClient conflicts and breaks realtime.
  *
- * Reference: resources/rxdb-migration-guide.md Part 2
+ * Reference: https://rxdb.info/replication-supabase.html
  */
 
-import { SupabaseReplication } from 'rxdb-supabase';
-import type { RxCollection } from 'rxdb';
+import { replicateSupabase } from 'rxdb/plugins/replication-supabase';
+import type { RxCollection, RxReplicationState } from 'rxdb';
 import { supabase } from '@/shared/api'; // Use SINGLETON client - DO NOT create new client!
 import type { DevlogDatabase } from './rxdb';
 
 // Verify client is ready
-console.log('[RxDB Replication] Using singleton client');
-console.log('[RxDB Replication] Client channel method:', typeof supabase.channel);
-console.log('[RxDB Replication] Realtime available:', typeof supabase.realtime);
-console.log('[RxDB Replication] Using rxdb-supabase library (not built-in plugin)');
+console.log('[RxDB Replication] Using singleton Supabase client');
+console.log('[RxDB Replication] Using OFFICIAL RxDB Supabase plugin (v16.19.0+)');
 
 // =============================================================================
 // Sync State Tracking
@@ -93,45 +92,60 @@ export function setupPreInsertHooks(db: DevlogDatabase): void {
 }
 
 // =============================================================================
-// Replication Setup using rxdb-supabase
+// Replication Setup using Official RxDB Plugin
 // =============================================================================
 
-// Store replication instances for management
-type ReplicationInstance = InstanceType<typeof SupabaseReplication<any>>;
+// Type alias for replication state
+type ReplicationInstance = RxReplicationState<any, any>;
 
 /**
- * Setup Supabase replication for a collection using rxdb-supabase library
+ * Setup Supabase replication for a collection using official RxDB plugin
+ *
+ * Uses replicateSupabase from rxdb/plugins/replication-supabase
+ * Released in RxDB v16.19.0 (September 2025)
  */
-export function setupCollectionReplication<T extends { id: string; _deleted?: boolean }>(
+export async function setupCollectionReplication<T extends { id: string; _deleted?: boolean }>(
   collection: RxCollection<T>,
   tableName: string,
   userId: string
-): ReplicationInstance {
+): Promise<ReplicationInstance> {
   console.log(`[RxDB Replication] Setting up replication for ${tableName}`);
 
-  const replication = new SupabaseReplication<T>({
+  const replication = await replicateSupabase<T, any>({
     supabaseClient: supabase,
     collection,
-    table: tableName,
     replicationIdentifier: `supabase-${tableName}-${userId}`,
 
     pull: {
       batchSize: tableName === 'blocks' ? 200 : 100,
-      // Transform Supabase nulls to empty strings (sentinel values) for RxDB
+      /**
+       * Transform Supabase response for RxDB compatibility
+       * CRITICAL: Supabase returns null, RxDB expects undefined
+       */
       modifier: (doc: any) => {
-        // Convert nulls to sentinel values (empty strings)
-        if (doc.folder_id === null) doc.folder_id = '';
-        if (doc.parent_id === null) doc.parent_id = '';
-        // Ensure timestamps have defaults
-        if (!doc.created_at) doc.created_at = '';
-        if (!doc.updated_at) doc.updated_at = '';
-        // Ensure _modified is number
+        // Convert nulls to appropriate values for RxDB
+        Object.keys(doc).forEach((key) => {
+          if (doc[key] === null) {
+            // For string fields that use sentinel values, use empty string
+            if (key === 'folder_id' || key === 'parent_id' || key === 'path') {
+              doc[key] = '';
+            } else if (key === 'created_at' || key === 'updated_at') {
+              doc[key] = '';
+            } else {
+              // For other fields, delete to let RxDB use defaults
+              delete doc[key];
+            }
+          }
+        });
+
+        // Ensure _modified is a number
         if (typeof doc._modified === 'string') {
           doc._modified = new Date(doc._modified).getTime();
         }
         if (doc._modified === null || doc._modified === undefined) {
           doc._modified = 0;
         }
+
         // Mark as synced when pulled from server (it exists on server)
         markAsSynced(tableName, doc.id);
         return doc;
@@ -141,22 +155,40 @@ export function setupCollectionReplication<T extends { id: string; _deleted?: bo
     push: {
       batchSize: tableName === 'blocks' ? 100 : 50,
       /**
-       * Filter out deletions of documents that were never synced to the server.
-       * These documents only exist locally and trying to delete them on the
-       * server will cause a "not found" error.
+       * Transform RxDB document before pushing to Supabase
+       * - Strip _modified (Supabase auto-generates via trigger)
+       * - Skip deletions for never-synced documents
        */
       modifier: (doc: any) => {
-        // If this is a deletion...
+        // If this is a deletion of a document that was never synced, skip it
         if (doc._deleted === true) {
-          // Check if the document was ever synced to the server
           if (!wasSynced(tableName, doc.id)) {
             console.log(`[RxDB Replication] Skipping deletion of never-synced doc: ${doc.id}`);
             return null; // Skip this document - don't push to server
           }
         }
-        return doc;
+
+        // Strip _modified - Supabase generates this via trigger
+        // Note: There's a known bug (RxDB #7513) where modifier may not be called
+        // If _modified causes issues, add a Supabase trigger to ignore it
+        const { _modified, ...rest } = doc;
+        return rest;
       },
     },
+
+    // Enable Realtime streaming for live updates
+    live: true,
+
+    // Retry failed operations
+    retryTime: 5000,
+
+    // Auto-start replication
+    autoStart: true,
+  });
+
+  // Log replication state changes
+  replication.active$.subscribe((active: boolean) => {
+    console.log(`[RxDB Replication] ${tableName}: ${active ? 'Active' : 'Inactive'}`);
   });
 
   // Log replication errors
@@ -180,28 +212,32 @@ export async function startAllReplications(
   // Setup pre-insert hooks for all collections
   setupPreInsertHooks(db);
 
-  console.log('[RxDB Replication] Starting replications with rxdb-supabase library...');
+  console.log('[RxDB Replication] Starting replications with OFFICIAL RxDB plugin...');
 
   const replications = new Map<string, ReplicationInstance>();
 
   try {
-    replications.set('documents', setupCollectionReplication(
+    // Start replications sequentially to avoid race conditions
+    const documentsRep = await setupCollectionReplication(
       db.documents,
       'documents',
       userId
-    ));
+    );
+    replications.set('documents', documentsRep);
 
-    replications.set('folders', setupCollectionReplication(
+    const foldersRep = await setupCollectionReplication(
       db.folders,
       'folders',
       userId
-    ));
+    );
+    replications.set('folders', foldersRep);
 
-    replications.set('blocks', setupCollectionReplication(
+    const blocksRep = await setupCollectionReplication(
       db.blocks,
       'blocks',
       userId
-    ));
+    );
+    replications.set('blocks', blocksRep);
 
     console.log('[RxDB Replication] All replications started successfully!');
   } catch (err) {
@@ -241,9 +277,9 @@ export async function resyncAll(
 // Legacy exports for backwards compatibility
 // =============================================================================
 
-// These are no longer needed with rxdb-supabase but kept for any external imports
+// These functions are no longer needed with the official plugin but kept for external imports
 export async function ensureSupabaseRealtimeReady(_timeoutMs = 10000): Promise<boolean> {
-  console.log('[RxDB Replication] ensureSupabaseRealtimeReady() - not needed with rxdb-supabase');
+  console.log('[RxDB Replication] ensureSupabaseRealtimeReady() - handled by official plugin');
   return true;
 }
 
@@ -252,5 +288,5 @@ export async function waitForRealtimeReady(maxWaitMs = 10000): Promise<boolean> 
 }
 
 export function forceRealtimeConnect(): void {
-  console.log('[RxDB Replication] forceRealtimeConnect() - not needed with rxdb-supabase');
+  console.log('[RxDB Replication] forceRealtimeConnect() - handled by official plugin');
 }

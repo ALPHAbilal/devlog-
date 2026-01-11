@@ -152,15 +152,19 @@ export function useRxDocuments(options: UseRxDocumentsOptions = {}) {
   const isLoadingMore = false;
 
   // loadMore - no-op with RxDB (all data loaded)
-  const loadMore = useCallback(() => {
+  // Returns Promise for API compatibility with usePaginatedDashboard
+  const loadMore = useCallback((): Promise<void> => {
     // RxDB loads all data instantly - no pagination needed
     console.log('[useRxDocuments] loadMore called - RxDB loads all data instantly');
+    return Promise.resolve();
   }, []);
 
   // loadInitial - no-op with RxDB (data is reactive)
-  const loadInitial = useCallback(() => {
+  // Returns Promise for API compatibility with usePaginatedDashboard
+  const loadInitial = useCallback((): Promise<void> => {
     // RxDB queries are reactive - no manual load needed
     console.log('[useRxDocuments] loadInitial called - RxDB is reactive');
+    return Promise.resolve();
   }, []);
 
   // checkLoadMore - no-op with RxDB
@@ -169,9 +173,11 @@ export function useRxDocuments(options: UseRxDocumentsOptions = {}) {
   }, []);
 
   // reset - no-op with RxDB (data is reactive)
-  const reset = useCallback(() => {
+  // Returns Promise for API compatibility with usePaginatedDashboard
+  const reset = useCallback((): Promise<void> => {
     setCurrentPage(0);
     console.log('[useRxDocuments] reset called - RxDB is reactive');
+    return Promise.resolve();
   }, []);
 
   // Create document

@@ -283,11 +283,12 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
   }, [documentsCollection]);
 
   // refreshFolders - no-op with RxDB (data is reactive)
-  // Kept for API compatibility
-  const refreshFolders = useCallback(async () => {
+  // Returns Promise for API compatibility with old useFolders
+  const refreshFolders = useCallback((): Promise<void> => {
     // RxDB queries are reactive - no manual refresh needed
     // This is a no-op for API compatibility
     console.log('[useRxFolders] refreshFolders called - RxDB is reactive, no manual refresh needed');
+    return Promise.resolve();
   }, []);
 
   // Build folder tree from flat list (for consumers that need Map format)

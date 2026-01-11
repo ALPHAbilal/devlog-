@@ -1,12 +1,15 @@
-# Active: Dashboard 'then' undefined
+# Active: RxDB live:true channel error
 
 **Started**: 2025-01-11
 
 ## Symptom
-- `Cannot read properties of undefined (reading 'then')` at line 1529
+- `Cannot read properties of undefined (reading 'channel')` after replication "Started"
 
 ## Attempts
-1. Fixed RxDB channel error → ✅ (different issue)
+1. Schema check → ✅ Tables have `_modified`, `_deleted`, data exists (392 docs)
+2. WebSocket test channel → ✅ SUBSCRIBED works
+3. Set `live: false` → Testing now
 
 ## Next
-- Investigate Dashboard background sync code
+- If `live: false` works → Issue is Realtime channel creation in RxDB plugin
+- Check RxDB plugin version compatibility with Supabase v2.46.2

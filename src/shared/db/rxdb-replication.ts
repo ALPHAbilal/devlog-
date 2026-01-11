@@ -165,28 +165,47 @@ export async function setupCollectionReplication<T extends { id: string; _delete
 ): Promise<ReplicationInstance> {
   console.log(`[RxDB Replication] Setting up replication for ${tableName}`);
 
-  const replication = await replicateSupabase<T, any>({
-    supabaseClient: supabase,
-    collection,
-    replicationIdentifier: `supabase-${tableName}-${userId}`,
+  // DEBUG: Verify supabase client is available
+  console.log(`[RxDB Replication] DEBUG supabase client check:`, {
+    supabaseExists: !!supabase,
+    hasFrom: typeof supabase?.from === 'function',
+    hasChannel: typeof supabase?.channel === 'function',
+  });
 
-    pull: {
-      batchSize: tableName === 'blocks' ? 200 : 100,
-      /**
-       * Transform Supabase response for RxDB compatibility
-       * CRITICAL: Supabase returns null, RxDB expects undefined
-       */
-      modifier: (doc: any) => {
-        // Convert nulls to appropriate values for RxDB
+  const batchSize = tableName === 'blocks' ? 200 : 100;
+
+  // ✅ CRITICAL FIX: Custom pull handler as arrow function to capture supabase in closure
+  // The RxDB plugin's internal handler loses the supabaseClient reference
+  const pullHandler = async (
+    checkpoint: { modified: number } | null,
+    batchSize: number
+  ): Promise<{ documents: T[]; checkpoint: { modified: number } | null }> => {
+    try {
+      console.log(`[RxDB Replication] ${tableName}: Pull starting`, { checkpoint, batchSize });
+
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('user_id', userId)
+        .gt('_modified', checkpoint?.modified ?? 0)
+        .order('_modified', { ascending: true })
+        .limit(batchSize);
+
+      if (error) {
+        console.error(`[RxDB Replication] ${tableName}: Pull error`, error);
+        throw error;
+      }
+
+      // Transform documents for RxDB compatibility
+      const documents = (data || []).map((doc: any) => {
+        // Convert nulls to appropriate values
         Object.keys(doc).forEach((key) => {
           if (doc[key] === null) {
-            // For string fields that use sentinel values, use empty string
             if (key === 'folder_id' || key === 'parent_id' || key === 'path') {
               doc[key] = '';
             } else if (key === 'created_at' || key === 'updated_at') {
               doc[key] = '';
             } else {
-              // For other fields, delete to let RxDB use defaults
               delete doc[key];
             }
           }
@@ -200,40 +219,89 @@ export async function setupCollectionReplication<T extends { id: string; _delete
           doc._modified = 0;
         }
 
-        // Mark as synced when pulled from server (it exists on server)
+        // Mark as synced
         markAsSynced(tableName, doc.id);
         return doc;
-      },
+      });
+
+      // Calculate new checkpoint
+      const newCheckpoint = documents.length > 0
+        ? { modified: documents[documents.length - 1]._modified }
+        : checkpoint;
+
+      console.log(`[RxDB Replication] ${tableName}: Pulled ${documents.length} docs`, {
+        newCheckpoint,
+        hasMore: documents.length === batchSize,
+      });
+
+      return {
+        documents,
+        checkpoint: newCheckpoint,
+      };
+    } catch (err) {
+      console.error(`[RxDB Replication] ${tableName}: Pull handler error`, err);
+      throw err;
+    }
+  };
+
+  // ✅ CRITICAL FIX: Custom push handler as arrow function
+  const pushHandler = async (
+    docs: T[]
+  ): Promise<T[]> => {
+    try {
+      console.log(`[RxDB Replication] ${tableName}: Push starting`, { count: docs.length });
+
+      const results: T[] = [];
+
+      for (const doc of docs) {
+        // Skip deletion of never-synced documents
+        if ((doc as any)._deleted === true && !wasSynced(tableName, doc.id)) {
+          console.log(`[RxDB Replication] Skipping deletion of never-synced doc: ${doc.id}`);
+          continue;
+        }
+
+        // Strip _modified - Supabase generates this via trigger
+        const { _modified, ...docToUpsert } = doc as any;
+
+        const { error } = await supabase
+          .from(tableName)
+          .upsert(docToUpsert, { onConflict: 'id' });
+
+        if (error) {
+          console.error(`[RxDB Replication] ${tableName}: Push error for ${doc.id}`, error);
+          throw error;
+        }
+
+        // Mark as synced after successful push
+        markAsSynced(tableName, doc.id);
+        results.push(doc);
+      }
+
+      console.log(`[RxDB Replication] ${tableName}: Pushed ${results.length} docs`);
+      return results;
+    } catch (err) {
+      console.error(`[RxDB Replication] ${tableName}: Push handler error`, err);
+      throw err;
+    }
+  };
+
+  const replication = await replicateSupabase<T, { modified: number }>({
+    supabaseClient: supabase,
+    collection,
+    replicationIdentifier: `supabase-${tableName}-${userId}`,
+
+    pull: {
+      batchSize,
+      handler: pullHandler,  // ✅ Custom arrow function handler
     },
 
     push: {
       batchSize: tableName === 'blocks' ? 100 : 50,
-      /**
-       * Transform RxDB document before pushing to Supabase
-       * - Strip _modified (Supabase auto-generates via trigger)
-       * - Skip deletions for never-synced documents
-       */
-      modifier: (doc: any) => {
-        // If this is a deletion of a document that was never synced, skip it
-        if (doc._deleted === true) {
-          if (!wasSynced(tableName, doc.id)) {
-            console.log(`[RxDB Replication] Skipping deletion of never-synced doc: ${doc.id}`);
-            return null; // Skip this document - don't push to server
-          }
-        }
-
-        // Strip _modified - Supabase generates this via trigger
-        // Note: There's a known bug (RxDB #7513) where modifier may not be called
-        // If _modified causes issues, add a Supabase trigger to ignore it
-        const { _modified, ...rest } = doc;
-        return rest;
-      },
+      handler: pushHandler,  // ✅ Custom arrow function handler
     },
 
-    // Enable Realtime streaming for live updates
-    // DEBUG: Temporarily disable live mode to test if that's causing the 'channel' error
-    // Set to true once fixed
-    live: false, // TODO: Re-enable after fixing Realtime channel issue
+    // Disable live mode for now (has separate 'channel' error)
+    live: false,
 
     // Retry failed operations
     retryTime: 5000,

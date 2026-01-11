@@ -1,5 +1,17 @@
 # RxDB + Supabase Bugs
 
+## loadInitial returns undefined - 2025-01-11
+**Symptom**: `Cannot read properties of undefined (reading 'then')` in Dashboard
+**Cause**: `useRxDocuments.loadInitial()` returned void, Dashboard called `.then()`
+**Fix**: `return Promise.resolve()` in loadInitial, loadMore, reset
+**Check First**: Does hook return Promise for API compat with legacy code?
+
+## profiles.single() 406 error - 2025-01-11
+**Symptom**: `PGRST116: JSON object requested, multiple (or no) rows returned`
+**Cause**: `.single()` expects exactly 1 row, user has no profile
+**Fix**: Change `.single()` to `.maybeSingle()` in settings-provider.tsx
+**Check First**: Use `.maybeSingle()` when row may not exist
+
 ## WebSocket Lazy Init - 2025-01-11
 **Symptom**: `Cannot read 'channel' of undefined` on replication start
 **Cause**: Supabase v2 WebSocket doesn't exist until first `.subscribe()`
@@ -23,3 +35,9 @@
 **Cause**: Normal - means no pending changes to sync
 **Fix**: Not a bug. Active only when syncing data.
 **Check First**: Check if data actually exists to sync
+
+## live:true channel error - 2025-01-11 (IN PROGRESS)
+**Symptom**: `Cannot read 'channel' of undefined` after "Started"
+**Cause**: RxDB plugin internal issue with Supabase Realtime
+**Fix**: Testing with `live: false` to isolate
+**Check First**: Does `live: false` allow data to pull successfully?

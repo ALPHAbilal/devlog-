@@ -84,6 +84,49 @@ async function verifySupabaseSchema(tableName: string): Promise<{ hasModified: b
 }
 
 // =============================================================================
+// Supabase Column Whitelist
+// =============================================================================
+
+/**
+ * Only these columns exist in Supabase tables.
+ * Extra fields (like filePath, language, isNew) must be stripped before push.
+ */
+const SUPABASE_COLUMNS: Record<string, string[]> = {
+  documents: [
+    'id', 'user_id', 'title', 'folder_id', 'tags', 'metadata',
+    'doc_position', 'created_at', 'updated_at', '_modified', '_deleted'
+  ],
+  folders: [
+    'id', 'user_id', 'name', 'parent_id', 'path', 'position',
+    'created_at', 'updated_at', '_modified', '_deleted'
+  ],
+  blocks: [
+    'id', 'document_id', 'type', 'content', 'position', 'metadata',
+    'created_at', 'updated_at', '_modified', '_deleted'
+  ],
+};
+
+/**
+ * Strip fields that don't exist in Supabase table.
+ * Extra fields like filePath, language, isNew are stored in RxDB but not in Supabase.
+ */
+function stripExtraFields<T extends Record<string, any>>(doc: T, tableName: string): Partial<T> {
+  const allowedColumns = SUPABASE_COLUMNS[tableName];
+  if (!allowedColumns) {
+    console.warn(`[RxDB Replication] No column whitelist for table "${tableName}", sending all fields`);
+    return doc;
+  }
+
+  const stripped: Record<string, any> = {};
+  for (const key of allowedColumns) {
+    if (key in doc) {
+      stripped[key] = doc[key];
+    }
+  }
+  return stripped as Partial<T>;
+}
+
+// =============================================================================
 // Sync State Tracking
 // =============================================================================
 
@@ -268,8 +311,10 @@ export async function setupCollectionReplication<T extends { id: string; _delete
           continue;
         }
 
-        // Strip _modified and _rev - Supabase generates _modified via trigger
-        const { _modified, _rev, ...docToUpsert } = newDoc as any;
+        // Strip extra fields that don't exist in Supabase (filePath, language, isNew, etc.)
+        // Also strip _modified (Supabase generates via trigger) and _rev (RxDB internal)
+        const strippedDoc = stripExtraFields(newDoc as any, tableName);
+        const { _modified, _rev, ...docToUpsert } = strippedDoc as any;
 
         if (!assumedMasterState) {
           // INSERT - new document
@@ -359,14 +404,18 @@ export async function setupCollectionReplication<T extends { id: string; _delete
 
   // DEBUG: Log when documents are received from pull
   replication.received$.subscribe((docs: any) => {
-    console.log(`[RxDB Replication] ${tableName}: Received ${docs?.length || 0} docs from pull`,
-      docs?.slice(0, 2).map((d: any) => ({ id: d.id?.substring(0, 8), title: d.title }))
+    // docs might be array or single object depending on RxDB version
+    const docsArray = Array.isArray(docs) ? docs : (docs ? [docs] : []);
+    console.log(`[RxDB Replication] ${tableName}: Received ${docsArray.length} docs from pull`,
+      docsArray.slice(0, 2).map((d: any) => ({ id: d.id?.substring(0, 8), title: d.title }))
     );
   });
 
   // DEBUG: Log when documents are sent via push
   replication.sent$.subscribe((docs: any) => {
-    console.log(`[RxDB Replication] ${tableName}: Sent ${docs?.length || 0} docs via push`);
+    // docs might be array or single object depending on RxDB version
+    const docsArray = Array.isArray(docs) ? docs : (docs ? [docs] : []);
+    console.log(`[RxDB Replication] ${tableName}: Sent ${docsArray.length} docs via push`);
   });
 
   // DEBUG: Log replication state for debugging

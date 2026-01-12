@@ -191,11 +191,33 @@ function prepareFromSupabase<T extends Record<string, any>>(doc: T, tableName: s
 }
 
 /**
+ * Convert millisecond timestamp to ISO date string for Supabase.
+ * Supabase expects "timestamp with time zone" as ISO 8601 strings.
+ *
+ * Example: 1768170748648 → "2026-01-11T22:32:28.648Z"
+ */
+function toISOString(value: any): string | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  // If it's a number (milliseconds), convert to ISO string
+  if (typeof value === 'number') {
+    return new Date(value).toISOString();
+  }
+  // If it's already a string, assume it's valid
+  if (typeof value === 'string') {
+    return value;
+  }
+  return null;
+}
+
+/**
  * Convert camelCase field names to snake_case for Supabase.
  * Also strips fields that don't exist in the Supabase table.
+ * Also converts timestamp fields to ISO strings.
  *
- * Example: { filePath: '/foo', language: 'ts', isNew: true }
- *       → { file_path: '/foo', language: 'ts' } (isNew stripped - not in Supabase)
+ * Example: { filePath: '/foo', language: 'ts', isNew: true, created_at: 1768170748648 }
+ *       → { file_path: '/foo', language: 'ts', created_at: '2026-01-11T22:32:28.648Z' }
  */
 function prepareForSupabase<T extends Record<string, any>>(doc: T, tableName: string): Partial<T> {
   const allowedColumns = SUPABASE_COLUMNS[tableName];
@@ -208,13 +230,21 @@ function prepareForSupabase<T extends Record<string, any>>(doc: T, tableName: st
 
   const prepared: Record<string, any> = {};
 
+  // Fields that need timestamp conversion
+  const timestampFields = ['created_at', 'updated_at', 'createdAt', 'updatedAt', 'deleted_at', 'deletedAt'];
+
   for (const [key, value] of Object.entries(doc)) {
     // First, check if this field needs to be renamed (camelCase → snake_case)
     const mappedKey = fieldMappings[key] || key;
 
     // Only include if the (mapped) field is in the allowed columns
     if (allowedColumns.includes(mappedKey)) {
-      prepared[mappedKey] = value;
+      // Convert timestamp fields to ISO strings
+      if (timestampFields.includes(key) || timestampFields.includes(mappedKey)) {
+        prepared[mappedKey] = toISOString(value);
+      } else {
+        prepared[mappedKey] = value;
+      }
     }
   }
 

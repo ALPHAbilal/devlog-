@@ -89,41 +89,136 @@ async function verifySupabaseSchema(tableName: string): Promise<{ hasModified: b
 
 /**
  * Only these columns exist in Supabase tables.
- * Extra fields (like filePath, language, isNew) must be stripped before push.
+ * Fields not in this list will be stripped before push.
+ *
+ * IMPORTANT: Supabase uses snake_case, JS uses camelCase.
+ * See FIELD_MAPPINGS below for conversions.
  */
 const SUPABASE_COLUMNS: Record<string, string[]> = {
   documents: [
     'id', 'user_id', 'title', 'folder_id', 'tags', 'metadata',
-    'doc_position', 'created_at', 'updated_at', '_modified', '_deleted'
+    'doc_position', 'created_at', 'updated_at', '_modified', '_deleted',
+    'is_favorite', 'share_settings'
   ],
   folders: [
     'id', 'user_id', 'name', 'parent_id', 'path', 'position',
     'created_at', 'updated_at', '_modified', '_deleted'
   ],
   blocks: [
-    'id', 'document_id', 'type', 'content', 'position', 'metadata',
-    'created_at', 'updated_at', '_modified', '_deleted'
+    'id', 'document_id', 'user_id', 'type', 'content', 'position', 'metadata',
+    'created_at', 'updated_at', '_modified', '_deleted',
+    'language', 'file_path', 'extracted_tags'
   ],
 };
 
 /**
- * Strip fields that don't exist in Supabase table.
- * Extra fields like filePath, language, isNew are stored in RxDB but not in Supabase.
+ * Field name mappings: JS camelCase → Supabase snake_case
+ * Used in push handler to convert field names before sending to Supabase
  */
-function stripExtraFields<T extends Record<string, any>>(doc: T, tableName: string): Partial<T> {
+const FIELD_MAPPINGS: Record<string, Record<string, string>> = {
+  blocks: {
+    filePath: 'file_path',
+    extractedTags: 'extracted_tags',
+    documentId: 'document_id',
+    userId: 'user_id',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+  documents: {
+    userId: 'user_id',
+    folderId: 'folder_id',
+    docPosition: 'doc_position',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    isFavorite: 'is_favorite',
+    shareSettings: 'share_settings',
+  },
+  folders: {
+    userId: 'user_id',
+    parentId: 'parent_id',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+  },
+};
+
+/**
+ * Reverse field mappings: Supabase snake_case → JS camelCase
+ * Used in pull handler to convert field names after receiving from Supabase
+ */
+const REVERSE_FIELD_MAPPINGS: Record<string, Record<string, string>> = {
+  blocks: {
+    file_path: 'filePath',
+    extracted_tags: 'extractedTags',
+    document_id: 'documentId',
+    user_id: 'userId',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+  },
+  documents: {
+    user_id: 'userId',
+    folder_id: 'folderId',
+    doc_position: 'docPosition',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+    is_favorite: 'isFavorite',
+    share_settings: 'shareSettings',
+  },
+  folders: {
+    user_id: 'userId',
+    parent_id: 'parentId',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+  },
+};
+
+/**
+ * Convert snake_case field names from Supabase to camelCase for RxDB/React.
+ *
+ * Example: { file_path: '/foo', language: 'ts' }
+ *       → { filePath: '/foo', language: 'ts' }
+ */
+function prepareFromSupabase<T extends Record<string, any>>(doc: T, tableName: string): T {
+  const reverseMappings = REVERSE_FIELD_MAPPINGS[tableName] || {};
+  const prepared: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(doc)) {
+    // Check if this field needs to be renamed (snake_case → camelCase)
+    const mappedKey = reverseMappings[key] || key;
+    prepared[mappedKey] = value;
+  }
+
+  return prepared as T;
+}
+
+/**
+ * Convert camelCase field names to snake_case for Supabase.
+ * Also strips fields that don't exist in the Supabase table.
+ *
+ * Example: { filePath: '/foo', language: 'ts', isNew: true }
+ *       → { file_path: '/foo', language: 'ts' } (isNew stripped - not in Supabase)
+ */
+function prepareForSupabase<T extends Record<string, any>>(doc: T, tableName: string): Partial<T> {
   const allowedColumns = SUPABASE_COLUMNS[tableName];
+  const fieldMappings = FIELD_MAPPINGS[tableName] || {};
+
   if (!allowedColumns) {
     console.warn(`[RxDB Replication] No column whitelist for table "${tableName}", sending all fields`);
     return doc;
   }
 
-  const stripped: Record<string, any> = {};
-  for (const key of allowedColumns) {
-    if (key in doc) {
-      stripped[key] = doc[key];
+  const prepared: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(doc)) {
+    // First, check if this field needs to be renamed (camelCase → snake_case)
+    const mappedKey = fieldMappings[key] || key;
+
+    // Only include if the (mapped) field is in the allowed columns
+    if (allowedColumns.includes(mappedKey)) {
+      prepared[mappedKey] = value;
     }
   }
-  return stripped as Partial<T>;
+
+  return prepared as Partial<T>;
 }
 
 // =============================================================================
@@ -244,10 +339,10 @@ export async function setupCollectionReplication<T extends { id: string; _delete
 
       // Transform documents for RxDB compatibility
       const documents = (data || []).map((doc: any) => {
-        // Convert nulls to appropriate values
+        // Convert nulls to appropriate values (before field name conversion)
         Object.keys(doc).forEach((key) => {
           if (doc[key] === null) {
-            if (key === 'folder_id' || key === 'parent_id' || key === 'path') {
+            if (key === 'folder_id' || key === 'parent_id' || key === 'path' || key === 'file_path') {
               doc[key] = '';
             } else if (key === 'created_at' || key === 'updated_at') {
               doc[key] = '';
@@ -257,17 +352,20 @@ export async function setupCollectionReplication<T extends { id: string; _delete
           }
         });
 
+        // Convert snake_case → camelCase (file_path → filePath, etc.)
+        const converted = prepareFromSupabase(doc, tableName);
+
         // Ensure _modified is a number
-        if (typeof doc._modified === 'string') {
-          doc._modified = new Date(doc._modified).getTime();
+        if (typeof converted._modified === 'string') {
+          converted._modified = new Date(converted._modified).getTime();
         }
-        if (doc._modified === null || doc._modified === undefined) {
-          doc._modified = 0;
+        if (converted._modified === null || converted._modified === undefined) {
+          converted._modified = 0;
         }
 
         // Mark as synced
-        markAsSynced(tableName, doc.id);
-        return doc;
+        markAsSynced(tableName, converted.id);
+        return converted;
       });
 
       // Calculate new checkpoint
@@ -311,10 +409,12 @@ export async function setupCollectionReplication<T extends { id: string; _delete
           continue;
         }
 
-        // Strip extra fields that don't exist in Supabase (filePath, language, isNew, etc.)
-        // Also strip _modified (Supabase generates via trigger) and _rev (RxDB internal)
-        const strippedDoc = stripExtraFields(newDoc as any, tableName);
-        const { _modified, _rev, ...docToUpsert } = strippedDoc as any;
+        // Prepare doc for Supabase:
+        // 1. Convert camelCase → snake_case (filePath → file_path)
+        // 2. Strip fields that don't exist in Supabase (isNew, etc.)
+        // 3. Remove _modified (Supabase generates via trigger) and _rev (RxDB internal)
+        const preparedDoc = prepareForSupabase(newDoc as any, tableName);
+        const { _modified, _rev, ...docToUpsert } = preparedDoc as any;
 
         if (!assumedMasterState) {
           // INSERT - new document

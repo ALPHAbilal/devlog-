@@ -447,22 +447,19 @@ export async function setupCollectionReplication<T extends { id: string; _delete
         const { _modified, _rev, ...docToUpsert } = preparedDoc as any;
 
         if (!assumedMasterState) {
-          // INSERT - new document
+          // UPSERT - insert new document OR update if already exists
+          // This handles the case where a document was synced via the old system
+          // before RxDB migration, and RxDB doesn't know it already exists
           const { error } = await supabase
             .from(tableName)
-            .insert([docToUpsert]);
+            .upsert([docToUpsert], { onConflict: 'id' });
 
           if (error) {
-            if (error.code === '23505') {
-              // Conflict - document already exists
-              console.log(`[RxDB Replication] ${tableName}: Conflict on INSERT ${newDoc.id}`);
-              conflicts.push(newDoc);
-            } else {
-              console.error(`[RxDB Replication] ${tableName}: Insert error for ${newDoc.id}`, error);
-              throw error;
-            }
+            console.error(`[RxDB Replication] ${tableName}: Upsert error for ${newDoc.id}`, error);
+            throw error;
           } else {
             markAsSynced(tableName, newDoc.id);
+            console.log(`[RxDB Replication] ${tableName}: Upserted ${newDoc.id}`);
           }
         } else {
           // UPDATE with optimistic concurrency

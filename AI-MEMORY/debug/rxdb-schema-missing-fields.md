@@ -1,173 +1,240 @@
-# RxDB Schema Missing Fields - Root Cause Analysis
+# Block Data Loss & RLS Failure - Root Cause Analysis
 
-**Status**: NEEDS VERIFICATION
+**Status**: VERIFIED
 **Date**: 2026-01-13
-**Severity**: Critical - Data Loss
+**Severity**: Critical - Data Loss + Sync Failure
 
 ---
 
-## Symptom
+## Symptoms
 
-- AI blocks lose `messages` after app reload
-- Table/Todo/IssueTracker blocks lose `data`
-- FileTree blocks lose `treeData`
-- Image blocks lose `images`
-- Supabase shows `content: ""` or `content_length: 0` for new blocks
+1. **Data Loss**: AI/Table/Todo/FileTree blocks lose their data after reload
+2. **RLS Failure**: `new row violates row-level security policy for table "blocks"` (code 42501)
+3. **Serialization appears to work** but content is empty or defaults only
 
 ---
 
-## Suspected Root Cause
+## Root Causes Found (3 Issues)
 
-**RxDB schema (`src/shared/db/rxdb-schemas.ts`) does NOT include block-specific fields.**
+### Issue 1: Serializer Strips Critical Fields
 
-### Current Schema (lines 86-112):
+**File**: `src/features/block/lib/serializer.ts` (lines 58-65)
+
+```typescript
+const serialized: Record<string, unknown> = {
+  id: block.id,
+  type: block.type,
+  position: block.position,
+  metadata: block.metadata || {},
+  created_at: block.created_at,
+  updated_at: block.updated_at
+};
+// Later adds: content
+```
+
+**Missing**: `document_id`, `user_id`
+
+**Result**: Even if block has these fields, serializer creates NEW object without them → RLS fails.
+
+---
+
+### Issue 2: RxDB Schema Missing `user_id`
+
+**File**: `src/shared/db/rxdb-schemas.ts` (lines 86-112)
+
 ```typescript
 export const blockSchema: RxJsonSchema<any> = {
   properties: {
     id: { type: 'string' },
-    document_id: { type: 'string' },
+    document_id: { type: 'string' },  // ✅ EXISTS
     type: { type: 'string' },
-    content: { type: ['string', 'object'] },  // Only this exists
+    content: { type: ['string', 'object'] },
     position: { type: 'number' },
     metadata: { type: 'object' },
     created_at: { type: 'number' },
     updated_at: { type: 'number' },
     _modified: { type: 'number' },
     _deleted: { type: 'boolean' },
+    // ❌ NO user_id!
   },
-  // ...
 };
 ```
 
-### Missing Fields:
-| Block Type | Missing Field | Used By |
-|------------|---------------|---------|
-| ai | `messages` | AIBlockRefined.jsx |
-| table | `data` | TableBlock.jsx |
-| todo | `data` | TodoBlock.jsx |
-| issue-tracker | `data` | IssueTrackerBlock.jsx |
-| filetree | `treeData`, `snapshots` | FileTreeBlock.jsx |
-| image | `images` | ImageBlock.jsx |
+**Result**: `user_id` never stored in RxDB → can't be sent to Supabase → RLS fails.
 
 ---
 
-## Data Flow (Suspected)
+### Issue 3: RxDB Schema Missing Block-Specific Fields
 
-```
-1. AIBlock calls: onUpdate(blockId, { messages: [...] })
-                              ↓
-2. useRxBlocks.updateBlock: doc.patch({ messages: [...] })
-                              ↓
-3. RxDB: "messages" not in schema → IGNORED/STRIPPED
-                              ↓
-4. Push handler receives doc WITHOUT messages
-                              ↓
-5. serializeBlock: get(block, 'messages') → undefined → []
-                              ↓
-6. Supabase: content = '{"messages":[],"metadata":{}}'
-```
+**Same file**: `src/shared/db/rxdb-schemas.ts`
+
+**Missing fields:**
+| Block Type | Missing Field |
+|------------|---------------|
+| ai | `messages` |
+| table | `data` |
+| todo | `data` |
+| issue-tracker | `data` |
+| filetree | `treeData`, `snapshots` |
+| image | `images` |
+
+**Result**: When UI calls `onUpdate({ messages: [...] })`, RxDB ignores the field → data lost.
 
 ---
 
-## Evidence
+## Evidence from Logs
 
-### From Supabase Query:
+### Serializer Input Shows Missing Data
 ```
-| Block ID       | content_length | updated_at  |
-|----------------|----------------|-------------|
-| d51a7622-...   | 0              | 2026-01-12  | ← NEW block, empty
-| 8b1de8f2-...   | 29             | 2026-01-04  | ← Older, has {}
-| older blocks   | 29-153         | 2025-xx-xx  | ← Have data
+🔍 BlockSerializer.serialize INPUT: {
+  id: 'a15bffa2-...',
+  type: 'table',
+  hasContent: true,
+  hasData: false,    ← NO DATA FIELD!
+  blockKeys: Array(10)
+}
 ```
 
-### From Console Logs:
+### Serializer Output Has Content (but it's DEFAULTS)
 ```
-🔎 BlockSerializer.deserialize INPUT: {
-  id: '2243e5c0-...',
-  type: 'ai',
-  contentLength: 0  ← Already empty when pulled
+🔍 BlockSerializer.serialize OUTPUT: {
+  contentLength: 116,
+  contentPreview: '{"data":{"headers":["Column 1","Column 2"]...'
+}
+```
+The 116 chars are DEFAULT values, not user data!
+
+### Push Fails with RLS
+```
+POST .../blocks 403 (Forbidden)
+Error: 'new row violates row-level security policy for table "blocks"'
+Code: 42501
+```
+
+### Document Missing user_id
+```json
+"newDocumentState": {
+  "id": "a15bffa2-...",
+  "document_id": "640612a7-...",
+  "type": "table",
+  "content": "",
+  // NO user_id!
 }
 ```
 
 ---
 
-## Verification Needed
+## Complete Data Flow (Broken)
 
-### Test 1: Confirm RxDB strips unknown fields
-```javascript
-// In browser console after patching an AI block:
-const db = await getDatabase();
-const doc = await db.blocks.findOne('BLOCK_ID').exec();
-console.log('Stored doc:', doc.toJSON());
-// Check if 'messages' exists in output
 ```
-
-### Test 2: Check what push handler receives
-Add logging BEFORE serializeBlock in `rxdb-replication.ts:471`:
-```javascript
-console.log('PRE-SERIALIZE:', {
-  id: docToProcess.id,
-  type: docToProcess.type,
-  hasMessages: 'messages' in docToProcess,
-  messages: docToProcess.messages,
-});
+1. User edits table block, adds data
+   ↓
+2. Component calls: onUpdate({ data: {...} })
+   ↓
+3. RxDB.patch({ data: {...} })
+   ↓
+4. RxDB: "data" not in schema → IGNORED ❌
+   RxDB: "user_id" not in schema → IGNORED ❌
+   ↓
+5. Push handler receives: { content: "", document_id: "...", NO user_id }
+   ↓
+6. serializeBlock() creates NEW object:
+   - Strips document_id ❌
+   - Strips user_id (wasn't there anyway) ❌
+   - data missing → uses DEFAULTS
+   ↓
+7. prepareForSupabase() receives: { id, type, position, metadata, content: "defaults" }
+   ↓
+8. Supabase INSERT fails:
+   - RLS requires user_id → MISSING → 403 Forbidden
 ```
-
-### Test 3: Verify RxDB behavior
-Check RxDB docs: Does it strip fields not in schema, or store them anyway?
 
 ---
 
-## Potential Fixes (If Confirmed)
+## Required Fixes
 
-### Option A: Add fields to RxDB schema
+### Fix 1: Update Serializer to Preserve Fields (CRITICAL)
+
+`src/features/block/lib/serializer.ts` line 58-65:
+
 ```typescript
-export const blockSchema = {
+// BEFORE (BROKEN)
+const serialized: Record<string, unknown> = {
+  id: block.id,
+  type: block.type,
+  position: block.position,
+  metadata: block.metadata || {},
+  created_at: block.created_at,
+  updated_at: block.updated_at
+};
+
+// AFTER (FIXED)
+const serialized: Record<string, unknown> = {
+  id: block.id,
+  document_id: (block as any).document_id,  // PRESERVE!
+  user_id: (block as any).user_id,          // PRESERVE!
+  type: block.type,
+  position: block.position,
+  metadata: block.metadata || {},
+  created_at: block.created_at,
+  updated_at: block.updated_at
+};
+```
+
+### Fix 2: Add user_id to RxDB Schema
+
+`src/shared/db/rxdb-schemas.ts`:
+
+```typescript
+export const blockSchema: RxJsonSchema<any> = {
   properties: {
-    // ... existing fields
-    messages: { type: 'array', default: [] },
-    data: { type: 'object' },
-    treeData: { type: 'array', default: [] },
-    images: { type: 'array', default: [] },
-    snapshots: { type: 'array', default: [] },
-  }
+    // ... existing
+    user_id: { type: 'string', maxLength: 36 },  // ADD THIS
+  },
+  required: ['id', 'document_id', 'type', 'position', 'user_id'],  // ADD user_id
 };
 ```
-**Risk**: Schema migration needed for existing data
 
-### Option B: Serialize BEFORE RxDB storage
-Store everything as `content` locally too, not just for Supabase.
-```
-UI → serialize → RxDB (content only) → Supabase
-Supabase → RxDB (content) → deserialize → UI
-```
-**Risk**: More refactoring, all block components need updates
+### Fix 3: Add Block-Specific Fields to RxDB Schema
 
-### Option C: Use additionalProperties in schema
 ```typescript
-export const blockSchema = {
-  additionalProperties: true,  // Allow any extra fields
-  // ...
+export const blockSchema: RxJsonSchema<any> = {
+  properties: {
+    // ... existing
+    messages: { type: 'array', default: [] },     // For AI blocks
+    data: { type: 'object' },                      // For table/todo/issue-tracker
+    treeData: { type: 'array', default: [] },     // For filetree
+    images: { type: 'array', default: [] },       // For image blocks
+    snapshots: { type: 'array', default: [] },    // For filetree
+  },
 };
 ```
-**Risk**: Need to verify RxDB supports this
+
+### Fix 4: Ensure user_id is Set on Block Creation
+
+Check where blocks are created and ensure `user_id` is set from auth context.
 
 ---
 
-## Files Involved
+## Files to Modify
 
-- `src/shared/db/rxdb-schemas.ts` - Schema definition
-- `src/shared/db/rxdb-replication.ts` - Push/pull handlers
-- `src/shared/db/hooks/use-blocks.ts` - updateBlock function
-- `src/features/block/lib/serializer.ts` - serialize/deserialize
-- `src/components/blocks/AIBlockRefined.jsx` - Uses messages field
+1. `src/features/block/lib/serializer.ts` - Preserve document_id, user_id
+2. `src/shared/db/rxdb-schemas.ts` - Add missing fields
+3. Block creation code - Ensure user_id is set
 
 ---
 
-## Next Steps
+## Testing After Fix
 
-1. Run verification tests above
-2. Confirm RxDB behavior with unknown fields
-3. Choose fix option (A, B, or C)
-4. Implement fix
-5. Test with fresh blocks AND existing data migration
+1. Create new AI block → Add messages → Reload → Messages should persist
+2. Create new table block → Edit data → Reload → Data should persist
+3. Check Supabase: blocks should have user_id and document_id
+4. No more RLS 403 errors
+
+---
+
+## Risk Assessment
+
+- **Schema change**: May require RxDB migration or DB reset for existing users
+- **Serializer change**: Low risk, additive change
+- **user_id requirement**: Need to verify all block creation paths set user_id

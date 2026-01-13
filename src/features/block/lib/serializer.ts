@@ -54,9 +54,12 @@ export function serializeBlock(block: BlockData | TypedBlockData): SerializedBlo
     blockKeys: Object.keys(block)
   });
 
-  // Base structure
+  // Base structure - CRITICAL: Preserve document_id and user_id for RLS
+  const b = block as unknown as Record<string, unknown>;
   const serialized: Record<string, unknown> = {
     id: block.id,
+    document_id: b['document_id'],  // Preserve for RxDB storage
+    user_id: b['user_id'],          // Preserve for RLS
     type: block.type,
     position: block.position,
     metadata: block.metadata || {},
@@ -74,7 +77,6 @@ export function serializeBlock(block: BlockData | TypedBlockData): SerializedBlo
 
   // Declare dataToValidate BEFORE try block so catch block can access it
   let dataToValidate: Record<string, unknown> = {};
-  const b = block as unknown as Record<string, unknown>;
 
   try {
     // Extract data based on block type

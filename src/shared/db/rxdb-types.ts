@@ -53,6 +53,7 @@ export type FolderCollection = RxCollection<FolderDocType>;
 export interface BlockDocType {
   id: string;
   document_id: string;
+  user_id: string;  // ADDED: Required for RLS
   type: string;
   content: string | Record<string, unknown>;
   position: number;

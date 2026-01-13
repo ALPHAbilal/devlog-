@@ -47,7 +47,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 // v5: Removed manual IndexedDB deletion (causes DatabaseClosedError)
 // v6: Removed _modified from custom indexes (RxDB manages replication indexes internally)
 // v7: Made indexed fields required + use sentinel values (DXE1 fix - B-Tree constraint)
-const SCHEMA_VERSION = 7;
+// v8: Added user_id to block schema for RLS (required field)
+const SCHEMA_VERSION = 8;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;
@@ -143,7 +144,19 @@ async function createDatabase(): Promise<DevlogDatabase> {
   await db.addCollections({
     documents: { schema: documentSchema },
     folders: { schema: folderSchema },
-    blocks: { schema: blockSchema },
+    blocks: {
+      schema: blockSchema,
+      // Migration strategy: Delete local blocks without user_id
+      // They will be re-pulled from Supabase with the correct user_id
+      migrationStrategies: {
+        1: function(_oldDoc: any) {
+          // Return null to delete this document during migration
+          // Blocks will be re-pulled from Supabase with user_id populated
+          console.log('[RxDB] Migrating block (deleting for re-pull):', _oldDoc.id);
+          return null;
+        }
+      }
+    },
   });
 
   console.log('[RxDB] Database ready:', Object.keys(db.collections));

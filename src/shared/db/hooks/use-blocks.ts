@@ -22,6 +22,7 @@ import type { BlockDocType } from '../rxdb-types';
 import type { RxCollection, RxDocument } from 'rxdb';
 import type { BlockData } from '@/features/block/lib/schemas';
 import { serializeBlock, deserializeBlock } from '@/features/block/lib/serializer';
+import { useAuth } from '@/app/providers';
 
 interface UseRxBlocksOptions {
   enabled?: boolean;
@@ -50,6 +51,7 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
   const { enabled = true } = options;
   const db = useRxDB();
   const collection = useRxCollection<BlockDocType>('blocks');
+  const { user } = useAuth();
 
   const [blocks, setBlocks] = useState<BlockData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -92,14 +94,17 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
   // Create block
   // Serializes messages/data/treeData/images → content JSON before RxDB storage
   const createBlock = useCallback(async (block: BlockData) => {
-    if (!collection || !documentId) return;
+    if (!collection || !documentId || !user?.id) return;
 
     const now = Date.now();
 
     // Serialize block to convert messages/data/treeData/images → content
+    // Pass document_id and user_id so serializer preserves them
     const serialized = serializeBlock({
       ...block,
       id: block.id || crypto.randomUUID(),
+      document_id: documentId,
+      user_id: user.id,
       created_at: block.created_at || now,
       updated_at: now,
     } as any);
@@ -107,6 +112,7 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
     const newBlock: BlockDocType = {
       id: serialized.id,
       document_id: documentId,
+      user_id: user.id,  // CRITICAL: Required for RLS
       type: serialized.type,
       content: serialized.content || '',
       position: serialized.position,
@@ -118,7 +124,7 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
     };
 
     await collection.insert(newBlock);
-  }, [collection, documentId]);
+  }, [collection, documentId, user?.id]);
 
   // Update block
   // Merges updates with current state, serializes, then patches RxDB
@@ -171,7 +177,7 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
   // Bulk update (for reordering)
   // Serializes each block before updating RxDB
   const updateBlocks = useCallback(async (newBlocks: BlockData[]) => {
-    if (!collection || !documentId) return;
+    if (!collection || !documentId || !user?.id) return;
 
     const now = Date.now();
 
@@ -181,8 +187,11 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
       const doc = await collection.findOne(block.id).exec();
 
       // Serialize block to convert messages/data/treeData/images → content
+      // Pass document_id and user_id so serializer preserves them
       const serialized = serializeBlock({
         ...block,
+        document_id: documentId,
+        user_id: user.id,
         position: i,
       } as any);
 
@@ -199,6 +208,7 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
         await collection.insert({
           id: block.id || crypto.randomUUID(),
           document_id: documentId,
+          user_id: user.id,  // CRITICAL: Required for RLS
           type: serialized.type,
           content: serialized.content || '',
           position: i,
@@ -210,7 +220,7 @@ export function useRxBlocks(documentId: string | undefined, options: UseRxBlocks
         });
       }
     }
-  }, [collection, documentId]);
+  }, [collection, documentId, user?.id]);
 
   return {
     blocks,

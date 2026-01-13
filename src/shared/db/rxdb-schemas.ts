@@ -84,12 +84,13 @@ export const folderSchema: RxJsonSchema<any> = {
 // =============================================================================
 
 export const blockSchema: RxJsonSchema<any> = {
-  version: 0,
+  version: 1,  // BUMPED: Added user_id field
   primaryKey: 'id',
   type: 'object',
   properties: {
     id: { type: 'string', maxLength: 36 },
     document_id: { type: 'string', maxLength: 36 },
+    user_id: { type: 'string', maxLength: 36 },  // ADDED: Required for RLS
     type: { type: 'string' },
     content: { type: ['string', 'object'] },
     position: { type: 'number', default: 0 },
@@ -104,9 +105,10 @@ export const blockSchema: RxJsonSchema<any> = {
     _deleted: { type: 'boolean', default: false },
   },
   // ALL indexed fields must be required for Dexie B-Tree indexes
-  required: ['id', 'document_id', 'type', 'position'],
+  required: ['id', 'document_id', 'user_id', 'type', 'position'],
   indexes: [
     'document_id',
-    'position'
+    'position',
+    'user_id'
   ],
 };

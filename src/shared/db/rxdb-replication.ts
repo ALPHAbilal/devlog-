@@ -26,7 +26,8 @@ import { supabase } from '@/shared/api'; // Use SINGLETON client - DO NOT create
 import type { DevlogDatabase } from './rxdb';
 
 // Import block serializer for converting special fields to content
-import { serializeBlock, deserializeBlock } from '@/features/block/lib/serializer';
+// NOTE: deserializeBlock is NOT used here - deserialization happens in use-blocks.ts
+import { serializeBlock } from '@/features/block/lib/serializer';
 
 // Verify client is ready
 console.log('[RxDB Replication] Using singleton Supabase client');
@@ -388,21 +389,11 @@ export async function setupCollectionReplication<T extends { id: string; _delete
         // Convert snake_case → camelCase (file_path → filePath, etc.)
         let converted = prepareFromSupabase(doc, tableName);
 
-        // Deserialize blocks - converts content JSON → messages/data/treeData/images
+        // NOTE: Do NOT deserialize here. RxDB stores content as-is (JSON string).
+        // Deserialization happens in use-blocks.ts toBlockData() when UI reads blocks.
+        // This ensures the pull → RxDB → push cycle doesn't lose data.
         if (tableName === 'blocks' && converted.type) {
-          try {
-            converted = deserializeBlock(converted as any) as any;
-            console.log(`[RxDB Replication] ${tableName}: Deserialized block ${converted.id}`, {
-              type: converted.type,
-              hasMessages: 'messages' in converted,
-              hasData: 'data' in converted,
-              hasTreeData: 'treeData' in converted,
-              hasImages: 'images' in converted,
-            });
-          } catch (deserializeErr) {
-            console.error(`[RxDB Replication] ${tableName}: Deserialization failed for ${converted.id}`, deserializeErr);
-            // Continue with unconverted doc if deserialization fails
-          }
+          console.log(`[RxDB Replication] ${tableName}: Pull storing block ${converted.id} with content length: ${converted.content?.length || 0}`);
         }
 
         // Ensure _modified is a number
@@ -468,17 +459,27 @@ export async function setupCollectionReplication<T extends { id: string; _delete
         let docToProcess = newDoc as any;
 
         // Serialize blocks - converts messages/data/treeData/images → content JSON
+        // SKIP if content is already a valid JSON string (serialized in use-blocks.ts)
         if (tableName === 'blocks' && docToProcess.type) {
-          try {
-            docToProcess = serializeBlock(docToProcess);
-            console.log(`[RxDB Replication] ${tableName}: Serialized block ${newDoc.id}`, {
-              type: docToProcess.type,
-              contentLength: docToProcess.content?.length || 0
-            });
-          } catch (serializeErr) {
-            console.error(`[RxDB Replication] ${tableName}: Serialization failed for ${newDoc.id}`, serializeErr);
-            // Continue with original doc if serialization fails
-            docToProcess = newDoc as any;
+          const contentIsAlreadySerialized =
+            typeof docToProcess.content === 'string' &&
+            docToProcess.content.length > 2 &&  // Not just "{}" or empty
+            docToProcess.content.startsWith('{');
+
+          if (!contentIsAlreadySerialized) {
+            try {
+              docToProcess = serializeBlock(docToProcess);
+              console.log(`[RxDB Replication] ${tableName}: Serialized block ${newDoc.id}`, {
+                type: docToProcess.type,
+                contentLength: docToProcess.content?.length || 0
+              });
+            } catch (serializeErr) {
+              console.error(`[RxDB Replication] ${tableName}: Serialization failed for ${newDoc.id}`, serializeErr);
+              // Continue with original doc if serialization fails
+              docToProcess = newDoc as any;
+            }
+          } else {
+            console.log(`[RxDB Replication] ${tableName}: Block ${newDoc.id} already serialized, content length: ${docToProcess.content.length}`);
           }
         }
 

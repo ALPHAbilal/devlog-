@@ -386,8 +386,10 @@ export async function setupCollectionReplication<T extends { id: string; _delete
           }
         });
 
-        // Convert snake_case → camelCase (file_path → filePath, etc.)
-        let converted = prepareFromSupabase(doc, tableName);
+        // FIXED: Do NOT convert field names - RxDB schema uses snake_case like Supabase
+        // Converting to camelCase breaks queries that use snake_case selectors (user_id, etc.)
+        // The prepareFromSupabase was causing documents to have 'userId' but queries look for 'user_id'
+        let converted = doc;
 
         // NOTE: Do NOT deserialize here. RxDB stores content as-is (JSON string).
         // Deserialization happens in use-blocks.ts toBlockData() when UI reads blocks.

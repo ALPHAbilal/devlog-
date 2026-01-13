@@ -52,7 +52,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 // v8: Added user_id to block schema for RLS (required field)
 // v9: Added RxDBMigrationSchemaPlugin (fixes migration errors)
 // v10: Fixed replication identifier to include version (checkpoint reset)
-export const SCHEMA_VERSION = 10;
+// v11: Removed prepareFromSupabase in pull (was converting to camelCase, breaking queries)
+export const SCHEMA_VERSION = 11;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;

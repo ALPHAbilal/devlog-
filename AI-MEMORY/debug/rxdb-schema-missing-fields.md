@@ -1,8 +1,35 @@
 # Block Data Loss & RLS Failure - Root Cause Analysis
 
-**Status**: VERIFIED
+**Status**: FIXED (v11)
 **Date**: 2026-01-13
 **Severity**: Critical - Data Loss + Sync Failure
+
+---
+
+## Issue 4: prepareFromSupabase Breaks Document Queries (FIXED)
+
+**File**: `src/shared/db/rxdb-replication.ts` (line ~390)
+
+**Symptom**: 100 folders show but only 1 document (should be 395)
+
+**Root Cause**:
+- `prepareFromSupabase()` converts snake_case → camelCase (`user_id` → `userId`)
+- RxDB schema uses snake_case (`user_id`, `updated_at`)
+- Query selectors use snake_case (`{ user_id: userId }`)
+- Result: Query looks for `user_id`, data has `userId` → NO MATCH
+
+**Why Folders Worked**: Folder query has NO `user_id` filter, only `_deleted`
+
+**Fix Applied**:
+```typescript
+// BEFORE (broken):
+let converted = prepareFromSupabase(doc, tableName);
+
+// AFTER (fixed):
+let converted = doc;  // Keep snake_case from Supabase
+```
+
+**Schema Version**: Bumped to v11 to force fresh DB
 
 ---
 

@@ -51,7 +51,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 // v7: Made indexed fields required + use sentinel values (DXE1 fix - B-Tree constraint)
 // v8: Added user_id to block schema for RLS (required field)
 // v9: Added RxDBMigrationSchemaPlugin (fixes migration errors)
-const SCHEMA_VERSION = 9;
+// v10: Fixed replication identifier to include version (checkpoint reset)
+export const SCHEMA_VERSION = 10;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;

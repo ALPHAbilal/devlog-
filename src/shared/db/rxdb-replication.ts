@@ -23,7 +23,7 @@
 import { replicateRxCollection } from 'rxdb/plugins/replication';
 import type { RxCollection, RxReplicationState } from 'rxdb';
 import { supabase } from '@/shared/api'; // Use SINGLETON client - DO NOT create new client!
-import type { DevlogDatabase } from './rxdb';
+import { SCHEMA_VERSION, type DevlogDatabase } from './rxdb';
 
 // Import block serializer for converting special fields to content
 // NOTE: deserializeBlock is NOT used here - deserialization happens in use-blocks.ts
@@ -535,7 +535,7 @@ export async function setupCollectionReplication<T extends { id: string; _delete
   // Using replicateRxCollection - our custom handlers WILL be called
   const replication = replicateRxCollection<T, { modified: number }>({
     collection,
-    replicationIdentifier: `supabase-${tableName}-${userId}`,
+    replicationIdentifier: `supabase-v${SCHEMA_VERSION}-${tableName}-${userId}`,
 
     pull: {
       batchSize,
@@ -589,7 +589,7 @@ export async function setupCollectionReplication<T extends { id: string; _delete
   console.log(`[RxDB Replication] ${tableName}: Replication object created`, {
     isStopped: replication.isStopped(),
     collection: collection.name,
-    identifier: `supabase-${tableName}-${userId}`,
+    identifier: `supabase-v${SCHEMA_VERSION}-${tableName}-${userId}`,
   });
 
   console.log(`[RxDB Replication] ${tableName}: Started`);

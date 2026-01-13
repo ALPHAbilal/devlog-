@@ -10,6 +10,7 @@ import { createRxDatabase, addRxPlugin, removeRxDatabase, type RxDatabase, type 
 import { RxDBDevModePlugin } from 'rxdb/plugins/dev-mode';
 import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie';
 import { RxDBQueryBuilderPlugin } from 'rxdb/plugins/query-builder';
+import { RxDBMigrationSchemaPlugin } from 'rxdb/plugins/migration-schema';
 
 import { documentSchema, folderSchema, blockSchema } from './rxdb-schemas';
 import type { DocumentCollection, FolderCollection, BlockCollection } from './rxdb-types';
@@ -19,6 +20,7 @@ if (import.meta.env.DEV) {
   addRxPlugin(RxDBDevModePlugin);
 }
 addRxPlugin(RxDBQueryBuilderPlugin);
+addRxPlugin(RxDBMigrationSchemaPlugin);  // Required for schema migrations
 
 // ============================================================================
 // CRITICAL: Create storage ONCE as singleton to avoid DB9 errors
@@ -48,7 +50,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 // v6: Removed _modified from custom indexes (RxDB manages replication indexes internally)
 // v7: Made indexed fields required + use sentinel values (DXE1 fix - B-Tree constraint)
 // v8: Added user_id to block schema for RLS (required field)
-const SCHEMA_VERSION = 8;
+// v9: Added RxDBMigrationSchemaPlugin (fixes migration errors)
+const SCHEMA_VERSION = 9;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;

@@ -378,6 +378,12 @@ class SmartSyncManager {
    * Execute the actual batch sync to Supabase
    */
   async executeBatchSync() {
+    // DISABLED: RxDB replication handles all block syncing now.
+    // SmartSync was racing ahead and causing foreign key errors:
+    // "blocks_document_id_fkey" - blocks synced before documents existed
+    console.log('[SmartSync] DISABLED - RxDB handles block replication');
+    return;
+
     if (this.syncInProgress || this.batchQueue.length === 0 || !navigator.onLine) {
       return;
     }

@@ -310,21 +310,29 @@ const CinematicDocumentDemo = () => {
             await new Promise(r => setTimeout(r, Math.max(40, 80 - (i * 5))));
         }
 
-        // Act 6: Cinematic Pull-Away - zoom out until blocks become thin lines
-        // Progressive zoom out while bringing camera back to center
-        const zoomSteps = [0.7, 0.5, 0.35, 0.22, 0.12];
+        // Act 6: Cinematic Pull-Away - smooth zoom out until blocks become thin lines
         const currentY = cameraY_target.get();
+        const currentScale = cameraScale_target.get();
 
-        for (let i = 0; i < zoomSteps.length; i++) {
-            cameraScale_target.set(zoomSteps[i]);
-            // Gradually bring cameraY back to 0 so content stays visible
-            const progress = (i + 1) / zoomSteps.length; // 0.2, 0.4, 0.6, 0.8, 1.0
-            cameraY_target.set(currentY * (1 - progress)); // Lerp toward 0
-            await new Promise(r => setTimeout(r, 400));
-        }
+        // Single smooth animation for both scale and position
+        // Using easeOut for that cinematic "pulling away" feel
+        const pullAwayDuration = 2.5; // seconds
+
+        animate(cameraScale_target, 0.12, {
+            duration: pullAwayDuration,
+            ease: [0.16, 1, 0.3, 1] // Custom ease: slow start, smooth deceleration
+        });
+
+        animate(cameraY_target, 0, {
+            duration: pullAwayDuration,
+            ease: [0.16, 1, 0.3, 1]
+        });
+
+        // Wait for the pull-away animation to complete
+        await new Promise(r => setTimeout(r, pullAwayDuration * 1000));
 
         // Hold at maximum zoom-out (blocks appear as thin lines)
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(r => setTimeout(r, 1200));
 
         // Quick fade transition before restart
         animate(cursorOpacity, 0, { duration: 0.3 });

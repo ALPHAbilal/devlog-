@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal, FolderPlus, FilePlus, Trash2, Star, StarOff } from 'lucide-react';
+import { useDraggable, useDroppable } from '@dnd-kit/core';
+import { CSS } from '@dnd-kit/utilities';
 
 export default function SidebarTreeItemEnhanced({
   item,
@@ -16,11 +18,52 @@ export default function SidebarTreeItemEnhanced({
   isSelected = false,
   activeDocumentId,
   recentlyCreatedFolderId,
-  viewMode = 'tree' // 'tree' | 'table' | 'compact'
+  viewMode = 'tree', // 'tree' | 'table' | 'compact'
+  isDragDisabled = false,
 }) {
   const hasChildren = item.children && item.children.length > 0;
   const isFile = item.type === 'file' || item.type === 'document';
   const itemCount = item.count || (item.children ? item.children.length : 0);
+
+  // Draggable hook - all items can be dragged
+  const {
+    attributes: dragAttributes,
+    listeners: dragListeners,
+    setNodeRef: setDragRef,
+    transform,
+    isDragging,
+  } = useDraggable({
+    id: item.id,
+    data: { type: item.type, item },
+    disabled: isDragDisabled,
+  });
+
+  // Droppable hook - only folders are drop targets
+  const {
+    isOver,
+    setNodeRef: setDropRef,
+    active,
+  } = useDroppable({
+    id: item.id,
+    data: { type: item.type, item },
+    disabled: isFile, // Files can't be drop targets
+  });
+
+  // Combine refs
+  const setNodeRef = useCallback((node) => {
+    setDragRef(node);
+    if (!isFile) setDropRef(node);
+  }, [setDragRef, setDropRef, isFile]);
+
+  // Drag styles
+  const dragStyle = {
+    transform: CSS.Translate.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  // Determine if this is a valid drop target
+  const canDrop = active && active.id !== item.id && !isFile;
+  const isValidDropTarget = isOver && canDrop;
 
   // Check if this folder contains the active document in its tree
   const containsActiveDocument = !isFile && activeDocumentId && hasChildren && (function checkChildren(children) {
@@ -145,7 +188,15 @@ export default function SidebarTreeItemEnhanced({
   // Table view renders as a flat row with columns
   if (viewMode === 'table') {
     return (
-      <div className="w-full min-w-0 overflow-hidden group">
+      <div
+        ref={setNodeRef}
+        style={dragStyle}
+        {...dragAttributes}
+        {...dragListeners}
+        className={`w-full min-w-0 overflow-hidden group ${
+          isValidDropTarget ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10 rounded-lg' : ''
+        }`}
+      >
         <div
           className={`
             w-full min-w-0 overflow-hidden flex items-center ${styles.spacing} ${styles.padding} ${styles.fontSize} transition-all duration-200 relative
@@ -209,7 +260,15 @@ export default function SidebarTreeItemEnhanced({
 
   // Tree and Compact view (hierarchical with children)
   return (
-    <div className="w-full min-w-0 overflow-hidden group">
+    <div
+      ref={setNodeRef}
+      style={dragStyle}
+      {...dragAttributes}
+      {...dragListeners}
+      className={`w-full min-w-0 overflow-hidden group ${
+        isValidDropTarget ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10 rounded-lg' : ''
+      }`}
+    >
       {/* Tree guide lines - only in tree/compact mode */}
       {viewMode !== 'table' && depth > 0 && (
         <div

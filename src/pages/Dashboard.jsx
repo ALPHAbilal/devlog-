@@ -85,7 +85,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   // Folders hook - folders are auto-loaded by the hook
-  const { folders, refreshFolders, createFolder, deleteFolder, toggleFavorite: toggleFolderFavorite } = useFolders();
+  const { folders, refreshFolders, createFolder, deleteFolder, toggleFavorite: toggleFolderFavorite, moveFolder, moveDocumentToFolder } = useFolders();
 
   // IndexedDB cache for instant document access across navigation
   const {
@@ -1642,6 +1642,8 @@ export default function Dashboard() {
             }}
             onRefresh={loadEntries}
             isLoading={isLoadingDocuments}
+            onMoveDocument={moveDocumentToFolder}
+            onMoveFolder={moveFolder}
           />
 
           {/* Document area - takes remaining width, scrolls internally */}

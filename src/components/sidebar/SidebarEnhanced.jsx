@@ -25,6 +25,8 @@ export function SidebarEnhanced({
   onToggleFavorite,
   onRefresh,
   isLoading,
+  onMoveDocument,
+  onMoveFolder,
 }) {
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(ACTIVITY_VIEWS.EXPLORER);
@@ -116,6 +118,8 @@ export function SidebarEnhanced({
                   onToggleFavorite={onToggleFavorite}
                   onRefresh={onRefresh}
                   isLoading={isLoading}
+                  onMoveDocument={onMoveDocument}
+                  onMoveFolder={onMoveFolder}
                 />
               </div>
             </motion.div>
@@ -180,6 +184,8 @@ export function SidebarEnhanced({
               onToggleFavorite={onToggleFavorite}
               onRefresh={onRefresh}
               isLoading={isLoading}
+              onMoveDocument={onMoveDocument}
+              onMoveFolder={onMoveFolder}
             />
           </motion.div>
         )}
@@ -202,6 +208,8 @@ function ViewContent({
   onToggleFavorite,
   onRefresh,
   isLoading,
+  onMoveDocument,
+  onMoveFolder,
 }) {
   switch (activeView) {
     case ACTIVITY_VIEWS.SEARCH:
@@ -226,6 +234,8 @@ function ViewContent({
           onToggleFavorite={onToggleFavorite}
           onRefresh={onRefresh}
           isLoading={isLoading}
+          onMoveDocument={onMoveDocument}
+          onMoveFolder={onMoveFolder}
         />
       );
 

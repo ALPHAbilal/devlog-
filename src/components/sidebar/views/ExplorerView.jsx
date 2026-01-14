@@ -1,9 +1,42 @@
-import { useState, useMemo, useCallback } from 'react';
-import { FolderPlus, FilePlus, LayoutList, TreePine, ChevronDown } from 'lucide-react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { FolderPlus, FilePlus, LayoutList, TreePine, ChevronDown, Folder as FolderIcon, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '../../ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../ui/dropdown-menu';
 import SidebarTreeItemEnhanced from '../SidebarTreeItemEnhanced';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+  useDroppable,
+} from '@dnd-kit/core';
+import { snapCenterToCursor } from '@dnd-kit/modifiers';
+import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+
+// Droppable root area component
+function DroppableRoot({ children }) {
+  const { isOver, setNodeRef, active } = useDroppable({
+    id: 'root',
+    data: { type: 'root' }
+  });
+
+  const canDrop = active !== null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-full transition-all duration-200 ${
+        isOver && canDrop ? 'bg-emerald-500/5 ring-1 ring-emerald-500/20 ring-inset rounded-lg' : ''
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
 
 const VIEW_MODES = {
   TREE: 'tree',
@@ -22,9 +55,37 @@ export function ExplorerView({
   onToggleFavorite,
   onRefresh,
   isLoading = false,
+  onMoveDocument,
+  onMoveFolder,
 }) {
   const [viewMode, setViewMode] = useState(VIEW_MODES.TREE);
   const [expandedFolders, setExpandedFolders] = useState(new Set());
+
+  // Drag and drop state
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState(null);
+  const hoverTimerRef = useRef(null);
+
+  // Add sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px minimum before drag starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);
 
   // Toggle folder expansion
   const toggleFolder = useCallback((folderId) => {
@@ -106,6 +167,115 @@ export function ExplorerView({
     }
   }, [onCreateFolder, onCreateDocument, onDeleteItem]);
 
+  // Helper to find item by ID in tree
+  const findItemById = useCallback((items, id) => {
+    for (const item of items) {
+      if (item.id === id) return item;
+      if (item.children) {
+        const found = findItemById(item.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }, []);
+
+  // Helper to check if targetId is a descendant of folder
+  const isDescendant = useCallback((folder, targetId) => {
+    if (folder.id === targetId) return true;
+    if (folder.children) {
+      return folder.children.some(child => isDescendant(child, targetId));
+    }
+    return false;
+  }, []);
+
+  // Drag handlers
+  const handleDragStart = useCallback((event) => {
+    const { active } = event;
+    const item = findItemById(treeData, active.id);
+    setDraggedItem(item);
+  }, [treeData, findItemById]);
+
+  const handleDragOver = useCallback((event) => {
+    const { over, active } = event;
+
+    if (!over || !active) {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+      setDragOverFolderId(null);
+      return;
+    }
+
+    if (over.id !== dragOverFolderId) {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+
+      setDragOverFolderId(over.id);
+
+      // Auto-expand collapsed folders after 700ms hover
+      const targetItem = findItemById(treeData, over.id);
+      if (targetItem && targetItem.type === 'folder' && !expandedFolders.has(over.id)) {
+        hoverTimerRef.current = setTimeout(() => {
+          setExpandedFolders(prev => new Set([...prev, over.id]));
+          hoverTimerRef.current = null;
+        }, 700);
+      }
+    }
+  }, [dragOverFolderId, treeData, expandedFolders, findItemById]);
+
+  const handleDragEnd = useCallback(async (event) => {
+    // Clear hover state
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setDragOverFolderId(null);
+
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      setDraggedItem(null);
+      return;
+    }
+
+    const draggedItemData = findItemById(treeData, active.id);
+    if (!draggedItemData) {
+      setDraggedItem(null);
+      return;
+    }
+
+    // Handle drop on root
+    if (over.id === 'root') {
+      if (draggedItemData.type === 'document') {
+        await onMoveDocument?.(draggedItemData.id, null);
+      } else if (draggedItemData.type === 'folder') {
+        await onMoveFolder?.(draggedItemData.id, null);
+      }
+    } else {
+      const targetItem = findItemById(treeData, over.id);
+      if (!targetItem) {
+        setDraggedItem(null);
+        return;
+      }
+
+      // Document to folder
+      if (draggedItemData.type === 'document' && targetItem.type === 'folder') {
+        await onMoveDocument?.(draggedItemData.id, targetItem.id);
+      }
+      // Folder to folder (prevent dropping folder on itself or its descendants)
+      else if (draggedItemData.type === 'folder' && targetItem.type === 'folder') {
+        if (!isDescendant(draggedItemData, targetItem.id)) {
+          await onMoveFolder?.(draggedItemData.id, targetItem.id);
+        }
+      }
+    }
+
+    setDraggedItem(null);
+  }, [treeData, onMoveDocument, onMoveFolder, findItemById, isDescendant]);
+
   return (
     <div className="flex flex-col h-full min-w-0">
       {/* Header - pt-10 to avoid overlap with collapse button */}
@@ -152,42 +322,72 @@ export function ExplorerView({
         </div>
       </div>
 
-      {/* Content */}
-      <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
-        <div className={`w-full min-w-0 overflow-hidden ${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'}`}>
-          {isLoading && treeData.length === 0 ? (
-            <div className="px-3 py-8 text-center">
-              <div className="animate-pulse text-white/30 text-sm">Loading...</div>
+      {/* Content with DnD Context */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
+          <DroppableRoot>
+            <div className={`w-full min-w-0 overflow-hidden ${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'}`}>
+              {isLoading && treeData.length === 0 ? (
+                <div className="px-3 py-8 text-center">
+                  <div className="animate-pulse text-white/30 text-sm">Loading...</div>
+                </div>
+              ) : treeData.length === 0 ? (
+                <div className="px-3 py-8 text-center">
+                  <div className="text-white/30 text-sm">No documents yet</div>
+                  <div className="text-white/20 text-xs mt-1">Create your first document to get started</div>
+                </div>
+              ) : (
+                // Tree/Compact view - hierarchical
+                <div className={`w-full min-w-0 overflow-hidden pl-2 pr-1 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
+                  {treeData.map((item, index) => (
+                    <SidebarTreeItemEnhanced
+                      key={item.id}
+                      item={item}
+                      isExpanded={expandedFolders.has(item.id)}
+                      onToggle={toggleFolder}
+                      expandedFolders={expandedFolders}
+                      isLast={index === treeData.length - 1}
+                      onItemClick={onOpenDocument}
+                      onContextMenu={handleContextMenu}
+                      onToggleFavorite={onToggleFavorite}
+                      isSelected={item.id === activeDocumentId}
+                      activeDocumentId={activeDocumentId}
+                      recentlyCreatedFolderId={recentlyCreatedFolderId}
+                      viewMode={viewMode}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          ) : treeData.length === 0 ? (
-            <div className="px-3 py-8 text-center">
-              <div className="text-white/30 text-sm">No documents yet</div>
-              <div className="text-white/20 text-xs mt-1">Create your first document to get started</div>
+          </DroppableRoot>
+        </ScrollArea>
+
+        {/* Drag overlay */}
+        <DragOverlay
+          modifiers={[snapCenterToCursor]}
+          dropAnimation={{
+            duration: 200,
+            easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)',
+          }}
+        >
+          {draggedItem ? (
+            <div className="bg-[#0d0d0d] text-white px-3 py-2 rounded-lg shadow-2xl flex items-center gap-2 border border-emerald-500/30">
+              {draggedItem.type === 'folder' ? (
+                <FolderIcon className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <FileText className="w-4 h-4 text-white/60" />
+              )}
+              <span className="text-sm">{draggedItem.name || draggedItem.title || 'Moving...'}</span>
             </div>
-          ) : (
-            // Tree/Compact view - hierarchical
-            <div className={`w-full min-w-0 overflow-hidden pl-2 pr-1 ${viewMode === VIEW_MODES.COMPACT ? 'space-y-0' : 'space-y-0.5'}`}>
-              {treeData.map((item, index) => (
-                <SidebarTreeItemEnhanced
-                  key={item.id}
-                  item={item}
-                  isExpanded={expandedFolders.has(item.id)}
-                  onToggle={toggleFolder}
-                  expandedFolders={expandedFolders}
-                  isLast={index === treeData.length - 1}
-                  onItemClick={onOpenDocument}
-                  onContextMenu={handleContextMenu}
-                  onToggleFavorite={onToggleFavorite}
-                  isSelected={item.id === activeDocumentId}
-                  activeDocumentId={activeDocumentId}
-                  recentlyCreatedFolderId={recentlyCreatedFolderId}
-                  viewMode={viewMode}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </ScrollArea>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
 
       {/* Stats footer */}
       <div className="px-3 py-2 border-t border-white/5 text-[11px] text-white/30 flex justify-between">

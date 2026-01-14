@@ -590,10 +590,10 @@ export async function setupCollectionReplication<T extends { id: string; _delete
       handler: pushHandler,  // ✅ WILL be called (unlike replicateSupabase)
     },
 
-    // No live mode with generic replication (would need manual Realtime setup)
-    live: false,
+    // Enable live mode for continuous sync of new changes
+    live: true,
 
-    // Retry failed operations
+    // Retry failed operations every 5 seconds
     retryTime: 5000,
 
     // Auto-start replication

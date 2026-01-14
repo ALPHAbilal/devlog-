@@ -34,6 +34,50 @@ console.log('[RxDB Replication] Using singleton Supabase client');
 console.log('[RxDB Replication] Using replicateRxCollection (custom handlers)');
 
 // =============================================================================
+// Global Replication State (for sync status indicator)
+// =============================================================================
+
+// Track active sync state from RxDB active$ observables
+const activeStates: Map<string, boolean> = new Map();
+let lastSyncTime = Date.now();
+
+/**
+ * Store replications globally and subscribe to active$ for sync status
+ */
+export function setGlobalReplications(replications: Map<string, RxReplicationState<any, any>>) {
+  // Subscribe to each replication's active$ observable
+  for (const [name, replication] of replications) {
+    replication.active$.subscribe((isActive: boolean) => {
+      activeStates.set(name, isActive);
+      if (!isActive) {
+        lastSyncTime = Date.now(); // Update last sync when becoming inactive
+      }
+    });
+  }
+}
+
+/**
+ * Get current RxDB sync status for UI indicators
+ * Called by SmartSync.getSyncStatus()
+ */
+export function getRxDBSyncStatus(): { syncing: boolean; pendingCount: number; lastSync: number } {
+  // Check if ANY replication is currently active
+  let isSyncing = false;
+  for (const [name, isActive] of activeStates) {
+    if (isActive) {
+      isSyncing = true;
+      break;
+    }
+  }
+
+  return {
+    syncing: isSyncing,
+    pendingCount: 0,
+    lastSync: lastSyncTime
+  };
+}
+
+// =============================================================================
 // DEBUG: Schema Verification Helper
 // =============================================================================
 
@@ -703,6 +747,9 @@ export async function startAllReplications(
       userId
     );
     replications.set('blocks', blocksRep);
+
+    // Store globally for sync status indicator
+    setGlobalReplications(replications);
 
     console.log('[RxDB Replication] All replications started successfully!');
   } catch (err) {

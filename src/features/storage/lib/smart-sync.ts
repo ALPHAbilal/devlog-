@@ -16,6 +16,7 @@
 import Dexie from 'dexie';
 import { debounce, throttle } from 'lodash-es';
 import { paginatedBlockLoader } from '@/shared/lib';
+import { getRxDBSyncStatus } from '@/shared/db/rxdb-replication';
 
 class SmartSyncManager {
   constructor(supabase, documentId) {
@@ -813,12 +814,13 @@ class SmartSyncManager {
    * Get sync status for UI indicators
    */
   getSyncStatus() {
-    // SmartSync is DISABLED - RxDB handles all syncing now
-    // Always return 0 pending since we don't track RxDB's internal state here
+    // Get actual sync status from RxDB replication
+    const rxdbStatus = getRxDBSyncStatus();
+
     const status = {
-      pending: 0,  // SmartSync disabled, RxDB handles sync
-      syncing: false,
-      lastSync: this.lastSyncTime,
+      pending: rxdbStatus.pendingCount,
+      syncing: rxdbStatus.syncing,
+      lastSync: rxdbStatus.lastSync || this.lastSyncTime,
       online: navigator.onLine
     };
     console.log('[SYNC-STATUS-GET] 📊 Status requested:', status);

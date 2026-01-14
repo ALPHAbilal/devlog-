@@ -36,6 +36,7 @@ import { useSidebar } from '@/app/providers';
 import { useAnalytics, useDocumentAnalytics } from '@/features/analytics';
 import TrialBanner from '../components/TrialBanner';
 import { useDocumentOrganization, useFolders, usePaginatedDashboard } from '@/features/document';
+import { useRxDB, useRxCollection } from '@/shared/db';
 import { 
   DndContext, 
   closestCenter,
@@ -97,6 +98,12 @@ export default function Dashboard() {
     getDocument: getCachedDocument
   } = useIndexedDBCache();
 
+  // RxDB collections for direct document/block creation
+  // Used instead of storageWrapper to ensure proper sync order (folders before documents)
+  const rxdb = useRxDB();
+  const documentsCollection = useRxCollection('documents');
+  const blocksCollection = useRxCollection('blocks');
+
   // Initialize pagination hook for documents
   const {
     documents: paginatedDocuments,
@@ -108,7 +115,12 @@ export default function Dashboard() {
     loadInitial,
     checkLoadMore,
     progress,
-    currentPage
+    currentPage,
+    // RxDB CRUD methods - use these instead of storageWrapper
+    createDocument: createRxDocument,
+    updateDocument: updateRxDocument,
+    deleteDocument: deleteRxDocument,
+    moveDocument: moveRxDocument,
   } = usePaginatedDashboard({
     pageSize: 50,
     orderBy: 'updated_at',
@@ -352,29 +364,72 @@ export default function Dashboard() {
       console.warn('Could not invalidate cache:', error);
     }
 
-    // 🔄 BACKGROUND SYNC: Save to Supabase without blocking UI
-    storageWrapper.saveDocument(newEntry)
-      .then(() => {
-        // Update metadata to mark as synced
-        newEntry.metadata.syncStatus = 'synced';
-        toast.success('Document synced to cloud');
+    // 🔄 RxDB SYNC: Insert into RxDB - replication handles Supabase sync
+    // This ensures proper sync order: folders sync before documents (by _modified timestamp)
+    if (documentsCollection && blocksCollection) {
+      const now = Date.now();
+      const nowStr = new Date(now).toISOString();
 
-        // Track document creation
-        trackDocumentEvent('created', newEntry.id, {
-          folder_id: folderId || 'root',
-          creation_method: 'manual',
-          has_folder: !!folderId
+      // Prepare document for RxDB (without blocks - they go in separate collection)
+      const rxdbDoc = {
+        id: newEntry.id,
+        user_id: user.id,
+        title: newEntry.title,
+        folder_id: newEntry.folder_id || '',  // RxDB uses empty string for null
+        tags: newEntry.tags || [],
+        metadata: newEntry.metadata || {},
+        doc_position: 0,
+        created_at: nowStr,
+        updated_at: nowStr,
+        _modified: now,
+        _deleted: false,
+      };
+
+      // Insert document into RxDB
+      documentsCollection.insert(rxdbDoc)
+        .then(() => {
+          console.log('[Dashboard] Document inserted into RxDB:', newEntry.id);
+
+          // Insert blocks into RxDB blocks collection
+          const blockPromises = (newEntry.blocks || []).map((block, index) => {
+            const rxdbBlock = {
+              id: block.id,
+              document_id: newEntry.id,
+              user_id: user.id,
+              type: block.type || 'text',
+              content: typeof block.content === 'string' ? block.content : JSON.stringify(block.content || ''),
+              position: block.position ?? index,
+              metadata: block.metadata || {},
+              created_at: now,
+              updated_at: now,
+              _modified: now,
+              _deleted: false,
+            };
+            return blocksCollection.insert(rxdbBlock);
+          });
+
+          return Promise.all(blockPromises);
+        })
+        .then(() => {
+          newEntry.metadata.syncStatus = 'synced';
+          toast.success('Document saved');
+
+          // Track document creation
+          trackDocumentEvent('created', newEntry.id, {
+            folder_id: folderId || 'root',
+            creation_method: 'manual',
+            has_folder: !!folderId
+          });
+        })
+        .catch((error) => {
+          console.error('[Dashboard] RxDB insert failed:', error);
+          newEntry.metadata.syncStatus = 'failed';
+          toast.error('Failed to save document locally.');
         });
-      })
-      .catch((error) => {
-        console.error('Background sync failed:', error);
-        newEntry.metadata.syncStatus = 'failed';
-        toast.error('Failed to sync document. Changes saved locally.');
-
-        // TODO: Implement retry logic
-        // Could add to a sync queue for automatic retry
-      });
-  }, [entries, openTab, trackDocumentEvent, updateDocumentInCache]);
+    } else {
+      console.warn('[Dashboard] RxDB collections not ready, skipping sync');
+    }
+  }, [entries, openTab, trackDocumentEvent, updateDocumentInCache, documentsCollection, blocksCollection, user?.id]);
 
   // Handle new tab creation (creates document and opens in tab)
   const handleCreateNewTab = useCallback(async () => {
@@ -438,20 +493,58 @@ export default function Dashboard() {
     // Using cache hook for consistent state management
     updateDocumentInCache(newEntry);
 
-    // Background sync to Supabase
-    storageWrapper.saveDocument(newEntry)
-      .then(() => {
-        newEntry.metadata.syncStatus = 'synced';
-        toast.success('Document synced to cloud');
-      })
-      .catch((error) => {
-        console.error('Background sync failed:', error);
-        newEntry.metadata.syncStatus = 'failed';
-        toast.error('Failed to sync document. Changes saved locally.');
-      });
+    // 🔄 RxDB SYNC: Insert into RxDB - replication handles Supabase sync
+    if (documentsCollection && blocksCollection) {
+      const now = Date.now();
+      const nowStr = new Date(now).toISOString();
+
+      const rxdbDoc = {
+        id: newEntry.id,
+        user_id: user.id,
+        title: newEntry.title,
+        folder_id: newEntry.folder_id || '',
+        tags: newEntry.tags || [],
+        metadata: newEntry.metadata || {},
+        doc_position: 0,
+        created_at: nowStr,
+        updated_at: nowStr,
+        _modified: now,
+        _deleted: false,
+      };
+
+      documentsCollection.insert(rxdbDoc)
+        .then(() => {
+          const blockPromises = (newEntry.blocks || []).map((block, index) => {
+            const rxdbBlock = {
+              id: block.id,
+              document_id: newEntry.id,
+              user_id: user.id,
+              type: block.type || 'text',
+              content: typeof block.content === 'string' ? block.content : JSON.stringify(block.content || ''),
+              position: block.position ?? index,
+              metadata: block.metadata || {},
+              created_at: now,
+              updated_at: now,
+              _modified: now,
+              _deleted: false,
+            };
+            return blocksCollection.insert(rxdbBlock);
+          });
+          return Promise.all(blockPromises);
+        })
+        .then(() => {
+          newEntry.metadata.syncStatus = 'synced';
+          toast.success('Document saved');
+        })
+        .catch((error) => {
+          console.error('[Dashboard] RxDB insert failed:', error);
+          newEntry.metadata.syncStatus = 'failed';
+          toast.error('Failed to save document locally.');
+        });
+    }
 
     return newEntry;
-  }, [entries, user?.id, openTab, toast, updateDocumentInCache]);
+  }, [entries, user?.id, openTab, toast, updateDocumentInCache, documentsCollection, blocksCollection]);
 
   // Handle closing a tab - removes from caches since document no longer needs instant access
   const handleCloseTab = useCallback((tabId) => {
@@ -1063,9 +1156,24 @@ export default function Dashboard() {
           hasBlocks: false
         });
 
-        await storageWrapper.saveDocument(documentToSave);
-        console.log('[DEBUG-TITLE-3] Document saved successfully:', { id: documentToSave.id?.substring(0, 8), title: documentToSave.title });
-        // Update storage info after save
+        // 🔄 RxDB UPDATE: Update document in RxDB - replication handles Supabase sync
+        if (documentsCollection) {
+          const doc = await documentsCollection.findOne(documentToSave.id).exec();
+          if (doc) {
+            const now = Date.now();
+            await doc.patch({
+              title: documentToSave.title,
+              tags: documentToSave.tags || [],
+              folder_id: documentToSave.folder_id || '',
+              metadata: documentToSave.metadata || {},
+              updated_at: new Date(now).toISOString(),
+              _modified: now,
+            });
+            console.log('[DEBUG-TITLE-3] Document updated in RxDB:', { id: documentToSave.id?.substring(0, 8), title: documentToSave.title });
+          } else {
+            console.warn('[Dashboard] Document not found in RxDB for update:', documentToSave.id);
+          }
+        }
         updateStorageInfo();
       } catch (error) {
         console.error('Error saving document:', {
@@ -1075,18 +1183,6 @@ export default function Dashboard() {
           hint: error.hint,
           status: error.status
         });
-        // If single document save fails, fall back to saving all
-        try {
-          await storageWrapper.saveEntries(updatedEntries);
-        } catch (fallbackError) {
-          console.error('Fallback save also failed:', {
-            message: fallbackError.message,
-            code: fallbackError.code,
-            details: fallbackError.details,
-            hint: fallbackError.hint,
-            status: fallbackError.status
-          });
-        }
       }
     };
     
@@ -1103,7 +1199,7 @@ export default function Dashboard() {
         });
       }, 16); // Wait for next frame
     }
-  }, [entries, expandedEntry, updateStorageInfo, removeFromCache, updateDocumentInCache]);
+  }, [entries, expandedEntry, updateStorageInfo, removeFromCache, updateDocumentInCache, documentsCollection]);
 
   // Handle document link clicks
   useEffect(() => {

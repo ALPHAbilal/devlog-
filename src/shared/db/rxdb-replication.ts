@@ -446,6 +446,40 @@ export async function setupCollectionReplication<T extends { id: string; _delete
         const newDoc = row.newDocumentState;
         const assumedMasterState = row.assumedMasterState; // null = INSERT, otherwise UPDATE
 
+        // BLOCKS: Verify parent document exists in Supabase before pushing
+        // Prevents RLS/FK errors when blocks sync faster than their parent document
+        if (tableName === 'blocks' && (newDoc as any).document_id) {
+          const docId = (newDoc as any).document_id;
+          const { data: parentDoc } = await supabase
+            .from('documents')
+            .select('id')
+            .eq('id', docId)
+            .single();
+
+          if (!parentDoc) {
+            console.log(`[RxDB Replication] blocks: Deferring block ${newDoc.id} - parent document ${docId} not synced yet`);
+            conflicts.push(newDoc); // Return as conflict → RxDB will retry
+            continue;
+          }
+        }
+
+        // DOCUMENTS: Verify parent folder exists in Supabase before pushing (if folder_id set)
+        // Prevents FK errors when documents sync faster than their parent folder
+        if (tableName === 'documents' && (newDoc as any).folder_id) {
+          const folderId = (newDoc as any).folder_id;
+          const { data: parentFolder } = await supabase
+            .from('folders')
+            .select('id')
+            .eq('id', folderId)
+            .single();
+
+          if (!parentFolder) {
+            console.log(`[RxDB Replication] documents: Deferring doc ${newDoc.id} - parent folder ${folderId} not synced yet`);
+            conflicts.push(newDoc); // Return as conflict → RxDB will retry
+            continue;
+          }
+        }
+
         // Skip deletion of never-synced documents
         if ((newDoc as any)._deleted === true && !wasSynced(tableName, newDoc.id)) {
           console.log(`[RxDB Replication] Skipping deletion of never-synced doc: ${newDoc.id}`);

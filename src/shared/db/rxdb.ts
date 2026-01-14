@@ -53,7 +53,8 @@ let dbPromise: Promise<DevlogDatabase> | null = null;
 // v9: Added RxDBMigrationSchemaPlugin (fixes migration errors)
 // v10: Fixed replication identifier to include version (checkpoint reset)
 // v11: Removed prepareFromSupabase in pull (was converting to camelCase, breaking queries)
-export const SCHEMA_VERSION = 11;
+// v12: Added is_favorite field to documents and folders schemas
+export const SCHEMA_VERSION = 12;
 
 // Database name includes version to avoid RxDB registry conflicts
 const DB_NAME = `devlog-rxdb-v${SCHEMA_VERSION}`;
@@ -130,6 +131,9 @@ async function clearAllDatabases(): Promise<void> {
  *
  * NOTE: ignoreDuplicate is NOT used - it's only allowed in dev-mode.
  * Instead, we properly cache the instance and close before recreation.
+ *
+ * IMPORTANT: If createRxDatabase succeeds but addCollections fails,
+ * we must destroy the partial db to prevent DB8 errors on retry.
  */
 async function createDatabase(): Promise<DevlogDatabase> {
   console.log('[RxDB] Creating database...');
@@ -146,23 +150,35 @@ async function createDatabase(): Promise<DevlogDatabase> {
     // ❌ REMOVED: ignoreDuplicate: true - causes DB9 in production!
   });
 
-  await db.addCollections({
-    documents: { schema: documentSchema },
-    folders: { schema: folderSchema },
-    blocks: {
-      schema: blockSchema,
-      // Migration strategy: Delete local blocks without user_id
-      // They will be re-pulled from Supabase with the correct user_id
-      migrationStrategies: {
-        1: function(_oldDoc: any) {
-          // Return null to delete this document during migration
-          // Blocks will be re-pulled from Supabase with user_id populated
-          console.log('[RxDB] Migrating block (deleting for re-pull):', _oldDoc.id);
-          return null;
+  try {
+    await db.addCollections({
+      documents: { schema: documentSchema },
+      folders: { schema: folderSchema },
+      blocks: {
+        schema: blockSchema,
+        // Migration strategy: Delete local blocks without user_id
+        // They will be re-pulled from Supabase with the correct user_id
+        migrationStrategies: {
+          1: function(_oldDoc: any) {
+            // Return null to delete this document during migration
+            // Blocks will be re-pulled from Supabase with user_id populated
+            console.log('[RxDB] Migrating block (deleting for re-pull):', _oldDoc.id);
+            return null;
+          }
         }
-      }
-    },
-  });
+      },
+    });
+  } catch (error) {
+    // CRITICAL: If addCollections fails, destroy the partial db
+    // Otherwise it stays in RxDB's internal registry and causes DB8 on retry
+    console.log('[RxDB] addCollections failed, destroying partial database...');
+    try {
+      await db.destroy();
+    } catch (destroyErr) {
+      console.log('[RxDB] destroy() during cleanup:', destroyErr);
+    }
+    throw error;
+  }
 
   console.log('[RxDB] Database ready:', Object.keys(db.collections));
   return db;

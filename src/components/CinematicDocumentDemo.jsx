@@ -272,7 +272,7 @@ const CinematicDocumentDemo = () => {
         animate(cursorOpacity, 0, { duration: 0.3 });
         cameraScale_target.set(0.9); // Zoom out slightly to see the speed
 
-        // Rapid fire block generation
+        // Rapid fire block generation - visible "infinite creation" effect
         const dummyTypes = ['heading', 'text', 'code', 'issue'];
         const dummyContents = [
             "Scaling Mesh Nodes...",
@@ -294,11 +294,17 @@ const CinematicDocumentDemo = () => {
                 filePath: type === 'code' ? 'src/core/mesh.ts' : null
             }]);
 
-            // Accelerate camera as we go
-            const speed = 150 + (i * 200);
-            cameraY_target.set(cameraY_target.get() - speed);
+            // Wait for block to render, then follow it with camera
+            await new Promise(r => setTimeout(r, 80)); // Consistent fast timing
 
-            await new Promise(r => setTimeout(r, 100 - (i * 5))); // Accelerate timing
+            // Center camera on the newly added block so it's visible
+            const newBlock = blockRefs.current[id];
+            if (newBlock) {
+                centerOnElement(newBlock);
+            }
+
+            // Small additional delay for visual rhythm (gets slightly faster)
+            await new Promise(r => setTimeout(r, Math.max(40, 80 - (i * 5))));
         }
 
         // Act 6: Cinematic Closure

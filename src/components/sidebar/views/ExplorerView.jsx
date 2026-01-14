@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { FolderPlus, FilePlus, LayoutGrid, LayoutList, TreePine, RefreshCcw, ChevronDown } from 'lucide-react';
+import { FolderPlus, FilePlus, LayoutList, TreePine, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ScrollArea } from '../../ui/scroll-area';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../ui/dropdown-menu';
@@ -8,7 +8,6 @@ import SidebarTreeItemEnhanced from '../SidebarTreeItemEnhanced';
 const VIEW_MODES = {
   TREE: 'tree',
   COMPACT: 'compact',
-  TABLE: 'table',
 };
 
 export function ExplorerView({
@@ -106,23 +105,6 @@ export function ExplorerView({
     }
   }, [onCreateFolder, onCreateDocument, onDeleteItem]);
 
-  // Flatten tree for table view
-  const flattenedItems = useMemo(() => {
-    if (viewMode !== VIEW_MODES.TABLE) return [];
-
-    const flatten = (items, depth = 0) => {
-      return items.flatMap(item => {
-        const flattened = [{ ...item, depth }];
-        if (item.children && expandedFolders.has(item.id)) {
-          flattened.push(...flatten(item.children, depth + 1));
-        }
-        return flattened;
-      });
-    };
-
-    return flatten(treeData);
-  }, [treeData, viewMode, expandedFolders]);
-
   return (
     <div className="flex flex-col h-full min-w-0">
       {/* Header - pt-10 to avoid overlap with collapse button */}
@@ -136,7 +118,6 @@ export function ExplorerView({
                 <button className="p-1.5 hover:bg-white/10 rounded transition-colors" title="View mode">
                   {viewMode === VIEW_MODES.TREE && <TreePine className="w-4 h-4 text-white/40" />}
                   {viewMode === VIEW_MODES.COMPACT && <LayoutList className="w-4 h-4 text-white/40" />}
-                  {viewMode === VIEW_MODES.TABLE && <LayoutGrid className="w-4 h-4 text-white/40" />}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -146,21 +127,8 @@ export function ExplorerView({
                 <DropdownMenuItem onClick={() => setViewMode(VIEW_MODES.COMPACT)}>
                   <LayoutList className="w-4 h-4 mr-2" /> Compact View
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setViewMode(VIEW_MODES.TABLE)}>
-                  <LayoutGrid className="w-4 h-4 mr-2" /> Table View
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Refresh button */}
-            <button
-              onClick={onRefresh}
-              className="p-1.5 hover:bg-white/10 rounded transition-colors"
-              title="Refresh"
-              disabled={isLoading}
-            >
-              <RefreshCcw className={`w-4 h-4 text-white/40 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
           </div>
         </div>
 
@@ -183,16 +151,6 @@ export function ExplorerView({
         </div>
       </div>
 
-      {/* Tree/Table Header for Table view */}
-      {viewMode === VIEW_MODES.TABLE && (
-        <div className="px-3 py-2 border-b border-white/5 flex items-center text-[11px] text-white/40 uppercase tracking-wider">
-          <div className="flex-1">Name</div>
-          <div className="w-20">Modified</div>
-          <div className="w-14">Type</div>
-          <div className="w-6"></div>
-        </div>
-      )}
-
       {/* Content */}
       <ScrollArea className="flex-1" viewportClassName="overflow-x-hidden">
         <div className={`w-full min-w-0 overflow-hidden ${viewMode === VIEW_MODES.COMPACT ? 'py-1' : 'py-2'}`}>
@@ -204,24 +162,6 @@ export function ExplorerView({
             <div className="px-3 py-8 text-center">
               <div className="text-white/30 text-sm">No documents yet</div>
               <div className="text-white/20 text-xs mt-1">Create your first document to get started</div>
-            </div>
-          ) : viewMode === VIEW_MODES.TABLE ? (
-            // Table view - flat list
-            <div className="w-full min-w-0 overflow-hidden pl-2 pr-1 space-y-0.5">
-              {flattenedItems.map((item) => (
-                <SidebarTreeItemEnhanced
-                  key={item.id}
-                  item={item}
-                  isExpanded={expandedFolders.has(item.id)}
-                  onToggle={toggleFolder}
-                  expandedFolders={expandedFolders}
-                  onItemClick={onOpenDocument}
-                  onContextMenu={handleContextMenu}
-                  isSelected={item.id === activeDocumentId}
-                  recentlyCreatedFolderId={recentlyCreatedFolderId}
-                  viewMode="table"
-                />
-              ))}
             </div>
           ) : (
             // Tree/Compact view - hierarchical

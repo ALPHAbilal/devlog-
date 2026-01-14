@@ -283,7 +283,7 @@ const CinematicDocumentDemo = () => {
             "Sync engine stabilized.",
         ];
 
-        for (let i = 0; i < 12; i++) {
+        for (let i = 0; i < 24; i++) {
             const id = `inf-${i}`;
             const type = dummyTypes[i % dummyTypes.length];
             setBlocks(prev => [...prev, {
@@ -297,10 +297,13 @@ const CinematicDocumentDemo = () => {
             // Wait for block to render, then follow it with camera
             await new Promise(r => setTimeout(r, 80)); // Consistent fast timing
 
-            // Center camera on the newly added block so it's visible
-            const newBlock = blockRefs.current[id];
-            if (newBlock) {
-                centerOnElement(newBlock);
+            // Only center on first 16 blocks - after that, stop following
+            // to avoid showing empty space below the last blocks
+            if (i < 16) {
+                const newBlock = blockRefs.current[id];
+                if (newBlock) {
+                    centerOnElement(newBlock);
+                }
             }
 
             // Small additional delay for visual rhythm (gets slightly faster)

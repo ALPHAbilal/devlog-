@@ -22,9 +22,7 @@ import {
   Trash2,
   Copy,
   Download,
-  Upload,
-  Star,
-  StarOff
+  Upload
 } from 'lucide-react';
 import SearchBar from './SearchBar';
 import ContextMenu from './ContextMenu';
@@ -309,17 +307,6 @@ export default function ProjectExplorer({
       );
     }
     
-    // Add favorite option
-    const isFavorite = item.is_favorite || item.isFavorite;
-    menuItems.push(
-      {
-        label: isFavorite ? 'Remove from Favorites' : 'Add to Favorites',
-        icon: isFavorite ? StarOff : Star,
-        onClick: () => onToggleFavorite?.(item, !isFavorite)
-      },
-      { divider: true }
-    );
-
     menuItems.push(
       { label: 'Rename', icon: Edit2, onClick: () => startRenaming(item) },
       { label: 'Delete', icon: Trash2, onClick: () => deleteItem(item, parentId), danger: true }

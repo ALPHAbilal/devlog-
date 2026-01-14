@@ -101,7 +101,7 @@ async function verifySupabaseSchema(tableName: string): Promise<{ hasModified: b
 const SUPABASE_COLUMNS: Record<string, string[]> = {
   documents: [
     'id', 'user_id', 'title', 'folder_id', 'tags', 'metadata',
-    'doc_position', 'created_at', 'updated_at', '_modified', '_deleted',
+    'created_at', 'updated_at', '_modified', '_deleted',
     'is_favorite', 'share_settings'
   ],
   folders: [

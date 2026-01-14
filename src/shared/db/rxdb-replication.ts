@@ -237,6 +237,9 @@ function prepareForSupabase<T extends Record<string, any>>(doc: T, tableName: st
   // Fields that need timestamp conversion
   const timestampFields = ['created_at', 'updated_at', 'createdAt', 'updatedAt', 'deleted_at', 'deletedAt'];
 
+  // UUID fields that use empty string '' as sentinel in RxDB but need NULL in Supabase
+  const uuidSentinelFields = ['folder_id', 'parent_id', 'folderId', 'parentId'];
+
   for (const [key, value] of Object.entries(doc)) {
     // First, check if this field needs to be renamed (camelCase → snake_case)
     const mappedKey = fieldMappings[key] || key;
@@ -246,6 +249,10 @@ function prepareForSupabase<T extends Record<string, any>>(doc: T, tableName: st
       // Convert timestamp fields to ISO strings
       if (timestampFields.includes(key) || timestampFields.includes(mappedKey)) {
         prepared[mappedKey] = toISOString(value);
+      }
+      // Convert empty string UUID sentinels to null for Supabase
+      else if (uuidSentinelFields.includes(key) || uuidSentinelFields.includes(mappedKey)) {
+        prepared[mappedKey] = value === '' ? null : value;
       } else {
         prepared[mappedKey] = value;
       }

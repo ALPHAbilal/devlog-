@@ -308,12 +308,16 @@ const CinematicDocumentDemo = () => {
         }
 
         // Act 6: Cinematic Pull-Away - zoom out until blocks become thin lines
-        // Progressive zoom out: 0.9 → 0.6 → 0.4 → 0.25 → 0.15
+        // Progressive zoom out while bringing camera back to center
         const zoomSteps = [0.7, 0.5, 0.35, 0.22, 0.12];
+        const currentY = cameraY_target.get();
 
         for (let i = 0; i < zoomSteps.length; i++) {
             cameraScale_target.set(zoomSteps[i]);
-            await new Promise(r => setTimeout(r, 400)); // Smooth step timing
+            // Gradually bring cameraY back to 0 so content stays visible
+            const progress = (i + 1) / zoomSteps.length; // 0.2, 0.4, 0.6, 0.8, 1.0
+            cameraY_target.set(currentY * (1 - progress)); // Lerp toward 0
+            await new Promise(r => setTimeout(r, 400));
         }
 
         // Hold at maximum zoom-out (blocks appear as thin lines)

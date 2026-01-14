@@ -85,7 +85,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   // Folders hook - folders are auto-loaded by the hook
-  const { folders, refreshFolders, createFolder, deleteFolder } = useFolders();
+  const { folders, refreshFolders, createFolder, deleteFolder, toggleFavorite: toggleFolderFavorite } = useFolders();
 
   // IndexedDB cache for instant document access across navigation
   const {
@@ -1619,10 +1619,26 @@ export default function Dashboard() {
               setShowConfirmDialog(true);
             }}
             onToggleFavorite={async (item, isFavorite) => {
-              if (item.type === 'document') {
-                await updateEntry(item.id, { is_favorite: isFavorite });
+              try {
+                if (item.type === 'folder') {
+                  await toggleFolderFavorite(item.id, isFavorite);
+                } else {
+                  // Document - use RxDB collection directly
+                  if (documentsCollection) {
+                    const doc = await documentsCollection.findOne(item.id).exec();
+                    if (doc) {
+                      const now = Date.now();
+                      await doc.patch({
+                        is_favorite: isFavorite,
+                        updated_at: new Date(now).toISOString(),
+                        _modified: now,
+                      });
+                    }
+                  }
+                }
+              } catch (error) {
+                console.error('[Dashboard] Failed to toggle favorite:', error);
               }
-              // TODO: Implement folder favorites
             }}
             onRefresh={loadEntries}
             isLoading={isLoadingDocuments}

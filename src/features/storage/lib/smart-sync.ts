@@ -813,9 +813,11 @@ class SmartSyncManager {
    * Get sync status for UI indicators
    */
   getSyncStatus() {
+    // SmartSync is DISABLED - RxDB handles all syncing now
+    // Always return 0 pending since we don't track RxDB's internal state here
     const status = {
-      pending: this.batchQueue.length,
-      syncing: this.syncInProgress,
+      pending: 0,  // SmartSync disabled, RxDB handles sync
+      syncing: false,
       lastSync: this.lastSyncTime,
       online: navigator.onLine
     };

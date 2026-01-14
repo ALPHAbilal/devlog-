@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal, FolderPlus, FilePlus, Trash2 } from 'lucide-react';
+import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal, FolderPlus, FilePlus, Trash2, Star, StarOff } from 'lucide-react';
 
 export default function SidebarTreeItemEnhanced({
   item,
@@ -12,6 +12,7 @@ export default function SidebarTreeItemEnhanced({
   isLast = false,
   onItemClick,
   onContextMenu,
+  onToggleFavorite,
   isSelected = false,
   activeDocumentId,
   recentlyCreatedFolderId,
@@ -99,6 +100,9 @@ export default function SidebarTreeItemEnhanced({
     setShowMenu(!showMenu);
   };
 
+  // Check if item is favorited
+  const isItemFavorite = item.is_favorite || item.isFavorite || isFavorite;
+
   // Context Menu Portal - shared between all views
   const contextMenuPortal = showMenu && createPortal(
     <div
@@ -120,6 +124,16 @@ export default function SidebarTreeItemEnhanced({
           <div className="h-px bg-white/10 my-1" />
         </>
       )}
+      {/* Add to Favorites option */}
+      <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+        onClick={(e) => { e.stopPropagation(); setShowMenu(false); onToggleFavorite?.(item, !isItemFavorite); }}>
+        {isItemFavorite ? (
+          <><StarOff className="w-4 h-4 text-amber-400" /><span>Remove from Favorites</span></>
+        ) : (
+          <><Star className="w-4 h-4 text-amber-400" /><span>Add to Favorites</span></>
+        )}
+      </button>
+      <div className="h-px bg-white/10 my-1" />
       <button className="flex items-center gap-2 px-3 py-2 text-sm text-red-400/80 hover:text-red-300 hover:bg-red-500/10 w-full text-left transition-colors"
         onClick={(e) => { e.stopPropagation(); setShowMenu(false); onContextMenu?.({}, { ...item, action: 'delete' }); }}>
         <Trash2 className="w-4 h-4" /><span>Delete</span>
@@ -302,6 +316,7 @@ export default function SidebarTreeItemEnhanced({
                 isLast={index === item.children.length - 1}
                 onItemClick={onItemClick}
                 onContextMenu={onContextMenu}
+                onToggleFavorite={onToggleFavorite}
                 isSelected={child.id === activeDocumentId}
                 activeDocumentId={activeDocumentId}
                 recentlyCreatedFolderId={recentlyCreatedFolderId}

@@ -223,6 +223,7 @@ function ViewContent({
           onCreateFolder={onCreateFolder}
           onCreateDocument={onCreateDocument}
           onDeleteItem={onDeleteItem}
+          onToggleFavorite={onToggleFavorite}
           onRefresh={onRefresh}
           isLoading={isLoading}
         />

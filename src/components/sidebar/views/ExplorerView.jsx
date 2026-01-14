@@ -19,6 +19,7 @@ export function ExplorerView({
   onCreateFolder,
   onCreateDocument,
   onDeleteItem,
+  onToggleFavorite,
   onRefresh,
   isLoading = false,
 }) {
@@ -176,6 +177,7 @@ export function ExplorerView({
                   isLast={index === treeData.length - 1}
                   onItemClick={onOpenDocument}
                   onContextMenu={handleContextMenu}
+                  onToggleFavorite={onToggleFavorite}
                   isSelected={item.id === activeDocumentId}
                   activeDocumentId={activeDocumentId}
                   recentlyCreatedFolderId={recentlyCreatedFolderId}

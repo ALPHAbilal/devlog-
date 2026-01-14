@@ -23,6 +23,8 @@ interface Folder {
   position: number;
   created_at: string;
   updated_at: string;
+  is_favorite?: boolean;
+  isFavorite?: boolean;  // Alias for UI compatibility
   children?: Folder[];
   documentCount?: number;
 }
@@ -42,6 +44,8 @@ function toFolder(doc: FolderDocType): Folder {
     position: doc.position,
     created_at: doc.created_at,
     updated_at: doc.updated_at,
+    is_favorite: doc.is_favorite ?? false,
+    isFavorite: doc.is_favorite ?? false,  // Alias for FavoritesView
     children: [], // Will be populated by tree building
     documentCount: 0, // Will be populated by document counting
   };
@@ -291,6 +295,27 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
     return Promise.resolve();
   }, []);
 
+  // Toggle folder favorite status
+  const toggleFavorite = useCallback(async (id: string, isFavorite?: boolean) => {
+    if (!collection) return;
+
+    const doc = await collection.findOne(id).exec();
+    if (!doc) {
+      console.warn(`[useRxFolders] Folder ${id} not found`);
+      return;
+    }
+
+    const currentValue = doc.get('is_favorite') ?? false;
+    const newValue = isFavorite !== undefined ? isFavorite : !currentValue;
+
+    const now = Date.now();
+    await doc.patch({
+      is_favorite: newValue,
+      updated_at: new Date(now).toISOString(),
+      _modified: now,
+    } as Partial<FolderDocType>);
+  }, [collection]);
+
   // Build folder tree from flat list (for consumers that need Map format)
   const folderTree = useMemo(() => {
     const map = new Map<string | null, Folder[]>();
@@ -321,5 +346,6 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
     moveFolder,
     moveDocumentToFolder,
     refreshFolders,
+    toggleFavorite,
   };
 }

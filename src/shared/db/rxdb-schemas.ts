@@ -41,6 +41,8 @@ export const documentSchema: RxJsonSchema<any> = {
     // Replication fields
     _modified: { type: 'number', default: 0 },
     _deleted: { type: 'boolean', default: false },
+    // Favorites
+    is_favorite: { type: 'boolean', default: false },
   },
   // ALL indexed fields must be required for Dexie B-Tree indexes
   required: ['id', 'user_id', 'title', 'updated_at'],
@@ -71,6 +73,8 @@ export const folderSchema: RxJsonSchema<any> = {
     // Replication fields
     _modified: { type: 'number', default: 0 },
     _deleted: { type: 'boolean', default: false },
+    // Favorites
+    is_favorite: { type: 'boolean', default: false },
   },
   // ALL indexed fields must be required for Dexie B-Tree indexes
   required: ['id', 'user_id', 'name'],

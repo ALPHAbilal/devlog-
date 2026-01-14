@@ -24,6 +24,8 @@ interface Document {
   doc_position: number;
   created_at: string;
   updated_at: string;
+  is_favorite?: boolean;
+  isFavorite?: boolean;  // Alias for UI compatibility
   // Additional fields for usePaginatedDashboard compatibility
   createdAt?: string;
   updatedAt?: string;
@@ -56,6 +58,8 @@ function toDocument(doc: DocumentDocType): Document {
     doc_position: doc.doc_position,
     created_at: doc.created_at,
     updated_at: doc.updated_at,
+    is_favorite: doc.is_favorite ?? false,
+    isFavorite: doc.is_favorite ?? false,  // Alias for FavoritesView
     // Aliases for usePaginatedDashboard compatibility
     createdAt: doc.created_at,
     updatedAt: doc.updated_at,
@@ -251,6 +255,27 @@ export function useRxDocuments(options: UseRxDocumentsOptions = {}) {
     await updateDocument(id, { folder_id: targetFolderId });
   }, [updateDocument]);
 
+  // Toggle document favorite status
+  const toggleFavorite = useCallback(async (id: string, isFavorite?: boolean) => {
+    if (!collection) return;
+
+    const doc = await collection.findOne(id).exec();
+    if (!doc) {
+      console.warn(`[useRxDocuments] Document ${id} not found`);
+      return;
+    }
+
+    const currentValue = doc.get('is_favorite') ?? false;
+    const newValue = isFavorite !== undefined ? isFavorite : !currentValue;
+
+    const now = Date.now();
+    await doc.patch({
+      is_favorite: newValue,
+      updated_at: new Date(now).toISOString(),
+      _modified: now,
+    } as Partial<DocumentDocType>);
+  }, [collection]);
+
   // documentsWithSkeletons - for loading states
   const documentsWithSkeletons = useMemo(() => {
     if (isLoading && documents.length === 0) {
@@ -283,6 +308,7 @@ export function useRxDocuments(options: UseRxDocumentsOptions = {}) {
     updateDocument,
     deleteDocument,
     moveDocument,
+    toggleFavorite,
   };
 }
 

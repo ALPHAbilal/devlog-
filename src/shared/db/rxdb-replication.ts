@@ -150,7 +150,8 @@ const SUPABASE_COLUMNS: Record<string, string[]> = {
   ],
   folders: [
     'id', 'user_id', 'name', 'parent_id', 'path', 'position',
-    'created_at', 'updated_at', '_modified', '_deleted'
+    'created_at', 'updated_at', '_modified', '_deleted',
+    'is_favorite'
   ],
   blocks: [
     'id', 'document_id', 'user_id', 'type', 'content', 'position', 'metadata',
@@ -186,6 +187,7 @@ const FIELD_MAPPINGS: Record<string, Record<string, string>> = {
     parentId: 'parent_id',
     createdAt: 'created_at',
     updatedAt: 'updated_at',
+    isFavorite: 'is_favorite',
   },
 };
 
@@ -216,6 +218,7 @@ const REVERSE_FIELD_MAPPINGS: Record<string, Record<string, string>> = {
     parent_id: 'parentId',
     created_at: 'createdAt',
     updated_at: 'updatedAt',
+    is_favorite: 'isFavorite',
   },
 };
 

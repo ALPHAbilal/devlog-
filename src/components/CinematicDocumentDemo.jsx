@@ -307,18 +307,26 @@ const CinematicDocumentDemo = () => {
             await new Promise(r => setTimeout(r, Math.max(40, 80 - (i * 5))));
         }
 
-        // Act 6: Cinematic Closure
-        cameraScale_target.set(1.4);
-        animate(cameraBlur, 15, { duration: 1.5 });
-        setSaveStatus('saving');
-        await new Promise(r => setTimeout(r, 1000));
-        setSaveStatus('saved');
+        // Act 6: Cinematic Pull-Away - zoom out until blocks become thin lines
+        // Progressive zoom out: 0.9 → 0.6 → 0.4 → 0.25 → 0.15
+        const zoomSteps = [0.7, 0.5, 0.35, 0.22, 0.12];
 
-        // Loop Reset
-        await new Promise(r => setTimeout(r, 4000));
-        animate(cameraBlur, 0, { duration: 2 });
+        for (let i = 0; i < zoomSteps.length; i++) {
+            cameraScale_target.set(zoomSteps[i]);
+            await new Promise(r => setTimeout(r, 400)); // Smooth step timing
+        }
+
+        // Hold at maximum zoom-out (blocks appear as thin lines)
+        await new Promise(r => setTimeout(r, 1500));
+
+        // Quick fade transition before restart
+        animate(cursorOpacity, 0, { duration: 0.3 });
+
+        // Reset and loop
+        await new Promise(r => setTimeout(r, 500));
         cameraScale_target.set(1);
-        await new Promise(r => setTimeout(r, 3000));
+        cameraY_target.set(0);
+        await new Promise(r => setTimeout(r, 300));
         if (viewportRef.current) playTimeline();
     };
 

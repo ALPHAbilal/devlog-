@@ -212,6 +212,7 @@ export default function SettingsClaude() {
   // Navigation sections
   const sections = [
     { id: 'account', label: 'Account' },
+    { id: 'display', label: 'Display' },
     { id: 'api', label: 'API Keys' },
     { id: 'data', label: 'Data & Privacy' },
   ];
@@ -565,6 +566,112 @@ export default function SettingsClaude() {
                   </Button>
                 </div>
               </SettingGroup>
+            </div>
+          )}
+
+          {/* Display Section */}
+          {activeSection === 'display' && (
+            <div className="content-section">
+              <h2 className="section-title">Display</h2>
+              <p className="section-description">
+                Customize how text and blocks appear in the editor
+              </p>
+
+              <SettingGroup title="Typography">
+                {/* Font Size Slider */}
+                <div className="setting-item">
+                  <div className="setting-content">
+                    <label className="setting-label">Font Size</label>
+                    <p className="setting-description">Adjust text size in blocks ({settings.displayFontSize}px)</p>
+                  </div>
+                  <div className="slider-container">
+                    <span className="slider-label">12</span>
+                    <input
+                      type="range"
+                      min="12"
+                      max="18"
+                      step="1"
+                      value={settings.displayFontSize}
+                      onChange={(e) => updateSetting('displayFontSize', parseInt(e.target.value))}
+                      className="setting-slider"
+                    />
+                    <span className="slider-label">18</span>
+                  </div>
+                </div>
+
+                {/* Line Height Slider */}
+                <div className="setting-item">
+                  <div className="setting-content">
+                    <label className="setting-label">Line Height</label>
+                    <p className="setting-description">Space between lines ({settings.displayLineHeight})</p>
+                  </div>
+                  <div className="slider-container">
+                    <span className="slider-label">Tight</span>
+                    <input
+                      type="range"
+                      min="1.2"
+                      max="1.8"
+                      step="0.1"
+                      value={settings.displayLineHeight}
+                      onChange={(e) => updateSetting('displayLineHeight', parseFloat(e.target.value))}
+                      className="setting-slider"
+                    />
+                    <span className="slider-label">Loose</span>
+                  </div>
+                </div>
+              </SettingGroup>
+
+              <SettingGroup title="Layout">
+                {/* Block Spacing */}
+                <div className="setting-item">
+                  <div className="setting-content">
+                    <label className="setting-label">Block Spacing</label>
+                    <p className="setting-description">Space between content blocks</p>
+                  </div>
+                  <div className="radio-group">
+                    {['compact', 'normal', 'relaxed'].map((option) => (
+                      <label key={option} className="radio-option">
+                        <input
+                          type="radio"
+                          name="blockSpacing"
+                          value={option}
+                          checked={settings.displayBlockSpacing === option}
+                          onChange={(e) => updateSetting('displayBlockSpacing', e.target.value)}
+                        />
+                        <span className="radio-label">{option.charAt(0).toUpperCase() + option.slice(1)}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </SettingGroup>
+
+              {/* Live Preview */}
+              <SettingGroup title="Preview">
+                <div
+                  className="display-preview"
+                  style={{
+                    fontSize: `${settings.displayFontSize}px`,
+                    lineHeight: settings.displayLineHeight
+                  }}
+                >
+                  <p>This is a preview of how your text will look with the current settings. Adjust the sliders above to see changes in real-time.</p>
+                  <p>Multiple paragraphs help you visualize the line height and spacing between content blocks.</p>
+                </div>
+              </SettingGroup>
+
+              {/* Reset Button */}
+              <div className="reset-section">
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    updateSetting('displayFontSize', 14);
+                    updateSetting('displayLineHeight', 1.4);
+                    updateSetting('displayBlockSpacing', 'normal');
+                  }}
+                >
+                  Reset to Defaults
+                </Button>
+              </div>
             </div>
           )}
 

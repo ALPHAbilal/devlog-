@@ -12,7 +12,11 @@ export function SettingsProvider({ children }) {
     autoSaveInterval: 30, // Changed from 1 to 30 seconds for production stability
     showLineNumbers: true,
     enableTextCollapse: true,
-    sessionTimeout: 4320 // Default 3 days (72 hours = 4320 minutes)
+    sessionTimeout: 4320, // Default 3 days (72 hours = 4320 minutes)
+    // Display settings
+    displayFontSize: 14,        // px (range: 12-18)
+    displayLineHeight: 1.4,     // ratio (range: 1.2-1.8)
+    displayBlockSpacing: 'normal' // 'compact' | 'normal' | 'relaxed'
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -99,6 +103,22 @@ export function SettingsProvider({ children }) {
 
     loadSettings();
   }, [user]);
+
+  // Apply display settings as CSS variables
+  useEffect(() => {
+    const root = document.documentElement;
+
+    // Font size (convert px to rem for better scaling)
+    root.style.setProperty('--step-writing', `${settings.displayFontSize / 16}rem`);
+
+    // Line height
+    root.style.setProperty('--line-height-writing', settings.displayLineHeight);
+
+    // Block spacing multiplier
+    const spacingMap = { compact: 0.75, normal: 1, relaxed: 1.5 };
+    const multiplier = spacingMap[settings.displayBlockSpacing] || 1;
+    root.style.setProperty('--block-spacing-multiplier', multiplier);
+  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing]);
 
   // Update a single setting
   const updateSetting = async (key, value) => {

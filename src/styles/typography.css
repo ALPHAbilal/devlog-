@@ -37,10 +37,10 @@
   --line-height-tight: 1.2;
   --line-height-normal: 1.58; /* Medium's ratio */
   --line-height-loose: 1.8;
-  --line-height-writing: 1.6; /* Clean, focused reading */
+  --line-height-writing: 1.4; /* Dense, compact reading */
 
-  /* Writing font size - balanced for developers */
-  --step-writing: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem); /* 15-16px */
+  /* Writing font size - compact for developers */
+  --step-writing: clamp(0.875rem, 0.85rem + 0.1vw, 0.875rem); /* 14px max */
   
   /* Letter spacing refinements */
   --letter-spacing-tight: -0.003em; /* Medium's approach for headings */

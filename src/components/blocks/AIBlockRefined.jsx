@@ -243,7 +243,7 @@ function AIBlock({ block, onUpdate }) {
                 }}
                 onBlur={saveEdit}
                 className="ai-edit-textarea block w-full bg-transparent text-text-primary resize-none
-                         focus:outline-none font-sans text-[15px] leading-[1.6]
+                         focus:outline-none font-sans text-[14px] leading-[1.4]
                          whitespace-pre-wrap break-words"
                 style={{ 
                   minHeight: '24px',
@@ -262,7 +262,7 @@ function AIBlock({ block, onUpdate }) {
                   window.__lastClickEvent = e;
                   startEdit(e);
                 }}
-                className="text-text-primary text-[15px] leading-[1.6] cursor-text
+                className="text-text-primary text-[14px] leading-[1.4] cursor-text
                          whitespace-pre-wrap break-words font-sans prose-sm"
               >
                 {/* Parse markdown for better display */}
@@ -453,7 +453,7 @@ function AIBlock({ block, onUpdate }) {
             className={`
               w-full text-text-primary p-4 rounded-lg resize-none
               focus:outline-none focus:ring-2 placeholder-text-secondary/50 
-              text-[15px] leading-[1.8] font-sans border transition-all
+              text-[14px] leading-[1.4] font-sans border transition-all
               ${selectedRole === 'user' 
                 ? 'bg-blue-500/5 border-blue-500/20 focus:ring-blue-500/50' 
                 : 'bg-accent-green/5 border-accent-green/20 focus:ring-accent-green/50'

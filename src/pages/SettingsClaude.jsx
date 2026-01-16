@@ -179,7 +179,50 @@ export default function SettingsClaude() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { databaseSize, storageLimit, usagePercentage } = useSmartDatabaseUsage();
-  const { settings, updateSetting } = useSettings();
+  const { settings, updateSetting, updateSettings, applyDisplaySettings } = useSettings();
+
+  // Local state for display settings (preview before apply)
+  const [localDisplaySettings, setLocalDisplaySettings] = useState({
+    fontSize: settings.displayFontSize || 14,
+    lineHeight: settings.displayLineHeight || 1.4,
+    blockSpacing: settings.displayBlockSpacing || 'normal'
+  });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Sync local state when settings load
+  useEffect(() => {
+    setLocalDisplaySettings({
+      fontSize: settings.displayFontSize || 14,
+      lineHeight: settings.displayLineHeight || 1.4,
+      blockSpacing: settings.displayBlockSpacing || 'normal'
+    });
+  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing]);
+
+  // Handle local display setting change (preview only)
+  const handleLocalDisplayChange = (key, value) => {
+    setLocalDisplaySettings(prev => ({ ...prev, [key]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  // Apply display settings to the entire platform
+  const handleApplyDisplaySettings = () => {
+    // Apply CSS variables immediately
+    applyDisplaySettings(
+      localDisplaySettings.fontSize,
+      localDisplaySettings.lineHeight,
+      localDisplaySettings.blockSpacing
+    );
+
+    // Save to settings (localStorage + Supabase)
+    updateSettings({
+      displayFontSize: localDisplaySettings.fontSize,
+      displayLineHeight: localDisplaySettings.lineHeight,
+      displayBlockSpacing: localDisplaySettings.blockSpacing
+    });
+
+    setHasUnsavedChanges(false);
+    toast.success('Display settings applied!');
+  };
   const toast = useToast();
   const { trackEvent } = useAnalytics();
   
@@ -582,7 +625,7 @@ export default function SettingsClaude() {
                 <div className="setting-item">
                   <div className="setting-content">
                     <label className="setting-label">Font Size</label>
-                    <p className="setting-description">Adjust text size in blocks ({settings.displayFontSize}px)</p>
+                    <p className="setting-description">Adjust text size in blocks ({localDisplaySettings.fontSize}px)</p>
                   </div>
                   <div className="slider-container">
                     <span className="slider-label">12</span>
@@ -591,8 +634,8 @@ export default function SettingsClaude() {
                       min="12"
                       max="18"
                       step="1"
-                      value={settings.displayFontSize}
-                      onChange={(e) => updateSetting('displayFontSize', parseInt(e.target.value))}
+                      value={localDisplaySettings.fontSize}
+                      onChange={(e) => handleLocalDisplayChange('fontSize', parseInt(e.target.value))}
                       className="setting-slider"
                     />
                     <span className="slider-label">18</span>
@@ -603,7 +646,7 @@ export default function SettingsClaude() {
                 <div className="setting-item">
                   <div className="setting-content">
                     <label className="setting-label">Line Height</label>
-                    <p className="setting-description">Space between lines ({settings.displayLineHeight})</p>
+                    <p className="setting-description">Space between lines ({localDisplaySettings.lineHeight})</p>
                   </div>
                   <div className="slider-container">
                     <span className="slider-label">Tight</span>
@@ -612,8 +655,8 @@ export default function SettingsClaude() {
                       min="1.2"
                       max="1.8"
                       step="0.1"
-                      value={settings.displayLineHeight}
-                      onChange={(e) => updateSetting('displayLineHeight', parseFloat(e.target.value))}
+                      value={localDisplaySettings.lineHeight}
+                      onChange={(e) => handleLocalDisplayChange('lineHeight', parseFloat(e.target.value))}
                       className="setting-slider"
                     />
                     <span className="slider-label">Loose</span>
@@ -635,8 +678,8 @@ export default function SettingsClaude() {
                           type="radio"
                           name="blockSpacing"
                           value={option}
-                          checked={settings.displayBlockSpacing === option}
-                          onChange={(e) => updateSetting('displayBlockSpacing', e.target.value)}
+                          checked={localDisplaySettings.blockSpacing === option}
+                          onChange={(e) => handleLocalDisplayChange('blockSpacing', e.target.value)}
                         />
                         <span className="radio-label">{option.charAt(0).toUpperCase() + option.slice(1)}</span>
                       </label>
@@ -650,8 +693,8 @@ export default function SettingsClaude() {
                 <div
                   className="display-preview"
                   style={{
-                    fontSize: `${settings.displayFontSize}px`,
-                    lineHeight: settings.displayLineHeight
+                    fontSize: `${localDisplaySettings.fontSize}px`,
+                    lineHeight: localDisplaySettings.lineHeight
                   }}
                 >
                   <p>This is a preview of how your text will look with the current settings. Adjust the sliders above to see changes in real-time.</p>
@@ -659,18 +702,27 @@ export default function SettingsClaude() {
                 </div>
               </SettingGroup>
 
-              {/* Reset Button */}
-              <div className="reset-section">
+              {/* Apply Button */}
+              <div className="apply-section">
+                <Button
+                  variant="primary"
+                  onClick={handleApplyDisplaySettings}
+                  disabled={!hasUnsavedChanges}
+                >
+                  Apply to Platform
+                </Button>
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    updateSetting('displayFontSize', 14);
-                    updateSetting('displayLineHeight', 1.4);
-                    updateSetting('displayBlockSpacing', 'normal');
+                    setLocalDisplaySettings({ fontSize: 14, lineHeight: 1.4, blockSpacing: 'normal' });
+                    setHasUnsavedChanges(true);
                   }}
                 >
                   Reset to Defaults
                 </Button>
+                {hasUnsavedChanges && (
+                  <span className="unsaved-indicator">Unsaved changes</span>
+                )}
               </div>
             </div>
           )}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/shared/api';
 import { useAuth } from './AuthContextOptimized';
 import { setInactivityTimeout } from '@/shared/api';
@@ -104,21 +104,36 @@ export function SettingsProvider({ children }) {
     loadSettings();
   }, [user]);
 
-  // Apply display settings as CSS variables
-  useEffect(() => {
+  // Function to apply display settings as CSS variables
+  const applyDisplaySettings = useCallback((fontSize, lineHeight, blockSpacing) => {
     const root = document.documentElement;
 
-    // Font size (convert px to rem for better scaling)
-    root.style.setProperty('--step-writing', `${settings.displayFontSize / 16}rem`);
+    // Font size in pixels (direct px for reliability)
+    const fontSizePx = `${fontSize}px`;
+    root.style.setProperty('--step-writing', fontSizePx);
 
-    // Line height
-    root.style.setProperty('--line-height-writing', settings.displayLineHeight);
+    // Line height as number
+    const lineHeightVal = String(lineHeight);
+    root.style.setProperty('--line-height-writing', lineHeightVal);
 
     // Block spacing multiplier
     const spacingMap = { compact: 0.75, normal: 1, relaxed: 1.5 };
-    const multiplier = spacingMap[settings.displayBlockSpacing] || 1;
-    root.style.setProperty('--block-spacing-multiplier', multiplier);
-  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing]);
+    const multiplier = spacingMap[blockSpacing] || 1;
+    root.style.setProperty('--block-spacing-multiplier', String(multiplier));
+
+    console.log('[Display Settings] Applied:', { fontSizePx, lineHeightVal, blockSpacing, multiplier });
+  }, []);
+
+  // Apply display settings when they change (e.g., loaded from localStorage/Supabase)
+  useEffect(() => {
+    if (settings.displayFontSize && settings.displayLineHeight) {
+      applyDisplaySettings(
+        settings.displayFontSize,
+        settings.displayLineHeight,
+        settings.displayBlockSpacing || 'normal'
+      );
+    }
+  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing, applyDisplaySettings]);
 
   // Update a single setting
   const updateSetting = async (key, value) => {
@@ -175,6 +190,7 @@ export function SettingsProvider({ children }) {
       settings,
       updateSetting,
       updateSettings,
+      applyDisplaySettings,
       isLoading
     }}>
       {children}

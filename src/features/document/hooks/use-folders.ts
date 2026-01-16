@@ -368,13 +368,45 @@ export function useFolders() {
   // Move folder
   const moveFolder = useCallback(async (folderId, newParentId) => {
     try {
-      // Prevent moving to self or descendants
+      // Prevent moving to self
       if (folderId === newParentId) {
         toast.error('Cannot move folder to itself');
         return false;
       }
 
-      // TODO: Check for circular references
+      // Check for circular references - prevent moving folder into its own descendants
+      if (newParentId) {
+        // Fetch all folders to check the hierarchy
+        const { data: allFolders, error: fetchError } = await supabase
+          .from('folders')
+          .select('id, parent_id')
+          .eq('user_id', user.id);
+
+        if (fetchError) throw fetchError;
+
+        // Build a parent chain from newParentId to root
+        const visited = new Set();
+        let currentId = newParentId;
+
+        while (currentId) {
+          // If we encounter the folder we're moving, it's a circular reference
+          if (currentId === folderId) {
+            toast.error('Cannot move folder into its own subfolder');
+            return false;
+          }
+
+          // Prevent infinite loops
+          if (visited.has(currentId)) {
+            console.error('Circular reference detected in existing folder structure');
+            break;
+          }
+          visited.add(currentId);
+
+          // Find the parent of current folder
+          const currentFolder = allFolders?.find(f => f.id === currentId);
+          currentId = currentFolder?.parent_id || null;
+        }
+      }
 
       const { error } = await supabase
         .from('folders')
@@ -388,7 +420,7 @@ export function useFolders() {
       if (error) throw error;
 
       toast.success('Folder moved');
-      
+
       // Force refresh for move operations
       await loadFolders(true);
       return true;

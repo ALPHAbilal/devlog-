@@ -1615,6 +1615,31 @@ const addDocumentsToFolder = (folder) => {
 **Impact**: All folder/document creation now works instantly with optimistic updates
 **Saved**: 6+ hours debugging, prevents data loss, improves UX significantly
 
+### Folder Disappears When Moved Into Subfolder (Circular Reference Bug)
+**Symptom**: Moving folder A into folder B (where B is a child of A) causes folder A to disappear from sidebar
+**Root Cause**: Missing circular reference check in `moveFolder` function in `use-folders.ts`
+**Fix**: Added check that traverses parent chain of target folder to ensure dragged folder is not an ancestor
+**Location**: `src/features/document/hooks/use-folders.ts:moveFolder`
+**Code**:
+```typescript
+if (newParentId) {
+  const { data: allFolders } = await supabase
+    .from('folders').select('id, parent_id').eq('user_id', user.id);
+
+  let currentId = newParentId;
+  while (currentId) {
+    if (currentId === folderId) {
+      toast.error('Cannot move folder into its own subfolder');
+      return false;
+    }
+    currentId = allFolders?.find(f => f.id === currentId)?.parent_id;
+  }
+}
+```
+**Check First**: Ensure `isDescendant` check in ExplorerView.jsx line 269-273 also works
+**Saved**: Prevents folder data loss
+**Date**: 2026-01-16
+
 ### Folders Appearing Empty in Dashboard
 **Symptom**: Only empty folders appear in dashboard grid, folders with documents don't show or appear empty
 **Root Cause**: `useFolders` hook only populates `folder.children` with subfolders, NOT documents

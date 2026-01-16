@@ -268,136 +268,139 @@ function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
     { value: 'xml', label: 'XML' },
   ];
 
-  if (isEditing) {
-    const editorClasses = isFullscreen
-      ? "fixed inset-0 z-[9000] bg-dark-primary p-8 overflow-auto"
-      : "space-y-2";
-
-    return (
-      <div className={`${editorClasses} code-editor-container`}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <input
-                type="text"
-                value={filePath}
-                onChange={handleFilePathChange}
-                onFocus={() => {
-                  if (filePath.length > 0) {
-                    handleFilePathChange({ target: { value: filePath } });
-                  }
-                }}
-                onBlur={() => {
-                  setTimeout(() => setShowFilePathSuggestions(false), 200);
-                }}
-                placeholder="File path (e.g., src/components/Block.jsx)"
-                className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm
-                           placeholder-text-secondary/50 focus:outline-none focus:ring-1
-                           focus:ring-accent-green/50 min-w-[300px]"
-              />
-              
-              {/* File path suggestions dropdown */}
-              {showFilePathSuggestions && filePathSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto
-                                bg-dark-secondary rounded-lg shadow-xl border border-dark-primary/50
-                                z-[100]">
-                  {filePathSuggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => {
-                        setFilePath(suggestion);
-                        setShowFilePathSuggestions(false);
-                      }}
-                      className="w-full px-3 py-2 text-left text-sm text-text-secondary
-                                 hover:bg-dark-primary/50 hover:text-text-primary
-                                 transition-colors truncate"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm"
-            >
-              {supportedLanguages.map(lang => (
-                <option key={lang.value} value={lang.value}>{lang.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={toggleFullscreen}
-              className="p-1 hover:bg-dark-secondary rounded text-text-secondary hover:text-text-primary"
-              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-            >
-              {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-            </button>
-            <span className="text-text-secondary text-xs">
-              {isFullscreen ? "Esc to exit • " : ""}Ctrl+Enter to save
-            </span>
-          </div>
-        </div>
-        
-        <div className="relative flex bg-dark-primary rounded-lg overflow-hidden">
-          {/* Line numbers */}
-          <div className="select-none text-text-secondary text-sm font-mono p-4 pr-0 text-right border-r border-dark-secondary">
-            {lineNumbers.map(num => (
-              <div key={num} className="leading-6">{num}</div>
-            ))}
-          </div>
-          
-          {/* Code editor */}
-          <textarea
-            ref={textareaRef}
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            onBlur={(e) => {
-              // Check if the new focus target is within the same code block
-              const codeBlockContainer = e.currentTarget.closest('.code-editor-container');
-              const newFocusTarget = e.relatedTarget;
-              
-              // Only save if focus is moving outside the code block
-              if (!isFullscreen && (!newFocusTarget || !codeBlockContainer?.contains(newFocusTarget))) {
-                handleSave();
-              }
-            }}
-            onKeyDown={handleKeyDown}
-            className="flex-1 bg-transparent text-text-primary p-4 pl-4
-                       font-mono text-sm resize-none overflow-hidden
-                       focus:outline-none leading-6"
-            placeholder="// Enter your code here..."
-            spellCheck={false}
-            style={{ minHeight: '100px' }}
-          />
-        </div>
-        
-        {isFullscreen && (
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              onClick={() => {
-                setCode(block.content || '');
-                setIsEditing(false);
-                setIsFullscreen(false);
+  // Editor content - shared between inline and fullscreen modes
+  const editorContent = (
+    <div className={`${isFullscreen ? "fixed inset-0 z-[9999] bg-dark-primary p-8 overflow-auto" : "space-y-2"} code-editor-container`}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <input
+              type="text"
+              value={filePath}
+              onChange={handleFilePathChange}
+              onFocus={() => {
+                if (filePath.length > 0) {
+                  handleFilePathChange({ target: { value: filePath } });
+                }
               }}
-              className="px-4 py-2 text-text-secondary hover:text-text-primary"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              className="px-4 py-2 bg-accent-green text-dark-primary rounded hover:bg-accent-green/80"
-            >
-              Save
-            </button>
+              onBlur={() => {
+                setTimeout(() => setShowFilePathSuggestions(false), 200);
+              }}
+              placeholder="File path (e.g., src/components/Block.jsx)"
+              className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm
+                         placeholder-text-secondary/50 focus:outline-none focus:ring-1
+                         focus:ring-accent-green/50 min-w-[300px]"
+            />
+
+            {/* File path suggestions dropdown */}
+            {showFilePathSuggestions && filePathSuggestions.length > 0 && (
+              <div className="absolute top-full left-0 mt-1 w-full max-h-48 overflow-y-auto
+                              bg-dark-secondary rounded-lg shadow-xl border border-dark-primary/50
+                              z-[100]">
+                {filePathSuggestions.map((suggestion, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => {
+                      setFilePath(suggestion);
+                      setShowFilePathSuggestions(false);
+                    }}
+                    className="w-full px-3 py-2 text-left text-sm text-text-secondary
+                               hover:bg-dark-primary/50 hover:text-text-primary
+                               transition-colors truncate"
+                  >
+                    {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        )}
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="bg-dark-secondary text-text-primary px-3 py-1 rounded text-sm"
+          >
+            {supportedLanguages.map(lang => (
+              <option key={lang.value} value={lang.value}>{lang.label}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleFullscreen}
+            className="p-1 hover:bg-dark-secondary rounded text-text-secondary hover:text-text-primary"
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+          </button>
+          <span className="text-text-secondary text-xs">
+            {isFullscreen ? "Esc to exit • " : ""}Ctrl+Enter to save
+          </span>
+        </div>
       </div>
-    );
+
+      <div className={`relative flex bg-dark-primary rounded-lg overflow-hidden ${isFullscreen ? 'flex-1' : ''}`}>
+        {/* Line numbers */}
+        <div className="select-none text-text-secondary text-sm font-mono p-4 pr-0 text-right border-r border-dark-secondary">
+          {lineNumbers.map(num => (
+            <div key={num} className="leading-6">{num}</div>
+          ))}
+        </div>
+
+        {/* Code editor */}
+        <textarea
+          ref={textareaRef}
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          onBlur={(e) => {
+            // Check if the new focus target is within the same code block
+            const codeBlockContainer = e.currentTarget.closest('.code-editor-container');
+            const newFocusTarget = e.relatedTarget;
+
+            // Only save if focus is moving outside the code block
+            if (!isFullscreen && (!newFocusTarget || !codeBlockContainer?.contains(newFocusTarget))) {
+              handleSave();
+            }
+          }}
+          onKeyDown={handleKeyDown}
+          className={`flex-1 bg-transparent text-text-primary p-4 pl-4
+                     font-mono text-sm resize-none overflow-hidden
+                     focus:outline-none leading-6 ${isFullscreen ? 'h-full' : ''}`}
+          placeholder="// Enter your code here..."
+          spellCheck={false}
+          style={{ minHeight: isFullscreen ? 'calc(100vh - 200px)' : '100px' }}
+        />
+      </div>
+
+      {isFullscreen && (
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            onClick={() => {
+              setCode(block.content || '');
+              setIsEditing(false);
+              setIsFullscreen(false);
+            }}
+            className="px-4 py-2 text-text-secondary hover:text-text-primary"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-accent-green text-dark-primary rounded hover:bg-accent-green/80"
+          >
+            Save
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  if (isEditing) {
+    // Use portal for fullscreen to escape stacking context
+    if (isFullscreen) {
+      return createPortal(editorContent, document.body);
+    }
+    return editorContent;
   }
 
   // Calculate if content should be collapsible

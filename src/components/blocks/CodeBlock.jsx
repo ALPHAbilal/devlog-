@@ -268,8 +268,8 @@ function CodeBlock({ block, onUpdate, allBlocks, onNavigateToBlock }) {
   ];
 
   if (isEditing) {
-    const editorClasses = isFullscreen 
-      ? "fixed inset-0 z-50 bg-dark-primary p-8 overflow-auto"
+    const editorClasses = isFullscreen
+      ? "fixed inset-0 z-[9000] bg-dark-primary p-8 overflow-auto"
       : "space-y-2";
 
     return (

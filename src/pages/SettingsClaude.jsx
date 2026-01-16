@@ -180,6 +180,8 @@ export default function SettingsClaude() {
   const { user, signOut } = useAuth();
   const { databaseSize, storageLimit, usagePercentage } = useSmartDatabaseUsage();
   const { settings, updateSetting, updateSettings, applyDisplaySettings } = useSettings();
+  const toast = useToast();
+  const { trackEvent } = useAnalytics();
 
   // Local state for display settings (preview before apply)
   const [localDisplaySettings, setLocalDisplaySettings] = useState({
@@ -223,8 +225,6 @@ export default function SettingsClaude() {
     setHasUnsavedChanges(false);
     toast.success('Display settings applied!');
   };
-  const toast = useToast();
-  const { trackEvent } = useAnalytics();
   
   const [activeSection, setActiveSection] = useState('account');
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);

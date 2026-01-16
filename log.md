@@ -1,734 +1,598 @@
-positionrelative
-align-contentnormal
-align-itemsnormal
-align-selfauto
-block-size292.109px
-bottom0px
-box-sizingborder-box
-clearnone
-clipauto
-displayblock
-flex-basisauto
-flex-directionrow
-flex-grow0
-flex-shrink1
-flex-wrapnowrap
-floatnone
-height292.109px
-inline-size767px
-justify-contentnormal
-left0px
-margin-bottom0px
-margin-left0px
-margin-right0px
-margin-top0px
-max-block-sizenone
-max-heightnone
-max-inline-size958px
-max-width958px
-min-block-size24px
-min-height24px
-min-inline-size0px
-min-width0px
-overflow-xvisible
-overflow-yvisible
-padding-bottom8px
-padding-left0px
-padding-right0px
-padding-top8px
-resizenone
-right0px
-top0px
-visibilityvisible
-width767px
-z-indexauto
-text-size-adjust100%
-directionltr
-font-familyInter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
-font-feature-settings"liga" 0
-font-kerningauto
-font-language-overridenormal
-font-optical-sizingauto
-font-size16px
-font-size-adjustnone
-font-stretch100%
-font-stylenormal
-font-variant-alternatesnormal
-font-variant-capsnormal
-font-variant-east-asiannormal
-font-variant-emojinormal
-font-variant-ligaturesnone
-font-variant-numericnormal
-font-variant-positionnormal
-font-variation-settingsnormal
-font-weight400
-letter-spacing-0.16px
-line-height25.6px
-tab-size4
-text-alignstart
-text-align-lastauto
-text-decoration-colorrgb(228, 228, 231)
-text-decoration-linenone
-text-decoration-stylesolid
-text-decoration-thicknessauto
-text-indent0px
-text-overflowclip
-text-shadownone
-text-transformnone
-text-wrap-modewrap
-vertical-alignbaseline
-white-space-collapsebreak-spaces
-word-breaknormal
-word-spacing0px
-colorrgb(228, 228, 231)
-background-attachmentscroll
-background-clipborder-box
-background-colorrgba(0, 0, 0, 0)
-background-imagenone
-background-originpadding-box
-background-position-x0%
-background-position-y0%
-background-repeatrepeat
-background-sizeauto
-border-bottom-colorrgb(228, 228, 231)
-border-bottom-stylenone
-border-bottom-width0px
-border-image-outset0
-border-image-repeatstretch
-border-image-slice100%
-border-image-sourcenone
-border-image-width1
-border-left-colorrgb(228, 228, 231)
-border-left-stylenone
-border-left-width0px
-border-right-colorrgb(228, 228, 231)
-border-right-stylenone
-border-right-width0px
-border-top-colorrgb(228, 228, 231)
-border-top-stylenone
-border-top-width0px
-box-shadownone
-cursorauto
-outline-colorrgb(228, 228, 231)
-outline-offset0px
-outline-stylenone
-outline-width0px
--webkit-border-imagenone
-animation-delay0s
-animation-directionnormal
-animation-duration0s
-animation-fill-modenone
-animation-iteration-count1
-animation-namenone
-animation-play-staterunning
-animation-range-endnormal
-animation-range-startnormal
-animation-timelineauto
-animation-timing-functionease
-transition-behaviornormal, normal
-transition-delay0s, 0s
-transition-duration0.15s, 0.15s
-transition-propertypadding, border-color
-transition-timing-functionease, ease
---container-md768px
---bg-primary#0f172b
---auth-text-muted#62748e
---db-radius-lg16px
---auth-error#ef4444
---border-mono-strongrgba(255, 255, 255, .2)
---dark-base#0a1628
---step-6clamp(4.209rem, 2.5rem + 8.545vw, 5.926rem)
---step-5clamp(3.157rem, 2.2rem + 4.785vw, 4.444rem)
---auth-border#314158
---bg-subtle#21262d
---db-glass-blur24px
---brand-primary#00bc7d
---db-shadow-md0 4px 6px rgba(0, 0, 0, .4)
---db-text-tertiary#94a3b8
---card-shadow-hover0 4px 12px rgba(0, 0, 0, .06), 0 8px 24px rgba(0, 0, 0, .12), 0 16px 48px rgba(0, 0, 0, .18), 0 32px 96px rgba(0, 0, 0, .24)
---container-paddingclamp(1rem, .75rem + 1.25vw, 2.5rem)
---gradient-pricing-accentrgba(16, 185, 129, .05)
---gradient-monolinear-gradient(135deg, rgba(255, 255, 255, .05) 0%, rgba(255, 255, 255, .02) 100%)
---step-4clamp(2.369rem, 1.8rem + 2.845vw, 3.333rem)
---spacing-2xlclamp(3rem, 2rem + 5vw, 5rem)
---gradient-accentrgba(16, 185, 129, .08)
---gradient-cta-accentrgba(16, 185, 129, .1)
---auth-button-primary-bg#ffffff
---db-dark-primary#0a1628
---font-mono"JetBrains Mono", "SF Mono", Monaco, "Cascadia Code", "Roboto Mono", monospace
---spacing-smclamp(.5rem, .4rem + .5vw, .75rem)
---gradient-hero-secondary#050d1a
---step--2clamp(.694rem, .68rem + .07vw, .781rem)
---tw-ring-colorrgb(59 130 246 / .5)
---step-1clamp(1.125rem, 1.05rem + .375vw, 1.5rem)
---font-size-4xlclamp(2.25rem, 1.95rem + 1.5vw, 3rem)
---font-uiArial, -apple-system, system-ui, sans-serif
---db-glass-borderrgba(255, 255, 255, .1)
---db-shadow-lg0 10px 15px rgba(0, 0, 0, .5)
---accent-greenrgba(16, 185, 129, .15)
---space-5clamp(1.5rem, 1.2rem + 1.5vw, 3rem)
---blend-cta-footer#0a1628
---tw-gradient-from#050b14
---auth-text-secondary#90a1b9
---sat0px
---tw-gradient-to#0f1d32
---border-mono-mediumrgba(255, 255, 255, .15)
---border-mono-subtlergba(255, 255, 255, .1)
---space-3.75rem
---db-transition-normal.25s cubic-bezier(.4, 0, .2, 1)
---tw-gradient-via-position
---gradient-hero-primary#0a1628
---noise-opacity.02
---tw-saturate
---dark-secondary#0f1419
---db-transition-fast.15s cubic-bezier(.4, 0, .2, 1)
---gradient-pricing-primary#0a1628
---tw-grayscale
---db-spacing-lg1.5rem
---db-blue#60a5fa
---space-1.25rem
---hero-shadow-lg0 4px 8px rgba(16, 185, 129, .2), 0 8px 16px rgba(16, 185, 129, .15), 0 16px 32px rgba(16, 185, 129, .1)
---tw-gradient-to-position
---glow-mono-subtlergba(255, 255, 255, .1)
---dark-accent#111922
---font-size-xsclamp(.75rem, .7rem + .25vw, .875rem)
---gradient-hero-accentrgba(16, 185, 129, .08)
---auth-text-primary#ffffff
---brand-primary-end#00bba7
---gradient-cta-secondary#050d1a
---db-z-base1
---gradient-problem-accentrgba(255, 255, 255, .02)
---db-spacing-sm.75rem
---db-blue-dark#3b82f6
---container-xs100%
---db-shadow-sm0 1px 2px rgba(0, 0, 0, .3)
---tw-pinch-zoom
---gradient-video-primary#0a1628
---demo-dark-secondary#020618
---blend-pricing-cta#0a1628
---db-spacing-xl2rem
---text-secondary#90a1b9
---card-shadow-base0 2px 8px rgba(0, 0, 0, .04), 0 4px 16px rgba(0, 0, 0, .08), 0 8px 32px rgba(0, 0, 0, .12), 0 16px 64px rgba(0, 0, 0, .16)
---auth-input-placeholder#62748e
---blend-problem-video#0a1628
---noise-opacity-heavy.025
---border-sectionrgba(29, 41, 61, .5)
---hero-gradient-secondarylinear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)
---text-muted#62748e
---font-size-2xlclamp(1.5rem, 1.35rem + .75vw, 1.875rem)
---blend-hero-problem#0a1628
---spacing-lgclamp(1.5rem, 1.2rem + 1.5vw, 2rem)
---gradient-primary#0a1628
---hero-glow-secondaryrgba(59, 130, 246, .5)
---tw-numeric-spacing
---gradient-problem-secondary#050d1a
---tw-scale-y1
---border-colorrgba(255, 255, 255, .1)
---tw-backdrop-contrast
---tw-drop-shadow
---line-height-writing1.6
---accent-mono-lightrgba(255, 255, 255, .05)
---demo-dark-primary#0f172b
---line-height-normal1.5
---db-container-max-width1920px
---space-4xlcalc(.5rem* 12)
---gradient-footer-secondary#0a0c0f
---tw-pan-x
---tw-translate-y0
---db-header-height72px
---space-61.5rem
---hero-gradient-primarylinear-gradient(135deg, #10b981 0%, #047857 50%, #064e3b 100%)
---db-amber-dark#f59e0b
---auth-bg#020618
---db-dark-secondary#0f1d32
---gradient-problem-primary#0a1628
---tw-contain-size
---db-blue-light#93c5fd
---glow-mono-mediumrgba(255, 255, 255, .15)
---font-size-3xlclamp(1.875rem, 1.65rem + 1.125vw, 2.25rem)
---db-emerald-light#34d399
---color-error#ef4444
---transition.2s ease
---will-change-safetransform
---shadow-base0 1px 3px rgba(0, 0, 0, .02), 0 4px 8px rgba(0, 0, 0, .04), 0 8px 16px rgba(0, 0, 0, .08), 0 16px 32px rgba(0, 0, 0, .12), 0 32px 64px rgba(0, 0, 0, .16)
---text-primary#ffffff
---font-size-lgclamp(1.125rem, 1.05rem + .375vw, 1.25rem)
---tw-translate-x0
---hero-glow-accentrgba(139, 92, 246, .5)
---db-z-elevated10
---gradient-cta-primary#0a1628
---letter-spacing-tight-.003em
---db-transition-slow.35s cubic-bezier(.4, 0, .2, 1)
---mesh-color-4rgba(236, 72, 153, .3)
---tw-border-spacing-y0
---accent-warning#d29922
---gradient-secondary#050d1a
---space-3xlcalc(.5rem* 10)
---line-height-relaxed1.75
---section-paddingclamp(2rem, 1.5rem + 2.5vw, 5rem)
---container-xl1280px
---step-0clamp(1rem, .95rem + .25vw, 1.125rem)
---fluid-space-unitclamp(.5rem, .4rem + .5vw, .75rem)
---tw-blur
---card-paddingclamp(1rem, .8rem + 1vw, 2rem)
---tw-invert
---step-writingclamp(.9375rem, .9rem + .2vw, 1rem)
---demo-text-primary#ffffff
---space-smcalc(.5rem* 2)
---tw-contain-layout
---scrollbar-widthcalc(100vw - 100%)
---db-sidebar-width-expanded280px
---db-radius-md12px
---tw-backdrop-sepia
---db-z-sidebar90
---tw-ring-shadow0 0 #0000
---auth-success#10b981
---tablet-min768
---db-z-header100
---gradient-features-accentrgba(255, 255, 255, .02)
---tw-sepia
---tw-ordinal
---space-41rem
---hero-gradient-accentlinear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)
---tw-contain-style
---mesh-color-3rgba(139, 92, 246, .3)
---bg-elevatedrgba(15, 23, 43, .5)
---space-82rem
---tw-backdrop-invert
---hero-glow-primaryrgba(16, 185, 129, .5)
---auth-button-primary-text#020618
---step-3clamp(1.777rem, 1.5rem + 1.385vw, 2.5rem)
---space-xlcalc(.5rem* 6)
---spacing-mdclamp(1rem, .8rem + 1vw, 1.5rem)
---accent-error#f85149
---db-text-secondary#cbd5e1
---db-shadow-glow0 0 20px rgba(16, 185, 129, .3)
---tw-border-spacing-x0
---sar0px
---tw-backdrop-grayscale
---tw-hue-rotate
---db-z-toast2000
---spacing-xlclamp(2rem, 1.5rem + 2.5vw, 3rem)
---tw-pan-y
---db-spacing-xs.5rem
---dark-primary#0d1117
---bg-secondary#020618
---line-height-tight1.25
---text-disabledrgba(243, 244, 246, .4)
---touch-target44px
---tw-rotate0
---space-2xlcalc(.5rem* 8)
---tw-ring-offset-color#fff
---db-dark-tertiary#142842
---auth-surface#0f172b
---max-width2560
---gradient-features-primary#0a1628
---step-2clamp(1.333rem, 1.2rem + .666vw, 1.875rem)
---gradient-pricing-secondary#050d1a
---font-size-baseclamp(1rem, .95rem + .25vw, 1.125rem)
---font-sans"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
---hero-shadow-sm0 4px 12px rgba(16, 185, 129, .1), inset 0 1px 1px rgba(255, 255, 255, .1)
---spacing-xsclamp(.25rem, .2rem + .25vw, .5rem)
---tw-bg-opacity1
---container-sm640px
---tw-ring-offset-width0px
---db-radius-sm8px
---tw-scroll-snap-strictnessproximity
---letter-spacing-normal0
---db-sidebar-width-collapsed80px
---container-lg1024px
---db-emerald-dark#059669
---tw-backdrop-hue-rotate
---tw-shadow-colored0 0 #0000
---space-10clamp(4rem, 3.2rem + 4vw, 8rem)
---tw-numeric-fraction
---color-danger#ff6467
---gradient-footer-primary#080a0d
---tw-skew-y0
---tw-slashed-zero
---gradient-features-secondary#050d1a
---demo-border-color#30363d
---tw-backdrop-opacity
---tw-gradient-from-position
---tw-contain-paint
---tw-ring-offset-shadow0 0 #0000
---db-dark-base#050b14
---glow-mono-heavyrgba(255, 255, 255, .2)
---hero-shadow-xl0 8px 16px rgba(16, 185, 129, .3), 0 16px 32px rgba(16, 185, 129, .2), 0 24px 48px rgba(16, 185, 129, .15)
---font-size-smclamp(.875rem, .825rem + .25vw, 1rem)
---border-primary#388bfd
---sal0px
---text-tertiary#cad5e2
---tw-gradient-stops#050b14, #0a1628, #0f1d32
---letter-spacing-wide.025em
---tw-backdrop-saturate
---touch-target-small36px
---transform-gputranslateZ(0)
---brand-primary-hover#00a06a
---demo-text-secondary#90a1b9
---space-5xlcalc(.5rem* 16)
---db-amber#fbbf24
---db-emerald#10b981
---tw-ring-inset
---demo-accent-green#238636
---blend-video-features#0a1628
---border-subtlergba(49, 65, 88, .5)
---mesh-color-2rgba(59, 130, 246, .3)
---step--1clamp(.833rem, .8rem + .165vw, .937rem)
---glow-mono-strongrgba(255, 255, 255, .2)
---sab0px
---color-warning#f59e0b
---tw-brightness
---db-text-muted#64748b
---blend-features-pricing#0a1628
---color-success#10b981
---tw-backdrop-brightness
---space-lgcalc(.5rem* 4)
---space-6xlcalc(.5rem* 20)
---gradient-video-accentrgba(255, 255, 255, .03)
---tw-contrast
---db-text-primary#f8fafc
---api-key-text#00d492
---auth-text-disabled#45556c
---accent-mono-darkrgba(0, 0, 0, .2)
---space-xscalc(.5rem* 1)
---accent-green-bright#00ff88
---border-default#30363d
---font-size-xlclamp(1.25rem, 1.15rem + .5vw, 1.5rem)
---accent-primary#238636
---gradient-video-secondary#050d1a
---accent-mono-mediumrgba(255, 255, 255, .08)
---tw-skew-x0
---db-spacing-md1rem
---space-2.5rem
---tw-backdrop-blur
---laptop-min1280
---tw-shadow0 0 #0000
---hero-shadow-md0 8px 20px rgba(16, 185, 129, .2), inset 0 1px 1px rgba(255, 255, 255, .2)
---space-unit.5rem
---db-amber-light#fcd34d
---space-mdcalc(.5rem* 3)
---line-height-loose1.8
---tw-scale-x1
---db-spacing-2xl3rem
---space-12clamp(6rem, 4.8rem + 6vw, 12rem)
---mesh-color-1rgba(16, 185, 129, .3)
---shadow-hover0 2px 6px rgba(0, 0, 0, .03), 0 6px 12px rgba(0, 0, 0, .06), 0 12px 24px rgba(0, 0, 0, .12), 0 24px 48px rgba(0, 0, 0, .18), 0 48px 96px rgba(0, 0, 0, .24)
---db-radius-xl24px
---db-glass-bgrgba(10, 22, 40, .4)
---db-z-modal1000
---glow-mono-lightrgba(255, 255, 255, .1)
---tw-numeric-figure
---min-width320
-grid-auto-columnsauto
-grid-auto-flowrow
-grid-auto-rowsauto
-grid-column-endauto
-grid-column-startauto
-grid-row-endauto
-grid-row-startauto
-grid-template-areasnone
-grid-template-columnsnone
-grid-template-rowsnone
-justify-itemsnormal
-justify-selfauto
-order0
-border-collapseseparate
-caption-sidetop
-empty-cellsshow
-table-layoutauto
--webkit-border-horizontal-spacing0px
--webkit-border-vertical-spacing0px
-contentnormal
-counter-incrementnone
-counter-resetnone
-quotesauto
-color-schemenormal
-forced-color-adjustauto
-mask-imagenone
-math-depth0
-position-anchorauto
-appearancenone
-font-palettenormal
-font-synthesis-small-capsauto
-font-synthesis-styleauto
-font-synthesis-weightauto
-position-areanone
-text-orientationmixed
-text-renderingoptimizelegibility
-text-spacing-trimnormal
--webkit-font-smoothingantialiased
--webkit-locale"en"
--webkit-text-orientationvertical-right
-writing-modehorizontal-tb
-zoom1
-accent-colorauto
-alignment-baselineauto
-all
-anchor-namenone
-anchor-scopenone
-animation-compositionreplace
-app-regionnone
-aspect-ratioauto
-backdrop-filternone
-backface-visibilityvisible
-background-blend-modenormal
-baseline-shift0px
-baseline-sourceauto
-border-block-end-colorrgb(228, 228, 231)
-border-block-end-stylenone
-border-block-end-width0px
-border-block-start-colorrgb(228, 228, 231)
-border-block-start-stylenone
-border-block-start-width0px
-border-bottom-left-radius0px
-border-bottom-right-radius0px
-border-end-end-radius0px
-border-end-start-radius0px
-border-inline-end-colorrgb(228, 228, 231)
-border-inline-end-stylenone
-border-inline-end-width0px
-border-inline-start-colorrgb(228, 228, 231)
-border-inline-start-stylenone
-border-inline-start-width0px
-border-start-end-radius0px
-border-start-start-radius0px
-border-top-left-radius0px
-border-top-right-radius0px
-box-decoration-breakslice
-break-afterauto
-break-beforeauto
-break-insideauto
-buffered-renderingauto
-caret-animationauto
-caret-colorrgb(34, 197, 94)
-clip-pathnone
-clip-rulenonzero
-color-interpolationsrgb
-color-interpolation-filterslinearrgb
-color-renderingauto
-column-countauto
-column-fillbalance
-column-gapnormal
-column-rule-colorrgb(228, 228, 231)
-column-rule-stylenone
-column-rule-width0px
-column-spannone
-column-widthauto
-containnone
-contain-intrinsic-block-sizenone
-contain-intrinsic-heightnone
-contain-intrinsic-inline-sizenone
-contain-intrinsic-widthnone
-container-namenone
-container-typenormal
-content-visibilityvisible
-corner-bottom-left-shaperound
-corner-bottom-right-shaperound
-corner-end-end-shaperound
-corner-end-start-shaperound
-corner-start-end-shaperound
-corner-start-start-shaperound
-corner-top-left-shaperound
-corner-top-right-shaperound
-counter-setnone
-cx0px
-cy0px
-dnone
-dominant-baselineauto
-dynamic-range-limitno-limit
-field-sizingfixed
-fillrgb(0, 0, 0)
-fill-opacity1
-fill-rulenonzero
-filternone
-flood-colorrgb(0, 0, 0)
-flood-opacity1
-hyphenate-characterauto
-hyphenate-limit-charsauto
-hyphensmanual
-image-orientationfrom-image
-image-renderingauto
-initial-letternormal
-inset-block-end0px
-inset-block-start0px
-inset-inline-end0px
-inset-inline-start0px
-interactivityauto
-interest-delay-endnormal
-interest-delay-startnormal
-interpolate-sizenumeric-only
-isolationauto
-lighting-colorrgb(255, 255, 255)
-line-breakafter-white-space
-list-style-imagenone
-list-style-positionoutside
-list-style-typedisc
-margin-block-end0px
-margin-block-start0px
-margin-inline-end0px
-margin-inline-start0px
-marker-endnone
-marker-midnone
-marker-startnone
-mask-clipborder-box
-mask-compositeadd
-mask-modematch-source
-mask-originborder-box
-mask-repeatrepeat
-mask-sizeauto
-mask-typeluminance
-math-shiftnormal
-math-stylenormal
-mix-blend-modenormal
-object-fitfill
-object-position50% 50%
-object-view-boxnone
-offset-anchorauto
-offset-distance0px
-offset-pathnone
-offset-positionnormal
-offset-rotateauto 0deg
-opacity1
-orphans2
-overflow-anchorauto
-overflow-blockvisible
-overflow-clip-margin0px
-overflow-inlinevisible
-overflow-wrapbreak-word
-overlaynone
-overscroll-behavior-blockauto
-overscroll-behavior-inlineauto
-overscroll-behavior-xauto
-overscroll-behavior-yauto
-padding-block-end8px
-padding-block-start8px
-padding-inline-end0px
-padding-inline-start0px
-pageauto
-page-orientation
-paint-ordernormal
-perspectivenone
-perspective-origin383.5px 146.047px
-pointer-eventsauto
-position-try-fallbacksnone
-position-try-ordernormal
-position-visibilityanchors-visible
-print-color-adjusteconomy
-r0px
-reading-flownormal
-reading-order0
-rotatenone
-row-gapnormal
-ruby-alignspace-around
-ruby-positionover
-rxauto
-ryauto
-scalenone
-scroll-behaviorauto
-scroll-initial-targetnone
-scroll-margin-block-end0px
-scroll-margin-block-start0px
-scroll-margin-bottom0px
-scroll-margin-inline-end0px
-scroll-margin-inline-start0px
-scroll-margin-left0px
-scroll-margin-right0px
-scroll-margin-top0px
-scroll-marker-groupnone
-scroll-padding-block-endauto
-scroll-padding-block-startauto
-scroll-padding-bottomauto
-scroll-padding-inline-endauto
-scroll-padding-inline-startauto
-scroll-padding-leftauto
-scroll-padding-rightauto
-scroll-padding-topauto
-scroll-snap-alignnone
-scroll-snap-stopnormal
-scroll-snap-typenone
-scroll-target-groupnone
-scroll-timeline-axisblock
-scroll-timeline-namenone
-scrollbar-colorauto
-scrollbar-gutterauto
-scrollbar-widthauto
-shape-image-threshold0
-shape-margin0px
-shape-outsidenone
-shape-renderingauto
-size
-speaknormal
-stop-colorrgb(0, 0, 0)
-stop-opacity1
-strokenone
-stroke-dasharraynone
-stroke-dashoffset0px
-stroke-linecapbutt
-stroke-linejoinmiter
-stroke-miterlimit4
-stroke-opacity1
-stroke-width1px
-text-anchorstart
-text-autospaceno-autospace
-text-box-edgeauto
-text-box-trimnone
-text-combine-uprightnone
-text-decoration-skip-inkauto
-text-emphasis-colorrgb(228, 228, 231)
-text-emphasis-positionover
-text-emphasis-stylenone
-text-underline-offsetauto
-text-underline-positionauto
-text-wrap-styleauto
-timeline-scopenone
-touch-actionauto
-transformnone
-transform-boxview-box
-transform-origin383.5px 146.055px
-transform-styleflat
-translatenone
-unicode-bidiisolate
-user-selectauto
-vector-effectnone
-view-timeline-axisblock
-view-timeline-insetauto
-view-timeline-namenone
-view-transition-classnone
-view-transition-groupnormal
-view-transition-namenone
--webkit-box-alignstretch
--webkit-box-directionnormal
--webkit-box-flex0
--webkit-box-ordinal-group1
--webkit-box-orienthorizontal
--webkit-box-packstart
--webkit-box-reflectnone
--webkit-line-clampnone
--webkit-mask-box-image-outset0
--webkit-mask-box-image-repeatstretch
--webkit-mask-box-image-slice0 fill
--webkit-mask-box-image-sourcenone
--webkit-mask-box-image-widthauto
--webkit-mask-position-x0%
--webkit-mask-position-y0%
--webkit-perspective-origin-x
--webkit-perspective-origin-y
--webkit-rtl-orderinglogical
--webkit-ruby-positionbefore
--webkit-tap-highlight-colorrgba(0, 0, 0, 0)
--webkit-text-combinenone
--webkit-text-decorations-in-effectnone
--webkit-text-fill-colorrgb(228, 228, 231)
--webkit-text-securitynone
--webkit-text-stroke-colorrgb(228, 228, 231)
--webkit-text-stroke-width0px
--webkit-transform-origin-x
--webkit-transform-origin-y
--webkit-transform-origin-z
--webkit-user-dragauto
--webkit-user-modifyread-write
-widows2
-will-changeauto
-x0px
-y0px
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized: {defaultTimeout_ms: 259200000, defaultTimeout_hours: 72, defaultTimeout_days: 3, timestamp: '2026-01-16T20:29:50.627Z'}
+ [RxDB Replication] Using singleton Supabase client
+ [RxDB Replication] Using replicateRxCollection (custom handlers)
+ IndexedDB initialized successfully
+ [TAB-RESTORE] {tabCount: 3, activeTabId: 'c227ca13', tabIds: Array(3)}
+ [DEBUG-TIMEOUT-14] ⚙️ Settings from LOCALSTORAGE: {source: 'localStorage.devlogSettings', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, timestamp: '2026-01-16T20:29:50.684Z'}
+ [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 259200000, oldTimeout_hours: 72, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
+ [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T20:59:50.685Z', timestamp: '2026-01-16T20:29:50.685Z'}
+ [DatabaseProvider] Initializing RxDB...
+ [RxDB] Creating database...
+ -------------- RxDB Open Core RxStorage -------------------------------
+You are using the free Dexie.js based RxStorage implementation from RxDB https://rxdb.info/rx-storage-dexie.html?console=dexie 
+While this is a great option, we want to let you know that there are faster storage solutions available in our premium plugins.
+For professional users and production environments, we highly recommend considering these premium options to enhance performance and reliability.
+ https://rxdb.info/premium/?console=dexie 
+If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
+---------------------------------------------------------------------
+(anonymous) @ index-B7-GkVSv.js:26
+e.bulkWrite @ index-B7-GkVSv.js:831
+await in e.bulkWrite
+(anonymous) @ index-B7-GkVSv.js:829
+wrapCall @ index-B7-GkVSv.js:829
+e.lockedRun @ index-B7-GkVSv.js:829
+bulkWrite @ index-B7-GkVSv.js:829
+wke @ index-B7-GkVSv.js:829
+t @ index-B7-GkVSv.js:829
+(anonymous) @ index-B7-GkVSv.js:829
+await in (anonymous)
+zke @ index-B7-GkVSv.js:829
+_F @ index-B7-GkVSv.js:832
+(anonymous) @ index-B7-GkVSv.js:832
+WTe @ index-B7-GkVSv.js:832
+(anonymous) @ index-B7-GkVSv.js:832
+(anonymous) @ index-B7-GkVSv.js:832
+uv @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+Rl @ index-B7-GkVSv.js:106
+l3 @ index-B7-GkVSv.js:106
+R3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+q @ index-B7-GkVSv.js:91
+ [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T20:59:50.721Z', timestamp: '2026-01-16T20:29:50.721Z'}
+ [DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED: {events: Array(4), timeout_hours: 0.5, timestamp: '2026-01-16T20:29:50.721Z'}
+ [Supabase] Auth event: INITIAL_SESSION
+ [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+ [RxDB] Database ready: (3) ['documents', 'folders', 'blocks']
+ [DatabaseProvider] RxDB ready
+ [DatabaseProvider] Starting replications for user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ [RxDB] Pre-insert hooks set up for documents
+ [RxDB] Pre-insert hooks set up for folders
+ [RxDB] Pre-insert hooks set up for blocks
+ [RxDB Replication] Starting replications with replicateRxCollection...
+ [RxDB Replication] 🔍 Verifying Supabase schema...
+ [DEBUG-TIMEOUT-8] 🔑 JWT Token status: {expiresAt: '2026-01-16T20:53:40.000Z', timeUntilExpiry_seconds: 1430, timeUntilExpiry_minutes: 23, refreshThreshold_seconds: 300, willRefreshSoon: false, …}
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [CACHE-GET] {lookingFor: 'c227ca13', cacheSize: 0, found: false, cachedIds: Array(0)}
+ [ACTIVE-DOC] Checking IndexedDB cache: {id: 'c227ca13', found: false}
+ [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: false, activeView: 'explorer', foldersCount: 0, …}
+ [DEBUG-EXPLORER-1] 📂 ExplorerView RENDER: {viewMode: 'tree', totalFolders: 0, totalDocs: 0, treeDataLength: 0, expandedFoldersCount: 0, …}
+ [DEBUG-DASHBOARD] Waiting for documents to load: 0
+ [DEBUG-INIT] Dashboard mounted, user: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
+ [Dashboard] Loading from IndexedDB cache FIRST...
+ [PAGINATION-SCROLL] ⚠️ Scroll container not found
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 0, …}
+ [CACHE-LOAD] {docCount: 3, loadTime_ms: 37, docIds: Array(3)}
+ [Dashboard] Loaded 3 documents from IndexedDB cache
+ [Dashboard] Starting background Supabase sync...
+ [useRxDocuments] loadInitial called - RxDB is reactive
+ [Dashboard] Background Supabase sync complete
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [ACTIVE-DOC] Found in allDocuments: {id: 'c227ca13', title: 'another test '}
+ [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 0, …}
+ [SYNC-STATUS-POLL] ⏳ Waiting for SmartSync manager...
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ⚠️ Not ready to start polling: {hasDocumentId: true, managerReady: false, hasManagerRef: false}
+index-B7-GkVSv.js:26 [MULTI-TAB] 🆔 Tab RCKKK6 initialized for document c227ca13
+index-B7-GkVSv.js:26 SmartSync: Recovering 11 emergency changes
+index-B7-GkVSv.js:26 [MULTI-TAB] 📄 Document c227ca13 opened in this tab
+index-B7-GkVSv.js:26 [DEBUG-DASHBOARD] Combined: 0 folders + 2 documents = 2 total items
+index-B7-GkVSv.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (2) [{…}, {…}]
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 0, …}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ✅ SmartSync manager ready
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ✅ Starting status polling for document: c227ca13-d9c2-4290-875c-7488c6107104
+index-B7-GkVSv.js:26 SmartSync: IndexedDB initialized
+index-B7-GkVSv.js:26 SmartSync: Found 3 unsynced changes in IndexedDB
+index-B7-GkVSv.js:26 [RECOVERY] Processing change from IndexedDB: {action: 'CREATE', blockId: 'eac1a4b8-5c60-44a0-b1cd-6d381c3a668c', hasContent: true, contentLength: 14, contentPreview: '{"content":""}', …}
+index-B7-GkVSv.js:26 [RECOVERY] Processing change from IndexedDB: {action: 'UPDATE', blockId: 'eac1a4b8-5c60-44a0-b1cd-6d381c3a668c', hasContent: true, contentLength: 18, contentPreview: '{"content":"dddd"}', …}
+index-B7-GkVSv.js:26 [RECOVERY] Processing change from IndexedDB: {action: 'UPDATE', blockId: 'eac1a4b8-5c60-44a0-b1cd-6d381c3a668c', hasContent: true, contentLength: 26, contentPreview: '{"content":"dddd\\nhhhhhh"}', …}
+index-B7-GkVSv.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+index-B7-GkVSv.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'bb566f28-b32d-4ed1-846d-61b2992f1314', type: 'table', hasContent: true, contentType: 'string', contentLength: 116, …}
+index-B7-GkVSv.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '3f0d728b-70cd-4f96-924f-5bbff5e97d5e', type: 'ai', hasContent: true, contentType: 'string', contentLength: 29, …}
+index-B7-GkVSv.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '56f9c8a2-8caf-44c3-949d-3dec4ed8c555', type: 'filetree', hasContent: true, contentType: 'string', contentLength: 88, …}
+index-B7-GkVSv.js:26 🌲 FileTree DESERIALIZE: {treeDataLength: 0, filesWithContent: 0, snapshotCount: 0, hasComments: false}
+index-B7-GkVSv.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'eac1a4b8-5c60-44a0-b1cd-6d381c3a668c', type: 'text', hasContent: true, contentType: 'string', contentLength: 26, …}
+index-B7-GkVSv.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 3, visibleCount: 4}
+index-B7-GkVSv.js:26 [TABLE-SAVE] Step: Initialization {blockId: 'bb566f28-b32d-4ed1-846d-61b2992f1314', blockType: 'table', hasBlockData: true, receivedData: {…}, willUseDefault: false, …}
+index-B7-GkVSv.js:26 [TABLE-SAVE] Step: Initialization Complete {blockId: 'bb566f28-b32d-4ed1-846d-61b2992f1314', initializedData: {…}}
+index-B7-GkVSv.js:26 📝 TextBlock eac1a4b8-5c60-44a0-b1cd-6d381c3a668c rendered at 2026-01-16T20:29:51.034Z
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T19:03:48.047Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T23:47:14.882Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "ddd": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:36.208Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:23.159Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T23:47:31.155Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (5)": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T23:47:31.155Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "new folder 4": 1 subfolders + 1 documents = 2 items, most recent: 2026-01-16T20:12:33.793Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (6)": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T11:11:59.280Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T21:13:51.338Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:12:50.604Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:36:39.300Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:00:46.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 3 subfolders + 0 documents = 3 items, most recent: 2025-07-20T17:00:46.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "introduction": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-02T10:28:42.169Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "world of the API": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-02T10:28:42.169Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2025-10-25T12:30:26.729Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-04T21:34:15.563Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (4)": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-04T21:34:15.563Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T12:10:37.944Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "another test": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T07:15:16.472Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "wow": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T21:23:40.667Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-24T21:23:40.667Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "TRANSLATION": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-03T10:02:51.181Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "API": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-14T13:41:50.071Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "prompts": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-17T10:54:31.319Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "class": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T15:27:29.468Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "FLASK": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T16:01:00.271Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fundamentals": 4 subfolders + 0 documents = 4 items, most recent: 2025-11-17T10:54:31.319Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:42.460Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "problems": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:42.460Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:57.215Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "seo thing": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:57.215Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2026-01-14T23:48:57.215Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T11:51:01.742Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:14:28.504Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "vvv": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:15:24.818Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "hello": 3 subfolders + 0 documents = 3 items, most recent: 2025-11-01T11:51:01.742Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "chatbot africawork": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-11T21:00:03.689Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "planing": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-08T09:24:09.176Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-27T21:54:19.336Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-27T21:54:19.336Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T21:14:26.415Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T21:14:26.415Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "suf folder azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-28T08:20:39.989Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Azure": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-28T08:20:39.989Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "new ui of the folder add": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:24:10.787Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T10:15:42.785Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:34:43.643Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-16T16:34:43.643Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:53:33.052Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-24T22:53:33.052Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:58:39.132Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T17:53:47.591Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2026-01-14T17:53:47.591Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T18:38:02.421Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "can 2": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T09:01:46.351Z
+index-B7-GkVSv.js:26 [DEBUG-DASHBOARD] Combined: 41 folders + 2 documents = 43 total items
+index-B7-GkVSv.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 🤖 AIBlock 3f0d728b-70cd-4f96-924f-5bbff5e97d5e rendered at 2026-01-16T20:29:51.139Z
+index-B7-GkVSv.js:26 📁 FileTreeBlock 56f9c8a2-8caf-44c3-949d-3dec4ed8c555 rendered at 2026-01-16T20:29:51.139Z
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 [PAGINATION-SCROLL] ⚠️ Scroll container not found
+index-B7-GkVSv.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'c227ca13', localTitle: 'another test ', serverTitle: 'another test ', localBlocks: 0, reason: 'createdLocally'}
+index-B7-GkVSv.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'b2bb9e65', localTitle: 'Untitled Document (6)', serverTitle: 'Untitled Document (6)', localBlocks: 0, reason: 'createdLocally'}
+index-B7-GkVSv.js:26 [DEBUG-CREATE-8] Merging docs: {paginated: 121, locallyCreatedNew: 0, localIds: Array(0)}
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [ACTIVE-DOC] Found in allDocuments: {id: 'c227ca13', title: 'another test '}
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 5 documents = 5 items, most recent: 2026-01-14T19:03:48.047Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T23:47:14.882Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "ddd": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:36.208Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:23.159Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T23:47:31.155Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (5)": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T23:47:31.155Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "new folder 4": 1 subfolders + 1 documents = 2 items, most recent: 2026-01-16T20:12:33.793Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (6)": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T11:11:59.280Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T21:13:51.338Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:12:50.604Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:36:39.300Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:00:46.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 3 subfolders + 0 documents = 3 items, most recent: 2025-07-20T17:00:46.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "introduction": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-02T10:28:42.169Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "world of the API": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-02T10:28:42.169Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2025-10-25T12:30:26.729Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-04T21:34:15.563Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (4)": 1 subfolders + 1 documents = 2 items, most recent: 2026-01-04T21:34:15.563Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 3 documents = 3 items, most recent: 2025-08-21T12:10:37.944Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "another test": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-17T07:15:16.472Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "wow": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-24T21:23:40.667Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 2 documents = 4 items, most recent: 2025-07-24T21:23:40.667Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "TRANSLATION": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-03T10:02:51.181Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "API": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-14T13:41:50.071Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "prompts": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-17T10:54:31.319Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "class": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T15:27:29.468Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "FLASK": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T16:01:00.271Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fundamentals": 4 subfolders + 0 documents = 4 items, most recent: 2025-11-17T10:54:31.319Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:42.460Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "problems": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:42.460Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:57.215Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "seo thing": 1 subfolders + 1 documents = 2 items, most recent: 2026-01-14T23:48:57.215Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2026-01-14T23:48:57.215Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T11:51:01.742Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:14:28.504Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "vvv": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:15:24.818Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "hello": 3 subfolders + 0 documents = 3 items, most recent: 2025-11-01T11:51:01.742Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "chatbot africawork": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-11T21:00:03.689Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "planing": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-08T09:24:09.176Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-27T21:54:19.336Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-27T21:54:19.336Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T21:14:26.415Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T21:14:26.415Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "suf folder azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-28T08:20:39.989Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Azure": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-28T08:20:39.989Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "new ui of the folder add": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:24:10.787Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-24T10:15:42.785Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-16T16:34:43.643Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 2 documents = 5 items, most recent: 2025-08-16T16:34:43.643Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:53:33.052Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-24T22:53:33.052Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:58:39.132Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T17:53:47.591Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2026-01-14T17:53:47.591Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T18:38:02.421Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "can 2": 1 subfolders + 3 documents = 4 items, most recent: 2026-01-16T18:52:45.262Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
+index-B7-GkVSv.js:26 [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 2 documents = 2 items, most recent: 2026-01-16T09:01:46.351Z
+index-B7-GkVSv.js:26 [DEBUG-DASHBOARD] Combined: 41 folders + 93 documents = 134 total items
+index-B7-GkVSv.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 FileTreeBlock memo: PREVENTED
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table): {source: 'profiles.settings', userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, …}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 1800000, oldTimeout_hours: 0.5, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T20:59:51.439Z', timestamp: '2026-01-16T20:29:51.439Z'}
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 [RxDB Replication] ✅ Table "folders" has required columns. Row count: 103
+index-B7-GkVSv.js:26 [RxDB Replication] 📊 Sample folders data: (2) [{…}, {…}]
+index-B7-GkVSv.js:26 [RxDB Replication] ✅ Table "documents" has required columns. Row count: 409
+index-B7-GkVSv.js:26 [RxDB Replication] 📊 Sample documents data: (2) [{…}, {…}]
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table): {source: 'profiles.settings', userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, …}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 1800000, oldTimeout_hours: 0.5, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T20:59:51.495Z', timestamp: '2026-01-16T20:29:51.495Z'}
+index-B7-GkVSv.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-B7-GkVSv.js:26 [DEBUG-SIDEBAR-1] 🗂️ SidebarEnhanced RENDER: {isOpen: false, isMobile: false, isCollapsed: true, activeView: 'explorer', foldersCount: 41, …}
+index-B7-GkVSv.js:26 [RxDB Replication] ✅ Table "blocks" has required columns. Row count: 2684
+index-B7-GkVSv.js:26 [RxDB Replication] 📊 Sample blocks data: (2) [{…}, {…}]
+index-B7-GkVSv.js:26 [RxDB Replication] ✅ All Supabase tables have required columns
+index-B7-GkVSv.js:26 [RxDB Replication] 🔌 Forcing Supabase Realtime WebSocket initialization...
+index-B7-GkVSv.js:26 ExpandedView: Initial load period complete, enabling saves
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595390641, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595390641, online: true}
+index-B7-GkVSv.js:26 [RxDB Replication] Channel status: SUBSCRIBED 
+index-B7-GkVSv.js:26 [RxDB Replication] ✅ Realtime WebSocket connected and ready!
+index-B7-GkVSv.js:26 [RxDB Replication] Channel status: CLOSED 
+index-B7-GkVSv.js:26 [RxDB Replication] Setting up replication for documents
+index-B7-GkVSv.js:26 [RxDB Replication] DEBUG supabase client check: {supabaseExists: true, hasFrom: true, hasChannel: true}
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Inactive
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Replication object created {isStopped: false, collection: 'documents', identifier: 'supabase-v12-documents-8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Started
+index-B7-GkVSv.js:26 [RxDB Replication] Setting up replication for folders
+index-B7-GkVSv.js:26 [RxDB Replication] DEBUG supabase client check: {supabaseExists: true, hasFrom: true, hasChannel: true}
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Inactive
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Replication object created {isStopped: false, collection: 'folders', identifier: 'supabase-v12-folders-8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Started
+index-B7-GkVSv.js:26 [RxDB Replication] Channel status: CLOSED 
+index-B7-GkVSv.js:26 [RxDB Replication] Setting up replication for blocks
+index-B7-GkVSv.js:26 [RxDB Replication] DEBUG supabase client check: {supabaseExists: true, hasFrom: true, hasChannel: true}
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Inactive
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Replication object created {isStopped: false, collection: 'blocks', identifier: 'supabase-v12-blocks-8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Started
+index-B7-GkVSv.js:26 [RxDB Replication] All replications started successfully!
+index-B7-GkVSv.js:26 [DatabaseProvider] Replications started
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Active
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Active
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Active
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Active
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Active
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Active
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Pull starting {checkpoint: {…}, batchSize: 100}
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Pull starting {checkpoint: {…}, batchSize: 100}
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Pull starting {checkpoint: {…}, batchSize: 200}
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Active
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Active
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Active
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: true, lastSync: 1768595392577, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-B7-GkVSv.js:26 SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Pulled 0 docs {newCheckpoint: {…}, hasMore: false}
+index-B7-GkVSv.js:26 [RxDB Replication] documents: Inactive
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Pulled 0 docs {newCheckpoint: {…}, hasMore: false}
+index-B7-GkVSv.js:26 [RxDB Replication] folders: Inactive
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Pulled 0 docs {newCheckpoint: {…}, hasMore: false}
+index-B7-GkVSv.js:26 [RxDB Replication] blocks: Inactive
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] 🔄 Status changed, updating UI: {from: {…}, to: {…}}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [DatabaseProvider] Replication health check: {documents: 121, folders: 103, replications: 3}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1768595393482, online: true}
+index-B7-GkVSv.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-7] 🖱️ User activity detected: {activityCount: 1, lastEvent: 'mousedown', timerWillReset: true, timestamp: '2026-01-16T20:30:21.302Z'}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:21.302Z', timestamp: '2026-01-16T20:30:21.302Z'}
+index-B7-GkVSv.js:26 [MULTI-TAB] 🚪 Document c227ca13 unmounting - triggering force sync
+index-B7-GkVSv.js:26 [MULTI-TAB] 🔄 Tab RCKKK6 FORCE SYNC (closing/switching) | Pending: 14
+index-B7-GkVSv.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-B7-GkVSv.js:26 [SYNC-STATUS-POLL] 🛑 Stopping status polling
+index-B7-GkVSv.js:26 🔚 AIBlock 3f0d728b-70cd-4f96-924f-5bbff5e97d5e unmounted
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:23.162Z', timestamp: '2026-01-16T20:30:23.162Z'}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:26.904Z', timestamp: '2026-01-16T20:30:26.904Z'}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:27.605Z', timestamp: '2026-01-16T20:30:27.605Z'}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:29.581Z', timestamp: '2026-01-16T20:30:29.581Z'}
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:30.140Z', timestamp: '2026-01-16T20:30:30.140Z'}
+index-B7-GkVSv.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:45.807Z', timestamp: '2026-01-16T20:30:45.807Z'}
+index-B7-GkVSv.js:26 Global error caught: TypeError: u is not a function
+    at x (index-B7-GkVSv.js:1533:17963)
+    at $3 (index-B7-GkVSv.js:106:128737)
+    at index-B7-GkVSv.js:106:134065
+    at hi (index-B7-GkVSv.js:106:15145)
+    at CA (index-B7-GkVSv.js:106:129985)
+    at zA (index-B7-GkVSv.js:107:28916)
+    at bre (index-B7-GkVSv.js:107:28737)
+    at HTMLDivElement.r (index-B7-GkVSv.js:26:9399)
+(anonymous) @ index-B7-GkVSv.js:26
+(anonymous) @ index-B7-GkVSv.js:161
+r @ index-B7-GkVSv.js:26
+$3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+hi @ index-B7-GkVSv.js:106
+CA @ index-B7-GkVSv.js:106
+zA @ index-B7-GkVSv.js:107
+bre @ index-B7-GkVSv.js:107
+r @ index-B7-GkVSv.js:26
+index-B7-GkVSv.js:1533 Uncaught TypeError: u is not a function
+    at x (index-B7-GkVSv.js:1533:17963)
+    at $3 (index-B7-GkVSv.js:106:128737)
+    at index-B7-GkVSv.js:106:134065
+    at hi (index-B7-GkVSv.js:106:15145)
+    at CA (index-B7-GkVSv.js:106:129985)
+    at zA (index-B7-GkVSv.js:107:28916)
+    at bre (index-B7-GkVSv.js:107:28737)
+    at HTMLDivElement.r (index-B7-GkVSv.js:26:9399)
+x @ index-B7-GkVSv.js:1533
+$3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+hi @ index-B7-GkVSv.js:106
+CA @ index-B7-GkVSv.js:106
+zA @ index-B7-GkVSv.js:107
+bre @ index-B7-GkVSv.js:107
+r @ index-B7-GkVSv.js:26
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:47.200Z', timestamp: '2026-01-16T20:30:47.200Z'}
+index-B7-GkVSv.js:26 Global error caught: TypeError: u is not a function
+    at x (index-B7-GkVSv.js:1533:17963)
+    at $3 (index-B7-GkVSv.js:106:128737)
+    at index-B7-GkVSv.js:106:134065
+    at hi (index-B7-GkVSv.js:106:15145)
+    at CA (index-B7-GkVSv.js:106:129985)
+    at zA (index-B7-GkVSv.js:107:28916)
+    at bre (index-B7-GkVSv.js:107:28737)
+    at HTMLDivElement.r (index-B7-GkVSv.js:26:9399)
+(anonymous) @ index-B7-GkVSv.js:26
+(anonymous) @ index-B7-GkVSv.js:161
+r @ index-B7-GkVSv.js:26
+$3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+hi @ index-B7-GkVSv.js:106
+CA @ index-B7-GkVSv.js:106
+zA @ index-B7-GkVSv.js:107
+bre @ index-B7-GkVSv.js:107
+r @ index-B7-GkVSv.js:26
+index-B7-GkVSv.js:1533 Uncaught TypeError: u is not a function
+    at x (index-B7-GkVSv.js:1533:17963)
+    at $3 (index-B7-GkVSv.js:106:128737)
+    at index-B7-GkVSv.js:106:134065
+    at hi (index-B7-GkVSv.js:106:15145)
+    at CA (index-B7-GkVSv.js:106:129985)
+    at zA (index-B7-GkVSv.js:107:28916)
+    at bre (index-B7-GkVSv.js:107:28737)
+    at HTMLDivElement.r (index-B7-GkVSv.js:26:9399)
+x @ index-B7-GkVSv.js:1533
+$3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+hi @ index-B7-GkVSv.js:106
+CA @ index-B7-GkVSv.js:106
+zA @ index-B7-GkVSv.js:107
+bre @ index-B7-GkVSv.js:107
+r @ index-B7-GkVSv.js:26
+index-B7-GkVSv.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-01-16T21:00:49.530Z', timestamp: '2026-01-16T20:30:49.530Z'}
+index-B7-GkVSv.js:26 Global error caught: TypeError: u is not a function
+    at x (index-B7-GkVSv.js:1533:17963)
+    at $3 (index-B7-GkVSv.js:106:128737)
+    at index-B7-GkVSv.js:106:134065
+    at hi (index-B7-GkVSv.js:106:15145)
+    at CA (index-B7-GkVSv.js:106:129985)
+    at zA (index-B7-GkVSv.js:107:28916)
+    at bre (index-B7-GkVSv.js:107:28737)
+    at HTMLDivElement.r (index-B7-GkVSv.js:26:9399)
+(anonymous) @ index-B7-GkVSv.js:26
+(anonymous) @ index-B7-GkVSv.js:161
+r @ index-B7-GkVSv.js:26
+$3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+hi @ index-B7-GkVSv.js:106
+CA @ index-B7-GkVSv.js:106
+zA @ index-B7-GkVSv.js:107
+bre @ index-B7-GkVSv.js:107
+r @ index-B7-GkVSv.js:26
+index-B7-GkVSv.js:1533 Uncaught TypeError: u is not a function
+    at x (index-B7-GkVSv.js:1533:17963)
+    at $3 (index-B7-GkVSv.js:106:128737)
+    at index-B7-GkVSv.js:106:134065
+    at hi (index-B7-GkVSv.js:106:15145)
+    at CA (index-B7-GkVSv.js:106:129985)
+    at zA (index-B7-GkVSv.js:107:28916)
+    at bre (index-B7-GkVSv.js:107:28737)
+    at HTMLDivElement.r (index-B7-GkVSv.js:26:9399)
+x @ index-B7-GkVSv.js:1533
+$3 @ index-B7-GkVSv.js:106
+(anonymous) @ index-B7-GkVSv.js:106
+hi @ index-B7-GkVSv.js:106
+CA @ index-B7-GkVSv.js:106
+zA @ index-B7-GkVSv.js:107
+bre @ index-B7-GkVSv.js:107
+r @ index-B7-GkVSv.js:26
+index-B7-GkVSv.js:26 [SmartSync] DISABLED - RxDB handles block replication

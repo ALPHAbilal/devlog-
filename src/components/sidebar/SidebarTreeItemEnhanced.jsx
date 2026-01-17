@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal, FolderPlus, FilePlus, Trash2, Star, StarOff } from 'lucide-react';
+import { ChevronRight, Folder, FolderOpen, FileText, MoreHorizontal, FolderPlus, FilePlus, Trash2, Star, StarOff, Pencil } from 'lucide-react';
 import { useDraggable, useDroppable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 
@@ -15,6 +15,7 @@ export default function SidebarTreeItemEnhanced({
   onItemClick,
   onContextMenu,
   onToggleFavorite,
+  onRename,
   isSelected = false,
   activeDocumentId,
   recentlyCreatedFolderId,
@@ -167,6 +168,11 @@ export default function SidebarTreeItemEnhanced({
           <div className="h-px bg-white/10 my-1" />
         </>
       )}
+      {/* Rename option */}
+      <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
+        onClick={(e) => { e.stopPropagation(); setShowMenu(false); onRename?.(item); }}>
+        <Pencil className="w-4 h-4 text-sky-400" /><span>Rename</span>
+      </button>
       {/* Add to Favorites option */}
       <button className="flex items-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 w-full text-left transition-colors"
         onClick={(e) => { e.stopPropagation(); setShowMenu(false); onToggleFavorite?.(item, !isItemFavorite); }}>
@@ -376,6 +382,7 @@ export default function SidebarTreeItemEnhanced({
                 onItemClick={onItemClick}
                 onContextMenu={onContextMenu}
                 onToggleFavorite={onToggleFavorite}
+                onRename={onRename}
                 isSelected={child.id === activeDocumentId}
                 activeDocumentId={activeDocumentId}
                 recentlyCreatedFolderId={recentlyCreatedFolderId}

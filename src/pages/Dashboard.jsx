@@ -85,7 +85,7 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   // Folders hook - folders are auto-loaded by the hook
-  const { folders, refreshFolders, createFolder, deleteFolder, toggleFavorite: toggleFolderFavorite, moveFolder, moveDocumentToFolder } = useFolders();
+  const { folders, refreshFolders, createFolder, deleteFolder, updateFolder, toggleFavorite: toggleFolderFavorite, moveFolder, moveDocumentToFolder } = useFolders();
 
   // IndexedDB cache for instant document access across navigation
   const {
@@ -202,6 +202,10 @@ export default function Dashboard() {
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [folderParentId, setFolderParentId] = useState(null);
   const [recentlyCreatedFolderId, setRecentlyCreatedFolderId] = useState(null);
+
+  // Rename modal state
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [itemToRename, setItemToRename] = useState(null);
 
   // Check if we're in projects view
   const isProjectsView = location.search.includes('view=projects');
@@ -1640,10 +1644,20 @@ export default function Dashboard() {
                 console.error('[Dashboard] Failed to toggle favorite:', error);
               }
             }}
+            onRename={(item) => {
+              setItemToRename(item);
+              setShowRenameModal(true);
+            }}
             onRefresh={loadEntries}
             isLoading={isLoadingDocuments}
             onMoveDocument={moveDocumentToFolder}
-            onMoveFolder={moveFolder}
+            onMoveFolder={async (folderId, targetParentId) => {
+              const result = await moveFolder(folderId, targetParentId);
+              if (!result.success && result.error) {
+                toast.error(result.error);
+              }
+              return result.success;
+            }}
           />
 
           {/* Document area - takes remaining width, scrolls internally */}
@@ -1814,6 +1828,49 @@ export default function Dashboard() {
         title="Create New Folder"
         placeholder="Enter folder name..."
         confirmText="Create Folder"
+      />
+
+      {/* Rename Modal */}
+      <InputModal
+        isOpen={showRenameModal}
+        onClose={() => {
+          setShowRenameModal(false);
+          setItemToRename(null);
+        }}
+        onConfirm={async (newName) => {
+          if (!itemToRename) return;
+
+          try {
+            if (itemToRename.type === 'folder') {
+              await updateFolder(itemToRename.id, { name: newName });
+              toast.success('Folder renamed successfully');
+            } else {
+              // Document rename
+              if (documentsCollection) {
+                const doc = await documentsCollection.findOne(itemToRename.id).exec();
+                if (doc) {
+                  const now = Date.now();
+                  await doc.patch({
+                    title: newName,
+                    updated_at: new Date(now).toISOString(),
+                    _modified: now,
+                  });
+                  toast.success('Document renamed successfully');
+                }
+              }
+            }
+          } catch (error) {
+            console.error('[Dashboard] Failed to rename:', error);
+            toast.error('Failed to rename. Please try again.');
+          }
+
+          setShowRenameModal(false);
+          setItemToRename(null);
+        }}
+        title={`Rename ${itemToRename?.type === 'folder' ? 'Folder' : 'Document'}`}
+        placeholder="Enter new name..."
+        confirmText="Rename"
+        defaultValue={itemToRename?.name || itemToRename?.title || ''}
       />
 
       {/* Confirmation Dialog */}

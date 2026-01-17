@@ -100,80 +100,36 @@ export function ExplorerView({
     });
   }, []);
 
-  // Build tree structure from folders and documents
+  // Build tree structure from folders and documents - RECURSIVE to handle any depth
   const treeData = useMemo(() => {
-    console.log('[DEBUG-TREE-1] 🌳 Building treeData:', {
-      folderCount: folders.length,
-      documentCount: documents.length,
-      folders: folders.map(f => ({
-        id: f.id,
-        name: f.name,
-        parent_id: f.parent_id,
-        childrenCount: f.children?.length || 0,
-        childrenNames: f.children?.map(c => c.name) || []
-      }))
-    });
-
-    // Add documents to their folders or to root
-    const rootItems = [];
-
-    // Add folders with their documents as children
-    folders.forEach(folder => {
+    // Recursive function to process folders at any depth
+    const processFolder = (folder, depth = 0) => {
       const folderDocs = documents.filter(doc => doc.folder_id === folder.id);
-      console.log('[DEBUG-TREE-2] 📁 Processing folder:', {
-        id: folder.id,
-        name: folder.name,
-        parent_id: folder.parent_id,
-        existingChildren: folder.children?.length || 0,
-        docsInFolder: folderDocs.length
-      });
 
-      const folderWithDocs = {
+      // Recursively process child folders (preserving the full hierarchy)
+      const processedChildren = (folder.children || []).map(child => processFolder(child, depth + 1));
+
+      return {
         ...folder,
         type: 'folder',
         children: [
-          ...(folder.children || []).map(child => {
-            console.log('[DEBUG-TREE-3] 📂 Processing child folder:', {
-              id: child.id,
-              name: child.name,
-              parent_id: child.parent_id
-            });
-            return {
-              ...child,
-              type: 'folder',
-              children: documents.filter(doc => doc.folder_id === child.id).map(doc => ({
-                ...doc,
-                type: 'document',
-              })),
-            };
-          }),
-          ...folderDocs.map(doc => ({
-            ...doc,
-            type: 'document',
-          })),
+          ...processedChildren,  // Nested folders (recursively processed)
+          ...folderDocs.map(doc => ({ ...doc, type: 'document' })),  // Documents in this folder
         ],
         count: folderDocs.length + (folder.children?.length || 0),
       };
-      rootItems.push(folderWithDocs);
-    });
+    };
 
-    // Add unfiled documents
+    // Process all root folders
+    const rootItems = folders.map(folder => processFolder(folder, 0));
+
+    // Add unfiled documents (documents without a folder)
     const unfiledDocs = documents.filter(doc => !doc.folder_id);
     unfiledDocs.forEach(doc => {
       rootItems.push({
         ...doc,
         type: 'document',
       });
-    });
-
-    console.log('[DEBUG-TREE-4] 🌳 treeData BUILT:', {
-      rootItemCount: rootItems.length,
-      rootItems: rootItems.map(item => ({
-        id: item.id,
-        name: item.name || item.title,
-        type: item.type,
-        childrenCount: item.children?.length || 0
-      }))
     });
 
     return rootItems;

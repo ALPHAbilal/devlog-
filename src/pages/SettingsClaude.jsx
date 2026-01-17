@@ -186,8 +186,7 @@ export default function SettingsClaude() {
   // Local state for display settings (preview before apply)
   const [localDisplaySettings, setLocalDisplaySettings] = useState({
     fontSize: settings.displayFontSize || 14,
-    lineHeight: settings.displayLineHeight || 1.4,
-    blockSpacing: settings.displayBlockSpacing || 'normal'
+    lineHeight: settings.displayLineHeight || 1.4
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -195,10 +194,9 @@ export default function SettingsClaude() {
   useEffect(() => {
     setLocalDisplaySettings({
       fontSize: settings.displayFontSize || 14,
-      lineHeight: settings.displayLineHeight || 1.4,
-      blockSpacing: settings.displayBlockSpacing || 'normal'
+      lineHeight: settings.displayLineHeight || 1.4
     });
-  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing]);
+  }, [settings.displayFontSize, settings.displayLineHeight]);
 
   // Handle local display setting change (preview only)
   const handleLocalDisplayChange = (key, value) => {
@@ -211,15 +209,13 @@ export default function SettingsClaude() {
     // Apply CSS variables immediately
     applyDisplaySettings(
       localDisplaySettings.fontSize,
-      localDisplaySettings.lineHeight,
-      localDisplaySettings.blockSpacing
+      localDisplaySettings.lineHeight
     );
 
     // Save to settings (localStorage + Supabase)
     updateSettings({
       displayFontSize: localDisplaySettings.fontSize,
-      displayLineHeight: localDisplaySettings.lineHeight,
-      displayBlockSpacing: localDisplaySettings.blockSpacing
+      displayLineHeight: localDisplaySettings.lineHeight
     });
 
     setHasUnsavedChanges(false);
@@ -664,46 +660,18 @@ export default function SettingsClaude() {
                 </div>
               </SettingGroup>
 
-              <SettingGroup title="Layout">
-                {/* Block Spacing */}
-                <div className="setting-item">
-                  <div className="setting-content">
-                    <label className="setting-label">Block Spacing</label>
-                    <p className="setting-description">Space between content blocks</p>
-                  </div>
-                  <div className="radio-group">
-                    {['compact', 'normal', 'relaxed'].map((option) => (
-                      <label key={option} className="radio-option">
-                        <input
-                          type="radio"
-                          name="blockSpacing"
-                          value={option}
-                          checked={localDisplaySettings.blockSpacing === option}
-                          onChange={(e) => handleLocalDisplayChange('blockSpacing', e.target.value)}
-                        />
-                        <span className="radio-label">{option.charAt(0).toUpperCase() + option.slice(1)}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              </SettingGroup>
-
               {/* Live Preview */}
               <SettingGroup title="Preview">
                 <div
                   className="display-preview"
                   style={{
                     fontSize: `${localDisplaySettings.fontSize}px`,
-                    lineHeight: localDisplaySettings.lineHeight,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: localDisplaySettings.blockSpacing === 'compact' ? '8px' :
-                         localDisplaySettings.blockSpacing === 'relaxed' ? '24px' : '16px'
+                    lineHeight: localDisplaySettings.lineHeight
                   }}
                 >
-                  <p style={{ margin: 0 }}>This is a preview of how your text will look with the current settings. Adjust the sliders above to see changes in real-time.</p>
-                  <p style={{ margin: 0 }}>Multiple paragraphs help you visualize the line height and spacing between content blocks.</p>
-                  <p style={{ margin: 0, fontSize: '0.875em', opacity: 0.7 }}>Current: {localDisplaySettings.fontSize}px / {localDisplaySettings.lineHeight} / {localDisplaySettings.blockSpacing}</p>
+                  <p>This is a preview of how your text will look with the current settings.</p>
+                  <p>Adjust the sliders above to see changes in real-time.</p>
+                  <p style={{ fontSize: '0.85em', opacity: 0.6, marginTop: '8px' }}>Font: {localDisplaySettings.fontSize}px | Line height: {localDisplaySettings.lineHeight}</p>
                 </div>
               </SettingGroup>
 
@@ -719,7 +687,7 @@ export default function SettingsClaude() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setLocalDisplaySettings({ fontSize: 14, lineHeight: 1.4, blockSpacing: 'normal' });
+                    setLocalDisplaySettings({ fontSize: 14, lineHeight: 1.4 });
                     setHasUnsavedChanges(true);
                   }}
                 >

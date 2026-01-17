@@ -15,8 +15,7 @@ export function SettingsProvider({ children }) {
     sessionTimeout: 4320, // Default 3 days (72 hours = 4320 minutes)
     // Display settings
     displayFontSize: 14,        // px (range: 12-18)
-    displayLineHeight: 1.4,     // ratio (range: 1.2-1.8)
-    displayBlockSpacing: 'normal' // 'compact' | 'normal' | 'relaxed'
+    displayLineHeight: 1.4      // ratio (range: 1.2-1.8)
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -105,7 +104,7 @@ export function SettingsProvider({ children }) {
   }, [user]);
 
   // Function to apply display settings as CSS variables
-  const applyDisplaySettings = useCallback((fontSize, lineHeight, blockSpacing) => {
+  const applyDisplaySettings = useCallback((fontSize, lineHeight) => {
     const root = document.documentElement;
 
     // Font size in pixels (direct px for reliability)
@@ -116,23 +115,7 @@ export function SettingsProvider({ children }) {
     const lineHeightVal = String(lineHeight);
     root.style.setProperty('--line-height-writing', lineHeightVal);
 
-    // Block spacing multiplier (compact=8px, normal=16px, relaxed=24px)
-    const spacingMap = { compact: '8px', normal: '16px', relaxed: '24px' };
-    const spacingValue = spacingMap[blockSpacing] || '16px';
-    root.style.setProperty('--block-gap', spacingValue);
-
-    // Debug: verify the values were set
-    const computedStyle = getComputedStyle(root);
-    console.log('[Display Settings] Applied:', {
-      fontSizePx,
-      lineHeightVal,
-      blockSpacing,
-      spacingValue,
-      // Verify actual computed values
-      actualFontSize: computedStyle.getPropertyValue('--step-writing'),
-      actualLineHeight: computedStyle.getPropertyValue('--line-height-writing'),
-      actualBlockGap: computedStyle.getPropertyValue('--block-gap')
-    });
+    console.log('[Display Settings] Applied:', { fontSizePx, lineHeightVal });
   }, []);
 
   // Apply display settings when they change (e.g., loaded from localStorage/Supabase)
@@ -140,11 +123,10 @@ export function SettingsProvider({ children }) {
     if (settings.displayFontSize && settings.displayLineHeight) {
       applyDisplaySettings(
         settings.displayFontSize,
-        settings.displayLineHeight,
-        settings.displayBlockSpacing || 'normal'
+        settings.displayLineHeight
       );
     }
-  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing, applyDisplaySettings]);
+  }, [settings.displayFontSize, settings.displayLineHeight, applyDisplaySettings]);
 
   // Update a single setting
   const updateSetting = async (key, value) => {

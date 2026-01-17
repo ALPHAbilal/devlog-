@@ -116,12 +116,23 @@ export function SettingsProvider({ children }) {
     const lineHeightVal = String(lineHeight);
     root.style.setProperty('--line-height-writing', lineHeightVal);
 
-    // Block spacing multiplier
-    const spacingMap = { compact: 0.75, normal: 1, relaxed: 1.5 };
-    const multiplier = spacingMap[blockSpacing] || 1;
-    root.style.setProperty('--block-spacing-multiplier', String(multiplier));
+    // Block spacing multiplier (compact=8px, normal=16px, relaxed=24px)
+    const spacingMap = { compact: '8px', normal: '16px', relaxed: '24px' };
+    const spacingValue = spacingMap[blockSpacing] || '16px';
+    root.style.setProperty('--block-gap', spacingValue);
 
-    console.log('[Display Settings] Applied:', { fontSizePx, lineHeightVal, blockSpacing, multiplier });
+    // Debug: verify the values were set
+    const computedStyle = getComputedStyle(root);
+    console.log('[Display Settings] Applied:', {
+      fontSizePx,
+      lineHeightVal,
+      blockSpacing,
+      spacingValue,
+      // Verify actual computed values
+      actualFontSize: computedStyle.getPropertyValue('--step-writing'),
+      actualLineHeight: computedStyle.getPropertyValue('--line-height-writing'),
+      actualBlockGap: computedStyle.getPropertyValue('--block-gap')
+    });
   }, []);
 
   // Apply display settings when they change (e.g., loaded from localStorage/Supabase)

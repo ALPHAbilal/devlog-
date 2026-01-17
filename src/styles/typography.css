@@ -41,6 +41,9 @@
 
   /* Writing font size - compact for developers */
   --step-writing: clamp(0.875rem, 0.85rem + 0.1vw, 0.875rem); /* 14px max */
+
+  /* Block spacing - configurable via settings (compact=8px, normal=16px, relaxed=24px) */
+  --block-gap: 16px;
   
   /* Letter spacing refinements */
   --letter-spacing-tight: -0.003em; /* Medium's approach for headings */

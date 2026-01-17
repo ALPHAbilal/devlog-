@@ -85,7 +85,8 @@ function BlockListViewComponent({
   return (
     <div
       ref={contentContainerRef}
-      className={`space-y-4 mb-8 min-h-[400px] relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
+      className={`mb-8 min-h-[400px] relative ${isMobileView ? 'pl-0' : 'pl-8'}`}
+      style={{ display: 'flex', flexDirection: 'column', gap: 'var(--block-gap, 16px)' }}
       onClick={onBackgroundClick}
     >
       {/* Show loading skeletons during initial document load */}

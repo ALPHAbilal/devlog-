@@ -694,11 +694,16 @@ export default function SettingsClaude() {
                   className="display-preview"
                   style={{
                     fontSize: `${localDisplaySettings.fontSize}px`,
-                    lineHeight: localDisplaySettings.lineHeight
+                    lineHeight: localDisplaySettings.lineHeight,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: localDisplaySettings.blockSpacing === 'compact' ? '8px' :
+                         localDisplaySettings.blockSpacing === 'relaxed' ? '24px' : '16px'
                   }}
                 >
-                  <p>This is a preview of how your text will look with the current settings. Adjust the sliders above to see changes in real-time.</p>
-                  <p>Multiple paragraphs help you visualize the line height and spacing between content blocks.</p>
+                  <p style={{ margin: 0 }}>This is a preview of how your text will look with the current settings. Adjust the sliders above to see changes in real-time.</p>
+                  <p style={{ margin: 0 }}>Multiple paragraphs help you visualize the line height and spacing between content blocks.</p>
+                  <p style={{ margin: 0, fontSize: '0.875em', opacity: 0.7 }}>Current: {localDisplaySettings.fontSize}px / {localDisplaySettings.lineHeight} / {localDisplaySettings.blockSpacing}</p>
                 </div>
               </SettingGroup>
 

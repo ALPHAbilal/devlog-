@@ -83,6 +83,15 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
     const subscription = query.$.subscribe({
       next: (docs: RxDocument<FolderDocType>[]) => {
         const folders = docs.map(doc => toFolder(doc.toJSON()));
+        console.log('[DEBUG-RXDB-SUB-1] 📡 RxDB subscription update:', {
+          docCount: docs.length,
+          folders: folders.map(f => ({
+            id: f.id,
+            name: f.name,
+            parent_id: f.parent_id
+          })),
+          timestamp: new Date().toISOString()
+        });
         setAllFolders(folders);
         setIsLoading(false);
         setError(null);
@@ -99,6 +108,15 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
 
   // Build tree structure - matches old useFolders output format
   const folders = useMemo(() => {
+    console.log('[DEBUG-RXDB-TREE-1] 🌲 Building folder tree from allFolders:', {
+      count: allFolders.length,
+      folders: allFolders.map(f => ({
+        id: f.id,
+        name: f.name,
+        parent_id: f.parent_id
+      }))
+    });
+
     // First pass: create folder map with children arrays
     const folderMap = new Map<string, Folder>();
     const rootFolders: Folder[] = [];
@@ -119,14 +137,39 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
       if (folder.parent_id) {
         const parent = folderMap.get(folder.parent_id);
         if (parent) {
+          console.log('[DEBUG-RXDB-TREE-2] 📂 Adding child to parent:', {
+            childId: folder.id,
+            childName: folder.name,
+            parentId: folder.parent_id,
+            parentName: parent.name
+          });
           parent.children!.push(folderWithChildren);
         } else {
           // Orphaned folder, treat as root
+          console.log('[DEBUG-RXDB-TREE-3] ⚠️ ORPHANED folder (parent not found):', {
+            folderId: folder.id,
+            folderName: folder.name,
+            missingParentId: folder.parent_id
+          });
           rootFolders.push(folderWithChildren);
         }
       } else {
+        console.log('[DEBUG-RXDB-TREE-4] 🏠 Root folder:', {
+          id: folder.id,
+          name: folder.name
+        });
         rootFolders.push(folderWithChildren);
       }
+    });
+
+    console.log('[DEBUG-RXDB-TREE-5] 🌲 Tree built. Root folders:', {
+      count: rootFolders.length,
+      roots: rootFolders.map(f => ({
+        id: f.id,
+        name: f.name,
+        childrenCount: f.children?.length || 0,
+        children: f.children?.map(c => ({ id: c.id, name: c.name })) || []
+      }))
     });
 
     return rootFolders;
@@ -193,20 +236,47 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
     id: string,
     updates: Partial<Folder>
   ) => {
-    if (!collection) return;
+    console.log('[DEBUG-UPDATE-1] ✏️ updateFolder START:', {
+      folderId: id,
+      updates,
+      hasCollection: !!collection
+    });
 
-    const doc = await collection.findOne(id).exec();
-    if (!doc) {
-      console.warn(`[useRxFolders] Folder ${id} not found`);
+    if (!collection) {
+      console.log('[DEBUG-UPDATE-2] ❌ No collection');
       return;
     }
 
+    const doc = await collection.findOne(id).exec();
+    if (!doc) {
+      console.warn(`[DEBUG-UPDATE-3] ⚠️ Folder ${id} not found`);
+      return;
+    }
+
+    console.log('[DEBUG-UPDATE-4] 📄 Found folder, current state:', {
+      id: doc.get('id'),
+      name: doc.get('name'),
+      parent_id: doc.get('parent_id'),
+      path: doc.get('path')
+    });
+
     const now = Date.now();
-    await doc.patch({
+    const patchData = {
       ...updates,
       updated_at: new Date(now).toISOString(),
       _modified: now,
-    } as Partial<FolderDocType>);
+    };
+
+    console.log('[DEBUG-UPDATE-5] 🔄 Patching with:', patchData);
+
+    await doc.patch(patchData as Partial<FolderDocType>);
+
+    console.log('[DEBUG-UPDATE-6] ✅ Patch complete, new state:', {
+      id: doc.get('id'),
+      name: doc.get('name'),
+      parent_id: doc.get('parent_id'),
+      path: doc.get('path')
+    });
   }, [collection]);
 
   // Delete folder (soft delete)
@@ -234,29 +304,61 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
     id: string,
     targetParentId: string | null
   ): Promise<boolean> => {
-    if (!collection) return false;
+    console.log('[DEBUG-MOVE-1] 📁 moveFolder START:', {
+      folderId: id,
+      targetParentId,
+      hasCollection: !!collection,
+      timestamp: new Date().toISOString()
+    });
+
+    if (!collection) {
+      console.log('[DEBUG-MOVE-2] ❌ No collection available');
+      return false;
+    }
 
     try {
       const doc = await collection.findOne(id).exec();
-      if (!doc) return false;
+      console.log('[DEBUG-MOVE-3] 📄 Found folder document:', {
+        found: !!doc,
+        currentName: doc?.get('name'),
+        currentParentId: doc?.get('parent_id'),
+        currentPath: doc?.get('path')
+      });
+
+      if (!doc) {
+        console.log('[DEBUG-MOVE-4] ❌ Folder document NOT found in RxDB');
+        return false;
+      }
 
       // Build new path
       let newPath = `/${doc.get('name')}`;
       if (targetParentId) {
         const parent = await collection.findOne(targetParentId).exec();
+        console.log('[DEBUG-MOVE-5] 📂 Target parent folder:', {
+          found: !!parent,
+          parentName: parent?.get('name'),
+          parentPath: parent?.get('path')
+        });
         if (parent) {
           newPath = `${parent.get('path')}/${doc.get('name')}`;
         }
       }
+
+      console.log('[DEBUG-MOVE-6] 🔄 Calling updateFolder with:', {
+        folderId: id,
+        newParentId: targetParentId,
+        newPath
+      });
 
       await updateFolder(id, {
         parent_id: targetParentId,
         path: newPath,
       });
 
+      console.log('[DEBUG-MOVE-7] ✅ moveFolder COMPLETE - folder should now have new parent');
       return true;
     } catch (err) {
-      console.error('[useRxFolders] Error moving folder:', err);
+      console.error('[DEBUG-MOVE-ERROR] ❌ Error moving folder:', err);
       return false;
     }
   }, [collection, updateFolder]);

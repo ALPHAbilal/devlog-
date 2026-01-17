@@ -102,24 +102,51 @@ export function ExplorerView({
 
   // Build tree structure from folders and documents
   const treeData = useMemo(() => {
+    console.log('[DEBUG-TREE-1] 🌳 Building treeData:', {
+      folderCount: folders.length,
+      documentCount: documents.length,
+      folders: folders.map(f => ({
+        id: f.id,
+        name: f.name,
+        parent_id: f.parent_id,
+        childrenCount: f.children?.length || 0,
+        childrenNames: f.children?.map(c => c.name) || []
+      }))
+    });
+
     // Add documents to their folders or to root
     const rootItems = [];
 
     // Add folders with their documents as children
     folders.forEach(folder => {
       const folderDocs = documents.filter(doc => doc.folder_id === folder.id);
+      console.log('[DEBUG-TREE-2] 📁 Processing folder:', {
+        id: folder.id,
+        name: folder.name,
+        parent_id: folder.parent_id,
+        existingChildren: folder.children?.length || 0,
+        docsInFolder: folderDocs.length
+      });
+
       const folderWithDocs = {
         ...folder,
         type: 'folder',
         children: [
-          ...(folder.children || []).map(child => ({
-            ...child,
-            type: 'folder',
-            children: documents.filter(doc => doc.folder_id === child.id).map(doc => ({
-              ...doc,
-              type: 'document',
-            })),
-          })),
+          ...(folder.children || []).map(child => {
+            console.log('[DEBUG-TREE-3] 📂 Processing child folder:', {
+              id: child.id,
+              name: child.name,
+              parent_id: child.parent_id
+            });
+            return {
+              ...child,
+              type: 'folder',
+              children: documents.filter(doc => doc.folder_id === child.id).map(doc => ({
+                ...doc,
+                type: 'document',
+              })),
+            };
+          }),
           ...folderDocs.map(doc => ({
             ...doc,
             type: 'document',
@@ -137,6 +164,16 @@ export function ExplorerView({
         ...doc,
         type: 'document',
       });
+    });
+
+    console.log('[DEBUG-TREE-4] 🌳 treeData BUILT:', {
+      rootItemCount: rootItems.length,
+      rootItems: rootItems.map(item => ({
+        id: item.id,
+        name: item.name || item.title,
+        type: item.type,
+        childrenCount: item.children?.length || 0
+      }))
     });
 
     return rootItems;
@@ -181,9 +218,27 @@ export function ExplorerView({
 
   // Helper to check if targetId is a descendant of folder
   const isDescendant = useCallback((folder, targetId) => {
-    if (folder.id === targetId) return true;
+    console.log('[DEBUG-DESCENDANT-1] 🔍 Checking isDescendant:', {
+      folderId: folder.id,
+      folderName: folder.name,
+      targetId,
+      hasChildren: !!(folder.children && folder.children.length > 0),
+      childrenIds: folder.children?.map(c => c.id) || []
+    });
+
+    if (folder.id === targetId) {
+      console.log('[DEBUG-DESCENDANT-2] ⚠️ Target is the folder itself!');
+      return true;
+    }
     if (folder.children) {
-      return folder.children.some(child => isDescendant(child, targetId));
+      const found = folder.children.some(child => {
+        const result = isDescendant(child, targetId);
+        if (result) {
+          console.log('[DEBUG-DESCENDANT-3] ⚠️ Found descendant match at child:', child.id, child.name);
+        }
+        return result;
+      });
+      return found;
     }
     return false;
   }, []);
@@ -236,44 +291,90 @@ export function ExplorerView({
 
     const { active, over } = event;
 
+    console.log('[DEBUG-DND-1] 🎯 handleDragEnd START:', {
+      activeId: active?.id,
+      overId: over?.id,
+      timestamp: new Date().toISOString()
+    });
+
     if (!over || active.id === over.id) {
+      console.log('[DEBUG-DND-2] ❌ Early return: no target or same item');
       setDraggedItem(null);
       return;
     }
 
     const draggedItemData = findItemById(treeData, active.id);
+    console.log('[DEBUG-DND-3] 📦 Dragged item found:', {
+      id: draggedItemData?.id,
+      name: draggedItemData?.name || draggedItemData?.title,
+      type: draggedItemData?.type,
+      parent_id: draggedItemData?.parent_id,
+      found: !!draggedItemData
+    });
+
     if (!draggedItemData) {
+      console.log('[DEBUG-DND-4] ❌ Dragged item NOT found in treeData');
       setDraggedItem(null);
       return;
     }
 
     // Handle drop on root
     if (over.id === 'root') {
+      console.log('[DEBUG-DND-5] 🏠 Dropping on ROOT');
       if (draggedItemData.type === 'document') {
+        console.log('[DEBUG-DND-6] 📄 Moving document to root');
         await onMoveDocument?.(draggedItemData.id, null);
       } else if (draggedItemData.type === 'folder') {
+        console.log('[DEBUG-DND-7] 📁 Moving folder to root');
         await onMoveFolder?.(draggedItemData.id, null);
       }
     } else {
       const targetItem = findItemById(treeData, over.id);
+      console.log('[DEBUG-DND-8] 🎯 Target item found:', {
+        id: targetItem?.id,
+        name: targetItem?.name || targetItem?.title,
+        type: targetItem?.type,
+        parent_id: targetItem?.parent_id,
+        found: !!targetItem
+      });
+
       if (!targetItem) {
+        console.log('[DEBUG-DND-9] ❌ Target item NOT found in treeData');
         setDraggedItem(null);
         return;
       }
 
       // Document to folder
       if (draggedItemData.type === 'document' && targetItem.type === 'folder') {
+        console.log('[DEBUG-DND-10] 📄➡️📁 Moving document to folder:', {
+          docId: draggedItemData.id,
+          targetFolderId: targetItem.id
+        });
         await onMoveDocument?.(draggedItemData.id, targetItem.id);
       }
       // Folder to folder (prevent dropping folder on itself or its descendants)
       else if (draggedItemData.type === 'folder' && targetItem.type === 'folder') {
-        if (!isDescendant(draggedItemData, targetItem.id)) {
+        const isDesc = isDescendant(draggedItemData, targetItem.id);
+        console.log('[DEBUG-DND-11] 📁➡️📁 Moving folder to folder:', {
+          folderId: draggedItemData.id,
+          folderName: draggedItemData.name,
+          targetFolderId: targetItem.id,
+          targetFolderName: targetItem.name,
+          isDescendant: isDesc,
+          willMove: !isDesc
+        });
+        if (!isDesc) {
+          console.log('[DEBUG-DND-12] ✅ Calling onMoveFolder');
           await onMoveFolder?.(draggedItemData.id, targetItem.id);
+          console.log('[DEBUG-DND-13] ✅ onMoveFolder completed');
+        } else {
+          console.log('[DEBUG-DND-14] ⛔ BLOCKED: Target is descendant of dragged folder');
         }
       }
     }
 
     setDraggedItem(null);
+    console.log('[DEBUG-DND-15] 🏁 handleDragEnd COMPLETE');
   }, [treeData, onMoveDocument, onMoveFolder, findItemById, isDescendant]);
 
   return (

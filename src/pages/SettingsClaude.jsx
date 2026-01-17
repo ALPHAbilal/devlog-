@@ -208,38 +208,22 @@ export default function SettingsClaude() {
 
   // Apply display settings to the entire platform
   const handleApplyDisplaySettings = () => {
-    console.log('[APPLY-DEBUG-1] Starting handleApplyDisplaySettings');
-    console.log('[APPLY-DEBUG-2] applyDisplaySettings type:', typeof applyDisplaySettings);
-    console.log('[APPLY-DEBUG-3] updateSettings type:', typeof updateSettings);
-    console.log('[APPLY-DEBUG-4] toast:', toast, 'toast.success type:', typeof toast?.success);
-    console.log('[APPLY-DEBUG-5] localDisplaySettings:', localDisplaySettings);
+    // Apply CSS variables immediately
+    applyDisplaySettings(
+      localDisplaySettings.fontSize,
+      localDisplaySettings.lineHeight,
+      localDisplaySettings.blockSpacing
+    );
 
-    try {
-      // Apply CSS variables immediately
-      console.log('[APPLY-DEBUG-6] Calling applyDisplaySettings...');
-      applyDisplaySettings(
-        localDisplaySettings.fontSize,
-        localDisplaySettings.lineHeight,
-        localDisplaySettings.blockSpacing
-      );
-      console.log('[APPLY-DEBUG-7] applyDisplaySettings done');
+    // Save to settings (localStorage + Supabase)
+    updateSettings({
+      displayFontSize: localDisplaySettings.fontSize,
+      displayLineHeight: localDisplaySettings.lineHeight,
+      displayBlockSpacing: localDisplaySettings.blockSpacing
+    });
 
-      // Save to settings (localStorage + Supabase)
-      console.log('[APPLY-DEBUG-8] Calling updateSettings...');
-      updateSettings({
-        displayFontSize: localDisplaySettings.fontSize,
-        displayLineHeight: localDisplaySettings.lineHeight,
-        displayBlockSpacing: localDisplaySettings.blockSpacing
-      });
-      console.log('[APPLY-DEBUG-9] updateSettings done');
-
-      setHasUnsavedChanges(false);
-      console.log('[APPLY-DEBUG-10] Calling toast.success...');
-      toast.success('Display settings applied!');
-      console.log('[APPLY-DEBUG-11] All done!');
-    } catch (err) {
-      console.error('[APPLY-DEBUG-ERROR]', err);
-    }
+    setHasUnsavedChanges(false);
+    toast.success('Display settings applied!');
   };
   
   const [activeSection, setActiveSection] = useState('account');

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { supabase, setInactivityTimeout } from '@/shared/api';
 import { useAuth } from './auth-provider';
 
@@ -8,6 +8,10 @@ interface Settings {
   showLineNumbers: boolean;
   enableTextCollapse: boolean;
   sessionTimeout: number;
+  // Display settings
+  displayFontSize: number;
+  displayLineHeight: number;
+  displayBlockSpacing: 'compact' | 'normal' | 'relaxed';
   [key: string]: unknown; // Allow additional settings
 }
 
@@ -15,6 +19,7 @@ interface SettingsContextValue {
   settings: Settings;
   updateSetting: (key: string, value: unknown) => Promise<void>;
   updateSettings: (updates: Partial<Settings>) => Promise<void>;
+  applyDisplaySettings: (fontSize: number, lineHeight: number, blockSpacing: string) => void;
   isLoading: boolean;
 }
 
@@ -31,7 +36,11 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     autoSaveInterval: 30, // Changed from 1 to 30 seconds for production stability
     showLineNumbers: true,
     enableTextCollapse: true,
-    sessionTimeout: 4320 // Default 3 days (72 hours = 4320 minutes)
+    sessionTimeout: 4320, // Default 3 days (72 hours = 4320 minutes)
+    // Display settings
+    displayFontSize: 14,
+    displayLineHeight: 1.4,
+    displayBlockSpacing: 'normal'
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -170,11 +179,40 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     }
   };
 
+  // Apply display settings as CSS variables
+  const applyDisplaySettings = useCallback((fontSize: number, lineHeight: number, blockSpacing: string) => {
+    const root = document.documentElement;
+
+    // Font size in pixels
+    root.style.setProperty('--step-writing', `${fontSize}px`);
+
+    // Line height as number
+    root.style.setProperty('--line-height-writing', String(lineHeight));
+
+    // Block spacing (compact=8px, normal=16px, relaxed=24px)
+    const spacingMap: Record<string, string> = { compact: '8px', normal: '16px', relaxed: '24px' };
+    root.style.setProperty('--block-gap', spacingMap[blockSpacing] || '16px');
+
+    console.log('[Display Settings] Applied:', { fontSize, lineHeight, blockSpacing });
+  }, []);
+
+  // Apply display settings when they change
+  useEffect(() => {
+    if (settings.displayFontSize && settings.displayLineHeight) {
+      applyDisplaySettings(
+        settings.displayFontSize,
+        settings.displayLineHeight,
+        settings.displayBlockSpacing || 'normal'
+      );
+    }
+  }, [settings.displayFontSize, settings.displayLineHeight, settings.displayBlockSpacing, applyDisplaySettings]);
+
   return (
     <SettingsContext.Provider value={{
       settings,
       updateSetting,
       updateSettings,
+      applyDisplaySettings,
       isLoading
     }}>
       {children}

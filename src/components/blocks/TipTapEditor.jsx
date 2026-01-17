@@ -115,6 +115,27 @@ function TipTapEditor({
     };
   }, [editor]);
 
+  // Debug: Log computed styles when editor mounts
+  useEffect(() => {
+    if (editor) {
+      // Wait for DOM to be ready
+      requestAnimationFrame(() => {
+        const editorElement = document.querySelector('.tiptap-editor');
+        if (editorElement) {
+          const style = getComputedStyle(editorElement);
+          const rootStyle = getComputedStyle(document.documentElement);
+          console.log('[TipTap Debug] Editor rendered with styles:', {
+            computedFontSize: style.fontSize,
+            computedLineHeight: style.lineHeight,
+            cssVarStepWriting: rootStyle.getPropertyValue('--step-writing'),
+            cssVarLineHeight: rootStyle.getPropertyValue('--line-height-writing'),
+            hasClass: editorElement.classList.contains('tiptap-editor')
+          });
+        }
+      });
+    }
+  }, [editor]);
+
   // Expose editor methods via ref if needed
   // For now, just render the editor content
   if (!editor) {

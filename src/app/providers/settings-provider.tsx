@@ -193,11 +193,43 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     const spacingMap: Record<string, string> = { compact: '8px', normal: '16px', relaxed: '24px' };
     root.style.setProperty('--block-gap', spacingMap[blockSpacing] || '16px');
 
-    console.log('[Display Settings] Applied:', { fontSize, lineHeight, blockSpacing });
+    // Debug: Verify CSS variables were set
+    const computedStyle = getComputedStyle(root);
+    console.log('[Display Settings] Applied:', {
+      fontSize,
+      lineHeight,
+      blockSpacing,
+      // Verify the values were actually set
+      verifyStepWriting: computedStyle.getPropertyValue('--step-writing'),
+      verifyLineHeight: computedStyle.getPropertyValue('--line-height-writing'),
+      verifyBlockGap: computedStyle.getPropertyValue('--block-gap'),
+    });
+
+    // Debug: Check if any tiptap-editor elements exist and what their computed styles are
+    setTimeout(() => {
+      const tiptapEditors = document.querySelectorAll('.tiptap-editor');
+      if (tiptapEditors.length > 0) {
+        const editorStyle = getComputedStyle(tiptapEditors[0]);
+        console.log('[Display Settings] TipTap Editor computed styles:', {
+          fontSize: editorStyle.fontSize,
+          lineHeight: editorStyle.lineHeight,
+          editorCount: tiptapEditors.length
+        });
+      } else {
+        console.log('[Display Settings] No .tiptap-editor elements found on page');
+      }
+    }, 100);
   }, []);
 
   // Apply display settings when they change
   useEffect(() => {
+    console.log('[Display Settings] useEffect triggered:', {
+      displayFontSize: settings.displayFontSize,
+      displayLineHeight: settings.displayLineHeight,
+      displayBlockSpacing: settings.displayBlockSpacing,
+      currentPath: window.location.pathname
+    });
+
     if (settings.displayFontSize && settings.displayLineHeight) {
       applyDisplaySettings(
         settings.displayFontSize,

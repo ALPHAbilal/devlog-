@@ -106,6 +106,7 @@ export function SidebarEnhanced({
                   onCreateDocument={onCreateDocument}
                   onDeleteItem={onDeleteItem}
                   onToggleFavorite={onToggleFavorite}
+                  onRename={onRename}
                   onRefresh={onRefresh}
                   isLoading={isLoading}
                   onMoveDocument={onMoveDocument}
@@ -172,6 +173,7 @@ export function SidebarEnhanced({
               onCreateDocument={onCreateDocument}
               onDeleteItem={onDeleteItem}
               onToggleFavorite={onToggleFavorite}
+              onRename={onRename}
               onRefresh={onRefresh}
               isLoading={isLoading}
               onMoveDocument={onMoveDocument}
@@ -196,6 +198,7 @@ function ViewContent({
   onCreateDocument,
   onDeleteItem,
   onToggleFavorite,
+  onRename,
   onRefresh,
   isLoading,
   onMoveDocument,

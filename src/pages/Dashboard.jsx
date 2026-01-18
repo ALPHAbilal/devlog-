@@ -1077,8 +1077,11 @@ export default function Dashboard() {
     }
     
     // Find the entry being updated
-    const entryToUpdate = entries.find(entry => entry.id === entryId);
+    // CRITICAL: Look in allDocuments, not entries, because entries only contains
+    // root-level items. Documents inside folders are nested and won't be found.
+    const entryToUpdate = allDocuments.find(doc => doc.id === entryId);
     if (!entryToUpdate) {
+      console.warn('[Dashboard] updateEntry: Document not found:', entryId?.substring(0, 8));
       return;
     }
     
@@ -1203,7 +1206,7 @@ export default function Dashboard() {
         });
       }, 16); // Wait for next frame
     }
-  }, [entries, expandedEntry, updateStorageInfo, removeFromCache, updateDocumentInCache, documentsCollection]);
+  }, [entries, allDocuments, expandedEntry, updateStorageInfo, removeFromCache, updateDocumentInCache, documentsCollection, updateTabTitle, trackDocumentEvent, endDocumentTimer]);
 
   // Handle document link clicks
   useEffect(() => {

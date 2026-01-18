@@ -2,150 +2,101 @@
 
 ## Overview
 
-Document titles don't update in the UI after being changed. The root cause is a memo comparison function in `DocumentEditor.tsx` that doesn't check for title changes, preventing re-renders when the title updates.
+Document titles don't update in the UI after being changed. The root cause is that `updateEntry` looks for documents in `entries` (which only contains root-level items), so documents inside folders can't be found and the update silently fails.
 
 ## Current State Analysis
 
-### Data Flow (Working Correctly)
+### Data Flow
 1. User edits title in `HeaderControls` → `setTitle()` updates local state ✅
 2. User saves (blur/enter) → `handleTitleSave()` calls `onUpdate(entry.id, { title })` ✅
-3. `updateEntry` in Dashboard updates:
-   - Local state: `setAllDocuments(prev.map(...))` ✅
-   - Tab title: `updateTabTitle(entryId, updates.title)` ✅
-   - RxDB: `doc.patch({ title })` ✅
+3. `updateEntry` in Dashboard tries to find document... **FAILS for docs in folders** ❌
 
 ### Bug Location
-**File**: `src/components/DocumentEditor/DocumentEditor.tsx` (lines 430-443)
+**File**: `src/pages/Dashboard.jsx` (line 1080)
 
-```typescript
-export const DocumentEditor = memo(DocumentEditorComponent, (prevProps, nextProps) => {
-  if (!prevProps.entry || !nextProps.entry) return false;
-  if (prevProps.entry.id !== nextProps.entry.id) return false;
-  if (prevProps.isMobileView !== nextProps.isMobileView) return false;
-  if (prevProps.allEntries?.length !== nextProps.allEntries?.length) return false;
-  return true;  // ❌ Always returns true if same ID → title change blocked!
-});
+```javascript
+// BROKEN: entries only contains root-level items (folders + root documents)
+// Documents inside folders are nested in folder.items, not at top level
+const entryToUpdate = entries.find(entry => entry.id === entryId);
+if (!entryToUpdate) {
+  return;  // ← SILENTLY RETURNS for documents in folders!
+}
 ```
 
-The memo comparison only checks `entry.id`, not `entry.title`. When title changes:
-1. `activeDocument` updates with new title ✅
-2. `DocumentEditor` memo returns `true` (same id) → **blocks re-render** ❌
-3. `useDocumentState`'s sync effect never runs ❌
-4. UI still shows old title ❌
+### Why `entries` Doesn't Work
+- `entries` is populated from `allDocuments` + `folders` in a useEffect (lines 838-922)
+- Root documents go directly into `entries`
+- Documents in folders are nested inside their folder's `items` array
+- `entries.find()` only searches top-level items, not nested ones
+
+## Root Cause
+
+In `updateEntry` (Dashboard.jsx):
+1. Code looks for document in `entries` using `entries.find(entry => entry.id === entryId)`
+2. `entries` only contains ROOT-level items (folders + root documents)
+3. Documents inside folders are nested in `folder.items`, not at top level
+4. `entries.find()` returns `undefined` for documents in folders
+5. Function returns early without updating anything
+6. No error logged, so issue was silent
 
 ## Desired End State
 
 After the fix:
-1. User changes document title
+1. User changes document title (whether in folder or not)
 2. UI immediately reflects the new title
 3. Sidebar shows updated title
 4. Tab bar shows updated title
 5. RxDB and Supabase sync correctly
 
-### Verification Steps
-1. Change document title via input field
-2. Blur or press Enter to save
-3. Title should update in:
-   - Header (immediate)
-   - Sidebar document list
-   - Tab bar
-4. Refresh page → title persists
-
 ## What We're NOT Doing
 
-- Not changing the RxDB sync logic (working correctly)
-- Not changing how `updateEntry` works (working correctly)
-- Not changing state management architecture
+- Not changing the folder structure
+- Not changing the RxDB sync logic
 - Not adding new features
 
-## Implementation Approach
+## Implementation
 
-Simple fix: Update the memo comparison to also check `entry.title`.
+### Fix 1: Look in `allDocuments` instead of `entries`
 
-## Phase 1: Fix DocumentEditor Memo
+**File**: `src/pages/Dashboard.jsx`
 
-### Overview
-Update memo comparison to allow re-renders when title changes.
+```javascript
+// OLD (broken for docs in folders):
+const entryToUpdate = entries.find(entry => entry.id === entryId);
 
-### Changes Required
-
-**File**: `src/components/DocumentEditor/DocumentEditor.tsx`
-
-**Current** (lines 430-443):
-```typescript
-export const DocumentEditor = memo(DocumentEditorComponent, (prevProps, nextProps) => {
-  // Fast path: check ID first
-  if (!prevProps.entry || !nextProps.entry) return false;
-  if (prevProps.entry.id !== nextProps.entry.id) return false;
-
-  // Check mobile view
-  if (prevProps.isMobileView !== nextProps.isMobileView) return false;
-
-  // Check entries count (for backlinks)
-  if (prevProps.allEntries?.length !== nextProps.allEntries?.length) return false;
-
-  // All checks passed
-  return true;
-});
+// NEW (works for all docs):
+const entryToUpdate = allDocuments.find(doc => doc.id === entryId);
 ```
 
-**Fixed**:
-```typescript
-export const DocumentEditor = memo(DocumentEditorComponent, (prevProps, nextProps) => {
-  // Fast path: check ID first
-  if (!prevProps.entry || !nextProps.entry) return false;
-  if (prevProps.entry.id !== nextProps.entry.id) return false;
+### Fix 2: Add `allDocuments` to dependency array
 
-  // Check title (for sync after save)
-  if (prevProps.entry.title !== nextProps.entry.title) return false;
+```javascript
+// OLD:
+}, [entries, expandedEntry, updateStorageInfo, ...]);
 
-  // Check mobile view
-  if (prevProps.isMobileView !== nextProps.isMobileView) return false;
-
-  // Check entries count (for backlinks)
-  if (prevProps.allEntries?.length !== nextProps.allEntries?.length) return false;
-
-  // All checks passed
-  return true;
-});
+// NEW:
+}, [entries, allDocuments, expandedEntry, updateStorageInfo, ...]);
 ```
 
-### Success Criteria
+### Fix 3: Add warning log for debugging
 
-#### Automated Verification
-- [ ] Build passes: `npm run build`
-- [ ] Lint passes: `npm run lint`
-- [ ] No TypeScript errors
+```javascript
+if (!entryToUpdate) {
+  console.warn('[Dashboard] updateEntry: Document not found:', entryId?.substring(0, 8));
+  return;
+}
+```
 
-#### Manual Verification
-- [ ] Change document title → saves and displays correctly
-- [ ] Title updates in sidebar document list
+## Success Criteria
+
+### Manual Verification
+- [ ] Change title of document in root → saves correctly
+- [ ] Change title of document inside folder → saves correctly
+- [ ] Title updates in sidebar
 - [ ] Title updates in tab bar
-- [ ] Refresh page → title persists from RxDB
-- [ ] No unexpected re-renders (check React DevTools)
+- [ ] Refresh page → title persists
 
-## Testing Strategy
+## Files Changed
 
-### Manual Testing Steps
-1. Open any document
-2. Click title to edit
-3. Change title to something unique (e.g., "Test Title 123")
-4. Press Enter or click away
-5. Verify:
-   - Title in header shows "Test Title 123"
-   - Sidebar shows "Test Title 123"
-   - Tab shows "Test Title 123"
-6. Refresh page
-7. Verify title still shows "Test Title 123"
-
-### Edge Cases
-- Empty title → should handle gracefully
-- Very long title → should truncate appropriately
-- Special characters in title → should work
-
-## References
-
-- Root cause analysis in this plan
-- `src/components/DocumentEditor/DocumentEditor.tsx:430-443`
-- `src/features/document/hooks/use-document-state.ts:127-131` (sync effect)
-- `src/pages/Dashboard.jsx:1125-1128` (tab title update)
+1. `src/pages/Dashboard.jsx` - Main fix (look in allDocuments)
+2. `src/components/DocumentEditor/DocumentEditor.tsx` - Memo fix (allow title re-renders)

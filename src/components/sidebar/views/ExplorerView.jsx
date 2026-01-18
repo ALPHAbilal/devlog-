@@ -58,14 +58,18 @@ export function ExplorerView({
   isLoading = false,
   onMoveDocument,
   onMoveFolder,
+  targetFolderId,
+  onTargetFolderReached,
 }) {
   const [viewMode, setViewMode] = useState(VIEW_MODES.TREE);
   const [expandedFolders, setExpandedFolders] = useState(new Set());
+  const [highlightedFolderId, setHighlightedFolderId] = useState(null);
 
   // Drag and drop state
   const [draggedItem, setDraggedItem] = useState(null);
   const [dragOverFolderId, setDragOverFolderId] = useState(null);
   const hoverTimerRef = useRef(null);
+  const targetFolderRef = useRef(null);
 
   // Add sensors
   const sensors = useSensors(
@@ -87,6 +91,63 @@ export function ExplorerView({
       }
     };
   }, []);
+
+  // Handle target folder navigation from search
+  useEffect(() => {
+    if (!targetFolderId || !folders || folders.length === 0) return;
+
+    // Build a map of folder id -> folder for quick lookup
+    const folderMap = new Map();
+    const buildFolderMap = (folderList) => {
+      for (const folder of folderList) {
+        folderMap.set(folder.id, folder);
+        if (folder.children?.length) {
+          buildFolderMap(folder.children);
+        }
+      }
+    };
+    buildFolderMap(folders);
+
+    // Find the path to the target folder (all parent IDs)
+    const findPath = (folderId) => {
+      const path = [];
+      let current = folderMap.get(folderId);
+      while (current) {
+        path.unshift(current.id);
+        current = current.parent_id ? folderMap.get(current.parent_id) : null;
+      }
+      return path;
+    };
+
+    const pathToTarget = findPath(targetFolderId);
+
+    if (pathToTarget.length > 0) {
+      // Expand all folders in the path (except the target itself)
+      setExpandedFolders(prev => {
+        const next = new Set(prev);
+        pathToTarget.forEach(id => next.add(id));
+        return next;
+      });
+
+      // Highlight the target folder
+      setHighlightedFolderId(targetFolderId);
+
+      // Scroll to the target folder after a short delay (to allow expansion)
+      setTimeout(() => {
+        if (targetFolderRef.current) {
+          targetFolderRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+
+      // Remove highlight after 2 seconds
+      setTimeout(() => {
+        setHighlightedFolderId(null);
+      }, 2000);
+
+      // Notify parent that we've reached the target
+      onTargetFolderReached?.();
+    }
+  }, [targetFolderId, folders, onTargetFolderReached]);
 
   // Toggle folder expansion
   const toggleFolder = useCallback((folderId) => {
@@ -345,6 +406,8 @@ export function ExplorerView({
                       activeDocumentId={activeDocumentId}
                       recentlyCreatedFolderId={recentlyCreatedFolderId}
                       viewMode={viewMode}
+                      highlightedFolderId={highlightedFolderId}
+                      targetFolderRef={item.id === targetFolderId ? targetFolderRef : null}
                     />
                   ))}
                 </div>

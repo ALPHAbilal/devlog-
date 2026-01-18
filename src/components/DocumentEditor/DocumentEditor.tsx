@@ -432,6 +432,9 @@ export const DocumentEditor = memo(DocumentEditorComponent, (prevProps, nextProp
   if (!prevProps.entry || !nextProps.entry) return false;
   if (prevProps.entry.id !== nextProps.entry.id) return false;
 
+  // Check title (for sync after save - prevents memo from blocking title updates)
+  if (prevProps.entry.title !== nextProps.entry.title) return false;
+
   // Check mobile view
   if (prevProps.isMobileView !== nextProps.isMobileView) return false;
 

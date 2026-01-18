@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Inbox, FileText, Clock, ArrowRight, CheckCircle, Sparkles, AlertCircle, Archive, Trash2 } from 'lucide-react';
+import { Inbox, FileText, Clock, ArrowRight, CheckCircle, Sparkles, AlertCircle, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ScrollArea } from '../../ui/scroll-area';
 
@@ -33,11 +33,9 @@ export function InboxView({ documents, onOpenDocument }) {
         // "Inbox" items are unfiled documents created in the last 7 days
         const isUnfiled = !doc.folder_id;
         const isRecent = new Date(doc.created_at) > sevenDaysAgo;
-        const isArchived = doc.metadata?.archived;
 
-        if (filter === 'archived') return isUnfiled && isArchived;
-        if (filter === 'unread') return isUnfiled && isRecent && !isArchived;
-        return isUnfiled && !isArchived;
+        if (filter === 'unread') return isUnfiled && isRecent;
+        return isUnfiled;
       })
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
   }, [documents, filter]);
@@ -49,8 +47,7 @@ export function InboxView({ documents, onOpenDocument }) {
 
     return documents.filter(doc =>
       !doc.folder_id &&
-      new Date(doc.created_at) > sevenDaysAgo &&
-      !doc.metadata?.archived
+      new Date(doc.created_at) > sevenDaysAgo
     ).length;
   }, [documents]);
 
@@ -76,7 +73,6 @@ export function InboxView({ documents, onOpenDocument }) {
           {[
             { id: 'unread', label: 'Unread', icon: AlertCircle },
             { id: 'all', label: 'All', icon: Inbox },
-            { id: 'archived', label: 'Archived', icon: Archive },
           ].map(f => (
             <button
               key={f.id}
@@ -110,7 +106,7 @@ export function InboxView({ documents, onOpenDocument }) {
               >
                 <CheckCircle className="w-8 h-8 text-emerald-400/50 mx-auto mb-3" />
                 <div className="text-white/30 text-sm">
-                  {filter === 'archived' ? 'No archived items' : 'Inbox is empty'}
+                  Inbox is empty
                 </div>
                 <div className="text-white/20 text-xs mt-1">
                   {filter === 'unread'

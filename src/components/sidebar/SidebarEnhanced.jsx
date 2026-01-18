@@ -32,6 +32,13 @@ export function SidebarEnhanced({
   const navigate = useNavigate();
   const [activeView, setActiveView] = useState(ACTIVITY_VIEWS.EXPLORER);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [targetFolderId, setTargetFolderId] = useState(null);
+
+  // Handle folder selection from search - navigate to explorer and highlight folder
+  const handleOpenFolder = useCallback((folder) => {
+    setTargetFolderId(folder.id);
+    setActiveView(ACTIVITY_VIEWS.EXPLORER);
+  }, []);
 
   // Persist collapsed state
   useEffect(() => {
@@ -111,6 +118,12 @@ export function SidebarEnhanced({
                   isLoading={isLoading}
                   onMoveDocument={onMoveDocument}
                   onMoveFolder={onMoveFolder}
+                  onOpenFolder={(folder) => {
+                    handleOpenFolder(folder);
+                    onClose?.();
+                  }}
+                  targetFolderId={targetFolderId}
+                  onTargetFolderReached={() => setTargetFolderId(null)}
                 />
               </div>
             </motion.div>
@@ -178,6 +191,9 @@ export function SidebarEnhanced({
               isLoading={isLoading}
               onMoveDocument={onMoveDocument}
               onMoveFolder={onMoveFolder}
+              onOpenFolder={handleOpenFolder}
+              targetFolderId={targetFolderId}
+              onTargetFolderReached={() => setTargetFolderId(null)}
             />
           </motion.div>
         )}
@@ -203,19 +219,16 @@ function ViewContent({
   isLoading,
   onMoveDocument,
   onMoveFolder,
+  onOpenFolder,
+  targetFolderId,
+  onTargetFolderReached,
 }) {
   switch (activeView) {
     case ACTIVITY_VIEWS.SEARCH:
       return (
         <SearchView
           onOpenDocument={onOpenDocument}
-          onOpenFolder={(folder) => {
-            // When a folder is clicked from search results, we could:
-            // 1. Navigate to explorer view (not implemented yet)
-            // 2. Show a toast with the folder name
-            // For now, just log it - user can navigate manually
-            console.log('[SearchView] Folder selected:', folder);
-          }}
+          onOpenFolder={onOpenFolder}
         />
       );
 
@@ -236,6 +249,8 @@ function ViewContent({
           isLoading={isLoading}
           onMoveDocument={onMoveDocument}
           onMoveFolder={onMoveFolder}
+          targetFolderId={targetFolderId}
+          onTargetFolderReached={onTargetFolderReached}
         />
       );
 

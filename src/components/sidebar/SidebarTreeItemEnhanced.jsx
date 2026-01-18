@@ -21,6 +21,8 @@ export default function SidebarTreeItemEnhanced({
   recentlyCreatedFolderId,
   viewMode = 'tree', // 'tree' | 'table' | 'compact'
   isDragDisabled = false,
+  highlightedFolderId,
+  targetFolderRef,
 }) {
   const hasChildren = item.children && item.children.length > 0;
   const isFile = item.type === 'file' || item.type === 'document';
@@ -77,6 +79,9 @@ export default function SidebarTreeItemEnhanced({
 
   // Check if this is a recently created folder
   const isRecentlyCreated = !isFile && recentlyCreatedFolderId && item.id === recentlyCreatedFolderId;
+
+  // Check if this folder is highlighted (from search navigation)
+  const isHighlighted = !isFile && highlightedFolderId && item.id === highlightedFolderId;
 
   // State for dropdown menu
   const [showMenu, setShowMenu] = useState(false);
@@ -223,11 +228,13 @@ export default function SidebarTreeItemEnhanced({
             ) : (
               <Folder className={`
                 ${styles.iconSize} flex-shrink-0 transition-all duration-200
-                ${isRecentlyCreated
-                  ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] animate-pulse'
-                  : isFavorite
-                    ? 'text-amber-400/90 group-hover:text-amber-300'
-                    : 'text-blue-400/80 group-hover:text-blue-300'
+                ${isHighlighted
+                  ? 'text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.7)] animate-pulse'
+                  : isRecentlyCreated
+                    ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] animate-pulse'
+                    : isFavorite
+                      ? 'text-amber-400/90 group-hover:text-amber-300'
+                      : 'text-blue-400/80 group-hover:text-blue-300'
                 }
               `} />
             )}
@@ -264,16 +271,24 @@ export default function SidebarTreeItemEnhanced({
     );
   }
 
+  // Combine refs for the outer div
+  const combinedRef = useCallback((node) => {
+    setNodeRef(node);
+    if (targetFolderRef) {
+      targetFolderRef.current = node;
+    }
+  }, [setNodeRef, targetFolderRef]);
+
   // Tree and Compact view (hierarchical with children)
   return (
     <div
-      ref={setNodeRef}
+      ref={combinedRef}
       style={dragStyle}
       {...dragAttributes}
       {...dragListeners}
       className={`w-full min-w-0 overflow-hidden group ${
         isValidDropTarget ? 'ring-2 ring-emerald-500/50 bg-emerald-500/10 rounded-lg' : ''
-      }`}
+      } ${isHighlighted ? 'ring-2 ring-emerald-400/60 bg-emerald-500/20 rounded-lg' : ''}`}
     >
       {/* Tree guide lines - only in tree/compact mode */}
       {viewMode !== 'table' && depth > 0 && (
@@ -320,13 +335,15 @@ export default function SidebarTreeItemEnhanced({
         ) : (
           <Folder className={`
             ${viewMode === 'compact' ? 'w-3.5 h-3.5' : 'w-4 h-4'} flex-shrink-0 transition-all duration-200
-            ${isRecentlyCreated
-              ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] animate-pulse'
-              : containsActiveDocument
-                ? 'text-emerald-400/80 drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]'
-                : isFavorite
-                  ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
-                  : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
+            ${isHighlighted
+              ? 'text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.7)] animate-pulse'
+              : isRecentlyCreated
+                ? 'text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] animate-pulse'
+                : containsActiveDocument
+                  ? 'text-emerald-400/80 drop-shadow-[0_0_6px_rgba(52,211,153,0.4)]'
+                  : isFavorite
+                    ? 'text-amber-400/90 group-hover:text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.2)]'
+                    : 'text-blue-400/80 group-hover:text-blue-300 group-hover:drop-shadow-[0_0_8px_rgba(96,165,250,0.2)]'
             }
           `} />
         )}
@@ -387,6 +404,8 @@ export default function SidebarTreeItemEnhanced({
                 activeDocumentId={activeDocumentId}
                 recentlyCreatedFolderId={recentlyCreatedFolderId}
                 viewMode={viewMode}
+                highlightedFolderId={highlightedFolderId}
+                targetFolderRef={child.id === highlightedFolderId ? targetFolderRef : null}
               />
             ))}
           </div>

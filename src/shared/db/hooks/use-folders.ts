@@ -64,10 +64,11 @@ export function useRxFolders(options: UseRxFoldersOptions = {}) {
 
   // Subscribe to folders
   useEffect(() => {
+    // If database or collection not ready, stay in loading state but don't clear data
+    // This prevents flash of empty state when navigating back to Dashboard
     if (!db || !collection || !enabled) {
       setIsLoading(false);
-      setAllFolders([]);
-      return;
+      return;  // Don't clear folders - preserve previous state
     }
 
     setIsLoading(true);

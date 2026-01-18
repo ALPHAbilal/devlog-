@@ -96,9 +96,18 @@ export function useRxDocuments(options: UseRxDocumentsOptions = {}) {
 
   // Subscribe to documents
   useEffect(() => {
-    if (!db || !collection || !enabled || !user?.id) {
+    // If database or collection not ready, stay in loading state but don't clear data
+    if (!db || !collection || !enabled) {
       setIsLoading(false);
-      setDocuments([]);
+      return;
+    }
+
+    // Wait for user auth - don't clear documents, just stay in loading state
+    // This prevents the flash of empty state when navigating back to Dashboard
+    // (auth context takes a moment to provide user.id on remount)
+    if (!user?.id) {
+      // Keep isLoading true while waiting for auth
+      // Don't clear documents - preserve previous state
       return;
     }
 

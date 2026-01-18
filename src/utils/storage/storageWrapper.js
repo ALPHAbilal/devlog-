@@ -309,6 +309,25 @@ export async function searchDocuments(userId, query, options = {}) {
   }));
 }
 
+/**
+ * Search all content (documents, blocks, folders) using FTS
+ * @param {string} userId - User ID
+ * @param {string} query - Search query
+ * @param {Object} options - Search options
+ * @returns {Promise<Array>} Search results with result_type
+ */
+export async function searchAll(userId, query, options = {}) {
+  const storageAdapter = await init();
+
+  if (storageAdapter.supabaseAdapter?.searchAll) {
+    return await storageAdapter.supabaseAdapter.searchAll(userId, query, options);
+  }
+
+  // No fallback - requires Supabase
+  console.warn('[storageWrapper] searchAll requires Supabase adapter');
+  return [];
+}
+
 // Reset function for logout
 export function reset() {
   adapter = null;
@@ -335,6 +354,7 @@ export const storageWrapper = {
   deleteEntry,
   searchEntries,
   searchDocuments,
+  searchAll,
   getAdapter,
   // Backward compatibility aliases
   getEntries: loadEntries,

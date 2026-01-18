@@ -233,8 +233,8 @@ COMMENT ON FUNCTION search_all IS
 ### Success Criteria
 
 #### Automated Verification:
-- [ ] Migration applies cleanly: `npx supabase db push` or apply via dashboard
-- [ ] Function exists: Query `SELECT * FROM search_all('user-uuid', 'test', 10)` returns results
+- [x] Migration applies cleanly: `npx supabase db push` or apply via dashboard
+- [x] Function exists: Query `SELECT * FROM search_all('user-uuid', 'test', 10)` returns results
 
 #### Manual Verification:
 - [ ] Search for folder name returns folder results
@@ -327,8 +327,8 @@ Add to exports (around line 337):
 ### Success Criteria
 
 #### Automated Verification:
-- [ ] No TypeScript/ESLint errors: `npm run lint`
-- [ ] Build succeeds: `npm run build`
+- [x] No TypeScript/ESLint errors: `npm run lint`
+- [x] Build succeeds: `npm run build`
 
 #### Manual Verification:
 - [ ] Call `storageWrapper.searchAll(userId, 'test')` from console returns results
@@ -627,8 +627,8 @@ case ACTIVITY_VIEWS.SEARCH:
 ### Success Criteria
 
 #### Automated Verification:
-- [ ] No lint errors: `npm run lint`
-- [ ] Build succeeds: `npm run build`
+- [x] No lint errors: `npm run lint` (in modified files)
+- [x] Build succeeds: `npm run build`
 
 #### Manual Verification:
 - [ ] Type in search box, see loading indicator

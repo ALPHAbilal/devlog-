@@ -208,8 +208,14 @@ function ViewContent({
     case ACTIVITY_VIEWS.SEARCH:
       return (
         <SearchView
-          documents={documents}
           onOpenDocument={onOpenDocument}
+          onOpenFolder={(folder) => {
+            // When a folder is clicked from search results, we could:
+            // 1. Navigate to explorer view (not implemented yet)
+            // 2. Show a toast with the folder name
+            // For now, just log it - user can navigate manually
+            console.log('[SearchView] Folder selected:', folder);
+          }}
         />
       );
 

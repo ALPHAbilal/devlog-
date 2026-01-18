@@ -476,6 +476,42 @@ export class SupabaseAdapterOptimized {
   }
 
   /**
+   * Search all content using PostgreSQL Full Text Search
+   * Searches documents (title, tags, blocks) and folders
+   * @param {string} userId - User ID
+   * @param {string} query - Search query
+   * @param {Object} options - Search options
+   * @returns {Promise<Array>} Array of results with result_type, match_reason, match_score
+   */
+  async searchAll(userId, query, options = {}) {
+    const { limit = 50 } = options;
+    const cacheKey = `searchAll:${userId}:${query}:${limit}`;
+
+    try {
+      const result = await deduplicateRequest(cacheKey, async () => {
+        const { data, error } = await this.supabase.rpc('search_all', {
+          p_user_id: userId,
+          p_search_query: query,
+          p_limit: limit
+        });
+
+        if (error) {
+          console.error('[SupabaseAdapter] searchAll error:', error);
+          throw error;
+        }
+
+        return { data };
+      });
+
+      // Sort by score descending
+      return (result.data || []).sort((a, b) => b.match_score - a.match_score);
+    } catch (error) {
+      console.error('[SupabaseAdapter] searchAll failed:', error);
+      return [];
+    }
+  }
+
+  /**
    * Bulk operations for blocks
    */
   async saveBlocks(documentId, blocks) {

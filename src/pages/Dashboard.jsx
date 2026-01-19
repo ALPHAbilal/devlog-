@@ -786,9 +786,15 @@ export default function Dashboard() {
 
   // Sync paginated documents to both allDocuments state AND IndexedDB cache
   useEffect(() => {
+    console.log('[SYNC-DEBUG] Sync effect triggered:', {
+      paginatedDocsCount: paginatedDocuments?.length || 0,
+      condition: paginatedDocuments && paginatedDocuments.length > 0 ? 'WILL SYNC' : 'SKIPPING',
+    });
+
     if (paginatedDocuments && paginatedDocuments.length > 0) {
       // Merge: Preserve locally-created documents with their blocks
       setAllDocuments(prev => {
+        console.log('[SYNC-DEBUG] setAllDocuments called, prev count:', prev?.length || 0);
         const paginatedIds = new Set(paginatedDocuments.map(d => d.id));
 
         // Keep locally-created documents that aren't synced yet
@@ -1582,6 +1588,13 @@ export default function Dashboard() {
         {/* Main area - fills remaining height */}
         <div className="flex-1 min-h-0 flex overflow-hidden">
           {/* Enhanced Sidebar with Activity Bar */}
+          {/* DEBUG: Log what we pass to sidebar */}
+          {console.log('[SIDEBAR-PASS-DEBUG]', {
+            foldersCount: folders?.length || 0,
+            allDocumentsCount: allDocuments?.length || 0,
+            paginatedDocsCount: paginatedDocuments?.length || 0,
+            activeTabId: activeTabId?.substring(0, 8),
+          })}
           <SidebarEnhanced
             isOpen={showSidebar}
             onClose={closeMobileSidebar}

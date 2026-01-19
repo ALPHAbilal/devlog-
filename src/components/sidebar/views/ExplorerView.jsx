@@ -164,6 +164,14 @@ export function ExplorerView({
 
   // Build tree structure from folders and documents - RECURSIVE to handle any depth
   const treeData = useMemo(() => {
+    // DEBUG: Log what ExplorerView receives
+    console.log('[EXPLORER-DEBUG] Building treeData:', {
+      foldersCount: folders?.length || 0,
+      documentsCount: documents?.length || 0,
+      firstDoc: documents?.[0]?.id?.substring(0, 8),
+      lastDoc: documents?.[documents?.length - 1]?.id?.substring(0, 8),
+    });
+
     // Recursive function to process folders at any depth
     const processFolder = (folder, depth = 0) => {
       const folderDocs = documents.filter(doc => doc.folder_id === folder.id);

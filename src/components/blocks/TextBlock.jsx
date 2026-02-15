@@ -69,9 +69,9 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
     };
   }, []);
 
-  // Sync content from block prop
+  // Sync content from block prop (skip if local edit pending save)
   useEffect(() => {
-    if (block.content !== content) {
+    if (block.content !== content && !hasContentChanged) {
       setContent(block.content || '');
       setHtmlContent(markdownToHtml(block.content || ''));
     }

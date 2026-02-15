@@ -1,11 +1,11 @@
- [DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized: {defaultTimeout_ms: 259200000, defaultTimeout_hours: 72, defaultTimeout_days: 3, timestamp: '2026-02-15T20:02:32.148Z'}
- [RxDB Replication] Using singleton Supabase client
- [RxDB Replication] Using replicateRxCollection (custom handlers)
+index-BojqEohK.js:26 [DEBUG-TIMEOUT-1] 🔧 OptimizedSupabaseClient initialized: {defaultTimeout_ms: 259200000, defaultTimeout_hours: 72, defaultTimeout_days: 3, timestamp: '2026-02-15T20:10:11.586Z'}
+index-BojqEohK.js:26 [RxDB Replication] Using singleton Supabase client
+index-BojqEohK.js:26 [RxDB Replication] Using replicateRxCollection (custom handlers)
  IndexedDB initialized successfully
  [TAB-RESTORE] {tabCount: 1, activeTabId: '54a04334', tabIds: Array(1)}
- [DEBUG-TIMEOUT-14] ⚙️ Settings from LOCALSTORAGE: {source: 'localStorage.devlogSettings', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, timestamp: '2026-02-15T20:02:32.188Z'}
+ [DEBUG-TIMEOUT-14] ⚙️ Settings from LOCALSTORAGE: {source: 'localStorage.devlogSettings', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, timestamp: '2026-02-15T20:10:11.651Z'}
  [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 259200000, oldTimeout_hours: 72, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
- [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:32.189Z', timestamp: '2026-02-15T20:02:32.189Z'}
+ [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:11.652Z', timestamp: '2026-02-15T20:10:11.652Z'}
  [DatabaseProvider] Initializing RxDB...
  [RxDB] Creating database...
  -------------- RxDB Open Core RxStorage -------------------------------
@@ -15,56 +15,56 @@ For professional users and production environments, we highly recommend consider
  https://rxdb.info/premium/?console=dexie 
 If you already purchased premium access you can disable this log by calling the setPremiumFlag() function from rxdb-premium/plugins/shared.
 ---------------------------------------------------------------------
-(anonymous) @ index-DdF_BKK8.js:26
-e.bulkWrite @ index-DdF_BKK8.js:836
+(anonymous) @ index-BojqEohK.js:26
+e.bulkWrite @ index-BojqEohK.js:836
 await in e.bulkWrite
-(anonymous) @ index-DdF_BKK8.js:834
-wrapCall @ index-DdF_BKK8.js:834
-e.lockedRun @ index-DdF_BKK8.js:834
-bulkWrite @ index-DdF_BKK8.js:834
-Ike @ index-DdF_BKK8.js:834
-t @ index-DdF_BKK8.js:834
-(anonymous) @ index-DdF_BKK8.js:834
+(anonymous) @ index-BojqEohK.js:834
+wrapCall @ index-BojqEohK.js:834
+e.lockedRun @ index-BojqEohK.js:834
+bulkWrite @ index-BojqEohK.js:834
+Ike @ index-BojqEohK.js:834
+t @ index-BojqEohK.js:834
+(anonymous) @ index-BojqEohK.js:834
 await in (anonymous)
-Qke @ index-DdF_BKK8.js:834
-RF @ index-DdF_BKK8.js:837
-(anonymous) @ index-DdF_BKK8.js:837
-sAe @ index-DdF_BKK8.js:837
-(anonymous) @ index-DdF_BKK8.js:837
-(anonymous) @ index-DdF_BKK8.js:837
-pv @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-Ol @ index-DdF_BKK8.js:106
-m3 @ index-DdF_BKK8.js:106
-L3 @ index-DdF_BKK8.js:106
-(anonymous) @ index-DdF_BKK8.js:106
-V @ index-DdF_BKK8.js:91
+Qke @ index-BojqEohK.js:834
+RF @ index-BojqEohK.js:837
+(anonymous) @ index-BojqEohK.js:837
+sAe @ index-BojqEohK.js:837
+(anonymous) @ index-BojqEohK.js:837
+(anonymous) @ index-BojqEohK.js:837
+pv @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+Ol @ index-BojqEohK.js:106
+m3 @ index-BojqEohK.js:106
+L3 @ index-BojqEohK.js:106
+(anonymous) @ index-BojqEohK.js:106
+V @ index-BojqEohK.js:91
  IndexedDB initialized successfully
  [Supabase] Restored existing session: 8eac28e6-0127-40d1-ba55-c10cbe52a32b
- [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:32.216Z', timestamp: '2026-02-15T20:02:32.216Z'}
- [DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED: {events: Array(4), timeout_hours: 0.5, timestamp: '2026-02-15T20:02:32.216Z'}
+ [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:11.678Z', timestamp: '2026-02-15T20:10:11.678Z'}
+ [DEBUG-TIMEOUT-6] 👀 Activity monitoring ENABLED: {events: Array(4), timeout_hours: 0.5, timestamp: '2026-02-15T20:10:11.678Z'}
  [Supabase] Auth event: INITIAL_SESSION
  [AuthContext] Auth state change received: INITIAL_SESSION {mounted: true, hasSession: true, userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b'}
  [RxDB] Database ready: (3) ['documents', 'folders', 'blocks']
@@ -75,7 +75,8 @@ V @ index-DdF_BKK8.js:91
  [RxDB] Pre-insert hooks set up for blocks
  [RxDB Replication] Starting replications with replicateRxCollection...
  [RxDB Replication] 🔍 Verifying Supabase schema...
- [DEBUG-TIMEOUT-8] 🔑 JWT Token status: {expiresAt: '2026-02-15T21:02:06.000Z', timeUntilExpiry_seconds: 3574, timeUntilExpiry_minutes: 59, refreshThreshold_seconds: 300, willRefreshSoon: false, …}
+ SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
+ [DEBUG-TIMEOUT-8] 🔑 JWT Token status: {expiresAt: '2026-02-15T21:02:06.000Z', timeUntilExpiry_seconds: 3115, timeUntilExpiry_minutes: 51, refreshThreshold_seconds: 300, willRefreshSoon: false, …}
  [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
  [CACHE-GET] {lookingFor: '54a04334', cacheSize: 0, found: false, cachedIds: Array(0)}
  [ACTIVE-DOC] Checking IndexedDB cache: {id: '54a04334', found: false}
@@ -88,7 +89,7 @@ V @ index-DdF_BKK8.js:91
  [PAGINATION-SCROLL] ⚠️ Scroll container not found
  [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
  [SIDEBAR-PASS-DEBUG] {foldersCount: 0, allDocumentsCount: 0, paginatedDocsCount: 0, activeTabId: '54a04334'}
- [CACHE-LOAD] {docCount: 1, loadTime_ms: 39, docIds: Array(1)}
+ [CACHE-LOAD] {docCount: 1, loadTime_ms: 35, docIds: Array(1)}
  [Dashboard] Loaded 1 documents from IndexedDB cache
  [Dashboard] Starting background Supabase sync...
  [useRxDocuments] loadInitial called - RxDB is reactive
@@ -98,8 +99,8 @@ V @ index-DdF_BKK8.js:91
  [SIDEBAR-PASS-DEBUG] {foldersCount: 0, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
  [SYNC-STATUS-POLL] ⏳ Waiting for SmartSync manager...
  [SYNC-STATUS-POLL] ⚠️ Not ready to start polling: {hasDocumentId: true, managerReady: false, hasManagerRef: false}
- [MULTI-TAB] 🆔 Tab 77DE5V initialized for document 54a04334
- SmartSync: Recovering 4 emergency changes
+ [MULTI-TAB] 🆔 Tab BI3TVS initialized for document 54a04334
+ SmartSync: Recovering 10 emergency changes
  [MULTI-TAB] 📄 Document 54a04334 opened in this tab
  [DEBUG-DASHBOARD] Combined: 0 folders + 0 documents = 0 total items
  [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: []
@@ -107,144 +108,154 @@ V @ index-DdF_BKK8.js:91
  [SIDEBAR-PASS-DEBUG] {foldersCount: 0, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
  [SYNC-STATUS-POLL] ✅ SmartSync manager ready
  [SYNC-STATUS-POLL] ✅ Starting status polling for document: 54a04334-cd8d-47b3-a6b1-e884e91d830b
- SW registered: ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://www.devlog.design/', …}
  SmartSync: IndexedDB initialized
+ [DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table): {source: 'profiles.settings', userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, …}
+ [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 1800000, oldTimeout_hours: 0.5, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
+ [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:11.893Z', timestamp: '2026-02-15T20:10:11.893Z'}
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [SIDEBAR-PASS-DEBUG] {foldersCount: 0, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
+ 🔎 BlockSerializer.deserialize INPUT: {id: 'df331839-9127-4d82-a9d5-3c94df35e190', type: 'text', hasContent: true, contentType: 'string', contentLength: 1423, …}
+ 🔎 BlockSerializer.deserialize INPUT: {id: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', type: 'text', hasContent: true, contentType: 'string', contentLength: 84, …}
+ 🔎 BlockSerializer.deserialize INPUT: {id: '992a8030-4d5f-408c-aa8c-4232f688312a', type: 'text', hasContent: true, contentType: 'string', contentLength: 14, …}
+ SmartSync: Found 4 unsynced changes in IndexedDB
+ [RECOVERY] Processing change from IndexedDB: {action: 'UPDATE', blockId: 'df331839-9127-4d82-a9d5-3c94df35e190', hasContent: true, contentLength: 1423, contentPreview: '{"content":"```\\nServer generates signed URL → pas', …}
+ [RECOVERY] Processing change from IndexedDB: {action: 'CREATE', blockId: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', hasContent: true, contentLength: 14, contentPreview: '{"content":""}', …}
+ [RECOVERY] Processing change from IndexedDB: {action: 'UPDATE', blockId: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', hasContent: true, contentLength: 84, contentPreview: '{"content":"C:\\\\Users\\\\dell\\\\Desktop\\\\Myprojects\\\\', …}
+ [RECOVERY] Processing change from IndexedDB: {action: 'CREATE', blockId: '992a8030-4d5f-408c-aa8c-4232f688312a', hasContent: true, contentLength: 14, contentPreview: '{"content":""}', …}
+ [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
+ [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 2, visibleCount: 3}
+ [PASTE-DEBUG-CONV] markdownToHtml START {inputLength: 1398}
+ [PASTE-DEBUG-CONV] markdownToHtml END {inputLength: 1398, outputLength: 2151, durationMs: '1.00'}
+ [PASTE-DEBUG-CONV] markdownToHtml START {inputLength: 64}
+ [PASTE-DEBUG-CONV] markdownToHtml END {inputLength: 64, outputLength: 124, durationMs: '0.50'}
+ [RxDB Replication] ✅ Table "documents" has required columns. Row count: 415
+ [RxDB Replication] 📊 Sample documents data: (2) [{…}, {…}]
+ 📝 TextBlock df331839-9127-4d82-a9d5-3c94df35e190 rendered at 2026-02-15T20:10:11.997Z
+ 📝 TextBlock df26c74a-42f8-4573-b479-a3e406e2c1d9 rendered at 2026-02-15T20:10:11.999Z
+ 📝 TextBlock 992a8030-4d5f-408c-aa8c-4232f688312a rendered at 2026-02-15T20:10:12.000Z
  [RxDB Replication] ✅ Table "folders" has required columns. Row count: 107
-index-DdF_BKK8.js:26 [RxDB Replication] 📊 Sample folders data: (2) [{…}, {…}]
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table): {source: 'profiles.settings', userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, …}
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 1800000, oldTimeout_hours: 0.5, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:32.482Z', timestamp: '2026-02-15T20:02:32.483Z'}
-index-DdF_BKK8.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
-index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 0, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
-index-DdF_BKK8.js:26 [RxDB Replication] ✅ Table "documents" has required columns. Row count: 415
-index-DdF_BKK8.js:26 [RxDB Replication] 📊 Sample documents data: (2) [{…}, {…}]
-index-DdF_BKK8.js:26 SmartSync: Found 2 unsynced changes in IndexedDB
-index-DdF_BKK8.js:26 [RECOVERY] Processing change from IndexedDB: {action: 'UPDATE', blockId: 'df331839-9127-4d82-a9d5-3c94df35e190', hasContent: true, contentLength: 1423, contentPreview: '{"content":"```\\nServer generates signed URL → pas', …}
-index-DdF_BKK8.js:26 [RECOVERY] Processing change from IndexedDB: {action: 'CREATE', blockId: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', hasContent: true, contentLength: 14, contentPreview: '{"content":""}', …}
-index-DdF_BKK8.js:26 [SYNC-SCHEDULE] ⏳ Have changes, calling debouncedSync (5s debounce)
-index-DdF_BKK8.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'df331839-9127-4d82-a9d5-3c94df35e190', type: 'text', hasContent: true, contentType: 'string', contentLength: 1423, …}
-index-DdF_BKK8.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', type: 'text', hasContent: true, contentType: 'string', contentLength: 14, …}
-index-DdF_BKK8.js:26 [RxDB Replication] ✅ Table "blocks" has required columns. Row count: 2793
-index-DdF_BKK8.js:26 [RxDB Replication] 📊 Sample blocks data: (2) [{…}, {…}]
-index-DdF_BKK8.js:26 [RxDB Replication] ✅ All Supabase tables have required columns
-index-DdF_BKK8.js:26 [RxDB Replication] 🔌 Forcing Supabase Realtime WebSocket initialization...
-index-DdF_BKK8.js:26 [VIRTUOSO-RANGE] Visible range changed: {startIndex: 0, endIndex: 1, visibleCount: 2}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] markdownToHtml START {inputLength: 1398}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] markdownToHtml END {inputLength: 1398, outputLength: 2151, durationMs: '0.50'}
-index-DdF_BKK8.js:26 📝 TextBlock df331839-9127-4d82-a9d5-3c94df35e190 rendered at 2026-02-15T20:02:32.563Z
-index-DdF_BKK8.js:26 📝 TextBlock df26c74a-42f8-4573-b479-a3e406e2c1d9 rendered at 2026-02-15T20:02:32.564Z
-index-DdF_BKK8.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
-index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T19:03:48.047Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T23:47:14.882Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:57:19.718Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "ddd": 0 subfolders + 0 documents = 0 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:23.159Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T19:25:19.330Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:56:46.807Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (5)": 5 subfolders + 0 documents = 5 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:54:29.374Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "new folder 4": 2 subfolders + 0 documents = 2 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (6)": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T11:11:59.280Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T21:13:51.338Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T10:18:58.469Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-18T10:01:22.725Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "introduction": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "world of the API": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (4)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-19T13:01:17.616Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T12:10:37.944Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "another test": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T07:15:16.472Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "wow": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T21:23:40.667Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-24T21:23:40.667Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "TRANSLATION": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-03T10:02:51.181Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "API": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-14T13:41:50.071Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "prompts": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-17T10:54:31.319Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "class": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T15:27:29.468Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "FLASK": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T16:01:00.271Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fundamentals": 4 subfolders + 0 documents = 4 items, most recent: 2025-11-17T10:54:31.319Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:42.460Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "problems": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:42.460Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:57.215Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "seo thing": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T14:32:02.089Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2026-01-18T14:32:02.089Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T11:51:01.742Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:14:28.504Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "vvv": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:15:24.818Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "hello": 3 subfolders + 0 documents = 3 items, most recent: 2025-11-01T11:51:01.742Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "chatbot africawork": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-11T21:00:03.689Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "planing": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-08T09:24:09.176Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-27T21:54:19.336Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-27T21:54:19.336Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T21:14:26.415Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T21:14:26.415Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "suf folder azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-28T08:20:39.989Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Azure": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-28T08:20:39.989Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "new ui of the folder add": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:24:10.787Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T10:15:42.785Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:34:43.643Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-16T16:34:43.643Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:53:33.052Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-24T22:53:33.052Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:58:39.132Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T17:53:47.591Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2026-01-14T17:53:47.591Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T18:38:02.421Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "can 2": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 0 documents = 0 items, most recent: 2026-02-12T20:42:06.939Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "indexdb": 0 subfolders + 0 documents = 0 items, most recent: 2026-02-14T13:47:13.006Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T17:25:46.467Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T17:25:46.467Z
-index-DdF_BKK8.js:26 [DEBUG-DASHBOARD] Combined: 42 folders + 0 documents = 42 total items
-index-DdF_BKK8.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
-index-DdF_BKK8.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
-index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
+ [RxDB Replication] 📊 Sample folders data: (2) [{…}, {…}]
+ [RxDB Replication] ✅ Table "blocks" has required columns. Row count: 2794
+ [RxDB Replication] 📊 Sample blocks data: (2) [{…}, {…}]
+ [RxDB Replication] ✅ All Supabase tables have required columns
+ [RxDB Replication] 🔌 Forcing Supabase Realtime WebSocket initialization...
+ [DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table): {source: 'profiles.settings', userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, …}
+ [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 1800000, oldTimeout_hours: 0.5, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
+ [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:12.031Z', timestamp: '2026-02-15T20:10:12.031Z'}
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [SIDEBAR-PASS-DEBUG] {foldersCount: 0, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
+ [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
+ [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
+ [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
+ [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T19:03:48.047Z
+ [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T23:47:14.882Z
+ [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:57:19.718Z
+ [DEBUG-FOLDER] Folder "ddd": 0 subfolders + 0 documents = 0 items, most recent: 2026-02-09T19:24:30.179Z
+ [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:23.159Z
+ [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2026-02-09T19:24:30.179Z
+ [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T19:25:19.330Z
+ [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:56:46.807Z
+ [DEBUG-FOLDER] Folder "New Folder (5)": 5 subfolders + 0 documents = 5 items, most recent: 2026-02-09T19:24:30.179Z
+ [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:54:29.374Z
+ [DEBUG-FOLDER] Folder "new folder 4": 2 subfolders + 0 documents = 2 items, most recent: 2026-02-09T19:24:30.179Z
+ [DEBUG-FOLDER] Folder "New Folder (6)": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T11:11:59.280Z
+ [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T21:13:51.338Z
+ [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T10:18:58.469Z
+ [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-18T10:01:22.725Z
+ [DEBUG-FOLDER] Folder "introduction": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
+ [DEBUG-FOLDER] Folder "world of the API": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
+ [DEBUG-FOLDER] Folder "New Folder (4)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-19T13:01:17.616Z
+ [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T12:10:37.944Z
+ [DEBUG-FOLDER] Folder "another test": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T07:15:16.472Z
+ [DEBUG-FOLDER] Folder "wow": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T21:23:40.667Z
+ [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-24T21:23:40.667Z
+ [DEBUG-FOLDER] Folder "TRANSLATION": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-03T10:02:51.181Z
+ [DEBUG-FOLDER] Folder "API": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-14T13:41:50.071Z
+ [DEBUG-FOLDER] Folder "prompts": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-17T10:54:31.319Z
+ [DEBUG-FOLDER] Folder "class": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T15:27:29.468Z
+ [DEBUG-FOLDER] Folder "FLASK": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T16:01:00.271Z
+ [DEBUG-FOLDER] Folder "fundamentals": 4 subfolders + 0 documents = 4 items, most recent: 2025-11-17T10:54:31.319Z
+ [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:42.460Z
+ [DEBUG-FOLDER] Folder "problems": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:42.460Z
+ [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
+ [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:57.215Z
+ [DEBUG-FOLDER] Folder "seo thing": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T14:32:02.089Z
+ [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2026-01-18T14:32:02.089Z
+ [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
+ [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T11:51:01.742Z
+ [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:14:28.504Z
+ [DEBUG-FOLDER] Folder "vvv": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:15:24.818Z
+ [DEBUG-FOLDER] Folder "hello": 3 subfolders + 0 documents = 3 items, most recent: 2025-11-01T11:51:01.742Z
+ [DEBUG-FOLDER] Folder "chatbot africawork": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-11T21:00:03.689Z
+ [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
+ [DEBUG-FOLDER] Folder "planing": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-08T09:24:09.176Z
+ [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-27T21:54:19.336Z
+ [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
+ [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-27T21:54:19.336Z
+ [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
+ [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
+ [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+ [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+ [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T21:14:26.415Z
+ [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T21:14:26.415Z
+ [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
+ [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
+ [DEBUG-FOLDER] Folder "suf folder azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-28T08:20:39.989Z
+ [DEBUG-FOLDER] Folder "Azure": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-28T08:20:39.989Z
+ [DEBUG-FOLDER] Folder "new ui of the folder add": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:24:10.787Z
+ [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T10:15:42.785Z
+ [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:34:43.643Z
+ [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
+ [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-16T16:34:43.643Z
+ [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
+ [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
+ [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
+ [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
+ [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
+ [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
+ [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
+ [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
+ [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
+ [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
+ [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
+ [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
+ [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
+ [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
+ [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
+ [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
+ [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:53:33.052Z
+ [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-24T22:53:33.052Z
+ [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
+ [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
+ [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
+ [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
+ [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
+ [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
+ [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
+ [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
+ [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:58:39.132Z
+ [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
+ [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
+ [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
+ [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 0 documents = 2 items, most recent: 2026-01-14T17:53:47.591Z
+ [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
+ [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
+ [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
+ [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
+ [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2026-01-14T17:53:47.591Z
+ [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T18:38:02.421Z
+ [DEBUG-FOLDER] Folder "can 2": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
+ [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
+ [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 0 documents = 0 items, most recent: 2026-02-12T20:42:06.939Z
+ [DEBUG-FOLDER] Folder "indexdb": 0 subfolders + 0 documents = 0 items, most recent: 2026-02-14T13:47:13.006Z
+ [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
+ [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
+ [DEBUG-DASHBOARD] Combined: 42 folders + 0 documents = 42 total items
+ [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
+ [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+ [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 1, paginatedDocsCount: 0, activeTabId: '54a04334'}
  [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
  [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 1, paginatedDocsCount: 130, activeTabId: '54a04334'}
  [SYNC-DEBUG] Sync effect triggered: {paginatedDocsCount: 130, condition: 'WILL SYNC'}
@@ -359,15 +370,10 @@ index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 
  [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
  [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 2 documents = 2 items, most recent: 2026-02-12T20:42:06.939Z
  [DEBUG-FOLDER] Folder "indexdb": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-14T13:47:13.006Z
- [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T17:25:46.467Z
- [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T17:25:46.467Z
+ [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
+ [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
  [DEBUG-DASHBOARD] Combined: 42 folders + 99 documents = 141 total items
  [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
- [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
- [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
- [DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table): {source: 'profiles.settings', userId: '8eac28e6-0127-40d1-ba55-c10cbe52a32b', sessionTimeout_minutes: 30, sessionTimeout_hours: 0.5, allSettings: {…}, …}
- [DEBUG-TIMEOUT-2] ⚠️ Timeout OVERRIDDEN via setInactivityTimeout(): {oldTimeout_ms: 1800000, oldTimeout_hours: 0.5, newTimeout_minutes: 30, newTimeout_ms: 1800000, newTimeout_hours: 0.5, …}
- [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:32.690Z', timestamp: '2026-02-15T20:02:32.690Z'}
  [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
  [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
  [RxDB Replication] Channel status: SUBSCRIBED 
@@ -397,21 +403,18 @@ index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 
  [RxDB Replication] folders: Active
  [RxDB Replication] blocks: Active
  [RxDB Replication] blocks: Active
- [RxDB Replication] folders: Pull starting {checkpoint: {…}, batchSize: 100}
  [RxDB Replication] documents: Pull starting {checkpoint: {…}, batchSize: 100}
- [RxDB Replication] documents: Active
+ [RxDB Replication] folders: Pull starting {checkpoint: {…}, batchSize: 100}
  [RxDB Replication] blocks: Pull starting {checkpoint: {…}, batchSize: 200}
- [RxDB Replication] blocks: Active
+ [RxDB Replication] documents: Active
  [RxDB Replication] folders: Active
+ [RxDB Replication] blocks: Active
  [RxDB Replication] folders: Pulled 1 docs {newCheckpoint: {…}, hasMore: false}
- [RxDB Replication] blocks: Pull storing block df331839-9127-4d82-a9d5-3c94df35e190 with content length: 1423
- [RxDB Replication] blocks: Pull storing block df26c74a-42f8-4573-b479-a3e406e2c1d9 with content length: 14
- [RxDB Replication] blocks: Pulled 2 docs {newCheckpoint: {…}, hasMore: false}
- [RxDB Replication] documents: Pulled 1 docs {newCheckpoint: {…}, hasMore: false}
  [RxDB Replication] folders: Active
  [RxDB Replication] folders: Active
  [RxDB Replication] folders: Received 1 docs from pull [{…}]
  [RxDB Replication] folders: Active
+ [RxDB Replication] documents: Pulled 1 docs {newCheckpoint: {…}, hasMore: false}
  [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
  [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
  [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
@@ -518,21 +521,14 @@ index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 
  [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
  [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 2 documents = 2 items, most recent: 2026-02-12T20:42:06.939Z
  [DEBUG-FOLDER] Folder "indexdb": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-14T13:47:13.006Z
- [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
- [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
+ [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T20:09:43.565Z
+ [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T20:09:43.565Z
  [DEBUG-DASHBOARD] Combined: 42 folders + 99 documents = 141 total items
  [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
  [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
  [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
- [RxDB Replication] blocks: Active
- [RxDB Replication] blocks: Active
- [RxDB Replication] blocks: Received 1 docs from pull [{…}]
- [RxDB Replication] blocks: Received 1 docs from pull [{…}]
- 🔎 BlockSerializer.deserialize INPUT: {id: 'df331839-9127-4d82-a9d5-3c94df35e190', type: 'text', hasContent: true, contentType: 'string', contentLength: 1423, …}
- 🔎 BlockSerializer.deserialize INPUT: {id: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', type: 'text', hasContent: true, contentType: 'string', contentLength: 14, …}
- [RxDB Replication] blocks: Active
- [BLOCK-MEMO] textBlock df331839 - PREVENTED
- [BLOCK-MEMO] textBlock df26c74a - PREVENTED
+ ExpandedView: Initial load period complete, enabling saves
+ [RxDB Replication] folders: Inactive
  [RxDB Replication] documents: Active
  [RxDB Replication] documents: Active
  [RxDB Replication] documents: Received 1 docs from pull [{…}]
@@ -650,190 +646,208 @@ index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 
  [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'bca59e66', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
  [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '8e80b655', localTitle: 'documentation', serverTitle: 'documentation', localBlocks: 0, reason: 'createdLocally'}
  [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '32d55589', localTitle: 'example test', serverTitle: 'example test', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'bafb7059', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '0ee01728', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '9b95dd22', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'b68482da', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '7f8cebf7', localTitle: 'what i noticed', serverTitle: 'what i noticed', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '175fcaab', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '295b9ee4', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'f386d590', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'cb3251dd', localTitle: 'test 0101010', serverTitle: 'test 0101010', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '7a3294a4', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '61fed872', localTitle: 'test 1010', serverTitle: 'test 1010', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'a1c5a052', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'cf91e992', localTitle: 'new test 1010101', serverTitle: 'new test 1010101', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'd718c97f', localTitle: 'the last test', serverTitle: 'the last test', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'e8dbedce', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '99809bc9', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '5b229353', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '041c93ba', localTitle: 'this another test', serverTitle: 'this another test', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '29d943d3', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '8a7d940c', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '7266c71c', localTitle: 'another test for the new updates', serverTitle: 'another test for the new updates', localBlocks: 0, reason: 'localNewer'}
-index-DdF_BKK8.js:26 [DEBUG-CREATE-8] Merging docs: {paginated: 130, locallyCreatedNew: 0, localIds: Array(0)}
-index-DdF_BKK8.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
-index-DdF_BKK8.js:26 [ACTIVE-DOC] Found in allDocuments: {id: '54a04334', title: 'security look'}
-index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 5 documents = 5 items, most recent: 2026-01-14T19:03:48.047Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T23:47:14.882Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:57:19.718Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "ddd": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:23.159Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 1 documents = 3 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T19:25:19.330Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:56:46.807Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (5)": 5 subfolders + 0 documents = 5 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:54:29.374Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "new folder 4": 2 subfolders + 0 documents = 2 items, most recent: 2026-02-09T19:24:30.179Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (6)": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T11:11:59.280Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T21:13:51.338Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T10:18:58.469Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-18T10:01:22.725Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "introduction": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "world of the API": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (4)": 0 subfolders + 1 documents = 1 items, most recent: 2026-01-19T13:01:17.616Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 3 documents = 3 items, most recent: 2025-08-21T12:10:37.944Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "another test": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-17T07:15:16.472Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "wow": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-24T21:23:40.667Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 2 documents = 4 items, most recent: 2025-07-24T21:23:40.667Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "TRANSLATION": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-03T10:02:51.181Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "API": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-14T13:41:50.071Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "prompts": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-17T10:54:31.319Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "class": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T15:27:29.468Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "FLASK": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T16:01:00.271Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fundamentals": 4 subfolders + 0 documents = 4 items, most recent: 2025-11-17T10:54:31.319Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:42.460Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "problems": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:42.460Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:57.215Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "seo thing": 1 subfolders + 1 documents = 2 items, most recent: 2026-01-18T14:32:02.089Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2026-01-18T14:32:02.089Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T11:51:01.742Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:14:28.504Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "vvv": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:15:24.818Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "hello": 3 subfolders + 0 documents = 3 items, most recent: 2025-11-01T11:51:01.742Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "chatbot africawork": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-11T21:00:03.689Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "planing": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-08T09:24:09.176Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-27T21:54:19.336Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-27T21:54:19.336Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T21:14:26.415Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T21:14:26.415Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "suf folder azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-28T08:20:39.989Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Azure": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-28T08:20:39.989Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "new ui of the folder add": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:24:10.787Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-24T10:15:42.785Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-16T16:34:43.643Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 2 documents = 5 items, most recent: 2025-08-16T16:34:43.643Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:53:33.052Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-24T22:53:33.052Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-25T09:58:39.132Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T17:53:47.591Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2026-01-14T17:53:47.591Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T18:38:02.421Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "can 2": 1 subfolders + 3 documents = 4 items, most recent: 2026-01-16T18:52:45.262Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 2 documents = 2 items, most recent: 2026-02-12T20:42:06.939Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "indexdb": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-14T13:47:13.006Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
-index-DdF_BKK8.js:26 [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T20:02:31.524Z
-index-DdF_BKK8.js:26 [DEBUG-DASHBOARD] Combined: 42 folders + 99 documents = 141 total items
-index-DdF_BKK8.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
-index-DdF_BKK8.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
-index-DdF_BKK8.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
-index-DdF_BKK8.js:26 [RxDB Replication] folders: Inactive
-index-DdF_BKK8.js:26 [RxDB Replication] blocks: Inactive
-index-DdF_BKK8.js:26 [RxDB Replication] documents: Inactive
-index-DdF_BKK8.js:26 ExpandedView: Initial load period complete, enabling saves
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-7] 🖱️ User activity detected: {activityCount: 1, lastEvent: 'mousedown', timerWillReset: true, timestamp: '2026-02-15T20:02:33.368Z'}
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:33.369Z', timestamp: '2026-02-15T20:02:33.369Z'}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:34.091Z', timestamp: '2026-02-15T20:02:34.091Z'}
-index-DdF_BKK8.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:32:34.221Z', timestamp: '2026-02-15T20:02:34.221Z'}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-1] TipTap handlePaste fired {hasTextData: true, textLength: 11120, textPreview: "# Goose + MiniMax M2.5 — Your $5/Month Claude Code Alternative\r\n\r\n## What You're Building\r\n\r\nA termi", hasHtmlData: false, htmlLength: 0, …}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-1] ⚠️ LARGE PASTE DETECTED: 11120 chars
-(anonymous) @ index-DdF_BKK8.js:26
-handlePaste @ index-DdF_BKK8.js:1078
-(anonymous) @ index-DdF_BKK8.js:974
-someProp @ index-DdF_BKK8.js:974
-Vb @ index-DdF_BKK8.js:974
-Bo.paste @ index-DdF_BKK8.js:974
-t.dom.addEventListener.t.input.eventHandlers.<computed> @ index-DdF_BKK8.js:974
-r @ index-DdF_BKK8.js:26
-index-DdF_BKK8.js:26 [PASTE-DEBUG-2] TipTap onUpdate fired {htmlLength: 14312, htmlPreview: '<p># Goose + MiniMax M2.5 — Your $5/Month Claude C…>A terminal-based AI coding agent that works almo', htmlEnd: '<p><em>Setup verified against Goose source code (GitHub: block/goose) on February 15, 2026.</em></p>'}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-3] TextBlock handleEditorUpdate START {htmlLength: 14312}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown START {inputLength: 14312}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown END {inputLength: 14312, outputLength: 10855, durationMs: '0.50', truncated: 'normal'}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-3] htmlToMarkdown completed {inputLength: 14312, outputLength: 10855, durationMs: '0.70', markdownPreview: '# Goose + MiniMax M2.5 — Your $5/Month Claude Code…ed AI coding agent that works almost identically ', markdownEnd: 'the cost.\n---\n*Setup verified against Goose source code (GitHub: block/goose) on February 15, 2026.*'}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-4] Setting state {markdownLength: 10855, htmlLength: 14312}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-4] State updated successfully
-index-DdF_BKK8.js:26 [PASTE-DEBUG-5] handleEditorBlur {htmlLength: 14312}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown START {inputLength: 14312}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown END {inputLength: 14312, outputLength: 10855, durationMs: '0.40', truncated: 'normal'}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-5] blur markdown result {markdownLength: 10855}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] markdownToHtml START {inputLength: 1398}
-index-DdF_BKK8.js:26 [PASTE-DEBUG-CONV] markdownToHtml END {inputLength: 1398, outputLength: 2151, durationMs: '0.40'}
-index-DdF_BKK8.js:26 📝 TextBlock df331839-9127-4d82-a9d5-3c94df35e190 rendered at 2026-02-15T20:02:34.334Z
-index-DdF_BKK8.js:26 📝 TextBlock df26c74a-42f8-4573-b479-a3e406e2c1d9 rendered at 2026-02-15T20:02:34.335Z
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [DatabaseProvider] Replication health check: {documents: 130, folders: 106, replications: 3}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SmartSync] DISABLED - RxDB handles block replication
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
-index-DdF_BKK8.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771185753139, online: true}
+ [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'bafb7059', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+ [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '0ee01728', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+ [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '9b95dd22', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+ [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'b68482da', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '7f8cebf7', localTitle: 'what i noticed', serverTitle: 'what i noticed', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '175fcaab', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '295b9ee4', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'f386d590', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'cb3251dd', localTitle: 'test 0101010', serverTitle: 'test 0101010', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '7a3294a4', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '61fed872', localTitle: 'test 1010', serverTitle: 'test 1010', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'a1c5a052', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'cf91e992', localTitle: 'new test 1010101', serverTitle: 'new test 1010101', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'd718c97f', localTitle: 'the last test', serverTitle: 'the last test', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: 'e8dbedce', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '99809bc9', localTitle: 'Untitled Document', serverTitle: 'Untitled Document', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '5b229353', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '041c93ba', localTitle: 'this another test', serverTitle: 'this another test', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '29d943d3', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '8a7d940c', localTitle: 'Getting Started with Journey Logger', serverTitle: 'Getting Started with Journey Logger', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-9] Preserving local data (newer or locally created): {id: '7266c71c', localTitle: 'another test for the new updates', serverTitle: 'another test for the new updates', localBlocks: 0, reason: 'localNewer'}
+index-BojqEohK.js:26 [DEBUG-CREATE-8] Merging docs: {paginated: 130, locallyCreatedNew: 0, localIds: Array(0)}
+index-BojqEohK.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-BojqEohK.js:26 [ACTIVE-DOC] Found in allDocuments: {id: '54a04334', title: 'security look'}
+index-BojqEohK.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T13:30:17.265Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folderdff": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-15T12:50:14.176Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "hhhhh": 2 subfolders + 0 documents = 2 items, most recent: 2025-07-15T13:30:17.265Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 5 documents = 5 items, most recent: 2026-01-14T19:03:48.047Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "documentation101ee2": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T23:47:14.882Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (8)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:57:19.718Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "ddd": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-09T19:24:30.179Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:26:23.159Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 1 documents = 3 items, most recent: 2026-02-09T19:24:30.179Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T19:25:19.330Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:56:46.807Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (5)": 5 subfolders + 0 documents = 5 items, most recent: 2026-02-09T19:24:30.179Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-17T18:54:29.374Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "new folder 4": 2 subfolders + 0 documents = 2 items, most recent: 2026-02-09T19:24:30.179Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (6)": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-21T11:11:59.280Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "important lessons": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T21:13:51.338Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-17T10:18:58.469Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-18T10:01:22.725Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "introduction": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "world of the API": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-18T10:01:22.725Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (4)": 0 subfolders + 1 documents = 1 items, most recent: 2026-01-19T13:01:17.616Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "what should happen": 0 subfolders + 3 documents = 3 items, most recent: 2025-08-21T12:10:37.944Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "another test": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-17T07:15:16.472Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "wow": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-24T21:23:40.667Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "renaming": 2 subfolders + 2 documents = 4 items, most recent: 2025-07-24T21:23:40.667Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "TRANSLATION": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-03T10:02:51.181Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "API": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-14T13:41:50.071Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "prompts": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-17T10:54:31.319Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "class": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T15:27:29.468Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "FLASK": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-13T16:01:00.271Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "fundamentals": 4 subfolders + 0 documents = 4 items, most recent: 2025-11-17T10:54:31.319Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "pipeline": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:42.460Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "problems": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T23:48:42.460Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "perfect": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T14:54:51.375Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "google": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-14T23:48:57.215Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "seo thing": 1 subfolders + 1 documents = 2 items, most recent: 2026-01-18T14:32:02.089Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "devlog": 3 subfolders + 0 documents = 3 items, most recent: 2026-01-18T14:32:02.089Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "translation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-26T17:40:41.414Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "hi": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T11:51:01.742Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "fff": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:14:28.504Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "vvv": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-01T04:15:24.818Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "hello": 3 subfolders + 0 documents = 3 items, most recent: 2025-11-01T11:51:01.742Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "chatbot africawork": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-11T21:00:03.689Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "new folder 222": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:25:37.144Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "planing": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-08T09:24:09.176Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-27T21:54:19.336Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (2)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T17:01:31.529Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (3)": 2 subfolders + 0 documents = 2 items, most recent: 2025-11-27T21:54:19.336Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "now better": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T14:24:48.758Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-20T13:49:25.607Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "third one": 1 subfolders + 0 documents = 1 items, most recent: 2025-07-20T13:49:25.607Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-14T21:14:26.415Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T21:14:26.415Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder (7)": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:25.286Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "folder 1101": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-24T06:33:49.889Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "suf folder azure": 0 subfolders + 0 documents = 0 items, most recent: 2025-11-28T08:20:39.989Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Azure": 1 subfolders + 0 documents = 1 items, most recent: 2025-11-28T08:20:39.989Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "new ui of the folder add": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:24:10.787Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "deep folder": 0 subfolders + 1 documents = 1 items, most recent: 2025-07-24T10:15:42.785Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "inspirations": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-16T16:34:43.643Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "New Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-07-31T23:14:24.791Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "another ttest": 3 subfolders + 2 documents = 5 items, most recent: 2025-08-16T16:34:43.643Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-16T16:41:23.254Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:26.073Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder from API": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T15:56:06.494Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder from NPM Package": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-23T16:56:09.677Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Core Concepts": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:40:35.353Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Tutorials": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:01.416Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Examples": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:07.759Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "API Reference": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:14.100Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T11:41:20.063Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "LangGraph Documentation": 5 subfolders + 0 documents = 5 items, most recent: 2025-08-24T11:41:20.063Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder for Move": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T12:00:17.880Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "MCP Test Folder - Claude Code": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T13:21:01.051Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:20:37.296Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:29.205Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Debug Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:22:50.963Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Test Folder Suite": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:23:17.601Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-12-24T22:53:33.052Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-12-24T22:53:33.052Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:30.576Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Child Folder": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-24T14:58:42.301Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Parent Folder": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-24T14:58:42.301Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "API Documentation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:52.361Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "JSONL Format": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:54:50.419Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Batch Lifecycle": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:56:51.433Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "1. Fundamentals & Concepts": 3 subfolders + 0 documents = 3 items, most recent: 2025-08-26T06:25:45.292Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Python Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:57:57.807Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Monitoring & Tracking": 0 subfolders + 1 documents = 1 items, most recent: 2025-08-25T09:58:39.132Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "2. Implementation Guides": 2 subfolders + 0 documents = 2 items, most recent: 2025-08-25T09:58:39.132Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Array Mode Strategy": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T09:59:18.257Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Token Management": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:10:55.921Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "3. Cost Optimization": 2 subfolders + 1 documents = 3 items, most recent: 2026-01-14T17:53:47.591Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "4. Best Practices": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:11:40.166Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "5. Troubleshooting & Debugging": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T10:01:08.863Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Translation Pipeline Project": 0 subfolders + 0 documents = 0 items, most recent: 2025-08-25T11:12:08.338Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "6. Case Studies & Projects": 1 subfolders + 0 documents = 1 items, most recent: 2025-08-25T11:12:08.338Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "OpenAI Batch Mode Learning": 6 subfolders + 0 documents = 6 items, most recent: 2026-01-14T17:53:47.591Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "Azure Chatbot V3 Implementation": 0 subfolders + 0 documents = 0 items, most recent: 2026-01-16T18:38:02.421Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "can 2": 1 subfolders + 3 documents = 4 items, most recent: 2026-01-16T18:52:45.262Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "can": 1 subfolders + 0 documents = 1 items, most recent: 2026-01-16T18:52:45.262Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "PII encription": 0 subfolders + 2 documents = 2 items, most recent: 2026-02-12T20:42:06.939Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "indexdb": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-14T13:47:13.006Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "web": 0 subfolders + 1 documents = 1 items, most recent: 2026-02-15T20:09:43.565Z
+index-BojqEohK.js:26 [DEBUG-FOLDER] Folder "fundamentals": 1 subfolders + 0 documents = 1 items, most recent: 2026-02-15T20:09:43.565Z
+index-BojqEohK.js:26 [DEBUG-DASHBOARD] Combined: 42 folders + 99 documents = 141 total items
+index-BojqEohK.js:26 [DEBUG-DASHBOARD] Sorted by recent action - first 3 items: (3) [{…}, {…}, {…}]
+index-BojqEohK.js:26 [DASHBOARD-DEBUG] Dashboard render, expandedEntry: undefined
+index-BojqEohK.js:26 [SIDEBAR-PASS-DEBUG] {foldersCount: 42, allDocumentsCount: 130, paginatedDocsCount: 130, activeTabId: '54a04334'}
+index-BojqEohK.js:26 [RxDB Replication] blocks: Pull storing block df331839-9127-4d82-a9d5-3c94df35e190 with content length: 1423
+index-BojqEohK.js:26 [RxDB Replication] blocks: Pull storing block df26c74a-42f8-4573-b479-a3e406e2c1d9 with content length: 84
+index-BojqEohK.js:26 [RxDB Replication] blocks: Pull storing block 992a8030-4d5f-408c-aa8c-4232f688312a with content length: 14
+index-BojqEohK.js:26 [RxDB Replication] blocks: Pulled 3 docs {newCheckpoint: {…}, hasMore: false}
+index-BojqEohK.js:26 [RxDB Replication] documents: Inactive
+index-BojqEohK.js:26 [RxDB Replication] blocks: Active
+index-BojqEohK.js:26 [RxDB Replication] blocks: Active
+index-BojqEohK.js:26 [RxDB Replication] blocks: Received 1 docs from pull [{…}]
+index-BojqEohK.js:26 [RxDB Replication] blocks: Received 1 docs from pull [{…}]
+index-BojqEohK.js:26 [RxDB Replication] blocks: Received 1 docs from pull [{…}]
+index-BojqEohK.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'df331839-9127-4d82-a9d5-3c94df35e190', type: 'text', hasContent: true, contentType: 'string', contentLength: 1423, …}
+index-BojqEohK.js:26 🔎 BlockSerializer.deserialize INPUT: {id: 'df26c74a-42f8-4573-b479-a3e406e2c1d9', type: 'text', hasContent: true, contentType: 'string', contentLength: 84, …}
+index-BojqEohK.js:26 🔎 BlockSerializer.deserialize INPUT: {id: '992a8030-4d5f-408c-aa8c-4232f688312a', type: 'text', hasContent: true, contentType: 'string', contentLength: 14, …}
+index-BojqEohK.js:26 [RxDB Replication] blocks: Active
+index-BojqEohK.js:26 [BLOCK-MEMO] textBlock df331839 - PREVENTED
+index-BojqEohK.js:26 [BLOCK-MEMO] textBlock df26c74a - PREVENTED
+index-BojqEohK.js:26 [BLOCK-MEMO] textBlock 992a8030 - PREVENTED
+index-BojqEohK.js:26 [RxDB Replication] blocks: Inactive
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [DEBUG-TIMEOUT-7] 🖱️ User activity detected: {activityCount: 1, lastEvent: 'mousedown', timerWillReset: true, timestamp: '2026-02-15T20:10:14.875Z'}
+index-BojqEohK.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:14.876Z', timestamp: '2026-02-15T20:10:14.876Z'}
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:15.256Z', timestamp: '2026-02-15T20:10:15.256Z'}
+index-BojqEohK.js:26 [DatabaseProvider] Replication health check: {documents: 130, folders: 106, replications: 3}
+index-BojqEohK.js:26 [DEBUG-TIMEOUT-4] 🔄 Inactivity timer RESET: {timeout_ms: 1800000, timeout_hours: 0.5, willExpireAt: '2026-02-15T20:40:15.447Z', timestamp: '2026-02-15T20:10:15.448Z'}
+index-BojqEohK.js:26 [PASTE-DEBUG-1] TipTap handlePaste fired {hasTextData: true, textLength: 8023, textPreview: '---\r\ndate: 2026-02-15T12:00:00+05:00\r\nresearcher: Claude\r\ngit_commit: 7c7349a\r\nbranch: main\r\nreposit', hasHtmlData: false, htmlLength: 0, …}
+index-BojqEohK.js:26 [PASTE-DEBUG-1] ⚠️ LARGE PASTE DETECTED: 8023 chars
+(anonymous) @ index-BojqEohK.js:26
+handlePaste @ index-BojqEohK.js:1078
+(anonymous) @ index-BojqEohK.js:974
+someProp @ index-BojqEohK.js:974
+Vb @ index-BojqEohK.js:974
+Bo.paste @ index-BojqEohK.js:974
+t.dom.addEventListener.t.input.eventHandlers.<computed> @ index-BojqEohK.js:974
+r @ index-BojqEohK.js:26
+index-BojqEohK.js:26 [PASTE-DEBUG-2] TipTap onUpdate fired {htmlLength: 9784, htmlPreview: '<p>---</p><p>date: 2026-02-15T12:00:00+05:00</p><p…>branch: main</p><p>repository: devlog-</p><p>top', htmlEnd: 's happening</p><p>6. <strong>Optimize regex</strong> - Combine patterns, avoid lookbehind</p><p></p>'}
+index-BojqEohK.js:26 [PASTE-DEBUG-3] TextBlock handleEditorUpdate START {htmlLength: 9784}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown START {inputLength: 9784}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown END {inputLength: 9784, outputLength: 7720, durationMs: '1.20', truncated: 'normal'}
+index-BojqEohK.js:26 [PASTE-DEBUG-3] htmlToMarkdown completed {inputLength: 9784, outputLength: 7720, durationMs: '1.90', markdownPreview: '---\ndate: 2026-02-15T12:00:00+05:00\nresearcher: Cl…evlog-\ntopic: "Why large text pastes fail in Text', markdownEnd: 'ator** - Show user something is happening\n6. **Optimize regex** - Combine patterns, avoid lookbehind'}
+index-BojqEohK.js:26 [PASTE-DEBUG-4] Setting state {markdownLength: 7720, htmlLength: 9784}
+index-BojqEohK.js:26 [PASTE-DEBUG-4] State updated successfully
+index-BojqEohK.js:26 [PASTE-DEBUG-5] handleEditorBlur {htmlLength: 9784}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown START {inputLength: 9784}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] htmlToMarkdown END {inputLength: 9784, outputLength: 7720, durationMs: '0.40', truncated: 'normal'}
+index-BojqEohK.js:26 [PASTE-DEBUG-5] blur markdown result {markdownLength: 7720}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] markdownToHtml START {inputLength: 1398}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] markdownToHtml END {inputLength: 1398, outputLength: 2151, durationMs: '0.50'}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] markdownToHtml START {inputLength: 64}
+index-BojqEohK.js:26 [PASTE-DEBUG-CONV] markdownToHtml END {inputLength: 64, outputLength: 124, durationMs: '0.40'}
+index-BojqEohK.js:26 📝 TextBlock df331839-9127-4d82-a9d5-3c94df35e190 rendered at 2026-02-15T20:10:15.544Z
+index-BojqEohK.js:26 📝 TextBlock df26c74a-42f8-4573-b479-a3e406e2c1d9 rendered at 2026-02-15T20:10:15.546Z
+index-BojqEohK.js:26 📝 TextBlock 992a8030-4d5f-408c-aa8c-4232f688312a rendered at 2026-02-15T20:10:15.547Z
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SmartSync] DISABLED - RxDB handles block replication
+index-BojqEohK.js:26 [SYNC-STATUS-GET] 📊 Status requested: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}
+index-BojqEohK.js:26 [SYNC-STATUS-POLL] ➡️ Status unchanged: {pending: 0, syncing: false, lastSync: 1771186212676, online: true}

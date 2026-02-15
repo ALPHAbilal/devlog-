@@ -46,6 +46,8 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
   const isMountedRef = useRef(false);
   const saveTimeoutRef = useRef(null);
   const containerRef = useRef(null);
+  const contentRef = useRef(content);
+  const hasContentChangedRef = useRef(false);
 
   // Constants
   const MAX_LINES_BEFORE_COLLAPSE = 15;
@@ -71,24 +73,26 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
 
   // Sync content from block prop (skip if local edit pending save)
   useEffect(() => {
-    if (block.content !== content && !hasContentChanged) {
+    if (block.content !== contentRef.current && !hasContentChangedRef.current) {
       setContent(block.content || '');
       setHtmlContent(markdownToHtml(block.content || ''));
+      contentRef.current = block.content || '';
     }
   }, [block.content]);
 
   // Handle save
   const handleSave = useCallback(() => {
-    if (!hasContentChanged) {
+    if (!hasContentChangedRef.current) {
       console.log('[TEXTBLOCK-SAVE-DEBUG] Skipping save - no content change');
       return;
     }
 
-    const extractedTags = extractTagsFromContent(content);
+    const currentContent = contentRef.current;
+    const extractedTags = extractTagsFromContent(currentContent);
 
     console.log('[TEXTBLOCK-SAVE-DEBUG] Saving:', {
       blockId: block.id?.substring(0, 8),
-      contentLength: content?.length,
+      contentLength: currentContent?.length,
       tags: extractedTags
     });
 
@@ -102,14 +106,15 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
     }
 
     onUpdate(block.id, {
-      content: content,
+      content: currentContent,
       tags: extractedTags,
       isNew: undefined,
       metadata: { ...block.metadata, isCollapsed }
     });
 
+    hasContentChangedRef.current = false;
     setHasContentChanged(false);
-  }, [content, hasContentChanged, block.id, block.tags, block.metadata, isCollapsed, onUpdate, trackEvent]);
+  }, [block.id, block.tags, block.metadata, isCollapsed, onUpdate, trackEvent]);
 
   // Handle TipTap content updates
   const handleEditorUpdate = useCallback((html) => {
@@ -165,6 +170,8 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
       markdownLength: markdown?.length || 0,
       htmlLength: html?.length || 0,
     });
+    contentRef.current = markdown;
+    hasContentChangedRef.current = true;
     setContent(markdown);
     setHtmlContent(html);
     setHasContentChanged(true);
@@ -177,6 +184,7 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
     console.log('[PASTE-DEBUG-5] handleEditorBlur', { htmlLength: html?.length || 0 });
     const markdown = htmlToMarkdown(html);
     console.log('[PASTE-DEBUG-5] blur markdown result', { markdownLength: markdown?.length || 0 });
+    contentRef.current = markdown;
     setContent(markdown);
 
     // Debounce save slightly to allow for click-to-other-element
@@ -184,11 +192,11 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
       clearTimeout(saveTimeoutRef.current);
     }
     saveTimeoutRef.current = setTimeout(() => {
-      if (hasContentChanged) {
+      if (hasContentChangedRef.current) {
         handleSave();
       }
     }, 100);
-  }, [hasContentChanged, handleSave]);
+  }, [handleSave]);
 
   // Handle focus
   const handleEditorFocus = useCallback(() => {

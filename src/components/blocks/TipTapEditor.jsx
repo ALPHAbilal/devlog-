@@ -71,6 +71,11 @@ function TipTapEditor({
     autofocus: autoFocus ? 'end' : false,
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
+      console.log('[PASTE-DEBUG-2] TipTap onUpdate fired', {
+        htmlLength: html?.length || 0,
+        htmlPreview: html?.substring(0, 150),
+        htmlEnd: html?.substring(Math.max(0, (html?.length || 0) - 100)),
+      });
       onUpdate?.(html);
     },
     onBlur: ({ editor, event }) => {
@@ -86,6 +91,20 @@ function TipTapEditor({
       },
       // Handle paste events
       handlePaste: (view, event) => {
+        const clipboardData = event.clipboardData;
+        const textData = clipboardData?.getData('text/plain');
+        const htmlData = clipboardData?.getData('text/html');
+        console.log('[PASTE-DEBUG-1] TipTap handlePaste fired', {
+          hasTextData: !!textData,
+          textLength: textData?.length || 0,
+          textPreview: textData?.substring(0, 100),
+          hasHtmlData: !!htmlData,
+          htmlLength: htmlData?.length || 0,
+          types: Array.from(clipboardData?.types || []),
+        });
+        if (textData?.length > 5000) {
+          console.warn('[PASTE-DEBUG-1] ⚠️ LARGE PASTE DETECTED:', textData.length, 'chars');
+        }
         // Let default handling work for text
         // Image paste will be handled by parent component
         return false;

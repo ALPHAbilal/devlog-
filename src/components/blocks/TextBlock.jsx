@@ -113,7 +113,19 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
 
   // Handle TipTap content updates
   const handleEditorUpdate = useCallback((html) => {
+    console.log('[PASTE-DEBUG-3] TextBlock handleEditorUpdate START', {
+      htmlLength: html?.length || 0,
+    });
+    const t0 = performance.now();
     const markdown = htmlToMarkdown(html);
+    const t1 = performance.now();
+    console.log('[PASTE-DEBUG-3] htmlToMarkdown completed', {
+      inputLength: html?.length || 0,
+      outputLength: markdown?.length || 0,
+      durationMs: (t1 - t0).toFixed(2),
+      markdownPreview: markdown?.substring(0, 150),
+      markdownEnd: markdown?.substring(Math.max(0, (markdown?.length || 0) - 100)),
+    });
 
     // Check for slash commands
     const slashMatch = markdown.match(/^\/(\w+)$/m) || markdown.match(/\n\/(\w+)$/);
@@ -149,15 +161,22 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
       }
     }
 
+    console.log('[PASTE-DEBUG-4] Setting state', {
+      markdownLength: markdown?.length || 0,
+      htmlLength: html?.length || 0,
+    });
     setContent(markdown);
     setHtmlContent(html);
     setHasContentChanged(true);
+    console.log('[PASTE-DEBUG-4] State updated successfully');
   }, [block.id, onUpdate, onConvert]);
 
   // Handle blur - save content
   const handleEditorBlur = useCallback((html) => {
     setIsFocused(false);
+    console.log('[PASTE-DEBUG-5] handleEditorBlur', { htmlLength: html?.length || 0 });
     const markdown = htmlToMarkdown(html);
+    console.log('[PASTE-DEBUG-5] blur markdown result', { markdownLength: markdown?.length || 0 });
     setContent(markdown);
 
     // Debounce save slightly to allow for click-to-other-element
@@ -178,6 +197,12 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
 
   // Handle image paste
   const handlePaste = useCallback(async (e) => {
+    const textData = e.clipboardData?.getData('text/plain');
+    console.log('[PASTE-DEBUG-0] TextBlock container onPaste', {
+      hasTextData: !!textData,
+      textLength: textData?.length || 0,
+      types: Array.from(e.clipboardData?.types || []),
+    });
     const items = e.clipboardData?.items;
     if (!items) return;
 

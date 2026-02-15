@@ -13,6 +13,9 @@
 export function markdownToHtml(markdown) {
   if (!markdown) return '';
 
+  const _mt0 = performance.now();
+  console.log('[PASTE-DEBUG-CONV] markdownToHtml START', { inputLength: markdown.length });
+
   let html = markdown;
 
   // Escape HTML entities first (except for our markdown)
@@ -127,6 +130,13 @@ export function markdownToHtml(markdown) {
   html = html.replace(/<p><\/p>(?=<\/?(ul|ol|blockquote|hr))/g, '');
   html = html.replace(/(<\/?(ul|ol|blockquote|hr)[^>]*>)<p><\/p>/g, '$1');
 
+  const _mt1 = performance.now();
+  console.log('[PASTE-DEBUG-CONV] markdownToHtml END', {
+    inputLength: markdown.length,
+    outputLength: html.length,
+    durationMs: (_mt1 - _mt0).toFixed(2),
+  });
+
   return html;
 }
 
@@ -137,6 +147,9 @@ export function markdownToHtml(markdown) {
  */
 export function htmlToMarkdown(html) {
   if (!html) return '';
+
+  const _t0 = performance.now();
+  console.log('[PASTE-DEBUG-CONV] htmlToMarkdown START', { inputLength: html.length });
 
   let markdown = html;
 
@@ -204,6 +217,14 @@ export function htmlToMarkdown(html) {
 
   // Trim whitespace
   markdown = markdown.trim();
+
+  const _t1 = performance.now();
+  console.log('[PASTE-DEBUG-CONV] htmlToMarkdown END', {
+    inputLength: html.length,
+    outputLength: markdown.length,
+    durationMs: (_t1 - _t0).toFixed(2),
+    truncated: markdown.length < html.length * 0.5 ? '⚠️ SIGNIFICANT SHRINK' : 'normal',
+  });
 
   return markdown;
 }

@@ -4,13 +4,16 @@ import Placeholder from '@tiptap/extension-placeholder';
 import Link from '@tiptap/extension-link';
 import Underline from '@tiptap/extension-underline';
 import Typography from '@tiptap/extension-typography';
-import { useEffect, useCallback, memo } from 'react';
+import { useEffect, useRef, memo } from 'react';
 
 /**
  * TipTap WYSIWYG Editor Component
  *
  * A seamless, live-preview markdown editor that makes writing feel natural.
  * Built on ProseMirror via TipTap for battle-tested reliability.
+ *
+ * Uses refs for callback props so useEditor always calls the latest versions,
+ * avoiding stale closure issues (critical for paste + blur save flow).
  */
 function TipTapEditor({
   content = '',
@@ -22,14 +25,21 @@ function TipTapEditor({
   className = '',
   autoFocus = false,
 }) {
+  // Refs to always hold the latest callback props
+  const onUpdateRef = useRef(onUpdate);
+  const onBlurRef = useRef(onBlur);
+  const onFocusRef = useRef(onFocus);
+
+  // Keep refs in sync with latest props
+  useEffect(() => { onUpdateRef.current = onUpdate; }, [onUpdate]);
+  useEffect(() => { onBlurRef.current = onBlur; }, [onBlur]);
+  useEffect(() => { onFocusRef.current = onFocus; }, [onFocus]);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        // Disable heading - we have HeadingBlock for that
         heading: false,
-        // Disable codeBlock - we have CodeBlock for that
         codeBlock: false,
-        // Enable everything else
         bold: true,
         italic: true,
         strike: true,
@@ -60,7 +70,6 @@ function TipTapEditor({
       }),
       Underline,
       Typography.configure({
-        // Smart typography: quotes, dashes, ellipsis
         oneHalf: true,
         oneQuarter: true,
         threeQuarters: true,
@@ -76,20 +85,19 @@ function TipTapEditor({
         htmlPreview: html?.substring(0, 150),
         htmlEnd: html?.substring(Math.max(0, (html?.length || 0) - 100)),
       });
-      onUpdate?.(html);
+      onUpdateRef.current?.(html);
     },
     onBlur: ({ editor, event }) => {
-      onBlur?.(editor.getHTML(), event);
+      onBlurRef.current?.(editor.getHTML(), event);
     },
     onFocus: ({ editor, event }) => {
-      onFocus?.(event);
+      onFocusRef.current?.(event);
     },
     editorProps: {
       attributes: {
         class: `tiptap-editor ${className}`.trim(),
         spellcheck: 'false',
       },
-      // Handle paste events
       handlePaste: (view, event) => {
         const clipboardData = event.clipboardData;
         const textData = clipboardData?.getData('text/plain');
@@ -105,8 +113,6 @@ function TipTapEditor({
         if (textData?.length > 5000) {
           console.warn('[PASTE-DEBUG-1] ⚠️ LARGE PASTE DETECTED:', textData.length, 'chars');
         }
-        // Let default handling work for text
-        // Image paste will be handled by parent component
         return false;
       },
     },
@@ -116,8 +122,6 @@ function TipTapEditor({
   useEffect(() => {
     if (editor && content !== undefined) {
       const currentContent = editor.getHTML();
-      // Only update if content is actually different
-      // Avoid the empty paragraph comparison issue
       const normalizedCurrent = currentContent === '<p></p>' ? '' : currentContent;
       const normalizedNew = content === '<p></p>' ? '' : content;
 
@@ -134,8 +138,6 @@ function TipTapEditor({
     };
   }, [editor]);
 
-  // Expose editor methods via ref if needed
-  // For now, just render the editor content
   if (!editor) {
     return null;
   }

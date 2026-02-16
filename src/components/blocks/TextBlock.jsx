@@ -178,7 +178,7 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
     console.log('[PASTE-DEBUG-4] State updated successfully');
   }, [block.id, onUpdate, onConvert]);
 
-  // Handle blur - save content
+  // Handle blur - save content immediately (no timeout to avoid unmount race)
   const handleEditorBlur = useCallback((html) => {
     setIsFocused(false);
     console.log('[PASTE-DEBUG-5] handleEditorBlur', { htmlLength: html?.length || 0 });
@@ -187,15 +187,10 @@ function TextBlock({ block, onUpdate, onConvert, onAddBelow, allBlocks }) {
     contentRef.current = markdown;
     setContent(markdown);
 
-    // Debounce save slightly to allow for click-to-other-element
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
+    // Save immediately using refs (avoids stale closure issues)
+    if (hasContentChangedRef.current) {
+      handleSave();
     }
-    saveTimeoutRef.current = setTimeout(() => {
-      if (hasContentChangedRef.current) {
-        handleSave();
-      }
-    }, 100);
   }, [handleSave]);
 
   // Handle focus

@@ -206,6 +206,13 @@ export default function SettingsClaude() {
 
   // Apply display settings to the entire platform
   const handleApplyDisplaySettings = () => {
+    console.log('[FONT-DEBUG-PAGE] 🖱️ Apply button clicked:', {
+      localDisplaySettings,
+      argsToApply: [localDisplaySettings.fontSize, localDisplaySettings.lineHeight],
+      applyDisplaySettingsArgCount: applyDisplaySettings.length,
+      timestamp: new Date().toISOString()
+    });
+
     // Apply CSS variables immediately
     applyDisplaySettings(
       localDisplaySettings.fontSize,

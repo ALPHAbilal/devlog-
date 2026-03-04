@@ -47,30 +47,36 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   // Load settings from localStorage first (for immediate access)
   useEffect(() => {
     const localSettings = localStorage.getItem('devlogSettings');
+    console.log('[FONT-DEBUG-1] 📦 localStorage raw:', localSettings);
     if (localSettings) {
       try {
         const parsed = JSON.parse(localSettings);
-        setSettings(prev => ({ ...prev, ...parsed }));
+        console.log('[FONT-DEBUG-2] 📦 localStorage parsed display settings:', {
+          displayFontSize: parsed.displayFontSize,
+          displayLineHeight: parsed.displayLineHeight,
+          displayBlockSpacing: parsed.displayBlockSpacing,
+          allKeys: Object.keys(parsed),
+          timestamp: new Date().toISOString()
+        });
+        setSettings(prev => {
+          const merged = { ...prev, ...parsed };
+          console.log('[FONT-DEBUG-3] 📦 State after localStorage merge:', {
+            displayFontSize: merged.displayFontSize,
+            displayLineHeight: merged.displayLineHeight,
+            displayBlockSpacing: merged.displayBlockSpacing,
+          });
+          return merged;
+        });
 
         // Apply session timeout if set in localStorage
         if (parsed.sessionTimeout !== undefined) {
-          // [DEBUG-TIMEOUT] Log localStorage override
-          console.log('[DEBUG-TIMEOUT-14] ⚙️ Settings from LOCALSTORAGE:', {
-            source: 'localStorage.devlogSettings',
-            sessionTimeout_minutes: parsed.sessionTimeout,
-            sessionTimeout_hours: parsed.sessionTimeout / 60,
-            allSettings: parsed,
-            timestamp: new Date().toISOString()
-          });
-
           setInactivityTimeout(parsed.sessionTimeout);
         }
       } catch (err) {
         console.error('Error parsing local settings:', err);
       }
     } else {
-      // [DEBUG-TIMEOUT] Log no localStorage settings
-      console.log('[DEBUG-TIMEOUT-15] ℹ️ No localStorage settings found, using defaults');
+      console.log('[FONT-DEBUG-1] ⚠️ No localStorage settings found at all');
     }
   }, []);
 
@@ -92,32 +98,41 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
           .maybeSingle();
 
         if (error) {
-          console.error('Error loading profile settings:', error);
+          console.error('[FONT-DEBUG-4] ❌ Supabase profile load error:', error);
         } else if (profile?.settings) {
           const profileSettings = profile.settings;
-          setSettings(prev => ({ ...prev, ...profileSettings }));
+          console.log('[FONT-DEBUG-5] 💾 Supabase returned settings:', {
+            displayFontSize: profileSettings.displayFontSize,
+            displayLineHeight: profileSettings.displayLineHeight,
+            displayBlockSpacing: profileSettings.displayBlockSpacing,
+            allKeys: Object.keys(profileSettings),
+            timestamp: new Date().toISOString()
+          });
+
+          const localBeforeOverwrite = localStorage.getItem('devlogSettings');
+          console.log('[FONT-DEBUG-6] 💾 localStorage BEFORE Supabase overwrite:', localBeforeOverwrite);
+
+          setSettings(prev => {
+            const merged = { ...prev, ...profileSettings };
+            console.log('[FONT-DEBUG-7] 💾 State after Supabase merge:', {
+              displayFontSize: merged.displayFontSize,
+              displayLineHeight: merged.displayLineHeight,
+              prevFontSize: prev.displayFontSize,
+              prevLineHeight: prev.displayLineHeight,
+            });
+            return merged;
+          });
 
           // Update local cache
           localStorage.setItem('devlogSettings', JSON.stringify(profileSettings));
+          console.log('[FONT-DEBUG-8] 💾 localStorage AFTER Supabase overwrite:', localStorage.getItem('devlogSettings'));
 
           // Apply session timeout if set
           if (profileSettings.sessionTimeout !== undefined) {
-            // [DEBUG-TIMEOUT] Log database override
-            console.log('[DEBUG-TIMEOUT-16] 💾 Settings from DATABASE (profiles table):', {
-              source: 'profiles.settings',
-              userId: user.id,
-              sessionTimeout_minutes: profileSettings.sessionTimeout,
-              sessionTimeout_hours: profileSettings.sessionTimeout / 60,
-              allSettings: profileSettings,
-              timestamp: new Date().toISOString()
-            });
-
             setInactivityTimeout(profileSettings.sessionTimeout);
-          } else {
-            console.log('[DEBUG-TIMEOUT-17] ℹ️ Database settings loaded but no sessionTimeout specified');
           }
         } else {
-          console.log('[DEBUG-TIMEOUT-18] ℹ️ No database settings found for user');
+          console.log('[FONT-DEBUG-9] ⚠️ No settings found in Supabase profile (profile exists but settings is null/empty)');
         }
       } catch (err) {
         console.error('Error loading settings from profiles:', err);
@@ -157,10 +172,25 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   // Update multiple settings at once
   const updateSettings = async (updates: Partial<Settings>) => {
     const newSettings = { ...settings, ...updates };
+    console.log('[FONT-DEBUG-SAVE] 💾 updateSettings called:', {
+      updates,
+      currentSettingsDisplay: {
+        displayFontSize: settings.displayFontSize,
+        displayLineHeight: settings.displayLineHeight,
+        displayBlockSpacing: settings.displayBlockSpacing,
+      },
+      newSettingsDisplay: {
+        displayFontSize: newSettings.displayFontSize,
+        displayLineHeight: newSettings.displayLineHeight,
+        displayBlockSpacing: newSettings.displayBlockSpacing,
+      },
+      timestamp: new Date().toISOString()
+    });
     setSettings(newSettings);
     
     // Save to localStorage immediately
     localStorage.setItem('devlogSettings', JSON.stringify(newSettings));
+    console.log('[FONT-DEBUG-SAVE] 💾 Saved to localStorage, keys:', Object.keys(newSettings));
     
     // Save to profiles table if user is authenticated
     if (user) {
@@ -171,17 +201,27 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
           .eq('id', user.id);
         
         if (error) {
-          console.error('Error saving settings to profiles:', error);
+          console.error('[FONT-DEBUG-SAVE] ❌ Supabase save error:', error);
+        } else {
+          console.log('[FONT-DEBUG-SAVE] ✅ Saved to Supabase successfully');
         }
       } catch (err) {
-        console.error('Error updating profile settings:', err);
+        console.error('[FONT-DEBUG-SAVE] ❌ Supabase save exception:', err);
       }
+    } else {
+      console.log('[FONT-DEBUG-SAVE] ⚠️ No user — saved to localStorage only');
     }
   };
 
   // Apply display settings as CSS variables
   const applyDisplaySettings = useCallback((fontSize: number, lineHeight: number, blockSpacing: string) => {
     const root = document.documentElement;
+
+    console.log('[FONT-DEBUG-CSS] 🎨 applyDisplaySettings called with:', {
+      fontSize, lineHeight, blockSpacing,
+      callerStack: new Error().stack?.split('\n')[2]?.trim(),
+      timestamp: new Date().toISOString()
+    });
 
     // Font size in pixels
     root.style.setProperty('--step-writing', `${fontSize}px`);
@@ -192,10 +232,25 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     // Block spacing (compact=8px, normal=16px, relaxed=24px)
     const spacingMap: Record<string, string> = { compact: '8px', normal: '16px', relaxed: '24px' };
     root.style.setProperty('--block-gap', spacingMap[blockSpacing] || '16px');
+
+    // Verify what actually got set
+    const computed = getComputedStyle(root);
+    console.log('[FONT-DEBUG-CSS] 🎨 CSS vars AFTER apply:', {
+      '--step-writing': computed.getPropertyValue('--step-writing'),
+      '--line-height-writing': computed.getPropertyValue('--line-height-writing'),
+      '--block-gap': computed.getPropertyValue('--block-gap'),
+    });
   }, []);
 
   // Apply display settings when they change
   useEffect(() => {
+    console.log('[FONT-DEBUG-10] 🔄 Display settings effect triggered:', {
+      displayFontSize: settings.displayFontSize,
+      displayLineHeight: settings.displayLineHeight,
+      displayBlockSpacing: settings.displayBlockSpacing,
+      willApply: !!(settings.displayFontSize && settings.displayLineHeight),
+      timestamp: new Date().toISOString()
+    });
     if (settings.displayFontSize && settings.displayLineHeight) {
       applyDisplaySettings(
         settings.displayFontSize,
